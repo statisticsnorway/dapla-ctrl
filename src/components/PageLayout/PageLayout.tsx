@@ -1,7 +1,7 @@
-import './Layout.scss'
+import './PageLayout.scss'
 import { Title, Button, Breadcrumb } from '@statisticsnorway/ssb-component-library'
 
-export function Layout({title, breadcrumbItems, buttonText}: LayoutProps) {
+export function PageLayout({title, breadcrumbItems, buttonText}: PageLayoutProps) {
     return (
         <div className="container">
             {breadcrumbItems?.length && <Breadcrumb items={breadcrumbItems}/>}
@@ -13,7 +13,7 @@ export function Layout({title, breadcrumbItems, buttonText}: LayoutProps) {
   )
 }
 
-interface LayoutProps {
+interface PageLayoutProps {
     title: string;
     breadcrumbItems?: Array<{text: string, link?: string}>;
     buttonText?: string | ChildNode;

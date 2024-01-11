@@ -1,8 +1,8 @@
-import { Layout } from "../components/Layout/Layout"
+import { PageLayout } from "../components/PageLayout/PageLayout"
 
 export function Users () {
     return (
-        <Layout 
+        <PageLayout 
             title="Medlemmer"
             buttonText="Legg til medlem"
         />

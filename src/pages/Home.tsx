@@ -1,8 +1,8 @@
-import { Layout } from "../components/Layout/Layout"
+import { PageLayout } from "../components/PageLayout/PageLayout"
 
 export function Home() {  
     return (
-      <Layout 
+      <PageLayout 
         title="Teamoversikt" 
         breadcrumbItems={[{text: 'Forside'}]}
         buttonText="Opprett team"
