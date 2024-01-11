@@ -1,21 +1,21 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .container {
-    margin: 1.5rem 8rem;
-  
-    @media #{variables.$mobile} {
-      margin: 1.5rem;
-    }
+  margin: 1.5rem 8rem;
+
+  @media #{variables.$mobile} {
+    margin: 1.5rem;
   }
-  
-  .title-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  
-    margin-top: 1.5rem;
-  
-    @media #{variables.$mobile} {
-      flex-direction: column;
-    }
+}
+
+.title-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  margin-top: 1.5rem;
+
+  @media #{variables.$mobile} {
+    flex-direction: column;
   }
+}
