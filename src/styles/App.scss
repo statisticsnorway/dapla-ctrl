@@ -1,0 +1,33 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+body {
+  margin: 0;
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border-bottom: 1px solid gray;
+  padding: 1rem;
+}
+
+.container {
+  margin: 1.5rem 8rem;
+
+  @media #{variables.$mobile} {
+    margin: 1.5rem;
+  }
+}
+
+.title-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  margin-top: 1.5rem;
+
+  @media #{variables.$mobile} {
+    flex-direction: column;
+  }
+}
