@@ -6,8 +6,10 @@ export function Home() {
     return (
       <div className="container">
         <Breadcrumb items={breadcrumbItems}/>
-        <Title size={1}>Teamoversikt</Title>
-        <Button>Opprett team</Button>
+        <div className="title-container">
+            <Title size={1}>Teamoversikt</Title>
+            <Button>Opprett team</Button>
+        </div>
       </div>
     )
 }
