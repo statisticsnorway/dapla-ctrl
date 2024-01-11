@@ -1,12 +1,19 @@
 import './styles/App.scss'
-import { Breadcrumb } from '@statisticsnorway/ssb-component-library'
+
+import { Header } from './components/Header'
+import { Home } from './pages/Home'
+import { Users } from './pages/Users'
+import { Routes, Route } from 'react-router-dom'
 
 function App() {
   return (
-    <>
-      <Breadcrumb items={[{text: 'Forside'}]} />
-      <h1>Teamoversikt</h1>
-    </>
+    <main>
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/users" element={<Users />} />
+      </Routes>
+    </main>
   )
 }
 
