@@ -4,7 +4,7 @@ export function Header() {
     return (
         <div className="header">
             <span>Dapla ctrl</span>
-            <Link to="/users">Medlemmer</Link>
+            <Link to="/medlemmer">Medlemmer</Link>
         </div>
     )
 }
