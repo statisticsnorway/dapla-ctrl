@@ -1,15 +1,11 @@
-import { Breadcrumb, Title, Button } from '@statisticsnorway/ssb-component-library'
+import { Layout } from "../components/Layout/Layout"
 
-export function Home() {
-    const breadcrumbItems = [{text: 'Forside'}]
-  
+export function Home() {  
     return (
-      <div className="container">
-        <Breadcrumb items={breadcrumbItems}/>
-        <div className="title-container">
-            <Title size={1}>Teamoversikt</Title>
-            <Button>Opprett team</Button>
-        </div>
-      </div>
+      <Layout 
+        title="Teamoversikt" 
+        breadcrumbItems={[{text: 'Forside'}]}
+        buttonText="Opprett team"
+      />
     )
 }

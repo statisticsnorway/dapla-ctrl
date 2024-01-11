@@ -1,9 +1,10 @@
-import { Title } from '@statisticsnorway/ssb-component-library'
+import { Layout } from "../components/Layout/Layout"
 
 export function Users () {
     return (
-        <div className="container">
-            <Title size={1}>Medlemmer</Title>
-        </div>
-    )
+        <Layout 
+            title="Medlemmer"
+            buttonText="Legg til medlem"
+        />
+      )
 }
