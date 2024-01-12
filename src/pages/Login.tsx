@@ -14,14 +14,11 @@ export function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        // Check for token in local storage
         const storedToken = localStorage.getItem("token");
 
-        // If a token is found, verify it
         if (storedToken && jwtRegex.test(storedToken)) {
             verifyKeycloakToken(storedToken).then(isValid => {
                 if (isValid) {
-                    // If the token is valid, redirect to home page
                     navigate(from);
                 }
             });
@@ -53,7 +50,7 @@ export function Login() {
             return false;
         }
 
-        // Check if the token is valid
+        // Check if the token is invalid
         if (!await verifyKeycloakToken(token)) {
             return false;
         }
