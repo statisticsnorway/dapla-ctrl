@@ -26,38 +26,34 @@ export function Login() {
     }, [navigate]);
 
     useEffect(() => {
+        const validateToken = (token: string) => {
+            // Check if the token matches the JWT pattern
+            if (!jwtRegex.test(token)) {
+                return Promise.resolve(false);
+            }
+
+            // Check if the token is invalid
+            return verifyKeycloakToken(token).then(isValid => {
+                if (!isValid) {
+                    return false;
+                }
+                setValue(token);
+                return true;
+            });
+        };
+
         if (!value) {
             setError(false);
-        }
-
-        const checkToken = async () => {
-            const isValidToken = await validateToken(value);
-            if (isValidToken) {
-                localStorage.setItem("token", value);
-                navigate(from);
-            }
-            setError(!isValidToken);
-        }
-
-        if (value) {
-            checkToken();
+        } else {
+            validateToken(value).then(isValidToken => {
+                if (isValidToken) {
+                    localStorage.setItem("token", value);
+                    navigate(from);
+                }
+                setError(!isValidToken);
+            });
         }
     }, [value, from]);
-
-    const validateToken = async (token: string) => {
-        // Check if the token matches the JWT pattern
-        if (!jwtRegex.test(token)) {
-            return false;
-        }
-
-        // Check if the token is invalid
-        if (!await verifyKeycloakToken(token)) {
-            return false;
-        }
-
-        setValue(token);
-        return true;
-    };
 
     const handleInputChange = (input: string) => {
         setValue(input);
