@@ -1,12 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import { verifyKeycloakToken } from '../api/VerifyKeycloakToken';
 
-type ProtectedRouteProps = {
-    children: React.ReactNode;
-};
-
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+export const ProtectedRoute = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
     const from = location.pathname;
@@ -26,5 +22,5 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         }
     }, [navigate]);
 
-    return isAuthenticated ? children : null;
+    return isAuthenticated ? <Outlet /> : null;
 };
