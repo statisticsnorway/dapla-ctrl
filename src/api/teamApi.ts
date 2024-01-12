@@ -1,16 +1,6 @@
-export interface ApiResponse {
+export interface TeamApiResponse {
     success: boolean;
-    data: Data;
-}
-
-interface Data {
-    _embedded: Embedded;
-    _links: Links;
-    count: number;
-}
-
-interface Embedded {
-    teams: Team[];
+    data: Team[];
 }
 
 interface Team {
@@ -33,7 +23,7 @@ interface Links {
 }
 
 
-export const getAllTeams = (token: string): Promise<ApiResponse> => {
+export const getAllTeams = (token: string): Promise<TeamApiResponse> => {
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
@@ -46,7 +36,7 @@ export const getAllTeams = (token: string): Promise<ApiResponse> => {
             throw new Error('Request failed');
         }
         return response.json();
-    }).then(data => data as ApiResponse)
+    }).then(data => data as TeamApiResponse)
         .catch(error => {
             console.error('Error during fetching teams:', error);
             throw error;

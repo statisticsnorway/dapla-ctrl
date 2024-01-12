@@ -59,7 +59,7 @@ app.get('/api/teams', (req, res) => {
         }
         return response.json();
     }).then(data => {
-        return res.json({ success: true, data: data });
+        return res.json({ success: true, data: data._embedded.teams });
     }).catch(error => {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });

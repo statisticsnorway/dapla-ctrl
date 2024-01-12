@@ -1,11 +1,9 @@
 import { PageLayout } from "../components/PageLayout/PageLayout"
-import { getAllTeams, ApiResponse } from "../api/teamApi"
+import { getAllTeams, TeamApiResponse } from "../api/teamApi"
 import { useEffect, useState } from "react"
-import styles from './Users.module.scss';
 
 export function Users() {
-    // get token from localstorage
-    const [teams, setTeams] = useState<ApiResponse | undefined>();
+    const [teams, setTeams] = useState<TeamApiResponse | undefined>();
 
     useEffect(() => {
         const token = localStorage.getItem('token') as string;
@@ -20,8 +18,8 @@ export function Users() {
                 title="Medlemmer"
                 buttonText="Legg til medlem"
             />
-            {teams && teams.data._embedded.teams.length > 0 ? (
-                <div>
+            {teams && teams.data.length > 0 && (
+                <div className="container">
                     <h2>Team List</h2>
                     <table>
                         <thead>
@@ -31,7 +29,7 @@ export function Users() {
                             </tr>
                         </thead>
                         <tbody>
-                            {teams.data._embedded.teams.map(team => (
+                            {teams.data.map(team => (
                                 <tr key={team.uniformName}>
                                     <td>{team.uniformName}</td>
                                     <td>{team.displayName}</td>
@@ -40,9 +38,9 @@ export function Users() {
                         </tbody>
                     </table>
                 </div>
-            ) : (
-                <div>No teams found.</div>
-            )}
+            ) || <div className="container">Loading...</div> || (
+                    <div className="container">No teams found.</div>
+                )}
 
         </>
     )
