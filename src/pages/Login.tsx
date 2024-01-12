@@ -69,7 +69,7 @@ export function Login() {
     return (
         <>
             <div className="container">
-                <Input label="Password" placeholder={"Keycloak token"} value={value} handleChange={handleInputChange} error={error} errorMessage="Invalid keycloak token" />
+                <Input placeholder={"Keycloak token"} value={value} handleChange={handleInputChange} error={error} errorMessage="Invalid keycloak token" />
             </div>
         </>
     )
