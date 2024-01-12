@@ -1,10 +1,9 @@
-import { PageLayout } from "../components/PageLayout/PageLayout"
+import PageLayout from '../components/PageLayout/PageLayout'
 
-export function Home() {  
+export default function Home() {  
     return (
         <PageLayout 
             title="Teamoversikt" 
-            buttonText="Opprett team"
         />
     )
 }

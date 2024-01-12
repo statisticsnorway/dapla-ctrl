@@ -1,10 +1,9 @@
-import { PageLayout } from "../components/PageLayout/PageLayout"
+import PageLayout from '../components/PageLayout/PageLayout'
 
-export function Users() {
+export default function Users() {
     return (
         <PageLayout 
             title="Medlemmer"
-            buttonText="Legg til medlem"
         />
     )
 }

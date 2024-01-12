@@ -1,7 +1,7 @@
 import { Breadcrumb as OriginalBreadcrumb } from '@statisticsnorway/ssb-component-library';
 import { useLocation } from 'react-router-dom';
 
-function Breadcrumb() {
+export default function Breadcrumb() {
     const location = useLocation();
     const pathnames = location.pathname.split('/').filter(x => x);
 
@@ -26,5 +26,3 @@ function Breadcrumb() {
         </div>
     );
 }
-
-export default Breadcrumb;
