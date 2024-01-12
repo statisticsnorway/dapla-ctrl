@@ -17,7 +17,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
 
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute />}> {
+          /* Possibly setup passable props to ProtectedRoute so we can add authorization too,
+          example: <ProtectedRoute roles={['managers', 'data-admins']} />
+          */
+        }
           <Route path="/medlemmer" element={<Users />} />
           <Route path="/medlemmer/test" element={<h1>Test</h1>} />
         </Route>
