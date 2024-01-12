@@ -21,8 +21,6 @@ export default function Breadcrumb() {
         : [{ text: 'Forsiden', link: '/' }, ...breadcrumbItems];
 
     return (
-        <div className="container">
-            <OriginalBreadcrumb items={items} />
-        </div>
+        <OriginalBreadcrumb items={items} />
     );
 }

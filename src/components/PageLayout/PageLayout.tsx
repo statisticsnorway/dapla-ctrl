@@ -1,4 +1,4 @@
-import './PageLayout.scss'
+import styles from './pagelayout.module.scss'
 
 import { Title, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
@@ -11,13 +11,15 @@ interface PageLayoutProps {
 
 export default function PageLayout({title, description, button, body}: PageLayoutProps) {
     return (
-        <div className="container">
-            <div className="title-container">
+        <>
+            <div className={styles.title}>
                 <Title size={1}>{title}</Title>
                 {button}
             </div>
-            <LeadParagraph>{description}</LeadParagraph>
-            {body}
-        </div>
+            <div className="">
+                <LeadParagraph>{description}</LeadParagraph>
+                {body}
+            </div>
+        </>
     )
 }
