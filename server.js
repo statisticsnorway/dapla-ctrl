@@ -19,8 +19,8 @@ const client = jwksClient({
     jwksUri: process.env.VITE_JWKS_URI
 });
 
-app.post('/verify-token', (req, res) => {
-    const { token } = req.body;
+app.post('/api/verify-token', (req, res) => {
+    const token = req.headers.authorization.split("Bearer ")[1];
 
     const decodedToken = jwt.decode(token, { complete: true });
     if (!decodedToken) {
@@ -38,8 +38,32 @@ app.post('/verify-token', (req, res) => {
             });
         })
         .catch(error => {
+            console.error(error);
             res.status(500).json({ success: false, message: 'Server error', error: error.message });
         });
+});
+
+app.get('/api/teams', (req, res) => {
+    const token = req.headers.authorization;
+    const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/teams`;
+
+    fetch(url, {
+        method: "GET",
+        headers: {
+            "accept": "*/*",
+            "Authorization": "Bearer " + token.split("Bearer ")[1],
+        }
+    }).then(response => {
+        if (!response.ok) {
+            throw new Error('Response not ok');
+        }
+        return response.json();
+    }).then(data => {
+        return res.json({ success: true, data: data });
+    }).catch(error => {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    });
 });
 
 function getPublicKeyFromKeycloak(kid) {

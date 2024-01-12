@@ -1,10 +1,11 @@
 export const verifyKeycloakToken = (token: string): Promise<boolean> => {
-    return fetch('/verify-token', {
+    return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ token })
+
     }).then(response => {
         if (!response.ok) {
             console.error('Token verification failed with status:', response.status);
