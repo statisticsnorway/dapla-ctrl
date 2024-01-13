@@ -1,18 +1,23 @@
-import './PageLayout.scss'
-import { Title, Button } from '@statisticsnorway/ssb-component-library'
+import styles from './pagelayout.module.scss'
 
-export function PageLayout({title, buttonText}: PageLayoutProps) {
-    return (
-        <div className="container">
-            <div className="title-container">
-                <Title size={1}>{title}</Title>
-                {buttonText && <Button>{buttonText}</Button>}
-            </div>
-        </div>
-    )
-}
+import { Title, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 interface PageLayoutProps {
-    title: string;
-    buttonText?: string | ChildNode;
+    title: string,
+    description?: string,
+    button?: JSX.Element,
+    content?: JSX.Element
+}
+
+export default function PageLayout({ title, description, button, content }: PageLayoutProps) {
+    return (
+        <>
+            <div className={styles.title}>
+                <Title size={1}>{title}</Title>
+                {button}
+            </div>
+            <LeadParagraph>{description}</LeadParagraph>
+            {content}
+        </>
+    )
 }

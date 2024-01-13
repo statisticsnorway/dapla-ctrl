@@ -1,33 +1,34 @@
-import './App.scss';
+import styles from './app.module.scss'
 
-import { Header } from './components/Header/Header';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { Home } from './pages/Home';
-import { Users } from './pages/Users';
-import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header/Header';
 import Breadcrumb from './components/Breadcrumb';
-import { Login } from './pages/Login';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import Home from './pages/Home';
+import Users from './pages/Users';
+import Login from './pages/Login';
 
-function App() {
+import { Routes, Route } from 'react-router-dom';
+
+export default function App() {
   return (
-    <main>
+    <>
       <Header />
-      <Breadcrumb />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+      <main className={styles.container}>
+        <Breadcrumb />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
 
-        <Route element={<ProtectedRoute />}> {
-          /* Possibly setup passable props to ProtectedRoute so we can add authorization too,
-          example: <ProtectedRoute roles={['managers', 'data-admins']} />
-          */
-        }
-          <Route path="/medlemmer" element={<Users />} />
-          <Route path="/medlemmer/test" element={<h1>Test</h1>} />
-        </Route>
-      </Routes>
-    </main>
+          <Route element={<ProtectedRoute />}> {
+            /* Possibly setup passable props to ProtectedRoute so we can add authorization too,
+            example: <ProtectedRoute roles={['managers', 'data-admins']} />
+            */
+          }
+            <Route path="/medlemmer" element={<Users />} />
+            <Route path="/medlemmer/test" element={<h1>Test</h1>} />
+          </Route>
+        </Routes>
+      </main>
+    </>
   )
 }
-
-export default App;

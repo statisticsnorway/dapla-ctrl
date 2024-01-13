@@ -1,8 +1,8 @@
-import { PageLayout } from "../components/PageLayout/PageLayout"
+import PageLayout from "../components/PageLayout/PageLayout"
 import { getAllTeams, TeamApiResponse } from "../api/teamApi"
 import { useEffect, useState } from "react"
 
-export function Users() {
+export default function Users() {
     const [teams, setTeams] = useState<TeamApiResponse | undefined>();
 
     useEffect(() => {
@@ -16,10 +16,9 @@ export function Users() {
         <>
             <PageLayout
                 title="Medlemmer"
-                buttonText="Legg til medlem"
             />
             {teams && teams.data.length > 0 && (
-                <div className="container">
+                <>
                     <h2>Team List</h2>
                     <table>
                         <thead>
@@ -37,9 +36,9 @@ export function Users() {
                             ))}
                         </tbody>
                     </table>
-                </div>
-            ) || <div className="container">Loading...</div> || (
-                    <div className="container">No teams found.</div>
+                </>
+            ) || <p>Loading...</p> || (
+                    <p>No teams found.</p>
                 )}
 
         </>

@@ -1,11 +1,11 @@
-import { Input, Link, References } from "@statisticsnorway/ssb-component-library";
+import { Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const jwtRegex = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
 
-export function Login() {
+export default function Login() {
     const [error, setError] = useState(false);
     const [value, setValue] = useState("");
 
@@ -60,13 +60,11 @@ export function Login() {
     };
 
     return (
-        <>
-            <div className="container">
-                <span>Trykk </span>
-                <Link isExternal={true} href="https://httpbin-fe.staging-bip-app.ssb.no/bearer">her</Link>
-                <span> for å hente keycloak token</span>
-                <Input placeholder={"Keycloak token"} value={value} handleChange={handleInputChange} error={error} errorMessage="Invalid keycloak token" />
-            </div>
-        </>
+        <div>
+            <span> Trykk </span >
+            <Link isExternal={true} href="https://httpbin-fe.staging-bip-app.ssb.no/bearer">her</Link>
+            <span> for å hente keycloak token</span>
+            <Input placeholder={"Keycloak token"} value={value} handleChange={handleInputChange} error={error} errorMessage="Invalid keycloak token" />
+        </div>
     )
 }
