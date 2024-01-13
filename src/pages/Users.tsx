@@ -40,7 +40,6 @@ export default function Users() {
             ) || <p>Loading...</p> || (
                     <p>No teams found.</p>
                 )}
-
         </>
     )
 }
