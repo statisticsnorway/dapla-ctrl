@@ -1,14 +1,18 @@
 import PageLayout from "../components/PageLayout/PageLayout"
 import { getAllTeams, TeamApiResponse } from "../api/teamApi"
 import { useEffect, useState } from "react"
+import { Dialog } from "@statisticsnorway/ssb-component-library"
 
 export default function Users() {
     const [teams, setTeams] = useState<TeamApiResponse | undefined>();
+    const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
         const token = localStorage.getItem('token') as string;
         getAllTeams(token).then(response => {
             setTeams(response);
+        }).catch(error => {
+            setError(error.toString());
         });
     }, []);
 
@@ -17,7 +21,9 @@ export default function Users() {
             <PageLayout
                 title="Medlemmer"
             />
-            {teams && teams.data.length > 0 && (
+            {error ? <Dialog type='warning' title="Could not fetch teams">
+                {error}
+            </Dialog> : teams && teams.data.length > 0 && (
                 <>
                     <h2>Team List</h2>
                     <table>
@@ -38,8 +44,8 @@ export default function Users() {
                     </table>
                 </>
             ) || <p>Loading...</p> || (
-                    <p>No teams found.</p>
-                )}
+                <p>No teams found.</p>
+            )}
         </>
     )
 }

@@ -20,6 +20,10 @@ const client = jwksClient({
 });
 
 app.post('/api/verify-token', (req, res) => {
+    if (!req.headers.authorization.startsWith("Bearer")) {
+        return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
     const token = req.headers.authorization.split("Bearer ")[1];
 
     const decodedToken = jwt.decode(token, { complete: true });
@@ -44,14 +48,18 @@ app.post('/api/verify-token', (req, res) => {
 });
 
 app.get('/api/teams', (req, res) => {
-    const token = req.headers.authorization;
+    if (!req.headers.authorization.startsWith("Bearer")) {
+        return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+
+    const token = req.headers.authorization.split("Bearer ")[1];
     const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/teams`;
 
     fetch(url, {
         method: "GET",
         headers: {
             "accept": "*/*",
-            "Authorization": "Bearer " + token.split("Bearer ")[1],
+            "Authorization": `Bearer ${token}`,
         }
     }).then(response => {
         if (!response.ok) {
