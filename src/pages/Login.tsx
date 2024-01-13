@@ -1,4 +1,4 @@
-import { Input } from "@statisticsnorway/ssb-component-library";
+import { Input, Link, References } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -62,6 +62,9 @@ export function Login() {
     return (
         <>
             <div className="container">
+                <span>Trykk </span>
+                <Link isExternal={true} href="https://httpbin-fe.staging-bip-app.ssb.no/bearer">her</Link>
+                <span> for å hente keycloak token</span>
                 <Input placeholder={"Keycloak token"} value={value} handleChange={handleInputChange} error={error} errorMessage="Invalid keycloak token" />
             </div>
         </>
