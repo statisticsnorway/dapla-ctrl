@@ -18,11 +18,6 @@ interface Link {
     templated?: boolean;
 }
 
-interface Links {
-    self: Link;
-}
-
-
 export const getAllTeams = (token: string): Promise<TeamApiResponse> => {
     return fetch('/api/teams', {
         method: 'GET',

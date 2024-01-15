@@ -5,16 +5,19 @@ import Breadcrumb from './components/Breadcrumb';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Users from './pages/Users';
-import Login from './pages/Login';
 import Logout from './pages/Logout';
-import { Routes, Route } from 'react-router-dom';
+import Login from './pages/Login/Login';
+
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 export default function App() {
+  const isLoggedIn = useLocation().pathname !== '/login';
+
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
       <main className={styles.container}>
-        <Breadcrumb />
+        {isLoggedIn && <Breadcrumb />}
         <Routes>
           <Route path="/login" element={<Login />} />
 

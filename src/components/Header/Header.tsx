@@ -4,7 +4,8 @@ import { Link } from '@statisticsnorway/ssb-component-library';
 import AccountMenu from '../AccountMenu/AccountMenu';
 import { useNavigate } from 'react-router-dom';
 
-export default function Header() {
+export default function Header(props: { isLoggedIn: boolean }) {
+    const { isLoggedIn } = props
 
     let token = localStorage.getItem('token');
     if (token)
@@ -14,16 +15,15 @@ export default function Header() {
     return (
         <div className={styles.header}>
             <h2 style={{ "cursor": "pointer" }} onClick={() => navigate("/")}>Dapla ctrl</h2>
-            <div className={styles.navigation}>
-                <Link href="/teammedlemmer">Teammedlemmer</Link>
-                {token ? <AccountMenu
-                    firstName={decoded_jwt.given_name}
-                    lastName={decoded_jwt.family_name}
-                /> : <AccountMenu firstName='#' lastName='#' />} {/* What to use as fallback?*/}
-
-
-            </div>
-
+            {isLoggedIn &&
+                <div className={styles.navigation}>
+                    <Link href="/teammedlemmer">Teammedlemmer</Link>
+                    {token ? <AccountMenu
+                        firstName={decoded_jwt.given_name}
+                        lastName={decoded_jwt.family_name}
+                    /> : <AccountMenu firstName='#' lastName='#' />}
+                </div>
+            }
         </div>
     )
 }
