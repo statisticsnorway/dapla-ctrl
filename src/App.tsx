@@ -16,7 +16,6 @@ export default function App() {
       <main className={styles.container}>
         <Breadcrumb />
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
 
           <Route element={<ProtectedRoute />}> {
@@ -24,6 +23,7 @@ export default function App() {
             example: <ProtectedRoute roles={['managers', 'data-admins']} />
             */
           }
+            <Route path="/" element={<Home />} />
             <Route path="/medlemmer" element={<Users />} />
             <Route path="/medlemmer/test" element={<h1>Test</h1>} />
           </Route>
