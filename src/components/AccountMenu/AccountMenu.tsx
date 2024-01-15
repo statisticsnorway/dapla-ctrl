@@ -29,10 +29,9 @@ export default function AccountMenu({ firstName, lastName, image }: PageLayoutPr
     }, [menuRef]);
 
     const onClick = () => {
-        //const path_to_go = encodeURI(`/teammedlemmer/${firstName} ${lastName}`);
-        //navigate(path_to_go);
+        const path_to_go = encodeURI(`/teammedlemmer/${firstName} ${lastName}`);
+        navigate(path_to_go);
         setVisibleMenu(!visibleMenu);
-        console.log("account menu clicked")
     }
 
     return (
@@ -42,14 +41,6 @@ export default function AccountMenu({ firstName, lastName, image }: PageLayoutPr
             onClick={onClick}
         >
             {image ? <img src={image} alt="Gå til profil" /> : <div className={styles.initials}>{initials}</div>}
-            {visibleMenu &&
-                <div className="todo">
-                    <ul>
-                        <li><a href={`${encodeURI(`/teammedlemmer/${firstName} ${lastName}`)}`}>Min profil</a></li>
-                        <li><a href="/logout">Logg ut</a></li>
-                    </ul>
-                </div>
-            }
         </div>
     )
 }

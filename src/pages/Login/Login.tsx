@@ -4,8 +4,8 @@ import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
+import { jwtRegex } from "../../utils/regex";
 
-const jwtRegex = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
 
 export default function Login() {
     const [error, setError] = useState(false);
@@ -69,10 +69,10 @@ export default function Login() {
             </span>
             <Input
                 label="Lim inn keycloak token"
-                placeholder="Keycloak token" 
-                value={value} 
-                handleChange={handleInputChange} 
-                error={error} 
+                placeholder="Keycloak token"
+                value={value}
+                handleChange={handleInputChange}
+                error={error}
                 errorMessage="Invalid keycloak token" />
         </div>
     )
