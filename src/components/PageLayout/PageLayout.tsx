@@ -9,7 +9,7 @@ interface PageLayoutProps {
     content?: JSX.Element
 }
 
-export default function PageLayout({title, description, button, content}: PageLayoutProps) {
+export default function PageLayout({ title, description, button, content }: PageLayoutProps) {
     return (
         <>
             <div className={styles.title}>
