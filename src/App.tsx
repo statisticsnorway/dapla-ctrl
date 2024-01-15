@@ -7,14 +7,16 @@ import Home from './pages/Home';
 import Users from './pages/Users';
 import Login from './pages/Login/Login';
 
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 
 export default function App() {
+  const isLoggedIn = useLocation().pathname !== '/login';
+
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
       <main className={styles.container}>
-        <Breadcrumb />
+        {isLoggedIn && <Breadcrumb />}
         <Routes>
           <Route path="/login" element={<Login />} />
 
