@@ -6,7 +6,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Users from './pages/Users';
 import Login from './pages/Login';
-
+import Logout from './pages/Logout';
 import { Routes, Route } from 'react-router-dom';
 
 export default function App() {
@@ -24,8 +24,9 @@ export default function App() {
             */
           }
             <Route path="/" element={<Home />} />
-            <Route path="/medlemmer" element={<Users />} />
-            <Route path="/medlemmer/test" element={<h1>Test</h1>} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/teammedlemmer" element={<Users />} />
+            <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
           </Route>
         </Routes>
       </main>

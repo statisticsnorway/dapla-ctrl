@@ -19,7 +19,7 @@ export default function Users() {
     return (
         <>
             <PageLayout
-                title="Medlemmer"
+                title="Teammedlemmer"
             />
             {error ? <Dialog type='warning' title="Could not fetch teams">
                 {error}

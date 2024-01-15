@@ -1,7 +1,18 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
 .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    border-bottom: 1px solid gray;
+    border-bottom: 1px solid variables.$ssb-dark-2;
+    color: variables.$ssb-dark-5;
+    align-items: center;
     padding: 1rem;
+
+    & .navigation {
+        @extend .header;
+        gap: 2rem;
+        border-bottom: 0; // unset border-bottom from the inherited .header class
+
+    }
 }
