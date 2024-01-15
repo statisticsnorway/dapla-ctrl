@@ -21,9 +21,9 @@ export default function Header(props: { isLoggedIn: boolean }) {
             {isLoggedIn &&
                 <div className={styles.navigation}>
                     <Link href="/teammedlemmer">Teammedlemmer</Link>
-                    {token ? <AccountMenu
+                    {token && <AccountMenu
                         fullName={decoded_jwt.name}
-                    /> : <AccountMenu fullName='#' />}
+                    />}
                 </div>
             }
         </div>
