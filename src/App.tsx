@@ -5,7 +5,6 @@ import Breadcrumb from './components/Breadcrumb';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Users from './pages/Users';
-import Logout from './pages/Logout';
 import Login from './pages/Login/Login';
 
 import { Routes, Route, useLocation } from 'react-router-dom';
@@ -31,7 +30,6 @@ export default function App() {
             */
           }
             <Route path="/" element={<Home />} />
-            <Route path="/logout" element={<Logout />} />
             <Route path="/teammedlemmer" element={<Users />} />
             <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
           </Route>
