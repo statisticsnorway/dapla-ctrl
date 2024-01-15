@@ -9,9 +9,13 @@ import Logout from './pages/Logout';
 import Login from './pages/Login/Login';
 
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { jwtRegex } from './utils/regex';
 
 export default function App() {
-  const isLoggedIn = useLocation().pathname !== '/login';
+  const isLoggedIn = (
+    useLocation().pathname !== '/login' &&
+    localStorage.getItem('token') !== null &&
+    jwtRegex.test(localStorage.getItem('token') as string));
 
   return (
     <>
