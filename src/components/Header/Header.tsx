@@ -22,9 +22,8 @@ export default function Header(props: { isLoggedIn: boolean }) {
                 <div className={styles.navigation}>
                     <Link href="/teammedlemmer">Teammedlemmer</Link>
                     {token ? <AccountMenu
-                        firstName={decoded_jwt.given_name}
-                        lastName={decoded_jwt.family_name}
-                    /> : <AccountMenu firstName='#' lastName='#' />}
+                        fullName={decoded_jwt.name}
+                    /> : <AccountMenu fullName='#' />}
                 </div>
             }
         </div>
