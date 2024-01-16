@@ -1,10 +1,14 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
+.tableContainer {
+  overflow-x: auto;
+}
+
 .table {
   background-color: variables.$ssb-white;
+  width: 100%;
   border-collapse: collapse;
   border: 1px solid;
-  width: 100%;
   padding: 2rem;
 
   th,td {
