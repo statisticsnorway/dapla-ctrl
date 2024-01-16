@@ -1,4 +1,4 @@
-import styles from './accountmenu.module.scss'
+import styles from './avatar.module.scss'
 import { useNavigate } from 'react-router-dom';
 
 interface PageLayoutProps {

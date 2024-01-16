@@ -1,7 +1,7 @@
 import styles from './header.module.scss'
 
 import { Link } from '@statisticsnorway/ssb-component-library';
-import AccountMenu from '../AccountMenu/AccountMenu';
+import Avatar from '../Avatar/Avatar';
 import { useNavigate } from 'react-router-dom';
 import {
     jwtRegex
@@ -21,7 +21,7 @@ export default function Header(props: { isLoggedIn: boolean }) {
             {isLoggedIn &&
                 <div className={styles.navigation}>
                     <Link href="/teammedlemmer">Teammedlemmer</Link>
-                    {token && <AccountMenu
+                    {token && <Avatar
                         fullName={decoded_jwt.name}
                     />}
                 </div>
