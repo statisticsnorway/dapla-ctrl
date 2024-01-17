@@ -18,14 +18,19 @@ export default function Home() {
         });
     }, []);
 
-    function renderTeamNameCell(team: Team) {
+    function renderTeamNameColumn(team: Team) {
         return (
-            <Link href={team._links.self.href}>{team.displayName}</Link>
+            <>
+                <Link href={team._links.self.href}>
+                    <b>{team.displayName}</b>
+                </Link>
+                {/* TODO: Fetch department from API. Teams are missing a department property */}
+            </>
         )
     }
 
     function renderAllTeams() {
-        if(error) {
+        if (error) {
             return (
                 <Dialog type='warning' title="Could not fetch teams">
                     {error}
@@ -34,7 +39,7 @@ export default function Home() {
         }
 
         if (teams && teams.data.length) {
-            const allTeamsTableHeader = [{
+            const allTeamsTableHeaderColumns = [{
                 id: 'navn',
                 label: 'Navn',
             },
@@ -46,17 +51,23 @@ export default function Home() {
                 label: 'Ansvarlig'
             }]
             
-            const allTeamsTableData = teams.data.map(team => ({
+            const allTeamsTableDataColumns = teams.data.map(team => ({
                 id: team.uniformName,
-                'navn': renderTeamNameCell(team)
+                'navn': renderTeamNameColumn(team),
+                // TODO: Fetch team user count from API e.g. /teams/{team.uniformName}/users and users.count
+                'teammedlemmer': '',
+                // TODO: 
+                // * Fetch team manager? from API e.g. /groups/{team.uniformName}-managers/users and use users.displayName
+                'ansvarlig': '', 
             }))
             
+            // TODO: Loading can be replaced by a spinner eventually
             return (
                 <>
                     <Title size={2}>Alle team</Title>
                     <Table
-                        columns={allTeamsTableHeader}
-                        data={allTeamsTableData}
+                        columns={allTeamsTableHeaderColumns}
+                        data={allTeamsTableDataColumns}
                     />
                     </>
                     ) || <p>Loading...</p> || (
