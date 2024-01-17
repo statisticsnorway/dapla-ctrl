@@ -21,9 +21,11 @@ export default function Home() {
     function renderTeamNameColumn(team: Team) {
         return (
             <>
-                <Link href={team._links.self.href}>
-                    <b>{team.displayName}</b>
-                </Link>
+                <span>
+                    <Link href={team._links.self.href}>
+                        <b>{team.displayName}</b>
+                    </Link>
+                </span>
                 {/* TODO: Fetch department from API. Teams are missing a department property */}
             </>
         )
@@ -55,10 +57,10 @@ export default function Home() {
                 id: team.uniformName,
                 'navn': renderTeamNameColumn(team),
                 // TODO: Fetch team user count from API e.g. /teams/{team.uniformName}/users and users.count
-                'teammedlemmer': '',
+                'teammedlemmer': 12,
                 // TODO: 
                 // * Fetch team manager? from API e.g. /groups/{team.uniformName}-managers/users and use users.displayName
-                'ansvarlig': '', 
+                'ansvarlig': 'Lorem ipsum', 
             }))
             
             // TODO: Loading can be replaced by a spinner eventually

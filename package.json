@@ -20,6 +20,7 @@
     "nodemon": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-responsive": "^9.0.2",
     "react-router-dom": "^6.21.1",
     "vite-express": "0.13.0"
   },
