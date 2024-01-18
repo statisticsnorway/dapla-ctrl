@@ -1,5 +1,7 @@
 import styles from './table.module.scss'
+
 import { useMediaQuery } from 'react-responsive'
+import { Text } from '@statisticsnorway/ssb-component-library'
 
 export interface TableData {
     columns: {
@@ -13,8 +15,8 @@ export interface TableData {
 }
 
 function conditionalStyling(index: number) {
-    // Add conditional styling for first element, then third etc
-    return (index + 1) % 2 !== 0 ? styles.conditionalCell : undefined
+    // Add conditional styling for the first element, then third etc
+    return (index + 1) % 2 !== 0 ? styles.greenBackground : undefined
 }
 
 const TableMobileView = ({columns, data}: TableData) => (
@@ -23,10 +25,10 @@ const TableMobileView = ({columns, data}: TableData) => (
             return (
                 <div key={row.id} className={`${styles.tableMobile} ${conditionalStyling(index)}`}>
                     {columns.map((column, index) => 
-                        <div key={column.id}>
+                        <Text small key={column.id}>
                             {index !== 0 && <b>{column.label}</b>}
                             {row[column.id]} 
-                        </div>
+                        </Text>
                     )}
                 </div>
             )
@@ -37,7 +39,7 @@ const TableMobileView = ({columns, data}: TableData) => (
 const TableDesktopView = ({columns, data}: TableData) => (
     <div className={styles.tableContainer}>
         <table className={styles.table}>
-                <thead>
+            <thead>
                 <tr>
                     {columns.map((column) => (
                         <th key={column.id}>
@@ -45,37 +47,39 @@ const TableDesktopView = ({columns, data}: TableData) => (
                         </th>
                     ))}
                 </tr>
-                </thead>
-                <tbody>
-                    {data.map((row, index) => {
-                        return (
-                            <tr key={row.id} className={conditionalStyling(index)}>
-                                {columns.map((column) => (
-                                    <td key={column.id}>
-                                        {row[column.id]}
-                                    </td>
-                                ))}
-                            </tr>
-                        )
-                    })}
-                </tbody>
+            </thead>
+            <tbody>
+                {data.map((row, index) => {
+                    return (
+                        <tr key={row.id} className={conditionalStyling(index)}>
+                            {columns.map((column) => (
+                                <td key={column.id}>
+                                    {row[column.id]}
+                                </td>
+                            ))}
+                        </tr>
+                    )
+                })}
+            </tbody>
         </table>
     </div>
 )
 
 export default function Table ({columns, data}: TableData) {
-    const isMobile = useMediaQuery({ query: '(max-width: 767px)'}) // from ssb-component-library
-    
-    return (
-        <>
-           {!isMobile && <TableDesktopView 
+    const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)'}) // $mobile variable from ssb-component-library
+    if (isOnMobile) {
+        return (
+            <TableMobileView 
                 columns={columns} 
                 data={data} 
-            />}
-            {isMobile && <TableMobileView 
+            />
+        )
+    } else {
+        return (
+            <TableDesktopView 
                 columns={columns} 
                 data={data} 
-            />}
-        </>
-    )
+            />
+        )
+    }
 }

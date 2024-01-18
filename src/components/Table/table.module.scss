@@ -1,6 +1,5 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
-// TODO: Use grid, flex, spacing from SSB design system
 .tableContainer {
   overflow-x: auto;
 
@@ -27,24 +26,27 @@
 }
 
 .tableContainerMobile {
+  background-color: variables.$ssb-white;
   width: 100%;
   border: 1px solid;
   
   .tableMobile {
     display: flex;
     flex-direction: column;
-    border: 1px inset variables.$ssb-dark-2; 
     padding: .5rem;
-    font-size: .8rem;
-  
+    border-bottom: 1px inset variables.$ssb-dark-2; 
+    
     > * {
       display: flex;
       flex-direction: column;
-      margin-bottom: 1rem;
+
+      &:not(:last-child) {
+        margin-bottom: 1.5rem;
+      }
     }
   }
 }
 
-.conditionalCell {
+.greenBackground {
   background-color: variables.$ssb-green-1;
 }
