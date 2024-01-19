@@ -1,5 +1,4 @@
-import { getTokenCookie } from "../auth";
-
+import Cookies from 'js-cookie'
 export interface TeamApiResponse {
     success: boolean;
     data: Team[];
@@ -22,11 +21,13 @@ interface Link {
 
 
 export const getAllTeams = (): Promise<TeamApiResponse> => {
+    const token = Cookies.get('token');
+
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${getTokenCookie()}`
+            'Authorization': `Bearer ${token}`
         }
     }).then(response => {
         if (!response.ok) {
