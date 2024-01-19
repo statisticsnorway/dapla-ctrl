@@ -1,0 +1,52 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.tableContainer {
+  overflow-x: auto;
+
+  .table {
+    background-color: variables.$ssb-white;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid;
+    padding: 2rem;
+  
+    th,td {
+      padding: 0.75rem;
+      text-align: start;
+    }
+  
+    th {
+      border: 1px solid;
+    }
+  
+    td {
+      border: 1px inset variables.$ssb-dark-2;
+    }  
+  }
+}
+
+.tableContainerMobile {
+  background-color: variables.$ssb-white;
+  width: 100%;
+  border: 1px solid;
+  
+  .tableMobile {
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    border-bottom: 1px inset variables.$ssb-dark-2; 
+    
+    > * {
+      display: flex;
+      flex-direction: column;
+
+      &:not(:last-child) {
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+}
+
+.greenBackground {
+  background-color: variables.$ssb-green-1;
+}

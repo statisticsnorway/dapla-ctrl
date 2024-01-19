@@ -3,7 +3,7 @@ export interface TeamApiResponse {
     data: Team[];
 }
 
-interface Team {
+export interface Team {
     uniformName: string;
     displayName: string;
     _links: TeamLinks;
