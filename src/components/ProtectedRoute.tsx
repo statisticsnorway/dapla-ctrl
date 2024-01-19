@@ -10,19 +10,13 @@ export const ProtectedRoute = () => {
     const from = location.pathname;
 
     useEffect(() => {
-        const token = Cookies.get('token');
-        
-        if (token) {
-            verifyKeycloakToken(token).then(isValid => {
-                setIsAuthenticated(isValid);
-                if (!isValid) {
-                    Cookies.remove('token');
-                    navigate('/login', { state: { from: from } });
-                }
-            });
-        } else {
-            navigate('/login', { state: { from: from } });
-        }
+        verifyKeycloakToken().then(isValid => {
+            setIsAuthenticated(isValid);
+            if (!isValid) {
+                Cookies.remove('token');
+                navigate('/login', { state: { from: from } });
+            }
+        });
     }, [navigate]);
 
     return isAuthenticated ? <Outlet /> : null;

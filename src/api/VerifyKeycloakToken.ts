@@ -1,9 +1,13 @@
-export const verifyKeycloakToken = (token: string): Promise<boolean> => {
+import Cookie from 'js-cookie'
+
+export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
+    const getTokenCookie = Cookie.get('token');
+
     return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token || getTokenCookie}`
         },
 
     }).then(response => {
