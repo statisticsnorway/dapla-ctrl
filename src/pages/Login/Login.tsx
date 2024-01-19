@@ -51,7 +51,7 @@ export default function Login() {
         } else {
             validateToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    Cookies.set('token', value, { httpsOnly: true, secure: true })
+                    Cookies.set('token', value, { expires: 7, secure: true, sameSite: 'strict'})
                     navigate(from);
                 }
                 setError(!isValidToken);
