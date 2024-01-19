@@ -1,5 +1,7 @@
 import styles from './login.module.scss'
 
+import Cookies from 'js-cookie'
+
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
@@ -16,7 +18,7 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
+        const storedToken = Cookies.get('token');
 
         if (storedToken && jwtRegex.test(storedToken)) {
             verifyKeycloakToken(storedToken).then(isValid => {
@@ -49,7 +51,7 @@ export default function Login() {
         } else {
             validateToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    localStorage.setItem("token", value);
+                    Cookies.set('token', value, { httpsOnly: true, secure: true })
                     navigate(from);
                 }
                 setError(!isValidToken);

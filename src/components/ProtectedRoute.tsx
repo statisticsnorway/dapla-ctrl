@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie';
+
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { verifyKeycloakToken } from '../api/VerifyKeycloakToken';
@@ -8,12 +10,13 @@ export const ProtectedRoute = () => {
     const from = location.pathname;
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = Cookies.get('token');
+        
         if (token) {
             verifyKeycloakToken(token).then(isValid => {
                 setIsAuthenticated(isValid);
                 if (!isValid) {
-                    localStorage.removeItem('token');
+                    Cookies.remove('token');
                     navigate('/login', { state: { from: from } });
                 }
             });

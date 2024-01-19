@@ -1,3 +1,5 @@
+import Cookies from 'js-cookie'
+
 import PageLayout from "../components/PageLayout/PageLayout"
 import { getAllTeams, TeamApiResponse } from "../api/teamApi"
 import { useEffect, useState } from "react"
@@ -8,7 +10,7 @@ export default function Users() {
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
-        const token = localStorage.getItem('token') as string;
+        const token = Cookies.get('token');
         getAllTeams(token).then(response => {
             setTeams(response);
         }).catch(error => {
