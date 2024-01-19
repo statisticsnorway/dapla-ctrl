@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie'
 import PageLayout from '../components/PageLayout/PageLayout'
 import Table from '../components/Table/Table'
 
@@ -10,10 +9,8 @@ export default function Home() {
     const [teams, setTeams] = useState<TeamApiResponse | undefined>();
     const [error, setError] = useState<string | undefined>();
 
-    useEffect(() => {
-        const token = Cookies.get('token');
-        
-        getAllTeams(token).then(response => {
+    useEffect(() => {        
+        getAllTeams().then(response => {
             setTeams(response);
         }).catch(error => {
             setError(error.toString());

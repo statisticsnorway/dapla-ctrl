@@ -1,3 +1,5 @@
+import { getTokenCookie } from "../auth";
+
 export interface TeamApiResponse {
     success: boolean;
     data: Team[];
@@ -19,12 +21,12 @@ interface Link {
 }
 
 
-export const getAllTeams = (token: string): Promise<TeamApiResponse> => {
+export const getAllTeams = (): Promise<TeamApiResponse> => {
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${getTokenCookie()}`
         }
     }).then(response => {
         if (!response.ok) {
