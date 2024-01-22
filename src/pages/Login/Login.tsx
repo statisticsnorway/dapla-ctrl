@@ -18,10 +18,10 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedToken = Cookies.get('token');
+        const storedAccessToken = Cookies.get('access_token');
 
-        if (storedToken && jwtRegex.test(storedToken)) {
-            verifyKeycloakToken(storedToken).then(isValid => {
+        if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
+            verifyKeycloakToken(storedAccessToken).then(isValid => {
                 if (isValid) {
                     navigate(from);
                 }
@@ -30,18 +30,18 @@ export default function Login() {
     }, [navigate]);
 
     useEffect(() => {
-        const validateToken = (token: string) => {
+        const validateAccessToken = (accessToken: string) => {
             // Check if the token matches the JWT pattern
-            if (!jwtRegex.test(token)) {
+            if (!jwtRegex.test(accessToken)) {
                 return Promise.resolve(false);
             }
 
             // Check if the token is invalid
-            return verifyKeycloakToken(token).then(isValid => {
+            return verifyKeycloakToken(accessToken).then(isValid => {
                 if (!isValid) {
                     return false;
                 }
-                setValue(token);
+                setValue(accessToken);
                 return true;
             });
         };
@@ -49,9 +49,9 @@ export default function Login() {
         if (!value) {
             setError(false);
         } else {
-            validateToken(value).then(isValidToken => {
+            validateAccessToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    Cookies.set('token', value, { expires: 7, secure: true, sameSite: 'strict'})
+                    Cookies.set('access_token', value, { expires: 7, secure: true, sameSite: 'strict'})
                     navigate(from);
                 }
                 setError(!isValidToken);

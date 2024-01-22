@@ -1,13 +1,13 @@
 import Cookie from 'js-cookie'
 
 export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
-    const getTokenCookie = Cookie.get('token');
+    const getAccessTokenCookie = Cookie.get('access_token');
 
     return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || getTokenCookie}`
+            'Authorization': `Bearer ${token || getAccessTokenCookie}`
         },
 
     }).then(response => {

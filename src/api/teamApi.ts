@@ -21,13 +21,13 @@ interface Link {
 
 
 export const getAllTeams = (): Promise<TeamApiResponse> => {
-    const token = Cookies.get('token');
+    const accessToken = Cookies.get('access_token');
 
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${accessToken}`
         }
     }).then(response => {
         if (!response.ok) {
