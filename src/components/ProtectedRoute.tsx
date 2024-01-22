@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
         verifyKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {
-                Cookies.remove('token');
+                Cookies.remove('access_token', { secure: true, sameSite: 'strict' });
                 navigate('/login', { state: { from: from } });
             }
         });
