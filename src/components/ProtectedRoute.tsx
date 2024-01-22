@@ -1,4 +1,4 @@
-import Cookies from 'js-cookie';
+import secureLocalStorage from 'react-secure-storage';
 
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
@@ -13,7 +13,7 @@ export const ProtectedRoute = () => {
         verifyKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {
-                Cookies.remove('access_token', { secure: true, sameSite: 'strict' });
+                secureLocalStorage.removeItem('access_token');
                 navigate('/login', { state: { from: from } });
             }
         });

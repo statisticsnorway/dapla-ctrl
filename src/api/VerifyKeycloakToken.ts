@@ -1,13 +1,13 @@
-import Cookie from 'js-cookie'
+import secureLocalStorage from 'react-secure-storage'
 
 export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
-    const getAccessTokenCookie = Cookie.get('access_token');
+    const getAccessToken = secureLocalStorage.getItem('access_token');
 
     return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || getAccessTokenCookie}`
+            'Authorization': `Bearer ${token || getAccessToken}`
         },
 
     }).then(response => {

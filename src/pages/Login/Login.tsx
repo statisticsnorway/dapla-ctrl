@@ -1,6 +1,6 @@
-import styles from './login.module.scss'
+import styles from './login.module.scss';
 
-import Cookies from 'js-cookie'
+import secureLocalStorage from 'react-secure-storage';
 
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
@@ -18,7 +18,7 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedAccessToken = Cookies.get('access_token');
+        const storedAccessToken = secureLocalStorage.getItem('access_token') as string;
 
         if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
             verifyKeycloakToken(storedAccessToken).then(isValid => {
@@ -51,7 +51,7 @@ export default function Login() {
         } else {
             validateAccessToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    Cookies.set('access_token', value, { expires: 7, secure: true, sameSite: 'strict'})
+                    secureLocalStorage.setItem('access_token', value)
                     navigate(from);
                 }
                 setError(!isValidToken);
