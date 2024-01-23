@@ -4,7 +4,6 @@ import styles from './avatar.module.scss';
 
 interface PageLayoutProps {
     fullName: string,
-    image?: string,
     photo?: string,
 }
 
