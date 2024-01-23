@@ -18,7 +18,7 @@ export default function Avatar({ fullName }: PageLayoutProps) {
     const imageSrc = base64Image ? `data:image/png;base64,${base64Image}` : null;
 
     return (
-        <div className={styles.Avatar} onClick={handleClick}>
+        <div className={styles.avatar} onClick={handleClick}>
             {imageSrc ? <img src={imageSrc} alt="User" /> :
                 <div className={styles.initials}>{`${userProfile.firstName[0]}${userProfile.lastName[0]}`}</div>}
         </div>
