@@ -8,7 +8,7 @@ interface PageLayoutProps {
 
 export default function Avatar({ fullName }: PageLayoutProps) {
     const navigate = useNavigate();
-    const onClick = () => {
+    const handleClick = () => {
         const path_to_go = encodeURI(`/teammedlemmer/${fullName}`);
         navigate(path_to_go);
     };
@@ -18,7 +18,7 @@ export default function Avatar({ fullName }: PageLayoutProps) {
     const imageSrc = base64Image ? `data:image/png;base64,${base64Image}` : null;
 
     return (
-        <div className={styles.Avatar} onClick={onClick}>
+        <div className={styles.Avatar} onClick={handleClick}>
             {imageSrc ? <img src={imageSrc} alt="User" /> :
                 <div className={styles.initials}>{`${userProfile.firstName[0]}${userProfile.lastName[0]}`}</div>}
         </div>
