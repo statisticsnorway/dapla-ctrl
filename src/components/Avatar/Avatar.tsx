@@ -15,12 +15,12 @@ export default function Avatar({ fullName }: PageLayoutProps) {
 
     const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
     const base64Image = userProfile?.photo;
-
     const imageSrc = base64Image ? `data:image/png;base64,${base64Image}` : null;
 
     return (
         <div className={styles.Avatar} onClick={onClick}>
-            {imageSrc && <img src={imageSrc} alt="User" />}
+            {imageSrc ? <img src={imageSrc} alt="User" /> :
+                <div className={styles.initials}>{`${userProfile.firstName[0]}${userProfile.lastName[0]}`}</div>}
         </div>
     );
 }

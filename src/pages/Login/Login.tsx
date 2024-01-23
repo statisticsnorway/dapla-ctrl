@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { jwtRegex } from "../../utils/regex";
-import { getUserProfile } from "../../api/UserProfile";
+import { getUserProfile, getUserProfileFallback } from "../../api/UserProfile";
 
 export default function Login() {
     const [error, setError] = useState(false);
@@ -37,8 +37,14 @@ export default function Login() {
             if (!isValid) return false;
             setValue(accessToken);
 
-            const userProfile = await getUserProfile(accessToken);
-            localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            try {
+                const userProfile = await getUserProfile(accessToken);
+                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            } catch (error) {
+                console.error("Could not fetch user profile, using fallback", error);
+                const userProfile = getUserProfileFallback(accessToken);
+                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            }
 
             return true;
         };

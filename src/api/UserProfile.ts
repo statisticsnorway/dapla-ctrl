@@ -7,7 +7,7 @@ export interface UserData {
     lastName: string
     email: string,
     manager: any
-    photo: string
+    photo: string | null
 }
 
 
@@ -30,4 +30,18 @@ export const getUserProfile = async (accessToken: string): Promise<UserData> => 
             console.error('Error during fetching userProfile:', error);
             throw error;
         });
+};
+
+export const getUserProfileFallback = (accessToken: string): UserData => {
+    var jwt = JSON.parse(atob(accessToken.split('.')[1]));
+    return {
+        principalName: jwt.upn,
+        azureAdId: jwt.oid,
+        displayName: jwt.name,
+        firstName: jwt.given_name,
+        lastName: jwt.family_name,
+        email: jwt.email,
+        manager: null,
+        photo: null
+    };
 };
