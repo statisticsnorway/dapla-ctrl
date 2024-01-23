@@ -33,7 +33,7 @@ export const getUserProfile = async (accessToken: string): Promise<UserData> => 
 };
 
 export const getUserProfileFallback = (accessToken: string): UserData => {
-    var jwt = JSON.parse(atob(accessToken.split('.')[1]));
+    const jwt = JSON.parse(atob(accessToken.split('.')[1]));
     return {
         principalName: jwt.upn,
         azureAdId: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
