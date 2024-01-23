@@ -36,7 +36,7 @@ export const getUserProfileFallback = (accessToken: string): UserData => {
     var jwt = JSON.parse(atob(accessToken.split('.')[1]));
     return {
         principalName: jwt.upn,
-        azureAdId: jwt.oid,
+        azureAdId: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
         displayName: jwt.name,
         firstName: jwt.given_name,
         lastName: jwt.family_name,
