@@ -11,7 +11,6 @@ export const ProtectedRoute = () => {
         if (localStorage.getItem('userProfile') === null) {
             localStorage.removeItem('access_token');
             navigate('/login', { state: { from: from } });
-            console.log("here");
             return;
         }
 
