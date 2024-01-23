@@ -11,12 +11,13 @@ export interface UserData {
 }
 
 
-export const getUserProfile = async (token: string): Promise<UserData> => {
+export const getUserProfile = async (accessToken: string): Promise<UserData> => {
+
     return fetch('/api/userProfile', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${accessToken}`
         }
     }).then(response => {
         if (!response.ok) {
@@ -26,7 +27,7 @@ export const getUserProfile = async (token: string): Promise<UserData> => {
         return response.json();
     }).then(data => data as UserData)
         .catch(error => {
-            console.error('Error during fetching teams:', error);
+            console.error('Error during fetching userProfile:', error);
             throw error;
         });
 };

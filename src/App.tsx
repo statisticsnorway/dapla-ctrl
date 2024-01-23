@@ -13,8 +13,8 @@ import { jwtRegex } from './utils/regex';
 export default function App() {
   const isLoggedIn = (
     useLocation().pathname !== '/login' &&
-    localStorage.getItem('token') !== null &&
-    jwtRegex.test(localStorage.getItem('token') as string));
+    localStorage.getItem('access_token') !== null &&
+    jwtRegex.test(localStorage.getItem('access_token') as string));
 
   return (
     <>

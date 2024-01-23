@@ -8,8 +8,7 @@ export default function Users() {
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
-        const token = localStorage.getItem('token') as string;
-        getAllTeams(token).then(response => {
+        getAllTeams().then(response => {
             setTeams(response);
         }).catch(error => {
             setError(error.toString());

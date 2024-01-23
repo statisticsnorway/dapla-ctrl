@@ -1,9 +1,11 @@
-export const verifyKeycloakToken = (token: string): Promise<boolean> => {
+export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
+    const accessToken = localStorage.getItem('access_token');
+
     return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token || accessToken}`
         },
     }).then(response => {
         if (!response.ok) {

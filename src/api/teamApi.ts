@@ -13,12 +13,14 @@ interface Link {
     templated?: boolean;
 }
 
-export const getAllTeams = (token: string): Promise<Team[]> => {
+export const getAllTeams = (): Promise<Team[]> => {
+    const accessToken = localStorage.getItem('access_token');
+
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${accessToken}`
         }
     }).then(response => {
         if (!response.ok) {

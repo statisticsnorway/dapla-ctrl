@@ -16,10 +16,10 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
+        const storedAccessToken = localStorage.getItem('access_token') as string;
 
-        if (storedToken && jwtRegex.test(storedToken)) {
-            verifyKeycloakToken(storedToken).then(isValid => {
+        if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
+            verifyKeycloakToken(storedAccessToken).then(isValid => {
                 if (isValid) {
                     navigate(from);
                 }
@@ -28,29 +28,30 @@ export default function Login() {
     }, [navigate]);
 
     useEffect(() => {
-        const validateToken = async (token: string) => {
+        const validateToken = async (accessToken: string) => {
             // Check if the token matches the JWT pattern
-            if (!jwtRegex.test(token)) return false;
+            if (!jwtRegex.test(accessToken)) return false;
 
             // Check if the token is invalid
-            const isValid = await verifyKeycloakToken(token);
+            const isValid = await verifyKeycloakToken(accessToken);
             if (!isValid) return false;
+            setValue(accessToken);
 
-            setValue(token);
-            const userProfile = await getUserProfile(token);
+            const userProfile = await getUserProfile(accessToken);
             localStorage.setItem("userProfile", JSON.stringify(userProfile));
+
             return true;
         };
 
         if (!value) {
             setError(false);
         } else {
-            validateToken(value).then(isValidToken => {
-                if (isValidToken) {
-                    localStorage.setItem("token", value);
+            validateToken(value).then(isValidAccessToken => {
+                if (isValidAccessToken) {
+                    localStorage.setItem("access_token", value);
                     navigate(from);
                 }
-                setError(!isValidToken);
+                setError(!isValidAccessToken);
             });
         }
     }, [value, from]);
