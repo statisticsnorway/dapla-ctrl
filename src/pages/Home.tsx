@@ -2,14 +2,14 @@ import PageLayout from '../components/PageLayout/PageLayout'
 import Table from '../components/Table/Table'
 
 import { useEffect, useState } from "react"
-import { getAllTeams, TeamApiResponse, Team } from "../api/teamApi"
+import { getAllTeams, Team } from "../api/TeamApi"
 import { Title, Dialog, Link } from "@statisticsnorway/ssb-component-library"
 
 export default function Home() {
-    const [teams, setTeams] = useState<TeamApiResponse | undefined>();
+    const [teams, setTeams] = useState<Team[] | undefined>();
     const [error, setError] = useState<string | undefined>();
 
-    useEffect(() => {        
+    useEffect(() => {
         getAllTeams().then(response => {
             setTeams(response);
         }).catch(error => {
@@ -22,7 +22,7 @@ export default function Home() {
             <>
                 <span>
                     <Link href={team._links.self.href}>
-                        <b>{team.displayName}</b>
+                        <b>{team.uniformName}</b>
                     </Link>
                 </span>
                 {/* TODO: Fetch department from API. Teams are missing a department property */}
@@ -39,7 +39,7 @@ export default function Home() {
             )
         }
 
-        if (teams && teams.data.length) {
+        if (teams && teams.length) {
             const allTeamsTableHeaderColumns = [{
                 id: 'navn',
                 label: 'Navn',
@@ -51,17 +51,17 @@ export default function Home() {
                 id: 'ansvarlig',
                 label: 'Ansvarlig'
             }]
-            
-            const allTeamsTableDataColumns = teams.data.map(team => ({
+
+            const allTeamsTableDataColumns = teams.map(team => ({
                 id: team.uniformName,
                 'navn': renderTeamNameColumn(team),
                 // TODO: Fetch team user count from API e.g. /teams/{team.uniformName}/users and users.count
                 'teammedlemmer': 12,
                 // TODO: 
                 // * Fetch team manager? from API e.g. /groups/{team.uniformName}-managers/users and use users.displayName
-                'ansvarlig': 'Lorem ipsum', 
+                'ansvarlig': 'Lorem ipsum',
             }))
-            
+
             // TODO: Loading can be replaced by a spinner eventually
             return (
                 <>
@@ -70,9 +70,9 @@ export default function Home() {
                         columns={allTeamsTableHeaderColumns}
                         data={allTeamsTableDataColumns}
                     />
-                    </>
-                    ) || <p>Loading...</p> || (
-                        <p>No teams found.</p>
+                </>
+            ) || <p>Loading...</p> || (
+                    <p>No teams found.</p>
                 )
         }
     }
