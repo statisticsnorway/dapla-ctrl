@@ -72,8 +72,9 @@ export default function Login() {
             <Input
                 label="Lim inn keycloak token"
                 placeholder="Keycloak token" 
+                type="password"
                 value={value} 
-                handleChange={handleInputChange} 
+                handleChange={handleInputChange}
                 error={error} 
                 errorMessage="Invalid keycloak token" />
         </div>
