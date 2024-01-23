@@ -8,6 +8,13 @@ export const ProtectedRoute = () => {
     const from = location.pathname;
 
     useEffect(() => {
+        if (localStorage.getItem('userProfile') === null) {
+            localStorage.removeItem('access_token');
+            navigate('/login', { state: { from: from } });
+            console.log("here");
+            return;
+        }
+
         verifyKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {

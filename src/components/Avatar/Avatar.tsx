@@ -1,5 +1,7 @@
-import styles from './avatar.module.scss';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from '../../api/UserApi';
+import styles from './avatar.module.scss';
 
 interface PageLayoutProps {
     fullName: string,
@@ -7,20 +9,38 @@ interface PageLayoutProps {
 }
 
 export default function Avatar({ fullName }: PageLayoutProps) {
-    const navigate = useNavigate();
-    const handleClick = () => {
-        const path_to_go = encodeURI(`/teammedlemmer/${fullName}`);
-        navigate(path_to_go);
-    };
+    const [userProfileData, setUserProfileData] = useState<User>();
+    const [imageSrc, setImageSrc] = useState<string>("");
 
-    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    const base64Image = userProfile?.photo;
-    const imageSrc = base64Image ? `data:image/png;base64,${base64Image}` : null;
+    const navigate = useNavigate();
+    const encodedURI = encodeURI(`/teammedlemmer/${fullName}`);
+
+    useEffect(() => {
+        const storedUserProfile = localStorage.getItem('userProfile');
+        if (!storedUserProfile) {
+            navigate('/login', { state: { from: encodedURI } });
+            return;
+        }
+
+        const userProfile = JSON.parse(storedUserProfile) as User;
+        const base64Image = userProfile?.photo;
+        setUserProfileData(userProfile);
+        setImageSrc(`data:image/png;base64,${base64Image}`);
+    }, []);
+
+    const handleClick = () => {
+        navigate(encodedURI);
+    };
 
     return (
         <div className={styles.avatar} onClick={handleClick}>
-            {imageSrc ? <img src={imageSrc} alt="User" /> :
-                <div className={styles.initials}>{`${userProfile.firstName[0]}${userProfile.lastName[0]}`}</div>}
+            {imageSrc ? (
+                <img src={imageSrc} alt="User" />
+            ) : (
+                <div className={styles.initials}>
+                    {userProfileData ? `${userProfileData.firstName?.[0]}${userProfileData.lastName?.[0]}` : '??'}
+                </div>
+            )}
         </div>
     );
 }
