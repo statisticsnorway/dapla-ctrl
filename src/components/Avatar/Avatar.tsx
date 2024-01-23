@@ -1,20 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../../api/UserApi';
 import styles from './avatar.module.scss';
 
-interface PageLayoutProps {
-    fullName: string
-}
-
-export default function Avatar({ fullName }: PageLayoutProps) {
+export default function Avatar() {
     const [userProfileData, setUserProfileData] = useState<User>();
     const [imageSrc, setImageSrc] = useState<string>();
-
-    const fallbackInitials = `${fullName.split(' ')[0][0]}${fullName.split(' ')[1][0]}`
+    const [fallbackInitials, setFallbackInitials] = useState<string>('??');
+    const [encodedURI, setEncodedURI] = useState<string>('');
 
     const navigate = useNavigate();
-    const encodedURI = encodeURI(`/teammedlemmer/${fullName}`);
 
     useEffect(() => {
         const storedUserProfile = localStorage.getItem('userProfile');
@@ -26,12 +21,16 @@ export default function Avatar({ fullName }: PageLayoutProps) {
         if (!userProfile) return;
         setUserProfileData(userProfile);
 
+        setEncodedURI(encodeURI(`/teammedlemmer/${userProfile.displayName.split(', ').reverse().join(' ')}`));
+        setFallbackInitials(userProfile.firstName[0] + userProfile.lastName[0]);
+
         const base64Image = userProfile?.photo;
         if (!base64Image) return;
         setImageSrc(`data:image/png;base64,${base64Image}`);
     }, []);
 
     const handleClick = () => {
+        if (encodedURI === '') return;
         navigate(encodedURI);
     };
 
