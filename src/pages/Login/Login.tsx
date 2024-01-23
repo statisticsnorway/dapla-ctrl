@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { jwtRegex } from "../../utils/regex";
-import { getUserProfile, getUserProfileFallback } from "../../api/UserProfile";
+import { getUserProfile, getUserProfileFallback } from "../../api/UserApi";
 
 export default function Login() {
     const [error, setError] = useState(false);

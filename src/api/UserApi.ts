@@ -1,18 +1,17 @@
 
-export interface UserData {
+export interface User {
     principalName: string
     azureAdId: string
     displayName: string
     firstName: string
     lastName: string
-    email: string,
-    manager: any
-    photo: string | null
+    email: string
+    manager?: User
+    photo?: string
 }
 
 
-export const getUserProfile = async (accessToken: string): Promise<UserData> => {
-
+export const getUserProfile = async (accessToken: string): Promise<User> => {
     return fetch('/api/userProfile', {
         method: 'GET',
         headers: {
@@ -25,14 +24,14 @@ export const getUserProfile = async (accessToken: string): Promise<UserData> => 
             throw new Error('Request failed');
         }
         return response.json();
-    }).then(data => data as UserData)
+    }).then(data => data as User)
         .catch(error => {
             console.error('Error during fetching userProfile:', error);
             throw error;
         });
 };
 
-export const getUserProfileFallback = (accessToken: string): UserData => {
+export const getUserProfileFallback = (accessToken: string): User => {
     const jwt = JSON.parse(atob(accessToken.split('.')[1]));
     return {
         principalName: jwt.upn,
@@ -40,8 +39,6 @@ export const getUserProfileFallback = (accessToken: string): UserData => {
         displayName: jwt.name,
         firstName: jwt.given_name,
         lastName: jwt.family_name,
-        email: jwt.email,
-        manager: null,
-        photo: null
+        email: jwt.email
     };
 };

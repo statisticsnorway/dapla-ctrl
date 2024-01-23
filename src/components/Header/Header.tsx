@@ -10,8 +10,11 @@ import {
 export default function Header(props: { isLoggedIn: boolean }) {
     const { isLoggedIn } = props
 
-    const token = localStorage.getItem('access_token') as string;
-    const decoded_jwt = JSON.parse(atob(token.split('.')[1]));
+    const token = localStorage.getItem('access_token');
+    let decoded_jwt;
+
+    if (token && jwtRegex.test(token))
+        decoded_jwt = JSON.parse(atob(token.split('.')[1]));
 
     const navigate = useNavigate();
     return (
