@@ -3,20 +3,24 @@ import styles from './header.module.scss'
 import { Link } from '@statisticsnorway/ssb-component-library';
 import Avatar from '../Avatar/Avatar';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../../api/UserApi';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Header(props: { isLoggedIn: boolean }) {
     const { isLoggedIn } = props
-    const [userProfile, setUserProfile] = useState<User | null>(null);
-    const navigate = useNavigate();
+    const [accessToken, setAccessToken] = useState<string | null>(null);
+    const [fullName, setUserName] = useState<string | null>(null);
 
+    const navigate = useNavigate();
     useEffect(() => {
-        const storedUserProfile = localStorage.getItem('userProfile');
-        if (!storedUserProfile) {
-            return;
-        }
-        setUserProfile(JSON.parse(storedUserProfile));
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+
+        setAccessToken(token);
+
+        const jwt = JSON.parse(atob(token.split('.')[1]));
+
+        if (!jwt) return;
+        setUserName(jwt.name);
     }, [isLoggedIn]);
 
     return (
@@ -25,9 +29,8 @@ export default function Header(props: { isLoggedIn: boolean }) {
             {isLoggedIn &&
                 <div className={styles.navigation}>
                     <Link href="/teammedlemmer">Teammedlemmer</Link>
-                    {userProfile && <Avatar
-                        fullName={userProfile.displayName.split(', ').reverse().join(' ')}
-                        photo={userProfile.photo}
+                    {accessToken && <Avatar
+                        fullName={fullName ? fullName : '??'}
                     />}
                 </div>
             }
