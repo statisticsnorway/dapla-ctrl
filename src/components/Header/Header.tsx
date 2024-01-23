@@ -14,7 +14,6 @@ export default function Header(props: { isLoggedIn: boolean }) {
     useEffect(() => {
         const storedUserProfile = localStorage.getItem('userProfile');
         if (!storedUserProfile) {
-            navigate('/login');
             return;
         }
         setUserProfile(JSON.parse(storedUserProfile));
