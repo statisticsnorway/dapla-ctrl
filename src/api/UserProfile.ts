@@ -1,20 +1,18 @@
-export interface Team {
-    uniformName: string;
-    displayName: string;
-    _links: TeamLinks;
+
+export interface UserData {
+    principalName: string
+    azureAdId: string
+    displayName: string
+    firstName: string
+    lastName: string
+    email: string,
+    manager: any
+    photo: string
 }
 
-interface TeamLinks {
-    self: Link;
-}
 
-interface Link {
-    href: string;
-    templated?: boolean;
-}
-
-export const getAllTeams = (token: string): Promise<Team[]> => {
-    return fetch('/api/teams', {
+export const getUserProfile = async (token: string): Promise<UserData> => {
+    return fetch('/api/userProfile', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -26,10 +24,9 @@ export const getAllTeams = (token: string): Promise<Team[]> => {
             throw new Error('Request failed');
         }
         return response.json();
-    }).then(data => data as Team[])
+    }).then(data => data as UserData)
         .catch(error => {
             console.error('Error during fetching teams:', error);
             throw error;
         });
 };
-

@@ -5,7 +5,6 @@ export const verifyKeycloakToken = (token: string): Promise<boolean> => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-
     }).then(response => {
         if (!response.ok) {
             console.error('Token verification failed with status:', response.status);

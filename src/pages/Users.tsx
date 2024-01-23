@@ -1,10 +1,10 @@
 import PageLayout from "../components/PageLayout/PageLayout"
-import { getAllTeams, TeamApiResponse } from "../api/teamApi"
+import { getAllTeams, Team } from "../api/TeamApi"
 import { useEffect, useState } from "react"
 import { Dialog } from "@statisticsnorway/ssb-component-library"
 
 export default function Users() {
-    const [teams, setTeams] = useState<TeamApiResponse | undefined>();
+    const [teams, setTeams] = useState<Team[] | undefined>();
     const [error, setError] = useState<string | undefined>();
 
     useEffect(() => {
@@ -23,7 +23,7 @@ export default function Users() {
             />
             {error ? <Dialog type='warning' title="Could not fetch teams">
                 {error}
-            </Dialog> : teams && teams.data.length > 0 && (
+            </Dialog> : teams && teams.length > 0 && (
                 <>
                     <h2>Team List</h2>
                     <table>
@@ -34,7 +34,7 @@ export default function Users() {
                             </tr>
                         </thead>
                         <tbody>
-                            {teams.data.map(team => (
+                            {teams.map(team => (
                                 <tr key={team.uniformName}>
                                     <td>{team.uniformName}</td>
                                     <td>{team.displayName}</td>

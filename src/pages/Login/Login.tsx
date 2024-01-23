@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { jwtRegex } from "../../utils/regex";
-
+import { getUserProfile } from "../../api/UserProfile";
 
 export default function Login() {
     const [error, setError] = useState(false);
@@ -28,20 +28,18 @@ export default function Login() {
     }, [navigate]);
 
     useEffect(() => {
-        const validateToken = (token: string) => {
+        const validateToken = async (token: string) => {
             // Check if the token matches the JWT pattern
-            if (!jwtRegex.test(token)) {
-                return Promise.resolve(false);
-            }
+            if (!jwtRegex.test(token)) return false;
 
             // Check if the token is invalid
-            return verifyKeycloakToken(token).then(isValid => {
-                if (!isValid) {
-                    return false;
-                }
-                setValue(token);
-                return true;
-            });
+            const isValid = await verifyKeycloakToken(token);
+            if (!isValid) return false;
+
+            setValue(token);
+            const userProfile = await getUserProfile(token);
+            localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            return true;
         };
 
         if (!value) {
