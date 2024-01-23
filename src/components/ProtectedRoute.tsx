@@ -12,6 +12,7 @@ export const ProtectedRoute = () => {
             setIsAuthenticated(isValid);
             if (!isValid) {
                 localStorage.removeItem('access_token');
+                localStorage.removeItem('userProfile');
                 navigate('/login', { state: { from: from } });
             }
         });

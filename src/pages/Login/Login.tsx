@@ -1,11 +1,11 @@
-import styles from './login.module.scss';
+import styles from './login.module.scss'
 
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
-
-const jwtRegex = /^[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/;
+import { jwtRegex } from "../../utils/regex";
+import { getUserProfile, getUserProfileFallback } from "../../api/UserApi";
 
 export default function Login() {
     const [error, setError] = useState(false);
@@ -28,31 +28,36 @@ export default function Login() {
     }, [navigate]);
 
     useEffect(() => {
-        const validateAccessToken = (accessToken: string) => {
+        const validateToken = async (accessToken: string) => {
             // Check if the token matches the JWT pattern
-            if (!jwtRegex.test(accessToken)) {
-                return Promise.resolve(false);
-            }
+            if (!jwtRegex.test(accessToken)) return false;
 
             // Check if the token is invalid
-            return verifyKeycloakToken(accessToken).then(isValid => {
-                if (!isValid) {
-                    return false;
-                }
-                setValue(accessToken);
-                return true;
-            });
+            const isValid = await verifyKeycloakToken(accessToken);
+            if (!isValid) return false;
+            setValue(accessToken);
+
+            try {
+                const userProfile = await getUserProfile(accessToken);
+                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            } catch (error) {
+                console.error("Could not fetch user profile, using fallback", error);
+                const userProfile = getUserProfileFallback(accessToken);
+                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+            }
+
+            return true;
         };
 
         if (!value) {
             setError(false);
         } else {
-            validateAccessToken(value).then(isValidToken => {
-                if (isValidToken) {
-                    localStorage.setItem('access_token', value)
+            validateToken(value).then(isValidAccessToken => {
+                if (isValidAccessToken) {
+                    localStorage.setItem("access_token", value);
                     navigate(from);
                 }
-                setError(!isValidToken);
+                setError(!isValidAccessToken);
             });
         }
     }, [value, from]);
@@ -69,11 +74,10 @@ export default function Login() {
             </span>
             <Input
                 label="Lim inn keycloak token"
-                placeholder="Keycloak token" 
-                type="password"
-                value={value} 
+                placeholder="Keycloak token"
+                value={value}
                 handleChange={handleInputChange}
-                error={error} 
+                error={error}
                 errorMessage="Invalid keycloak token" />
         </div>
     )

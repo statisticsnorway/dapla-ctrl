@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 
 export default function Breadcrumb() {
     const location = useLocation();
-    const pathnames = location.pathname.split('/').filter(x => x);
+    const pathnames = location.pathname.split('/').filter(x => x).map(x => decodeURI(x));
 
     const breadcrumbItems = pathnames.map((value, index) => {
         const last = index === pathnames.length - 1;

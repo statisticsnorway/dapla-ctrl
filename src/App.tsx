@@ -8,9 +8,13 @@ import Users from './pages/Users';
 import Login from './pages/Login/Login';
 
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { jwtRegex } from './utils/regex';
 
 export default function App() {
-  const isLoggedIn = useLocation().pathname !== '/login';
+  const isLoggedIn = (
+    useLocation().pathname !== '/login' &&
+    localStorage.getItem('access_token') !== null &&
+    jwtRegex.test(localStorage.getItem('access_token') as string));
 
   return (
     <>
@@ -26,8 +30,8 @@ export default function App() {
             */
           }
             <Route path="/" element={<Home />} />
-            <Route path="/medlemmer" element={<Users />} />
-            <Route path="/medlemmer/test" element={<h1>Test</h1>} />
+            <Route path="/teammedlemmer" element={<Users />} />
+            <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
           </Route>
         </Routes>
       </main>

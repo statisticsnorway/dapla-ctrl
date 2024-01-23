@@ -1,13 +1,12 @@
 export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
-    const getAccessToken = localStorage.getItem('access_token');
+    const accessToken = localStorage.getItem('access_token');
 
     return fetch('/api/verify-token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || getAccessToken}`
+            'Authorization': `Bearer ${token || accessToken}`
         },
-
     }).then(response => {
         if (!response.ok) {
             console.error('Token verification failed with status:', response.status);
