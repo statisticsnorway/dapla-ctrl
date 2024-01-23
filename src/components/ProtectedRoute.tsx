@@ -1,5 +1,3 @@
-import secureLocalStorage from 'react-secure-storage';
-
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { verifyKeycloakToken } from '../api/VerifyKeycloakToken';
@@ -13,7 +11,7 @@ export const ProtectedRoute = () => {
         verifyKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {
-                secureLocalStorage.removeItem('access_token');
+                localStorage.removeItem('access_token');
                 navigate('/login', { state: { from: from } });
             }
         });

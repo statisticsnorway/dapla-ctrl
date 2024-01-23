@@ -1,7 +1,5 @@
-import secureLocalStorage from 'react-secure-storage'
-
 export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
-    const getAccessToken = secureLocalStorage.getItem('access_token');
+    const getAccessToken = localStorage.getItem('access_token');
 
     return fetch('/api/verify-token', {
         method: 'POST',

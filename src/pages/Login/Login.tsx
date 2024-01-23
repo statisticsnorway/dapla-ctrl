@@ -1,7 +1,5 @@
 import styles from './login.module.scss';
 
-import secureLocalStorage from 'react-secure-storage';
-
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
 import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
@@ -18,7 +16,7 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedAccessToken = secureLocalStorage.getItem('access_token') as string;
+        const storedAccessToken = localStorage.getItem('access_token') as string;
 
         if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
             verifyKeycloakToken(storedAccessToken).then(isValid => {
@@ -51,7 +49,7 @@ export default function Login() {
         } else {
             validateAccessToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    secureLocalStorage.setItem('access_token', value)
+                    localStorage.setItem('access_token', value)
                     navigate(from);
                 }
                 setError(!isValidToken);

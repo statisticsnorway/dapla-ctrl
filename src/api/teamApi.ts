@@ -1,4 +1,3 @@
-import secureLocalStorage from 'react-secure-storage'
 export interface TeamApiResponse {
     success: boolean;
     data: Team[];
@@ -21,7 +20,7 @@ interface Link {
 
 
 export const getAllTeams = (): Promise<TeamApiResponse> => {
-    const accessToken = secureLocalStorage.getItem('access_token');
+    const accessToken = localStorage.getItem('access_token');
 
     return fetch('/api/teams', {
         method: 'GET',
