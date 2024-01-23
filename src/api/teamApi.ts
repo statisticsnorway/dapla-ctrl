@@ -19,12 +19,14 @@ interface Link {
 }
 
 
-export const getAllTeams = (token: string): Promise<TeamApiResponse> => {
+export const getAllTeams = (): Promise<TeamApiResponse> => {
+    const accessToken = localStorage.getItem('access_token');
+
     return fetch('/api/teams', {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${accessToken}`
         }
     }).then(response => {
         if (!response.ok) {

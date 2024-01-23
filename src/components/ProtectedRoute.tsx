@@ -8,18 +8,13 @@ export const ProtectedRoute = () => {
     const from = location.pathname;
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            verifyKeycloakToken(token).then(isValid => {
-                setIsAuthenticated(isValid);
-                if (!isValid) {
-                    localStorage.removeItem('token');
-                    navigate('/login', { state: { from: from } });
-                }
-            });
-        } else {
-            navigate('/login', { state: { from: from } });
-        }
+        verifyKeycloakToken().then(isValid => {
+            setIsAuthenticated(isValid);
+            if (!isValid) {
+                localStorage.removeItem('access_token');
+                navigate('/login', { state: { from: from } });
+            }
+        });
     }, [navigate]);
 
     return isAuthenticated ? <Outlet /> : null;

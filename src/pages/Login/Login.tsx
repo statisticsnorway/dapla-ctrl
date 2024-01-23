@@ -1,4 +1,4 @@
-import styles from './login.module.scss'
+import styles from './login.module.scss';
 
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
@@ -16,10 +16,10 @@ export default function Login() {
     const from = location.state?.from || '/';
 
     useEffect(() => {
-        const storedToken = localStorage.getItem("token");
+        const storedAccessToken = localStorage.getItem('access_token') as string;
 
-        if (storedToken && jwtRegex.test(storedToken)) {
-            verifyKeycloakToken(storedToken).then(isValid => {
+        if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
+            verifyKeycloakToken(storedAccessToken).then(isValid => {
                 if (isValid) {
                     navigate(from);
                 }
@@ -28,18 +28,18 @@ export default function Login() {
     }, [navigate]);
 
     useEffect(() => {
-        const validateToken = (token: string) => {
+        const validateAccessToken = (accessToken: string) => {
             // Check if the token matches the JWT pattern
-            if (!jwtRegex.test(token)) {
+            if (!jwtRegex.test(accessToken)) {
                 return Promise.resolve(false);
             }
 
             // Check if the token is invalid
-            return verifyKeycloakToken(token).then(isValid => {
+            return verifyKeycloakToken(accessToken).then(isValid => {
                 if (!isValid) {
                     return false;
                 }
-                setValue(token);
+                setValue(accessToken);
                 return true;
             });
         };
@@ -47,9 +47,9 @@ export default function Login() {
         if (!value) {
             setError(false);
         } else {
-            validateToken(value).then(isValidToken => {
+            validateAccessToken(value).then(isValidToken => {
                 if (isValidToken) {
-                    localStorage.setItem("token", value);
+                    localStorage.setItem('access_token', value)
                     navigate(from);
                 }
                 setError(!isValidToken);
@@ -70,8 +70,9 @@ export default function Login() {
             <Input
                 label="Lim inn keycloak token"
                 placeholder="Keycloak token" 
+                type="password"
                 value={value} 
-                handleChange={handleInputChange} 
+                handleChange={handleInputChange}
                 error={error} 
                 errorMessage="Invalid keycloak token" />
         </div>

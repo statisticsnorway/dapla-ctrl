@@ -9,9 +9,8 @@ export default function Home() {
     const [teams, setTeams] = useState<TeamApiResponse | undefined>();
     const [error, setError] = useState<string | undefined>();
 
-    useEffect(() => {
-        const token = localStorage.getItem('token') as string;
-        getAllTeams(token).then(response => {
+    useEffect(() => {        
+        getAllTeams().then(response => {
             setTeams(response);
         }).catch(error => {
             setError(error.toString());
