@@ -1,3 +1,4 @@
+import { getRequest } from "./Requests"
 
 export interface User {
     principalName: string
@@ -12,13 +13,7 @@ export interface User {
 
 
 export const getUserProfile = async (accessToken: string): Promise<User> => {
-    return fetch('/api/userProfile', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-        }
-    }).then(response => {
+    return getRequest('/api/userProfile', accessToken).then(response => {
         if (!response.ok) {
             console.error('Request failed with status:', response.status);
             throw new Error('Request failed');

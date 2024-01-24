@@ -1,3 +1,5 @@
+import { getRequest } from "./Requests"
+
 export interface Team {
     uniformName: string;
     displayName: string;
@@ -16,13 +18,7 @@ interface Link {
 export const getAllTeams = (): Promise<Team[]> => {
     const accessToken = localStorage.getItem('access_token');
 
-    return fetch('/api/teams', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
-        }
-    }).then(response => {
+	return getRequest('/api/teams', accessToken).then(response => {
         if (!response.ok) {
             console.error('Request failed with status:', response.status);
             throw new Error('Request failed');
