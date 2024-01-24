@@ -21,7 +21,7 @@ export async function postRequest<T>(path: string, token: string | null, body: s
 		method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || accessToken}`
+            'Authorization': `Bearer ${token}`
         },
 		body: body,
 	})
