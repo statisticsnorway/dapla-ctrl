@@ -11,6 +11,8 @@ if (!process.env.VITE_JWKS_URI) {
     dotenv.config({ path: './.env.local' });
 }
 
+const DAPLA_TEAM_API_URL = process.env.VITE_DAPLA_TEAM_API_URL;
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -19,6 +21,35 @@ app.use(express.json());
 const client = jwksClient({
     jwksUri: process.env.VITE_JWKS_URI
 });
+
+// Middleware to protect APi endpoints, requiring Bearer token every time.
+async function tokenVerificationMiddleware(req, res, next) {
+    try {
+        if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")) {
+            return res.status(401).json({ message: 'No token provided' });
+        }
+
+        const token = req.headers.authorization.split("Bearer ")[1];
+        const decodedToken = jwt.decode(token, { complete: true });
+        if (!decodedToken) {
+            return res.status(400).json({ message: 'Invalid token format' });
+        }
+
+        const kid = decodedToken.header.kid;
+        const publicKey = await getPublicKeyFromKeycloak(kid);
+        jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
+            if (err) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            req.user = decoded;
+            req.token = token;
+            next();
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+}
 
 app.post('/api/verify-token', (req, res) => {
     if (!req.headers.authorization.startsWith("Bearer")) {
@@ -48,28 +79,46 @@ app.post('/api/verify-token', (req, res) => {
         });
 });
 
-app.get('/api/teams', (req, res) => {
-    if (!req.headers.authorization.startsWith("Bearer")) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
+app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res) => {
+    const token = req.token;
+    const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
 
-    const token = req.headers.authorization.split("Bearer ")[1];
-    const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/teams`;
-
-    fetch(url, getFetchOptions(token))
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Response not ok');
-            }
-            return response.json();
-        }).then(data => {
-            return res.json(data._embedded.teams);
-        }).catch(error => {
-            console.error(error);
+    fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams))
+        .catch(error => {
+            // TODO: Handle errors, 401, 403 etc..
             res.status(500).json({ message: 'Server error', error: error.message });
         });
 });
 
+app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res) => {
+    const token = req.token;
+    const principalName = req.user.email;
+    const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
+
+    fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams)).catch(error => {
+        // TODO: Handle errors, 401, 403 etc..
+        res.status(500).json({ message: 'Server error', error: error.message });
+    });
+});
+
+function getTeamOverviewTeams(token, teams) {
+    return teams._embedded.teams.map(async (team) => {
+        const teamUniformName = team.uniformName
+        const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`;
+        const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`;
+
+        const [teamUsers, teamManager] = await Promise.all([
+            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
+            fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
+        ]);
+
+        team["teamUsers"] = teamUsers.count;
+        team["manager"] = teamManager._embedded.users[0];
+        return { ...team };
+    });
+}
+
+// TODO: Rework this to use the same logic as the other endpoints
 app.get('/api/userProfile', async (req, res) => {
     if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")) {
         return res.status(401).json({ message: 'No token provided' });
@@ -100,8 +149,19 @@ app.get('/api/userProfile', async (req, res) => {
     }
 });
 
+async function fetchAPIData(token, url, errorMessage) {
+    const response = await fetch(url, getFetchOptions(token));
+
+    if (!response.ok) {
+        throw new Error(errorMessage);
+    }
+
+    return response.json();
+}
+
+
 async function fetchUserProfile(token, email) {
-    const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/users/${email}`;
+    const url = `${DAPLA_TEAM_API_URL}/users/${email}`;
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {
@@ -114,7 +174,7 @@ async function fetchUserProfile(token, email) {
 async function fetchUserManager(token) {
     const jwt = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
     const email = jwt.email;
-    const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/users/${email}/manager`;
+    const url = `${DAPLA_TEAM_API_URL}/users/${email}/manager`;
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {
@@ -125,7 +185,7 @@ async function fetchUserManager(token) {
 }
 
 async function fetchPhoto(token, email) {
-    const url = `${process.env.VITE_DAPLA_TEAM_API_URL}/users/${email}/photo`;
+    const url = `${DAPLA_TEAM_API_URL}/users/${email}/photo`;
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {

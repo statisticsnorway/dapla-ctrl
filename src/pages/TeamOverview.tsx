@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { getAllTeams, Team } from "../api/TeamApi"
 import { Title, Dialog, Link } from "@statisticsnorway/ssb-component-library"
 
-export default function Home() {
+export default function TeamOverview() {
     const [teams, setTeams] = useState<Team[] | undefined>();
     const [error, setError] = useState<string | undefined>();
 
