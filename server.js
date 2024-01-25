@@ -83,11 +83,11 @@ app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, r
     const token = req.token;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
 
-    fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams))
+    res.json(await fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams))
         .catch(error => {
             // TODO: Handle errors, 401, 403 etc..
             res.status(500).json({ message: 'Server error', error: error.message });
-        });
+        }));
 });
 
 app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res) => {
@@ -95,15 +95,15 @@ app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, re
     const principalName = req.user.email;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
 
-    fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams)).catch(error => {
+    res.json(await fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams)).catch(error => {
         // TODO: Handle errors, 401, 403 etc..
         res.status(500).json({ message: 'Server error', error: error.message });
-    });
+    }));
 });
 
-function getTeamOverviewTeams(token, teams) {
-    return teams._embedded.teams.map(async (team) => {
-        const teamUniformName = team.uniformName
+async function getTeamOverviewTeams(token, teams) {
+    const teamPromises = teams._embedded.teams.map(async (team) => {
+        const teamUniformName = team.uniformName;
         const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`;
         const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`;
 
@@ -112,11 +112,15 @@ function getTeamOverviewTeams(token, teams) {
             fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
         ]);
 
-        team["teamUsers"] = teamUsers.count;
+        team["teamUserCount"] = teamUsers.count;
         team["manager"] = teamManager._embedded.users[0];
         return { ...team };
     });
+
+    teams._embedded.teams = await Promise.all(teamPromises);
+    return teams;
 }
+
 
 // TODO: Rework this to use the same logic as the other endpoints
 app.get('/api/userProfile', async (req, res) => {
