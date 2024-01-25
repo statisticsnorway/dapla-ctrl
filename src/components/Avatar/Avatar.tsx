@@ -1,26 +1,48 @@
-import styles from './avatar.module.scss';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { User } from '../../api/UserApi';
+import styles from './avatar.module.scss';
 
-interface PageLayoutProps {
-    fullName: string,
-    image?: string,
-}
+export default function Avatar() {
+    const [userProfileData, setUserProfileData] = useState<User>();
+    const [imageSrc, setImageSrc] = useState<string>();
+    const [fallbackInitials, setFallbackInitials] = useState<string>('??');
+    const [encodedURI, setEncodedURI] = useState<string>('');
 
-export default function Avatar({ fullName }: PageLayoutProps) {
     const navigate = useNavigate();
-    const handleClick = () => {
-        const path_to_go = encodeURI(`/teammedlemmer/${fullName}`);
-        navigate(path_to_go);
-    };
 
-    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-    const base64Image = userProfile?.photo;
-    const imageSrc = base64Image ? `data:image/png;base64,${base64Image}` : null;
+    useEffect(() => {
+        const storedUserProfile = localStorage.getItem('userProfile');
+        if (!storedUserProfile) {
+            return;
+        }
+
+        const userProfile = JSON.parse(storedUserProfile) as User;
+        if (!userProfile) return;
+        setUserProfileData(userProfile);
+
+        setEncodedURI(encodeURI(`/teammedlemmer/${userProfile.displayName.split(', ').reverse().join(' ')}`));
+        setFallbackInitials(userProfile.firstName[0] + userProfile.lastName[0]);
+
+        const base64Image = userProfile?.photo;
+        if (!base64Image) return;
+        setImageSrc(`data:image/png;base64,${base64Image}`);
+    }, []);
+
+    const handleClick = () => {
+        if (encodedURI === '') return;
+        navigate(encodedURI);
+    };
 
     return (
         <div className={styles.avatar} onClick={handleClick}>
-            {imageSrc ? <img src={imageSrc} alt="User" /> :
-                <div className={styles.initials}>{`${userProfile.firstName[0]}${userProfile.lastName[0]}`}</div>}
+            {imageSrc ? (
+                <img src={imageSrc} alt="User" />
+            ) : (
+                <div className={styles.initials}>
+                    {userProfileData ? `${fallbackInitials}` : '??'}
+                </div>
+            )}
         </div>
     );
 }
