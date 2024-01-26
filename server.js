@@ -80,19 +80,18 @@ app.post('/api/verify-token', (req, res) => {
         });
 });
 
-app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res) => {
+app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res, next) => {
     const token = req.token;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
     try {
         const overviewTeams = await fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams));
         res.json(overviewTeams);
     } catch (error) {
-        const statusCode = error.statusCode || 500;
-        return res.status(statusCode).json({ success: false, error: { code: getReasonPhrase(statusCode), message: error.message } });
+        next(error);
     }
 });
 
-app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res) => {
+app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res, next) => {
     const token = req.token;
     const principalName = req.user.email;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
@@ -100,8 +99,7 @@ app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, re
         const overviewTeams = await fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams));
         res.json(overviewTeams)
     } catch (error) {
-        const statusCode = error.statusCode || 500;
-        return res.status(statusCode).json({ success: false, error: { code: getReasonPhrase(statusCode), message: error.message } });
+        next(error);
     }
 });
 
@@ -259,6 +257,18 @@ function getPublicKeyFromKeycloak(kid) {
         });
     });
 }
+
+app.use((err, req, res, next) => {
+    const statusCode = err.statusCode || 500;
+
+    return res.status(statusCode).json({
+        success: false,
+        error: {
+            code: getReasonPhrase(statusCode),
+            message: err.message
+        }
+    });
+});
 
 //const lightship = await createLightship();
 // Replace above with below to get liveness and readiness probes when running locally
