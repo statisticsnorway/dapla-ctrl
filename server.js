@@ -4,6 +4,7 @@ import cache from 'memory-cache';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { getReasonPhrase } from 'http-status-codes';
 
 import dotenv from 'dotenv';
 
@@ -82,23 +83,26 @@ app.post('/api/verify-token', (req, res) => {
 app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res) => {
     const token = req.token;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
-
-    res.json(await fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams))
-        .catch(error => {
-            // TODO: Handle errors, 401, 403 etc..
-            res.status(500).json({ message: 'Server error', error: error.message });
-        }));
+    try {
+        const overviewTeams = await fetchAPIData(token, allteamsUrl, 'Failed to fetch teams').then(teams => getTeamOverviewTeams(token, teams));
+        res.json(overviewTeams);
+    } catch (error) {
+        const statusCode = error.statusCode || 500;
+        return res.status(statusCode).json({ success: false, error: { code: getReasonPhrase(statusCode), message: error.message } });
+    }
 });
 
 app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res) => {
     const token = req.token;
     const principalName = req.user.email;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
-
-    res.json(await fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams)).catch(error => {
-        // TODO: Handle errors, 401, 403 etc..
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }));
+    try {
+        const overviewTeams = await fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then(teams => getTeamOverviewTeams(token, teams));
+        res.json(overviewTeams)
+    } catch (error) {
+        const statusCode = error.statusCode || 500;
+        return res.status(statusCode).json({ success: false, error: { code: getReasonPhrase(statusCode), message: error.message } });
+    }
 });
 
 async function getTeamOverviewTeams(token, teams) {
@@ -108,12 +112,11 @@ async function getTeamOverviewTeams(token, teams) {
         const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`;
 
         const [teamUsers, teamManager] = await Promise.all([
-            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'), //.catch(_ => null),
+            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),//.catch(_ => null),
             fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')//.catch(_ => null)
         ]);
 
         //if (teamUsers == null || teamManager == null) {
-        //    console.log(`Failed to fetch team ${teamUniformName}`)
         //    return null;
         //}
 
@@ -158,15 +161,17 @@ app.get('/api/userProfile', async (req, res) => {
         return res.json(data);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-async function fetchAPIData(token, url, errorMessage) {
+async function fetchAPIData(token, url, fallbackErrorMessage) {
     const response = await fetch(url, getFetchOptions(token));
+    const wwwAuthenticate = response.headers.get('www-authenticate');
 
     if (!response.ok) {
-        throw new Error(errorMessage);
+        const { error_description } = wwwAuthenticate ? parseWwwAuthenticate(wwwAuthenticate) : { error_description: fallbackErrorMessage };
+        throw new APIError(error_description, response.status);
     }
 
     return response.json();
@@ -208,6 +213,25 @@ async function fetchPhoto(token, email) {
     const arrayBuffer = await response.arrayBuffer();
     const photoBuffer = Buffer.from(arrayBuffer);
     return photoBuffer.toString('base64');
+}
+
+function parseWwwAuthenticate(header) {
+    const parts = header.split(',');
+    const result = {};
+
+    parts.forEach(part => {
+        const [key, value] = part.trim().split('=');
+        result[key] = value.replace(/"/g, '');
+    });
+
+    return result;
+}
+
+class APIError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
 }
 
 function getFetchOptions(token) {
