@@ -1,3 +1,7 @@
+export interface TeamOverviewData {
+    [key: string]: Root, // myTeams && allTeams
+}
+
 export interface Root {
     _embedded: Embedded
     count: number
@@ -29,13 +33,11 @@ export interface Error {
     message: string
 }
 
-export type Path = 'allTeams' | 'myTeams';
-
-export const getTeams = async (path: Path): Promise<Root | TeamOverviewError> => {
+export const getTeamOverview = async (): Promise<TeamOverviewData | TeamOverviewError> => {
     const accessToken = localStorage.getItem('access_token');
 
     try {
-        const response = await fetch(`/api/teamOverview/${path}`, {
+        const response = await fetch(`/api/teamOverview`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -47,7 +49,7 @@ export const getTeams = async (path: Path): Promise<Root | TeamOverviewError> =>
             return errorData as TeamOverviewError;
         }
         const data = await response.json();
-        return data as Root;
+        return data as TeamOverviewData;
     } catch (error) {
         console.error('Error during fetching teams:', error);
         throw new Error('Error fetching teams');

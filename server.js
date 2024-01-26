@@ -80,23 +80,23 @@ app.post('/api/verify-token', (req, res) => {
         });
 });
 
-app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res, next) => {
-    const token = req.token;
-    const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
-    console.log("getting allTeams");
-    res.json(await fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
-        .then(teams => getTeamOverviewTeams(token, teams))
-        .catch(error => next(error)));
-});
-
-app.get('/api/teamOverview/myTeams', tokenVerificationMiddleware, async (req, res, next) => {
+app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next) => {
     const token = req.token;
     const principalName = req.user.email;
+    const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
 
-    res.json(await fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams')
-        .then(teams => getTeamOverviewTeams(token, teams))
-        .catch(error => next(error)));
+    try {
+        const [allTeams, myTeams] = await Promise.all([
+            fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
+                .then(teams => getTeamOverviewTeams(token, teams)),
+            fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams')
+                .then(teams => getTeamOverviewTeams(token, teams))
+        ])
+        res.json({ allTeams, myTeams });
+    } catch (error) {
+        next(error)
+    }
 });
 
 async function getTeamOverviewTeams(token, teams) {
@@ -126,7 +126,6 @@ async function getTeamOverviewTeams(token, teams) {
     teams.count = validTeams.length;
     return teams;
 }
-
 
 // TODO: Rework this to use the same logic as the other endpoints
 app.get('/api/userProfile', async (req, res) => {

@@ -1,8 +1,8 @@
 import PageLayout from '../components/PageLayout/PageLayout'
 import Table, { TableData } from '../components/Table/Table'
 import { useEffect, useState } from "react"
-import { getTeams, Root, TeamOverviewError, Team, Path } from "../api/teamOverview"
-import { Dialog, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
+import { getTeamOverview, TeamOverviewData, TeamOverviewError, Team } from "../api/teamOverview"
+import { Dialog, Title, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
 
 interface TabProps {
     title: string,
@@ -16,17 +16,20 @@ export default function TeamOverview() {
     }
 
     const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab);
+    const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>();
     const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>();
+    const [title, setTitle] = useState<string>(defaultActiveTab.title);
     const [error, setError] = useState<TeamOverviewError | undefined>();
 
     // initial page load
     useEffect(() => {
-        getTeams('myTeams').then(response => {
+        getTeamOverview().then(response => {
             if ((response as TeamOverviewError).error) {
                 setError(response as TeamOverviewError);
             }
             else {
-                setTeamOverviewTableData(prepTeamData(response as Root));
+                setTeamOverviewData(response as TeamOverviewData)
+                setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
             }
         }).catch(error => {
             setError(error.toString());
@@ -34,20 +37,16 @@ export default function TeamOverview() {
     }, []);
 
     useEffect(() => {
-        getTeams(((activeTab as TabProps)?.path ?? activeTab) as Path).then(response => {
-            if ((response as TeamOverviewError).error) {
-                setError(response as TeamOverviewError)
-            } else {
-                setTeamOverviewTableData(prepTeamData(response as Root));
-            }
-        }).catch(error => {
-            setError(error.toString());
-        });
+        // TODO: Add loading
+        if (teamOverviewData) {
+            setTeamOverviewTableData(prepTeamData(teamOverviewData))
+        }
     }, [activeTab])
 
+    const prepTeamData = (response: TeamOverviewData): TableData['data'] => {
+        const team = (activeTab as TabProps)?.path ?? activeTab
 
-    const prepTeamData = (response: Root): TableData['data'] => {
-        return response._embedded.teams.map(team => ({
+        return response[team]._embedded.teams.map(team => ({
             id: team.uniformName,
             'navn': renderTeamNameColumn(team),
             'teammedlemmer': team.teamUserCount,
@@ -57,6 +56,11 @@ export default function TeamOverview() {
 
     const handleTabClick = (tab: string) => {
         setActiveTab(tab);
+        if (tab === 'myTeams') {
+            setTitle('Mine team')
+        } else {
+            setTitle('Alle teams')
+        }
     };
 
     function renderTeamNameColumn(team: Team) {
@@ -101,17 +105,14 @@ export default function TeamOverview() {
                         activeOnInit={defaultActiveTab.path}
                         items={
                             [
-                                // { title: `Mine team (${teamOverviewTableData ? myTeamsData.count : 0})`, path: 'myTeams' },
-                                // { title: `Alle team (${teamOverviewTableData ? allTeamsData.count : 0})`, path: 'allTeams' },
-                                // TODO: Add count
-                                { title: `Mine team`, path: 'myTeams' },
-                                { title: `Alle team`, path: 'allTeams' },
+                                { title: `Mine team (${teamOverviewData?.myTeams.count ?? 0})`, path: 'myTeams' },
+                                { title: `Alle team (${teamOverviewData?.allTeams.count ?? 0})`, path: 'allTeams' },
                             ]}
                     />
                     <Divider dark />
+                    <Title size={2}>{title}</Title>
                     <Table
                         columns={teamOverviewTableHeaderColumns}
-                        // TODO: Can be undefined:
                         data={teamOverviewTableData as TableData['data']}
                     />
                 </>
