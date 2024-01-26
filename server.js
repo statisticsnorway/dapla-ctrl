@@ -106,13 +106,13 @@ async function getTeamOverviewTeams(token, teams) {
         const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`;
 
         const [teamUsers, teamManager] = await Promise.all([
-            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),//.catch(_ => null),
-            fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')//.catch(_ => null)
+            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users').catch(_ => null),
+            fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(_ => null)
         ]);
 
-        //if (teamUsers == null || teamManager == null) {
-        //    return null;
-        //}
+        if (teamUsers == null || teamManager == null) {
+            return null;
+        }
 
         team["teamUserCount"] = teamUsers.count;
         team["manager"] = teamManager._embedded.users[0];

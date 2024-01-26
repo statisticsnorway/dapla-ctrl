@@ -2,16 +2,20 @@ import PageLayout from '../components/PageLayout/PageLayout'
 import Table from '../components/Table/Table'
 
 import { useEffect, useState } from "react"
-import { getAllTeams, Team } from "../api/TeamApi"
+import { getAllTeams, getMyTeams, Root, TeamOverviewError, Team } from "../api/teamOverview"
 import { Title, Dialog, Link } from "@statisticsnorway/ssb-component-library"
 
 export default function TeamOverview() {
-    const [teams, setTeams] = useState<Team[] | undefined>();
-    const [error, setError] = useState<string | undefined>();
+    const [allTeams, setAllTeams] = useState<Root | undefined>();
+    const [error, setError] = useState<TeamOverviewError | undefined>();
 
     useEffect(() => {
         getAllTeams().then(response => {
-            setTeams(response);
+            if ((response as TeamOverviewError).error) {
+                setError(response as TeamOverviewError)
+            } else {
+                setAllTeams(response as Root);
+            }
         }).catch(error => {
             setError(error.toString());
         });
@@ -21,7 +25,7 @@ export default function TeamOverview() {
         return (
             <>
                 <span>
-                    <Link href={team._links.self.href}>
+                    <Link href={""}>
                         <b>{team.uniformName}</b>
                     </Link>
                 </span>
@@ -34,12 +38,12 @@ export default function TeamOverview() {
         if (error) {
             return (
                 <Dialog type='warning' title="Could not fetch teams">
-                    {error}
+                    {error.error.message}
                 </Dialog>
             )
         }
 
-        if (teams && teams.length) {
+        if (allTeams && allTeams.count) {
             const allTeamsTableHeaderColumns = [{
                 id: 'navn',
                 label: 'Navn',
@@ -52,14 +56,11 @@ export default function TeamOverview() {
                 label: 'Ansvarlig'
             }]
 
-            const allTeamsTableDataColumns = teams.map(team => ({
+            const allTeamsTableDataColumns = allTeams._embedded.teams.map(team => ({
                 id: team.uniformName,
                 'navn': renderTeamNameColumn(team),
-                // TODO: Fetch team user count from API e.g. /teams/{team.uniformName}/users and users.count
-                'teammedlemmer': 12,
-                // TODO: 
-                // * Fetch team manager? from API e.g. /groups/{team.uniformName}-managers/users and use users.displayName
-                'ansvarlig': 'Lorem ipsum',
+                'teammedlemmer': team.teamUserCount,
+                'ansvarlig': team.manager.displayName
             }))
 
             // TODO: Loading can be replaced by a spinner eventually
