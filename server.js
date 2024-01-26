@@ -83,7 +83,7 @@ app.post('/api/verify-token', (req, res) => {
 app.get('/api/teamOverview/allTeams', tokenVerificationMiddleware, async (req, res, next) => {
     const token = req.token;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
-
+    console.log("getting allTeams");
     res.json(await fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
         .then(teams => getTeamOverviewTeams(token, teams))
         .catch(error => next(error)));

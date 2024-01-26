@@ -29,34 +29,13 @@ export interface Error {
     message: string
 }
 
-export const getAllTeams = async (): Promise<Root | TeamOverviewError> => {
+export type Path = 'allTeams' | 'myTeams';
+
+export const getTeams = async (path: Path): Promise<Root | TeamOverviewError> => {
     const accessToken = localStorage.getItem('access_token');
 
     try {
-        const response = await fetch('/api/teamOverview/allTeams', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        if (!response.ok) {
-            const errorData = await response.json();
-            return errorData as TeamOverviewError;
-        }
-        const data = await response.json();
-        return data as Root;
-    } catch (error) {
-        console.error('Error during fetching teams:', error);
-        throw new Error('Error fetching teams');
-    }
-};
-
-export const getMyTeams = async (): Promise<Root | TeamOverviewError> => {
-    const accessToken = localStorage.getItem('access_token');
-
-    try {
-        const response = await fetch('/api/teamOverview/myTeams', {
+        const response = await fetch(`/api/teamOverview/${path}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

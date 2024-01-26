@@ -1,40 +1,77 @@
 import PageLayout from '../components/PageLayout/PageLayout'
-import Table from '../components/Table/Table'
-
+import Table, { TableData } from '../components/Table/Table'
 import { useEffect, useState } from "react"
-import { getAllTeams, getMyTeams, Root, TeamOverviewError, Team } from "../api/teamOverview"
-import { Title, Dialog, Link } from "@statisticsnorway/ssb-component-library"
+import { getTeams, Root, TeamOverviewError, Team, Path } from "../api/teamOverview"
+import { Dialog, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
+
+interface TabProps {
+    title: string,
+    path: string
+}
 
 export default function TeamOverview() {
-    const [allTeams, setAllTeams] = useState<Root | undefined>();
+    const defaultActiveTab = {
+        title: 'Mine team',
+        path: 'myTeams'
+    }
+
+    const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab);
+    const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>();
     const [error, setError] = useState<TeamOverviewError | undefined>();
 
+    // initial page load
     useEffect(() => {
-        getAllTeams().then(response => {
+        getTeams('myTeams').then(response => {
             if ((response as TeamOverviewError).error) {
-                setError(response as TeamOverviewError)
-            } else {
-                setAllTeams(response as Root);
+                setError(response as TeamOverviewError);
+            }
+            else {
+                setTeamOverviewTableData(prepTeamData(response as Root));
             }
         }).catch(error => {
             setError(error.toString());
         });
     }, []);
 
+    useEffect(() => {
+        getTeams(((activeTab as TabProps)?.path ?? activeTab) as Path).then(response => {
+            if ((response as TeamOverviewError).error) {
+                setError(response as TeamOverviewError)
+            } else {
+                setTeamOverviewTableData(prepTeamData(response as Root));
+            }
+        }).catch(error => {
+            setError(error.toString());
+        });
+    }, [activeTab])
+
+
+    const prepTeamData = (response: Root): TableData['data'] => {
+        return response._embedded.teams.map(team => ({
+            id: team.uniformName,
+            'navn': renderTeamNameColumn(team),
+            'teammedlemmer': team.teamUserCount,
+            'ansvarlig': team.manager.displayName
+        }));
+    }
+
+    const handleTabClick = (tab: string) => {
+        setActiveTab(tab);
+    };
+
     function renderTeamNameColumn(team: Team) {
         return (
             <>
                 <span>
-                    <Link href={""}>
+                    <Link href={`/${team.uniformName}`}>
                         <b>{team.uniformName}</b>
                     </Link>
                 </span>
-                {/* TODO: Fetch department from API. Teams are missing a department property */}
             </>
         )
     }
 
-    function renderAllTeams() {
+    function renderContent() {
         if (error) {
             return (
                 <Dialog type='warning' title="Could not fetch teams">
@@ -43,8 +80,8 @@ export default function TeamOverview() {
             )
         }
 
-        if (allTeams && allTeams.count) {
-            const allTeamsTableHeaderColumns = [{
+        if (teamOverviewTableData) {
+            const teamOverviewTableHeaderColumns = [{
                 id: 'navn',
                 label: 'Navn',
             },
@@ -56,20 +93,26 @@ export default function TeamOverview() {
                 label: 'Ansvarlig'
             }]
 
-            const allTeamsTableDataColumns = allTeams._embedded.teams.map(team => ({
-                id: team.uniformName,
-                'navn': renderTeamNameColumn(team),
-                'teammedlemmer': team.teamUserCount,
-                'ansvarlig': team.manager.displayName
-            }))
-
             // TODO: Loading can be replaced by a spinner eventually
             return (
                 <>
-                    <Title size={2}>Alle team</Title>
+                    <Tabs
+                        onClick={handleTabClick}
+                        activeOnInit={defaultActiveTab.path}
+                        items={
+                            [
+                                // { title: `Mine team (${teamOverviewTableData ? myTeamsData.count : 0})`, path: 'myTeams' },
+                                // { title: `Alle team (${teamOverviewTableData ? allTeamsData.count : 0})`, path: 'allTeams' },
+                                // TODO: Add count
+                                { title: `Mine team`, path: 'myTeams' },
+                                { title: `Alle team`, path: 'allTeams' },
+                            ]}
+                    />
+                    <Divider dark />
                     <Table
-                        columns={allTeamsTableHeaderColumns}
-                        data={allTeamsTableDataColumns}
+                        columns={teamOverviewTableHeaderColumns}
+                        // TODO: Can be undefined:
+                        data={teamOverviewTableData as TableData['data']}
                     />
                 </>
             ) || <p>Loading...</p> || (
@@ -81,7 +124,7 @@ export default function TeamOverview() {
     return (
         <PageLayout
             title="Teamoversikt"
-            content={renderAllTeams()}
+            content={renderContent()}
         />
     )
 }
