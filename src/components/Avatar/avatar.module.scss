@@ -9,7 +9,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #fff;
+    background-color: variables.$ssb-white;
     transition: transform 0.3s;
     cursor: pointer;
 
@@ -24,7 +24,5 @@
         height: 50px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid #ffffff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 }
