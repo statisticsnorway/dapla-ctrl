@@ -2,10 +2,11 @@ import styles from './app.module.scss'
 
 import Header from './components/Header/Header';
 import Breadcrumb from './components/Breadcrumb';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import TeamOverview from './pages/TeamOverview';
-import Users from './pages/Users';
+import ProtectedRoute from './components/ProtectedRoute';
+
 import Login from './pages/Login/Login';
+import TeamOverview from './pages/TeamOverview/TeamOverview';
+import Users from './pages/Users';
 
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { jwtRegex } from './utils/regex';

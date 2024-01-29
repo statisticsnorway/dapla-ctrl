@@ -1,5 +1,5 @@
 export interface TeamOverviewData {
-    [key: string]: Root, // myTeams && allTeams
+    [key: string]: Root,
 }
 
 export interface Root {

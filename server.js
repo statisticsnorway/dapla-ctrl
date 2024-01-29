@@ -182,10 +182,8 @@ async function fetchUserProfile(token, email) {
     return response.json();
 }
 
-async function fetchUserManager(token) {
-    const jwt = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
-    const email = jwt.email;
-    const url = `${DAPLA_TEAM_API_URL}/users/${email}/manager`;
+async function fetchUserManager(token, principalName) {
+    const url = `${DAPLA_TEAM_API_URL}/users/${principalName}/manager`;
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {

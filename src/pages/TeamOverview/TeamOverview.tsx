@@ -1,13 +1,11 @@
-import PageLayout from '../components/PageLayout/PageLayout'
-import Table, { TableData } from '../components/Table/Table'
-import { useEffect, useState } from "react"
-import { getTeamOverview, TeamOverviewData, TeamOverviewError, Team } from "../api/teamOverview"
-import { Dialog, Title, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
+import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 
-interface TabProps {
-    title: string,
-    path: string
-}
+import { useEffect, useState } from "react"
+import PageLayout from '../../components/PageLayout/PageLayout'
+import { TabProps } from '../../@types/pageTypes'
+import Table, { TableData } from '../../components/Table/Table'
+import { getTeamOverview, TeamOverviewData, TeamOverviewError, Team } from "../../api/teamOverview"
+import { Dialog, Title, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
 
 export default function TeamOverview() {
     const defaultActiveTab = {
@@ -18,7 +16,7 @@ export default function TeamOverview() {
     const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab);
     const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>();
     const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>();
-    const [title, setTitle] = useState<string>(defaultActiveTab.title);
+    const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title);
     const [error, setError] = useState<TeamOverviewError | undefined>();
 
     // initial page load
@@ -57,9 +55,9 @@ export default function TeamOverview() {
     const handleTabClick = (tab: string) => {
         setActiveTab(tab);
         if (tab === 'myTeams') {
-            setTitle('Mine team')
+            setTeamOverviewTableTitle('Mine team')
         } else {
-            setTitle('Alle teams')
+            setTeamOverviewTableTitle('Alle teams')
         }
     };
 
@@ -110,7 +108,7 @@ export default function TeamOverview() {
                             ]}
                     />
                     <Divider dark />
-                    <Title size={2}>{title}</Title>
+                    <Title size={2} className={pageLayoutStyles.tableTitle}>{teamOverviewTableTitle}</Title>
                     <Table
                         columns={teamOverviewTableHeaderColumns}
                         data={teamOverviewTableData as TableData['data']}

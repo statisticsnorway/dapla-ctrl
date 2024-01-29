@@ -10,7 +10,6 @@ export interface User {
     photo?: string
 }
 
-
 export const getUserProfile = async (accessToken: string): Promise<User> => {
     return fetch('/api/userProfile', {
         method: 'GET',

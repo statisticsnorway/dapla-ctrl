@@ -1,11 +1,13 @@
 import styles from './login.module.scss'
 
-import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { useEffect, useState } from "react";
-import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { jwtRegex } from "../../utils/regex";
+
+import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
+
+import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
 import { getUserProfile, getUserProfileFallback } from "../../api/UserApi";
+import { jwtRegex } from "../../utils/regex";
 
 export default function Login() {
     const [error, setError] = useState(false);
