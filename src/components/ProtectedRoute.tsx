@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
-import { verifyKeycloakToken } from '../api/VerifyKeycloakToken';
+import { validateKeycloakToken } from '../api/validateKeycloakToken';
 
 const ProtectedRoute = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,7 +14,7 @@ const ProtectedRoute = () => {
             return;
         }
 
-        verifyKeycloakToken().then(isValid => {
+        validateKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {
                 localStorage.removeItem('access_token');

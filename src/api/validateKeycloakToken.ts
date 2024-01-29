@@ -1,4 +1,4 @@
-export const verifyKeycloakToken = (token?: string): Promise<boolean> => {
+export const validateKeycloakToken = (token?: string): Promise<boolean> => {
     const accessToken = localStorage.getItem('access_token');
 
     return fetch('/api/verify-token', {

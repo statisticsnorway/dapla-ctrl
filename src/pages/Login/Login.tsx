@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 
-import { verifyKeycloakToken } from "../../api/VerifyKeycloakToken";
+import { validateKeycloakToken } from "../../api/validateKeycloakToken";
 import { getUserProfile, getUserProfileFallback } from "../../api/UserApi";
 import { jwtRegex } from "../../utils/regex";
 
@@ -21,7 +21,7 @@ export default function Login() {
         const storedAccessToken = localStorage.getItem('access_token') as string;
 
         if (storedAccessToken && jwtRegex.test(storedAccessToken)) {
-            verifyKeycloakToken(storedAccessToken).then(isValid => {
+            validateKeycloakToken(storedAccessToken).then(isValid => {
                 if (isValid) {
                     navigate(from);
                 }
@@ -35,7 +35,7 @@ export default function Login() {
             if (!jwtRegex.test(accessToken)) return false;
 
             // Check if the token is invalid
-            const isValid = await verifyKeycloakToken(accessToken);
+            const isValid = await validateKeycloakToken(accessToken);
             if (!isValid) return false;
             setValue(accessToken);
 
@@ -59,7 +59,7 @@ export default function Login() {
                     localStorage.setItem("access_token", value);
                     navigate(from);
                 }
-                setError(!isValidAccessToken);
+                setError(true);
             });
         }
     }, [value, from]);
@@ -72,10 +72,11 @@ export default function Login() {
         <div className={styles.loginContainer}>
             <Title size={1}>Logg inn med token</Title>
             <span>
-                Trykk <Link isExternal={true} href="https://httpbin-fe.staging-bip-app.ssb.no/bearer">her</Link> for å hente keycloak token
+                Trykk <Link isExternal={true} href={import.meta.env.VITE_SSB_BEARER_URL}>her</Link> for å hente keycloak token
             </span>
             <Input
                 label="Lim inn keycloak token"
+                type="password"
                 placeholder="Keycloak token"
                 value={value}
                 handleChange={handleInputChange}
