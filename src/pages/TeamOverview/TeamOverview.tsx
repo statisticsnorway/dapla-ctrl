@@ -1,12 +1,17 @@
 import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 
 import { useEffect, useState } from "react"
-import PageLayout from '../../components/PageLayout/PageLayout'
-import { TabProps } from '../../@types/pageTypes'
-import Table, { TableData } from '../../components/Table/Table'
-import { getTeamOverview, TeamOverviewData, TeamOverviewError, Team } from "../../api/teamOverview"
 import { Dialog, Title, Text, Link, Tabs, Divider } from "@statisticsnorway/ssb-component-library"
 import Skeleton from '@mui/material/Skeleton';
+
+import { TabProps } from '../../@types/pageTypes'
+import PageLayout from '../../components/PageLayout/PageLayout'
+import Table, { TableData } from '../../components/Table/Table'
+
+import { ErrorResponse } from '../../@types/error';
+import { Team } from '../../@types/team';
+
+import { getTeamOverview, TeamOverviewData } from "../../api/teamOverview"
 
 export default function TeamOverview() {
     const defaultActiveTab = {
@@ -18,13 +23,13 @@ export default function TeamOverview() {
     const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>();
     const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>();
     const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title);
-    const [error, setError] = useState<TeamOverviewError | undefined>();
+    const [error, setError] = useState<ErrorResponse | undefined>();
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         getTeamOverview().then(response => {
-            if ((response as TeamOverviewError).error) {
-                setError(response as TeamOverviewError);
+            if ((response as ErrorResponse).error) {
+                setError(response as ErrorResponse);
             }
             else {
                 setTeamOverviewData(response as TeamOverviewData)
@@ -46,7 +51,7 @@ export default function TeamOverview() {
     const prepTeamData = (response: TeamOverviewData): TableData['data'] => {
         const team = (activeTab as TabProps)?.path ?? activeTab
 
-        return response[team]._embedded.teams.map(team => ({
+        return response[team].teams.map(team => ({
             id: team.uniform_name,
             'navn': renderTeamNameColumn(team),
             'teammedlemmer': team.team_user_count,
@@ -76,7 +81,6 @@ export default function TeamOverview() {
         )
     }
 
-    // TODO: Will be used by the other pages as well. Can be repurposed if necessary
     function renderErrorAlert() {
         return (
             <Dialog type='warning' title="Could not fetch teams">

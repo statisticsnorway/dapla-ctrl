@@ -85,7 +85,7 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
     const principalName = req.user.email;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
-    // // http://localhost:8080/teams/and-fjaer
+
     try {
         const [allTeams, myTeams] = await Promise.all([
             fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
@@ -94,7 +94,16 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
                 .then(teams => getTeamOverviewTeams(token, teams))
         ])
 
-        res.json({ allTeams, myTeams });
+        res.json({
+            allTeams: {
+                count: allTeams.count,
+                ...allTeams._embedded
+            },
+            myTeams: {
+                count: myTeams.count,
+                ...myTeams._embedded
+            }
+        });
     } catch (error) {
         next(error)
     }
@@ -117,7 +126,6 @@ async function getTeamOverviewTeams(token, teams) {
             fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
             fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
         ]);
-
         team['section_name'] = teamInfo.section_name;
         team["team_user_count"] = teamUsers.count;
         team["manager"] = teamManager.count > 0 ? teamManager._embedded.users[0] : {

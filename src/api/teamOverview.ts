@@ -1,42 +1,17 @@
+import { Team } from '../@types/team';
+import { ErrorResponse } from '../@types/error';
+
 export interface TeamOverviewData {
-    [key: string]: Root,
+    [key: string]: TeamOverviewResult, // myTeams, allTeams
 }
 
-export interface Root {
-    _embedded: Embedded
+export interface TeamOverviewResult {
+    teams: Team[]
     count: number
 }
 
-export interface Embedded {
-    teams: Team[]
-}
 
-export interface Team {
-    uniform_name: string
-    display_name: string
-    division_name: string
-    section_name: string
-    section_code: number
-    team_user_count: number
-    manager: Manager
-}
-
-export interface Manager {
-    principal_name: string
-    display_name: string
-}
-
-export interface TeamOverviewError {
-    success: boolean
-    error: Error
-}
-
-export interface Error {
-    code: string
-    message: string
-}
-
-export const getTeamOverview = async (): Promise<TeamOverviewData | TeamOverviewError> => {
+export const getTeamOverview = async (): Promise<TeamOverviewData | ErrorResponse> => {
     const accessToken = localStorage.getItem('access_token');
 
     try {
@@ -49,7 +24,7 @@ export const getTeamOverview = async (): Promise<TeamOverviewData | TeamOverview
         });
         if (!response.ok) {
             const errorData = await response.json();
-            return errorData as TeamOverviewError;
+            return errorData as ErrorResponse;
         }
         const data = await response.json();
         return data as TeamOverviewData;
