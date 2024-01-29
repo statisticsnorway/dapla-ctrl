@@ -31,7 +31,7 @@ export default function App() {
             */
           }
             <Route path="/" element={<TeamOverview />} />
-            <Route path="/teammedlemmer" element={<Users />} />
+            <Route path="/teammedlemmer" element={<h1>Teammedlemmer</h1>} />
             <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
           </Route>
         </Routes>

@@ -21,8 +21,8 @@ export default function Avatar() {
         if (!userProfile) return;
         setUserProfileData(userProfile);
 
-        setEncodedURI(encodeURI(`/teammedlemmer/${userProfile.displayName.split(', ').reverse().join(' ')}`));
-        setFallbackInitials(userProfile.firstName[0] + userProfile.lastName[0]);
+        setEncodedURI(encodeURI(`/teammedlemmer/${userProfile.display_name.split(', ').reverse().join(' ')}`));
+        setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0]);
 
         const base64Image = userProfile?.photo;
         if (!base64Image) return;

@@ -85,7 +85,7 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
     const principalName = req.user.email;
     const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
     const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
-
+    // // http://localhost:8080/teams/and-fjaer
     try {
         const [allTeams, myTeams] = await Promise.all([
             fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
@@ -93,6 +93,7 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
             fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams')
                 .then(teams => getTeamOverviewTeams(token, teams))
         ])
+
         res.json({ allTeams, myTeams });
     } catch (error) {
         next(error)
@@ -101,21 +102,29 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
 
 async function getTeamOverviewTeams(token, teams) {
     const teamPromises = teams._embedded.teams.map(async (team) => {
-        const teamUniformName = team.uniformName;
+        const teamUniformName = team.uniform_name;
+        const teamInfoUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}`;
         const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`;
         const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`;
 
-        const [teamUsers, teamManager] = await Promise.all([
-            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users').catch(_ => null),
-            fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(_ => null)
+        const [teamInfo, teamUsers, teamManager] = await Promise.all([
+            fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => {
+                return {
+                    uniform_name: teamUniformName,
+                    section_name: "ukjent"
+                }
+            }),
+            fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
+            fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
         ]);
 
-        if (teamUsers == null || teamManager == null) {
-            return null;
-        }
+        team['section_name'] = teamInfo.section_name;
+        team["team_user_count"] = teamUsers.count;
+        team["manager"] = teamManager.count > 0 ? teamManager._embedded.users[0] : {
+            "display_name": "Ingen manager",
+            "principal_name": "Ingen manager",
+        };
 
-        team["teamUserCount"] = teamUsers.count;
-        team["manager"] = teamManager._embedded.users[0];
         return { ...team };
     });
 

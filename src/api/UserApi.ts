@@ -1,10 +1,10 @@
 
 export interface User {
-    principalName: string
-    azureAdId: string
-    displayName: string
-    firstName: string
-    lastName: string
+    principal_name: string
+    azure_ad_id: string
+    display_name: string
+    first_name: string
+    last_name: string
     email: string
     manager?: User
     photo?: string
@@ -33,11 +33,11 @@ export const getUserProfile = async (accessToken: string): Promise<User> => {
 export const getUserProfileFallback = (accessToken: string): User => {
     const jwt = JSON.parse(atob(accessToken.split('.')[1]));
     return {
-        principalName: jwt.upn,
-        azureAdId: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
-        displayName: jwt.name,
-        firstName: jwt.given_name,
-        lastName: jwt.family_name,
+        principal_name: jwt.upn,
+        azure_ad_id: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
+        display_name: jwt.name,
+        first_name: jwt.given_name,
+        last_name: jwt.family_name,
         email: jwt.email
     };
 };

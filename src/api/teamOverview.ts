@@ -12,15 +12,18 @@ export interface Embedded {
 }
 
 export interface Team {
-    uniformName: string
-    displayName: string
-    teamUserCount: number
+    uniform_name: string
+    display_name: string
+    division_name: string
+    section_name: string
+    section_code: number
+    team_user_count: number
     manager: Manager
 }
 
 export interface Manager {
-    principalName: string
-    displayName: string
+    principal_name: string
+    display_name: string
 }
 
 export interface TeamOverviewError {
