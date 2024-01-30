@@ -1,6 +1,6 @@
 import styles from './login.module.scss'
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
@@ -8,6 +8,7 @@ import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 import { validateKeycloakToken } from "../../api/validateKeycloakToken";
 import { getUserProfile, getUserProfileFallback } from "../../api/userProfile";
 import { jwtRegex } from "../../utils/regex";
+import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider';
 
 export default function Login() {
     const [error, setError] = useState(false);
@@ -16,6 +17,8 @@ export default function Login() {
     const navigate = useNavigate();
     const location = useLocation();
     const from = location.state?.from || '/';
+
+    const { login } = useContext(DaplaCtrlContext);
 
     useEffect(() => {
         const storedAccessToken = localStorage.getItem('access_token') as string;
@@ -43,11 +46,11 @@ export default function Login() {
 
             try {
                 const userProfile = await getUserProfile(jwt.email, accessToken);
-                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+                login(accessToken, userProfile);
             } catch (error) {
                 console.error("Could not fetch user profile, using fallback", error);
                 const userProfile = getUserProfileFallback(accessToken);
-                localStorage.setItem("userProfile", JSON.stringify(userProfile));
+                login(accessToken, userProfile);
             }
 
             return true;

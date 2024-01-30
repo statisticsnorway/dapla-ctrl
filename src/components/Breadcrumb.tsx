@@ -4,19 +4,19 @@ import { useLocation } from 'react-router-dom';
 import { DaplaCtrlContext } from '../provider/DaplaCtrlProvider';
 
 export default function Breadcrumb() {
-    const [displayName, setDisplayName] = useState(null);
+    const [displayName, setDisplayName] = useState<string>();
     const location = useLocation();
     const pathnames = location.pathname.split('/').filter(x => x).map(x => decodeURI(x));
 
-    const { data } = useContext(DaplaCtrlContext);
+    const { breadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext);
 
     useEffect(() => {
         if (pathnames[0] === 'teammedlemmer' && pathnames.length > 1) {
-            if (data) {
-                setDisplayName(data.displayName);
+            if (breadcrumbUserProfileDisplayName) {
+                setDisplayName(breadcrumbUserProfileDisplayName);
             }
         }
-    }, [location, data]);
+    }, [location, breadcrumbUserProfileDisplayName]);
 
 
     const breadcrumbItems = pathnames.map((value, index) => {

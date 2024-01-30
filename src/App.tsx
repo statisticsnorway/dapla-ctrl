@@ -9,11 +9,11 @@ import TeamOverview from './pages/TeamOverview/TeamOverview';
 import UserProfile from './pages/UserProfile/UserProfile';
 
 import { Routes, Route } from 'react-router-dom';
-import { jwtRegex } from './utils/regex';
+import { useContext } from 'react';
+import { DaplaCtrlContext } from './provider/DaplaCtrlProvider';
 
 export default function App() {
-  const accessToken = localStorage.getItem('access_token');
-  const isLoggedIn = accessToken !== null && jwtRegex.test(accessToken);
+  const { isLoggedIn } = useContext(DaplaCtrlContext);
 
   return (
     <>

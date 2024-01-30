@@ -20,7 +20,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { ErrorResponse } from "../../@types/error";
 
 export default function UserProfile() {
-    const { setData } = useContext(DaplaCtrlContext);
+    const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext);
     const [error, setError] = useState<ErrorResponse | undefined>();
     const [loadingUserProfileData, setLoadingUserProfileData] = useState<boolean>(true);
     const [loadingTeamData, setLoadingTeamDataInfo] = useState<boolean>(true);
@@ -62,7 +62,7 @@ export default function UserProfile() {
         if (userProfileData) {
             const displayName = userProfileData.display_name.split(', ').reverse().join(' ');
             userProfileData.display_name = displayName;
-            setData({ "displayName": displayName });
+            setBreadcrumbUserProfileDisplayName(displayName);
         }
     }, [userProfileData]);
 

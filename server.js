@@ -145,20 +145,45 @@ async function getTeamOverviewTeams(token, teams) {
 }
 
 app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
-    const token = req.token;
-    const principalName = req.params.principalName;
-    const userProfileUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}`;
-
     try {
-        const [userProfile] = await Promise.all([
-            fetchAPIData(token, userProfileUrl, 'Failed to fetch userProfile')
+        const token = req.token;
+        const principalName = req.params.principalName;
+        const userProfileUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}`;
+        const userManagerUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/manager`;
+        const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`;
+
+        const cacheKey = `userProfile-${principalName}`;
+        const cachedUserProfile = cache.get(cacheKey);
+        if (cachedUserProfile) {
+            return res.json(cachedUserProfile);
+        }
+
+        const [userProfile, userManager, userPhoto] = await Promise.all([
+            fetchAPIData(token, userProfileUrl, 'Failed to fetch userProfile'),
+            fetchAPIData(token, userManagerUrl, "Failed to fetch user manager"),
+            fetchPhoto(token, userPhotoUrl, "Failed to fetch user photo")
         ])
 
-        res.json(userProfile);
+        const data = { ...userProfile, manager: { ...userManager }, photo: userPhoto };
+        cache.put(cacheKey, data, 3600000);
+
+        return res.json(data);
     } catch (error) {
         next(error)
     }
 });
+
+async function fetchPhoto(token, url, fallbackErrorMessage) {
+    const response = await fetch(url, getFetchOptions(token));
+
+    if (!response.ok) {
+        throw new Error(fallbackErrorMessage);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const photoBuffer = Buffer.from(arrayBuffer);
+    return photoBuffer.toString('base64');
+}
 
 async function getUserProfileTeamData(token, principalName, teams) {
     const teamPromises = teams._embedded.teams.map(async (team) => {
@@ -248,42 +273,6 @@ async function fetchAPIData(token, url, fallbackErrorMessage) {
     }
 
     return response.json();
-}
-
-
-async function fetchUserProfile(token, principalName) {
-    const url = `${DAPLA_TEAM_API_URL}/users/${principalName}`;
-    const response = await fetch(url, getFetchOptions(token));
-
-    if (!response.ok) {
-        throw new APIError('Failed to fetch user profile', response.status);
-    }
-
-    return response.json();
-}
-
-async function fetchUserManager(token, principalName) {
-    const url = `${DAPLA_TEAM_API_URL}/users/${principalName}/manager`;
-    const response = await fetch(url, getFetchOptions(token));
-
-    if (!response.ok) {
-        throw new APIError('Failed to fetch user manager', response.status);
-    }
-
-    return response.json();
-}
-
-async function fetchPhoto(token, email) {
-    const url = `${DAPLA_TEAM_API_URL}/users/${email}/photo`;
-    const response = await fetch(url, getFetchOptions(token));
-
-    if (!response.ok) {
-        throw new APIError('Failed to fetch photo', response.status);
-    }
-
-    const arrayBuffer = await response.arrayBuffer();
-    const photoBuffer = Buffer.from(arrayBuffer);
-    return photoBuffer.toString('base64');
 }
 
 function parseWwwAuthenticate(header) {

@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { validateKeycloakToken } from '../api/validateKeycloakToken';
+import { DaplaCtrlContext } from '../provider/DaplaCtrlProvider';
 
 const ProtectedRoute = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
     const from = location.pathname;
+    const { logout } = useContext(DaplaCtrlContext);
 
     useEffect(() => {
         if (localStorage.getItem('userProfile') === null) {
-            localStorage.removeItem('access_token');
+            logout();
             navigate('/login', { state: { from: from } });
             return;
         }
@@ -17,8 +19,7 @@ const ProtectedRoute = () => {
         validateKeycloakToken().then(isValid => {
             setIsAuthenticated(isValid);
             if (!isValid) {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('userProfile');
+                logout();
                 navigate('/login', { state: { from: from } });
             }
         });

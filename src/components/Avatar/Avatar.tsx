@@ -17,12 +17,11 @@ export default function Avatar() {
             return;
         }
 
-
         const userProfile = JSON.parse(storedUserProfile) as User;
         if (!userProfile) return;
 
         setUserProfileData(userProfile);
-        setEncodedURI(`/teammedlemmer/${encodeURIComponent(userProfile.principal_name ? userProfile.principal_name.split('@')[0] : userProfile.email)}`);
+        setEncodedURI(`/teammedlemmer/${encodeURIComponent(userProfile.principal_name ? userProfile.principal_name.split('@')[0] : userProfile.email.split('@')[0])}`);
         setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0]);
 
         const base64Image = userProfile?.photo;
