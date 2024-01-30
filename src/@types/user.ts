@@ -5,6 +5,10 @@ export interface User {
     first_name: string
     last_name: string
     email: string
+    division_name?: string
+    division_code?: number
+    section_name?: string
+    section_code?: number
     manager?: User
     photo?: string
 }

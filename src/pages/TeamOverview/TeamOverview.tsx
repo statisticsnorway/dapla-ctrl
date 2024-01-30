@@ -101,7 +101,6 @@ export default function TeamOverview() {
 
     function renderContent() {
         if (error) return renderErrorAlert();
-
         if (loading) return renderSkeletonOnLoad();
 
         if (teamOverviewTableData) {
