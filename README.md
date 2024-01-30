@@ -79,11 +79,11 @@ This is an example of how to list things you need to use the software and how to
 * Create .env.local (note you must replace dummy names with real values)
     If testing with local version of dapla-team-api-redux put this:
     ```sh
-    touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://localhost:8080"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\n' >> .env.local
+    touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://localhost:8080"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\nVITE_SSB_BEARER_URL="https://your-http-bin.domain.com/bearer"' >> .env.local
     ```
     If testing with dapla-team-api-redux in production, put this:
     ```sh
-    touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://your-running-application.domain.com"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\n' >> .env.local
+    touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://your-running-application.domain.com"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\nVITE_SSB_BEARER_URL="https://your-http-bin.domain.com/bearer"' >> .env.local
     ```
 
 ### Installation

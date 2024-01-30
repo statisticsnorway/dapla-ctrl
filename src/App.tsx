@@ -2,19 +2,18 @@ import styles from './app.module.scss'
 
 import Header from './components/Header/Header';
 import Breadcrumb from './components/Breadcrumb';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import Home from './pages/Home';
-import Users from './pages/Users';
-import Login from './pages/Login/Login';
+import ProtectedRoute from './components/ProtectedRoute';
 
-import { Routes, Route, useLocation } from 'react-router-dom';
+import Login from './pages/Login/Login';
+import TeamOverview from './pages/TeamOverview/TeamOverview';
+import UserProfile from './pages/UserProfile';
+
+import { Routes, Route } from 'react-router-dom';
 import { jwtRegex } from './utils/regex';
 
 export default function App() {
-  const isLoggedIn = (
-    useLocation().pathname !== '/login' &&
-    localStorage.getItem('access_token') !== null &&
-    jwtRegex.test(localStorage.getItem('access_token') as string));
+  const accessToken = localStorage.getItem('access_token');
+  const isLoggedIn = accessToken !== null && jwtRegex.test(accessToken);
 
   return (
     <>
@@ -29,9 +28,9 @@ export default function App() {
             example: <ProtectedRoute roles={['managers', 'data-admins']} />
             */
           }
-            <Route path="/" element={<Home />} />
-            <Route path="/teammedlemmer" element={<Users />} />
-            <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
+            <Route path="/" element={<TeamOverview />} />
+            <Route path="/teammedlemmer" element={<h1>Teammedlemmer</h1>} />
+            <Route path="/teammedlemmer/:principalName" element={<UserProfile />} />
           </Route>
         </Routes>
       </main>
