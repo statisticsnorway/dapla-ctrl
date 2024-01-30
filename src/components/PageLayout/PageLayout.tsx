@@ -4,7 +4,7 @@ import { Title, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 interface PageLayoutProps {
     title: string,
-    description?: string,
+    description?: JSX.Element,
     button?: JSX.Element,
     content?: JSX.Element
 }

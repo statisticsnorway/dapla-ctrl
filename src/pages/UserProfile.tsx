@@ -1,27 +1,29 @@
 import pageLayoutStyles from '../components/PageLayout/pagelayout.module.scss'
 
-import { Dialog, Tabs, Divider, Title, Text, Link } from '@statisticsnorway/ssb-component-library';
+import { Dialog, Title, Text, Link } from '@statisticsnorway/ssb-component-library';
 import Table, { TableData } from '../components/Table/Table';
 import PageLayout from "../components/PageLayout/PageLayout"
 import { useContext, useEffect, useState } from "react"
 import { DaplaCtrlContext } from "../provider/DaplaCtrlProvider";
+import { getGroupType } from "../utils/utils";
 
-import { getUserProfile, getUserTeamsWithGroups } from '../api/userProfile';
+import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../api/userProfile';
 
 import { User } from "../@types/user";
 import { Team } from "../@types/team";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { ErrorResponse } from "../@types/error";
 import { Skeleton } from '@mui/material';
 
 export default function UserProfile() {
     const { setData } = useContext(DaplaCtrlContext);
     const [error, setError] = useState<ErrorResponse | undefined>();
-    const [loading, setLoading] = useState<boolean>();
+    const [loadingUserProfileData, setLoadingUserProfileData] = useState<boolean>(true);
+    const [loadingTeamData, setLoadingTeamDataInfo] = useState<boolean>(true);
     const [userProfileData, setUserProfileData] = useState<User>();
-    const [userTeams, setUserTeams] = useState<Team[]>();
     const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>();
     const { principalName } = useParams();
+    const location = useLocation();
 
     useEffect(() => {
         getUserProfile(principalName as string).then(response => {
@@ -30,28 +32,28 @@ export default function UserProfile() {
             } else {
                 setUserProfileData(response as User);
             }
-        }).finally(() => setLoading(false))
+        }).finally(() => setLoadingUserProfileData(false))
             .catch((error) => {
                 setError({ error: { message: error.message, code: "500" } });
             })
-    }, []);
+    }, [location, principalName]);
 
     useEffect(() => {
-        getUserTeamsWithGroups(principalName as string).then(response => {
-            if ((response as ErrorResponse).error) {
-                setError(response as ErrorResponse);
-            } else {
-                console.log(response);
-                setUserTeams(response as Team[]);
-                setUserProfileTableData(prepTeamData(response as Team[]));
-            }
-        }).finally(() => setLoading(false))
-            .catch((error) => {
-                setError({ error: { message: error.message, code: "500" } });
-            })
-    }, [])
+        if (userProfileData) {
+            getUserTeamsWithGroups(principalName as string).then(response => {
+                if ((response as ErrorResponse).error) {
+                    setError(response as ErrorResponse);
+                } else {
+                    setUserProfileTableData(prepTeamData(response as UserProfileTeamResult));
+                }
+            }).finally(() => setLoadingTeamDataInfo(false))
+                .catch((error) => {
+                    setError({ error: { message: error.message, code: "500" } });
+                })
+        }
+    }, [userProfileData])
 
-    // NOTE: This is where we set the data to the context, so that the breadcrumb can access it
+    // required for breadcrumb
     useEffect(() => {
         if (userProfileData) {
             const displayName = userProfileData.display_name.split(', ').reverse().join(' ');
@@ -60,11 +62,11 @@ export default function UserProfile() {
         }
     }, [userProfileData]);
 
-    const prepTeamData = (response: Team[]): TableData['data'] => {
+    const prepTeamData = (response: UserProfileTeamResult): TableData['data'] => {
         return response.teams.map(team => ({
             id: team.uniform_name,
             'navn': renderTeamNameColumn(team),
-            'gruppe': team.groups.map(group => group.display_name).join(", "),
+            'gruppe': team.groups?.map(group => getGroupType(group)).join(', '),
             'epost': userProfileData?.principal_name,
             'ansvarlig': team.manager.display_name.split(", ").reverse().join(" ")
         }));
@@ -94,7 +96,6 @@ export default function UserProfile() {
     function renderSkeletonOnLoad() {
         return (
             <>
-                <Skeleton variant="rectangular" animation="wave" height={60} />
                 <Skeleton variant="text" animation="wave" sx={{ fontSize: '5.5rem' }} width={150} />
                 <Skeleton variant="rectangular" animation="wave" height={200} />
             </>
@@ -103,7 +104,8 @@ export default function UserProfile() {
 
     function renderContent() {
         if (error) return renderErrorAlert();
-        if (loading) return renderSkeletonOnLoad();
+        // TODO: cheesy method to exclude showing skeleton for profile information (username etc..)
+        if (loadingTeamData && !loadingUserProfileData) return renderSkeletonOnLoad();
 
         if (teamUserProfileTableData) {
             const teamOverviewTableHeaderColumns = [{
@@ -115,7 +117,7 @@ export default function UserProfile() {
                 label: 'Gruppe',
             }, {
                 id: 'epost',
-                label: 'Epost'
+                label: 'Epost ?'
             },
             {
                 id: 'ansvarlig',
@@ -123,17 +125,11 @@ export default function UserProfile() {
             }];
             return (
                 <>
-                    <h1>{userProfileData?.section_name}</h1>
-                    <h1>{userProfileData?.display_name}</h1>
-
-                    <Divider dark />
-                    <Title size={2} className={pageLayoutStyles.tableTitle}>Hei</Title>
+                    <Title size={2} className={pageLayoutStyles.tableTitle}>Team</Title>
                     <Table
                         columns={teamOverviewTableHeaderColumns}
                         data={teamUserProfileTableData as TableData['data']}
                     />
-
-
                 </>
             )
         }
@@ -141,8 +137,14 @@ export default function UserProfile() {
 
     return (
         <PageLayout
-            title="Teammedlemmer"
+            title={userProfileData?.display_name as string}
             content={renderContent()}
+            description={
+                <>
+                    <p>{userProfileData?.section_name}</p>
+                    <p>{userProfileData?.principal_name}</p>
+                </>
+            }
         />
     )
 }

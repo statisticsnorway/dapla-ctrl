@@ -2,11 +2,11 @@ import { User } from "../@types/user";
 import { Team } from "../@types/team";
 import { ErrorResponse } from "../@types/error";
 
-export interface TeamUserProfileData {
-    [key: string]: TeamUserProfileResult, // myTeams, allTeams
+export interface UserProfileTeamData {
+    [key: string]: UserProfileTeamResult
 }
 
-export interface TeamUserProfileResult {
+export interface UserProfileTeamResult {
     teams: Team[]
     count: number
 }
@@ -14,13 +14,9 @@ export interface TeamUserProfileResult {
 
 export const getUserProfile = async (principalName: string, token?: string): Promise<User | ErrorResponse> => {
     const accessToken = localStorage.getItem('access_token');
+    principalName = principalName.replace(/@ssb\.no$/, '') + '@ssb.no';
 
-    // TODO: should not need this logic. Should be able to use principalName as is
-    if (principalName.endsWith('@ssb.no')) {
-        principalName = principalName.replace('@ssb.no', '');
-    }
-
-    return fetch(`/api/userProfile/${principalName}@ssb.no`, {
+    return fetch(`/api/userProfile/${principalName}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -39,15 +35,11 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
         });
 };
 
-export const getUserTeamsWithGroups = async (principalName: string): Promise<Team[] | ErrorResponse> => {
+export const getUserTeamsWithGroups = async (principalName: string): Promise<UserProfileTeamResult | ErrorResponse> => {
     const accessToken = localStorage.getItem('access_token');
+    principalName = principalName.replace(/@ssb\.no$/, '') + '@ssb.no';
 
-    // TODO: should not need this logic. Should be able to use principalName as is
-    if (principalName.endsWith('@ssb.no')) {
-        principalName = principalName.replace('@ssb.no', '');
-    }
-
-    return fetch(`/api/userProfile/${principalName}@ssb.no/team`, {
+    return fetch(`/api/userProfile/${principalName}/team`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -59,7 +51,7 @@ export const getUserTeamsWithGroups = async (principalName: string): Promise<Tea
             throw new Error('Request failed');
         }
         return response.json();
-    }).then(data => data as Team[])
+    }).then(data => data as UserProfileTeamResult)
         .catch(error => {
             console.error('Error during fetching userProfile:', error);
             throw error;
