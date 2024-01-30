@@ -6,7 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Login from './pages/Login/Login';
 import TeamOverview from './pages/TeamOverview/TeamOverview';
-import UserProfile from './pages/UserProfile';
+import UserProfile from './pages/UserProfile/UserProfile';
 
 import { Routes, Route } from 'react-router-dom';
 import { jwtRegex } from './utils/regex';

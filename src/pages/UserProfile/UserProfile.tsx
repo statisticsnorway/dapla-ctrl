@@ -1,19 +1,23 @@
-import pageLayoutStyles from '../components/PageLayout/pagelayout.module.scss'
+import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
+import styles from './userprofile.module.scss';
 
 import { Dialog, Title, Text, Link } from '@statisticsnorway/ssb-component-library';
-import Table, { TableData } from '../components/Table/Table';
-import PageLayout from "../components/PageLayout/PageLayout"
-import { useContext, useEffect, useState } from "react"
-import { DaplaCtrlContext } from "../provider/DaplaCtrlProvider";
-import { getGroupType } from "../utils/utils";
-
-import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../api/userProfile';
-
-import { User } from "../@types/user";
-import { Team } from "../@types/team";
-import { useLocation, useParams } from "react-router-dom";
-import { ErrorResponse } from "../@types/error";
 import { Skeleton } from '@mui/material';
+
+import Table, { TableData } from '../../components/Table/Table';
+import PageLayout from "../../components/PageLayout/PageLayout"
+
+import { useContext, useEffect, useState } from "react"
+import { DaplaCtrlContext } from "../../provider/DaplaCtrlProvider";
+import { getGroupType } from "../../utils/utils";
+
+import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../api/userProfile';
+
+import { User } from "../../@types/user";
+import { Team } from "../../@types/team";
+
+import { useLocation, useParams } from "react-router-dom";
+import { ErrorResponse } from "../../@types/error";
 
 export default function UserProfile() {
     const { setData } = useContext(DaplaCtrlContext);
@@ -141,8 +145,10 @@ export default function UserProfile() {
             content={renderContent()}
             description={
                 <>
-                    <p>{userProfileData?.section_name}</p>
-                    <p>{userProfileData?.principal_name}</p>
+                    <div className={styles.userProfileDescription}>
+                        <Text medium>{userProfileData?.section_name}</Text>
+                        <Text medium>{userProfileData?.principal_name}</Text>
+                    </div>
                 </>
             }
         />
