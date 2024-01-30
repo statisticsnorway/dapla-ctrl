@@ -8,12 +8,15 @@ import Login from './pages/Login/Login';
 import TeamOverview from './pages/TeamOverview/TeamOverview';
 import UserProfile from './pages/UserProfile/UserProfile';
 
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { jwtRegex } from './utils/regex';
 
 export default function App() {
   const accessToken = localStorage.getItem('access_token');
-  const isLoggedIn = accessToken !== null && jwtRegex.test(accessToken);
+  const isLoggedIn = (
+    useLocation().pathname !== '/login' &&
+    accessToken !== null &&
+    jwtRegex.test(accessToken as string));
 
   return (
     <>
