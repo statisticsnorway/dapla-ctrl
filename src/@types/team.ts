@@ -8,4 +8,5 @@ export interface Team {
     section_code: number
     team_user_count: number
     manager: User
+    groups?: string[]
 }
