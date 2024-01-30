@@ -1,21 +1,19 @@
+import { User } from "../@types/user";
+import { ErrorResponse } from "../@types/error";
 
-export interface User {
-    principal_name: string
-    azure_ad_id: string
-    display_name: string
-    first_name: string
-    last_name: string
-    email: string
-    manager?: User
-    photo?: string
-}
+export const getUserProfile = async (principalName: string, token?: string): Promise<User | ErrorResponse> => {
+    const accessToken = localStorage.getItem('access_token');
 
-export const getUserProfile = async (accessToken: string): Promise<User> => {
-    return fetch('/api/userProfile', {
+    // TODO: should not need this logic. Should be able to use principalName as is
+    if (principalName.endsWith('@ssb.no')) {
+        principalName = principalName.replace('@ssb.no', '');
+    }
+
+    return fetch(`/api/userProfile/${principalName}@ssb.no`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken || token}`
         }
     }).then(response => {
         if (!response.ok) {

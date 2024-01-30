@@ -32,8 +32,8 @@ export default function TeamOverview() {
                 setError(response as ErrorResponse);
             }
             else {
-                setTeamOverviewData(response as TeamOverviewData)
-                setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
+                setTeamOverviewData(response as TeamOverviewData);
+                setTeamOverviewTableData(prepTeamData(response as TeamOverviewData));
             }
         })
             .finally(() => setLoading(false))

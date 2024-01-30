@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../../api/UserApi';
+import { User } from '../../@types/user';
 import styles from './avatar.module.scss';
 
 export default function Avatar() {
@@ -17,11 +17,12 @@ export default function Avatar() {
             return;
         }
 
+
         const userProfile = JSON.parse(storedUserProfile) as User;
         if (!userProfile) return;
-        setUserProfileData(userProfile);
 
-        setEncodedURI(encodeURI(`/teammedlemmer/${userProfile.display_name.split(', ').reverse().join(' ')}`));
+        setUserProfileData(userProfile);
+        setEncodedURI(`/teammedlemmer/${encodeURIComponent(userProfile.principal_name ? userProfile.principal_name.split('@')[0] : userProfile.email)}`);
         setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0]);
 
         const base64Image = userProfile?.photo;

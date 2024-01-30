@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Title, Input, Link } from "@statisticsnorway/ssb-component-library";
 
 import { validateKeycloakToken } from "../../api/validateKeycloakToken";
-import { getUserProfile, getUserProfileFallback } from "../../api/UserApi";
+import { getUserProfile, getUserProfileFallback } from "../../api/userProfile";
 import { jwtRegex } from "../../utils/regex";
 
 export default function Login() {
@@ -39,8 +39,10 @@ export default function Login() {
             if (!isValid) return false;
             setValue(accessToken);
 
+            const jwt = JSON.parse(atob(accessToken.split('.')[1]));
+
             try {
-                const userProfile = await getUserProfile(accessToken);
+                const userProfile = await getUserProfile(jwt.email, accessToken);
                 localStorage.setItem("userProfile", JSON.stringify(userProfile));
             } catch (error) {
                 console.error("Could not fetch user profile, using fallback", error);

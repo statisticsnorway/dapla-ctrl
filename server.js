@@ -5,7 +5,6 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import { getReasonPhrase } from 'http-status-codes';
-
 import dotenv from 'dotenv';
 
 if (!process.env.VITE_JWKS_URI) {
@@ -94,7 +93,7 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
                 .then(teams => getTeamOverviewTeams(token, teams))
         ])
 
-        res.json({
+        const result = {
             allTeams: {
                 count: allTeams.count,
                 ...allTeams._embedded
@@ -103,7 +102,9 @@ app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next)
                 count: myTeams.count,
                 ...myTeams._embedded
             }
-        });
+        };
+
+        res.json(result);
     } catch (error) {
         next(error)
     }
@@ -120,7 +121,7 @@ async function getTeamOverviewTeams(token, teams) {
             fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => {
                 return {
                     uniform_name: teamUniformName,
-                    section_name: "ukjent"
+                    section_name: "Mangler seksjon"
                 }
             }),
             fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
@@ -129,8 +130,8 @@ async function getTeamOverviewTeams(token, teams) {
         team['section_name'] = teamInfo.section_name;
         team["team_user_count"] = teamUsers.count;
         team["manager"] = teamManager.count > 0 ? teamManager._embedded.users[0] : {
-            "display_name": "Ingen manager",
-            "principal_name": "Ingen manager",
+            "display_name": "Mangler ansvarlig",
+            "principal_name": "Mangler ansvarlig",
         };
 
         return { ...team };
@@ -144,36 +145,37 @@ async function getTeamOverviewTeams(token, teams) {
     return teams;
 }
 
-// TODO: Rework this to use the same logic as the other endpoints
-app.get('/api/userProfile', async (req, res) => {
-    if (!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
+app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
+    const token = req.token;
+    const principalName = req.user.email;
+    const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`;
+    const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`;
 
     try {
-        const token = req.headers.authorization.split("Bearer ")[1];
-        const jwt = JSON.parse(atob(token.split('.')[1]));
+        const [allTeams, myTeams] = await Promise.all([
+            fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams')
+                .then(teams => getTeamOverviewTeams(token, teams)),
+            fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams')
+                .then(teams => getTeamOverviewTeams(token, teams))
+        ])
 
-        const cacheKey = `userProfile-${jwt.email}`;
-        const cachedUserProfile = cache.get(cacheKey);
-        if (cachedUserProfile) {
-            return res.json(cachedUserProfile);
-        }
+        const result = {
+            allTeams: {
+                count: allTeams.count,
+                ...allTeams._embedded
+            },
+            myTeams: {
+                count: myTeams.count,
+                ...myTeams._embedded
+            }
+        };
 
-        const [userProfile, photo, manager] = await Promise.all([
-            fetchUserProfile(token, jwt.email),
-            fetchPhoto(token, jwt.email),
-            fetchUserManager(token, jwt.email)
-        ]);
-        const data = { ...userProfile, photo: photo, manager: { ...manager } };
-        cache.put(cacheKey, data, 3600000);
-
-        return res.json(data);
+        res.json(result);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error)
     }
 });
+
 
 async function fetchAPIData(token, url, fallbackErrorMessage) {
     const response = await fetch(url, getFetchOptions(token));
@@ -188,12 +190,12 @@ async function fetchAPIData(token, url, fallbackErrorMessage) {
 }
 
 
-async function fetchUserProfile(token, email) {
-    const url = `${DAPLA_TEAM_API_URL}/users/${email}`;
+async function fetchUserProfile(token, principalName) {
+    const url = `${DAPLA_TEAM_API_URL}/users/${principalName}`;
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+        throw new APIError('Failed to fetch user profile', response.status);
     }
 
     return response.json();
@@ -204,7 +206,7 @@ async function fetchUserManager(token, principalName) {
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
+        throw new APIError('Failed to fetch user manager', response.status);
     }
 
     return response.json();
@@ -215,7 +217,7 @@ async function fetchPhoto(token, email) {
     const response = await fetch(url, getFetchOptions(token));
 
     if (!response.ok) {
-        throw new Error('Failed to fetch photo');
+        throw new APIError('Failed to fetch photo', response.status);
     }
 
     const arrayBuffer = await response.arrayBuffer();

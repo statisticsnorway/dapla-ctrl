@@ -6,16 +6,14 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 import Login from './pages/Login/Login';
 import TeamOverview from './pages/TeamOverview/TeamOverview';
-import Users from './pages/Users';
+import UserProfile from './pages/UserProfile';
 
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { jwtRegex } from './utils/regex';
 
 export default function App() {
-  const isLoggedIn = (
-    useLocation().pathname !== '/login' &&
-    localStorage.getItem('access_token') !== null &&
-    jwtRegex.test(localStorage.getItem('access_token') as string));
+  const accessToken = localStorage.getItem('access_token');
+  const isLoggedIn = (accessToken !== null && jwtRegex.test(accessToken));
 
   return (
     <>
@@ -32,7 +30,7 @@ export default function App() {
           }
             <Route path="/" element={<TeamOverview />} />
             <Route path="/teammedlemmer" element={<h1>Teammedlemmer</h1>} />
-            <Route path="/teammedlemmer/:user" element={<h1>Test</h1>} />
+            <Route path="/teammedlemmer/:principalName" element={<UserProfile />} />
           </Route>
         </Routes>
       </main>
