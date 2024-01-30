@@ -13,7 +13,7 @@ import { jwtRegex } from './utils/regex';
 
 export default function App() {
   const accessToken = localStorage.getItem('access_token');
-  const isLoggedIn = (accessToken !== null && jwtRegex.test(accessToken));
+  const isLoggedIn = accessToken !== null && jwtRegex.test(accessToken);
 
   return (
     <>

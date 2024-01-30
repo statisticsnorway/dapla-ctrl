@@ -10,7 +10,6 @@ export interface TeamOverviewResult {
     count: number
 }
 
-
 export const getTeamOverview = async (): Promise<TeamOverviewData | ErrorResponse> => {
     const accessToken = localStorage.getItem('access_token');
 
