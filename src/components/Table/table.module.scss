@@ -42,7 +42,7 @@
     border-bottom: 1px inset variables.$ssb-dark-2;
 
     >* {
-      display: inline;
+      display: flex;
       flex-direction: column;
 
       &:not(:last-child) {
