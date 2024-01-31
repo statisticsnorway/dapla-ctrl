@@ -1,19 +1,19 @@
 import { FC, ReactNode, createContext, useState } from 'react'
 
 interface DaplaCtrlContextType {
-  data: object | null
-  setData: (data: object | null) => void
+  breadcrumbUserProfileDisplayName: object | null
+  setBreadcrumbUserProfileDisplayName: (breadcrumbUserProfileDisplayName: object | null) => void
 }
 
 const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
-  data: null,
-  setData: () => {},
+  breadcrumbUserProfileDisplayName: null,
+  setBreadcrumbUserProfileDisplayName: () => { },
 })
 
 const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [data, setData] = useState<object | null>(null)
+  const [breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName] = useState<object | null>(null)
 
-  return <DaplaCtrlContext.Provider value={{ data, setData }}>{children}</DaplaCtrlContext.Provider>
+  return <DaplaCtrlContext.Provider value={{ breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName }}>{children}</DaplaCtrlContext.Provider>
 }
 
 export { DaplaCtrlContext, DaplaCtrlProvider }

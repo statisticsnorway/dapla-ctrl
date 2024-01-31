@@ -114,24 +114,13 @@ async function getTeamOverviewTeams(token, teams) {
     const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
 
     const [teamInfo, teamUsers, teamManager] = await Promise.all([
-      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => {
-        return {
-          uniform_name: teamUniformName,
-          section_name: 'Mangler seksjon',
-        }
-      }),
+      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => missingSection(teamUniformName)),
       fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
-      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager'),
+      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(() => missingManager()),
     ])
     team['section_name'] = teamInfo.section_name
     team['team_user_count'] = teamUsers.count
-    team['manager'] =
-      teamManager.count > 0
-        ? teamManager._embedded.users[0]
-        : {
-            display_name: 'Mangler ansvarlig',
-            principal_name: 'Mangler ansvarlig',
-          }
+    team['manager'] = teamManager.count > 0 ? teamManager._embedded.users[0] : missingManager()
 
     return { ...team }
   })
@@ -160,7 +149,7 @@ app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (r
 
     const [userProfile, userManager, userPhoto] = await Promise.all([
       fetchAPIData(token, userProfileUrl, 'Failed to fetch userProfile'),
-      fetchAPIData(token, userManagerUrl, 'Failed to fetch user manager'),
+      fetchAPIData(token, userManagerUrl, 'Failed to fetch user manager').catch(() => missingManager()),
       fetchPhoto(token, userPhotoUrl, 'Failed to fetch user photo'),
     ])
 
@@ -193,27 +182,16 @@ async function getUserProfileTeamData(token, principalName, teams) {
     const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
 
     const [teamInfo, teamGroups, teamManager] = await Promise.all([
-      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => {
-        return {
-          uniform_name: teamUniformName,
-          section_name: 'Mangler seksjon',
-        }
-      }),
+      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => missingSection(teamUniformName)),
       fetchAPIData(token, teamGroupsUrl, 'Failed to fetch groups').then((response) => {
         const groupPromises = response._embedded.groups.map((group) => fetchUserGroups(group, token, principalName))
         return Promise.all(groupPromises).then((groupsArrays) => groupsArrays.flat())
       }),
-      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager'),
+      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(() => missingManager()),
     ])
 
     team['section_name'] = teamInfo.section_name
-    team['manager'] =
-      teamManager.count > 0
-        ? teamManager._embedded.users[0]
-        : {
-            display_name: 'Mangler ansvarlig',
-            principal_name: 'Mangler ansvarlig',
-          }
+    team['manager'] = teamManager.count > 0 ? teamManager._embedded.users[0] : missingManager()
     team['groups'] = teamGroups
 
     return { ...team }
@@ -337,6 +315,20 @@ app.use((err, req, res, next) => {
     },
   })
 })
+
+function missingManager() {
+  return {
+    display_name: 'Mangler ansvarlig',
+    principal_name: 'Mangler ansvarlig',
+  }
+}
+
+function missingSection(uniformName) {
+  return {
+    uniform_name: uniformName,
+    section_name: 'Mangler seksjon',
+  }
+}
 
 //const lightship = await createLightship();
 // Replace above with below to get liveness and readiness probes when running locally
