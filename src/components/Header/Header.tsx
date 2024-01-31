@@ -4,8 +4,7 @@ import { Link } from '@statisticsnorway/ssb-component-library'
 import Avatar from '../Avatar/Avatar'
 import { useNavigate } from 'react-router-dom'
 
-export default function Header(props: { isLoggedIn: boolean }) {
-  const { isLoggedIn } = props
+export default function Header() {
   const navigate = useNavigate()
 
   return (
@@ -13,12 +12,10 @@ export default function Header(props: { isLoggedIn: boolean }) {
       <h2 className={styles.title} onClick={() => navigate('/')}>
         Dapla ctrl
       </h2>
-      {isLoggedIn && (
-        <div className={styles.navigation}>
-          <Link href='/teammedlemmer'>Teammedlemmer</Link>
-          <Avatar />
-        </div>
-      )}
+      <div className={styles.navigation}>
+        <Link href='/teammedlemmer'>Teammedlemmer</Link>
+        <Avatar />
+      </div>
     </div>
   )
 }

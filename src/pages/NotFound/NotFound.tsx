@@ -1,7 +1,7 @@
 import notFoundStyles from './notFound.module.scss'
 
-import PageLayout from '../../components/PageLayout/PageLayout'
+import { Title } from '@statisticsnorway/ssb-component-library'
 
 export default function NotFound() {
-  return <PageLayout title='404 Not Found' content='' />
+  return <Title size={1}>404 Not Found</Title>
 }
