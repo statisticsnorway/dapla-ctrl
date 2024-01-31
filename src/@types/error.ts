@@ -1,8 +1,8 @@
 export interface ErrorResponse {
-    error: Error,
+  error: Error
 }
 
 export interface Error {
-    code: string
-    message: string
+  code: string
+  message: string
 }
