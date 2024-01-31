@@ -4,6 +4,7 @@ import Header from './components/Header/Header'
 import Breadcrumb from './components/Breadcrumb'
 import ProtectedRoute from './components/ProtectedRoute'
 
+import NotFound from './pages/NotFound/NotFound.tsx'
 import Login from './pages/Login/Login'
 import TeamOverview from './pages/TeamOverview/TeamOverview'
 import UserProfile from './pages/UserProfile/UserProfile'
@@ -31,6 +32,7 @@ export default function App() {
             <Route path='/' element={<TeamOverview />} />
             <Route path='/teammedlemmer' element={<h1>Teammedlemmer</h1>} />
             <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
+            <Route path='*' element={<NotFound />} />
           </Route>
         </Routes>
       </main>

@@ -66,7 +66,7 @@ export default function UserProfile() {
     if (userProfileData) {
       const displayName = userProfileData.display_name.split(', ').reverse().join(' ')
       userProfileData.display_name = displayName
-      setBreadcrumbUserProfileDisplayName({ "displayName": displayName })
+      setBreadcrumbUserProfileDisplayName({ displayName: displayName })
     }
   }, [userProfileData])
 
