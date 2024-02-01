@@ -1,6 +1,6 @@
 import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 import Skeleton from '@mui/material/Skeleton'
 
@@ -26,6 +26,20 @@ export default function TeamOverview() {
   const [error, setError] = useState<ErrorResponse | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
+  const prepTeamData = useCallback(
+    (response: TeamOverviewData): TableData['data'] => {
+      const team = (activeTab as TabProps)?.path ?? activeTab
+
+      return response[team].teams.map((team) => ({
+        id: team.uniform_name,
+        navn: renderTeamNameColumn(team),
+        teammedlemmer: team.team_user_count,
+        ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
+      }))
+    },
+    [activeTab]
+  )
+
   useEffect(() => {
     getTeamOverview()
       .then((response) => {
@@ -40,24 +54,13 @@ export default function TeamOverview() {
       .catch((error) => {
         setError(error.toString())
       })
-  }, [])
+  }, [prepTeamData])
 
   useEffect(() => {
     if (teamOverviewData) {
       setTeamOverviewTableData(prepTeamData(teamOverviewData))
     }
-  }, [activeTab])
-
-  const prepTeamData = (response: TeamOverviewData): TableData['data'] => {
-    const team = (activeTab as TabProps)?.path ?? activeTab
-
-    return response[team].teams.map((team) => ({
-      id: team.uniform_name,
-      navn: renderTeamNameColumn(team),
-      teammedlemmer: team.team_user_count,
-      ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
-    }))
-  }
+  }, [teamOverviewData, prepTeamData])
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
