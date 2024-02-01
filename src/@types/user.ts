@@ -1,3 +1,5 @@
+import { Group } from '../@types/group'
+
 export interface User {
   principal_name: string
   azure_ad_id: string
@@ -11,4 +13,5 @@ export interface User {
   section_code?: number
   manager?: User
   photo?: string
+  groups?: Group[]
 }
