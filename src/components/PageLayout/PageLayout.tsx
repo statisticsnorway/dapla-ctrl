@@ -1,3 +1,5 @@
+import Breadcrumb from '../Breadcrumb'
+import Header from '../Header/Header'
 import styles from './pagelayout.module.scss'
 
 import { Title, LeadParagraph } from '@statisticsnorway/ssb-component-library'
@@ -12,12 +14,16 @@ interface PageLayoutProps {
 export default function PageLayout({ title, description, button, content }: PageLayoutProps) {
   return (
     <>
-      <div className={styles.title}>
-        <Title size={1}>{title}</Title>
-        {button}
-      </div>
-      <LeadParagraph>{description}</LeadParagraph>
-      {content}
+      <Header />
+      <main className={styles.container}>
+        <Breadcrumb />
+        <div className={styles.title}>
+          <Title size={1}>{title}</Title>
+          {button}
+        </div>
+        <LeadParagraph>{description}</LeadParagraph>
+        {content}
+      </main>
     </>
   )
 }
