@@ -16,7 +16,7 @@ import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '.
 import { User } from '../../@types/user'
 import { Team } from '../../@types/team'
 
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 
 export default function UserProfile() {
@@ -27,7 +27,6 @@ export default function UserProfile() {
   const [userProfileData, setUserProfileData] = useState<User>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
   const { principalName } = useParams()
-  const location = useLocation()
 
   const prepTeamData = useCallback(
     (response: UserProfileTeamResult): TableData['data'] => {
@@ -55,7 +54,7 @@ export default function UserProfile() {
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [location, principalName])
+  }, [principalName])
 
   useEffect(() => {
     if (userProfileData) {

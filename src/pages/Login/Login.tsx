@@ -64,7 +64,7 @@ export default function Login() {
         setError(true)
       })
     }
-  }, [navigate, value, from])
+  }, [value, navigate, from])
 
   const handleInputChange = (input: string) => {
     setValue(input)
@@ -74,10 +74,10 @@ export default function Login() {
     <div className={styles.loginContainer}>
       <Title size={1}>Logg inn med token</Title>
       <span>
-        Trykk{' '}
+        Trykk
         <Link isExternal={true} href={import.meta.env.VITE_SSB_BEARER_URL}>
           her
-        </Link>{' '}
+        </Link>
         for å hente keycloak token
       </span>
       <Input

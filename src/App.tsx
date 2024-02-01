@@ -24,7 +24,6 @@ export default function App() {
           <Route path='/login' element={<Login />} />
 
           <Route element={<ProtectedRoute />}>
-            {' '}
             {/* Possibly setup passable props to ProtectedRoute so we can add authorization too,
             example: <ProtectedRoute roles={['managers', 'data-admins']} />
             */}
