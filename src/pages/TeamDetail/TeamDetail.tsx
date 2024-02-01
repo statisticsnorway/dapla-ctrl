@@ -30,7 +30,7 @@ export default function TeamOverview() {
                 setError(error.toString())
             })
 
-    }, [])
+    }, [teamId])
 
 
     return <PageLayout title='Teamoversikt' content={<h1>TeamDetail</h1>} />
