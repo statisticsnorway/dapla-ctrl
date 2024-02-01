@@ -7,13 +7,17 @@ interface DaplaCtrlContextType {
 
 const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
   breadcrumbUserProfileDisplayName: null,
-  setBreadcrumbUserProfileDisplayName: () => { },
+  setBreadcrumbUserProfileDisplayName: () => {},
 })
 
 const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName] = useState<object | null>(null)
 
-  return <DaplaCtrlContext.Provider value={{ breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName }}>{children}</DaplaCtrlContext.Provider>
+  return (
+    <DaplaCtrlContext.Provider value={{ breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName }}>
+      {children}
+    </DaplaCtrlContext.Provider>
+  )
 }
 
 export { DaplaCtrlContext, DaplaCtrlProvider }
