@@ -16,14 +16,12 @@ export default function App() {
         {/* Possibly setup passable props to ProtectedRoute so we can add authorization too,
             example: <ProtectedRoute roles={['managers', 'data-admins']} />
             */}
-            <Route path='/' element={<TeamOverview />} />
-            <Route path='/teammedlemmer' element={<h1>Teammedlemmer</h1>} />
-            <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
-            <Route path='/:teamId' element={<TeamDetail />} />
-             <Route path='*' element={<NotFound />} />
-          </Route>
-        </Routes>
-      </main>
-    </>
+        <Route path='/' element={<TeamOverview />} />
+        <Route path='/teammedlemmer' element={<h1>Teammedlemmer</h1>} />
+        <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
+        <Route path='/:teamId' element={<TeamDetail />} />
+        <Route path='*' element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
