@@ -1,8 +1,14 @@
 import { FC, ReactNode, createContext, useState } from 'react'
 
+interface BreadcrumbUserProfileDisplayName {
+  displayName: string
+}
+
 interface DaplaCtrlContextType {
   breadcrumbUserProfileDisplayName: object | null
-  setBreadcrumbUserProfileDisplayName: (breadcrumbUserProfileDisplayName: object | null) => void
+  setBreadcrumbUserProfileDisplayName: (
+    breadcrumbUserProfileDisplayName: BreadcrumbUserProfileDisplayName | null
+  ) => void
 }
 
 const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
@@ -11,7 +17,8 @@ const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
 })
 
 const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName] = useState<object | null>(null)
+  const [breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName] =
+    useState<BreadcrumbUserProfileDisplayName | null>(null)
 
   return (
     <DaplaCtrlContext.Provider value={{ breadcrumbUserProfileDisplayName, setBreadcrumbUserProfileDisplayName }}>

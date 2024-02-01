@@ -7,7 +7,7 @@ import { Skeleton } from '@mui/material'
 import Table, { TableData } from '../../components/Table/Table'
 import PageLayout from '../../components/PageLayout/PageLayout'
 
-import { useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType } from '../../utils/utils'
 
@@ -16,7 +16,7 @@ import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '.
 import { User } from '../../@types/user'
 import { Team } from '../../@types/team'
 
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 
 export default function UserProfile() {
@@ -27,7 +27,19 @@ export default function UserProfile() {
   const [userProfileData, setUserProfileData] = useState<User>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
   const { principalName } = useParams()
-  const location = useLocation()
+
+  const prepTeamData = useCallback(
+    (response: UserProfileTeamResult): TableData['data'] => {
+      return response.teams.map((team) => ({
+        id: team.uniform_name,
+        navn: renderTeamNameColumn(team),
+        gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
+        epost: userProfileData?.principal_name,
+        ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
+      }))
+    },
+    [userProfileData]
+  )
 
   useEffect(() => {
     getUserProfile(principalName as string)
@@ -42,7 +54,7 @@ export default function UserProfile() {
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [location, principalName])
+  }, [principalName])
 
   useEffect(() => {
     if (userProfileData) {
@@ -59,26 +71,16 @@ export default function UserProfile() {
           setError({ error: { message: error.message, code: '500' } })
         })
     }
-  }, [userProfileData])
+  }, [userProfileData, principalName, prepTeamData])
 
   // required for breadcrumb
   useEffect(() => {
     if (userProfileData) {
       const displayName = userProfileData.display_name.split(', ').reverse().join(' ')
       userProfileData.display_name = displayName
-      setBreadcrumbUserProfileDisplayName({ displayName: displayName })
+      setBreadcrumbUserProfileDisplayName({ displayName })
     }
-  }, [userProfileData])
-
-  const prepTeamData = (response: UserProfileTeamResult): TableData['data'] => {
-    return response.teams.map((team) => ({
-      id: team.uniform_name,
-      navn: renderTeamNameColumn(team),
-      gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
-      epost: userProfileData?.principal_name,
-      ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
-    }))
-  }
+  }, [userProfileData, setBreadcrumbUserProfileDisplayName])
 
   function renderTeamNameColumn(team: Team) {
     return (

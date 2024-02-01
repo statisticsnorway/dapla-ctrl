@@ -22,7 +22,7 @@ const ProtectedRoute = () => {
         navigate('/login', { state: { from: from } })
       }
     })
-  }, [navigate])
+  }, [from, navigate])
 
   return isAuthenticated ? <Outlet /> : null
 }

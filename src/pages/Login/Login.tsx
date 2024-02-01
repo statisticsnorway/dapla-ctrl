@@ -27,7 +27,7 @@ export default function Login() {
         }
       })
     }
-  }, [navigate])
+  }, [navigate, from])
 
   useEffect(() => {
     const validateToken = async (accessToken: string) => {
@@ -64,7 +64,7 @@ export default function Login() {
         setError(true)
       })
     }
-  }, [value, from])
+  }, [value, navigate, from])
 
   const handleInputChange = (input: string) => {
     setValue(input)
