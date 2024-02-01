@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login/Login'
 import TeamOverview from './pages/TeamOverview/TeamOverview'
 import UserProfile from './pages/UserProfile/UserProfile'
+import TeamDetail from './pages/TeamDetail/TeamDetail'
 
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { jwtRegex } from './utils/regex'
@@ -31,6 +32,7 @@ export default function App() {
             <Route path='/' element={<TeamOverview />} />
             <Route path='/teammedlemmer' element={<h1>Teammedlemmer</h1>} />
             <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
+            <Route path='/:teamId' element={<TeamDetail />} />
           </Route>
         </Routes>
       </main>
