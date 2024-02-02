@@ -1,8 +1,6 @@
 name: 'Build and Lint on Pull Requests'
 on:
   pull_request:
-    branches:
-      - develop
 
 jobs:
   build:
@@ -23,5 +21,8 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run ESLint
+      - name: Autofix ESLint and Prettier errors/warnings
+        run: npm run lint:fix && npm run lint:format
+
+      - name: Check for more ESLint errors/warnings
         run: npm run lint
