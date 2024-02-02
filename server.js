@@ -247,35 +247,35 @@ app.get('/api/userProfile/:principalName/team', tokenVerificationMiddleware, asy
 
 app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (req, res, next) => {
   try {
-    const token = req.token;
-    const teamUniformName = req.params.teamUniformName;
-    const teamInfoUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}`;
-    const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`;
+    const token = req.token
+    const teamUniformName = req.params.teamUniformName
+    const teamInfoUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}`
+    const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`
 
     const [teamInfo, teamUsers] = await Promise.all([
-      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info')
-        .then(async (teamInfo) => {
-          const manager = await fetchTeamManager(token, teamInfo)
-          return { ...teamInfo, manager};
-        }),
-      fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users')
-        .then(async (teamUsers) => {
-          const resolvedUsers = await fetchTeamUsersWithGroups(token, teamUsers, teamUniformName);
-          return { ...teamUsers, _embedded: { users: resolvedUsers } };
-        }),
-    ]);
+      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').then(async (teamInfo) => {
+        const manager = await fetchTeamManager(token, teamInfo)
+        return { ...teamInfo, manager }
+      }),
+      fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users').then(async (teamUsers) => {
+        const resolvedUsers = await fetchTeamUsersWithGroups(token, teamUsers, teamUniformName)
+        return { ...teamUsers, _embedded: { users: resolvedUsers } }
+      }),
+    ])
 
-    res.json({ teamInfo, teamUsers: teamUsers._embedded.users });
+    res.json({ teamInfo, teamUsers: teamUsers._embedded.users })
   } catch (error) {
-    next(error);
+    next(error)
   }
-});
+})
 
 async function fetchTeamManager(token, teamInfo) {
   const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamInfo.uniform_name}-managers/users`
-  return await fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').then((teamManager) => {
-    return teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
-  }).catch(() => managerFallback())
+  return await fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
+    .then((teamManager) => {
+      return teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
+    })
+    .catch(() => managerFallback())
 }
 
 async function fetchTeamUsersWithGroups(token, teamUsers, teamUniformName) {
@@ -287,11 +287,11 @@ async function fetchTeamUsersWithGroups(token, teamUsers, teamUniformName) {
       .filter((group) => group !== null && group.uniform_name.startsWith(teamUniformName))
       .flatMap((group) => group)
 
-    user["groups"] = flattenedGroups
-    
+    user['groups'] = flattenedGroups
+
     return { ...user }
-  });
-  return await Promise.all(userPromises);
+  })
+  return await Promise.all(userPromises)
 }
 
 async function fetchAPIData(token, url, fallbackErrorMessage) {
@@ -381,7 +381,7 @@ function sectionFallback(uniformName) {
 }
 
 function groupFallback() {
-  return { "_embedded": { "groups": [] }, "count": "0"}
+  return { _embedded: { groups: [] }, count: '0' }
 }
 
 //const lightship = await createLightship();
