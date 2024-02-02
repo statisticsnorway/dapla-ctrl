@@ -10,7 +10,7 @@ export default function Breadcrumb() {
     .filter((x) => x)
     .map((x) => decodeURI(x))
 
-  const { breadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
+  const { breadcrumbUserProfileDisplayName, breadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
 
   const breadcrumbItems = pathnames.map((value, index) => {
     const last = index === pathnames.length - 1
@@ -19,6 +19,8 @@ export default function Breadcrumb() {
     let displayValue = value.charAt(0).toUpperCase() + value.slice(1)
     if (index === 1 && breadcrumbUserProfileDisplayName && pathnames[0] === 'teammedlemmer') {
       displayValue = breadcrumbUserProfileDisplayName.displayName
+    } else if (index == 0 && breadcrumbTeamDetailDisplayName && pathnames[0] !== 'teammedlemmer') {
+      displayValue = breadcrumbTeamDetailDisplayName.displayName
     }
 
     return {

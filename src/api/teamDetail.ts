@@ -3,10 +3,10 @@ import { User } from '../@types/user'
 import { ErrorResponse } from '../@types/error'
 
 export interface TeamDetailData {
-  [key: string]: TeamDetailResult // myTeams, allTeams
+  [key: string]: TeamDetailTeamResult
 }
 
-export interface TeamDetailResult {
+export interface TeamDetailTeamResult {
   teamInfo: Team
   teamUsers: User[]
   count: number
