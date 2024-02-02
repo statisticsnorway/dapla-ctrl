@@ -5,7 +5,7 @@ interface BreadcrumbUserProfileDisplayName {
 }
 
 interface DaplaCtrlContextType {
-  breadcrumbUserProfileDisplayName: object | null
+  breadcrumbUserProfileDisplayName: BreadcrumbUserProfileDisplayName | null
   setBreadcrumbUserProfileDisplayName: (
     breadcrumbUserProfileDisplayName: BreadcrumbUserProfileDisplayName | null
   ) => void
