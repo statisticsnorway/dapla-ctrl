@@ -21,8 +21,8 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Autofix ESLint and Prettier errors/warnings
+      - name: Autofix ESLint and Prettier warnings
         run: npm run lint:fix && npm run lint:format
 
-      - name: Check for more ESLint errors/warnings
+      - name: Check for more ESLint warnings
         run: npm run lint
