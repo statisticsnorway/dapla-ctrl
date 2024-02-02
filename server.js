@@ -280,16 +280,18 @@ async function fetchTeamManager(token, teamInfo) {
 
 async function fetchTeamUsersWithGroups(token, teamUsers, teamUniformName) {
   const userPromises = teamUsers._embedded.users.map(async (user) => {
+    const userUrl = `${DAPLA_TEAM_API_URL}/users/${user.principal_name}`
     const userGroupsUrl = `${DAPLA_TEAM_API_URL}/users/${user.principal_name}/groups`
+    const currentUser = await fetchAPIData(token, userUrl, 'Failed to fetch user')
     const groups = await fetchAPIData(token, userGroupsUrl, 'Failed to fetch groups').catch(() => groupFallback())
 
     const flattenedGroups = groups._embedded.groups
       .filter((group) => group !== null && group.uniform_name.startsWith(teamUniformName))
       .flatMap((group) => group)
 
-    user["groups"] = flattenedGroups
+    currentUser.groups = flattenedGroups
     
-    return { ...user }
+    return { ...currentUser }
   });
   return await Promise.all(userPromises);
 }

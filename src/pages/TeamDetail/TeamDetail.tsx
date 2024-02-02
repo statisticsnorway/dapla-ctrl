@@ -29,7 +29,7 @@ export default function TeamDetail() {
             return response.teamUsers.map((user) => ({
                 id: user?.principal_name,
                 navn: renderUsernameColumn(user),
-                gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)),
+                gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
                 epost: user?.principal_name
             }))
         },
@@ -41,7 +41,6 @@ export default function TeamDetail() {
         getTeamDetail(teamId as string)
             .then((response) => {
                 if ((response as ErrorResponse).error) {
-                    console.log(response)
                     setError(response as ErrorResponse)
                 } else {
                     console.log((response))
@@ -83,15 +82,14 @@ export default function TeamDetail() {
     }, [teamDetailData, setBreadcrumbTeamDetailDisplayName])
 
     function renderUsernameColumn(user: User) {
-        console.log(user)
         return (
             <>
                 <span>
-                    <Link href={`/teammedlemmer/${user.principal_name}`}>
+                    <Link href={`/teammedlemmer/${user.principal_name.split('@')[0]}`}>
                         <b>{user.display_name.split(', ').reverse().join(' ')}</b>
                     </Link>
                 </span>
-                {user && <Text>{user.section_name}</Text>}
+                {user && <Text>{user.section_name ? user.section_name : "Mangler seksjon"}</Text>}
             </>
         )
     }
@@ -150,8 +148,9 @@ export default function TeamDetail() {
             content={renderContent()}
             description={
                 <div className={styles.userProfileDescription}>
-                    <Text medium>{"asd"}</Text>
-                    <Text medium>{"asd"}</Text>
+                    <Text medium>{teamDetailData?.teamInfo.uniform_name}</Text>
+                    <Text medium>{teamDetailData?.teamInfo.manager.display_name.split(', ').reverse().join(' ')}</Text>
+                    <Text medium>{teamDetailData?.teamInfo.section_name}</Text>
                 </div>
             }
         />
