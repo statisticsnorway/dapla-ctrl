@@ -99,6 +99,42 @@ This is an example of how to list things you need to use the software and how to
    npm run dev
    ```
 
+### ESLint and Prettier
+
+For ensuring code consistency and adhering to coding standards, our project utilizes ESLint and Prettier. To view linting warnings and errors in the console, it's recommended to run the following script during development:
+
+```sh
+npm run lint
+```
+
+To automatically fix linting and formatting issues across all files, you can use the following scripts (Note: While these scripts resolve many ESLint warnings or errors, some issues may require manual intervention):
+
+```sh
+npm run lint:fix && npm run lint:format
+```
+
+### Integrated Development Environments (IDEs) Support
+
+For seamless integration with popular IDEs such as Visual Studio Code and IntelliJ, consider installing the following plugins:
+
+#### Visual Studio Code
+
+1. **ESLint**: Install the ESLint extension to enable real-time linting and error highlighting.
+   [ESLint Extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+
+2. **Prettier**: Enhance code formatting by installing the Prettier extension.
+   [Prettier Extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+
+#### IntelliJ
+
+1. **ESLint**: Install the ESLint plugin to enable ESLint integration within IntelliJ.
+   [ESLint Plugin](https://plugins.jetbrains.com/plugin/7494-eslint)
+
+2. **Prettier**: Integrate Prettier for code formatting by installing the Prettier plugin.
+   [Prettier Plugin](https://plugins.jetbrains.com/plugin/10456-prettier)
+
+By incorporating these plugins into your development environment, you can take full advantage of ESLint and Prettier to maintain code quality and consistent formatting throughout your project.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
