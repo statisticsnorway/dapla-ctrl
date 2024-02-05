@@ -55,20 +55,20 @@ export default function TeamDetail() {
     }, [teamId])
 
     useEffect(() => {
-        if (teamDetailData) {
-            getTeamDetail(teamId as string)
-                .then((response) => {
-                    if ((response as ErrorResponse).error) {
-                        setError(response as ErrorResponse)
-                    } else {
-                        setTeamDetailTableData(prepTeamData(response as TeamDetailTeamResult))
-                    }
-                })
-                .finally(() => setLoadingTeamData(false))
-                .catch((error) => {
-                    setError({ error: { message: error.message, code: '500' } })
-                })
-        }
+        if (!teamDetailData) return
+
+        getTeamDetail(teamId as string)
+            .then((response) => {
+                if ((response as ErrorResponse).error) {
+                    setError(response as ErrorResponse)
+                } else {
+                    setTeamDetailTableData(prepTeamData(response as TeamDetailTeamResult))
+                }
+            })
+            .finally(() => setLoadingTeamData(false))
+            .catch((error) => {
+                setError({ error: { message: error.message, code: '500' } })
+            })
     }, [teamDetailData, teamId, prepTeamData])
 
     // required for breadcrumb
