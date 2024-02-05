@@ -15,16 +15,14 @@ interface DaplaCtrlContextType {
   ) => void
 
   breadcrumbTeamDetailDisplayName: BreadcrumbTeamDetailDisplayName | null
-  setBreadcrumbTeamDetailDisplayName: (
-    breadcrumbTeamDetailDisplayName: BreadcrumbTeamDetailDisplayName | null
-  ) => void
+  setBreadcrumbTeamDetailDisplayName: (breadcrumbTeamDetailDisplayName: BreadcrumbTeamDetailDisplayName | null) => void
 }
 
 const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
   breadcrumbUserProfileDisplayName: null,
-  setBreadcrumbUserProfileDisplayName: () => { },
+  setBreadcrumbUserProfileDisplayName: () => {},
   breadcrumbTeamDetailDisplayName: null,
-  setBreadcrumbTeamDetailDisplayName: () => { },
+  setBreadcrumbTeamDetailDisplayName: () => {},
 })
 
 const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -34,12 +32,14 @@ const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useState<BreadcrumbUserProfileDisplayName | null>(null)
 
   return (
-    <DaplaCtrlContext.Provider value={{
-      breadcrumbUserProfileDisplayName,
-      setBreadcrumbUserProfileDisplayName,
-      breadcrumbTeamDetailDisplayName,
-      setBreadcrumbTeamDetailDisplayName
-    }}>
+    <DaplaCtrlContext.Provider
+      value={{
+        breadcrumbUserProfileDisplayName,
+        setBreadcrumbUserProfileDisplayName,
+        breadcrumbTeamDetailDisplayName,
+        setBreadcrumbTeamDetailDisplayName,
+      }}
+    >
       {children}
     </DaplaCtrlContext.Provider>
   )
