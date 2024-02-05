@@ -3,7 +3,7 @@ import styles from './teamDetail.module.scss'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, TeamDetailTeamResult, getTeamDetail } from '../../api/teamDetail'
+import { TeamDetailData, getTeamDetail } from '../../api/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
@@ -22,8 +22,8 @@ export default function TeamDetail() {
 
   const { teamId } = useParams<{ teamId: string }>()
 
-  const prepTeamData = useCallback((response: TeamDetailTeamResult): TableData['data'] => {
-    return response.teamUsers.map((user) => ({
+  const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
+    return response[''].teamUsers.map((user) => ({
       id: user?.principal_name,
       navn: renderUsernameColumn(user),
       gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
@@ -48,28 +48,26 @@ export default function TeamDetail() {
   }, [teamId])
 
   useEffect(() => {
-    if (!teamDetailData) return
-
     getTeamDetail(teamId as string)
       .then((response) => {
         if ((response as ErrorResponse).error) {
           setError(response as ErrorResponse)
         } else {
-          setTeamDetailTableData(prepTeamData(response as TeamDetailTeamResult))
+          setTeamDetailTableData(prepTeamData(response as TeamDetailData))
         }
       })
       .finally(() => setLoadingTeamData(false))
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [teamDetailData, teamId, prepTeamData])
+  }, [teamId, prepTeamData])
 
   // required for breadcrumb
   useEffect(() => {
     if (!teamDetailData) return
 
-    const displayName = teamDetailData.teamInfo.display_name
-    teamDetailData.teamInfo.display_name = displayName
+    const displayName = teamDetailData[''].teamInfo.display_name
+    teamDetailData[''].teamInfo.display_name = displayName
     setBreadcrumbTeamDetailDisplayName({ displayName })
   }, [teamDetailData, setBreadcrumbTeamDetailDisplayName])
 
@@ -135,13 +133,15 @@ export default function TeamDetail() {
 
   return (
     <PageLayout
-      title={teamDetailData?.teamInfo.display_name}
+      title={teamDetailData ? teamDetailData[''].teamInfo.display_name : ''}
       content={renderContent()}
       description={
         <div className={styles.userProfileDescription}>
-          <Text medium>{teamDetailData?.teamInfo.uniform_name}</Text>
-          <Text medium>{teamDetailData?.teamInfo.manager.display_name.split(', ').reverse().join(' ')}</Text>
-          <Text medium>{teamDetailData?.teamInfo.section_name}</Text>
+          <Text medium>{teamDetailData ? teamDetailData[''].teamInfo.uniform_name : ''}</Text>
+          <Text medium>
+            {teamDetailData ? teamDetailData[''].teamInfo.manager.display_name.split(', ').reverse().join(' ') : ''}
+          </Text>
+          <Text medium>{teamDetailData ? teamDetailData[''].teamInfo.section_name : ''}</Text>
         </div>
       }
     />
