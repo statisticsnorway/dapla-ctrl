@@ -11,7 +11,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType } from '../../utils/utils'
 
-import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../api/userProfile'
+import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../services/userProfile'
 
 import { User } from '../../@types/user'
 import { Team } from '../../@types/team'

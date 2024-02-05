@@ -11,7 +11,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { ErrorResponse } from '../../@types/error'
 import { Team } from '../../@types/team'
 
-import { getTeamOverview, TeamOverviewData } from '../../api/teamOverview'
+import { getTeamOverview, TeamOverviewData } from '../../services/teamOverview'
 
 export default function TeamOverview() {
   const defaultActiveTab = {

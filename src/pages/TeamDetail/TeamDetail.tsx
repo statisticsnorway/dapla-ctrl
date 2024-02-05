@@ -3,7 +3,7 @@ import styles from './teamDetail.module.scss'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail } from '../../api/teamDetail'
+import { TeamDetailData, getTeamDetail } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'

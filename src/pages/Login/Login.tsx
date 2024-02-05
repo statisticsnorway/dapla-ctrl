@@ -5,8 +5,8 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import { Title, Input, Link } from '@statisticsnorway/ssb-component-library'
 
-import { validateKeycloakToken } from '../../api/validateKeycloakToken'
-import { getUserProfile, getUserProfileFallback } from '../../api/userProfile'
+import { validateKeycloakToken } from '../../services/validateKeycloakToken'
+import { getUserProfile, getUserProfileFallback } from '../../services/userProfile'
 import { jwtRegex } from '../../utils/regex'
 
 export default function Login() {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
-import { validateKeycloakToken } from '../services/validateKeycloakToken'
+import { validateKeycloakToken } from './services/validateKeycloakToken'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
