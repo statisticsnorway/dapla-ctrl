@@ -23,7 +23,7 @@ export default function TeamDetail() {
   const { teamId } = useParams<{ teamId: string }>()
 
   const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
-    return response[''].teamUsers.map((user) => ({
+    return response['teamUsers'].teamUsers.map((user) => ({
       id: user?.principal_name,
       navn: renderUsernameColumn(user),
       gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
@@ -66,8 +66,8 @@ export default function TeamDetail() {
   useEffect(() => {
     if (!teamDetailData) return
 
-    const displayName = teamDetailData[''].teamInfo.display_name
-    teamDetailData[''].teamInfo.display_name = displayName
+    const displayName = teamDetailData['teamUsers'].teamInfo.display_name
+    teamDetailData['teamUsers'].teamInfo.display_name = displayName
     setBreadcrumbTeamDetailDisplayName({ displayName })
   }, [teamDetailData, setBreadcrumbTeamDetailDisplayName])
 
@@ -123,7 +123,7 @@ export default function TeamDetail() {
       return (
         <>
           <Title size={2} className={pageLayoutStyles.tableTitle}>
-            Team
+            Teammedlemmer
           </Title>
           <Table columns={teamOverviewTableHeaderColumns} data={teamDetailTableData as TableData['data']} />
         </>
@@ -133,15 +133,17 @@ export default function TeamDetail() {
 
   return (
     <PageLayout
-      title={teamDetailData ? teamDetailData[''].teamInfo.display_name : ''}
+      title={teamDetailData ? teamDetailData['teamUsers'].teamInfo.display_name : ''}
       content={renderContent()}
       description={
         <div className={styles.userProfileDescription}>
-          <Text medium>{teamDetailData ? teamDetailData[''].teamInfo.uniform_name : ''}</Text>
+          <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
           <Text medium>
-            {teamDetailData ? teamDetailData[''].teamInfo.manager.display_name.split(', ').reverse().join(' ') : ''}
+            {teamDetailData
+              ? teamDetailData['teamUsers'].teamInfo.manager.display_name.split(', ').reverse().join(' ')
+              : ''}
           </Text>
-          <Text medium>{teamDetailData ? teamDetailData[''].teamInfo.section_name : ''}</Text>
+          <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
         </div>
       }
     />
