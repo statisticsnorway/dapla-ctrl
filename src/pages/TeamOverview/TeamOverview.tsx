@@ -12,6 +12,7 @@ import { ErrorResponse } from '../../@types/error'
 import { Team } from '../../@types/team'
 
 import { getTeamOverview, TeamOverviewData } from '../../services/teamOverview'
+import { formatDisplayName } from '../../utils/utils'
 
 export default function TeamOverview() {
   const defaultActiveTab = {
@@ -34,7 +35,7 @@ export default function TeamOverview() {
         id: team.uniform_name,
         navn: renderTeamNameColumn(team),
         teammedlemmer: team.team_user_count,
-        ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
+        ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
     [activeTab]

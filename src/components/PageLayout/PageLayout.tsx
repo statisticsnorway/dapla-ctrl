@@ -5,7 +5,7 @@ import styles from './pagelayout.module.scss'
 import { Title } from '@statisticsnorway/ssb-component-library'
 
 interface PageLayoutProps {
-  title?: string
+  title?: string | JSX.Element
   button?: JSX.Element
   content?: JSX.Element
 }

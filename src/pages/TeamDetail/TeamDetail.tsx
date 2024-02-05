@@ -8,10 +8,11 @@ import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
-import { getGroupType } from '../../utils/utils'
+import { formatDisplayName, getGroupType } from '../../utils/utils'
 import { User } from '../../@types/user'
 import { Text, Title, Link, Dialog, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
+import { Skeleton } from '@mui/material'
 
 export default function TeamDetail() {
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -75,7 +76,7 @@ export default function TeamDetail() {
       <>
         <span>
           <Link href={`/teammedlemmer/${user.principal_name.split('@')[0]}`}>
-            <b>{user.display_name.split(', ').reverse().join(' ')}</b>
+            <b>{formatDisplayName(user.display_name)}</b>
           </Link>
         </span>
         {user && <Text>{user.section_name ? user.section_name : 'Mangler seksjon'}</Text>}
@@ -113,10 +114,10 @@ export default function TeamDetail() {
       return (
         <>
           <LeadParagraph className={styles.userProfileDescription}>
-            <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
+            <Text medium className={styles.uniformName}>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
             <Text medium>
               {teamDetailData
-                ? teamDetailData['teamUsers'].teamInfo.manager.display_name.split(', ').reverse().join(' ')
+                ? formatDisplayName(teamDetailData['teamUsers'].teamInfo.manager.display_name)
                 : ''}
             </Text>
             <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
@@ -132,7 +133,8 @@ export default function TeamDetail() {
 
   return (
     <PageLayout
-      title={teamDetailData ? teamDetailData['teamUsers'].teamInfo.display_name : ''}
+      title={!loadingTeamData && teamDetailData ? teamDetailData['teamUsers'].teamInfo.display_name : <Skeleton variant='rectangular' animation='wave' width={350} height={90}/>
+    }
       content={renderContent()}
     />
   )

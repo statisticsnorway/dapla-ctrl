@@ -9,7 +9,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
-import { getGroupType } from '../../utils/utils'
+import { getGroupType, formatDisplayName } from '../../utils/utils'
 
 import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../services/userProfile'
 
@@ -22,7 +22,6 @@ import { ErrorResponse } from '../../@types/error'
 export default function UserProfile() {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ErrorResponse | undefined>()
-  const [loadingUserProfileData, setLoadingUserProfileData] = useState<boolean>(true)
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [userProfileData, setUserProfileData] = useState<User>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
@@ -35,7 +34,7 @@ export default function UserProfile() {
         navn: renderTeamNameColumn(team),
         gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
         epost: userProfileData?.principal_name,
-        ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
+        ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
     [userProfileData]
@@ -50,7 +49,6 @@ export default function UserProfile() {
           setUserProfileData(response as User)
         }
       })
-      .finally(() => setLoadingUserProfileData(false))
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
@@ -76,7 +74,7 @@ export default function UserProfile() {
   // required for breadcrumb
   useEffect(() => {
     if (userProfileData) {
-      const displayName = userProfileData.display_name.split(', ').reverse().join(' ')
+      const displayName = formatDisplayName(userProfileData.display_name)
       userProfileData.display_name = displayName
       setBreadcrumbUserProfileDisplayName({ displayName })
     }
@@ -105,8 +103,7 @@ export default function UserProfile() {
 
   function renderContent() {
     if (error) return renderErrorAlert()
-    // TODO: cheesy method to exclude showing skeleton for profile information (username etc..)
-    if (loadingTeamData && !loadingUserProfileData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
+    if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
     if (teamUserProfileTableData) {
       const teamOverviewTableHeaderColumns = [
