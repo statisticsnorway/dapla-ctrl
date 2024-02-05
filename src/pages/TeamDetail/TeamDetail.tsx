@@ -113,8 +113,7 @@ export default function TeamDetail() {
 
     function renderContent() {
         if (error) return renderErrorAlert()
-        // TODO: cheesy method to exclude showing skeleton for profile information (username etc..)
-        if (loadingTeamData && !loadingTeamDetailData) return renderSkeletonOnLoad()
+        if (loadingTeamData) return renderSkeletonOnLoad()
 
         if (teamDetailTableData) {
             const teamOverviewTableHeaderColumns = [
