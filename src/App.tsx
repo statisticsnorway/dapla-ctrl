@@ -11,7 +11,7 @@ import { Routes, Route } from 'react-router-dom'
 export default function App() {
   return (
     <Routes>
-      <Route path='/login' element={<Login />} />
+      {import.meta.env.NODE_ENV !== 'production' && <Route path='/login' element={<Login />} />}
       <Route element={<ProtectedRoute />}>
         {/* Possibly setup passable props to ProtectedRoute so we can add authorization too,
             example: <ProtectedRoute roles={['managers', 'data-admins']} />
