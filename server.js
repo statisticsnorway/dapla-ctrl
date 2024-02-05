@@ -264,7 +264,7 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
     ])
 
     // TODO: Implement shared data tab
-    res.json({teamUsers: { teamInfo, teamUsers: teamUsers._embedded.users }})
+    res.json({ teamUsers: { teamInfo, teamUsers: teamUsers._embedded.users } })
   } catch (error) {
     next(error)
   }
