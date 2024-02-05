@@ -18,6 +18,7 @@ import { Team } from '../../@types/team'
 
 import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
+import { Skeleton } from '@mui/material'
 
 export default function UserProfile() {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
@@ -139,5 +140,16 @@ export default function UserProfile() {
     }
   }
 
-  return <PageLayout title={userProfileData?.display_name as string} content={renderContent()} />
+  return (
+    <PageLayout
+      title={
+        !loadingTeamData && userProfileData ? (
+          (userProfileData?.display_name as string)
+        ) : (
+          <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
+        )
+      }
+      content={renderContent()}
+    />
+  )
 }

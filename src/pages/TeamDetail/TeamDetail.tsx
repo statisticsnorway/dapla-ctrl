@@ -114,11 +114,11 @@ export default function TeamDetail() {
       return (
         <>
           <LeadParagraph className={styles.userProfileDescription}>
-            <Text medium className={styles.uniformName}>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
+            <Text medium className={styles.uniformName}>
+              {teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}
+            </Text>
             <Text medium>
-              {teamDetailData
-                ? formatDisplayName(teamDetailData['teamUsers'].teamInfo.manager.display_name)
-                : ''}
+              {teamDetailData ? formatDisplayName(teamDetailData['teamUsers'].teamInfo.manager.display_name) : ''}
             </Text>
             <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
           </LeadParagraph>
@@ -133,8 +133,13 @@ export default function TeamDetail() {
 
   return (
     <PageLayout
-      title={!loadingTeamData && teamDetailData ? teamDetailData['teamUsers'].teamInfo.display_name : <Skeleton variant='rectangular' animation='wave' width={350} height={90}/>
-    }
+      title={
+        !loadingTeamData && teamDetailData ? (
+          teamDetailData['teamUsers'].teamInfo.display_name
+        ) : (
+          <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
+        )
+      }
       content={renderContent()}
     />
   )
