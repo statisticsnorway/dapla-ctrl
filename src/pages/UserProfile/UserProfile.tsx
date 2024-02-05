@@ -23,7 +23,7 @@ export default function UserProfile() {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ErrorResponse | undefined>()
   const [loadingUserProfileData, setLoadingUserProfileData] = useState<boolean>(true)
-  const [loadingTeamData, setLoadingTeamDataInfo] = useState<boolean>(true)
+  const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [userProfileData, setUserProfileData] = useState<User>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
   const { principalName } = useParams()
@@ -66,7 +66,7 @@ export default function UserProfile() {
             setUserProfileTableData(prepTeamData(response as UserProfileTeamResult))
           }
         })
-        .finally(() => setLoadingTeamDataInfo(false))
+        .finally(() => setLoadingTeamData(false))
         .catch((error) => {
           setError({ error: { message: error.message, code: '500' } })
         })
