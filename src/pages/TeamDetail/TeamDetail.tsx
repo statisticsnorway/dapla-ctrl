@@ -10,8 +10,8 @@ import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { getGroupType } from '../../utils/utils'
 import { User } from '../../@types/user'
-import { Text, Title, Link, Dialog } from '@statisticsnorway/ssb-component-library'
-import { Skeleton } from '@mui/material'
+import { Text, Title, Link, Dialog, LeadParagraph } from '@statisticsnorway/ssb-component-library'
+import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 export default function TeamDetail() {
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -38,7 +38,6 @@ export default function TeamDetail() {
         if ((response as ErrorResponse).error) {
           setError(response as ErrorResponse)
         } else {
-          console.log(response)
           setTeamDetailData(response as TeamDetailData)
         }
       })
@@ -92,18 +91,9 @@ export default function TeamDetail() {
     )
   }
 
-  function renderSkeletonOnLoad() {
-    return (
-      <>
-        <Skeleton variant='text' animation='wave' sx={{ fontSize: '5.5rem' }} width={150} />
-        <Skeleton variant='rectangular' animation='wave' height={200} />
-      </>
-    )
-  }
-
   function renderContent() {
     if (error) return renderErrorAlert()
-    if (loadingTeamData) return renderSkeletonOnLoad()
+    if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
     if (teamDetailTableData) {
       const teamOverviewTableHeaderColumns = [
@@ -122,6 +112,15 @@ export default function TeamDetail() {
       ]
       return (
         <>
+          <LeadParagraph className={styles.userProfileDescription}>
+            <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
+            <Text medium>
+              {teamDetailData
+                ? teamDetailData['teamUsers'].teamInfo.manager.display_name.split(', ').reverse().join(' ')
+                : ''}
+            </Text>
+            <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
+          </LeadParagraph>
           <Title size={2} className={pageLayoutStyles.tableTitle}>
             Teammedlemmer
           </Title>
@@ -135,17 +134,6 @@ export default function TeamDetail() {
     <PageLayout
       title={teamDetailData ? teamDetailData['teamUsers'].teamInfo.display_name : ''}
       content={renderContent()}
-      description={
-        <div className={styles.userProfileDescription}>
-          <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.uniform_name : ''}</Text>
-          <Text medium>
-            {teamDetailData
-              ? teamDetailData['teamUsers'].teamInfo.manager.display_name.split(', ').reverse().join(' ')
-              : ''}
-          </Text>
-          <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
-        </div>
-      }
     />
   )
 }

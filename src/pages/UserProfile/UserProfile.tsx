@@ -1,11 +1,11 @@
 import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './userprofile.module.scss'
 
-import { Dialog, Title, Text, Link } from '@statisticsnorway/ssb-component-library'
-import { Skeleton } from '@mui/material'
+import { Dialog, Title, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 import Table, { TableData } from '../../components/Table/Table'
 import PageLayout from '../../components/PageLayout/PageLayout'
+import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
@@ -103,19 +103,10 @@ export default function UserProfile() {
     )
   }
 
-  function renderSkeletonOnLoad() {
-    return (
-      <>
-        <Skeleton variant='text' animation='wave' sx={{ fontSize: '5.5rem' }} width={150} />
-        <Skeleton variant='rectangular' animation='wave' height={200} />
-      </>
-    )
-  }
-
   function renderContent() {
     if (error) return renderErrorAlert()
     // TODO: cheesy method to exclude showing skeleton for profile information (username etc..)
-    if (loadingTeamData && !loadingUserProfileData) return renderSkeletonOnLoad()
+    if (loadingTeamData && !loadingUserProfileData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
     if (teamUserProfileTableData) {
       const teamOverviewTableHeaderColumns = [
@@ -138,6 +129,10 @@ export default function UserProfile() {
       ]
       return (
         <>
+          <LeadParagraph className={styles.userProfileDescription}>
+            <Text medium>{userProfileData?.section_name}</Text>
+            <Text medium>{userProfileData?.principal_name}</Text>
+          </LeadParagraph>
           <Title size={2} className={pageLayoutStyles.tableTitle}>
             Team
           </Title>
@@ -147,16 +142,5 @@ export default function UserProfile() {
     }
   }
 
-  return (
-    <PageLayout
-      title={userProfileData?.display_name as string}
-      content={renderContent()}
-      description={
-        <div className={styles.userProfileDescription}>
-          <Text medium>{userProfileData?.section_name}</Text>
-          <Text medium>{userProfileData?.principal_name}</Text>
-        </div>
-      }
-    />
-  )
+  return <PageLayout title={userProfileData?.display_name as string} content={renderContent()} />
 }

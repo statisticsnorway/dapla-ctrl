@@ -2,11 +2,11 @@ import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss
 
 import { useCallback, useEffect, useState } from 'react'
 import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
-import Skeleton from '@mui/material/Skeleton'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
+import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { ErrorResponse } from '../../@types/error'
 import { Team } from '../../@types/team'
@@ -92,19 +92,9 @@ export default function TeamOverview() {
     )
   }
 
-  function renderSkeletonOnLoad() {
-    return (
-      <>
-        <Skeleton variant='rectangular' animation='wave' height={60} />
-        <Skeleton variant='text' animation='wave' sx={{ fontSize: '5.5rem' }} width={150} />
-        <Skeleton variant='rectangular' animation='wave' height={200} />
-      </>
-    )
-  }
-
   function renderContent() {
     if (error) return renderErrorAlert()
-    if (loading) return renderSkeletonOnLoad()
+    if (loading) return <PageSkeleton />
 
     if (teamOverviewTableData) {
       const teamOverviewTableHeaderColumns = [
