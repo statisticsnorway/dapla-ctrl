@@ -1,28 +1,28 @@
 import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './userprofile.module.scss'
 
-import { Dialog, Title, Text, Link } from '@statisticsnorway/ssb-component-library'
-import { Skeleton } from '@mui/material'
+import { Dialog, Title, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 import Table, { TableData } from '../../components/Table/Table'
 import PageLayout from '../../components/PageLayout/PageLayout'
+import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
-import { getGroupType } from '../../utils/utils'
+import { getGroupType, formatDisplayName } from '../../utils/utils'
 
-import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../api/userProfile'
+import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../services/userProfile'
 
 import { User } from '../../@types/user'
 import { Team } from '../../@types/team'
 
 import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
+import { Skeleton } from '@mui/material'
 
 export default function UserProfile() {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ErrorResponse | undefined>()
-  const [loadingUserProfileData, setLoadingUserProfileData] = useState<boolean>(true)
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [userProfileData, setUserProfileData] = useState<User>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
@@ -35,7 +35,7 @@ export default function UserProfile() {
         navn: renderTeamNameColumn(team),
         gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
         epost: userProfileData?.principal_name,
-        ansvarlig: team.manager.display_name.split(', ').reverse().join(' '),
+        ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
     [userProfileData]
@@ -50,7 +50,6 @@ export default function UserProfile() {
           setUserProfileData(response as User)
         }
       })
-      .finally(() => setLoadingUserProfileData(false))
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
@@ -76,7 +75,7 @@ export default function UserProfile() {
   // required for breadcrumb
   useEffect(() => {
     if (userProfileData) {
-      const displayName = userProfileData.display_name.split(', ').reverse().join(' ')
+      const displayName = formatDisplayName(userProfileData.display_name)
       userProfileData.display_name = displayName
       setBreadcrumbUserProfileDisplayName({ displayName })
     }
@@ -103,19 +102,9 @@ export default function UserProfile() {
     )
   }
 
-  function renderSkeletonOnLoad() {
-    return (
-      <>
-        <Skeleton variant='text' animation='wave' sx={{ fontSize: '5.5rem' }} width={150} />
-        <Skeleton variant='rectangular' animation='wave' height={200} />
-      </>
-    )
-  }
-
   function renderContent() {
     if (error) return renderErrorAlert()
-    // TODO: cheesy method to exclude showing skeleton for profile information (username etc..)
-    if (loadingTeamData && !loadingUserProfileData) return renderSkeletonOnLoad()
+    if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
     if (teamUserProfileTableData) {
       const teamOverviewTableHeaderColumns = [
@@ -138,6 +127,10 @@ export default function UserProfile() {
       ]
       return (
         <>
+          <LeadParagraph className={styles.userProfileDescription}>
+            <Text medium>{userProfileData?.section_name}</Text>
+            <Text medium>{userProfileData?.principal_name}</Text>
+          </LeadParagraph>
           <Title size={2} className={pageLayoutStyles.tableTitle}>
             Team
           </Title>
@@ -149,14 +142,14 @@ export default function UserProfile() {
 
   return (
     <PageLayout
-      title={userProfileData?.display_name as string}
-      content={renderContent()}
-      description={
-        <div className={styles.userProfileDescription}>
-          <Text medium>{userProfileData?.section_name}</Text>
-          <Text medium>{userProfileData?.principal_name}</Text>
-        </div>
+      title={
+        !loadingTeamData && userProfileData ? (
+          (userProfileData?.display_name as string)
+        ) : (
+          <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
+        )
       }
+      content={renderContent()}
     />
   )
 }

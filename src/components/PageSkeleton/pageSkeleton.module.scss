@@ -1,8 +1,9 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
-.userProfileDescription {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.description {
     margin-top: -2rem;
+
+    @media #{variables.$mobile} {
+        margin-top: -1.5rem;
+    }
 }

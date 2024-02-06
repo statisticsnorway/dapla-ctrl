@@ -1,4 +1,4 @@
-export function getGroupType(groupName: string) {
+export const getGroupType = (groupName: string) => {
   const match = groupName.match(/(managers|developers|data-admins|support|consumers)$/)
   const role = match ? match[0] : null
   switch (role) {
@@ -15,4 +15,8 @@ export function getGroupType(groupName: string) {
     default:
       return groupName
   }
+}
+
+export const formatDisplayName = (displayName: string) => {
+  return displayName.split(', ').reverse().join(' ')
 }

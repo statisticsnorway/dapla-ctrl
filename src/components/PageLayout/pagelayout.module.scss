@@ -1,7 +1,7 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .container {
-  margin: 1.5rem 8rem;
+  margin: 1.5rem 12.25rem;
 
   @media #{variables.$mobile} {
       margin: 1.5rem;

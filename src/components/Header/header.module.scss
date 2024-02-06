@@ -8,10 +8,16 @@
     color: variables.$ssb-dark-5;
     align-items: center;
     padding: 1rem;
-
+    padding-left: 4rem;
+    margin: 0;
+    font-family: 'Roboto Condensed', sans-serif !important;
+    font-stretch: condensed;
+    font-weight: bold;
+    font-size: 2rem;
+    
     .navigation {
         @extend .header;
-        gap: 2rem;
+        gap: 5rem;
         border-bottom: 0; // unset border-bottom from the inherited .header class
         padding: 0; // unset padding
     }
@@ -21,5 +27,14 @@
         cursor: pointer;
         border-bottom: 0; // unset border-bottom from the inherited .header class
         padding: 0; // unset padding
+    }
+
+    @media #{variables.$mobile} {
+        margin: 0;
+        padding-right: 0;
+        padding-left: .75rem;
+        .navigation {
+            gap: 1rem;
+        }
     }
 }
