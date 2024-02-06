@@ -8,8 +8,8 @@
     color: variables.$ssb-dark-5;
     align-items: center;
     padding: 1rem;
+    padding-left: 4rem;
     margin: 0;
-    margin-left: 1.5rem;
     font-family: 'Roboto Condensed', sans-serif !important;
     font-stretch: condensed;
     font-weight: bold;
@@ -31,8 +31,8 @@
 
     @media #{variables.$mobile} {
         margin: 0;
-        margin-left: 0.25rem;
         padding-right: 0;
+        padding-left: .75rem;
         .navigation {
             gap: 1rem;
         }
