@@ -13,6 +13,7 @@ import { Team } from '../../@types/team'
 
 import { getTeamOverview, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
+import Sidebar from '../../components/Sidebar/Sidebar'
 
 export default function TeamOverview() {
   const defaultActiveTab = {
@@ -26,6 +27,7 @@ export default function TeamOverview() {
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title)
   const [error, setError] = useState<ErrorResponse | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
@@ -72,6 +74,10 @@ export default function TeamOverview() {
     }
   }
 
+  const handleToggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
+
   function renderTeamNameColumn(team: Team) {
     return (
       <>
@@ -115,6 +121,9 @@ export default function TeamOverview() {
 
       return (
         <>
+          <Sidebar isOpen={isSidebarOpen} closeSidebar={handleToggleSidebar} >
+            <h1>Teamoverview sidebar</h1>
+          </Sidebar>
           <Tabs
             onClick={handleTabClick}
             activeOnInit={defaultActiveTab.path}
@@ -128,6 +137,7 @@ export default function TeamOverview() {
             {teamOverviewTableTitle}
           </Title>
           <Table columns={teamOverviewTableHeaderColumns} data={teamOverviewTableData as TableData['data']} />
+          <button onClick={handleToggleSidebar}>Click me</button>
         </>
       )
     }
