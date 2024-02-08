@@ -1,40 +1,81 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .container {
-    width: 20vw;
-    height: 100%;
+    width: 25vw;
+    height: 100vh;
     background-color: variables.$ssb-white;
     border-left: 1px solid variables.$ssb-dark-2;
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
 
     .hide {
         display: none;
     }
 
-    .header {
-        button {
-            background: none;
-            color: inherit;
-            border: none;
-            padding: 0;
-            font: inherit;
-            cursor: pointer;
-            outline: inherit;
-        }
+    button {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+        float: right;
+    }
 
-        .xIcon {
-            color: variables.$ssb-green-4;
+    .xIcon {
+        color: variables.$ssb-green-4;
+    }
+
+    .body {
+        background-color: rgb(236,254,236);
+        border-bottom: 1px solid #d4d4d4;
+        overflow: auto;
+        > * {
+            padding: 1rem;
         }
     }
 
-    .body {}
-    .footer{}
+    .modalHeader {
+        height: 10%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 5rem;
+        margin-left: 1rem;
+        margin-bottom: 3rem;
+    
+        button {
+            margin: 0;
+            padding: 0;
+            float: right;
+        }
+
+        > * > * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .modalType {}
+        .modalTitle {}
+        .modalDescription {}
+    }
+    
+    .modalFooter {
+        height: 10%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 2.5rem;
+        margin-right: 2.5rem;
+        margin-top: 2rem;
+    }
 
     // TODO: Add styling for mobile
-    @media #{variables.$mobile} {
-    
-    }
+    @media #{variables.$mobile} {}
 }
