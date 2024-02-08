@@ -15,15 +15,15 @@ interface PageLayoutProps {
 }
 
 export default function PageLayout({ title, description, button, content }: PageLayoutProps) {
-  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setSidebarOpen] = useState<boolean>(false)
 
   const handleToggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
+    setSidebarOpen(!isSidebarOpen)
   }
 
   const closeSidebar = () => {
-    setSidebarOpen(false);
-  }
+    setSidebarOpen(false)
+  }
 
   return (
     <>
