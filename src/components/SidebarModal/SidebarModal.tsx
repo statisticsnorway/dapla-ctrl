@@ -55,8 +55,8 @@ const SidebarModal = ({ header, footer, body }: SidebarModal) => {
             <X className={styles.xIcon} size={32} />
           </button>
           {/* TODO: Should this be wrapped around button? If yes, remove default styling on button */}
-          <SidebarModalHeader {...header} />
         </div>
+        <SidebarModalHeader {...header} />
         <div className={styles.body}>
           {/* Form goes here */}
           {body}

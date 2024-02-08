@@ -1,7 +1,7 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .container {
-    width: 25vw;
+    width: 30vw;
     height: 100vh;
     background-color: variables.$ssb-white;
     border-left: 1px solid variables.$ssb-dark-2;
@@ -42,10 +42,11 @@
 
     .modalHeader {
         height: 10%;
+        width: 100vw;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding-top: 5rem;
+        padding-top: 1rem;
         margin-left: 1rem;
         margin-bottom: 3rem;
     
@@ -77,5 +78,8 @@
     }
 
     // TODO: Add styling for mobile
-    @media #{variables.$mobile} {}
+    @media #{variables.$mobile} {
+        width: 100vw;
+        
+    }
 }
