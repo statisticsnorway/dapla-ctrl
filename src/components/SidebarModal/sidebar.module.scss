@@ -1,13 +1,17 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
-.container {
+@mixin transition($property, $duration, $timing-function) {
+    transition: $property $duration $timing-function;
+}
+
+.sidebar {
     width: 20vw;
     height: 100%;
     background-color: variables.$ssb-white;
     border-left: 1px solid variables.$ssb-dark-2;
     position: absolute;
     top: 0;
-    right: 0;
+    right: -20vw;
     z-index: 1;
 
     .hide {
@@ -37,4 +41,18 @@
     @media #{variables.$mobile} {
     
     }
+
+    @include transition(right, 0.3s, ease);
+}
+
+@keyframes slide-in {
+    100% { transform: translateX(100%); }
+}
+
+@-webkit-keyframes slide-in {
+    100% { -webkit-transform: translateX(100%); }
+}
+
+.open {
+    right: 0px;
 }

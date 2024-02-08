@@ -1,43 +1,45 @@
 import styles from './sidebar.module.scss'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarModal {
+  isOpen: boolean;
+  closeSidebar: () => void;
+
   header?: JSX.Element
   body?: JSX.Element
   button?: JSX.Element
 }
 
-const SidebarModal = ({ header, body, button }: SidebarModal) => {
-  const [isOpen, setOpen] = useState<boolean>(true)
+const SidebarModal = ({ isOpen, closeSidebar, header, body }: SidebarModal) => {
+  const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const handleClose = () => {
-    setOpen(!isOpen)
-  }
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        console.log("handleClickOutside moment, closed sidebar");
+        closeSidebar();
+      }
+    };
 
-  if (isOpen) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.header}>
-          {/* TODO: Should this be wrapped around button? If yes, remove default styling on button */}
-          <button onClick={handleClose}>
-            <X className={styles.xIcon} size={32} />
-          </button>
-          {header}
-        </div>
-        <div className={styles.body}>
-          {/* Form goes here */}
-          {body}
-        </div>
-        <div className={styles.footer}>
-          <Link onClick={handleClose}>Avbryt</Link>
-          {button}
-        </div>
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen, closeSidebar]);
+
+  return (
+    <div ref={sidebarRef} className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <div className={styles.header}>
+        <button onClick={closeSidebar}>X</button>
       </div>
-    )
-  }
+      <div className={styles.body}>
+        {body}
+      </div>
+    </div>
+  );
 }
 
 export default SidebarModal
