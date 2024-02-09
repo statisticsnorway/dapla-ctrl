@@ -1,7 +1,7 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .container {
-    width: 30vw;
+    width: 25dvw;
     height: 100vh;
     background-color: variables.$ssb-white;
     border-left: 1px solid variables.$ssb-dark-2;
@@ -32,23 +32,21 @@
     }
 
     .body {
-        background-color: rgb(236,254,236);
+        background-color: variables.$ssb-green-1;
         border-bottom: 1px solid #d4d4d4;
-        overflow: auto;
+        height: 70dvh;
         > * {
             padding: 1rem;
         }
     }
 
     .modalHeader {
-        height: 10%;
         width: 100vw;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding-top: 1rem;
         margin-left: 1rem;
-        margin-bottom: 3rem;
+        margin-bottom: 2rem;
     
         button {
             margin: 0;
@@ -67,19 +65,27 @@
     }
     
     .modalFooter {
-        height: 10%;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
         align-items: center;
         margin-left: 2.5rem;
         margin-right: 2.5rem;
-        margin-top: 2rem;
+        padding-top: 1rem;
+        height: auto;
     }
+
+    .modalInfoDialog {
+        padding-top: 1rem;//TODO: fix later
+      }
 
     // TODO: Add styling for mobile
     @media #{variables.$mobile} {
         width: 100vw;
         
     }
+}
+
+.open {
+    right: 0;
 }

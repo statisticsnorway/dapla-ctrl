@@ -1,7 +1,7 @@
 import styles from './sidebar.module.scss'
 
 import { useState } from 'react'
-import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
+import { Link, Button, Dialog, Input, Dropdown } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarHeader {
@@ -23,13 +23,18 @@ const SidebarModalHeader = ({modalType, modalTitle, modalDescription}: SidebarHe
 interface SidebarFooter {
   submitButtonText: string
   handleClose?: () => void
+  handleSubmit?: () => void
 }
 
-const SidebarModalFooter = ({submitButtonText, handleClose}: SidebarFooter): JSX.Element => {
+const SidebarModalFooter = ({submitButtonText, handleClose, handleSubmit}: SidebarFooter): JSX.Element => {
   return (
     <div className={styles.modalFooter}>
       <Link onClick={handleClose}>Avbryt</Link>
-      <div className={styles.modalFooterButtonText}><Button primary>{submitButtonText}</Button></div>
+      <div className={styles.modalFooterButtonText}>
+        <Button onClick={handleSubmit} primary>
+          {submitButtonText}
+        </Button>
+      </div>
     </div>
   )
 }
@@ -59,6 +64,31 @@ const SidebarModal = ({ header, footer, body }: SidebarModal) => {
         <SidebarModalHeader {...header} />
         <div className={styles.body}>
           {/* Form goes here */}
+          <div>
+            <h2>Legg person til teamet</h2>
+            <p>Navn</p>
+            <Input placeholder="Skriv navn..." />
+
+            <p>Rolle(r)</p>
+            <Dropdown 
+              placeholder="Velg rolle" 
+              searchable
+              selectedItem={{title: "Ingen tilgang", id: "ingen-tilgang"}}
+              items={
+              [
+                {title: "Managers", id: "managers"},
+                {title: "Developers", id: "developers"},
+                {title: "Data-admins", id: "data-admins"},
+                {title: "Ingen tilgang", id: "ingen-tilgang"},
+                
+              ]
+            }/>
+
+            <div className={styles.modalInfoDialog}></div>
+            <Dialog type='info' title="Tidskrevende jobb!">
+              Det kan ta litt tid før du ser endringen.
+            </Dialog>
+          </div>
           {body}
         </div>
         <SidebarModalFooter {...footer} handleClose={footer.handleClose ? footer.handleClose : handleClose} />
