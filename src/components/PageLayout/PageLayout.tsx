@@ -23,7 +23,7 @@ export default function PageLayout({ title, description, button, content }: Page
         <p>Navn</p>
         <Input placeholder='Skriv navn...' />
 
-        <p>Gruppe(r)</p>
+        <p>Tilgangsgruppe(r)</p>
         <Dropdown
           placeholder='Velg gruppe(r)'
           searchable
@@ -36,10 +36,11 @@ export default function PageLayout({ title, description, button, content }: Page
           ]}
         />
 
-        <div className={styles.modalInfoDialog}></div>
-        <Dialog type='info' title='Tidskrevende jobb!'>
-          Det kan ta litt tid før du ser endringen.
-        </Dialog>
+        <div className={styles.modalInfoDialog}>
+          <Dialog type='info' title='Tidskrevende jobb!'>
+            Det kan ta litt tid før du ser endringen.
+          </Dialog>
+        </div>
       </div>
     )
   }
@@ -63,6 +64,7 @@ export default function PageLayout({ title, description, button, content }: Page
             submitButtonText: 'Legg til medlem',
             handleSubmit: () => {
               console.log('clicked')
+              setOpen(false)
             },
           }}
           body={modalBody()}

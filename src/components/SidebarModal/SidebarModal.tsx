@@ -1,7 +1,6 @@
 import styles from './sidebar.module.scss'
 
-import { useEffect, useRef, useState } from 'react'
-import { Link, Button, Dialog, Input, Dropdown } from '@statisticsnorway/ssb-component-library'
+import { Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarHeader {
@@ -54,17 +53,36 @@ interface SidebarModal {
 }
 
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
+  /*
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const contentRef = useRef(null);
+
+  const checkForOverflow = () => {
+    const element = contentRef.current;
+    if (!element) return
+
+    // Check if the content is overflowing in the vertical direction
+    const hasOverflow = element.scrollHeight > element.clientHeight;
+    setShowScrollIndicator(hasOverflow);
+  };
+
+  useEffect(() => {
+    if (!open) return
+    
+    checkForOverflow();
+  }, [open]);
+  */
   return (
     <div className={`${styles.container} ${open ? styles.open : ''}`}>
       <div className={styles.header}>
         <button onClick={onClose}>
           <X className={styles.xIcon} size={32} />
         </button>
-        {/* TODO: Should this be wrapped around button? If yes, remove default styling on button */}
       </div>
       <SidebarModalHeader {...header} />
+      {/*<div className={styles.body} ref={contentRef} onScroll={checkForOverflow}> */}
       <div className={styles.body}>
-        {/* Form goes here */}
+        { /* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */ }
         {body}
       </div>
       <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
