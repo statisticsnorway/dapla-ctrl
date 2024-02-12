@@ -18,7 +18,7 @@ export default function PageLayout({ title, description, button, content }: Page
 
   const modalBody = (): JSX.Element => {
     return (
-      <div>
+      <div className={styles.modalBody}>
         <h2>Legg person til teamet</h2>
         <p>Navn</p>
         <Input placeholder='Skriv navn...' />

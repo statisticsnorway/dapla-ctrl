@@ -27,3 +27,8 @@
 .modalInfoDialog {
   padding-top: 1rem;//TODO: fix later
 }
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+}
