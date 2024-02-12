@@ -254,7 +254,7 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
 
     const [teamInfo, teamUsers] = await Promise.all([
       fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').then(async (teamInfo) => {
-        const manager = await fetchTeamManager(token, teamInfo)
+        const manager = await fetchTeamManager(token, teamInfo.uniform_name)
         return { ...teamInfo, manager }
       }),
       fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users').then(async (teamUsers) => {
@@ -271,40 +271,118 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
 })
 
 // TODO: Implement teamMembers
-app.get('/api/teamMembers', tokenVerificationMiddleware, async (req, res, next) => {
+app.get('/api/teamMembers/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
   try {
     const token = req.token
+    const principalName = 'obr@ssb.no' // req.user.email
+    
+    const [allTeamMembers, myTeamMembers] = await Promise.all([
+      fetchAllTeamMembers(token),
+      fetchUniqueUsersManagedByPrincipalName(token, principalName)
+    ])
 
-    const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`);
-    usersUrl.searchParams.set('embed', 'teams,groups,manager');
-
-    const teamMembers = await fetchAPIData(token, usersUrl.toString(), "could not fetch data for teamMembers")
-
-    const result = teamMembers._embedded.users.map((user) => {
-      const userInformation = {
-        principal_name: user.principal_name, 
-        section_name: user.section_name
-      }
-      const teamsCount = user._embedded.teams ? user._embedded.teams.length: 0
-      const dataAdminCount = user._embedded.groups ? user._embedded.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length: 0
-      const manager = user._embedded.manager ? user._embedded.manager: {
-        display_name: "Ikke funnet"
-      }
-      return {
-        ...userInformation,
-        teamsCount: teamsCount,
-        dataAdminCount: dataAdminCount,
-        manager: manager
-      }
-    })
-    res.json( { teamMembers: result })
+    res.json({ allTeamMembers: allTeamMembers, myTeamMembers: myTeamMembers })
   } catch (error) {
     next(error)
   }
 })
 
-async function fetchTeamManager(token, teamInfo) {
-  const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamInfo.uniform_name}-managers/users`
+async function fetchUniqueUsersManagedByPrincipalName(token, principalName) {
+  const uniqueUsers = []
+  
+  const teams = await fetchAPIData(
+    token,
+    `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`,
+    'Failed to fetch team users'
+  )
+
+  await Promise.all(
+    teams._embedded.teams.map(async (teamInfo) => {
+      const manager = await fetchTeamManager(token, teamInfo.uniform_name)
+      if (manager.principal_name !== principalName) return // skip any team where the user is not the manager
+
+      const teamUniformName = teamInfo.uniform_name
+      const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`
+      const teamUsers = await fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users')
+
+      // add users to uniqueUsers if they are not already there
+      teamUsers._embedded.users.forEach((user) => {
+        if (user.principal_name === principalName) return // skip the user itself
+        if (!uniqueUsers.some((existingUser) => existingUser.principal_name === user.principal_name)) {
+          uniqueUsers.push(user)
+        }
+      })
+    })
+  )
+
+  if (uniqueUsers.length === 0) return []
+
+  const result = await Promise.all(
+    uniqueUsers.map(async (user) => {
+      const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
+      usersUrl.searchParams.append('filter', `principal_name=${user.principal_name}`)
+      usersUrl.searchParams.append('embed', 'teams,groups,manager')
+
+      const teamMembers = await fetchAPIData(token, usersUrl.toString(), "could not fetch user data")
+      
+      return teamMembers._embedded.users.map((user) => {
+        const userInformation = {
+          principal_name: user.principal_name,
+          section_name: user.section_name,
+        }
+        const teamsCount = user._embedded.teams ? user._embedded.teams.length : 0
+        const dataAdminCount = user._embedded.groups
+          ? user._embedded.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length
+          : 0
+        const manager = user._embedded.manager
+          ? user._embedded.manager
+          : {
+              display_name: 'Ikke funnet',
+            }
+        return {
+          ...userInformation,
+          teamsCount: teamsCount,
+          dataAdminCount: dataAdminCount,
+          manager: manager,
+        }
+      })
+    })
+  )
+  return result
+}
+
+
+async function fetchAllTeamMembers(token) {
+  const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
+  usersUrl.searchParams.set('embed', 'teams,groups,manager')
+
+  const teamMembers = await fetchAPIData(token, usersUrl.toString(), 'could not fetch data for teamMembers')
+
+  return teamMembers._embedded.users.map((user) => {
+    const userInformation = {
+      principal_name: user.principal_name,
+      section_name: user.section_name,
+    }
+    const teamsCount = user._embedded.teams ? user._embedded.teams.length : 0
+    const dataAdminCount = user._embedded.groups
+      ? user._embedded.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length
+      : 0
+    const manager = user._embedded.manager
+      ? user._embedded.manager
+      : {
+          display_name: 'Ikke funnet',
+        }
+    return {
+      ...userInformation,
+      teamsCount: teamsCount,
+      dataAdminCount: dataAdminCount,
+      manager: manager,
+    }
+  })
+}
+
+async function fetchTeamManager(token, teamUniformName) {
+  const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
   return await fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
     .then((teamManager) => {
       return teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
