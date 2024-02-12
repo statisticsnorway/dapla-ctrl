@@ -270,6 +270,39 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
   }
 })
 
+// TODO: Implement teamMembers
+app.get('/api/teamMembers', tokenVerificationMiddleware, async (req, res, next) => {
+  try {
+    const token = req.token
+
+    const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`);
+    usersUrl.searchParams.set('embed', 'teams,groups,manager');
+
+    const teamMembers = await fetchAPIData(token, usersUrl.toString(), "could not fetch data for teamMembers")
+
+    const result = teamMembers._embedded.users.map((user) => {
+      const userInformation = {
+        principal_name: user.principal_name, 
+        section_name: user.section_name
+      }
+      const teamsCount = user._embedded.teams ? user._embedded.teams.length: 0
+      const dataAdminCount = user._embedded.groups ? user._embedded.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length: 0
+      const manager = user._embedded.manager ? user._embedded.manager: {
+        display_name: "Ikke funnet"
+      }
+      return {
+        ...userInformation,
+        teamsCount: teamsCount,
+        dataAdminCount: dataAdminCount,
+        manager: manager
+      }
+    })
+    res.json( { teamMembers: result })
+  } catch (error) {
+    next(error)
+  }
+})
+
 async function fetchTeamManager(token, teamInfo) {
   const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamInfo.uniform_name}-managers/users`
   return await fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
