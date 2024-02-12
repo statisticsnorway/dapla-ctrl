@@ -7,6 +7,9 @@ import jwksClient from 'jwks-rsa'
 import { getReasonPhrase } from 'http-status-codes'
 import dotenv from 'dotenv'
 
+// TODO: Do a massive cleanup. There are much of the code that can be re-written for reuseability, and some functions
+// may not even be required anymore after dapla-team-api-redux changes.
+
 if (!process.env.VITE_JWKS_URI) {
   dotenv.config({ path: './.env.local' })
 }
