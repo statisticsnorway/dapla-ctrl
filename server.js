@@ -1,6 +1,5 @@
 import ViteExpress from 'vite-express'
 import { createLightship } from 'lightship'
-import cache from 'memory-cache'
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
