@@ -82,7 +82,7 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
       <SidebarModalHeader {...header} />
       {/*<div className={styles.body} ref={contentRef} onScroll={checkForOverflow}> */}
       <div className={styles.body}>
-        { /* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */ }
+        {/* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */}
         {body}
       </div>
       <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
