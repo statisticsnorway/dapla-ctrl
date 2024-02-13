@@ -1,0 +1,112 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+
+.container {
+    width: 20%;
+    height: 100%;
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    background-color: variables.$ssb-white;
+    border-left: 1px solid variables.$ssb-dark-2;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    overflow-x: hidden;
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+
+    button {
+        background: none;
+        color: inherit;
+        border: none;
+        padding: 0;
+        font: inherit;
+        cursor: pointer;
+        outline: inherit;
+        float: right;
+    }
+
+    .xIcon {
+        color: variables.$ssb-green-4;
+    }
+
+    .body {
+        background-color: variables.$ssb-green-1;
+        border-bottom: 1px solid #d4d4d4;
+        height: 80%;
+        overflow-y: auto;
+        > * {
+            padding: 1rem;
+        }
+        .scroll {
+            color: red;
+            position: fixed;
+            left: 50%;
+            width: 100%;
+            text-align: center;
+            transform: translateX(-50%);
+            z-index: 1000; 
+        }
+    }
+
+    .modalHeader {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-left: 1rem;
+        margin-bottom: 2rem;
+      
+        button {
+            margin: 0;
+            padding: 0;
+            float: right;
+        }
+      
+        > * > * {
+            padding: 0;
+            margin: 0;
+        }
+      
+        .modalType {}
+        .modalTitle {}
+        .modalDescription {}
+      }
+      
+      .modalFooter {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: 2.5rem;
+        margin-right: 2.5rem;
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        height: auto;
+        
+        .modalFooterButtonText {}
+      }
+
+    @media (max-width: 1500px) {
+        width: 30%;
+        .modalFooter {
+            flex-direction: column;
+            gap: 20px;
+            padding: 1rem;
+        }
+    }
+
+    @media (max-width: 1050px) {
+        width: 100%;
+        .modalFooter {
+            flex-direction: column;
+            margin: 1rem 0;
+            gap: 1rem;
+        }
+    }
+}
+
+.open {
+    transform: translateX(0);
+}
