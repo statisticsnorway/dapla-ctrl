@@ -270,16 +270,15 @@ app.get('/api/teamMembers/:principalName', tokenVerificationMiddleware, async (r
 
     const [allTeamMembers, myTeamMembers] = await Promise.all([
       fetchAllTeamMembers(token),
-      fetchUsersManagedByPrincipalName(token, principalName),
+      fetchTeamMembersManagedByPrincipalName(token, principalName),
     ])
-
     res.json({ allTeamMembers: allTeamMembers, myTeamMembers: myTeamMembers })
   } catch (error) {
     next(error)
   }
 })
 
-async function fetchUsersManagedByPrincipalName(token, principalName) {
+async function fetchTeamMembersManagedByPrincipalName(token, principalName) {
   async function fetchManagerTeams() {
     const teamsResponse = await fetchAPIData(
       token,
@@ -302,7 +301,7 @@ async function fetchUsersManagedByPrincipalName(token, principalName) {
   async function fetchUserDetails(user) {
     const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
     usersUrl.searchParams.append('filter', `principal_name=${user.principal_name}`)
-    usersUrl.searchParams.append('embed', 'teams,groups,manager')
+    usersUrl.searchParams.append('embed', 'teams,groups,section_manager')
     return fetchAPIData(token, usersUrl.toString(), 'Could not fetch user data')
   }
 
@@ -338,7 +337,7 @@ async function fetchUsersManagedByPrincipalName(token, principalName) {
 
 async function fetchAllTeamMembers(token) {
   const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
-  usersUrl.searchParams.set('embed', 'teams,groups,manager')
+  usersUrl.searchParams.set('embed', 'teams,groups,section_manager')
 
   const users = await fetchAPIData(token, usersUrl.toString(), 'Could not fetch data for team members')
 
@@ -353,7 +352,7 @@ function formatUserDetails(user) {
     dataAdminCount: user._embedded.groups
       ? user._embedded.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length
       : 0,
-    manager: user._embedded.manager || managerFallback(),
+    section_manager: user._embedded.section_manager || managerFallback(),
   }
 }
 
