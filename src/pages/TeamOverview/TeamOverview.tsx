@@ -1,7 +1,4 @@
-// import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
-
 import { useCallback, useEffect, useState } from 'react'
-// import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
@@ -35,6 +32,7 @@ export default function TeamOverview() {
       return response[team].teams.map((team) => ({
         id: team.uniform_name,
         navn: renderTeamNameColumn(team),
+        seksjon: team.section_name,
         teammedlemmer: team.team_user_count,
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))
@@ -125,11 +123,6 @@ export default function TeamOverview() {
             ]}
           />
           <Divider dark />
-          {/*
-            <Title size={2} className={pageLayoutStyles.tableTitleWrapper}>
-              {teamOverviewTableTitle}
-            </Title>
-          */}
           <Table
             title={teamOverviewTableTitle}
             columns={teamOverviewTableHeaderColumns}

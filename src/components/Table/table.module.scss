@@ -46,7 +46,6 @@
 .tableContainer {
   overflow-x: auto;
 
-  
   .table {
     background-color: variables.$ssb-white;
     width: 100%;
@@ -98,4 +97,8 @@
 
 .greenBackground {
   background-color: variables.$ssb-green-1;
+}
+
+.noResult {
+  justify-content: center;
 }

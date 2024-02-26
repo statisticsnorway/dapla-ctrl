@@ -6,6 +6,7 @@ import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-li
 
 interface TableProps {
   title?: string // TODO: Make a required prop after testing; remove conditional
+  dropdownFilterItems?: object
   columns: TableData['columns']
   data: TableData['data']
 }
@@ -41,7 +42,7 @@ const TableMobileView = ({ columns, data }: TableData) => (
         )
       })
     ) : (
-      <p>Fant ingen resultater</p>
+      <p className={styles.noResult}>Fant ingen resultater</p>
     )}
   </div>
 )
@@ -69,7 +70,9 @@ const TableDesktopView = ({ columns, data }: TableData) => (
           })
         ) : (
           <tr>
-            <td colSpan={columns.length}>Fant ingen resultater</td>
+            <td colSpan={columns.length}>
+              <p className={styles.noResult}>Fant ingen resultater</p>
+            </td>
           </tr>
         )}
       </tbody>
@@ -81,7 +84,7 @@ const TableDesktopView = ({ columns, data }: TableData) => (
  * Add alphabetical, numerical etc sorting when row header is clicked
  * Consider making table sort more visible
  */
-export default function Table({ title, columns, data }: TableProps) {
+export default function Table({ title, dropdownFilterItems, columns, data }: TableProps) {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
   const [filteredTableData, setFilteredTableData] = useState(data)
 
@@ -89,7 +92,7 @@ export default function Table({ title, columns, data }: TableProps) {
 
   useEffect(() => {
     if (searchFilterKeyword !== '') {
-      // TODO: Sanitize input. Implement filter on navn row, currently unsearchable since we're passing a React Element
+      // TODO: Sanitize input
       const filterTableData = data.filter((row) =>
         Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
       )
@@ -103,12 +106,6 @@ export default function Table({ title, columns, data }: TableProps) {
     setSearchFilterKeyword(value)
   }
 
-  const dropdownFilterItems = [
-    {
-      title: 'Alle',
-      id: 'all',
-    },
-  ]
   return (
     <>
       <div className={styles.tableTitleContainer}>
@@ -118,12 +115,14 @@ export default function Table({ title, columns, data }: TableProps) {
           </Title>
         )}
         <div className={styles.tableFilterWrapper}>
-          <Dropdown
-            className={styles.tableFilterDropdown}
-            ariaLabel='' // TODO: Use aria-label since dropdown header is not visible
-            selectedItem={dropdownFilterItems[0]}
-            items={dropdownFilterItems}
-          />
+          {dropdownFilterItems && (
+            <Dropdown
+              className={styles.tableFilterDropdown}
+              ariaLabel='' // TODO: Use aria-label since dropdown header is not visible
+              selectedItem={dropdownFilterItems[0]}
+              items={dropdownFilterItems}
+            />
+          )}
           <Input placeholder='Filtrer liste...' searchField value={searchFilterKeyword} handleChange={handleChange} />
         </div>
       </div>
