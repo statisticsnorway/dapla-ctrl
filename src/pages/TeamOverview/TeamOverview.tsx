@@ -1,7 +1,8 @@
-import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
+// import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+// import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -124,10 +125,16 @@ export default function TeamOverview() {
             ]}
           />
           <Divider dark />
-          <Title size={2} className={pageLayoutStyles.tableTitle}>
-            {teamOverviewTableTitle}
-          </Title>
-          <Table columns={teamOverviewTableHeaderColumns} data={teamOverviewTableData as TableData['data']} />
+          {/*
+            <Title size={2} className={pageLayoutStyles.tableTitleWrapper}>
+              {teamOverviewTableTitle}
+            </Title>
+          */}
+          <Table
+            title={teamOverviewTableTitle}
+            columns={teamOverviewTableHeaderColumns}
+            data={teamOverviewTableData as TableData['data']}
+          />
         </>
       )
     }

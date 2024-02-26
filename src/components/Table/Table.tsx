@@ -1,8 +1,13 @@
 import styles from './table.module.scss'
 
 import { useMediaQuery } from 'react-responsive'
-import { Text } from '@statisticsnorway/ssb-component-library'
+import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 
+interface TableProps {
+  title?: string // TODO: Make a required prop after testing; remove conditional
+  columns: TableData['columns']
+  data: TableData['data']
+}
 export interface TableData {
   columns: {
     id: string
@@ -61,11 +66,50 @@ const TableDesktopView = ({ columns, data }: TableData) => (
   </div>
 )
 
-export default function Table({ columns, data }: TableData) {
+/* TODO:
+ * Add alphabetical, numerical etc sorting when row header is clicked
+ * Consider making table sort more visible
+ */
+// export default function Table({ columns, data }: TableData) {
+//   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
+//   if (isOnMobile) {
+//     return <TableMobileView columns={columns} data={data} />
+//   } else {
+//     return <TableDesktopView columns={columns} data={data} />
+//   }
+// }
+export default function Table({ title, columns, data }: TableProps) {
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
-  if (isOnMobile) {
-    return <TableMobileView columns={columns} data={data} />
-  } else {
-    return <TableDesktopView columns={columns} data={data} />
-  }
+
+  const dropdownFilterItems = [
+    {
+      title: 'Alle',
+      id: 'all',
+    },
+  ]
+  return (
+    <>
+      <div className={styles.tableTitleContainer}>
+        {title && (
+          <Title size={2} className={styles.tableTitleWrapper}>
+            {title}
+          </Title>
+        )}
+        <div className={styles.tableFilterWrapper}>
+          <Dropdown
+            className={styles.tableFilterDropdown}
+            ariaLabel='' // TODO: Use aria-label since dropdown header is not visible
+            selectedItem={dropdownFilterItems[0]}
+            items={dropdownFilterItems}
+          />
+          <Input placeholder='Filtrer liste...' searchField />
+        </div>
+      </div>
+      {isOnMobile ? (
+        <TableMobileView columns={columns} data={data} />
+      ) : (
+        <TableDesktopView columns={columns} data={data} />
+      )}
+    </>
+  )
 }
