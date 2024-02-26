@@ -95,8 +95,8 @@ export default function TeamMembers() {
 
   function renderErrorAlert() {
     return (
-      <Dialog type='warning' title='Could not fetch teams'>
-        {error?.error.message}
+      <Dialog type='warning' title='Could not fetch users'>
+        {error}
       </Dialog>
     )
   }
@@ -142,8 +142,8 @@ export default function TeamMembers() {
           {teamMembersTableData.length > 0 ? (
             <Table columns={teamMembersTableHeaderColumns} data={teamMembersTableData as TableData['data']} />
           ) : (
-            <Dialog type='warning' title='Ingen team funnet'>
-              Du er ikke manager i noen dapla-team
+            <Dialog type='warning' title='No team members found'>
+              You are not a manager in any dapla-team
             </Dialog>
           )}
         </>
