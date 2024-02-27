@@ -5,8 +5,9 @@ import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 
 interface TableProps {
-  title?: string // TODO: Make a required prop after testing; remove conditional
-  dropdownFilterItems?: object
+  title: string
+  dropdownAriaLabel?: string
+  dropdownFilterItems?: Array<object>
   columns: TableData['columns']
   data: TableData['data']
 }
@@ -84,7 +85,7 @@ const TableDesktopView = ({ columns, data }: TableData) => (
  * Add alphabetical, numerical etc sorting when row header is clicked
  * Consider making table sort more visible
  */
-export default function Table({ title, dropdownFilterItems, columns, data }: TableProps) {
+export default function Table({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
   const [filteredTableData, setFilteredTableData] = useState(data)
 
@@ -92,7 +93,6 @@ export default function Table({ title, dropdownFilterItems, columns, data }: Tab
 
   useEffect(() => {
     if (searchFilterKeyword !== '') {
-      // TODO: Sanitize input
       const filterTableData = data.filter((row) =>
         Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
       )
@@ -115,15 +115,15 @@ export default function Table({ title, dropdownFilterItems, columns, data }: Tab
           </Title>
         )}
         <div className={styles.tableFilterWrapper}>
-          {dropdownFilterItems && (
+          {dropdownFilterItems?.length && (
             <Dropdown
               className={styles.tableFilterDropdown}
-              ariaLabel='' // TODO: Use aria-label since dropdown header is not visible
+              ariaLabel={dropdownAriaLabel}
               selectedItem={dropdownFilterItems[0]}
               items={dropdownFilterItems}
             />
           )}
-          <Input placeholder='Filtrer liste...' searchField value={searchFilterKeyword} handleChange={handleChange} />
+          <Input placeholder='Filtrer liste...' value={searchFilterKeyword} handleChange={handleChange} searchField />
         </div>
       </div>
       {isOnMobile ? (
