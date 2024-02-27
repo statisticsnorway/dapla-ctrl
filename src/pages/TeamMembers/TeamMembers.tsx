@@ -10,7 +10,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
-import { ApiError } from '../../services/ApiError'
+import { ApiError } from '../../utils/services'
 
 export default function TeamMembers() {
   const accessToken = localStorage.getItem('access_token') || ''

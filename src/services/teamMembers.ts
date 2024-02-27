@@ -1,4 +1,4 @@
-import { ApiError } from './ApiError'
+import { ApiError, fetchAPIData } from '../utils/services'
 
 const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
@@ -44,21 +44,7 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const response = await fetch(usersUrl.toString(), {
-      method: 'GET',
-      headers: {
-        accept: '*/*',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      const errorMessage = (await response.text()) || 'An error occurred'
-      const { detail, status } = JSON.parse(errorMessage)
-      throw new ApiError(status, detail)
-    }
-
-    const managedUsersData = await response.json()
+    const managedUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
 
     if (!managedUsersData) throw new ApiError(500, 'No json data returned')
     if (!managedUsersData._embedded || !managedUsersData._embedded.managed_users) return [] // return an empty list if the user does not have any managed_users
@@ -98,21 +84,8 @@ export const fetchManagedUsersManagers = async (accessToken: string, principalNa
         usersUrl.searchParams.set('embed', embeds.join(','))
         usersUrl.searchParams.append('select', selects.join(','))
 
-        const response = await fetch(usersUrl.toString(), {
-          method: 'GET',
-          headers: {
-            accept: '*/*',
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
+        const managedUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
 
-        if (!response.ok) {
-          const errorMessage = (await response.text()) || 'An error occurred'
-          const { detail, status } = JSON.parse(errorMessage)
-          throw new ApiError(status, detail)
-        }
-
-        const managedUsersData = await response.json()
         const prepData = {
           ...managedUsersData,
           ...managedUsersData._embedded,
@@ -154,21 +127,7 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const response = await fetch(usersUrl.toString(), {
-      method: 'GET',
-      headers: {
-        accept: '*/*',
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-
-    if (!response.ok) {
-      const errorMessage = (await response.text()) || 'An error occurred'
-      const { detail, status } = JSON.parse(errorMessage)
-      throw new ApiError(status, detail)
-    }
-
-    const allUsersData = await response.json()
+    const allUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
 
     if (!allUsersData) throw new ApiError(500, 'No json data returned')
     if (!allUsersData._embedded || !allUsersData._embedded.users) throw new ApiError(500, 'Did not receive users data')
