@@ -58,12 +58,12 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
       throw new ApiError(status, detail)
     }
 
-    const jsonData = await response.json()
+    const managedUsersData = await response.json()
 
-    if (!jsonData) throw new ApiError(500, 'No json data returned')
-    if (!jsonData._embedded || !jsonData._embedded.managed_users) return [] // return an empty list if the user does not have any managed_users
+    if (!managedUsersData) throw new ApiError(500, 'No json data returned')
+    if (!managedUsersData._embedded || !managedUsersData._embedded.managed_users) return [] // return an empty list if the user does not have any managed_users
 
-    return jsonData._embedded.managed_users
+    return managedUsersData._embedded.managed_users
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch managed users:', error)
@@ -76,11 +76,11 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
   }
 }
 
-export const fetchManagersManagedUsers = async (accessToken: string, principalName: string): Promise<UsersData> => {
+export const fetchManagedUsersManagers = async (accessToken: string, principalName: string): Promise<UsersData> => {
   try {
     const users = await fetchManagedUsers(accessToken, principalName)
 
-    const formattedUsers = await Promise.all(
+    const prepUsers = await Promise.all(
       users.map(async (user): Promise<User> => {
         const usersUrl = new URL(`${USERS_URL}/${user.principal_name}`)
         const embeds = ['teams', 'groups', 'section_manager']
@@ -112,18 +112,18 @@ export const fetchManagersManagedUsers = async (accessToken: string, principalNa
           throw new ApiError(status, detail)
         }
 
-        const jsonData = await response.json()
-        const transformedData = {
-          ...jsonData,
-          ...jsonData._embedded,
+        const managedUsersData = await response.json()
+        const prepData = {
+          ...managedUsersData,
+          ...managedUsersData._embedded,
         }
-        delete transformedData._embedded
+        delete prepData._embedded
 
-        return transformedData
+        return prepData
       })
     )
 
-    return { users: formattedUsers }
+    return { users: prepUsers }
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch managed users:', error)
@@ -168,22 +168,22 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
       throw new ApiError(status, detail)
     }
 
-    const jsonData = await response.json()
+    const allUsersData = await response.json()
 
-    if (!jsonData) throw new ApiError(500, 'No json data returned')
-    if (!jsonData._embedded || !jsonData._embedded.users) throw new ApiError(500, 'Did not receive users data')
+    if (!allUsersData) throw new ApiError(500, 'No json data returned')
+    if (!allUsersData._embedded || !allUsersData._embedded.users) throw new ApiError(500, 'Did not receive users data')
 
-    const transformedData = jsonData._embedded.users.map((user: User) => {
-      const userFormatted = {
+    const prepData = allUsersData._embedded.users.map((user: User) => {
+      const prepUserData = {
         ...user,
         ...user._embedded,
       }
-      delete userFormatted._embedded
-      return userFormatted
+      delete prepUserData._embedded
+      return prepUserData
     })
-    delete transformedData._embedded
+    delete prepData._embedded
 
-    return { users: transformedData }
+    return { users: prepData }
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch all users:', error)
@@ -207,7 +207,7 @@ export const fetchAllTeamMembersData = async (principalName: string): Promise<Te
 
   try {
     const [myUsers, allUsers] = await Promise.all([
-      fetchManagersManagedUsers(accessToken, principalName),
+      fetchManagedUsersManagers(accessToken, principalName),
       fetchAllUsers(accessToken),
     ])
 

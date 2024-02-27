@@ -37,6 +37,7 @@ export default function TeamMembers() {
         navn: renderUserNameColumn(teamMember),
         team: teamMember.teams.length,
         data_admin_roller: teamMember.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
+        seksjon: teamMember.section_name,
         seksjonsleder: formatDisplayName(
           teamMember.section_manager && teamMember.section_manager.length > 0
             ? teamMember.section_manager[0].display_name
@@ -131,10 +132,12 @@ export default function TeamMembers() {
             ]}
           />
           <Divider dark />
+          {/* TODO: Remove Title */}
           <Title size={2} className={pageLayoutStyles.tableTitle}>
             {teamMembersTableTitle}
           </Title>
           {teamMembersTableData.length > 0 ? (
+            //TODO: <Table title={teamMembersTableTitle} columns={teamMembersTableHeaderColumns} data={teamMembersTableData as TableData['data']} />
             <Table columns={teamMembersTableHeaderColumns} data={teamMembersTableData as TableData['data']} />
           ) : (
             <Dialog type='warning' title='No team members found'>
