@@ -1,7 +1,5 @@
-import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
-
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -12,7 +10,7 @@ import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/t
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError } from '../../utils/services'
 
-export default function TeamMembers() {
+const TeamMembers = () => {
   const accessToken = localStorage.getItem('access_token') || ''
   const jwt = JSON.parse(atob(accessToken.split('.')[1]))
 
@@ -37,7 +35,7 @@ export default function TeamMembers() {
         navn: renderUserNameColumn(teamMember),
         team: teamMember.teams.length,
         data_admin_roller: teamMember.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
-        seksjon: teamMember.section_name,
+        seksjon: teamMember.section_name, // Makes section name searchable and sortable in table by including the field
         seksjonsleder: formatDisplayName(
           teamMember.section_manager && teamMember.section_manager.length > 0
             ? teamMember.section_manager[0].display_name
@@ -76,7 +74,7 @@ export default function TeamMembers() {
     }
   }
 
-  function renderUserNameColumn(user: User) {
+  const renderUserNameColumn = (user: User) => {
     return (
       <>
         <span>
@@ -89,7 +87,7 @@ export default function TeamMembers() {
     )
   }
 
-  function renderErrorAlert() {
+  const renderErrorAlert = () => {
     return (
       <Dialog type='warning' title='Could not fetch users'>
         {`${error?.code} - ${error?.message}`}
@@ -97,7 +95,7 @@ export default function TeamMembers() {
     )
   }
 
-  function renderContent() {
+  const renderContent = () => {
     if (error) return renderErrorAlert()
     if (loading) return <PageSkeleton />
 
@@ -132,13 +130,12 @@ export default function TeamMembers() {
             ]}
           />
           <Divider dark />
-          {/* TODO: Remove Title */}
-          <Title size={2} className={pageLayoutStyles.tableTitle}>
-            {teamMembersTableTitle}
-          </Title>
           {teamMembersTableData.length > 0 ? (
-            //TODO: <Table title={teamMembersTableTitle} columns={teamMembersTableHeaderColumns} data={teamMembersTableData as TableData['data']} />
-            <Table columns={teamMembersTableHeaderColumns} data={teamMembersTableData as TableData['data']} />
+            <Table
+              title={teamMembersTableTitle}
+              columns={teamMembersTableHeaderColumns}
+              data={teamMembersTableData as TableData['data']}
+            />
           ) : (
             <Dialog type='warning' title='No team members found'>
               You are not a manager in any dapla-team
@@ -151,3 +148,5 @@ export default function TeamMembers() {
 
   return <PageLayout title={'Teammedlemmer'} content={renderContent()} />
 }
+
+export default TeamMembers
