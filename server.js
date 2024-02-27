@@ -1,11 +1,13 @@
 import ViteExpress from 'vite-express'
 import { createLightship } from 'lightship'
-import cache from 'memory-cache'
 import express from 'express'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
 import { getReasonPhrase } from 'http-status-codes'
 import dotenv from 'dotenv'
+
+// TODO: Do a massive cleanup. There are much of the code that can be re-written for reuseability, and some functions
+// may not even be required anymore after dapla-team-api-redux changes.
 
 if (!process.env.VITE_JWKS_URI) {
   dotenv.config({ path: './.env.local' })
@@ -141,22 +143,13 @@ app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (r
     const userManagerUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/manager`
     const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
 
-    const cacheKey = `userProfile-${principalName}`
-    const cachedUserProfile = cache.get(cacheKey)
-    if (cachedUserProfile) {
-      return res.json(cachedUserProfile)
-    }
-
     const [userProfile, userManager, userPhoto] = await Promise.all([
       fetchAPIData(token, userProfileUrl, 'Failed to fetch userProfile'),
       fetchAPIData(token, userManagerUrl, 'Failed to fetch user manager').catch(() => managerFallback()),
       fetchPhoto(token, userPhotoUrl, 'Failed to fetch user photo'),
     ])
 
-    const data = { ...userProfile, manager: { ...userManager }, photo: userPhoto }
-    cache.put(cacheKey, data, 3600000)
-
-    return res.json(data)
+    return res.json({ ...userProfile, manager: { ...userManager }, photo: userPhoto })
   } catch (error) {
     next(error)
   }
@@ -254,7 +247,7 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
 
     const [teamInfo, teamUsers] = await Promise.all([
       fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').then(async (teamInfo) => {
-        const manager = await fetchTeamManager(token, teamInfo)
+        const manager = await fetchTeamManager(token, teamInfo.uniform_name)
         return { ...teamInfo, manager }
       }),
       fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users').then(async (teamUsers) => {
@@ -270,8 +263,8 @@ app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (
   }
 })
 
-async function fetchTeamManager(token, teamInfo) {
-  const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamInfo.uniform_name}-managers/users`
+async function fetchTeamManager(token, teamUniformName) {
+  const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
   return await fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager')
     .then((teamManager) => {
       return teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
