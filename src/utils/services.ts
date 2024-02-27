@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export const fetchAPIData = async (url: string, accessToken: string): Promise<any> => {
   const response = await fetch(url, {
     method: 'GET',
@@ -13,7 +14,7 @@ export const fetchAPIData = async (url: string, accessToken: string): Promise<an
     throw new ApiError(status, detail)
   }
 
-  return await response.json()
+  return response.json()
 }
 
 export class ApiError extends Error {
