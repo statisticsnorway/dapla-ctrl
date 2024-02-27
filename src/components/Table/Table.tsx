@@ -27,6 +27,8 @@ function conditionalStyling(index: number) {
   return (index + 1) % 2 !== 0 ? styles.greenBackground : undefined
 }
 
+const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater</p>
+
 const TableMobileView = ({ columns, data }: TableData) => (
   <div className={styles.tableContainerMobile}>
     {data.length ? (
@@ -43,7 +45,7 @@ const TableMobileView = ({ columns, data }: TableData) => (
         )
       })
     ) : (
-      <p className={styles.noResult}>Fant ingen resultater</p>
+      <NoResultText />
     )}
   </div>
 )
@@ -72,7 +74,7 @@ const TableDesktopView = ({ columns, data }: TableData) => (
         ) : (
           <tr>
             <td colSpan={columns.length}>
-              <p className={styles.noResult}>Fant ingen resultater</p>
+              <NoResultText />
             </td>
           </tr>
         )}

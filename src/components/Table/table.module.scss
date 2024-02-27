@@ -101,4 +101,8 @@
 
 .noResult {
   justify-content: center;
+
+  @media #{variables.$mobile} {
+    display: flex;
+  }
 }
