@@ -31,7 +31,7 @@ export default function UserProfile() {
     (response: UserProfileTeamResult): TableData['data'] => {
       return response.teams.map((team) => ({
         id: team.uniform_name,
-        seksjon: team.section_name,
+        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
         gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
         epost: userProfileData?.principal_name,

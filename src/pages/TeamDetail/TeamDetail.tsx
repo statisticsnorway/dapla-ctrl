@@ -23,14 +23,21 @@ export default function TeamDetail() {
   const { teamId } = useParams<{ teamId: string }>()
 
   const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
-    return response['teamUsers'].teamUsers.map((user) => ({
-      id: user?.principal_name,
-      user: user.display_name,
-      seksjon: user.section_name,
-      navn: renderUsernameColumn(user),
-      gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
-      epost: user?.principal_name,
-    }))
+    return response['teamUsers'].teamUsers.map((user) => {
+      // Makes data in username column searchable and sortable in table by including these fields
+      const usernameColumn = {
+        user: user.display_name,
+        seksjon: user.section_name,
+      }
+
+      return {
+        id: user?.principal_name,
+        ...usernameColumn,
+        navn: renderUsernameColumn(user),
+        gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
+        epost: user?.principal_name,
+      }
+    })
   }, [])
 
   useEffect(() => {
