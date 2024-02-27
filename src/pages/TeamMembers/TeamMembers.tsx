@@ -58,7 +58,7 @@ export default function TeamMembers() {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [prepUserData])
+  }, [prepUserData, jwt])
 
   useEffect(() => {
     if (teamMembersData) {
