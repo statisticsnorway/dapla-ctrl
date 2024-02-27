@@ -1,7 +1,6 @@
-import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './userprofile.module.scss'
 
-import { Dialog, Title, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 import Table, { TableData } from '../../components/Table/Table'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -32,6 +31,7 @@ export default function UserProfile() {
     (response: UserProfileTeamResult): TableData['data'] => {
       return response.teams.map((team) => ({
         id: team.uniform_name,
+        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
         gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
         epost: userProfileData?.principal_name,
@@ -131,10 +131,11 @@ export default function UserProfile() {
             <Text medium>{userProfileData?.section_name}</Text>
             <Text medium>{userProfileData?.principal_name}</Text>
           </LeadParagraph>
-          <Title size={2} className={pageLayoutStyles.tableTitle}>
-            Team
-          </Title>
-          <Table columns={teamOverviewTableHeaderColumns} data={teamUserProfileTableData as TableData['data']} />
+          <Table
+            title='Team'
+            columns={teamOverviewTableHeaderColumns}
+            data={teamUserProfileTableData as TableData['data']}
+          />
         </>
       )
     }

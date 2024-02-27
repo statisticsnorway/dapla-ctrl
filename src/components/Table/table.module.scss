@@ -1,5 +1,48 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
+.tableTitleContainer {  
+  @media #{variables.$desktop} {
+    display: flex;
+    flex-wrap: row;
+    justify-content: space-between;
+
+    .tableTitleWrapper {
+      margin: 2.5rem 0;
+    }
+
+    .tableFilterWrapper {
+      display: flex;
+      align-items: center;
+
+      .tableFilterDropdown {
+        margin-right: .5rem;
+
+        span {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  @media #{variables.$mobile} {
+    .tableTitleWrapper {
+      margin: 2.5rem 0 0;
+    }
+  
+    .tableFilterWrapper {
+      margin-bottom: 2rem;
+  
+      .tableFilterDropdown {
+        min-width: 100%;
+      }
+
+      > * {
+        margin: 1rem 0;
+      }
+    }
+  }
+}
+
 .tableContainer {
   overflow-x: auto;
 
@@ -54,4 +97,12 @@
 
 .greenBackground {
   background-color: variables.$ssb-green-1;
+}
+
+.noResult {
+  justify-content: center;
+
+  @media #{variables.$mobile} {
+    display: flex;
+  }
 }

@@ -1,8 +1,16 @@
 import styles from './table.module.scss'
 
+import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
-import { Text } from '@statisticsnorway/ssb-component-library'
+import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 
+interface TableProps {
+  title: string
+  dropdownAriaLabel?: string
+  dropdownFilterItems?: Array<object>
+  columns: TableData['columns']
+  data: TableData['data']
+}
 export interface TableData {
   columns: {
     id: string
@@ -19,20 +27,26 @@ function conditionalStyling(index: number) {
   return (index + 1) % 2 !== 0 ? styles.greenBackground : undefined
 }
 
+const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater</p>
+
 const TableMobileView = ({ columns, data }: TableData) => (
   <div className={styles.tableContainerMobile}>
-    {data.map((row, index) => {
-      return (
-        <div key={row.id} className={`${styles.tableMobile} ${conditionalStyling(index)}`}>
-          {columns.map((column, index) => (
-            <Text small key={column.id}>
-              {index !== 0 && <b>{column.label}</b>}
-              {row[column.id]}
-            </Text>
-          ))}
-        </div>
-      )
-    })}
+    {data.length ? (
+      data.map((row, index) => {
+        return (
+          <div key={row.id} className={`${styles.tableMobile} ${conditionalStyling(index)}`}>
+            {columns.map((column, index) => (
+              <Text small key={column.id}>
+                {index !== 0 && <b>{column.label}</b>}
+                {row[column.id]}
+              </Text>
+            ))}
+          </div>
+        )
+      })
+    ) : (
+      <NoResultText />
+    )}
   </div>
 )
 
@@ -47,25 +61,80 @@ const TableDesktopView = ({ columns, data }: TableData) => (
         </tr>
       </thead>
       <tbody>
-        {data.map((row, index) => {
-          return (
-            <tr key={row.id} className={conditionalStyling(index)}>
-              {columns.map((column) => (
-                <td key={column.id}>{row[column.id]}</td>
-              ))}
-            </tr>
-          )
-        })}
+        {data.length ? (
+          data.map((row, index) => {
+            return (
+              <tr key={row.id} className={conditionalStyling(index)}>
+                {columns.map((column) => (
+                  <td key={column.id}>{row[column.id]}</td>
+                ))}
+              </tr>
+            )
+          })
+        ) : (
+          <tr>
+            <td colSpan={columns.length}>
+              <NoResultText />
+            </td>
+          </tr>
+        )}
       </tbody>
     </table>
   </div>
 )
 
-export default function Table({ columns, data }: TableData) {
+/* TODO:
+ * Add alphabetical, numerical etc sorting when row header is clicked
+ * Consider making table sort more visible
+ */
+const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) => {
+  const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
+  const [filteredTableData, setFilteredTableData] = useState(data)
+
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
-  if (isOnMobile) {
-    return <TableMobileView columns={columns} data={data} />
-  } else {
-    return <TableDesktopView columns={columns} data={data} />
+
+  useEffect(() => {
+    if (searchFilterKeyword !== '') {
+      const filterTableData = data.filter((row) =>
+        Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
+      )
+      setFilteredTableData(filterTableData)
+    } else {
+      setFilteredTableData(data) // Reset filter
+    }
+  }, [searchFilterKeyword, data])
+
+  const handleChange = (value: string) => {
+    setSearchFilterKeyword(value)
   }
+
+  return (
+    <>
+      <div className={styles.tableTitleContainer}>
+        {title && (
+          <Title size={2} className={styles.tableTitleWrapper}>
+            {title}
+          </Title>
+        )}
+        <div className={styles.tableFilterWrapper}>
+          {dropdownFilterItems?.length && (
+            <Dropdown
+              className={styles.tableFilterDropdown}
+              ariaLabel={dropdownAriaLabel}
+              selectedItem={dropdownFilterItems[0]}
+              items={dropdownFilterItems}
+            />
+          )}
+          <Input placeholder='Filtrer liste...' value={searchFilterKeyword} handleChange={handleChange} searchField />
+        </div>
+      </div>
+      {isOnMobile ? (
+        <TableMobileView columns={columns} data={filteredTableData} />
+      ) : (
+        <TableDesktopView columns={columns} data={filteredTableData} />
+      )}
+    </>
+  )
 }
+
+export default Table

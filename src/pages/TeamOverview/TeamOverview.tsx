@@ -1,7 +1,5 @@
-import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
-
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Title, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -33,6 +31,7 @@ export default function TeamOverview() {
 
       return response[team].teams.map((team) => ({
         id: team.uniform_name,
+        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
         teammedlemmer: team.team_user_count,
         ansvarlig: formatDisplayName(team.manager.display_name),
@@ -124,10 +123,11 @@ export default function TeamOverview() {
             ]}
           />
           <Divider dark />
-          <Title size={2} className={pageLayoutStyles.tableTitle}>
-            {teamOverviewTableTitle}
-          </Title>
-          <Table columns={teamOverviewTableHeaderColumns} data={teamOverviewTableData as TableData['data']} />
+          <Table
+            title={teamOverviewTableTitle}
+            columns={teamOverviewTableHeaderColumns}
+            data={teamOverviewTableData as TableData['data']}
+          />
         </>
       )
     }
