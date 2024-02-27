@@ -1,4 +1,3 @@
-import { ErrorResponse } from '../@types/error'
 import { ApiError } from './ApiError'
 
 const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
@@ -52,19 +51,26 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
     })
 
     if (!response.ok) {
-      // TODO: Test that it actually works
       const errorMessage = (await response.text()) || 'An error occurred'
-      throw new ApiError(response.status, errorMessage)
+      const { detail, status } = JSON.parse(errorMessage)
+      throw new ApiError(status, detail)
     }
 
     const jsonData = await response.json()
 
-    if (!jsonData) throw new Error('No json data returned')
+    if (!jsonData) throw new ApiError(500, 'No json data returned')
     if (!jsonData._embedded || !jsonData._embedded.managed_users) return [] // return an empty list if the user does not have any managed_users
 
     return jsonData._embedded.managed_users
   } catch (error) {
-    throw error
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch managed users:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch managed users:', apiError)
+      throw apiError
+    }
   }
 }
 
@@ -100,7 +106,8 @@ export const fetchManagersManagedUsers = async (accessToken: string, principalNa
 
         if (!response.ok) {
           const errorMessage = (await response.text()) || 'An error occurred'
-          throw new ApiError(response.status, errorMessage)
+          const { detail, status } = JSON.parse(errorMessage)
+          throw new ApiError(status, detail)
         }
 
         const jsonData = await response.json()
@@ -116,8 +123,14 @@ export const fetchManagersManagedUsers = async (accessToken: string, principalNa
 
     return { users: formattedUsers }
   } catch (error) {
-    console.error('Failed to fetch managed users:', error)
-    throw error
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch managed users:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch managed users:', apiError)
+      throw apiError
+    }
   }
 }
 
@@ -149,13 +162,14 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
 
     if (!response.ok) {
       const errorMessage = (await response.text()) || 'An error occurred'
-      throw new ApiError(response.status, errorMessage)
+      const { detail, status } = JSON.parse(errorMessage)
+      throw new ApiError(status, detail)
     }
 
     const jsonData = await response.json()
 
-    if (!jsonData) throw new Error('No json data returned')
-    if (!jsonData._embedded || !jsonData._embedded.users) throw new Error('Did not receive users data')
+    if (!jsonData) throw new ApiError(500, 'No json data returned')
+    if (!jsonData._embedded || !jsonData._embedded.users) throw new ApiError(500, 'Did not receive users data')
 
     const transformedData = jsonData._embedded.users.map((user: any) => {
       const userFormatted = {
@@ -169,16 +183,24 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
 
     return { users: transformedData }
   } catch (error) {
-    console.error('Failed to fetch all users:', error)
-    throw error
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch all users:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch all users:', apiError)
+      throw apiError
+    }
   }
 }
 
-export const fetchAllTeamMembersData = async (principalName: string): Promise<TeamMembersData | ErrorResponse> => {
+export const fetchAllTeamMembersData = async (principalName: string): Promise<TeamMembersData | ApiError> => {
   const accessToken = localStorage.getItem('access_token')
   if (!accessToken) {
     console.error('No access token available')
-    throw new Error('No access token available')
+    const apiError = new ApiError(401, 'No access token available')
+    console.error('Failed to fetch team members data:', apiError)
+    throw apiError
   }
 
   try {
@@ -189,7 +211,13 @@ export const fetchAllTeamMembersData = async (principalName: string): Promise<Te
 
     return { myUsers: myUsers, allUsers: allUsers } as TeamMembersData
   } catch (error) {
-    console.error('Failed to fetch all data for teamMembers:', error)
-    throw error
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch team members data:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred while fetching team members data')
+      console.error('Failed to fetch team members data:', apiError)
+      throw apiError
+    }
   }
 }

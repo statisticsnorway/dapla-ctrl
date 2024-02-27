@@ -8,10 +8,9 @@ import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
-import { ErrorResponse } from '../../@types/error'
-
 import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
+import { ApiError } from '../../services/ApiError'
 
 export default function TeamMembers() {
   const accessToken = localStorage.getItem('access_token') || ''
@@ -26,7 +25,7 @@ export default function TeamMembers() {
   const [teamMembersData, setTeamMembersData] = useState<TeamMembersData>()
   const [teamMembersTableData, setTeamMembersTableData] = useState<TableData['data']>()
   const [teamMembersTableTitle, setTeamMembersTableTitle] = useState<string>(defaultActiveTab.title)
-  const [error, setError] = useState<ErrorResponse | undefined>()
+  const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
   const prepUserData = useCallback(
@@ -52,16 +51,12 @@ export default function TeamMembers() {
     if (!jwt) return
     fetchAllTeamMembersData(jwt.email)
       .then((response) => {
-        if ((response as ErrorResponse).error) {
-          setError(response as ErrorResponse)
-        } else {
-          setTeamMembersData(response as TeamMembersData)
-          setTeamMembersTableData(prepUserData(response as TeamMembersData))
-        }
+        setTeamMembersData(response as TeamMembersData)
+        setTeamMembersTableData(prepUserData(response as TeamMembersData))
       })
       .finally(() => setLoading(false))
       .catch((error) => {
-        setError(error.toString())
+        setError(error as ApiError)
       })
   }, [prepUserData])
 
@@ -96,7 +91,7 @@ export default function TeamMembers() {
   function renderErrorAlert() {
     return (
       <Dialog type='warning' title='Could not fetch users'>
-        {error}
+        {`${error?.code} - ${error?.message}`}
       </Dialog>
     )
   }
