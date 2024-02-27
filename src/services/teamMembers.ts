@@ -18,6 +18,8 @@ export interface User {
   section_manager: sectionManager[]
   teams: Team[]
   groups: Group[]
+  // eslint-disable-next-line
+  _embedded?: any
 }
 
 interface sectionManager {
@@ -171,7 +173,7 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
     if (!jsonData) throw new ApiError(500, 'No json data returned')
     if (!jsonData._embedded || !jsonData._embedded.users) throw new ApiError(500, 'Did not receive users data')
 
-    const transformedData = jsonData._embedded.users.map((user: any) => {
+    const transformedData = jsonData._embedded.users.map((user: User) => {
       const userFormatted = {
         ...user,
         ...user._embedded,
