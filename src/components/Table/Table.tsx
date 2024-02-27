@@ -20,6 +20,7 @@ export interface TableData {
     id: string
     [key: string]: React.ReactNode
   }[]
+  sortData?: CallableFunction
 }
 
 const conditionalStyling = (index: number) => {
@@ -50,43 +51,51 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-const TableDesktopView = ({ columns, data }: TableData) => (
-  <div className={styles.tableContainer}>
-    <table className={styles.table}>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column.id}>{column.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {data.length ? (
-          data.map((row, index) => {
-            return (
-              <tr key={row.id} className={conditionalStyling(index)}>
-                {columns.map((column) => (
-                  <td key={column.id}>{row[column.id]}</td>
-                ))}
-              </tr>
-            )
-          })
-        ) : (
-          <tr>
-            <td colSpan={columns.length}>
-              <NoResultText />
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-)
+const TableDesktopView = ({ columns, data, sortData }: TableData) => {
+  const [sortByDescending, setSortByDescending] = useState(false)
 
-/* TODO:
- * Add alphabetical, numerical etc sorting when row header is clicked
- * Consider making table sort more visible
- */
+  return (
+    <div className={styles.tableContainer}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.id}
+                onClick={() => {
+                  setSortByDescending(!sortByDescending)
+                  if (sortData) sortData(column.id, sortByDescending)
+                }}
+              >
+                {column.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.length ? (
+            data.map((row, index) => {
+              return (
+                <tr key={row.id} className={conditionalStyling(index)}>
+                  {columns.map((column) => (
+                    <td key={column.id}>{row[column.id]}</td>
+                  ))}
+                </tr>
+              )
+            })
+          ) : (
+            <tr>
+              <td colSpan={columns.length}>
+                <NoResultText />
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) => {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
   const [filteredTableData, setFilteredTableData] = useState(data)
@@ -106,6 +115,29 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
 
   const handleChange = (value: string) => {
     setSearchFilterKeyword(value)
+  }
+
+  // TODO: Currently not working for name tab.
+  const handleSort = (id: string, sortByDescending: boolean) => {
+    if (filteredTableData) {
+      filteredTableData.sort((a, b) => {
+        const valueA = a[id]
+        const valueB = b[id]
+
+        // Sort by number
+        if (typeof valueA === 'number' && typeof valueB === 'number')
+          return sortByDescending ? valueA - valueB : valueB - valueA
+
+        // Sort by alphabet
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDescending ? -1 : 1
+          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDescending ? 1 : -1
+        }
+        return 0
+      })
+
+      // TODO: Sort by date
+    }
   }
 
   return (
@@ -131,7 +163,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
       {isOnMobile ? (
         <TableMobileView columns={columns} data={filteredTableData} />
       ) : (
-        <TableDesktopView columns={columns} data={filteredTableData} />
+        <TableDesktopView columns={columns} data={filteredTableData} sortData={handleSort} />
       )}
     </>
   )
