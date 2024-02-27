@@ -3,7 +3,7 @@ import { Breadcrumb as OriginalBreadcrumb } from '@statisticsnorway/ssb-componen
 import { useLocation } from 'react-router-dom'
 import { DaplaCtrlContext } from '../provider/DaplaCtrlProvider'
 
-export default function Breadcrumb() {
+const Breadcrumb = () => {
   const location = useLocation()
   const pathnames = location.pathname
     .split('/')
@@ -34,3 +34,5 @@ export default function Breadcrumb() {
 
   return <OriginalBreadcrumb items={items} />
 }
+
+export default Breadcrumb

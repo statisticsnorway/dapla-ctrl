@@ -9,7 +9,7 @@ import { validateKeycloakToken } from '../../services/validateKeycloakToken'
 import { getUserProfile, getUserProfileFallback } from '../../services/userProfile'
 import { jwtRegex } from '../../utils/regex'
 
-export default function Login() {
+const Login = () => {
   const [error, setError] = useState(false)
   const [value, setValue] = useState('')
 
@@ -92,3 +92,5 @@ export default function Login() {
     </div>
   )
 }
+
+export default Login

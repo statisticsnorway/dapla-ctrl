@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { User } from '../../@types/user'
 import styles from './avatar.module.scss'
 
-export default function Avatar() {
+const Avatar = () => {
   const [userProfileData, setUserProfileData] = useState<User>()
   const [imageSrc, setImageSrc] = useState<string>()
   const [fallbackInitials, setFallbackInitials] = useState<string>('??')
@@ -46,3 +46,5 @@ export default function Avatar() {
     </div>
   )
 }
+
+export default Avatar

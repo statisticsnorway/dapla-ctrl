@@ -19,7 +19,7 @@ import { useParams } from 'react-router-dom'
 import { ErrorResponse } from '../../@types/error'
 import { Skeleton } from '@mui/material'
 
-export default function UserProfile() {
+const UserProfile = () => {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ErrorResponse | undefined>()
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
@@ -81,7 +81,7 @@ export default function UserProfile() {
     }
   }, [userProfileData, setBreadcrumbUserProfileDisplayName])
 
-  function renderTeamNameColumn(team: Team) {
+  const renderTeamNameColumn = (team: Team) => {
     return (
       <>
         <span>
@@ -94,7 +94,7 @@ export default function UserProfile() {
     )
   }
 
-  function renderErrorAlert() {
+  const renderErrorAlert = () => {
     return (
       <Dialog type='warning' title='Could not fetch data'>
         {error?.error.message}
@@ -102,7 +102,7 @@ export default function UserProfile() {
     )
   }
 
-  function renderContent() {
+  const renderContent = () => {
     if (error) return renderErrorAlert()
     if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
@@ -154,3 +154,5 @@ export default function UserProfile() {
     />
   )
 }
+
+export default UserProfile

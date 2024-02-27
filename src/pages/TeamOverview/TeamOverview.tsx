@@ -12,7 +12,7 @@ import { Team } from '../../@types/team'
 import { getTeamOverview, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
 
-export default function TeamOverview() {
+const TeamOverview = () => {
   const defaultActiveTab = {
     title: 'Mine team',
     path: 'myTeams',
@@ -71,7 +71,7 @@ export default function TeamOverview() {
     }
   }
 
-  function renderTeamNameColumn(team: Team) {
+  const renderTeamNameColumn = (team: Team) => {
     return (
       <>
         <span>
@@ -84,7 +84,7 @@ export default function TeamOverview() {
     )
   }
 
-  function renderErrorAlert() {
+  const renderErrorAlert = () => {
     return (
       <Dialog type='warning' title='Could not fetch teams'>
         {error?.error.message}
@@ -92,7 +92,7 @@ export default function TeamOverview() {
     )
   }
 
-  function renderContent() {
+  const renderContent = () => {
     if (error) return renderErrorAlert()
     if (loading) return <PageSkeleton />
 
@@ -135,3 +135,5 @@ export default function TeamOverview() {
 
   return <PageLayout title='Teamoversikt' content={renderContent()} />
 }
+
+export default TeamOverview

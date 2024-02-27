@@ -4,7 +4,7 @@ import { Link } from '@statisticsnorway/ssb-component-library'
 import Avatar from '../Avatar/Avatar'
 import { useNavigate } from 'react-router-dom'
 
-export default function Header() {
+const Header = () => {
   const navigate = useNavigate()
 
   return (
@@ -19,3 +19,5 @@ export default function Header() {
     </div>
   )
 }
+
+export default Header

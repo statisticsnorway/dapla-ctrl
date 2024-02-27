@@ -2,7 +2,7 @@ import notFoundStyles from './notFound.module.scss'
 
 import { Title } from '@statisticsnorway/ssb-component-library'
 
-export default function NotFound() {
+const NotFound = () => {
   return (
     <div className={notFoundStyles.centerDiv}>
       <Title size={1} className={notFoundStyles.title}>
@@ -14,3 +14,5 @@ export default function NotFound() {
     </div>
   )
 }
+
+export default NotFound

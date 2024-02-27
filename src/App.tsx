@@ -9,7 +9,7 @@ import TeamMembers from './pages/TeamMembers/TeamMembers'
 
 import { Routes, Route } from 'react-router-dom'
 
-export default function App() {
+const App = () => {
   return (
     <Routes>
       {import.meta.env.NODE_ENV !== 'production' && <Route path='/login' element={<Login />} />}
@@ -26,3 +26,5 @@ export default function App() {
     </Routes>
   )
 }
+
+export default App
