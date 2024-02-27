@@ -31,8 +31,8 @@ export default function TeamOverview() {
 
       return response[team].teams.map((team) => ({
         id: team.uniform_name,
-        navn: renderTeamNameColumn(team),
         seksjon: team.section_name,
+        navn: renderTeamNameColumn(team),
         teammedlemmer: team.team_user_count,
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))

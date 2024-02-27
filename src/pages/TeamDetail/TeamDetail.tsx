@@ -1,4 +1,3 @@
-import pageLayoutStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './teamDetail.module.scss'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -10,7 +9,7 @@ import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
 import { User } from '../../@types/user'
-import { Text, Title, Link, Dialog, LeadParagraph } from '@statisticsnorway/ssb-component-library'
+import { Text, Link, Dialog, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 
@@ -26,6 +25,8 @@ export default function TeamDetail() {
   const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
     return response['teamUsers'].teamUsers.map((user) => ({
       id: user?.principal_name,
+      user: user.display_name,
+      seksjon: user.section_name,
       navn: renderUsernameColumn(user),
       gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
       epost: user?.principal_name,
@@ -122,10 +123,11 @@ export default function TeamDetail() {
             </Text>
             <Text medium>{teamDetailData ? teamDetailData['teamUsers'].teamInfo.section_name : ''}</Text>
           </LeadParagraph>
-          <Title size={2} className={pageLayoutStyles.tableTitle}>
-            Teammedlemmer
-          </Title>
-          <Table columns={teamOverviewTableHeaderColumns} data={teamDetailTableData as TableData['data']} />
+          <Table
+            title='Teammedlemmer'
+            columns={teamOverviewTableHeaderColumns}
+            data={teamDetailTableData as TableData['data']}
+          />
         </>
       )
     }

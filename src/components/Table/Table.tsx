@@ -85,7 +85,7 @@ const TableDesktopView = ({ columns, data }: TableData) => (
  * Add alphabetical, numerical etc sorting when row header is clicked
  * Consider making table sort more visible
  */
-export default function Table({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) {
+const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) => {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
   const [filteredTableData, setFilteredTableData] = useState(data)
 
@@ -134,3 +134,5 @@ export default function Table({ title, dropdownAriaLabel, dropdownFilterItems, c
     </>
   )
 }
+
+export default Table
