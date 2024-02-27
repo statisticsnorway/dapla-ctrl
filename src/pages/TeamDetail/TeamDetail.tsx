@@ -13,7 +13,7 @@ import { Text, Link, Dialog, LeadParagraph } from '@statisticsnorway/ssb-compone
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 
-export default function TeamDetail() {
+const TeamDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ErrorResponse | undefined>()
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
@@ -79,7 +79,7 @@ export default function TeamDetail() {
     setBreadcrumbTeamDetailDisplayName({ displayName })
   }, [teamDetailData, setBreadcrumbTeamDetailDisplayName])
 
-  function renderUsernameColumn(user: User) {
+  const renderUsernameColumn = (user: User) => {
     return (
       <>
         <span>
@@ -92,7 +92,7 @@ export default function TeamDetail() {
     )
   }
 
-  function renderErrorAlert() {
+  const renderErrorAlert = () => {
     return (
       <Dialog type='warning' title='Could not fetch data'>
         {error?.error.message}
@@ -100,7 +100,7 @@ export default function TeamDetail() {
     )
   }
 
-  function renderContent() {
+  const renderContent = () => {
     if (error) return renderErrorAlert()
     if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
 
@@ -153,3 +153,5 @@ export default function TeamDetail() {
     />
   )
 }
+
+export default TeamDetail

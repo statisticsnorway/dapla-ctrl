@@ -22,7 +22,7 @@ export interface TableData {
   }[]
 }
 
-function conditionalStyling(index: number) {
+const conditionalStyling = (index: number) => {
   // Add conditional styling for the first element, then third etc
   return (index + 1) % 2 !== 0 ? styles.greenBackground : undefined
 }

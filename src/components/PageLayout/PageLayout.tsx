@@ -10,7 +10,7 @@ interface PageLayoutProps {
   content?: JSX.Element
 }
 
-export default function PageLayout({ title, button, content }: PageLayoutProps) {
+const PageLayout = ({ title, button, content }: PageLayoutProps) => {
   return (
     <>
       <Header />
@@ -25,3 +25,5 @@ export default function PageLayout({ title, button, content }: PageLayoutProps) 
     </>
   )
 }
+
+export default PageLayout
