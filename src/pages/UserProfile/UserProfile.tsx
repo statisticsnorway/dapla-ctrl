@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from './userprofile.module.scss'
 
 import { Dialog, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
@@ -53,7 +54,7 @@ const UserProfile = () => {
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [principalName])
+  }, [])
 
   useEffect(() => {
     if (userProfileData) {
@@ -70,7 +71,7 @@ const UserProfile = () => {
           setError({ error: { message: error.message, code: '500' } })
         })
     }
-  }, [userProfileData, principalName, prepTeamData])
+  }, [prepTeamData])
 
   // required for breadcrumb
   useEffect(() => {
@@ -79,7 +80,7 @@ const UserProfile = () => {
       userProfileData.display_name = displayName
       setBreadcrumbUserProfileDisplayName({ displayName })
     }
-  }, [userProfileData, setBreadcrumbUserProfileDisplayName])
+  }, [setBreadcrumbUserProfileDisplayName])
 
   const renderTeamNameColumn = (team: Team) => {
     return (
