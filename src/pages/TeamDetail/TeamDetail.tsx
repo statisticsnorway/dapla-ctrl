@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from './teamDetail.module.scss'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -53,7 +54,7 @@ const TeamDetail = () => {
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [teamId])
+  }, [])
 
   useEffect(() => {
     getTeamDetail(teamId as string)
@@ -68,7 +69,7 @@ const TeamDetail = () => {
       .catch((error) => {
         setError({ error: { message: error.message, code: '500' } })
       })
-  }, [teamId, prepTeamData])
+  }, [prepTeamData])
 
   // required for breadcrumb
   useEffect(() => {

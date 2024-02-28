@@ -93,15 +93,6 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
 
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
 
-  /* TODO:
-   * Fix bug; reinitializes 'data' state(?) a few seconds after Tab onClick.
-    So once after Tab onClick, and twice a few seconds later
-    Order after Tab onClick: 1. Sets state to current tab table data. 2. Then to previous tab table data. 3. Then back to current tab table data.
-  
-   * Notes:
-    - data is a stored in a state that is set by useEffect and an API call on a higher hierarchical level (e.g. TeamOverview)
-    - No indication of states reinitializing during the view jittering in React Component Developer tools
-  */
   useEffect(() => {
     if (searchFilterKeyword !== '' && data.length) {
       const filterTableData = data.filter((row) =>
