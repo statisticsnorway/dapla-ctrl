@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
 import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
@@ -57,13 +58,13 @@ const TeamMembers = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [prepUserData, jwt])
+  }, [])
 
   useEffect(() => {
     if (teamMembersData) {
-      setTeamMembersTableData(prepUserData(teamMembersData))
+      setTeamMembersTableData(prepUserData(teamMembersData)) // Update Table view on Tab onClick
     }
-  }, [teamMembersData, prepUserData])
+  }, [prepUserData])
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
