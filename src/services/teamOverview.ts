@@ -59,7 +59,60 @@ function flattenEmbedded(json: any): any {
 }
 
 const fetchAllTeams = async (accessToken: string): Promise<TeamsData> => {
-  return { teams: [] }
+  const teamsUrl = new URL(`${TEAMS_URL}`)
+  const embeds = ['users', 'groups.users']
+
+  const selects = [
+    'display_name',
+    'uniform_name',
+    'section_name',
+    'users.principal_name',
+    'groups.users.display_name',
+    'groups.users.principal_name',
+  ]
+
+  teamsUrl.searchParams.set('embed', embeds.join(','))
+  teamsUrl.searchParams.append('select', selects.join(','))
+
+  try {
+    const teams = await fetchAPIData(teamsUrl.toString(), accessToken)
+    if (!teams) throw new ApiError(500, 'No json data returned')
+    if (!teams._embedded || !teams._embedded.teams) return {} as TeamsData
+
+    const flattedTeams = flattenEmbedded({ ...teams })
+    flattedTeams.teams.forEach((team: Team, teamIndex: number) => {
+      if (!team.groups) flattedTeams.teams[teamIndex].groups = []
+
+      team.groups.forEach((group: Group, groupIndex: number) => {
+        if (!group.users) {
+          flattedTeams.teams[teamIndex].groups[groupIndex].users = []
+        }
+      })
+      if (!team.users) flattedTeams.teams[teamIndex].users = []
+    })
+
+    const flattedTeamsWithManager = flattedTeams.teams.map((team: Team) => {
+      const managers = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+      return {
+        ...team,
+        manager:
+          managers && managers.users && managers.users.length > 0
+            ? { display_name: managers.users[0].display_name, principal_name: managers.users[0].principal_name }
+            : { display_name: 'Mangler manager', principal_name: 'ManglerManager@ssb.no' },
+      }
+    })
+
+    return { teams: flattedTeamsWithManager }
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch all teams:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch all teams:', apiError)
+      throw apiError
+    }
+  }
 }
 
 const fetchTeamsForPrincipalName = async (accessToken: string, principalName: string): Promise<TeamsData> => {
@@ -93,16 +146,13 @@ const fetchTeamsForPrincipalName = async (accessToken: string, principalName: st
     })
 
     const flattedTeamsWithManager = flattedTeams.teams.map((team: Team) => {
-      const managers = team.groups.filter(
-        ({ uniform_name }: Group) => uniform_name === `${team.uniform_name}-managers`
-      )[0]
-      if (managers) {
-        return {
-          ...team,
-          manager: {
-            display_name: managers.users ? managers.users[0].display_name : 'Mangler ansvarlig',
-          },
-        }
+      const managers = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+      return {
+        ...team,
+        manager:
+          managers && managers.users && managers.users.length > 0
+            ? { display_name: managers.users[0].display_name, principal_name: managers.users[0].principal_name }
+            : { display_name: 'Mangler ansvarlig', principal_name: 'ManglerAnsvarlig@ssb.no' },
       }
     })
 

@@ -43,7 +43,6 @@ const TeamOverview = () => {
   useEffect(() => {
     fetchTeamOverviewData(jwt.email)
       .then((response) => {
-        console.log(response)
         setTeamOverviewData(response as TeamOverviewData)
         setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
       })

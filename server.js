@@ -79,62 +79,6 @@ app.post('/api/verify-token', (req, res) => {
     })
 })
 
-app.get('/api/teamOverview', tokenVerificationMiddleware, async (req, res, next) => {
-  const token = req.token
-  const principalName = req.user.email
-  const allteamsUrl = `${DAPLA_TEAM_API_URL}/teams`
-  const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`
-
-  try {
-    const [allTeams, myTeams] = await Promise.all([
-      fetchAPIData(token, allteamsUrl, 'Failed to fetch all teams').then((teams) => getTeamOverviewTeams(token, teams)),
-      fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then((teams) => getTeamOverviewTeams(token, teams)),
-    ])
-
-    const result = {
-      allTeams: {
-        count: allTeams.count,
-        ...allTeams._embedded,
-      },
-      myTeams: {
-        count: myTeams.count,
-        ...myTeams._embedded,
-      },
-    }
-
-    res.json(result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-async function getTeamOverviewTeams(token, teams) {
-  const teamPromises = teams._embedded.teams.map(async (team) => {
-    const teamUniformName = team.uniform_name
-    const teamInfoUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}`
-    const teamUsersUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/users`
-    const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
-
-    const [teamInfo, teamUsers, teamManager] = await Promise.all([
-      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => sectionFallback(teamUniformName)),
-      fetchAPIData(token, teamUsersUrl, 'Failed to fetch team users'),
-      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(() => managerFallback()),
-    ])
-    team['section_name'] = teamInfo.section_name
-    team['team_user_count'] = teamUsers.count
-    team['manager'] = teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
-
-    return { ...team }
-  })
-
-  const resolvedTeams = await Promise.all(teamPromises)
-  const validTeams = resolvedTeams.filter((team) => team !== null)
-
-  teams._embedded.teams = validTeams
-  teams.count = validTeams.length
-  return teams
-}
-
 app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
   try {
     const token = req.token
