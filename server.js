@@ -79,21 +79,16 @@ app.post('/api/verify-token', (req, res) => {
     })
 })
 
-app.get('/api/userProfile/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
+// DO NOT REMOVE, NECCESSARY FOR FRONTEND
+app.get('/api/photo/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
+  const accessToken = req.token
+  const principalName = req.params.principalName
+  const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
+  
   try {
-    const token = req.token
-    const principalName = req.params.principalName
-    const userProfileUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}`
-    const userManagerUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/manager`
-    const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
+    const photoData = await fetchPhoto(accessToken, userPhotoUrl)
 
-    const [userProfile, userManager, userPhoto] = await Promise.all([
-      fetchAPIData(token, userProfileUrl, 'Failed to fetch userProfile'),
-      fetchAPIData(token, userManagerUrl, 'Failed to fetch user manager').catch(() => managerFallback()),
-      fetchPhoto(token, userPhotoUrl, 'Failed to fetch user photo'),
-    ])
-
-    return res.json({ ...userProfile, manager: { ...userManager }, photo: userPhoto })
+    return res.send({photo: photoData})
   } catch (error) {
     next(error)
   }
@@ -110,77 +105,6 @@ async function fetchPhoto(token, url, fallbackErrorMessage) {
   const photoBuffer = Buffer.from(arrayBuffer)
   return photoBuffer.toString('base64')
 }
-
-async function getUserProfileTeamData(token, principalName, teams) {
-  const teamPromises = teams._embedded.teams.map(async (team) => {
-    const teamUniformName = team.uniform_name
-    const teamInfoUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}`
-    const teamGroupsUrl = `${DAPLA_TEAM_API_URL}/teams/${teamUniformName}/groups`
-    const teamManagerUrl = `${DAPLA_TEAM_API_URL}/groups/${teamUniformName}-managers/users`
-
-    const [teamInfo, teamGroups, teamManager] = await Promise.all([
-      fetchAPIData(token, teamInfoUrl, 'Failed to fetch team info').catch(() => sectionFallback(teamUniformName)),
-      fetchAPIData(token, teamGroupsUrl, 'Failed to fetch groups').then((response) => {
-        const groupPromises = response._embedded.groups.map((group) => fetchUserGroups(group, token, principalName))
-        return Promise.all(groupPromises).then((groupsArrays) => groupsArrays.flat())
-      }),
-      fetchAPIData(token, teamManagerUrl, 'Failed to fetch team manager').catch(() => managerFallback()),
-    ])
-
-    team['section_name'] = teamInfo.section_name
-    team['manager'] = teamManager.count > 0 ? teamManager._embedded.users[0] : managerFallback()
-    team['groups'] = teamGroups
-
-    return { ...team }
-  })
-
-  const resolvedTeams = await Promise.all(teamPromises)
-  const validTeams = resolvedTeams.filter((team) => team !== null)
-
-  teams._embedded.teams = validTeams
-  teams.count = validTeams.length
-  return teams
-}
-
-async function fetchUserGroups(group, token, principalName) {
-  const groupUsersUrl = `${DAPLA_TEAM_API_URL}/groups/${group.uniform_name}/users`
-  try {
-    const groupUsers = await fetchAPIData(token, groupUsersUrl, 'Failed to fetch group users')
-    if (!groupUsers._embedded || !groupUsers._embedded.users || groupUsers._embedded.users.length === 0) {
-      return []
-    }
-
-    return groupUsers._embedded.users
-      .filter((user) => user.principal_name === principalName)
-      .map(() => group.uniform_name)
-  } catch (error) {
-    console.error(`Error processing group ${group.uniform_name}:`, error)
-    throw error
-  }
-}
-
-app.get('/api/userProfile/:principalName/team', tokenVerificationMiddleware, async (req, res, next) => {
-  const token = req.token
-  const principalName = req.params.principalName
-  const myTeamsUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/teams`
-
-  try {
-    const [myTeams] = await Promise.all([
-      fetchAPIData(token, myTeamsUrl, 'Failed to fetch my teams').then((teams) =>
-        getUserProfileTeamData(token, principalName, teams)
-      ),
-    ])
-
-    const result = {
-      count: myTeams.count,
-      ...myTeams._embedded,
-    }
-
-    res.json(result)
-  } catch (error) {
-    next(error)
-  }
-})
 
 app.get('/api/teamDetail/:teamUniformName', tokenVerificationMiddleware, async (req, res, next) => {
   try {

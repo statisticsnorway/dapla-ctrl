@@ -11,7 +11,7 @@ export interface User {
   division_code?: number
   section_name?: string
   section_code?: number
-  manager?: User
+  section_manager?: User
   photo?: string
   groups?: Group[]
 }

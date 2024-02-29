@@ -22,7 +22,7 @@ const Avatar = () => {
 
     setUserProfileData(userProfile)
     setEncodedURI(
-      `/teammedlemmer/${encodeURIComponent(userProfile.principal_name ? userProfile.principal_name.split('@')[0] : userProfile.email.split('@')[0])}`
+      `/teammedlemmer/${userProfile.principal_name}`
     )
     setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0])
 

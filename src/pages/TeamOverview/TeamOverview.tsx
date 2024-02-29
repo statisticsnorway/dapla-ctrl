@@ -82,7 +82,7 @@ const TeamOverview = () => {
 
   const renderErrorAlert = () => {
     return (
-      <Dialog type='warning' title='Could not fetch users'>
+      <Dialog type='warning' title='Could not fetch teams'>
         {`${error?.code} - ${error?.message}`}
       </Dialog>
     )

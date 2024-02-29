@@ -10,73 +10,55 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType, formatDisplayName } from '../../utils/utils'
 
-import { getUserProfile, getUserTeamsWithGroups, UserProfileTeamResult } from '../../services/userProfile'
-
-import { User } from '../../@types/user'
-import { Team } from '../../@types/team'
+import { getUserProfileTeamData, TeamsData, Team } from '../../services/userProfile'
 
 import { useParams } from 'react-router-dom'
-import { ErrorResponse } from '../../@types/error'
 import { Skeleton } from '@mui/material'
+import { ApiError } from '../../utils/services'
 
 const UserProfile = () => {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
-  const [error, setError] = useState<ErrorResponse | undefined>()
+  const [error, setError] = useState<ApiError | undefined>()
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
-  const [userProfileData, setUserProfileData] = useState<User>()
+  const [userProfileData, setUserProfileData] = useState<TeamsData>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
   const { principalName } = useParams()
 
   const prepTeamData = useCallback(
-    (response: UserProfileTeamResult): TableData['data'] => {
+    (response: TeamsData): TableData['data'] => {
       return response.teams.map((team) => ({
         id: team.uniform_name,
         seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
-        gruppe: team.groups?.map((group) => getGroupType(group)).join(', '),
-        epost: userProfileData?.principal_name,
+        gruppe: team.groups
+        ?.filter(group => group.users.some(user => user.principal_name === principalName)) // Filter groups based on principalName presence
+        .map(group => getGroupType(group.uniform_name))
+        .join(', '),
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
-    [userProfileData]
+    [principalName]
   )
 
   useEffect(() => {
-    getUserProfile(principalName as string)
-      .then((response) => {
-        if ((response as ErrorResponse).error) {
-          setError(response as ErrorResponse)
-        } else {
-          setUserProfileData(response as User)
-        }
-      })
-      .catch((error) => {
-        setError({ error: { message: error.message, code: '500' } })
-      })
-  }, [principalName])
-
-  useEffect(() => {
-    if (userProfileData) {
-      getUserTeamsWithGroups(principalName as string)
+    
+      getUserProfileTeamData(principalName as string)
         .then((response) => {
-          if ((response as ErrorResponse).error) {
-            setError(response as ErrorResponse)
-          } else {
-            setUserProfileTableData(prepTeamData(response as UserProfileTeamResult))
-          }
+          setUserProfileTableData(prepTeamData(response as TeamsData))
+          setUserProfileData((response as TeamsData))
         })
         .finally(() => setLoadingTeamData(false))
         .catch((error) => {
-          setError({ error: { message: error.message, code: '500' } })
+          setError(error as ApiError)
         })
-    }
-  }, [userProfileData, principalName, prepTeamData])
+    
+  }, [principalName, prepTeamData])
 
   // required for breadcrumb
   useEffect(() => {
     if (userProfileData) {
-      const displayName = formatDisplayName(userProfileData.display_name)
-      userProfileData.display_name = displayName
+      const displayName = formatDisplayName(userProfileData.user.display_name)
+      userProfileData.user.display_name = displayName
       setBreadcrumbUserProfileDisplayName({ displayName })
     }
   }, [userProfileData, setBreadcrumbUserProfileDisplayName])
@@ -96,8 +78,8 @@ const UserProfile = () => {
 
   const renderErrorAlert = () => {
     return (
-      <Dialog type='warning' title='Could not fetch data'>
-        {error?.error.message}
+      <Dialog type='warning' title='Could not fetch teams'>
+        {`${error?.code} - ${error?.message}`}
       </Dialog>
     )
   }
@@ -117,10 +99,6 @@ const UserProfile = () => {
           label: 'Gruppe',
         },
         {
-          id: 'epost',
-          label: 'Epost ?',
-        },
-        {
           id: 'ansvarlig',
           label: 'Ansvarlig',
         },
@@ -128,8 +106,8 @@ const UserProfile = () => {
       return (
         <>
           <LeadParagraph className={styles.userProfileDescription}>
-            <Text medium>{userProfileData?.section_name}</Text>
-            <Text medium>{userProfileData?.principal_name}</Text>
+            <Text medium>{userProfileData?.user.section_name}</Text>
+            <Text medium>{userProfileData?.user.principal_name}</Text>
           </LeadParagraph>
           <Table
             title='Team'
@@ -145,7 +123,7 @@ const UserProfile = () => {
     <PageLayout
       title={
         !loadingTeamData && userProfileData ? (
-          (userProfileData?.display_name as string)
+          (userProfileData?.user.display_name as string)
         ) : (
           <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
         )
