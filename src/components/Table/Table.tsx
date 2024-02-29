@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 
+import { ArrowUp, ArrowDown } from 'react-feather'
+
 interface TableProps {
   title: string
   dropdownAriaLabel?: string
@@ -52,8 +54,14 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
+const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
+  if (selectedColumn && sortByDirection === 'asc') return <ArrowUp size={18} />
+  return <ArrowDown size={18} />
+}
+
 const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
-  const [sortByDescending, setSortByDescending] = useState(false)
+  const [sortBy, setSortBy] = useState('')
+  const [sortByDirection, setSortByDirection] = useState('desc')
 
   return (
     <div className={styles.tableContainer}>
@@ -63,16 +71,19 @@ const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
             {columns.map((column) => (
               <th
                 key={column.id}
+                className={!column.unsortable ? styles.sortableColumn : undefined}
                 onClick={
                   !column.unsortable && handleDataSorting
                     ? () => {
-                        setSortByDescending(!sortByDescending)
-                        handleDataSorting(column.id, sortByDescending)
+                        setSortBy(column.id)
+                        setSortByDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+                        handleDataSorting(column.id, sortByDirection)
                       }
                     : undefined
                 }
               >
                 {column.label}
+                {!column.unsortable ? renderSortByArrow(sortBy === column.id, sortByDirection) : undefined}
               </th>
             ))}
           </tr>
@@ -122,7 +133,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
     setSearchFilterKeyword(value)
   }
 
-  const handleSort = (id: string, sortByDescending: boolean) => {
+  const handleSort = (id: string, sortByDirection: string) => {
     if (filteredTableData) {
       filteredTableData.sort((a, b) => {
         // Sort by id for the first column;
@@ -131,12 +142,12 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
 
         // Sort by number
         if (typeof valueA === 'number' && typeof valueB === 'number')
-          return sortByDescending ? valueA - valueB : valueB - valueA
+          return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
 
         // Sort by alphabet
         if (typeof valueA === 'string' && typeof valueB === 'string') {
-          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDescending ? -1 : 1
-          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDescending ? 1 : -1
+          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
+          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
         }
         return 0
       })
