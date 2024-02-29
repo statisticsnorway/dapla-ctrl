@@ -25,16 +25,10 @@ const TeamDetail = () => {
 
   const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
     return response['teamUsers'].teamUsers.map((user) => {
-      // Makes data in username column searchable and sortable in table by including these fields
-      const usernameColumn = {
-        user: user.display_name,
-        seksjon: user.section_name,
-      }
-
       return {
-        id: user?.principal_name,
-        ...usernameColumn,
+        id: formatDisplayName(user.display_name),
         navn: renderUsernameColumn(user),
+        seksjon: user.section_name, // Makes section name searchable and sortable in table by including the field
         gruppe: user.groups?.map((group) => getGroupType(group.uniform_name)).join(', '),
         epost: user?.principal_name,
       }

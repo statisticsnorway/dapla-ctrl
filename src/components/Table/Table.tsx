@@ -15,12 +15,13 @@ export interface TableData {
   columns: {
     id: string
     label: string
+    sortable?: boolean
   }[]
   data: {
     id: string
     [key: string]: React.ReactNode
   }[]
-  sortData?: CallableFunction
+  handleDataSorting?: CallableFunction
 }
 
 const conditionalStyling = (index: number) => {
@@ -51,7 +52,8 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-const TableDesktopView = ({ columns, data, sortData }: TableData) => {
+// TODO: Make sorting optional using sortable prop. Default is true?
+const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
   const [sortByDescending, setSortByDescending] = useState(false)
 
   return (
@@ -62,10 +64,14 @@ const TableDesktopView = ({ columns, data, sortData }: TableData) => {
             {columns.map((column) => (
               <th
                 key={column.id}
-                onClick={() => {
-                  setSortByDescending(!sortByDescending)
-                  if (sortData) sortData(column.id, sortByDescending)
-                }}
+                onClick={
+                  handleDataSorting
+                    ? () => {
+                        setSortByDescending(!sortByDescending)
+                        handleDataSorting(column.id, sortByDescending)
+                      }
+                    : undefined
+                }
               >
                 {column.label}
               </th>
@@ -117,12 +123,12 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
     setSearchFilterKeyword(value)
   }
 
-  // TODO: Currently not working for name tab.
   const handleSort = (id: string, sortByDescending: boolean) => {
     if (filteredTableData) {
       filteredTableData.sort((a, b) => {
-        const valueA = a[id]
-        const valueB = b[id]
+        // Sort by id for the first column;
+        const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
+        const valueB = typeof b[id] === 'object' ? b['id'] : b[id]
 
         // Sort by number
         if (typeof valueA === 'number' && typeof valueB === 'number')
@@ -163,7 +169,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
       {isOnMobile ? (
         <TableMobileView columns={columns} data={filteredTableData} />
       ) : (
-        <TableDesktopView columns={columns} data={filteredTableData} sortData={handleSort} />
+        <TableDesktopView columns={columns} data={filteredTableData} handleDataSorting={handleSort} />
       )}
     </>
   )
