@@ -15,7 +15,7 @@ export interface TableData {
   columns: {
     id: string
     label: string
-    sortable?: boolean
+    unsortable?: boolean
   }[]
   data: {
     id: string
@@ -52,7 +52,6 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-// TODO: Make sorting optional using sortable prop. Default is true?
 const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
   const [sortByDescending, setSortByDescending] = useState(false)
 
@@ -65,7 +64,7 @@ const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
               <th
                 key={column.id}
                 onClick={
-                  handleDataSorting
+                  !column.unsortable && handleDataSorting
                     ? () => {
                         setSortByDescending(!sortByDescending)
                         handleDataSorting(column.id, sortByDescending)
