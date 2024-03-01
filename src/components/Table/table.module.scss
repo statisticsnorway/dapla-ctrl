@@ -74,6 +74,7 @@
     .sortableColumn {
       cursor: pointer;
 
+      // TODO: Only show icon on hover, add spacing etc
       // svg {
       //   display: none;
       // }
@@ -86,8 +87,9 @@
       // }
 
       svg {
-          color: variables.$ssb-green-4; 
-        }
+        display: inline-flex;
+        color: variables.$ssb-green-4; 
+      }
     }
   }
 }

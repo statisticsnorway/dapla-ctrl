@@ -23,7 +23,6 @@ export interface TableData {
     id: string
     [key: string]: React.ReactNode
   }[]
-  handleDataSorting?: CallableFunction
 }
 
 const conditionalStyling = (index: number) => {
@@ -54,14 +53,44 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
-  if (selectedColumn && sortByDirection === 'asc') return <ArrowUp size={18} />
-  return <ArrowDown size={18} />
-}
-
-const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
+const TableDesktopView = ({ columns, data }: TableData) => {
   const [sortBy, setSortBy] = useState('')
-  const [sortByDirection, setSortByDirection] = useState('desc')
+  const [sortByDirection, setSortByDirection] = useState('asc') // TODO: Does not reset when switching over Tabs
+
+  useEffect(() => {
+    console.log(sortByDirection)
+    if (data) {
+      data.sort((a, b) => {
+        // Sort by id for the first column;
+        const valueA = typeof a[sortBy] === 'object' ? a['id'] : a[sortBy]
+        const valueB = typeof b[sortBy] === 'object' ? b['id'] : b[sortBy]
+
+        // Sort by number
+        if (typeof valueA === 'number' && typeof valueB === 'number')
+          return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
+
+        // Sort by alphabet
+        if (typeof valueA === 'string' && typeof valueB === 'string') {
+          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
+          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
+        }
+        return 0
+
+        // TODO: Sort by date
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortByDirection])
+
+  const handleSortBy = (id: string) => {
+    setSortBy(id)
+    setSortByDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+  }
+
+  const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
+    if (selectedColumn && sortByDirection === 'asc') return <ArrowDown size={18} />
+    return <ArrowUp size={18} />
+  }
 
   return (
     <div className={styles.tableContainer}>
@@ -72,15 +101,7 @@ const TableDesktopView = ({ columns, data, handleDataSorting }: TableData) => {
               <th
                 key={column.id}
                 className={!column.unsortable ? styles.sortableColumn : undefined}
-                onClick={
-                  !column.unsortable && handleDataSorting
-                    ? () => {
-                        setSortBy(column.id)
-                        setSortByDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-                        handleDataSorting(column.id, sortByDirection)
-                      }
-                    : undefined
-                }
+                onClick={!column.unsortable ? () => handleSortBy(column.id) : undefined}
               >
                 {column.label}
                 {!column.unsortable ? renderSortByArrow(sortBy === column.id, sortByDirection) : undefined}
@@ -133,29 +154,6 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
     setSearchFilterKeyword(value)
   }
 
-  const handleSort = (id: string, sortByDirection: string) => {
-    if (filteredTableData) {
-      filteredTableData.sort((a, b) => {
-        // Sort by id for the first column;
-        const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
-        const valueB = typeof b[id] === 'object' ? b['id'] : b[id]
-
-        // Sort by number
-        if (typeof valueA === 'number' && typeof valueB === 'number')
-          return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
-
-        // Sort by alphabet
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
-          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
-        }
-        return 0
-      })
-
-      // TODO: Sort by date
-    }
-  }
-
   return (
     <>
       <div className={styles.tableTitleContainer}>
@@ -179,7 +177,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
       {isOnMobile ? (
         <TableMobileView columns={columns} data={filteredTableData} />
       ) : (
-        <TableDesktopView columns={columns} data={filteredTableData} handleDataSorting={handleSort} />
+        <TableDesktopView columns={columns} data={filteredTableData} />
       )}
     </>
   )
