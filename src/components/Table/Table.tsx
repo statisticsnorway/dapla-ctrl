@@ -6,12 +6,14 @@ import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-li
 
 import { ArrowUp, ArrowDown } from 'react-feather'
 
-interface TableProps {
+interface TableProps extends TableData {
   title: string
   dropdownAriaLabel?: string
   dropdownFilterItems?: Array<object>
-  columns: TableData['columns']
-  data: TableData['data']
+}
+
+interface TableDesktopViewProps extends TableData {
+  activeTab?: string
 }
 export interface TableData {
   columns: {
@@ -53,12 +55,21 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-const TableDesktopView = ({ columns, data }: TableData) => {
-  const [sortBy, setSortBy] = useState('')
-  const [sortByDirection, setSortByDirection] = useState('asc') // TODO: Does not reset when switching over Tabs
+const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopViewProps) => {
+  const defaultState = {
+    sortBy: '',
+    sortByDirection: '',
+  }
+  const [sortBy, setSortBy] = useState(defaultState.sortBy)
+  const [sortByDirection, setSortByDirection] = useState(defaultState.sortByDirection)
 
   useEffect(() => {
-    console.log(sortByDirection)
+    setSortBy(defaultState.sortBy)
+    setSortByDirection(defaultState.sortByDirection)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
+
+  const sortTableData = () => {
     if (data) {
       data.sort((a, b) => {
         // Sort by id for the first column;
@@ -79,15 +90,18 @@ const TableDesktopView = ({ columns, data }: TableData) => {
         // TODO: Sort by date
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, sortByDirection])
+  }
 
   const handleSortBy = (id: string) => {
+    console.log(id)
     setSortBy(id)
-    setSortByDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    setSortByDirection((prevState) => (prevState === 'asc' ? 'desc' : 'asc'))
+    sortTableData()
   }
 
   const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
+    console.log('selectedColumn ' + selectedColumn)
+    console.log(sortByDirection)
     if (selectedColumn && sortByDirection === 'asc') return <ArrowDown size={18} />
     return <ArrowUp size={18} />
   }
@@ -177,7 +191,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
       {isOnMobile ? (
         <TableMobileView columns={columns} data={filteredTableData} />
       ) : (
-        <TableDesktopView columns={columns} data={filteredTableData} />
+        <TableDesktopView columns={columns} data={filteredTableData} activeTab={title} /> // Table title changes when switching between tabs
       )}
     </>
   )
