@@ -58,7 +58,7 @@ const TableMobileView = ({ columns, data }: TableData) => (
 const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopViewProps) => {
   const defaultState = {
     sortBy: '',
-    sortByDirection: '',
+    sortByDirection: 'asc',
   }
   const [sortBy, setSortBy] = useState(defaultState.sortBy)
   const [sortByDirection, setSortByDirection] = useState(defaultState.sortByDirection)
@@ -69,39 +69,35 @@ const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopV
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
-  const sortTableData = () => {
-    if (data) {
-      data.sort((a, b) => {
-        // Sort by id for the first column;
-        const valueA = typeof a[sortBy] === 'object' ? a['id'] : a[sortBy]
-        const valueB = typeof b[sortBy] === 'object' ? b['id'] : b[sortBy]
+  const sortTableData = (id: string) => {
+    data.sort((a, b) => {
+      // Sort by id for the first column;
+      const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
+      const valueB = typeof b[id] === 'object' ? b['id'] : b[id]
 
-        // Sort by number
-        if (typeof valueA === 'number' && typeof valueB === 'number')
-          return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
+      // Sort by number
+      if (typeof valueA === 'number' && typeof valueB === 'number')
+        return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
 
-        // Sort by alphabet
-        if (typeof valueA === 'string' && typeof valueB === 'string') {
-          if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
-          if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
-        }
-        return 0
+      // Sort by alphabet
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
+        if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
+      }
+      return 0
 
-        // TODO: Sort by date
-      })
-    }
+      // TODO: Sort by date
+    })
   }
 
   const handleSortBy = (id: string) => {
-    console.log(id)
     setSortBy(id)
+    //TODO: Sort by direction should also take account of the cell as well
     setSortByDirection((prevState) => (prevState === 'asc' ? 'desc' : 'asc'))
-    sortTableData()
+    sortTableData(id)
   }
 
   const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
-    console.log('selectedColumn ' + selectedColumn)
-    console.log(sortByDirection)
     if (selectedColumn && sortByDirection === 'asc') return <ArrowDown size={18} />
     return <ArrowUp size={18} />
   }
