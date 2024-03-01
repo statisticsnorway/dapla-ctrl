@@ -80,6 +80,7 @@
       
       &:hover {
         span {
+          color: variables.$ssb-green-4; 
           display: flex;
           align-items: center;
         }
@@ -87,7 +88,6 @@
         svg {
           display: initial;
           margin-left: .25rem;
-          color: variables.$ssb-green-4; 
         }
       }
     }

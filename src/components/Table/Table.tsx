@@ -70,6 +70,7 @@ const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopV
   }, [activeTab])
 
   const sortTableData = (id: string) => {
+    console.log(id)
     data.sort((a, b) => {
       // Sort by id for the first column;
       const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
@@ -92,12 +93,15 @@ const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopV
 
   const handleSortBy = (id: string) => {
     setSortBy(id)
+    const selectedColumn = sortBy === id
     //TODO: Sort by direction should also take account of the cell as well
     setSortByDirection((prevState) => (prevState === 'asc' ? 'desc' : 'asc'))
     sortTableData(id)
   }
 
   const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
+    console.log('selectedColumn ' + selectedColumn)
+    console.log(sortByDirection)
     if (selectedColumn && sortByDirection === 'asc') return <ArrowDown size={18} />
     return <ArrowUp size={18} />
   }
