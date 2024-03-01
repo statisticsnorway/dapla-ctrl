@@ -74,21 +74,21 @@
     .sortableColumn {
       cursor: pointer;
 
-      // TODO: Only show icon on hover, add spacing etc
-      // svg {
-      //   display: none;
-      // }
-      
-      // &:hover {
-      //   svg {
-      //     display: inline-flex;
-      //     color: variables.$ssb-green-4; 
-      //   }
-      // }
-
       svg {
-        display: inline-flex;
-        color: variables.$ssb-green-4; 
+        display: none;
+      }
+      
+      &:hover {
+        span {
+          display: flex;
+          align-items: center;
+        }
+        
+        svg {
+          display: initial;
+          margin-left: .25rem;
+          color: variables.$ssb-green-4; 
+        }
       }
     }
   }

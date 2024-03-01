@@ -113,8 +113,14 @@ const TableDesktopView = ({ columns, data, activeTab: activeTab }: TableDesktopV
                 className={!column.unsortable ? styles.sortableColumn : undefined}
                 onClick={!column.unsortable ? () => handleSortBy(column.id) : undefined}
               >
-                {column.label}
-                {!column.unsortable ? renderSortByArrow(sortBy === column.id, sortByDirection) : undefined}
+                {!column.unsortable ? (
+                  <span>
+                    {column.label}
+                    {renderSortByArrow(sortBy === column.id, sortByDirection)}
+                  </span>
+                ) : (
+                  column.label
+                )}
               </th>
             ))}
           </tr>
