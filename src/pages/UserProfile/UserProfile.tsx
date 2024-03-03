@@ -45,7 +45,6 @@ const UserProfile = () => {
   useEffect(() => {
     getUserProfileTeamData(principalName as string)
       .then((response) => {
-        console.log(response)
         const formattedResponse = response as TeamsData
         setUserProfileTableData(prepTeamData(formattedResponse))
         setUserProfileData(formattedResponse)
