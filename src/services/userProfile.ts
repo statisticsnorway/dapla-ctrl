@@ -109,6 +109,7 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
 
 export const getUserProfileTeamData = async (principalName: string): Promise<TeamsData | ApiError> => {
   const accessToken = localStorage.getItem('access_token') as string
+  principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
 
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
   const embeds = [
@@ -170,31 +171,6 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
       throw apiError
     }
   }
-}
-
-export const getUserTeamsWithGroups = async (principalName: string): Promise<TeamsData | ApiError> => {
-  const accessToken = localStorage.getItem('access_token')
-  principalName = principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
-
-  return fetch(`/api/userProfile/${principalName}/team`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        console.error('Request failed with status:', response.status)
-        throw new Error('Request failed')
-      }
-      return response.json()
-    })
-    .then((data) => data as TeamsData)
-    .catch((error) => {
-      console.error('Error during fetching userProfile:', error)
-      throw error
-    })
 }
 
 export const getUserProfileFallback = (accessToken: string): User => {

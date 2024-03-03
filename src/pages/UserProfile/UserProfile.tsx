@@ -10,7 +10,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType, formatDisplayName } from '../../utils/utils'
 
-import { getUserProfileTeamData, TeamsData, Team } from '../../services/userProfile'
+import { getUserProfileTeamData, TeamsData, Team, UserProfileTeamData } from '../../services/userProfile'
 
 import { useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
@@ -30,10 +30,10 @@ const UserProfile = () => {
         id: team.uniform_name,
         seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
-        gruppe: team.groups
+        gruppe: principalName ? team.groups
         ?.filter(group => group.users.some(user => user.principal_name === principalName)) // Filter groups based on principalName presence
         .map(group => getGroupType(group.uniform_name))
-        .join(', '),
+        .join(', ') : "INGEN FUNNET",
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
@@ -41,11 +41,14 @@ const UserProfile = () => {
   )
 
   useEffect(() => {
-    
       getUserProfileTeamData(principalName as string)
         .then((response) => {
-          setUserProfileTableData(prepTeamData(response as TeamsData))
-          setUserProfileData((response as TeamsData))
+          const formattedResponse = response as TeamsData;
+          setUserProfileTableData(prepTeamData(formattedResponse))
+          setUserProfileData((formattedResponse))
+
+          const displayName = formatDisplayName(formattedResponse.user.display_name);
+          setBreadcrumbUserProfileDisplayName({ displayName });
         })
         .finally(() => setLoadingTeamData(false))
         .catch((error) => {
@@ -53,15 +56,6 @@ const UserProfile = () => {
         })
     
   }, [principalName, prepTeamData])
-
-  // required for breadcrumb
-  useEffect(() => {
-    if (userProfileData) {
-      const displayName = formatDisplayName(userProfileData.user.display_name)
-      userProfileData.user.display_name = displayName
-      setBreadcrumbUserProfileDisplayName({ displayName })
-    }
-  }, [userProfileData, setBreadcrumbUserProfileDisplayName])
 
   const renderTeamNameColumn = (team: Team) => {
     return (
@@ -123,7 +117,7 @@ const UserProfile = () => {
     <PageLayout
       title={
         !loadingTeamData && userProfileData ? (
-          (userProfileData?.user.display_name as string)
+          (formatDisplayName(userProfileData?.user.display_name) as string)
         ) : (
           <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
         )
