@@ -94,7 +94,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
 
   useEffect(() => {
-    if (searchFilterKeyword !== '') {
+    if (searchFilterKeyword !== '' && data.length) {
       const filterTableData = data.filter((row) =>
         Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
       )

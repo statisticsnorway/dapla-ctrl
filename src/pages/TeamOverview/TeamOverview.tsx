@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
 import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
@@ -50,13 +51,13 @@ const TeamOverview = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [prepTeamData])
+  }, [])
 
   useEffect(() => {
     if (teamOverviewData) {
-      setTeamOverviewTableData(prepTeamData(teamOverviewData))
+      setTeamOverviewTableData(prepTeamData(teamOverviewData)) // Update Table view on Tab onClick
     }
-  }, [teamOverviewData, prepTeamData])
+  }, [prepTeamData])
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)

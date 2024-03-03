@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from './teamDetail.module.scss'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
@@ -61,7 +62,7 @@ const TeamDetail = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [teamId])
+  }, [])
 
   useEffect(() => {
     getTeamDetail(teamId as string)
@@ -72,7 +73,7 @@ const TeamDetail = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [teamId, prepTeamData])
+  }, [prepTeamData])
 
   const renderUsernameColumn = (user: User) => {
     return (
