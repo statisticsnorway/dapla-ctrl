@@ -10,7 +10,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType, formatDisplayName } from '../../utils/utils'
 
-import { getUserProfileTeamData, TeamsData, Team, UserProfileTeamData } from '../../services/userProfile'
+import { getUserProfileTeamData, TeamsData, Team } from '../../services/userProfile'
 
 import { useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
