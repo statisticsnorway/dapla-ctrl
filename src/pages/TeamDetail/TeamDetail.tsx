@@ -25,7 +25,7 @@ const TeamDetail = () => {
 
   const prepTeamData = useCallback((response: TeamDetailData): TableData['data'] => {
     if (!response.team.users) {
-      return [];
+      return []
     }
 
     return response.team.users.map((user) => {
@@ -33,27 +33,30 @@ const TeamDetail = () => {
       const usernameColumn = {
         user: user.display_name,
         seksjon: user.section_name,
-      };
-  
+      }
+
       return {
         id: user?.principal_name,
         ...usernameColumn,
         navn: renderUsernameColumn(user),
-        gruppe: user.groups?.filter((group) => group.uniform_name.startsWith(response.team.uniform_name)).map((group) => getGroupType(group.uniform_name)).join(', '),
+        gruppe: user.groups
+          ?.filter((group) => group.uniform_name.startsWith(response.team.uniform_name))
+          .map((group) => getGroupType(group.uniform_name))
+          .join(', '),
         epost: user?.principal_name,
-      };
-    });
-  }, []);
+      }
+    })
+  }, [])
 
   useEffect(() => {
     if (!teamId) return
     getTeamDetail(teamId)
       .then((response) => {
-        const formattedResponse = response as TeamDetailData;
-        setTeamDetailData(formattedResponse);
+        const formattedResponse = response as TeamDetailData
+        setTeamDetailData(formattedResponse)
 
-        const displayName = formatDisplayName(formattedResponse.team.display_name);
-        setBreadcrumbTeamDetailDisplayName({ displayName });  
+        const displayName = formatDisplayName(formattedResponse.team.display_name)
+        setBreadcrumbTeamDetailDisplayName({ displayName })
       })
       .catch((error) => {
         setError(error as ApiError)
@@ -118,8 +121,7 @@ const TeamDetail = () => {
               {teamDetailData ? teamDetailData.team.uniform_name : ''}
             </Text>
             <Text medium>
-              {  teamDetailData ? formatDisplayName(teamDetailData.team.manager?.display_name ?? '') : ''
-}
+              {teamDetailData ? formatDisplayName(teamDetailData.team.manager?.display_name ?? '') : ''}
             </Text>
             <Text medium>{teamDetailData ? teamDetailData.team.section_name : ''}</Text>
           </LeadParagraph>

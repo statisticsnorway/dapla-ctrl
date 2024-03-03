@@ -81,11 +81,11 @@ app.get('/api/photo/:principalName', tokenVerificationMiddleware, async (req, re
   const accessToken = req.token
   const principalName = req.params.principalName
   const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
-  
+
   try {
     const photoData = await fetchPhoto(accessToken, userPhotoUrl)
 
-    return res.send({photo: photoData})
+    return res.send({ photo: photoData })
   } catch (error) {
     next(error)
   }
@@ -102,7 +102,6 @@ async function fetchPhoto(token, url, fallbackErrorMessage) {
   const photoBuffer = Buffer.from(arrayBuffer)
   return photoBuffer.toString('base64')
 }
-
 
 function getFetchOptions(token) {
   return {

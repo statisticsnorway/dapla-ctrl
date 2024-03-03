@@ -64,11 +64,11 @@ function flattenEmbedded(json: any): any {
 }
 
 export const getUserProfile = async (principalName: string, token?: string): Promise<User | ApiError> => {
-  const accessToken = localStorage.getItem('access_token') as string || token as string
+  const accessToken = (localStorage.getItem('access_token') as string) || (token as string)
   principalName = principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
 
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
-  
+
   const embeds = ['section_manager']
   const selects = [
     'principal_name',
@@ -79,7 +79,7 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
     'division_name',
     'phone',
     'section_manager.display_name',
-    'section_manager.principal_name'
+    'section_manager.principal_name',
   ]
 
   usersUrl.searchParams.set('embed', embeds.join(','))
@@ -88,12 +88,12 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
   try {
     const [userData, userPhoto] = await Promise.all([
       fetchAPIData(usersUrl.toString(), accessToken),
-      fetchPhoto(accessToken, principalName)
+      fetchPhoto(accessToken, principalName),
     ])
 
     userData.photo = userPhoto
 
-    return flattenEmbedded({...userData})
+    return flattenEmbedded({ ...userData })
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch userProfile data:', error)
@@ -106,27 +106,22 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
   }
 }
 
-
 export const getUserProfileTeamData = async (principalName: string): Promise<TeamsData | ApiError> => {
   const accessToken = localStorage.getItem('access_token') as string
   principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
 
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
-  const embeds = [
-    'teams',
-    'teams.groups',
-    'teams.groups.users',
-  ]
+  const embeds = ['teams', 'teams.groups', 'teams.groups.users']
 
   const selects = [
-    "display_name",
-    "principal_name",
-    "teams.section_name",
-    "teams.display_name",
-    "teams.uniform_name",
-    "team.groups.uniform_name",
-    "teams.groups.users.principal_name",
-    "teams.groups.users.display_name",
+    'display_name',
+    'principal_name',
+    'teams.section_name',
+    'teams.display_name',
+    'teams.uniform_name',
+    'team.groups.uniform_name',
+    'teams.groups.users.principal_name',
+    'teams.groups.users.display_name',
   ]
 
   usersUrl.searchParams.set('embed', embeds.join(','))
@@ -179,7 +174,7 @@ export const getUserProfileFallback = (accessToken: string): User => {
     principal_name: jwt.upn,
     azure_ad_id: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
     display_name: jwt.name,
-    section_name: "UNSET",
+    section_name: 'UNSET',
     first_name: jwt.given_name,
     last_name: jwt.family_name,
     email: jwt.email,
@@ -193,10 +188,10 @@ const fetchPhoto = async (accessToken: string, principalName: string) => {
       Accept: '*/*',
       Authorization: `Bearer ${accessToken}`,
     },
-  });
+  })
 
   if (!response.ok) {
-    throw new ApiError(500, "could not fetch photo");
+    throw new ApiError(500, 'could not fetch photo')
   }
 
   const data = await response.json()

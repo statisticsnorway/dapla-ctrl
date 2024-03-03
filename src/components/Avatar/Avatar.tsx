@@ -21,9 +21,7 @@ const Avatar = () => {
     if (!userProfile) return
 
     setUserProfileData(userProfile)
-    setEncodedURI(
-      `/teammedlemmer/${userProfile.principal_name}`
-    )
+    setEncodedURI(`/teammedlemmer/${userProfile.principal_name}`)
     setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0])
 
     const base64Image = userProfile?.photo

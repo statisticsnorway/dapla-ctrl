@@ -30,10 +30,12 @@ const UserProfile = () => {
         id: team.uniform_name,
         seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
-        gruppe: principalName ? team.groups
-        ?.filter(group => group.users.some(user => user.principal_name === principalName)) // Filter groups based on principalName presence
-        .map(group => getGroupType(group.uniform_name))
-        .join(', ') : "INGEN FUNNET",
+        gruppe: principalName
+          ? team.groups
+              ?.filter((group) => group.users.some((user) => user.principal_name === principalName)) // Filter groups based on principalName presence
+              .map((group) => getGroupType(group.uniform_name))
+              .join(', ')
+          : 'INGEN FUNNET',
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
@@ -41,20 +43,19 @@ const UserProfile = () => {
   )
 
   useEffect(() => {
-      getUserProfileTeamData(principalName as string)
-        .then((response) => {
-          const formattedResponse = response as TeamsData;
-          setUserProfileTableData(prepTeamData(formattedResponse))
-          setUserProfileData((formattedResponse))
+    getUserProfileTeamData(principalName as string)
+      .then((response) => {
+        const formattedResponse = response as TeamsData
+        setUserProfileTableData(prepTeamData(formattedResponse))
+        setUserProfileData(formattedResponse)
 
-          const displayName = formatDisplayName(formattedResponse.user.display_name);
-          setBreadcrumbUserProfileDisplayName({ displayName });
-        })
-        .finally(() => setLoadingTeamData(false))
-        .catch((error) => {
-          setError(error as ApiError)
-        })
-    
+        const displayName = formatDisplayName(formattedResponse.user.display_name)
+        setBreadcrumbUserProfileDisplayName({ displayName })
+      })
+      .finally(() => setLoadingTeamData(false))
+      .catch((error) => {
+        setError(error as ApiError)
+      })
   }, [principalName, prepTeamData])
 
   const renderTeamNameColumn = (team: Team) => {

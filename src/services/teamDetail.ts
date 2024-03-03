@@ -1,4 +1,4 @@
-import { ApiError, fetchAPIData} from '../utils/services'
+import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded } from '../utils/utils'
 
 const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
@@ -42,38 +42,37 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`)
   const embeds = ['users', 'users.groups', 'managers']
   const selects = [
-    "uniform_name",
-    "display_name",
-    "section_name",
-    "managers.principal_name",
-    "managers.display_name",
-    "managers.section_name",
-    "users.principal_name",
-    "users.display_name",
-    "users.section_name",
-    "users.groups.uniform_name"
+    'uniform_name',
+    'display_name',
+    'section_name',
+    'managers.principal_name',
+    'managers.display_name',
+    'managers.section_name',
+    'users.principal_name',
+    'users.display_name',
+    'users.section_name',
+    'users.groups.uniform_name',
   ]
 
   teamsUrl.searchParams.set('embed', embeds.join(','))
   teamsUrl.searchParams.append('select', selects.join(','))
 
   try {
-
     const teamDetailData = await fetchAPIData(teamsUrl.toString(), accessToken)
     const flattendTeams = flattenEmbedded(teamDetailData)
     if (!flattendTeams) return {} as Team
     if (!flattendTeams.users) flattendTeams.users = []
     if (!flattendTeams.managers || flattendTeams.managers.length === 0) {
       flattendTeams.manager = {
-      "display_name": "Ikke funnet",
-      "principal_name": "Ikke funnet",
-      "section_name": "Ikke funnet"
+        display_name: 'Ikke funnet',
+        principal_name: 'Ikke funnet',
+        section_name: 'Ikke funnet',
       }
     } else {
       flattendTeams.manager = flattendTeams.managers[0]
     }
     delete flattendTeams.managers
-    
+
     return flattendTeams
   } catch (error) {
     if (error instanceof ApiError) {
@@ -91,13 +90,12 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData | Ap
   const accessToken = localStorage.getItem('access_token') as string
 
   try {
-    
     const [teamInfo] = await Promise.all([
-      fetchTeamInfo(teamId, accessToken)
+      fetchTeamInfo(teamId, accessToken),
       //TODO: Add shared buckets part
     ])
 
-    return { team: teamInfo} as TeamDetailData
+    return { team: teamInfo } as TeamDetailData
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch data for teamDetail page:', error)
