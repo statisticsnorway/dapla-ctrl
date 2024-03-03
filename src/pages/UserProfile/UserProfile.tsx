@@ -45,6 +45,7 @@ const UserProfile = () => {
   useEffect(() => {
     getUserProfileTeamData(principalName as string)
       .then((response) => {
+        console.log(response)
         const formattedResponse = response as TeamsData
         setUserProfileTableData(prepTeamData(formattedResponse))
         setUserProfileData(formattedResponse)
@@ -56,7 +57,7 @@ const UserProfile = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [principalName, prepTeamData])
+  }, [principalName, prepTeamData, setBreadcrumbUserProfileDisplayName])
 
   const renderTeamNameColumn = (team: Team) => {
     return (

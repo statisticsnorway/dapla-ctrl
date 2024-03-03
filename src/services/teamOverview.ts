@@ -1,5 +1,5 @@
 import { ApiError, fetchAPIData } from '../utils/services'
-
+import { flattenEmbedded } from '../utils/utils'
 const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 const TEAMS_URL = `${DAPLA_TEAM_API_URL}/teams`
@@ -39,23 +39,6 @@ interface Group {
   uniform_name: string
   display_name: string
   users: User[]
-}
-
-function flattenEmbedded(json: any): any {
-  if (json._embedded) {
-    for (const prop in json._embedded) {
-      json[prop] = json._embedded[prop]
-    }
-    delete json._embedded
-  }
-
-  for (const prop in json) {
-    if (typeof json[prop] === 'object') {
-      json[prop] = flattenEmbedded(json[prop])
-    }
-  }
-
-  return json
 }
 
 const fetchAllTeams = async (accessToken: string): Promise<TeamsData> => {

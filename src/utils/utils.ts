@@ -21,6 +21,7 @@ export const formatDisplayName = (displayName: string) => {
   return displayName.split(', ').reverse().join(' ')
 }
 
+// eslint-disable-next-line
 export const flattenEmbedded = (json: any): any => {
   if (json._embedded) {
     for (const prop in json._embedded) {
