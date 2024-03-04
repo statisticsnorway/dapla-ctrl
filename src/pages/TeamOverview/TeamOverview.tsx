@@ -7,13 +7,14 @@ import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
-import { ErrorResponse } from '../../@types/error'
-import { Team } from '../../@types/team'
-
-import { getTeamOverview, TeamOverviewData } from '../../services/teamOverview'
+import { fetchTeamOverviewData, TeamOverviewData, Team } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
+import { ApiError } from '../../utils/services'
 
 const TeamOverview = () => {
+  const accessToken = localStorage.getItem('access_token') || ''
+  const jwt = JSON.parse(atob(accessToken.split('.')[1]))
+
   const defaultActiveTab = {
     title: 'Mine team',
     path: 'myTeams',
@@ -23,18 +24,17 @@ const TeamOverview = () => {
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title)
-  const [error, setError] = useState<ErrorResponse | undefined>()
+  const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
-      const team = (activeTab as TabProps)?.path ?? activeTab
-
-      return response[team].teams.map((team) => ({
+      const teamTab = (activeTab as TabProps)?.path ?? activeTab
+      return response[teamTab].teams.map((team) => ({
         id: team.uniform_name,
         seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
         navn: renderTeamNameColumn(team),
-        teammedlemmer: team.team_user_count,
+        teammedlemmer: team.users.length,
         ansvarlig: formatDisplayName(team.manager.display_name),
       }))
     },
@@ -42,18 +42,15 @@ const TeamOverview = () => {
   )
 
   useEffect(() => {
-    getTeamOverview()
+    if (!jwt) return
+    fetchTeamOverviewData(jwt.email)
       .then((response) => {
-        if ((response as ErrorResponse).error) {
-          setError(response as ErrorResponse)
-        } else {
-          setTeamOverviewData(response as TeamOverviewData)
-          setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
-        }
+        setTeamOverviewData(response as TeamOverviewData)
+        setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
       })
       .finally(() => setLoading(false))
       .catch((error) => {
-        setError(error.toString())
+        setError(error as ApiError)
       })
   }, [])
 
@@ -88,7 +85,7 @@ const TeamOverview = () => {
   const renderErrorAlert = () => {
     return (
       <Dialog type='warning' title='Could not fetch teams'>
-        {error?.error.message}
+        {`${error?.code} - ${error?.message}`}
       </Dialog>
     )
   }
@@ -119,8 +116,8 @@ const TeamOverview = () => {
             onClick={handleTabClick}
             activeOnInit={defaultActiveTab.path}
             items={[
-              { title: `Mine team (${teamOverviewData?.myTeams.count ?? 0})`, path: 'myTeams' },
-              { title: `Alle team (${teamOverviewData?.allTeams.count ?? 0})`, path: 'allTeams' },
+              { title: `Mine team (${teamOverviewData?.myTeams.teams.length ?? 0})`, path: 'myTeams' },
+              { title: `Alle team (${teamOverviewData?.allTeams.teams.length ?? 0})`, path: 'allTeams' },
             ]}
           />
           <Divider dark />
