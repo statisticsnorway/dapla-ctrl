@@ -129,7 +129,7 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
           {data.length ? (
             data.map((row, index) => {
               return (
-                <tr key={row.id} className={conditionalStyling(index)}>
+                <tr key={row.id + index} className={conditionalStyling(index)}>
                   {columns.map((column) => (
                     <td key={column.id}>{row[column.id]}</td>
                   ))}
