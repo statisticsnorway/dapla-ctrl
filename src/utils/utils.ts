@@ -20,3 +20,21 @@ export const getGroupType = (groupName: string) => {
 export const formatDisplayName = (displayName: string) => {
   return displayName.split(', ').reverse().join(' ')
 }
+
+// eslint-disable-next-line
+export const flattenEmbedded = (json: any): any => {
+  if (json._embedded) {
+    for (const prop in json._embedded) {
+      json[prop] = json._embedded[prop]
+    }
+    delete json._embedded
+  }
+
+  for (const prop in json) {
+    if (typeof json[prop] === 'object') {
+      json[prop] = flattenEmbedded(json[prop])
+    }
+  }
+
+  return json
+}
