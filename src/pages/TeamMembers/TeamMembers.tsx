@@ -32,7 +32,7 @@ const TeamMembers = () => {
       const teamMember = (activeTab as TabProps)?.path ?? activeTab
 
       return response[teamMember].users.map((teamMember) => ({
-        id: teamMember.principal_name,
+        id: formatDisplayName(teamMember.display_name),
         navn: renderUserNameColumn(teamMember),
         team: teamMember.teams.length,
         data_admin_roller: teamMember.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,

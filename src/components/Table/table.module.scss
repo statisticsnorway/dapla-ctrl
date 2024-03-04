@@ -70,6 +70,35 @@
         display: flex;
       }
     }
+
+    .sortableColumn {
+      cursor: pointer;
+
+      svg {
+        display: none;
+        color: variables.$ssb-green-4; 
+        margin-left: .25rem;
+      }
+      
+      span {
+        display: flex;
+        align-items: center;
+      }
+      
+      .displayArrowOnSelectedColumn {
+        display: initial;
+      }
+      
+      &:hover {
+        span {
+          color: variables.$ssb-green-4; 
+        } 
+
+        svg {
+          display: initial;
+        }
+      }
+    }
   }
 }
 

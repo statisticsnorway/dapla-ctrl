@@ -4,17 +4,22 @@ import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 
-interface TableProps {
+import { ArrowUp, ArrowDown } from 'react-feather'
+
+interface TableProps extends TableData {
   title: string
   dropdownAriaLabel?: string
   dropdownFilterItems?: Array<object>
-  columns: TableData['columns']
-  data: TableData['data']
+}
+
+interface TableDesktopViewProps extends TableData {
+  activeTab?: string
 }
 export interface TableData {
   columns: {
     id: string
     label: string
+    unsortable?: boolean
   }[]
   data: {
     id: string
@@ -50,43 +55,100 @@ const TableMobileView = ({ columns, data }: TableData) => (
   </div>
 )
 
-const TableDesktopView = ({ columns, data }: TableData) => (
-  <div className={styles.tableContainer}>
-    <table className={styles.table}>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column.id}>{column.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {data.length ? (
-          data.map((row, index) => {
-            return (
-              <tr key={row.id} className={conditionalStyling(index)}>
-                {columns.map((column) => (
-                  <td key={column.id}>{row[column.id]}</td>
-                ))}
-              </tr>
-            )
-          })
-        ) : (
-          <tr>
-            <td colSpan={columns.length}>
-              <NoResultText />
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-)
+const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) => {
+  const defaultState = {
+    sortBy: '',
+    sortByDirection: 'asc',
+  }
+  const [sortBy, setSortBy] = useState(defaultState.sortBy)
+  const [sortByDirection, setSortByDirection] = useState(defaultState.sortByDirection)
 
-/* TODO:
- * Add alphabetical, numerical etc sorting when row header is clicked
- * Consider making table sort more visible
- */
+  useEffect(() => {
+    setSortBy(defaultState.sortBy)
+    setSortByDirection(defaultState.sortByDirection)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab])
+
+  const sortTableData = (id: string) => {
+    data.sort((a, b) => {
+      // Sort by id for the first column;
+      const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
+      const valueB = typeof b[id] === 'object' ? b['id'] : b[id]
+
+      // Sort by number
+      if (typeof valueA === 'number' && typeof valueB === 'number')
+        return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
+
+      // Sort by alphabet
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
+        if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
+      }
+      return 0
+
+      // TODO: Sort by date
+    })
+  }
+
+  const handleSortBy = (id: string) => {
+    setSortBy(id)
+    setSortByDirection((prevState) => (prevState === 'asc' ? 'desc' : 'asc'))
+    sortTableData(id)
+  }
+
+  const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
+    if (selectedColumn && sortByDirection === 'asc')
+      return <ArrowDown size={18} className={styles.displayArrowOnSelectedColumn} />
+    return <ArrowUp className={selectedColumn ? styles.displayArrowOnSelectedColumn : undefined} size={18} />
+  }
+
+  return (
+    <div className={styles.tableContainer}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            {columns.map((column) => (
+              <th
+                key={column.id}
+                className={!column.unsortable ? styles.sortableColumn : undefined}
+                onClick={!column.unsortable ? () => handleSortBy(column.id) : undefined}
+              >
+                {!column.unsortable ? (
+                  <span>
+                    {column.label}
+                    {renderSortByArrow(sortBy === column.id, sortByDirection)}
+                  </span>
+                ) : (
+                  column.label
+                )}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.length ? (
+            data.map((row, index) => {
+              return (
+                <tr key={row.id} className={conditionalStyling(index)}>
+                  {columns.map((column) => (
+                    <td key={column.id}>{row[column.id]}</td>
+                  ))}
+                </tr>
+              )
+            })
+          ) : (
+            <tr>
+              <td colSpan={columns.length}>
+                <NoResultText />
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) => {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
   const [filteredTableData, setFilteredTableData] = useState(data)
@@ -131,7 +193,7 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
       {isOnMobile ? (
         <TableMobileView columns={columns} data={filteredTableData} />
       ) : (
-        <TableDesktopView columns={columns} data={filteredTableData} />
+        <TableDesktopView columns={columns} data={filteredTableData} activeTab={title} /> // Table title changes when switching between tabs
       )}
     </>
   )
