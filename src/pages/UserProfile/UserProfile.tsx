@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from './userprofile.module.scss'
 
 import { Dialog, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
@@ -56,7 +57,7 @@ const UserProfile = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [principalName, prepTeamData, setBreadcrumbUserProfileDisplayName])
+  }, [principalName, setBreadcrumbUserProfileDisplayName])
 
   const renderTeamNameColumn = (team: Team) => {
     return (

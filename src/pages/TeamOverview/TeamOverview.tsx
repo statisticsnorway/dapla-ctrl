@@ -51,7 +51,7 @@ const TeamOverview = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [jwt.email, prepTeamData])
+  }, [jwt.email])
 
   useEffect(() => {
     if (teamOverviewData) {
