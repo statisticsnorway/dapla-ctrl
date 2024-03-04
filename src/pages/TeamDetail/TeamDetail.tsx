@@ -62,7 +62,7 @@ const TeamDetail = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [teamId, setBreadcrumbTeamDetailDisplayName])
+  }, [])
 
   useEffect(() => {
     getTeamDetail(teamId as string)
