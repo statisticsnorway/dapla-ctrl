@@ -57,7 +57,7 @@ const UserProfile = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [principalName, setBreadcrumbUserProfileDisplayName])
+  }, [setBreadcrumbUserProfileDisplayName])
 
   const renderTeamNameColumn = (team: Team) => {
     return (
