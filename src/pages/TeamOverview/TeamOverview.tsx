@@ -42,6 +42,7 @@ const TeamOverview = () => {
   )
 
   useEffect(() => {
+    if (!jwt) return
     fetchTeamOverviewData(jwt.email)
       .then((response) => {
         setTeamOverviewData(response as TeamOverviewData)
@@ -51,7 +52,7 @@ const TeamOverview = () => {
       .catch((error) => {
         setError(error as ApiError)
       })
-  }, [jwt.email])
+  }, [])
 
   useEffect(() => {
     if (teamOverviewData) {
