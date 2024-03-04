@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import styles from './teamDetail.module.scss'
 
+import { TabProps } from '../../@types/pageTypes'
+
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import { TeamDetailData, getTeamDetail, Team, SharedBucket, SharedBuckets } from '../../services/teamDetail'
@@ -13,7 +15,7 @@ import { formatDisplayName, getGroupType } from '../../utils/utils'
 import { User } from '../../services/teamDetail'
 import { Text, Link, Dialog, LeadParagraph, Divider, Tabs } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import { Skeleton, TabProps } from '@mui/material'
+import { Skeleton } from '@mui/material'
 
 const TeamDetail = () => {
   const defaultActiveTab = {
@@ -36,26 +38,30 @@ const TeamDetail = () => {
     (response: TeamDetailData): TableData['data'] => {
       const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
       if (teamDetailTab === 'sharedBuckets') {
-        if (!response['sharedBuckets'].items) return []
-        return response['sharedBuckets'].items.map(({ short_name, bucket_name, metrics }) => {
+        const sharedBuckets = (response['sharedBuckets'] as SharedBuckets).items
+        if (!sharedBuckets) return []
+
+        return sharedBuckets.map(({ short_name, bucket_name, metrics }) => {
+          const teams_count = metrics?.teams_count
           return {
             id: short_name,
             navn: renderBucketNameColumn({ short_name, bucket_name }),
-            tilgang: `${metrics[0].teams_count} team`,
-            delte_data: metrics[0].groups_count,
-            antall_personer: metrics[0].users_count,
+            tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
+            delte_data: metrics?.groups_count,
+            antall_personer: metrics?.users_count,
           }
         })
       } else {
-        if (!response['team'].users) return []
+        const teamUsers = (response['team'] as Team).users
+        if (!teamUsers) return []
 
-        return response['team'].users.map((user) => {
+        return teamUsers.map((user) => {
           return {
             id: formatDisplayName(user.display_name),
             navn: renderUsernameColumn(user),
             seksjon: user.section_name, // Makes section name searchable and sortable in table by including the field
             gruppe: user.groups
-              ?.filter((group) => group.uniform_name.startsWith(response.team.uniform_name))
+              ?.filter((group) => group.uniform_name.startsWith((response.team as Team).uniform_name))
               .map((group) => getGroupType(group.uniform_name))
               .join(', '),
             epost: user?.principal_name,
@@ -101,15 +107,15 @@ const TeamDetail = () => {
     }
   }
 
-  const renderUsernameColumn = (user: User) => {
+  const renderUsernameColumn = ({ principal_name, display_name, section_name }: User) => {
     return (
       <>
         <span>
-          <Link href={`/teammedlemmer/${user.principal_name}`}>
-            <b>{formatDisplayName(user.display_name)}</b>
+          <Link href={`/teammedlemmer/${principal_name}`}>
+            <b>{formatDisplayName(display_name)}</b>
           </Link>
         </span>
-        {user && <Text>{user.section_name ? user.section_name : 'Mangler seksjon'}</Text>}
+        <Text>{section_name ? section_name : 'Mangler seksjon'}</Text>
       </>
     )
   }

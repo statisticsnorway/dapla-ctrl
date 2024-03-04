@@ -47,13 +47,13 @@ export interface SharedBuckets {
 export interface SharedBucket {
   short_name: string
   bucket_name: string
-  metrics?: Metrics[]
+  metrics?: Metrics
 }
 
-interface Metrics {
-  teams_count: number
-  groups_count: number
-  users_count: number
+export interface Metrics {
+  teams_count?: number
+  groups_count?: number
+  users_count?: number
 }
 
 export const fetchTeamInfo = async (teamId: string, accessToken: string): Promise<Team | ApiError> => {
@@ -118,17 +118,23 @@ export const fetchSharedBuckets = async (teamId: string, accessToken: string): P
     if (!sharedBuckets) throw new ApiError(500, 'No json data returned')
     if (!sharedBuckets._embedded) return {} as SharedBuckets
 
-    // TODO: Add fallback for teams with shared buckets that have no metrics
     const flattenedSharedBuckets = flattenEmbedded({ ...sharedBuckets })
+    flattenedSharedBuckets.items.forEach((item: SharedBucket) => {
+      if (!item.metrics) {
+        item.metrics = {}
+      } else {
+        item.metrics = (item.metrics as Metrics[])[0]
+      }
+    })
 
     return flattenedSharedBuckets
   } catch (error) {
     if (error instanceof ApiError) {
-      console.error('Failed to fetch teams:', error)
+      console.error('Failed to fetch shared buckets:', error)
       throw error
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred')
-      console.error('Failed to fetch teams:', apiError)
+      console.error('Failed to fetch shared buckets:', apiError)
       throw apiError
     }
   }
