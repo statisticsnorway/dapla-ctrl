@@ -8,6 +8,10 @@ interface BreadcrumbTeamDetailDisplayName {
   displayName: string
 }
 
+interface BreadcrumbBucketDetailDisplayName {
+  displayName: string
+}
+
 interface DaplaCtrlContextType {
   breadcrumbUserProfileDisplayName: BreadcrumbUserProfileDisplayName | null
   setBreadcrumbUserProfileDisplayName: (
@@ -16,6 +20,11 @@ interface DaplaCtrlContextType {
 
   breadcrumbTeamDetailDisplayName: BreadcrumbTeamDetailDisplayName | null
   setBreadcrumbTeamDetailDisplayName: (breadcrumbTeamDetailDisplayName: BreadcrumbTeamDetailDisplayName | null) => void
+
+  breadcrumbBucketDetailDisplayName: BreadcrumbBucketDetailDisplayName | null
+  setBreadcrumbBucketDetailDisplayName: (
+    breadcrumbBucketDetailDisplayName: BreadcrumbBucketDetailDisplayName | null
+  ) => void
 }
 
 const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
@@ -23,6 +32,8 @@ const DaplaCtrlContext = createContext<DaplaCtrlContextType>({
   setBreadcrumbUserProfileDisplayName: () => {},
   breadcrumbTeamDetailDisplayName: null,
   setBreadcrumbTeamDetailDisplayName: () => {},
+  breadcrumbBucketDetailDisplayName: null,
+  setBreadcrumbBucketDetailDisplayName: () => {},
 })
 
 const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
@@ -30,6 +41,8 @@ const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
     useState<BreadcrumbUserProfileDisplayName | null>(null)
   const [breadcrumbTeamDetailDisplayName, setBreadcrumbTeamDetailDisplayName] =
     useState<BreadcrumbUserProfileDisplayName | null>(null)
+  const [breadcrumbBucketDetailDisplayName, setBreadcrumbBucketDetailDisplayName] =
+    useState<BreadcrumbBucketDetailDisplayName | null>(null)
 
   return (
     <DaplaCtrlContext.Provider
@@ -38,6 +51,8 @@ const DaplaCtrlProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setBreadcrumbUserProfileDisplayName,
         breadcrumbTeamDetailDisplayName,
         setBreadcrumbTeamDetailDisplayName,
+        breadcrumbBucketDetailDisplayName,
+        setBreadcrumbBucketDetailDisplayName,
       }}
     >
       {children}
