@@ -17,19 +17,24 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 
-const TeamDetail = () => {
-  const defaultActiveTab = {
-    title: 'Teammedlemmer',
-    path: 'team',
-  }
+const TEAM_USERS_TAB = {
+  title: 'Teammedlemmer',
+  path: 'team',
+}
 
-  const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab)
+const SHARED_BUCKETS_TAB = {
+  title: 'Delte data',
+  path: 'sharedBuckets',
+}
+
+const TeamDetail = () => {
+  const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
-  const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(defaultActiveTab.title)
+  const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const { teamId } = useParams<{ teamId: string }>()
@@ -37,8 +42,9 @@ const TeamDetail = () => {
   const prepTeamData = useCallback(
     (response: TeamDetailData): TableData['data'] => {
       const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
-      if (teamDetailTab === 'sharedBuckets') {
-        const sharedBuckets = (response['sharedBuckets'] as SharedBuckets).items
+      const sharedBucketsTab = SHARED_BUCKETS_TAB.path
+      if (teamDetailTab === sharedBucketsTab) {
+        const sharedBuckets = (response[sharedBucketsTab] as SharedBuckets).items
         if (!sharedBuckets) return []
 
         return sharedBuckets.map(({ short_name, bucket_name, metrics }) => {
@@ -52,7 +58,7 @@ const TeamDetail = () => {
           }
         })
       } else {
-        const teamUsers = (response['team'] as Team).users
+        const teamUsers = (response[TEAM_USERS_TAB.path] as Team).users
         if (!teamUsers) return []
 
         return teamUsers.map((user) => {
@@ -101,10 +107,10 @@ const TeamDetail = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === defaultActiveTab.path) {
-      setTeamDetailTableTitle(defaultActiveTab.title)
+    if (tab === TEAM_USERS_TAB.path) {
+      setTeamDetailTableTitle(TEAM_USERS_TAB.title)
     } else {
-      setTeamDetailTableTitle('Delte data')
+      setTeamDetailTableTitle(SHARED_BUCKETS_TAB.title)
     }
   }
 
@@ -163,15 +169,15 @@ const TeamDetail = () => {
           </LeadParagraph>
           <Tabs
             onClick={handleTabClick}
-            activeOnInit={defaultActiveTab.path}
+            activeOnInit={TEAM_USERS_TAB.path}
             items={[
               {
-                title: `${defaultActiveTab.title} (${(teamDetailData?.team as Team).users?.length ?? 0})`,
-                path: defaultActiveTab.path,
+                title: `${TEAM_USERS_TAB.title} (${(teamDetailData?.team as Team).users?.length ?? 0})`,
+                path: TEAM_USERS_TAB.path,
               },
               {
-                title: `Delte data (${(teamDetailData?.sharedBuckets as SharedBuckets).items?.length ?? 0})`,
-                path: 'sharedBuckets',
+                title: `${SHARED_BUCKETS_TAB.title} (${(teamDetailData?.sharedBuckets as SharedBuckets).items?.length ?? 0})`,
+                path: SHARED_BUCKETS_TAB.path,
               },
             ]}
           />
