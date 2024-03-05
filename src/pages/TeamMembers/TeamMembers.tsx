@@ -11,19 +11,24 @@ import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/t
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError } from '../../utils/services'
 
+const MY_USERS_TAB = {
+  title: 'Mine teammedlemmer',
+  path: 'myUsers',
+}
+
+const ALL_USERS_TAB = {
+  title: 'Alle teammedlemmer',
+  path: 'allUsers',
+}
+
 const TeamMembers = () => {
   const accessToken = localStorage.getItem('access_token') || ''
   const jwt = JSON.parse(atob(accessToken.split('.')[1]))
 
-  const defaultActiveTab = {
-    title: 'Mine teammedlemmer',
-    path: 'myUsers',
-  }
-
-  const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab)
+  const [activeTab, setActiveTab] = useState<TabProps | string>(MY_USERS_TAB)
   const [teamMembersData, setTeamMembersData] = useState<TeamMembersData>()
   const [teamMembersTableData, setTeamMembersTableData] = useState<TableData['data']>()
-  const [teamMembersTableTitle, setTeamMembersTableTitle] = useState<string>(defaultActiveTab.title)
+  const [teamMembersTableTitle, setTeamMembersTableTitle] = useState<string>(MY_USERS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -69,10 +74,10 @@ const TeamMembers = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === 'myUsers') {
-      setTeamMembersTableTitle('Mine teammedlemmer')
+    if (tab === MY_USERS_TAB.path) {
+      setTeamMembersTableTitle(MY_USERS_TAB.title)
     } else {
-      setTeamMembersTableTitle('Alle teammedlemmer')
+      setTeamMembersTableTitle(ALL_USERS_TAB.title)
     }
   }
 
@@ -125,10 +130,16 @@ const TeamMembers = () => {
         <>
           <Tabs
             onClick={handleTabClick}
-            activeOnInit={defaultActiveTab.path}
+            activeOnInit={MY_USERS_TAB.path}
             items={[
-              { title: `Mine teammedlemmer (${teamMembersData?.myUsers.users.length ?? 0})`, path: 'myUsers' },
-              { title: `Alle teammedlemmer (${teamMembersData?.allUsers.users.length ?? 0})`, path: 'allUsers' },
+              {
+                title: `${MY_USERS_TAB.title} (${teamMembersData?.myUsers.users.length ?? 0})`,
+                path: MY_USERS_TAB.path,
+              },
+              {
+                title: `${ALL_USERS_TAB.title} (${teamMembersData?.allUsers.users.length ?? 0})`,
+                path: ALL_USERS_TAB.path,
+              },
             ]}
           />
           <Divider dark />

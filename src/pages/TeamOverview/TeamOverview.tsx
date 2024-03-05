@@ -11,19 +11,24 @@ import { fetchTeamOverviewData, TeamOverviewData, Team } from '../../services/te
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError } from '../../utils/services'
 
+const MY_TEAMS_TAB = {
+  title: 'Mine team',
+  path: 'myTeams',
+}
+
+const ALL_TEAMS_TAB = {
+  title: 'Alle teams',
+  path: 'allTeams',
+}
+
 const TeamOverview = () => {
   const accessToken = localStorage.getItem('access_token') || ''
   const jwt = JSON.parse(atob(accessToken.split('.')[1]))
 
-  const defaultActiveTab = {
-    title: 'Mine team',
-    path: 'myTeams',
-  }
-
-  const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab)
+  const [activeTab, setActiveTab] = useState<TabProps | string>(MY_TEAMS_TAB)
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
-  const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title)
+  const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -62,10 +67,10 @@ const TeamOverview = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === 'myTeams') {
-      setTeamOverviewTableTitle('Mine team')
+    if (tab === MY_TEAMS_TAB.path) {
+      setTeamOverviewTableTitle(MY_TEAMS_TAB.title)
     } else {
-      setTeamOverviewTableTitle('Alle teams')
+      setTeamOverviewTableTitle(ALL_TEAMS_TAB.title)
     }
   }
 
@@ -114,10 +119,16 @@ const TeamOverview = () => {
         <>
           <Tabs
             onClick={handleTabClick}
-            activeOnInit={defaultActiveTab.path}
+            activeOnInit={MY_TEAMS_TAB.path}
             items={[
-              { title: `Mine team (${teamOverviewData?.myTeams.teams.length ?? 0})`, path: 'myTeams' },
-              { title: `Alle team (${teamOverviewData?.allTeams.teams.length ?? 0})`, path: 'allTeams' },
+              {
+                title: `${MY_TEAMS_TAB.title} (${teamOverviewData?.myTeams.teams.length ?? 0})`,
+                path: MY_TEAMS_TAB.path,
+              },
+              {
+                title: `${ALL_TEAMS_TAB.title} (${teamOverviewData?.allTeams.teams.length ?? 0})`,
+                path: ALL_TEAMS_TAB.path,
+              },
             ]}
           />
           <Divider dark />
