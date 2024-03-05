@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import styles from './userprofile.module.scss'
+import styles from '../../components/PageLayout/pagelayout.module.scss'
 
 import { Dialog, Text, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
@@ -89,7 +89,7 @@ const UserProfile = () => {
       ]
       return (
         <>
-          <LeadParagraph className={styles.userProfileDescription}>
+          <LeadParagraph className={styles.description}>
             <Text medium>{userProfileData?.user.section_name}</Text>
             <Text medium>{userProfileData?.user.principal_name}</Text>
           </LeadParagraph>

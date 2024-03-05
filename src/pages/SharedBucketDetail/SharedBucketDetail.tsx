@@ -1,4 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import styles from '../../components/PageLayout/pagelayout.module.scss'
+
 import PageLayout from '../../components/PageLayout/PageLayout'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import Table, { TableData } from '../../components/Table/Table'
@@ -72,8 +74,10 @@ const SharedBucketDetail = () => {
 
       return (
         <>
-          <LeadParagraph>
-            <Text medium>{(sharedBucketData.sharedBucket as SharedBucket).bucket_name}</Text>
+          <LeadParagraph className={styles.description}>
+            <Text medium className={styles.descriptionSpacing}>
+              {(sharedBucketData.sharedBucket as SharedBucket).bucket_name}
+            </Text>
             <Text medium>{(sharedBucketData.team as Team).display_name}</Text>
             <Text medium>{(sharedBucketData.team as Team).section_name}</Text>
           </LeadParagraph>
