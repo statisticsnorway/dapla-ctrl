@@ -72,8 +72,8 @@ const TeamMembers = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === 'myUsers') {
-      setTeamMembersTableTitle('Mine teammedlemmer')
+    if (tab === defaultActiveTab.path) {
+      setTeamMembersTableTitle(defaultActiveTab.title)
     } else {
       setTeamMembersTableTitle('Alle teammedlemmer')
     }
@@ -130,7 +130,10 @@ const TeamMembers = () => {
             onClick={handleTabClick}
             activeOnInit={defaultActiveTab.path}
             items={[
-              { title: `Mine teammedlemmer (${teamMembersData?.myUsers.users.length ?? 0})`, path: 'myUsers' },
+              {
+                title: `${defaultActiveTab.title} (${teamMembersData?.myUsers.users.length ?? 0})`,
+                path: defaultActiveTab.path,
+              },
               { title: `Alle teammedlemmer (${teamMembersData?.allUsers.users.length ?? 0})`, path: 'allUsers' },
             ]}
           />

@@ -65,8 +65,8 @@ const TeamOverview = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === 'myTeams') {
-      setTeamOverviewTableTitle('Mine team')
+    if (tab === defaultActiveTab.path) {
+      setTeamOverviewTableTitle(defaultActiveTab.title)
     } else {
       setTeamOverviewTableTitle('Alle teams')
     }
@@ -119,7 +119,10 @@ const TeamOverview = () => {
             onClick={handleTabClick}
             activeOnInit={defaultActiveTab.path}
             items={[
-              { title: `Mine team (${teamOverviewData?.myTeams.teams.length ?? 0})`, path: 'myTeams' },
+              {
+                title: `${defaultActiveTab.title} (${teamOverviewData?.myTeams.teams.length ?? 0})`,
+                path: defaultActiveTab.path,
+              },
               { title: `Alle team (${teamOverviewData?.allTeams.teams.length ?? 0})`, path: 'allTeams' },
             ]}
           />
