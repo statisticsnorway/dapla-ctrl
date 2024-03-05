@@ -5,7 +5,7 @@ const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const TEAMS_URL = `${DAPLA_TEAM_API_URL}/teams`
 
 export interface TeamDetailData {
-  team: Team
+  [key: string]: Team | SharedBuckets // teamUsers, sharedBuckets
 }
 
 export interface Team {
@@ -36,6 +36,24 @@ export interface User {
 interface Group {
   uniform_name: string
   display_name: string
+}
+
+export interface SharedBuckets {
+  items: SharedBucket[]
+  // eslint-disable-next-line
+    _embedded?: any
+}
+
+export interface SharedBucket {
+  short_name: string
+  bucket_name: string
+  metrics?: Metrics
+}
+
+export interface Metrics {
+  teams_count?: number | string
+  groups_count?: number | string
+  users_count?: number | string
 }
 
 export const fetchTeamInfo = async (teamId: string, accessToken: string): Promise<Team | ApiError> => {
@@ -86,16 +104,56 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
   }
 }
 
-export const getTeamDetail = async (teamId: string): Promise<TeamDetailData | ApiError> => {
+export const fetchSharedBuckets = async (teamId: string, accessToken: string): Promise<SharedBuckets | ApiError> => {
+  const sharedBucketsUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets`)
+
+  const embeds = ['metrics']
+  const selects = ['short_name', 'bucket_name', 'metrics.teams_count', 'metrics.groups_count', 'metrics.users_count']
+
+  sharedBucketsUrl.searchParams.set('embed', embeds.join(','))
+  sharedBucketsUrl.searchParams.append('select', selects.join(','))
+
+  try {
+    const sharedBuckets = await fetchAPIData(sharedBucketsUrl.toString(), accessToken)
+    if (!sharedBuckets) throw new ApiError(500, 'No json data returned')
+    if (!sharedBuckets._embedded) return {} as SharedBuckets
+
+    const flattenedSharedBuckets = flattenEmbedded({ ...sharedBuckets })
+    flattenedSharedBuckets.items.forEach((item: SharedBucket) => {
+      if (!item.metrics) {
+        item.metrics = {
+          teams_count: 'Ingen data',
+          groups_count: 'Ingen data',
+          users_count: 'Ingen data',
+        }
+      } else {
+        item.metrics = (item.metrics as Metrics[])[0]
+      }
+    })
+
+    return flattenedSharedBuckets
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch shared buckets:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch shared buckets:', apiError)
+      throw apiError
+    }
+  }
+}
+
+export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => {
   const accessToken = localStorage.getItem('access_token') as string
 
   try {
-    const [teamInfo] = await Promise.all([
+    const [teamInfo, sharedBuckets] = await Promise.all([
       fetchTeamInfo(teamId, accessToken),
-      //TODO: Add shared buckets part
+      fetchSharedBuckets(teamId, accessToken),
     ])
 
-    return { team: teamInfo } as TeamDetailData
+    return { team: teamInfo as Team, sharedBuckets } as TeamDetailData
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch data for teamDetail page:', error)
