@@ -21,35 +21,6 @@ const client = jwksClient({
   jwksUri: process.env.VITE_JWKS_URI,
 })
 
-// Middleware to protect APi endpoints, requiring Bearer token every time.
-async function tokenVerificationMiddleware(req, res, next) {
-  try {
-    if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
-      return res.status(401).json({ message: 'No token provided' })
-    }
-
-    const token = req.headers.authorization.split('Bearer ')[1]
-    const decodedToken = jwt.decode(token, { complete: true })
-    if (!decodedToken) {
-      return res.status(400).json({ message: 'Invalid token format' })
-    }
-
-    const kid = decodedToken.header.kid
-    const publicKey = await getPublicKeyFromKeycloak(kid)
-    jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: 'Invalid token' })
-      }
-      req.user = decoded
-      req.token = token
-      next()
-    })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: 'Server error', error: error.message })
-  }
-}
-
 app.post('/api/verify-token', (req, res) => {
   if (!req.headers.authorization.startsWith('Bearer')) {
     return res.status(401).json({ message: 'No token provided' })
@@ -77,13 +48,13 @@ app.post('/api/verify-token', (req, res) => {
 })
 
 // DO NOT REMOVE, NECCESSARY FOR FRONTEND
-app.get('/api/photo/:principalName', tokenVerificationMiddleware, async (req, res, next) => {
-  const accessToken = req.token
+app.get('/api/photo/:principalName', async (req, res, next) => {
+  const accessToken = req.headers.authorization.split(' ')[1]
   const principalName = req.params.principalName
   const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
 
   try {
-    const photoData = await fetchPhoto(accessToken, userPhotoUrl)
+    const photoData = await fetchPhoto(accessToken, userPhotoUrl, 'could not fetch photo')
 
     return res.send({ photo: photoData })
   } catch (error) {
@@ -91,8 +62,8 @@ app.get('/api/photo/:principalName', tokenVerificationMiddleware, async (req, re
   }
 })
 
-async function fetchPhoto(token, url, fallbackErrorMessage) {
-  const response = await fetch(url, getFetchOptions(token))
+async function fetchPhoto(accessToken, url, fallbackErrorMessage) {
+  const response = await fetch(url, getFetchOptions(accessToken))
 
   if (!response.ok) {
     throw new Error(fallbackErrorMessage)
@@ -102,6 +73,16 @@ async function fetchPhoto(token, url, fallbackErrorMessage) {
   const photoBuffer = Buffer.from(arrayBuffer)
   return photoBuffer.toString('base64')
 }
+
+app.get('/api/fetch-token', (req, res) => {
+  if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
+    return res.status(401).json({ message: 'No token provided' })
+  }
+
+  const token = req.headers.authorization.split('Bearer ')[1]
+
+  res.json({ token })
+})
 
 function getFetchOptions(token) {
   return {

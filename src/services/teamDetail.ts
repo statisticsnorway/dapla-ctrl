@@ -38,7 +38,7 @@ interface Group {
   display_name: string
 }
 
-export const fetchTeamInfo = async (teamId: string, accessToken: string): Promise<Team | ApiError> => {
+export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`)
   const embeds = ['users', 'users.groups', 'managers']
   const selects = [
@@ -58,7 +58,7 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
   teamsUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const teamDetailData = await fetchAPIData(teamsUrl.toString(), accessToken)
+    const teamDetailData = await fetchAPIData(teamsUrl.toString())
     const flattendTeams = flattenEmbedded(teamDetailData)
     if (!flattendTeams) return {} as Team
     if (!flattendTeams.users) flattendTeams.users = []
@@ -87,11 +87,9 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
 }
 
 export const getTeamDetail = async (teamId: string): Promise<TeamDetailData | ApiError> => {
-  const accessToken = localStorage.getItem('access_token') as string
-
   try {
     const [teamInfo] = await Promise.all([
-      fetchTeamInfo(teamId, accessToken),
+      fetchTeamInfo(teamId),
       //TODO: Add shared buckets part
     ])
 

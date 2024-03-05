@@ -47,10 +47,7 @@ interface Group {
   users: User[]
 }
 
-export const getUserProfile = async (principalName: string, token?: string): Promise<User | ApiError> => {
-  const accessToken = (localStorage.getItem('access_token') as string) || (token as string)
-  principalName = principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
-
+export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
 
   const embeds = ['section_manager']
@@ -70,10 +67,7 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const [userData, userPhoto] = await Promise.all([
-      fetchAPIData(usersUrl.toString(), accessToken),
-      fetchPhoto(accessToken, principalName),
-    ])
+    const [userData, userPhoto] = await Promise.all([fetchAPIData(usersUrl.toString()), fetchPhoto(principalName)])
 
     userData.photo = userPhoto
 
@@ -91,9 +85,6 @@ export const getUserProfile = async (principalName: string, token?: string): Pro
 }
 
 export const getUserProfileTeamData = async (principalName: string): Promise<TeamsData | ApiError> => {
-  const accessToken = localStorage.getItem('access_token') as string
-  principalName.replace(/@ssb\.no$/, '') + '@ssb.no'
-
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
   const embeds = ['teams', 'teams.groups', 'teams.groups.users']
 
@@ -112,7 +103,7 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const userProfileData = await fetchAPIData(usersUrl.toString(), accessToken)
+    const userProfileData = await fetchAPIData(usersUrl.toString())
 
     if (!userProfileData) throw new ApiError(500, 'No json data returned')
     if (!userProfileData._embedded || !userProfileData._embedded.teams) return {} as TeamsData
@@ -152,27 +143,8 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
   }
 }
 
-export const getUserProfileFallback = (accessToken: string): User => {
-  const jwt = JSON.parse(atob(accessToken.split('.')[1]))
-  return {
-    principal_name: jwt.upn,
-    azure_ad_id: jwt.oid, // not the real azureAdId, this is actually keycloaks oid
-    display_name: jwt.name,
-    section_name: 'UNSET',
-    first_name: jwt.given_name,
-    last_name: jwt.family_name,
-    email: jwt.email,
-  }
-}
-
-const fetchPhoto = async (accessToken: string, principalName: string) => {
-  const response = await fetch(`/api/photo/${principalName}`, {
-    method: 'GET',
-    headers: {
-      Accept: '*/*',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+const fetchPhoto = async (principalName: string) => {
+  const response = await fetch(`/api/photo/${principalName}`)
 
   if (!response.ok) {
     throw new ApiError(500, 'could not fetch photo')

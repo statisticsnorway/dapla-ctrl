@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
-import { validateKeycloakToken } from '../services/validateKeycloakToken'
+import { getUserProfile } from '../services/userProfile'
+import { fetchUserInformationFromAuthToken } from '../utils/services'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -8,20 +9,21 @@ const ProtectedRoute = () => {
   const from = location.pathname
 
   useEffect(() => {
-    if (localStorage.getItem('userProfile') === null) {
-      localStorage.removeItem('access_token')
-      navigate('/login', { state: { from: from } })
-      return
-    }
+    const setData = async () => {
+      try {
+        if (localStorage.getItem('userProfile') !== null) {
+          setIsAuthenticated(true)
+          return
+        }
 
-    validateKeycloakToken().then((isValid) => {
-      setIsAuthenticated(isValid)
-      if (!isValid) {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('userProfile')
-        navigate('/login', { state: { from: from } })
+        const userProfileData = await fetchUserInformationFromAuthToken()
+        localStorage.setItem('userProfile', JSON.stringify(await getUserProfile(userProfileData.email)))
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error('Error occurred when updating userProfile data')
       }
-    })
+    }
+    setData()
   }, [from, navigate])
 
   return isAuthenticated ? <Outlet /> : null
