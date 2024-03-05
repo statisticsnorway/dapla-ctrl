@@ -1,9 +1,9 @@
 import { Text, Link } from '@statisticsnorway/ssb-component-library'
 
 interface FormattedTableColumnProps {
-  href: string
-  linkText: string
-  text: string
+  href?: string
+  linkText?: string
+  text?: string
 }
 
 const FormattedTableColumn = (props: FormattedTableColumnProps) => {
@@ -12,11 +12,13 @@ const FormattedTableColumn = (props: FormattedTableColumnProps) => {
   return (
     <>
       <span>
-        <Link href={href}>
-          <b>{linkText}</b>
-        </Link>
+        {href && linkText && (
+          <Link href={href}>
+            <b>{linkText}</b>
+          </Link>
+        )}
       </span>
-      <Text>{text}</Text>
+      {text && <Text>{text}</Text>}
     </>
   )
 }

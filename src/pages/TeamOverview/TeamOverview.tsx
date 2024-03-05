@@ -1,38 +1,44 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
-import { fetchTeamOverviewData, TeamOverviewData, Team } from '../../services/teamOverview'
+import { fetchTeamOverviewData, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
+
+const MY_TEAMS_TAB = {
+  title: 'Mine team',
+  path: 'myTeams',
+}
+
+const ALL_TEAMS_TAB = {
+  title: 'Alle teams',
+  path: 'allTeams',
+}
 
 const TeamOverview = () => {
-  const defaultActiveTab = {
-    title: 'Mine team',
-    path: 'myTeams',
-  }
-
-  const [activeTab, setActiveTab] = useState<TabProps | string>(defaultActiveTab)
+  const [activeTab, setActiveTab] = useState<TabProps | string>(MY_TEAMS_TAB)
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
-  const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(defaultActiveTab.title)
+  const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
       const teamTab = (activeTab as TabProps)?.path ?? activeTab
-      return response[teamTab].teams.map((team) => ({
-        id: team.uniform_name,
-        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
-        navn: renderTeamNameColumn(team),
-        teammedlemmer: team.users.length,
-        ansvarlig: formatDisplayName(team.manager.display_name),
+      return response[teamTab].teams.map(({ uniform_name, section_name, users, manager }) => ({
+        id: uniform_name,
+        seksjon: section_name, // Makes section name searchable and sortable in table by including the field
+        navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
+        teammedlemmer: users.length,
+        ansvarlig: formatDisplayName(manager.display_name),
       }))
     },
     [activeTab]
@@ -65,24 +71,11 @@ const TeamOverview = () => {
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab)
-    if (tab === defaultActiveTab.path) {
-      setTeamOverviewTableTitle(defaultActiveTab.title)
+    if (tab === MY_TEAMS_TAB.path) {
+      setTeamOverviewTableTitle(MY_TEAMS_TAB.title)
     } else {
-      setTeamOverviewTableTitle('Alle teams')
+      setTeamOverviewTableTitle(ALL_TEAMS_TAB.title)
     }
-  }
-
-  const renderTeamNameColumn = (team: Team) => {
-    return (
-      <>
-        <span>
-          <Link href={`/${team.uniform_name}`}>
-            <b>{team.uniform_name}</b>
-          </Link>
-        </span>
-        {team.section_name && <Text>{team.section_name}</Text>}
-      </>
-    )
   }
 
   const renderErrorAlert = () => {
@@ -117,13 +110,16 @@ const TeamOverview = () => {
         <>
           <Tabs
             onClick={handleTabClick}
-            activeOnInit={defaultActiveTab.path}
+            activeOnInit={MY_TEAMS_TAB.path}
             items={[
               {
-                title: `${defaultActiveTab.title} (${teamOverviewData?.myTeams.teams.length ?? 0})`,
-                path: defaultActiveTab.path,
+                title: `${MY_TEAMS_TAB.title} (${teamOverviewData?.myTeams.teams.length ?? 0})`,
+                path: MY_TEAMS_TAB.path,
               },
-              { title: `Alle team (${teamOverviewData?.allTeams.teams.length ?? 0})`, path: 'allTeams' },
+              {
+                title: `${ALL_TEAMS_TAB.title} (${teamOverviewData?.allTeams.teams.length ?? 0})`,
+                path: ALL_TEAMS_TAB.path,
+              },
             ]}
           />
           <Divider dark />
