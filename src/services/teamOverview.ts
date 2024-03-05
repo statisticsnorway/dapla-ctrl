@@ -41,7 +41,7 @@ interface Group {
   users: User[]
 }
 
-const fetchAllTeams = async (accessToken: string): Promise<TeamsData> => {
+const fetchAllTeams = async (): Promise<TeamsData> => {
   const teamsUrl = new URL(`${TEAMS_URL}`)
   const embeds = ['users', 'groups.users']
 
@@ -58,7 +58,7 @@ const fetchAllTeams = async (accessToken: string): Promise<TeamsData> => {
   teamsUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const teams = await fetchAPIData(teamsUrl.toString(), accessToken)
+    const teams = await fetchAPIData(teamsUrl.toString())
     if (!teams) throw new ApiError(500, 'No json data returned')
     if (!teams._embedded || !teams._embedded.teams) return {} as TeamsData
 
@@ -98,7 +98,7 @@ const fetchAllTeams = async (accessToken: string): Promise<TeamsData> => {
   }
 }
 
-const fetchTeamsForPrincipalName = async (accessToken: string, principalName: string): Promise<TeamsData> => {
+const fetchTeamsForPrincipalName = async (principalName: string): Promise<TeamsData> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
   const embeds = ['teams', 'teams.users', 'teams.groups.users']
 
@@ -117,7 +117,7 @@ const fetchTeamsForPrincipalName = async (accessToken: string, principalName: st
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const teams = await fetchAPIData(usersUrl.toString(), accessToken)
+    const teams = await fetchAPIData(usersUrl.toString())
 
     if (!teams) throw new ApiError(500, 'No json data returned')
     if (!teams._embedded || !teams._embedded.teams) return {} as TeamsData
@@ -153,19 +153,8 @@ const fetchTeamsForPrincipalName = async (accessToken: string, principalName: st
 }
 
 export const fetchTeamOverviewData = async (principalName: string): Promise<TeamOverviewData> => {
-  const accessToken = localStorage.getItem('access_token')
-  if (!accessToken) {
-    console.error('No access token available')
-    const apiError = new ApiError(401, 'No access token available')
-    console.error('Failed to fetch team members data:', apiError)
-    throw apiError
-  }
-
   try {
-    const [myTeams, allTeams] = await Promise.all([
-      fetchTeamsForPrincipalName(accessToken, principalName),
-      fetchAllTeams(accessToken),
-    ])
+    const [myTeams, allTeams] = await Promise.all([fetchTeamsForPrincipalName(principalName), fetchAllTeams()])
 
     return { myTeams: myTeams, allTeams: allTeams } as TeamOverviewData
   } catch (error) {

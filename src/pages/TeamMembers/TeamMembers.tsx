@@ -9,12 +9,9 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
-import { ApiError } from '../../utils/services'
+import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
 
 const TeamMembers = () => {
-  const accessToken = localStorage.getItem('access_token') || ''
-  const jwt = JSON.parse(atob(accessToken.split('.')[1]))
-
   const defaultActiveTab = {
     title: 'Mine teammedlemmer',
     path: 'myUsers',
@@ -49,16 +46,22 @@ const TeamMembers = () => {
   )
 
   useEffect(() => {
-    if (!jwt) return
-    fetchAllTeamMembersData(jwt.email)
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const tokenData = await fetchUserInformationFromAuthToken()
+        if (!tokenData) return
+
+        const response = await fetchAllTeamMembersData(tokenData.email)
         setTeamMembersData(response as TeamMembersData)
         setTeamMembersTableData(prepUserData(response as TeamMembersData))
-      })
-      .finally(() => setLoading(false))
-      .catch((error) => {
+      } catch (error) {
         setError(error as ApiError)
-      })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
   useEffect(() => {

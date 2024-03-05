@@ -9,12 +9,9 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { fetchTeamOverviewData, TeamOverviewData, Team } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
-import { ApiError } from '../../utils/services'
+import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
 
 const TeamOverview = () => {
-  const accessToken = localStorage.getItem('access_token') || ''
-  const jwt = JSON.parse(atob(accessToken.split('.')[1]))
-
   const defaultActiveTab = {
     title: 'Mine team',
     path: 'myTeams',
@@ -42,16 +39,22 @@ const TeamOverview = () => {
   )
 
   useEffect(() => {
-    if (!jwt) return
-    fetchTeamOverviewData(jwt.email)
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const tokenData = await fetchUserInformationFromAuthToken()
+        if (!tokenData) return
+
+        const response = await fetchTeamOverviewData(tokenData.email)
         setTeamOverviewData(response as TeamOverviewData)
         setTeamOverviewTableData(prepTeamData(response as TeamOverviewData))
-      })
-      .finally(() => setLoading(false))
-      .catch((error) => {
+      } catch (error) {
         setError(error as ApiError)
-      })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
   useEffect(() => {

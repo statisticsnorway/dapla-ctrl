@@ -1,12 +1,6 @@
 // eslint-disable-next-line
-export const fetchAPIData = async (url: string, accessToken: string): Promise<any> => {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      accept: '*/*',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+export const fetchAPIData = async (url: string): Promise<any> => {
+  const response = await fetch(url)
 
   if (!response.ok) {
     const errorMessage = (await response.text()) || 'An error occurred'
@@ -15,6 +9,21 @@ export const fetchAPIData = async (url: string, accessToken: string): Promise<an
   }
 
   return response.json()
+}
+
+interface TokenData {
+  name: string
+  given_name: string
+  family_name: string
+  email: string
+}
+
+export const fetchUserInformationFromAuthToken = async (): Promise<TokenData> => {
+  const response = await fetch('/api/fetch-token')
+
+  const tokenData = await response.json()
+  const jwt = JSON.parse(atob(tokenData.token.split('.')[1]))
+  return { ...jwt } as TokenData
 }
 
 export class ApiError extends Error {

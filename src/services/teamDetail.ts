@@ -56,7 +56,7 @@ export interface Metrics {
   users_count?: number | string
 }
 
-export const fetchTeamInfo = async (teamId: string, accessToken: string): Promise<Team | ApiError> => {
+export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`)
   const embeds = ['users', 'users.groups', 'managers']
   const selects = [
@@ -76,7 +76,7 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
   teamsUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const teamDetailData = await fetchAPIData(teamsUrl.toString(), accessToken)
+    const teamDetailData = await fetchAPIData(teamsUrl.toString())
     const flattendTeams = flattenEmbedded(teamDetailData)
     if (!flattendTeams) return {} as Team
     if (!flattendTeams.users) flattendTeams.users = []
@@ -104,7 +104,7 @@ export const fetchTeamInfo = async (teamId: string, accessToken: string): Promis
   }
 }
 
-export const fetchSharedBuckets = async (teamId: string, accessToken: string): Promise<SharedBuckets | ApiError> => {
+export const fetchSharedBuckets = async (teamId: string): Promise<SharedBuckets | ApiError> => {
   const sharedBucketsUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets`)
 
   const embeds = ['metrics']
@@ -114,7 +114,7 @@ export const fetchSharedBuckets = async (teamId: string, accessToken: string): P
   sharedBucketsUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const sharedBuckets = await fetchAPIData(sharedBucketsUrl.toString(), accessToken)
+    const sharedBuckets = await fetchAPIData(sharedBucketsUrl.toString())
     if (!sharedBuckets) throw new ApiError(500, 'No json data returned')
     if (!sharedBuckets._embedded) return {} as SharedBuckets
 
@@ -145,13 +145,8 @@ export const fetchSharedBuckets = async (teamId: string, accessToken: string): P
 }
 
 export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => {
-  const accessToken = localStorage.getItem('access_token') as string
-
   try {
-    const [teamInfo, sharedBuckets] = await Promise.all([
-      fetchTeamInfo(teamId, accessToken),
-      fetchSharedBuckets(teamId, accessToken),
-    ])
+    const [teamInfo, sharedBuckets] = await Promise.all([fetchTeamInfo(teamId), fetchSharedBuckets(teamId)])
 
     return { team: teamInfo as Team, sharedBuckets } as TeamDetailData
   } catch (error) {
