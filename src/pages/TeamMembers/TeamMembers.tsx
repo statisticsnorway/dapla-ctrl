@@ -54,7 +54,7 @@ const TeamMembers = () => {
           seksjonsleder: formatDisplayName(
             section_manager && section_manager.length > 0
               ? section_manager[0].display_name
-              : 'Seksjonsleder ikke funnet'
+              : 'Seksjonsleder ikke funnet' // TODO: Should be handled in services
           ),
         })
       )

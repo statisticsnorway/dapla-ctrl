@@ -68,7 +68,7 @@ const TeamDetail = () => {
               <FormattedTableColumn
                 href={`/teammedlemmer/${principal_name}`}
                 linkText={formatDisplayName(display_name)}
-                text={section_name ?? 'Mangler seksjon'}
+                text={section_name ?? 'Mangler seksjon'} // TODO: Should be handled in services
               />
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
@@ -126,9 +126,9 @@ const TeamDetail = () => {
     if (error) return renderErrorAlert()
     if (loadingTeamData) return <PageSkeleton hasDescription />
 
-    if (teamDetailTableData) {
+    if (teamDetailData && teamDetailTableData) {
       const teamOverviewTableHeaderColumns =
-        activeTab === 'sharedBuckets'
+        activeTab === SHARED_BUCKETS_TAB.path
           ? [
               {
                 id: 'navn',
@@ -160,12 +160,10 @@ const TeamDetail = () => {
         <>
           <LeadParagraph className={styles.userProfileDescription}>
             <Text medium className={styles.uniformName}>
-              {teamDetailData ? (teamDetailData.team as Team).uniform_name : ''}
+              {(teamDetailData.team as Team).uniform_name ?? ''}
             </Text>
-            <Text medium>
-              {teamDetailData ? formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '') : ''}
-            </Text>
-            <Text medium>{teamDetailData ? (teamDetailData.team as Team).section_name : ''}</Text>
+            <Text medium>{formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '')}</Text>
+            <Text medium>{(teamDetailData.team as Team).section_name ?? ''}</Text>
           </LeadParagraph>
           <Tabs
             onClick={handleTabClick}
