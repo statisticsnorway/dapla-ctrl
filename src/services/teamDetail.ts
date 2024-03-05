@@ -51,9 +51,9 @@ export interface SharedBucket {
 }
 
 export interface Metrics {
-  teams_count?: number
-  groups_count?: number
-  users_count?: number
+  teams_count?: number | string
+  groups_count?: number | string
+  users_count?: number | string
 }
 
 export const fetchTeamInfo = async (teamId: string, accessToken: string): Promise<Team | ApiError> => {
@@ -121,7 +121,11 @@ export const fetchSharedBuckets = async (teamId: string, accessToken: string): P
     const flattenedSharedBuckets = flattenEmbedded({ ...sharedBuckets })
     flattenedSharedBuckets.items.forEach((item: SharedBucket) => {
       if (!item.metrics) {
-        item.metrics = {}
+        item.metrics = {
+          teams_count: 'Ingen data',
+          groups_count: 'Ingen data',
+          users_count: 'Ingen data',
+        }
       } else {
         item.metrics = (item.metrics as Metrics[])[0]
       }
@@ -149,7 +153,7 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
       fetchSharedBuckets(teamId, accessToken),
     ])
 
-    return { team: teamInfo as Team, sharedBuckets: sharedBuckets as SharedBuckets } as TeamDetailData
+    return { team: teamInfo as Team, sharedBuckets } as TeamDetailData
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch data for teamDetail page:', error)

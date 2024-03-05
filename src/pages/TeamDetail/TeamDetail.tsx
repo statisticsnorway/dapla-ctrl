@@ -5,17 +5,17 @@ import { TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail, Team, SharedBucket, SharedBuckets } from '../../services/teamDetail'
+import { TeamDetailData, getTeamDetail, Team, SharedBuckets } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError } from '../../utils/services'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { User } from '../../services/teamDetail'
-import { Text, Link, Dialog, LeadParagraph, Divider, Tabs } from '@statisticsnorway/ssb-component-library'
+import { Text, Dialog, LeadParagraph, Divider, Tabs } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const TeamDetail = () => {
   const defaultActiveTab = {
@@ -45,7 +45,7 @@ const TeamDetail = () => {
           const teams_count = metrics?.teams_count
           return {
             id: short_name,
-            navn: renderBucketNameColumn({ short_name, bucket_name }),
+            navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
             tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
             delte_data: metrics?.groups_count,
             antall_personer: metrics?.users_count,
@@ -58,7 +58,13 @@ const TeamDetail = () => {
         return teamUsers.map((user) => {
           return {
             id: formatDisplayName(user.display_name),
-            navn: renderUsernameColumn(user),
+            navn: (
+              <FormattedTableColumn
+                href={`/teammedlemmer/${user.principal_name}`}
+                linkText={formatDisplayName(user.display_name)}
+                text={user.section_name ? user.section_name : 'Mangler seksjon'}
+              />
+            ),
             seksjon: user.section_name, // Makes section name searchable and sortable in table by including the field
             gruppe: user.groups
               ?.filter((group) => group.uniform_name.startsWith((response.team as Team).uniform_name))
@@ -78,24 +84,19 @@ const TeamDetail = () => {
       .then((response) => {
         const formattedResponse = response as TeamDetailData
         setTeamDetailData(formattedResponse)
+        setTeamDetailTableData(prepTeamData(formattedResponse))
 
         const displayName = formatDisplayName((formattedResponse.team as Team).display_name)
         setBreadcrumbTeamDetailDisplayName({ displayName })
       })
+      .finally(() => setLoadingTeamData(false))
       .catch((error) => {
         setError(error as ApiError)
       })
   }, [])
 
   useEffect(() => {
-    getTeamDetail(teamId as string)
-      .then((response) => {
-        setTeamDetailTableData(prepTeamData(response as TeamDetailData))
-      })
-      .finally(() => setLoadingTeamData(false))
-      .catch((error) => {
-        setError(error as ApiError)
-      })
+    if (teamDetailData) setTeamDetailTableData(prepTeamData(teamDetailData))
   }, [prepTeamData])
 
   const handleTabClick = (tab: string) => {
@@ -105,32 +106,6 @@ const TeamDetail = () => {
     } else {
       setTeamDetailTableTitle('Delte data')
     }
-  }
-
-  const renderUsernameColumn = ({ principal_name, display_name, section_name }: User) => {
-    return (
-      <>
-        <span>
-          <Link href={`/teammedlemmer/${principal_name}`}>
-            <b>{formatDisplayName(display_name)}</b>
-          </Link>
-        </span>
-        <Text>{section_name ? section_name : 'Mangler seksjon'}</Text>
-      </>
-    )
-  }
-
-  const renderBucketNameColumn = ({ short_name, bucket_name }: SharedBucket) => {
-    return (
-      <>
-        <span>
-          <Link href={`/${teamId}/${short_name}`}>
-            <b>{short_name}</b>
-          </Link>
-        </span>
-        <Text>{bucket_name}</Text>
-      </>
-    )
   }
 
   const renderErrorAlert = () => {
@@ -143,7 +118,7 @@ const TeamDetail = () => {
 
   const renderContent = () => {
     if (error) return renderErrorAlert()
-    if (loadingTeamData) return <PageSkeleton hasDescription hasTab={false} /> // TODO: Remove hasTab prop after tabs are implemented
+    if (loadingTeamData) return <PageSkeleton hasDescription />
 
     if (teamDetailTableData) {
       const teamOverviewTableHeaderColumns =
