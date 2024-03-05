@@ -9,7 +9,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { fetchAllTeamMembersData, TeamMembersData } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
-import { ApiError } from '../../utils/services'
+import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const MY_USERS_TAB = {
@@ -23,9 +23,6 @@ const ALL_USERS_TAB = {
 }
 
 const TeamMembers = () => {
-  const accessToken = localStorage.getItem('access_token') || ''
-  const jwt = JSON.parse(atob(accessToken.split('.')[1]))
-
   const [activeTab, setActiveTab] = useState<TabProps | string>(MY_USERS_TAB)
   const [teamMembersData, setTeamMembersData] = useState<TeamMembersData>()
   const [teamMembersTableData, setTeamMembersTableData] = useState<TableData['data']>()
@@ -63,16 +60,22 @@ const TeamMembers = () => {
   )
 
   useEffect(() => {
-    if (!jwt) return
-    fetchAllTeamMembersData(jwt.email)
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const tokenData = await fetchUserInformationFromAuthToken()
+        if (!tokenData) return
+
+        const response = await fetchAllTeamMembersData(tokenData.email)
         setTeamMembersData(response as TeamMembersData)
         setTeamMembersTableData(prepUserData(response as TeamMembersData))
-      })
-      .finally(() => setLoading(false))
-      .catch((error) => {
+      } catch (error) {
         setError(error as ApiError)
-      })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
   }, [])
 
   useEffect(() => {

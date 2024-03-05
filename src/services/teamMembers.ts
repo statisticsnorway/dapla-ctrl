@@ -35,7 +35,7 @@ interface Group {
   uniform_name: string
 }
 
-const fetchManagedUsers = async (accessToken: string, principalName: string): Promise<User[]> => {
+const fetchManagedUsers = async (principalName: string): Promise<User[]> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
   const embeds = ['managed_users']
   const selects = ['managed_users.principal_name']
@@ -44,7 +44,7 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const managedUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
+    const managedUsersData = await fetchAPIData(usersUrl.toString())
 
     if (!managedUsersData) throw new ApiError(500, 'No json data returned')
     if (!managedUsersData._embedded || !managedUsersData._embedded.managed_users) return [] // return an empty list if the user does not have any managed_users
@@ -62,9 +62,9 @@ const fetchManagedUsers = async (accessToken: string, principalName: string): Pr
   }
 }
 
-export const fetchManagedUsersManagers = async (accessToken: string, principalName: string): Promise<UsersData> => {
+export const fetchManagedUsersManagers = async (principalName: string): Promise<UsersData> => {
   try {
-    const users = await fetchManagedUsers(accessToken, principalName)
+    const users = await fetchManagedUsers(principalName)
 
     const prepUsers = await Promise.all(
       users.map(async (user): Promise<User> => {
@@ -84,7 +84,7 @@ export const fetchManagedUsersManagers = async (accessToken: string, principalNa
         usersUrl.searchParams.set('embed', embeds.join(','))
         usersUrl.searchParams.append('select', selects.join(','))
 
-        const managedUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
+        const managedUsersData = await fetchAPIData(usersUrl.toString())
 
         const prepData = {
           ...managedUsersData,
@@ -109,7 +109,7 @@ export const fetchManagedUsersManagers = async (accessToken: string, principalNa
   }
 }
 
-export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => {
+export const fetchAllUsers = async (): Promise<UsersData> => {
   const usersUrl = new URL(`${USERS_URL}`)
   const embeds = ['section_manager', 'teams', 'groups']
 
@@ -127,7 +127,7 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
   usersUrl.searchParams.append('select', selects.join(','))
 
   try {
-    const allUsersData = await fetchAPIData(usersUrl.toString(), accessToken)
+    const allUsersData = await fetchAPIData(usersUrl.toString())
 
     if (!allUsersData) throw new ApiError(500, 'No json data returned')
     if (!allUsersData._embedded || !allUsersData._embedded.users) throw new ApiError(500, 'Did not receive users data')
@@ -156,19 +156,8 @@ export const fetchAllUsers = async (accessToken: string): Promise<UsersData> => 
 }
 
 export const fetchAllTeamMembersData = async (principalName: string): Promise<TeamMembersData | ApiError> => {
-  const accessToken = localStorage.getItem('access_token')
-  if (!accessToken) {
-    console.error('No access token available')
-    const apiError = new ApiError(401, 'No access token available')
-    console.error('Failed to fetch team members data:', apiError)
-    throw apiError
-  }
-
   try {
-    const [myUsers, allUsers] = await Promise.all([
-      fetchManagedUsersManagers(accessToken, principalName),
-      fetchAllUsers(accessToken),
-    ])
+    const [myUsers, allUsers] = await Promise.all([fetchManagedUsersManagers(principalName), fetchAllUsers()])
 
     return { myUsers: myUsers, allUsers: allUsers } as TeamMembersData
   } catch (error) {
