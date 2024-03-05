@@ -135,17 +135,11 @@ const TeamMembers = () => {
             ]}
           />
           <Divider dark />
-          {teamMembersTableData.length > 0 ? (
-            <Table
-              title={teamMembersTableTitle}
-              columns={teamMembersTableHeaderColumns}
-              data={teamMembersTableData as TableData['data']}
-            />
-          ) : (
-            <Dialog type='warning' title='No team members found'>
-              You are not a manager in any dapla-team
-            </Dialog>
-          )}
+          <Table
+            title={teamMembersTableTitle}
+            columns={teamMembersTableHeaderColumns}
+            data={teamMembersTableData as TableData['data']}
+          />
         </>
       )
     }
