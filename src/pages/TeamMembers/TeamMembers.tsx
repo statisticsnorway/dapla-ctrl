@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
-import { fetchAllTeamMembersData, TeamMembersData, User } from '../../services/teamMembers'
+import { fetchAllTeamMembersData, TeamMembersData } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError } from '../../utils/services'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const MY_USERS_TAB = {
   title: 'Mine teammedlemmer',
@@ -36,19 +37,27 @@ const TeamMembers = () => {
     (response: TeamMembersData): TableData['data'] => {
       const teamMember = (activeTab as TabProps)?.path ?? activeTab
 
-      return response[teamMember].users.map((teamMember) => ({
-        id: formatDisplayName(teamMember.display_name),
-        navn: renderUserNameColumn(teamMember),
-        team: teamMember.teams.length,
-        epost: teamMember.principal_name,
-        data_admin_roller: teamMember.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
-        seksjon: teamMember.section_name, // Makes section name searchable and sortable in table by including the field
-        seksjonsleder: formatDisplayName(
-          teamMember.section_manager && teamMember.section_manager.length > 0
-            ? teamMember.section_manager[0].display_name
-            : 'Seksjonsleder ikke funnet'
-        ),
-      }))
+      return response[teamMember].users.map(
+        ({ display_name, principal_name, section_name, section_manager, teams, groups }) => ({
+          id: formatDisplayName(display_name),
+          navn: (
+            <FormattedTableColumn
+              href={`/teammedlemmer/${principal_name}`}
+              linkText={formatDisplayName(display_name)}
+              text={section_name}
+            />
+          ),
+          team: teams.length,
+          epost: principal_name,
+          data_admin_roller: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
+          seksjon: section_name, // Makes section name searchable and sortable in table by including the field
+          seksjonsleder: formatDisplayName(
+            section_manager && section_manager.length > 0
+              ? section_manager[0].display_name
+              : 'Seksjonsleder ikke funnet'
+          ),
+        })
+      )
     },
     [activeTab]
   )
@@ -79,19 +88,6 @@ const TeamMembers = () => {
     } else {
       setTeamMembersTableTitle(ALL_USERS_TAB.title)
     }
-  }
-
-  const renderUserNameColumn = (user: User) => {
-    return (
-      <>
-        <span>
-          <Link href={`/teammedlemmer/${user.principal_name}`}>
-            <b>{user.display_name}</b>
-          </Link>
-        </span>
-        {user.section_name && <Text>{user.section_name}</Text>}
-      </>
-    )
   }
 
   const renderErrorAlert = () => {

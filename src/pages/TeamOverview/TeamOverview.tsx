@@ -1,15 +1,16 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Text, Link, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import Table, { TableData } from '../../components/Table/Table'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
-import { fetchTeamOverviewData, TeamOverviewData, Team } from '../../services/teamOverview'
+import { fetchTeamOverviewData, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError } from '../../utils/services'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -35,12 +36,12 @@ const TeamOverview = () => {
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
       const teamTab = (activeTab as TabProps)?.path ?? activeTab
-      return response[teamTab].teams.map((team) => ({
-        id: team.uniform_name,
-        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
-        navn: renderTeamNameColumn(team),
-        teammedlemmer: team.users.length,
-        ansvarlig: formatDisplayName(team.manager.display_name),
+      return response[teamTab].teams.map(({ uniform_name, section_name, users, manager }) => ({
+        id: uniform_name,
+        seksjon: section_name, // Makes section name searchable and sortable in table by including the field
+        navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
+        teammedlemmer: users.length,
+        ansvarlig: formatDisplayName(manager.display_name),
       }))
     },
     [activeTab]
@@ -72,19 +73,6 @@ const TeamOverview = () => {
     } else {
       setTeamOverviewTableTitle(ALL_TEAMS_TAB.title)
     }
-  }
-
-  const renderTeamNameColumn = (team: Team) => {
-    return (
-      <>
-        <span>
-          <Link href={`/${team.uniform_name}`}>
-            <b>{team.uniform_name}</b>
-          </Link>
-        </span>
-        {team.section_name && <Text>{team.section_name}</Text>}
-      </>
-    )
   }
 
   const renderErrorAlert = () => {

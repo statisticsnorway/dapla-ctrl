@@ -61,22 +61,22 @@ const TeamDetail = () => {
         const teamUsers = (response[TEAM_USERS_TAB.path] as Team).users
         if (!teamUsers) return []
 
-        return teamUsers.map((user) => {
+        return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
           return {
-            id: formatDisplayName(user.display_name),
+            id: formatDisplayName(display_name),
             navn: (
               <FormattedTableColumn
-                href={`/teammedlemmer/${user.principal_name}`}
-                linkText={formatDisplayName(user.display_name)}
-                text={user.section_name ? user.section_name : 'Mangler seksjon'}
+                href={`/teammedlemmer/${principal_name}`}
+                linkText={formatDisplayName(display_name)}
+                text={section_name ?? 'Mangler seksjon'}
               />
             ),
-            seksjon: user.section_name, // Makes section name searchable and sortable in table by including the field
-            gruppe: user.groups
+            seksjon: section_name, // Makes section name searchable and sortable in table by including the field
+            gruppe: groups
               ?.filter((group) => group.uniform_name.startsWith((response.team as Team).uniform_name))
               .map((group) => getGroupType(group.uniform_name))
               .join(', '),
-            epost: user?.principal_name,
+            epost: principal_name,
           }
         })
       }

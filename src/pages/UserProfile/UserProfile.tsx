@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import styles from './userprofile.module.scss'
 
-import { Dialog, Text, Link, LeadParagraph } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Text, LeadParagraph } from '@statisticsnorway/ssb-component-library'
 
 import Table, { TableData } from '../../components/Table/Table'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -11,11 +11,12 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { getGroupType, formatDisplayName } from '../../utils/utils'
 
-import { getUserProfileTeamData, TeamsData, Team } from '../../services/userProfile'
+import { getUserProfileTeamData, TeamsData } from '../../services/userProfile'
 
 import { useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
 import { ApiError } from '../../utils/services'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const UserProfile = () => {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
@@ -27,17 +28,17 @@ const UserProfile = () => {
 
   const prepTeamData = useCallback(
     (response: TeamsData): TableData['data'] => {
-      return response.teams.map((team) => ({
-        id: team.uniform_name,
-        seksjon: team.section_name, // Makes section name searchable and sortable in table by including the field
-        navn: renderTeamNameColumn(team),
+      return response.teams.map(({ uniform_name, section_name, groups, manager }) => ({
+        id: uniform_name,
+        seksjon: section_name, // Makes section name searchable and sortable in table by including the field
+        navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
         gruppe: principalName
-          ? team.groups
+          ? groups
               ?.filter((group) => group.users.some((user) => user.principal_name === principalName)) // Filter groups based on principalName presence
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
           : 'INGEN FUNNET',
-        ansvarlig: formatDisplayName(team.manager.display_name),
+        ansvarlig: formatDisplayName(manager.display_name),
       }))
     },
     [userProfileData]
@@ -58,19 +59,6 @@ const UserProfile = () => {
         setError(error as ApiError)
       })
   }, [principalName, setBreadcrumbUserProfileDisplayName])
-
-  const renderTeamNameColumn = (team: Team) => {
-    return (
-      <>
-        <span>
-          <Link href={`/${team.uniform_name}`}>
-            <b>{team.uniform_name}</b>
-          </Link>
-        </span>
-        {team.section_name && <Text>{team.section_name}</Text>}
-      </>
-    )
-  }
 
   const renderErrorAlert = () => {
     return (
