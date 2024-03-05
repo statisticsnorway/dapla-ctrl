@@ -37,7 +37,7 @@ const UserProfile = () => {
               ?.filter((group) => group.users.some((user) => user.principal_name === principalName)) // Filter groups based on principalName presence
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
-          : 'INGEN FUNNET', // TODO: Should be handled in services
+          : 'INGEN FUNNET',
         ansvarlig: formatDisplayName(manager.display_name),
       }))
     },
