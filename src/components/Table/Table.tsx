@@ -107,22 +107,25 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
       <table className={styles.table}>
         <thead>
           <tr>
-            {columns.map((column) => (
-              <th
-                key={column.id}
-                className={!column.unsortable ? styles.sortableColumn : undefined}
-                onClick={!column.unsortable ? () => handleSortBy(column.id) : undefined}
-              >
-                {!column.unsortable ? (
-                  <span>
-                    {column.label}
-                    {renderSortByArrow(sortBy === column.id, sortByDirection)}
-                  </span>
-                ) : (
-                  column.label
-                )}
-              </th>
-            ))}
+            {columns.map((column) => {
+              const sortableColumn = data.length && !column.unsortable
+              return (
+                <th
+                  key={column.id}
+                  className={sortableColumn ? styles.sortableColumn : undefined}
+                  onClick={sortableColumn ? () => handleSortBy(column.id) : undefined}
+                >
+                  {sortableColumn ? (
+                    <span>
+                      {column.label}
+                      {renderSortByArrow(sortBy === column.id, sortByDirection)}
+                    </span>
+                  ) : (
+                    column.label
+                  )}
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody>
