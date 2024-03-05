@@ -35,6 +35,7 @@ const TeamMembers = () => {
         id: formatDisplayName(teamMember.display_name),
         navn: renderUserNameColumn(teamMember),
         team: teamMember.teams.length,
+        epost: teamMember.principal_name,
         data_admin_roller: teamMember.groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
         seksjon: teamMember.section_name, // Makes section name searchable and sortable in table by including the field
         seksjonsleder: formatDisplayName(
