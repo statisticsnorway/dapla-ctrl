@@ -123,9 +123,24 @@ app.use((err, req, res, next) => {
   })
 })
 
-//const lightship = await createLightship();
-// Replace above with below to get liveness and readiness probes when running locally
-const lightship = await createLightship({ detectKubernetes: false })
+
+const lightship = await createLightship()
+
+app.get('/live', (req, res) => {
+  if (lightship.isServerReady()) {
+    res.status(200).send({ status: 'ok' });
+  } else {
+    res.status(503).send({ status: 'error', message: 'Service not ready' });
+  }
+});
+
+app.get('/health', (req, res) => {
+  if (lightship.isServerReady()) {
+    res.status(200).send({ status: 'ok' });
+  } else {
+    res.status(503).send({ status: 'error', message: 'Service not healthy' });
+  }
+});
 
 ViteExpress.listen(app, PORT, () => {
   lightship.signalReady()
