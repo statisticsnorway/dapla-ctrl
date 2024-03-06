@@ -3,7 +3,6 @@ import styles from './table.module.scss'
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
-
 import { ArrowUp, ArrowDown } from 'react-feather'
 
 interface TableProps extends TableData {
@@ -57,7 +56,7 @@ const TableMobileView = ({ columns, data }: TableData) => (
 
 const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) => {
   const defaultState = {
-    sortBy: '',
+    sortBy: columns ? columns[0].id : '',
     sortByDirection: 'asc',
   }
   const [sortBy, setSortBy] = useState(defaultState.sortBy)
