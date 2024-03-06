@@ -1,6 +1,6 @@
 import styles from './sidebar.module.scss'
 
-import { Link, Button } from '@statisticsnorway/ssb-component-library'
+import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarHeader {
@@ -16,7 +16,7 @@ const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: Sidebar
         <span>{modalType}</span>
       </div>
       <div className={styles.modalTitle}>
-        <h1>{modalTitle}</h1>
+        <Title size={1}>{modalTitle}</Title>
       </div>
       <div className={styles.modalDescription}>
         <p>{modalDescription}</p>
@@ -75,7 +75,7 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
   return (
     <div className={`${styles.container} ${open ? styles.open : ''}`}>
       <div className={styles.header}>
-        <button onClick={onClose}>
+        <button className={styles.closeButton} onClick={onClose}>
           <X className={styles.xIcon} size={32} />
         </button>
       </div>
