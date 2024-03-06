@@ -3,16 +3,16 @@ import styles from '../../components/PageLayout/pagelayout.module.scss'
 
 import PageLayout from '../../components/PageLayout/PageLayout'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
+import FormattedTableColumn from '../../components/FormattedTableColumn'
 import Table, { TableData } from '../../components/Table/Table'
 import { ApiError } from '../../utils/services'
+import { Team, SharedBucket, SharedBucketDetail, getSharedBucketDetailData } from '../../services/sharedBucketDetail'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
 import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
 import { Dialog, LeadParagraph, Text } from '@statisticsnorway/ssb-component-library'
-import { Team, SharedBucket, SharedBucketDetail, getSharedBucketsDetailData } from '../../services/sharedBucketsDetail'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
 
 const SharedBucketDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName, setBreadcrumbBucketDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -35,7 +35,7 @@ const SharedBucketDetail = () => {
 
   useEffect(() => {
     if (!teamId && !shortName) return
-    getSharedBucketsDetailData(teamId as string, shortName as string)
+    getSharedBucketDetailData(teamId as string, shortName as string)
       .then((response) => {
         setSharedBucketData(response)
         setSharedBucketTableData(prepSharedBucketTableData(response))

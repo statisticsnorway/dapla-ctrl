@@ -75,7 +75,7 @@ export const fetchSharedBucketDetailData = async (teamId: string, shortName: str
   }
 }
 
-export const getSharedBucketsDetailData = async (teamId: string, shortName: string): Promise<SharedBucketDetail> => {
+export const getSharedBucketDetailData = async (teamId: string, shortName: string): Promise<SharedBucketDetail> => {
   try {
     const [team, sharedBucket] = await Promise.all([
       fetchTeamDetail(teamId),
