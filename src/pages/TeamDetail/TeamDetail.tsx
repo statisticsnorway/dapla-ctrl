@@ -12,10 +12,11 @@ import { ApiError } from '../../utils/services'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { Text, Dialog, LeadParagraph, Divider, Tabs } from '@statisticsnorway/ssb-component-library'
+import { Text, Dialog, LeadParagraph, Divider, Tabs, Button } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
+import SidebarModal from '../../components/SidebarModal/SidebarModal'
 
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
@@ -36,7 +37,7 @@ const TeamDetail = () => {
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
   const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
-
+  const [openSidebar, setOpenSidebar] = useState<boolean>(false);
   const { teamId } = useParams<{ teamId: string }>()
 
   const prepTeamData = useCallback(
@@ -189,18 +190,54 @@ const TeamDetail = () => {
       )
     }
   }
+  
+  const sideBarModalDisplay = () => {
+    if (teamDetailData) {
+      return (
+        <>
+        <SidebarModal
+            open={openSidebar}
+            onClose={() => setOpenSidebar(false)}
+            header={{ 
+              modalType: 'Medlem',
+              modalTitle: `${(teamDetailData?.team as Team).display_name}`, 
+              modalDescription: `${(teamDetailData?.team as Team).uniform_name}` }}
+            footer={{
+              submitButtonText: 'Legg til medlem',
+              handleSubmit: () => {
+                setOpenSidebar(false)
+              },
+            }}
+            body={
+            <>
+            <div className="body-todo">
+              <h2>Legg person til teamet</h2>
+              <div>
+              </div>
+            </div>
+            </>}
+          />
+        </>
+      )
+    }
+    return null
+  }
 
   return (
+    <>
+    {sideBarModalDisplay()}
     <PageLayout
       title={
         !loadingTeamData && teamDetailData ? (
           (teamDetailData.team as Team).display_name
-        ) : (
-          <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
-        )
-      }
-      content={renderContent()}
-    />
+          ) : (
+            <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
+            )
+          }
+          content={renderContent()}
+          button={<Button onClick={() => setOpenSidebar(true)}>Nytt medlem</Button>}
+          />
+      </>
   )
 }
 
