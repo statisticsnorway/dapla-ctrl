@@ -3,7 +3,6 @@ import styles from './table.module.scss'
 import { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
-
 import { ArrowUp, ArrowDown } from 'react-feather'
 
 interface TableProps extends TableData {
