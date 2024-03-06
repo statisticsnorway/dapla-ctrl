@@ -57,7 +57,7 @@ const TableMobileView = ({ columns, data }: TableData) => (
 
 const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) => {
   const defaultState = {
-    sortBy: '',
+    sortBy: columns ? columns[0].id : '',
     sortByDirection: 'asc',
   }
   const [sortBy, setSortBy] = useState(defaultState.sortBy)
