@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import styles from '../../components/PageLayout/pagelayout.module.scss'
+import pageStyles from '../../components/PageLayout/pagelayout.module.scss'
+import styles from './teamDetail.module.scss'
 
 import { TabProps } from '../../@types/pageTypes'
 
@@ -12,7 +13,17 @@ import { ApiError } from '../../utils/services'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { Text, Dialog, LeadParagraph, Divider, Tabs, Button, Title } from '@statisticsnorway/ssb-component-library'
+import {
+  Text,
+  Dialog,
+  LeadParagraph,
+  Divider,
+  Tabs,
+  Button,
+  Title,
+  Input,
+  Dropdown,
+} from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
@@ -159,8 +170,8 @@ const TeamDetail = () => {
 
       return (
         <>
-          <LeadParagraph className={styles.description}>
-            <Text medium className={styles.descriptionSpacing}>
+          <LeadParagraph className={pageStyles.description}>
+            <Text medium className={pageStyles.descriptionSpacing}>
               {(teamDetailData.team as Team).uniform_name ?? ''}
             </Text>
             <Text medium>{formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '')}</Text>
@@ -210,12 +221,18 @@ const TeamDetail = () => {
               },
             }}
             body={
-              <>
-                <div className='body-todo'>
-                  <Title size={2}>Legg person til teamet</Title>
-                  <div></div>
+              <div className={styles.modalBody}>
+                <Title size={2}>Legg person til teamet</Title>
+                <Input label='Navn' />
+                <Dropdown
+                  className={styles.dropdown}
+                  header='Tilgangsgrupper(r)'
+                  selectedItem={{ id: 'velg', title: 'Velg ...' }}
+                />
+                <div className={styles.modalBodyDialog}>
+                  <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
                 </div>
-              </>
+              </div>
             }
           />
         </>
@@ -236,7 +253,7 @@ const TeamDetail = () => {
           )
         }
         content={renderContent()}
-        button={<Button onClick={() => setOpenSidebar(true)}>Nytt medlem</Button>}
+        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
       />
     </>
   )
