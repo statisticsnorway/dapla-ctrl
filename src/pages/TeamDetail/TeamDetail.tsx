@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import styles from './teamDetail.module.scss'
+import styles from '../../components/PageLayout/pagelayout.module.scss'
 
 import { TabProps } from '../../@types/pageTypes'
 
@@ -158,8 +158,8 @@ const TeamDetail = () => {
 
       return (
         <>
-          <LeadParagraph className={styles.userProfileDescription}>
-            <Text medium className={styles.uniformName}>
+          <LeadParagraph className={styles.description}>
+            <Text medium className={styles.descriptionSpacing}>
               {(teamDetailData.team as Team).uniform_name ?? ''}
             </Text>
             <Text medium>{formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '')}</Text>
