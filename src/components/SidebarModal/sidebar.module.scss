@@ -15,67 +15,67 @@
     transition: transform 0.3s ease;
     transform: translateX(100%);
 
-    .closeButton {
-        background: none;
-        border: none;
-        cursor: pointer;
-        float: right;
-        padding: 1rem;
-    }
-
-    .xIcon {
-        color: variables.$ssb-green-4;
-    }
-
-    .body {
-        background-color: variables.$ssb-green-1;
-        border-bottom: 1px solid #d4d4d4;
-        height: 80%;
-        overflow-y: auto;
-
-        > * {
-            padding: 2rem 1.5rem;
-        }
-
-        .scroll {
-            color: red;
-            position: fixed;
-            left: 50%;
-            width: 100%;
-            text-align: center;
-            transform: translateX(-50%);
-            z-index: 1000; 
-        }
-    }
-
-    .modalHeader {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        margin: 0 0 2rem 1.5rem;
-        
-        > * > * {
-            padding: 0;
-            margin: 0;
-        }
-    }
-
-    .modalFooter {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        margin: 1rem 2.5rem;
-    }
-
     @media #{variables.$mobile} {
         width: 100%;
+    }
+}
 
-        .modalFooter {
-            flex-direction: column-reverse;
-            margin: 1rem 0;
-            gap: 1rem;
-        }
+.closeButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    float: right;
+    padding: 1rem;
+}
+
+.xIcon {
+    color: variables.$ssb-green-4;
+}
+
+.modalBody {
+    background-color: variables.$ssb-green-1;
+    border-bottom: 1px solid #d4d4d4;
+    height: 80%;
+    overflow-y: auto;
+
+    > * {
+        padding: 2rem 1.5rem;
+    }
+
+    .scroll {
+        color: red;
+        position: fixed;
+        left: 50%;
+        width: 100%;
+        text-align: center;
+        transform: translateX(-50%);
+        z-index: 1000; 
+    }
+}
+
+.modalHeader {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 0 2rem 1.5rem;
+    
+    > * {
+        padding: 0;
+        margin: 0;
+    }
+}
+
+.modalFooter {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 2.5rem;
+
+    @media #{variables.$mobile} {
+        flex-direction: column-reverse;
+        margin: 1rem 0;
+        gap: 1rem;
     }
 }
 

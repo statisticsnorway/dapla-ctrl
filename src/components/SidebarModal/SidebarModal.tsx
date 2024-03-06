@@ -1,5 +1,6 @@
 import styles from './sidebar.module.scss'
 
+import { useState, useRef, useEffect } from 'react'
 import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
@@ -12,15 +13,9 @@ interface SidebarHeader {
 const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
   return (
     <div className={styles.modalHeader}>
-      <div className={styles.modalType}>
-        <span>{modalType}</span>
-      </div>
-      <div className={styles.modalTitle}>
-        <Title size={1}>{modalTitle}</Title>
-      </div>
-      <div className={styles.modalDescription}>
-        <p>{modalDescription}</p>
-      </div>
+      <span>{modalType}</span>
+      <Title size={1}>{modalTitle}</Title>
+      <p>{modalDescription}</p>
     </div>
   )
 }
@@ -53,35 +48,42 @@ interface SidebarModal {
 }
 
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
-  /*
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const contentRef = useRef(null);
+  // const [showScrollIndicator, setShowScrollIndicator] = useState(false)
+  // const contentRef = useRef(null)
 
-  const checkForOverflow = () => {
-    const element = contentRef.current;
-    if (!element) return
+  // const checkForOverflow = () => {
+  //   const element = contentRef.current
+  //   if (!element) return
 
-    // Check if the content is overflowing in the vertical direction
-    const hasOverflow = element.scrollHeight > element.clientHeight;
-    setShowScrollIndicator(hasOverflow);
-  };
+  //   // Check if the content is overflowing in the vertical direction
+  //   const hasOverflow = element.scrollHeight > element.clientHeight
+  //   setShowScrollIndicator(hasOverflow)
+  // }
 
+  // useEffect(() => {
+  //   if (!open) return
+
+  //   checkForOverflow()
+  // }, [open])
+  const sidebarModalRef = useRef(null)
   useEffect(() => {
-    if (!open) return
-    
-    checkForOverflow();
-  }, [open]);
-  */
+    document.addEventListener('mousedown', () => onClose())
+    return () => {
+      document.removeEventListener('mousedown', () => onClose())
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className={`${styles.container} ${open ? styles.open : ''}`}>
-      <div className={styles.header}>
+    <div className={`${styles.container} ${open ? styles.open : ''}`} ref={sidebarModalRef}>
+      <div>
         <button className={styles.closeButton} onClick={onClose}>
           <X className={styles.xIcon} size={32} />
         </button>
       </div>
       <SidebarModalHeader {...header} />
       {/*<div className={styles.body} ref={contentRef} onScroll={checkForOverflow}> */}
-      <div className={styles.body}>
+      <div className={styles.modalBody}>
         {/* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */}
         {body}
       </div>
