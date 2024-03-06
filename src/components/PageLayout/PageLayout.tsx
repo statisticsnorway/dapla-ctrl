@@ -16,9 +16,13 @@ const PageLayout = ({ title, button, content }: PageLayoutProps) => {
       <Header />
       <main className={styles.container}>
         <Breadcrumb />
-        <div className={styles.title}>
-          {title && <Title size={1}>{title}</Title>}
-          {button}
+        <div className={styles.titleContainer}>
+          {title && (
+            <Title size={1} className={styles.title}>
+              {title}
+            </Title>
+          )}
+          {button && <div className={styles.button}>{button}</div>}
         </div>
         {content}
       </main>

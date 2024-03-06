@@ -8,7 +8,7 @@
   }
 }
 
-.title {
+.titleContainer {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -21,8 +21,12 @@
     align-items: start;
     margin-bottom: 1rem;
 
-    :first-child {
+    .title {
       margin: 0;
+    }
+
+    .button {
+      margin: 1.5rem 0 1rem;
     }
   }
 }
@@ -30,7 +34,7 @@
 .description {
   display: flex;
   flex-direction: column;
-  margin-top: -2rem;
+  margin-top: -2.5rem;
   gap: .5rem;
 
   @media #{variables.$mobile} {
