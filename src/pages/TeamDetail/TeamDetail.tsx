@@ -201,7 +201,7 @@ const TeamDetail = () => {
     }
   }
 
-  const SideBarModalDisplay = () => {
+  const renderSidebarModal = () => {
     return (
       <SidebarModal
         open={openSidebar}
@@ -239,7 +239,7 @@ const TeamDetail = () => {
 
   return (
     <>
-      {teamDetailData && <SideBarModalDisplay />}
+      {teamDetailData && renderSidebarModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
