@@ -248,16 +248,7 @@ const TeamDetail = () => {
           )
         }
         content={renderContent()}
-        button={
-          <Button
-            onClick={(e: Event) => {
-              e.stopPropagation()
-              setOpenSidebar(true)
-            }}
-          >
-            + Nytt medlem
-          </Button>
-        }
+        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
       />
     </>
   )

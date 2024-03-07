@@ -72,9 +72,9 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
       if (sidebarModalRef.current && !sidebarModalRef?.current?.contains(e.target as Node)) onClose()
     }
 
-    window.addEventListener('click', handleBackdropOnClick)
+    window.addEventListener('mousedown', handleBackdropOnClick)
     return () => {
-      window.removeEventListener('click', handleBackdropOnClick)
+      window.removeEventListener('mousedown', handleBackdropOnClick)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
