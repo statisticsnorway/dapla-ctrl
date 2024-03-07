@@ -76,6 +76,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
-          platforms: linux/amd64,linux/arm64
           build-args: |
             BASE_IMAGE=${{ env.REGISTRY }}/base-image:latest
