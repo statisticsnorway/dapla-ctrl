@@ -62,11 +62,11 @@ jobs:
           tags: |
             type=schedule
             type=ref,event=branch
-            type=ref,event=pr
+            type=ref,event=pr,suffix=-${{ github.event.pull_request.head.sha }}
+            type=raw,value={{branch}}-{{sha}}-{{date 'YYYYMMDDHHmmss'}},enable={{is_default_branch}}
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
-            type=sha
             type=raw,value=${{ env.TAG }}, enable=true
       
       - name: Build and push
