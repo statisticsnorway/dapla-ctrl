@@ -1,5 +1,10 @@
 name: Build and Deploy Docker Image
 
+permissions:
+  contents: read
+  id-token: write
+
+
 on:
   push:
     branches:
