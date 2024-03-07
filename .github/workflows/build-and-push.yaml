@@ -53,16 +53,20 @@ jobs:
           username: "oauth2accesstoken"
           password: "${{ steps.auth.outputs.access_token }}"
 
-      - name: Determine Tag
-        id: tag
-        run: |
-          if [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-            echo "::set-output name=version::latest"
-          elif [[ "${{ github.event_name }}" == "release" ]]; then
-            echo "::set-output name=version::${{ github.event.release.tag_name }}"
-          else
-            echo "::set-output name=version::$(date +'%Y%m%d%H%M%S')"
-          fi
+      - name: Docker meta
+        id: metadata
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE }}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}
+            type=sha
+            type=raw,value=${{ env.TAG }}, enable=true
       
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -70,6 +74,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE }}:${{ steps.tag.outputs.version }}
+          tags: ${{ steps.metadata.outputs.tags }}
           build-args: |
             BASE_IMAGE=${{ env.REGISTRY }}/base-image:latest
