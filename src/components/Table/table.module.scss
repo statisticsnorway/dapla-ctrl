@@ -1,0 +1,137 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.tableTitleContainer {  
+  @media #{variables.$desktop} {
+    display: flex;
+    flex-wrap: row;
+    justify-content: space-between;
+
+    .tableTitleWrapper {
+      margin: 2.5rem 0;
+    }
+
+    .tableFilterWrapper {
+      display: flex;
+      align-items: center;
+
+      .tableFilterDropdown {
+        margin-right: .5rem;
+
+        span {
+          margin: 0;
+        }
+      }
+    }
+  }
+
+  @media #{variables.$mobile} {
+    .tableTitleWrapper {
+      margin: 2.5rem 0 0;
+    }
+  
+    .tableFilterWrapper {
+      margin-bottom: 2rem;
+  
+      .tableFilterDropdown {
+        min-width: 100%;
+      }
+
+      > * {
+        margin: 1rem 0;
+      }
+    }
+  }
+}
+
+.tableContainer {
+  overflow-x: auto;
+
+  .table {
+    background-color: variables.$ssb-white;
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid;
+    padding: 2rem;
+
+    th,
+    td {
+      padding: 0.75rem;
+      text-align: start;
+    }
+
+    th {
+      border: 1px solid;
+    }
+
+    td {
+      border: 1px inset variables.$ssb-dark-2;
+
+      >* {
+        display: flex;
+      }
+    }
+
+    .sortableColumn {
+      cursor: pointer;
+
+      svg {
+        display: none;
+        color: variables.$ssb-green-4; 
+        margin-left: .25rem;
+      }
+      
+      span {
+        display: flex;
+        align-items: center;
+      }
+      
+      .displayArrowOnSelectedColumn {
+        display: initial;
+      }
+      
+      &:hover {
+        span {
+          color: variables.$ssb-green-4; 
+        } 
+
+        svg {
+          display: initial;
+        }
+      }
+    }
+  }
+}
+
+.tableContainerMobile {
+  background-color: variables.$ssb-white;
+  width: 100%;
+  border: 1px solid;
+
+  .tableMobile {
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    border-bottom: 1px inset variables.$ssb-dark-2;
+
+    >* {
+      display: flex;
+      flex-direction: column;
+
+      &:not(:last-child) {
+        margin-bottom: 1.5rem;
+      }
+    }
+  }
+}
+
+.greenBackground {
+  background-color: variables.$ssb-green-1;
+}
+
+.noResult {
+  justify-content: center;
+
+  @media #{variables.$mobile} {
+    display: flex;
+  }
+}

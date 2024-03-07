@@ -1,36 +1,27 @@
-import styles from './app.module.scss'
+import ProtectedRoute from './components/ProtectedRoute'
 
-import Header from './components/Header/Header';
-import Breadcrumb from './components/Breadcrumb';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import Home from './pages/Home';
-import Users from './pages/Users';
-import Login from './pages/Login/Login';
+import NotFound from './pages/NotFound/NotFound.tsx'
+import TeamOverview from './pages/TeamOverview/TeamOverview'
+import UserProfile from './pages/UserProfile/UserProfile'
+import TeamDetail from './pages/TeamDetail/TeamDetail'
+import TeamMembers from './pages/TeamMembers/TeamMembers'
+import SharedBucketDetail from './pages/SharedBucketDetail/SharedBucketDetail.tsx'
 
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom'
 
-export default function App() {
-  const isLoggedIn = useLocation().pathname !== '/login';
-
+const App = () => {
   return (
-    <>
-      <Header isLoggedIn={isLoggedIn} />
-      <main className={styles.container}>
-        {isLoggedIn && <Breadcrumb />}
-        <Routes>
-          <Route path="/login" element={<Login />} />
-
-          <Route element={<ProtectedRoute />}> {
-            /* Possibly setup passable props to ProtectedRoute so we can add authorization too,
-            example: <ProtectedRoute roles={['managers', 'data-admins']} />
-            */
-          }
-            <Route path="/" element={<Home />} />
-            <Route path="/medlemmer" element={<Users />} />
-            <Route path="/medlemmer/test" element={<h1>Test</h1>} />
-          </Route>
-        </Routes>
-      </main>
-    </>
+    <Routes>
+      <Route element={<ProtectedRoute />}>
+        <Route path='/' element={<TeamOverview />} />
+        <Route path='/teammedlemmer' element={<TeamMembers />} />
+        <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
+        <Route path='/:teamId' element={<TeamDetail />} />
+        <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
+        <Route path='*' element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
+
+export default App

@@ -1,5 +1,13 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
+.container {
+  margin: 1.5rem 12.25rem;
+
+  @media #{variables.$mobile} {
+      margin: 1.5rem;
+  }
+}
+
 .title {
   display: flex;
   flex-direction: row;
@@ -10,4 +18,15 @@
   @media #{variables.$mobile} {
     flex-direction: column;
   }
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  margin-top: -2rem;
+  gap: 0.5rem;
+}
+
+.descriptionSpacing {
+    margin-bottom: .5rem;
 }

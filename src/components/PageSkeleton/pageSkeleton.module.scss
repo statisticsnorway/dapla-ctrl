@@ -1,0 +1,9 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.description {
+    margin-top: -2rem;
+
+    @media #{variables.$mobile} {
+        margin-top: -1.5rem;
+    }
+}
