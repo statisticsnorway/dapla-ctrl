@@ -202,48 +202,43 @@ const TeamDetail = () => {
     }
   }
 
-  const sideBarModalDisplay = () => {
-    if (teamDetailData) {
-      return (
-        <>
-          <SidebarModal
-            open={openSidebar}
-            onClose={() => setOpenSidebar(false)}
-            header={{
-              modalType: 'Medlem',
-              modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-              modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-            }}
-            footer={{
-              submitButtonText: 'Legg til medlem',
-              handleSubmit: () => {
-                setOpenSidebar(false)
-              },
-            }}
-            body={
-              <div className={styles.modalBody}>
-                <Title size={2}>Legg person til teamet</Title>
-                <Input label='Navn' />
-                <Dropdown
-                  className={styles.dropdown}
-                  header='Tilgangsgrupper(r)'
-                  selectedItem={{ id: 'velg', title: 'Velg ...' }}
-                />
-                <div className={styles.modalBodyDialog}>
-                  <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-                </div>
-              </div>
-            }
-          />
-        </>
-      )
-    }
-    return null
+  const SideBarModalDisplay = () => {
+    return (
+      <SidebarModal
+        open={openSidebar}
+        onClose={() => setOpenSidebar(false)}
+        header={{
+          modalType: 'Medlem',
+          modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+          modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+        }}
+        footer={{
+          submitButtonText: 'Legg til medlem',
+          handleSubmit: () => {
+            setOpenSidebar(false)
+          },
+        }}
+        body={
+          <div className={styles.modalBody}>
+            <Title size={2}>Legg person til teamet</Title>
+            <Input className={styles.fields} label='Navn' />
+            <Dropdown
+              className={styles.fields}
+              header='Tilgangsgrupper(r)'
+              selectedItem={{ id: 'velg', title: 'Velg ...' }}
+            />
+            <div className={styles.modalBodyDialog}>
+              <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+            </div>
+          </div>
+        }
+      />
+    )
   }
 
   return (
     <>
-      {sideBarModalDisplay()}
+      {teamDetailData && <SideBarModalDisplay />}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
@@ -253,7 +248,16 @@ const TeamDetail = () => {
           )
         }
         content={renderContent()}
-        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
+        button={
+          <Button
+            onClick={(e: Event) => {
+              e.stopPropagation()
+              setOpenSidebar(true)
+            }}
+          >
+            + Nytt medlem
+          </Button>
+        }
       />
     </>
   )

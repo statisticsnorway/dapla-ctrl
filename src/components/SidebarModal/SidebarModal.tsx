@@ -1,29 +1,37 @@
 import styles from './sidebar.module.scss'
 
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarHeader {
-  modalType: string
+  modalType?: string
   modalTitle: string
-  modalDescription: string
-}
-
-const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
-  return (
-    <div className={styles.modalHeader}>
-      <span>{modalType}</span>
-      <Title size={1}>{modalTitle}</Title>
-      <p>{modalDescription}</p>
-    </div>
-  )
+  modalDescription?: string
 }
 
 interface SidebarFooter {
   submitButtonText: string
   onClose?: () => void
   handleSubmit?: () => void
+}
+
+interface SidebarModal {
+  open: boolean
+  onClose: () => void
+  header: SidebarHeader
+  body: JSX.Element
+  footer: SidebarFooter
+}
+
+const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
+  return (
+    <div className={styles.modalHeader}>
+      {modalType && <span>{modalType}</span>}
+      {<Title size={1}>{modalTitle}</Title>}
+      {modalDescription && <p>{modalDescription}</p>}
+    </div>
+  )
 }
 
 const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: SidebarFooter): JSX.Element => {
@@ -37,14 +45,6 @@ const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: Sidebar
       </div>
     </div>
   )
-}
-
-interface SidebarModal {
-  open: boolean
-  onClose: () => void
-  header: SidebarHeader
-  body: JSX.Element
-  footer: SidebarFooter
 }
 
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
@@ -65,11 +65,16 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
 
   //   checkForOverflow()
   // }, [open])
-  const sidebarModalRef = useRef(null)
+  const sidebarModalRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    document.addEventListener('mousedown', () => onClose())
+    const handleBackdropOnClick = (e: Event) => {
+      if (sidebarModalRef.current && !sidebarModalRef?.current?.contains(e.target as Node)) onClose()
+    }
+
+    window.addEventListener('click', handleBackdropOnClick)
     return () => {
-      document.removeEventListener('mousedown', () => onClose())
+      window.removeEventListener('click', handleBackdropOnClick)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

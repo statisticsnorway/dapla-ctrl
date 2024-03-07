@@ -2,10 +2,6 @@
 
 .modalBody {
     height: inherit;
-
-    > *:not(:first-child, :last-child) {
-        margin-bottom: 2.5rem;
-    }
 }
 
 .modalBodyDialog {
@@ -18,6 +14,7 @@
     }
 }
 
-.dropdown {
+.fields {
+    margin-bottom: 2.5rem;
     min-width: 100%;
 }
