@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import styles from '../../components/PageLayout/pagelayout.module.scss'
+import pageStyles from '../../components/PageLayout/pagelayout.module.scss'
+import styles from './teamDetail.module.scss'
 
 import { TabProps } from '../../@types/pageTypes'
 
@@ -12,10 +13,20 @@ import { ApiError } from '../../utils/services'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { Text, Dialog, LeadParagraph, Divider, Tabs } from '@statisticsnorway/ssb-component-library'
+import {
+  Text,
+  Dialog,
+  LeadParagraph,
+  Divider,
+  Tabs,
+  Button,
+  Input,
+  Dropdown,
+} from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
+import SidebarModal from '../../components/SidebarModal/SidebarModal'
 
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
@@ -36,7 +47,7 @@ const TeamDetail = () => {
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
   const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
-
+  const [openSidebar, setOpenSidebar] = useState<boolean>(false)
   const { teamId } = useParams<{ teamId: string }>()
 
   const prepTeamData = useCallback(
@@ -158,8 +169,8 @@ const TeamDetail = () => {
 
       return (
         <>
-          <LeadParagraph className={styles.description}>
-            <Text medium className={styles.descriptionSpacing}>
+          <LeadParagraph className={pageStyles.description}>
+            <Text medium className={pageStyles.descriptionSpacing}>
               {(teamDetailData.team as Team).uniform_name ?? ''}
             </Text>
             <Text medium>{formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '')}</Text>
@@ -190,17 +201,57 @@ const TeamDetail = () => {
     }
   }
 
+  const renderSidebarModal = () => {
+    return (
+      <SidebarModal
+        open={openSidebar}
+        onClose={() => setOpenSidebar(false)}
+        header={{
+          modalType: 'Medlem',
+          modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+          modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+        }}
+        footer={{
+          submitButtonText: 'Legg til medlem',
+          handleSubmit: () => {
+            setOpenSidebar(false)
+          },
+        }}
+        body={{
+          modalBodyTitle: 'Legg person til teamet',
+          modalBody: (
+            <>
+              <Input className={styles.fields} label='Navn' />
+              <Dropdown
+                className={styles.fields}
+                header='Tilgangsgrupper(r)'
+                selectedItem={{ id: 'velg', title: 'Velg ...' }}
+              />
+              <div className={styles.modalBodyDialog}>
+                <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+              </div>
+            </>
+          ),
+        }}
+      />
+    )
+  }
+
   return (
-    <PageLayout
-      title={
-        !loadingTeamData && teamDetailData ? (
-          (teamDetailData.team as Team).display_name
-        ) : (
-          <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
-        )
-      }
-      content={renderContent()}
-    />
+    <>
+      {teamDetailData && renderSidebarModal()}
+      <PageLayout
+        title={
+          !loadingTeamData && teamDetailData ? (
+            (teamDetailData.team as Team).display_name
+          ) : (
+            <Skeleton variant='rectangular' animation='wave' width={350} height={90} />
+          )
+        }
+        content={renderContent()}
+        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
+      />
+    </>
   )
 }
 

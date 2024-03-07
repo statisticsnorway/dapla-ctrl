@@ -1,1 +1,16 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.modalBodyDialog {
+    height: 55%;
+    display: flex;
+    align-items: center;
+
+    @media #{variables.$mobile} {
+        height: auto;
+    }
+}
+
+.fields {
+    margin-bottom: 2.5rem;
+    min-width: 100%;
+}

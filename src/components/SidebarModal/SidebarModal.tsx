@@ -1,34 +1,51 @@
 import styles from './sidebar.module.scss'
 
-import { Link, Button } from '@statisticsnorway/ssb-component-library'
+import { useRef, useEffect } from 'react'
+import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 interface SidebarHeader {
-  modalType: string
+  modalType?: string
   modalTitle: string
-  modalDescription: string
+  modalDescription?: string
 }
 
-const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
-  return (
-    <div className={styles.modalHeader}>
-      <div className={styles.modalType}>
-        <span>{modalType}</span>
-      </div>
-      <div className={styles.modalTitle}>
-        <h1>{modalTitle}</h1>
-      </div>
-      <div className={styles.modalDescription}>
-        <p>{modalDescription}</p>
-      </div>
-    </div>
-  )
+interface SidebarBody {
+  modalBodyTitle: string
+  modalBody: JSX.Element
 }
 
 interface SidebarFooter {
   submitButtonText: string
   onClose?: () => void
   handleSubmit?: () => void
+}
+
+interface SidebarModal {
+  open: boolean
+  onClose: () => void
+  header: SidebarHeader
+  body: SidebarBody
+  footer: SidebarFooter
+}
+
+const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
+  return (
+    <div className={styles.modalHeader}>
+      {modalType && <span>{modalType}</span>}
+      {<Title size={1}>{modalTitle}</Title>}
+      {modalDescription && <p>{modalDescription}</p>}
+    </div>
+  )
+}
+
+const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody): JSX.Element => {
+  return (
+    <div className={styles.modalBody}>
+      <Title size={2}>{modalBodyTitle}</Title>
+      {modalBody}
+    </div>
+  )
 }
 
 const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: SidebarFooter): JSX.Element => {
@@ -44,47 +61,30 @@ const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: Sidebar
   )
 }
 
-interface SidebarModal {
-  open: boolean
-  onClose: () => void
-  header: SidebarHeader
-  body: JSX.Element
-  footer: SidebarFooter
-}
-
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
-  /*
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const contentRef = useRef(null);
-
-  const checkForOverflow = () => {
-    const element = contentRef.current;
-    if (!element) return
-
-    // Check if the content is overflowing in the vertical direction
-    const hasOverflow = element.scrollHeight > element.clientHeight;
-    setShowScrollIndicator(hasOverflow);
-  };
+  const sidebarModalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!open) return
-    
-    checkForOverflow();
-  }, [open]);
-  */
+    const handleBackdropOnClick = (e: Event) => {
+      if (sidebarModalRef.current && !sidebarModalRef?.current?.contains(e.target as Node)) onClose()
+    }
+
+    window.addEventListener('mousedown', handleBackdropOnClick)
+    return () => {
+      window.removeEventListener('mousedown', handleBackdropOnClick)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   return (
-    <div className={`${styles.container} ${open ? styles.open : ''}`}>
-      <div className={styles.header}>
-        <button onClick={onClose}>
+    <div className={`${styles.container} ${open ? styles.open : ''}`} ref={sidebarModalRef}>
+      <div>
+        <button className={styles.closeButton} onClick={onClose}>
           <X className={styles.xIcon} size={32} />
         </button>
       </div>
       <SidebarModalHeader {...header} />
-      {/*<div className={styles.body} ref={contentRef} onScroll={checkForOverflow}> */}
-      <div className={styles.body}>
-        {/* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */}
-        {body}
-      </div>
+      <SidebarModalBody {...body} />
       <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
     </div>
   )
