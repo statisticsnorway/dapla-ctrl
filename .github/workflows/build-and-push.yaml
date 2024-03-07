@@ -22,6 +22,7 @@ on:
       - 'Dockerfile'
   release:
     types: [published]
+  workflow_dispatch:
 
 env:
   REGISTRY: europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-stat-docker
