@@ -10,6 +10,11 @@ interface SidebarHeader {
   modalDescription?: string
 }
 
+interface SidebarBody {
+  modalBodyTitle: string
+  modalBody: JSX.Element
+}
+
 interface SidebarFooter {
   submitButtonText: string
   onClose?: () => void
@@ -20,7 +25,7 @@ interface SidebarModal {
   open: boolean
   onClose: () => void
   header: SidebarHeader
-  body: JSX.Element
+  body: SidebarBody
   footer: SidebarFooter
 }
 
@@ -30,6 +35,15 @@ const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: Sidebar
       {modalType && <span>{modalType}</span>}
       {<Title size={1}>{modalTitle}</Title>}
       {modalDescription && <p>{modalDescription}</p>}
+    </div>
+  )
+}
+
+const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody): JSX.Element => {
+  return (
+    <div className={styles.modalBody}>
+      <Title size={2}>{modalBodyTitle}</Title>
+      {modalBody}
     </div>
   )
 }
@@ -48,23 +62,6 @@ const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: Sidebar
 }
 
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
-  // const [showScrollIndicator, setShowScrollIndicator] = useState(false)
-  // const contentRef = useRef(null)
-
-  // const checkForOverflow = () => {
-  //   const element = contentRef.current
-  //   if (!element) return
-
-  //   // Check if the content is overflowing in the vertical direction
-  //   const hasOverflow = element.scrollHeight > element.clientHeight
-  //   setShowScrollIndicator(hasOverflow)
-  // }
-
-  // useEffect(() => {
-  //   if (!open) return
-
-  //   checkForOverflow()
-  // }, [open])
   const sidebarModalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -87,11 +84,7 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
         </button>
       </div>
       <SidebarModalHeader {...header} />
-      {/*<div className={styles.body} ref={contentRef} onScroll={checkForOverflow}> */}
-      <div className={styles.modalBody}>
-        {/* showScrollIndicator && <div className={styles.scroll}>↓ Scroll for å vise mer innhold</div> */}
-        {body}
-      </div>
+      <SidebarModalBody {...body} />
       <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
     </div>
   )

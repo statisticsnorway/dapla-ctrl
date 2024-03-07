@@ -20,7 +20,6 @@ import {
   Divider,
   Tabs,
   Button,
-  Title,
   Input,
   Dropdown,
 } from '@statisticsnorway/ssb-component-library'
@@ -218,20 +217,22 @@ const TeamDetail = () => {
             setOpenSidebar(false)
           },
         }}
-        body={
-          <div className={styles.modalBody}>
-            <Title size={2}>Legg person til teamet</Title>
-            <Input className={styles.fields} label='Navn' />
-            <Dropdown
-              className={styles.fields}
-              header='Tilgangsgrupper(r)'
-              selectedItem={{ id: 'velg', title: 'Velg ...' }}
-            />
-            <div className={styles.modalBodyDialog}>
-              <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-            </div>
-          </div>
-        }
+        body={{
+          modalBodyTitle: 'Legg person til teamet',
+          modalBody: (
+            <>
+              <Input className={styles.fields} label='Navn' />
+              <Dropdown
+                className={styles.fields}
+                header='Tilgangsgrupper(r)'
+                selectedItem={{ id: 'velg', title: 'Velg ...' }}
+              />
+              <div className={styles.modalBodyDialog}>
+                <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+              </div>
+            </>
+          ),
+        }}
       />
     )
   }

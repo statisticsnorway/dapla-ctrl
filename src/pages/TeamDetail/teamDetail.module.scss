@@ -1,11 +1,7 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
-.modalBody {
-    height: inherit;
-}
-
 .modalBodyDialog {
-    height: inherit;
+    height: 55%;
     display: flex;
     align-items: center;
 
