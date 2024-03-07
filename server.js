@@ -1,12 +1,10 @@
 import ViteExpress from 'vite-express'
 import { createLightship } from 'lightship'
 import express from 'express'
-import jwt from 'jsonwebtoken'
-import jwksClient from 'jwks-rsa'
 import { getReasonPhrase } from 'http-status-codes'
 import dotenv from 'dotenv'
 
-if (!process.env.VITE_JWKS_URI) {
+if (!process.env.VITE_DAPLA_TEAM_API_URL) {
   dotenv.config({ path: './.env.local' })
 }
 
@@ -16,36 +14,6 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 app.use(express.json())
-
-const client = jwksClient({
-  jwksUri: process.env.VITE_JWKS_URI,
-})
-
-app.post('/api/verify-token', (req, res) => {
-  if (!req.headers.authorization.startsWith('Bearer')) {
-    return res.status(401).json({ message: 'No token provided' })
-  }
-
-  const token = req.headers.authorization.split('Bearer ')[1]
-
-  const decodedToken = jwt.decode(token, { complete: true })
-  if (!decodedToken) return res.status(400).json({ message: 'Invalid token format' })
-
-  const kid = decodedToken.header.kid
-  getPublicKeyFromKeycloak(kid)
-    .then((publicKey) => {
-      jwt.verify(token, publicKey, { algorithms: ['RS256'] }, (err, decoded) => {
-        if (err) {
-          return res.status(401).json({ message: 'Invalid token' })
-        }
-        res.json({ user: decoded })
-      })
-    })
-    .catch((error) => {
-      console.error(error)
-      res.status(500).json({ message: 'Server error', error: error.message })
-    })
-})
 
 // DO NOT REMOVE, NECCESSARY FOR FRONTEND
 app.get('/api/photo/:principalName', async (req, res, next) => {
@@ -94,22 +62,6 @@ function getFetchOptions(token) {
   }
 }
 
-function getPublicKeyFromKeycloak(kid) {
-  return new Promise((resolve, reject) => {
-    client.getSigningKey(kid, (err, key) => {
-      if (err) {
-        reject(err)
-        return
-      }
-      if (!key) {
-        reject(new Error('No key found'))
-        return
-      }
-      resolve(key.getPublicKey())
-    })
-  })
-}
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500
@@ -123,9 +75,8 @@ app.use((err, req, res, next) => {
   })
 })
 
-//const lightship = await createLightship();
-// Replace above with below to get liveness and readiness probes when running locally
-const lightship = await createLightship({ detectKubernetes: false })
+
+const lightship = await createLightship()
 
 ViteExpress.listen(app, PORT, () => {
   lightship.signalReady()
