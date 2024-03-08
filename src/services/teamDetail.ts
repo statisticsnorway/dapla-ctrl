@@ -1,5 +1,5 @@
 import { ApiError, fetchAPIData } from '../utils/services'
-import { flattenEmbedded, DAPLA_TEAM_API_URL} from '../utils/utils'
+import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
 const TEAMS_URL = `${DAPLA_TEAM_API_URL}/teams`
 
@@ -40,7 +40,7 @@ interface Group {
 export interface SharedBuckets {
   items: SharedBucket[]
   // eslint-disable-next-line
-    _embedded?: any
+  _embedded?: any
 }
 
 export interface SharedBucket {
