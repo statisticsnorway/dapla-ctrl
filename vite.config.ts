@@ -12,30 +12,24 @@ export default defineConfig({
        * This enables you to use another file for declaring your variables.
        */
       // declarationFile: '.env.declaration',
-      
+
       /*
-       * This is completely optional.  
-       * It enables you to define environment 
+       * This is completely optional.
+       * It enables you to define environment
        * variables that are computed at build time.
        */
-      computedEnv: async ({ resolvedConfig, /*declaredEnv, localEnv*/ }) => {
+      computedEnv: async ({ resolvedConfig /*declaredEnv, localEnv*/ }) => {
+        const path = await import('path')
+        const fs = await import('fs/promises')
 
-        const path = await import('path');
-        const fs = await import('fs/promises');
+        const packageJson = JSON.parse(await fs.readFile(path.join(resolvedConfig.root, 'package.json'), 'utf-8'))
 
-        const packageJson = JSON.parse(
-          await fs.readFile(
-            path.join(resolvedConfig.root, 'package.json'),
-            'utf-8'
-          )
-        );
-        
-        const DAPLA_TEAM_API_URL=process.env.DAPLA_TEAM_API_URL
-        const DAPLA_TEAM_API_CLUSTER_URL=process.env.DAPLA_TEAM_API_CLUSTER_URL
-        const PORT=process.env.PORT || 8080
+        const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL
+        const DAPLA_TEAM_API_CLUSTER_URL = process.env.DAPLA_TEAM_API_CLUSTER_URL
+        const PORT = process.env.PORT || 8080
         /*
-         * Here you can define any arbitrary value they will be available 
-         * in `import.meta.env` and it's type definitions.  
+         * Here you can define any arbitrary value they will be available
+         * in `import.meta.env` and it's type definitions.
          * You can also compute defaults for variable declared in `.env` files.
          */
         return {
@@ -44,12 +38,11 @@ export default defineConfig({
           DAPLA_TEAM_API_URL: DAPLA_TEAM_API_URL,
           DAPLA_TEAM_API_CLUSTER_URL: DAPLA_TEAM_API_CLUSTER_URL,
           PORT: PORT,
-        };
-
-      }
-    })
+        }
+      },
+    }),
   ],
   build: {
-    sourcemap: true
-  }
+    sourcemap: true,
+  },
 })
