@@ -2,6 +2,11 @@ FROM node:20-alpine AS builder
 WORKDIR /usr/local/app
 
 COPY . .
+
+# Required for building Vite frontend (env var must be available at build)
+ARG VITE_DAPLA_TEAM_API_URL
+ENV VITE_DAPLA_TEAM_API_URL=${VITE_DAPLA_TEAM_API_URL}
+
 RUN npm ci && npm run build
 
 FROM node:20-alpine
