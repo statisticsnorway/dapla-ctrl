@@ -1,16 +1,14 @@
-FROM node:20-alpine AS builder
-WORKDIR /usr/local/app
-
+# build environment
+FROM node:20-alpine AS build
+WORKDIR /app
 COPY . .
-
 RUN npm ci && npm run build
 
+# production environment
 FROM node:20-alpine
+WORKDIR /app
+COPY --from=build /app/dist .
 
-COPY --from=builder /usr/local/app/dist /usr/local/app/dist
-WORKDIR /usr/local/app
-
-COPY --from=builder /app/dist .
 COPY package*.json .
 COPY server.js .
 
