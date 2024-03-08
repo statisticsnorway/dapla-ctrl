@@ -6,6 +6,8 @@ type ImportMetaEnv = {
   MODE: string
   DEV: boolean
   PROD: boolean
+  BUILD_TIME: number
+  VERSION: string
   DAPLA_TEAM_API_URL: string
   DAPLA_TEAM_API_CLUSTER_URL: string
   PORT: string
