@@ -6,7 +6,12 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import Table, { TableData } from '../../components/Table/Table'
 import { ApiError } from '../../utils/services'
-import { Team, SharedBucket, SharedBucketDetail, getSharedBucketDetailData } from '../../services/sharedBucketDetail'
+import {
+  Team,
+  SharedBucket,
+  SharedBucketDetail as SharedBucketDetailType,
+  getSharedBucketDetailData,
+} from '../../services/sharedBucketDetail'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
@@ -18,13 +23,13 @@ const SharedBucketDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName, setBreadcrumbBucketDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
   const [loadingSharedBucketsData, setLoadingSharedBucketsData] = useState<boolean>(true)
-  const [sharedBucketData, setSharedBucketData] = useState<SharedBucketDetail>()
+  const [sharedBucketData, setSharedBucketData] = useState<SharedBucketDetailType>()
   const [sharedBucketTableData, setSharedBucketTableData] = useState<TableData['data']>()
 
   const { teamId } = useParams<{ teamId: string }>()
   const { shortName } = useParams<{ shortName: string }>()
 
-  const prepSharedBucketTableData = (response: SharedBucketDetail): TableData['data'] => {
+  const prepSharedBucketTableData = (response: SharedBucketDetailType): TableData['data'] => {
     return (response['sharedBucket'] as SharedBucket).teams.map(({ display_name, uniform_name, section_name }) => {
       return {
         id: display_name ?? '',
