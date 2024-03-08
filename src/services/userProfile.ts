@@ -48,8 +48,8 @@ interface Group {
 }
 
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
+  console.log("USERS_URL: " + USERS_URL)
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
-  console.log("UsersUrl: " + usersUrl.toString())
   const embeds = ['section_manager']
   const selects = [
     'principal_name',
