@@ -11,7 +11,7 @@
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
     "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
     "preview": "vite preview",
-    "prepare": "vite-envs update-types"
+    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then vite-envs update-types; fi"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
