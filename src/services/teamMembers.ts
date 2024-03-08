@@ -1,6 +1,6 @@
 import { ApiError, fetchAPIData } from '../utils/services'
+import { DAPLA_TEAM_API_URL } from '../utils/utils'
 
-const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
 export interface TeamMembersData {
