@@ -1,7 +1,6 @@
 import { ApiError, fetchAPIData } from '../utils/services'
-import { flattenEmbedded } from '../utils/utils'
+import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
-const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
 export interface UserProfileTeamData {
@@ -48,7 +47,6 @@ interface Group {
 }
 
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
-  console.log("USERS_URL: " + USERS_URL)
   const usersUrl = new URL(`${USERS_URL}/${principalName}`)
   const embeds = ['section_manager']
   const selects = [
@@ -144,7 +142,7 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
 }
 
 const fetchPhoto = async (principalName: string) => {
-  const response = await fetch(`/api/photo/${principalName}`)
+  const response = await fetch(`/localApi/photo/${principalName}`)
 
   if (!response.ok) {
     throw new ApiError(500, 'could not fetch photo')

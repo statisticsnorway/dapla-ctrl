@@ -76,5 +76,3 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
-          build-args: |
-            VITE_DAPLA_TEAM_API_URL=https://dapla-team-api-v2.staging-bip-app.ssb.no

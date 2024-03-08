@@ -2,21 +2,41 @@ import ViteExpress from 'vite-express'
 import { createLightship } from 'lightship'
 import express from 'express'
 import { getReasonPhrase } from 'http-status-codes'
-import dotenv from 'dotenv'
-
-if (!process.env.VITE_DAPLA_TEAM_API_URL) {
-  dotenv.config({ path: './.env.local' })
-}
-
-const DAPLA_TEAM_API_URL = process.env.VITE_DAPLA_TEAM_API_URL
+import proxy from 'express-http-proxy'
 
 const app = express()
 const PORT = process.env.PORT || 3000
+// use cluster URL if available
+const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_CLUSTER_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
+
+// Proxy, note this middleware must be place before all else.. THIS TOOK ME 3 HOURS TO FIGURE OUT! TODO: Remove comment
+app.use(
+  '/api',
+  proxy(DAPLA_TEAM_API_URL, {
+    proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
+      console.log(`Request Headers:`, srcReq.headers)
+      if (srcReq.body) {
+        console.log(`Request Body:`, srcReq.body)
+      }
+      return proxyReqOpts
+    },
+    proxyReqPathResolver: function (req) {
+      const newPath = req.originalUrl.replace(/^\/api/, '')
+      console.log(`Forwarding to: ${DAPLA_TEAM_API_URL}${newPath}`)
+      return newPath
+    },
+    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+      console.log(`Response Status: ${proxyRes.statusCode}`)
+      console.log(`Response Headers:`, proxyRes.headers)
+      return proxyResData
+    },
+  })
+)
 
 app.use(express.json())
 
 // DO NOT REMOVE, NECCESSARY FOR FRONTEND
-app.get('/api/photo/:principalName', async (req, res, next) => {
+app.get('/localApi/photo/:principalName', async (req, res, next) => {
   const accessToken = req.headers.authorization.split(' ')[1]
   const principalName = req.params.principalName
   const userPhotoUrl = `${DAPLA_TEAM_API_URL}/users/${principalName}/photo`
@@ -42,7 +62,7 @@ async function fetchPhoto(accessToken, url, fallbackErrorMessage) {
   return photoBuffer.toString('base64')
 }
 
-app.get('/api/fetch-token', (req, res) => {
+app.get('/localApi/fetch-token', (req, res) => {
   if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
     return res.status(401).json({ message: 'No token provided' })
   }
@@ -74,7 +94,6 @@ app.use((err, req, res, next) => {
     },
   })
 })
-
 
 const lightship = await createLightship()
 

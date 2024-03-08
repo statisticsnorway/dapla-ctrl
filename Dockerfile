@@ -3,10 +3,6 @@ WORKDIR /usr/local/app
 
 COPY . .
 
-# Required for building Vite frontend (env var must be available at build)
-ARG VITE_DAPLA_TEAM_API_URL
-ENV VITE_DAPLA_TEAM_API_URL=${VITE_DAPLA_TEAM_API_URL}
-
 RUN npm ci && npm run build
 
 FROM node:20-alpine
@@ -22,4 +18,4 @@ RUN npm i --save-exact express vite-express
 ENV PORT 8080
 EXPOSE 8080
 
-CMD ["npm", "run", "prod"]
+ENTRYPOINT sh -c "./dist/vite-envs.sh && npm run prod"

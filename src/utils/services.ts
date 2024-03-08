@@ -19,7 +19,7 @@ interface TokenData {
 }
 
 export const fetchUserInformationFromAuthToken = async (): Promise<TokenData> => {
-  const response = await fetch('/api/fetch-token')
+  const response = await fetch('/localApi/fetch-token')
 
   const tokenData = await response.json()
   const jwt = JSON.parse(atob(tokenData.token.split('.')[1]))

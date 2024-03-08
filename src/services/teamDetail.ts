@@ -1,7 +1,6 @@
 import { ApiError, fetchAPIData } from '../utils/services'
-import { flattenEmbedded } from '../utils/utils'
+import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
-const DAPLA_TEAM_API_URL = import.meta.env.VITE_DAPLA_TEAM_API_URL
 const TEAMS_URL = `${DAPLA_TEAM_API_URL}/teams`
 
 export interface TeamDetailData {
@@ -41,7 +40,7 @@ interface Group {
 export interface SharedBuckets {
   items: SharedBucket[]
   // eslint-disable-next-line
-    _embedded?: any
+  _embedded?: any
 }
 
 export interface SharedBucket {
