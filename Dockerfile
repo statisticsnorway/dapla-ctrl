@@ -10,7 +10,7 @@ FROM node:20-alpine
 COPY --from=builder /usr/local/app/dist /usr/local/app/dist
 WORKDIR /usr/local/app
 
-COPY --from=build /app/dist .
+COPY --from=builder /app/dist .
 COPY package*.json .
 COPY server.js .
 
