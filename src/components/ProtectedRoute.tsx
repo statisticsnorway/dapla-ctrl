@@ -21,6 +21,7 @@ const ProtectedRoute = () => {
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Error occurred when updating userProfile data')
+        console.error(error)
       }
     }
     setData()
