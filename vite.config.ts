@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     viteEnvs({
-      declarationFile: '.env.local',
+      declarationFile: '.env.declaration',
     }),
   ],
 })
