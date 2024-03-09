@@ -11,7 +11,7 @@ if (!process.env.DAPLA_TEAM_API_URL) {
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || "https://dapla-team-api-v2.staging-bip-app.ssb.no"
+const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
 
 // Proxy, note this middleware must be place before all else.. THIS TOOK ME 3 HOURS TO FIGURE OUT! TODO: Remove comment
 app.use(
