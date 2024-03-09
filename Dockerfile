@@ -13,9 +13,8 @@ COPY package*.json .
 COPY server.js .
 
 RUN npm i --save-exact express vite-express
-WORKDIR  /usr/local/app/dist
 
 ENV PORT 8080
 EXPOSE 8080
 
-ENTRYPOINT sh -c "./vite-envs.sh && npm run prod"
+CMD ["npm", "run", "prod"]
