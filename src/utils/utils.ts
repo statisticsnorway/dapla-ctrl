@@ -1,7 +1,7 @@
 // https://vitejs.dev/config/server-options.html
 // https://github.com/garronej/vite-envs
 
-export const DAPLA_TEAM_API_URL = `http://localhost:${import.meta.env.PORT}/api`
+export const DAPLA_TEAM_API_URL = `/api`
 
 export const getGroupType = (groupName: string) => {
   const match = groupName.match(/(managers|developers|data-admins|support|consumers)$/)

@@ -56,7 +56,7 @@ export interface Metrics {
 }
 
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
-  const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`)
+  const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
   const embeds = ['users', 'users.groups', 'managers']
   const selects = [
     'uniform_name',
@@ -104,7 +104,7 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
 }
 
 export const fetchSharedBuckets = async (teamId: string): Promise<SharedBuckets | ApiError> => {
-  const sharedBucketsUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets`)
+  const sharedBucketsUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets`, window.location.origin)
 
   const embeds = ['metrics']
   const selects = ['short_name', 'bucket_name', 'metrics.teams_count', 'metrics.groups_count', 'metrics.users_count']
