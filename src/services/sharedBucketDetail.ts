@@ -20,7 +20,7 @@ export interface Team {
 }
 
 const fetchTeamDetail = async (teamId: string): Promise<Team> => {
-  const teamUrl = new URL(`${TEAMS_URL}/${teamId}`)
+  const teamUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
 
   const selects = ['uniform_name', 'section_name']
 
@@ -46,7 +46,7 @@ const fetchTeamDetail = async (teamId: string): Promise<Team> => {
 }
 
 export const fetchSharedBucketDetailData = async (teamId: string, shortName: string): Promise<SharedBucket> => {
-  const sharedBucketUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets/${shortName}`)
+  const sharedBucketUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets/${shortName}`, window.location.origin)
 
   const embeds = ['teams']
   const selects = ['teams.uniform_name', 'teams.display_name', 'teams.section_name']

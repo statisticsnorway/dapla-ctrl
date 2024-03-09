@@ -36,7 +36,7 @@ interface Group {
 }
 
 const fetchManagedUsers = async (principalName: string): Promise<User[]> => {
-  const usersUrl = new URL(`${USERS_URL}/${principalName}`)
+  const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const embeds = ['managed_users']
   const selects = ['managed_users.principal_name']
 
@@ -68,7 +68,7 @@ export const fetchManagedUsersManagers = async (principalName: string): Promise<
 
     const prepUsers = await Promise.all(
       users.map(async (user): Promise<User> => {
-        const usersUrl = new URL(`${USERS_URL}/${user.principal_name}`)
+        const usersUrl = new URL(`${USERS_URL}/${user.principal_name}`, window.location.origin)
         const embeds = ['teams', 'groups', 'section_manager']
 
         const selects = [
@@ -110,7 +110,7 @@ export const fetchManagedUsersManagers = async (principalName: string): Promise<
 }
 
 export const fetchAllUsers = async (): Promise<UsersData> => {
-  const usersUrl = new URL(`${USERS_URL}`)
+  const usersUrl = new URL(`${USERS_URL}`, window.location.origin)
   const embeds = ['section_manager', 'teams', 'groups']
 
   const selects = [

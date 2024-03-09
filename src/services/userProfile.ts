@@ -47,7 +47,7 @@ interface Group {
 }
 
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
-  const usersUrl = new URL(`${USERS_URL}/${principalName}`)
+  const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const embeds = ['section_manager']
   const selects = [
     'principal_name',
@@ -83,7 +83,7 @@ export const getUserProfile = async (principalName: string): Promise<User | ApiE
 }
 
 export const getUserProfileTeamData = async (principalName: string): Promise<TeamsData | ApiError> => {
-  const usersUrl = new URL(`${USERS_URL}/${principalName}`)
+  const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const embeds = ['teams', 'teams.groups', 'teams.groups.users']
 
   const selects = [

@@ -42,7 +42,7 @@ interface Group {
 }
 
 const fetchAllTeams = async (): Promise<TeamsData> => {
-  const teamsUrl = new URL(`${TEAMS_URL}`)
+  const teamsUrl = new URL(`${TEAMS_URL}`, window.location.origin)
   const embeds = ['users', 'groups.users']
 
   const selects = [
@@ -99,7 +99,7 @@ const fetchAllTeams = async (): Promise<TeamsData> => {
 }
 
 const fetchTeamsForPrincipalName = async (principalName: string): Promise<TeamsData> => {
-  const usersUrl = new URL(`${USERS_URL}/${principalName}`)
+  const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const embeds = ['teams', 'teams.users', 'teams.groups.users']
 
   const selects = [
