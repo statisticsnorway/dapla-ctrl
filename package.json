@@ -10,8 +10,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
     "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
-    "preview": "vite preview",
-    "prepare": "npx vite-envs update-types"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -35,7 +34,6 @@
     "react-dom": "^18.2.0",
     "react-responsive": "^9.0.2",
     "react-router-dom": "^6.22.3",
-    "vite-envs": "^4.0.10",
     "vite-express": "0.15.0"
   },
   "devDependencies": {

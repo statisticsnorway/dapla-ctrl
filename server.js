@@ -3,11 +3,15 @@ import { createLightship } from 'lightship'
 import express from 'express'
 import { getReasonPhrase } from 'http-status-codes'
 import proxy from 'express-http-proxy'
+import dotenv from 'dotenv'
+
+if (!process.env.DAPLA_TEAM_API_URL) {
+  dotenv.config({ path: './.env.local' })
+}
 
 const app = express()
 const PORT = process.env.PORT || 3000
-// use cluster URL if available
-const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_CLUSTER_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
+const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
 
 // Proxy, note this middleware must be place before all else.. THIS TOOK ME 3 HOURS TO FIGURE OUT! TODO: Remove comment
 app.use(
