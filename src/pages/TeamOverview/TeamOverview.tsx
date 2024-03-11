@@ -30,9 +30,10 @@ const TeamOverview = () => {
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
+  const teamTab = (activeTab as TabProps)?.path ?? activeTab
+
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
-      const teamTab = (activeTab as TabProps)?.path ?? activeTab
       return response[teamTab].teams.map(({ uniform_name, section_name, users, manager }) => ({
         id: uniform_name,
         seksjon: section_name, // Makes section name searchable and sortable in table by including the field
@@ -65,18 +66,16 @@ const TeamOverview = () => {
 
   useEffect(() => {
     if (teamOverviewData) {
+      if (teamTab === MY_TEAMS_TAB.path) {
+        setTeamOverviewTableTitle(MY_TEAMS_TAB.title)
+      } else {
+        setTeamOverviewTableTitle(ALL_TEAMS_TAB.title)
+      }
       setTeamOverviewTableData(prepTeamData(teamOverviewData)) // Update Table view on Tab onClick
     }
   }, [prepTeamData])
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab)
-    if (tab === MY_TEAMS_TAB.path) {
-      setTeamOverviewTableTitle(MY_TEAMS_TAB.title)
-    } else {
-      setTeamOverviewTableTitle(ALL_TEAMS_TAB.title)
-    }
-  }
+  const handleTabClick = (tab: string) => setActiveTab(tab)
 
   const renderErrorAlert = () => {
     return (

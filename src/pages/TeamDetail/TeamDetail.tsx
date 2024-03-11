@@ -31,11 +31,37 @@ import SidebarModal from '../../components/SidebarModal/SidebarModal'
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
   path: 'team',
+  columns: [
+    {
+      id: 'navn',
+      label: 'Navn',
+    },
+    {
+      id: 'gruppe',
+      label: 'Gruppe',
+    },
+    {
+      id: 'epost',
+      label: 'Epost ?',
+    },
+  ],
 }
 
 const SHARED_BUCKETS_TAB = {
   title: 'Delte data',
   path: 'sharedBuckets',
+  columns: [
+    {
+      id: 'navn',
+      label: 'Navn',
+    },
+    {
+      id: 'tilgang',
+      label: 'Tilgang',
+    },
+    { id: 'delte_data', label: 'Delte data' },
+    { id: 'antall_personer', label: 'Antall personer' },
+  ],
 }
 
 const TeamDetail = () => {
@@ -46,13 +72,17 @@ const TeamDetail = () => {
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
   const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
+  const [teamDetailTableHeaderColumns, setTeamDetailTableHeaderColumns] = useState<TableData['columns']>(
+    TEAM_USERS_TAB.columns
+  )
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
+
   const { teamId } = useParams<{ teamId: string }>()
+  const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
 
   const prepTeamData = useCallback(
     (response: TeamDetailData): TableData['data'] => {
-      const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
       const sharedBucketsTab = SHARED_BUCKETS_TAB.path
       if (teamDetailTab === sharedBucketsTab) {
         const sharedBuckets = (response[sharedBucketsTab] as SharedBuckets).items
@@ -113,17 +143,19 @@ const TeamDetail = () => {
   }, [])
 
   useEffect(() => {
-    if (teamDetailData) setTeamDetailTableData(prepTeamData(teamDetailData))
+    if (teamDetailData) {
+      if (teamDetailTab === SHARED_BUCKETS_TAB.path) {
+        setTeamDetailTableTitle(SHARED_BUCKETS_TAB.title)
+        setTeamDetailTableHeaderColumns(SHARED_BUCKETS_TAB.columns)
+      } else {
+        setTeamDetailTableTitle(TEAM_USERS_TAB.title)
+        setTeamDetailTableHeaderColumns(TEAM_USERS_TAB.columns)
+      }
+      setTeamDetailTableData(prepTeamData(teamDetailData))
+    }
   }, [prepTeamData])
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab)
-    if (tab === TEAM_USERS_TAB.path) {
-      setTeamDetailTableTitle(TEAM_USERS_TAB.title)
-    } else {
-      setTeamDetailTableTitle(SHARED_BUCKETS_TAB.title)
-    }
-  }
+  const handleTabClick = (tab: string) => setActiveTab(tab)
 
   const renderErrorAlert = () => {
     return (
@@ -137,36 +169,7 @@ const TeamDetail = () => {
     if (error) return renderErrorAlert()
     if (loadingTeamData) return <PageSkeleton hasDescription />
 
-    if (teamDetailData && teamDetailTableData) {
-      const teamOverviewTableHeaderColumns =
-        activeTab === SHARED_BUCKETS_TAB.path
-          ? [
-              {
-                id: 'navn',
-                label: 'Navn',
-              },
-              {
-                id: 'tilgang',
-                label: 'Tilgang',
-              },
-              { id: 'delte_data', label: 'Delte data' },
-              { id: 'antall_personer', label: 'Antall personer' },
-            ]
-          : [
-              {
-                id: 'navn',
-                label: 'Navn',
-              },
-              {
-                id: 'gruppe',
-                label: 'Gruppe',
-              },
-              {
-                id: 'epost',
-                label: 'Epost ?',
-              },
-            ]
-
+    if (teamDetailData && teamDetailTableHeaderColumns && teamDetailTableData) {
       return (
         <>
           <LeadParagraph className={pageStyles.description}>
@@ -193,7 +196,7 @@ const TeamDetail = () => {
           <Divider dark />
           <Table
             title={teamDetailTableTitle}
-            columns={teamOverviewTableHeaderColumns}
+            columns={teamDetailTableHeaderColumns}
             data={teamDetailTableData as TableData['data']}
           />
         </>

@@ -30,11 +30,11 @@ const TeamMembers = () => {
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
 
+  const teamMembersTab = (activeTab as TabProps).path ?? activeTab
+
   const prepUserData = useCallback(
     (response: TeamMembersData): TableData['data'] => {
-      const teamMember = (activeTab as TabProps)?.path ?? activeTab
-
-      return response[teamMember].users.map(
+      return response[teamMembersTab].users.map(
         ({ display_name, principal_name, section_name, section_manager, teams, groups }) => ({
           id: formatDisplayName(display_name),
           navn: (
@@ -74,24 +74,21 @@ const TeamMembers = () => {
         setLoading(false)
       }
     }
-
     fetchData()
   }, [])
 
   useEffect(() => {
     if (teamMembersData) {
+      if (teamMembersTab === MY_USERS_TAB.path) {
+        setTeamMembersTableTitle(MY_USERS_TAB.title)
+      } else {
+        setTeamMembersTableTitle(ALL_USERS_TAB.title)
+      }
       setTeamMembersTableData(prepUserData(teamMembersData)) // Update Table view on Tab onClick
     }
   }, [prepUserData])
 
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab)
-    if (tab === MY_USERS_TAB.path) {
-      setTeamMembersTableTitle(MY_USERS_TAB.title)
-    } else {
-      setTeamMembersTableTitle(ALL_USERS_TAB.title)
-    }
-  }
+  const handleTabClick = (tab: string) => setActiveTab(tab)
 
   const renderErrorAlert = () => {
     return (
