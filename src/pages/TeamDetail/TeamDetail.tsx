@@ -2,7 +2,7 @@
 import pageStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './teamDetail.module.scss'
 
-import { TabProps } from '../../@types/pageTypes'
+import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -29,11 +29,6 @@ import { Skeleton } from '@mui/material'
 import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
-
-interface DropdownItems {
-  id: string
-  title: string
-}
 
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
@@ -85,8 +80,8 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
-  const [addUserNameInput, setAddUserNameInput] = useState<string>('')
-  const [groupTags, setGroupTags] = useState<DropdownItems[]>([])
+  const [addUserInput, setAddUserInput] = useState<string>('')
+  const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -214,14 +209,14 @@ const TeamDetail = () => {
     }
   }
 
-  const handleDropdownOnSelect = (item: DropdownItems) => {
-    const teamGroupsTags = [...groupTags, item]
-    setGroupTags(teamGroupsTags)
+  const handleAddTeamGroupTag = (item: DropdownItems) => {
+    const teamGroupsTags = [...teamGroupTags, item]
+    setTeamGroupTags(teamGroupsTags)
   }
 
-  const handleTagOnClick = (item: DropdownItems) => {
-    const teamGroupsTags = groupTags.filter((items) => items !== item)
-    setGroupTags(teamGroupsTags)
+  const handleDeleteGroupTag = (item: DropdownItems) => {
+    const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
+    setTeamGroupTags(teamGroupsTags)
   }
 
   const renderSidebarModal = () => {
@@ -249,8 +244,8 @@ const TeamDetail = () => {
                 <Input
                   className={styles.fields}
                   label='Navn'
-                  value={addUserNameInput}
-                  handleChange={(value: string) => setAddUserNameInput(value)}
+                  value={addUserInput}
+                  handleChange={(value: string) => setAddUserInput(value)}
                 />
                 <Dropdown
                   className={styles.fields}
@@ -260,12 +255,12 @@ const TeamDetail = () => {
                     id: uniform_name,
                     title: getGroupType(uniform_name),
                   }))}
-                  onSelect={handleDropdownOnSelect}
+                  onSelect={handleAddTeamGroupTag}
                 />
                 <div className={styles.tagsContainer}>
-                  {groupTags &&
-                    groupTags.map((group) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => handleTagOnClick(group)}>
+                  {teamGroupTags &&
+                    teamGroupTags.map((group) => (
+                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group)}>
                         {group.title}
                       </Tag>
                     ))}
