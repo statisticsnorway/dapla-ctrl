@@ -58,7 +58,7 @@ export interface Metrics {
 
 export interface JobResponse {
   status: string
-  details?: string
+  detail?: string
 }
 
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
@@ -189,6 +189,9 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
   try {
     const response = await fetch(groupsUrl, {
       method: 'POST',
+      headers: {
+        "content-type": 'application/json'
+      },
       body: JSON.stringify({
         users: [userPrincipalName],
       }),
