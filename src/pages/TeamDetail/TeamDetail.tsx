@@ -6,7 +6,7 @@ import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail, Team, SharedBuckets } from '../../services/teamDetail'
+import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError } from '../../utils/services'
 
@@ -66,6 +66,12 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
+const userInput = {
+  error: false,
+  errorMessage: '',
+  value: ''
+}
+
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
 
@@ -80,8 +86,10 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
-  const [addUserInput, setAddUserInput] = useState<string>('')
+  const [addUserInput, setAddUserInput] = useState(userInput)
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
+  
+  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>()
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -219,6 +227,37 @@ const TeamDetail = () => {
     setTeamGroupTags(teamGroupsTags)
   }
 
+  const handleAddUserOnSubmit = () => {
+    if (addUserInput.value === '') setAddUserInput({...addUserInput, error: true, errorMessage: `Name can't be empty`})
+    if (teamGroupTags.length) {
+      let addUserToTeamErrorsList: Array<string> = []
+      addUserToGroups(teamGroupTags.map(group => group.id), addUserInput.value)
+      .then((response) => {
+        response.forEach(({status, details}) => {
+          if (status === 'ERROR' && details) addUserToTeamErrorsList.push(details)
+        })
+
+        if (addUserToTeamErrorsList.length) setAddUserToTeamErrors(addUserToTeamErrorsList)
+      }
+      ).catch((e) => setAddUserToTeamErrors(e))
+    } else {
+      // TODO: Dropdown can't empty; add form validation
+    }
+  }
+
+  const renderSidebarModalAlert = () => {
+    if (false) { // TODO:
+      return (
+        <div className={styles.modalBodyDialog}>
+          {addUserToTeamErrors ?
+            <Dialog title="" type='warning'>{addUserToTeamErrors}</Dialog> :
+            <Dialog title="Brukeren har blitt lagt til" type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+          }
+        </div>
+      )
+    }
+  }
+
   const renderSidebarModal = () => {
     if (teamDetailData) {
       const teamGroups = (teamDetailData?.team as Team).groups ?? []
@@ -233,19 +272,20 @@ const TeamDetail = () => {
           }}
           footer={{
             submitButtonText: 'Legg til medlem',
-            handleSubmit: () => {
-              setOpenSidebar(false)
-            },
+            handleSubmit: handleAddUserOnSubmit
           }}
           body={{
             modalBodyTitle: 'Legg person til teamet',
             modalBody: (
               <>
+              {/* TODO: Burde hete noe annet enn navn hvis det er principal_name som skal skrives inn her */}
                 <Input
                   className={styles.fields}
                   label='Navn'
-                  value={addUserInput}
-                  handleChange={(value: string) => setAddUserInput(value)}
+                  value={addUserInput.value}
+                  error={addUserInput.error}
+                  errorMessage={addUserInput.errorMessage}
+                  handleChange={(value: string) => setAddUserInput({...addUserInput, value: value})}
                 />
                 <Dropdown
                   className={styles.fields}
@@ -256,6 +296,8 @@ const TeamDetail = () => {
                     title: getGroupType(uniform_name),
                   }))}
                   onSelect={handleAddTeamGroupTag}
+                  error={''}
+                  errorMessage={''}
                 />
                 <div className={styles.tagsContainer}>
                   {teamGroupTags &&
@@ -265,9 +307,7 @@ const TeamDetail = () => {
                       </Tag>
                     ))}
                 </div>
-                <div className={styles.modalBodyDialog}>
-                  <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-                </div>
+                {renderSidebarModalAlert()}
               </>
             ),
           }}

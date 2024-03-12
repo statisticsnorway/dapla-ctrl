@@ -168,7 +168,6 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
   }
 }
 
-
 export const addUserToGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
   try {
     const jobResponses = await Promise.all(groupIds.map(groupId => addUserToGroup(groupId, userPrincipalName)))
