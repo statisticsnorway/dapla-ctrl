@@ -241,7 +241,13 @@ const TeamDetail = () => {
 
   const handleAddUserOnSubmit = () => {
     if (userInput.value === '') setUserInput({ ...userInput, error: true })
-    if (teamGroupTags.length) {
+    if (!teamGroupTags.length)
+      setTeamGroupTagsError({
+        ...teamGroupTagsError,
+        error: true,
+      })
+
+    if (userInput.value !== '' && teamGroupTags.length) {
       const addUserToTeamErrorsList: Array<string> = []
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
@@ -255,11 +261,6 @@ const TeamDetail = () => {
         })
         .catch((e) => setAddUserToTeamErrors(e))
         .finally(() => setShowAddUserToTeamAlert(true))
-    } else {
-      setTeamGroupTagsError({
-        ...teamGroupTagsError,
-        error: true,
-      })
     }
   }
 
