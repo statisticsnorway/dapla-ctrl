@@ -170,7 +170,7 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
 
 export const addUserToGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
   try {
-    const jobResponses = await Promise.all(groupIds.map(groupId => addUserToGroup(groupId, userPrincipalName)))
+    const jobResponses = await Promise.all(groupIds.map((groupId) => addUserToGroup(groupId, userPrincipalName)))
     return jobResponses
   } catch (error) {
     if (error instanceof ApiError) {
@@ -182,7 +182,7 @@ export const addUserToGroups = async (groupIds: string[], userPrincipalName: str
       throw apiError
     }
   }
-} 
+}
 
 const addUserToGroup = async (groupId: string, userPrincipalName: string): Promise<JobResponse> => {
   const groupsUrl = `${GROUPS_URL}/${groupId}/users`
@@ -190,10 +190,8 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
     const response = await fetch(groupsUrl, {
       method: 'POST',
       body: JSON.stringify({
-        "users": [
-          userPrincipalName
-        ]
-      })
+        users: [userPrincipalName],
+      }),
     })
 
     if (!response.ok) {
@@ -203,10 +201,9 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
     }
 
     const responseJson = await response.json()
-    const flattendResponse = { ...responseJson._embedded.results[0]}
+    const flattendResponse = { ...responseJson._embedded.results[0] }
 
     return flattendResponse
-
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to add user to group: ', error)
