@@ -91,7 +91,7 @@ const TeamDetail = () => {
     errorMessage: 'Velg minst én tilgangsgruppe',
   })
   const [showAddUserToTeamAlert, setShowAddUserToTeamAlert] = useState<boolean>(false)
-  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>()
+  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -259,7 +259,7 @@ const TeamDetail = () => {
           })
           if (addUserToTeamErrorsList.length) setAddUserToTeamErrors(addUserToTeamErrorsList)
         })
-        .catch((e) => setAddUserToTeamErrors(e))
+        .catch((e) => setAddUserToTeamErrors(e.message))
         .finally(() => setShowAddUserToTeamAlert(true))
     }
   }
@@ -269,8 +269,16 @@ const TeamDetail = () => {
       return (
         <div className={styles.modalBodyDialog}>
           {addUserToTeamErrors ? (
-            <Dialog title='' type='warning'>
-              {addUserToTeamErrors}
+            <Dialog title='An error occured' type='warning'>
+              {typeof addUserToTeamErrors === 'string' ? (
+                addUserToTeamErrors
+              ) : (
+                <ul>
+                  {addUserToTeamErrors.map((errors) => (
+                    <li>{errors}</li>
+                  ))}
+                </ul>
+              )}
             </Dialog>
           ) : (
             <Dialog title='Brukeren har blitt lagt til' type='info'>
