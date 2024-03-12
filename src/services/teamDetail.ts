@@ -2,6 +2,7 @@ import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
 const TEAMS_URL = `${DAPLA_TEAM_API_URL}/teams`
+const GROUPS_URL = `${DAPLA_TEAM_API_URL}/groups`
 
 export interface TeamDetailData {
   [key: string]: Team | SharedBuckets // teamUsers, sharedBuckets
@@ -53,6 +54,11 @@ export interface Metrics {
   teams_count?: number | string
   groups_count?: number | string
   users_count?: number | string
+}
+
+export interface JobResponse {
+  status: string
+  details?: string
 }
 
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
@@ -156,7 +162,59 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
       throw error
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred')
-      console.error('FFailed to fetch data for teamDetail page:', apiError)
+      console.error('Failed to fetch data for teamDetail page:', apiError)
+      throw apiError
+    }
+  }
+}
+
+
+export const addUserToGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
+  try {
+    const jobResponses = await Promise.all(groupIds.map(groupId => addUserToGroup(groupId, userPrincipalName)))
+    return jobResponses
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to add user to groups: ', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to add user to groups: ', apiError)
+      throw apiError
+    }
+  }
+} 
+
+const addUserToGroup = async (groupId: string, userPrincipalName: string): Promise<JobResponse> => {
+  const groupsUrl = `${GROUPS_URL}/${groupId}/users`
+  try {
+    const response = await fetch(groupsUrl, {
+      method: 'POST',
+      body: JSON.stringify({
+        "users": [
+          userPrincipalName
+        ]
+      })
+    })
+
+    if (!response.ok) {
+      const errorMessage = (await response.text()) || 'An error occurred'
+      const { detail, status } = JSON.parse(errorMessage)
+      throw new ApiError(status, detail)
+    }
+
+    const responseJson = await response.json()
+    const flattendResponse = { ...responseJson._embedded.results[0]}
+
+    return flattendResponse
+
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to add user to group: ', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to add user to group: ', apiError)
       throw apiError
     }
   }
