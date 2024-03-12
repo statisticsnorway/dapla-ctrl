@@ -22,11 +22,18 @@ import {
   Button,
   Input,
   Dropdown,
+  Tag,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
+import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
+
+interface DropdownItems {
+  id: string
+  title: string
+}
 
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
@@ -76,7 +83,10 @@ const TeamDetail = () => {
     TEAM_USERS_TAB.columns
   )
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
+
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
+  const [addUserNameInput, setAddUserNameInput] = useState<string>('')
+  const [groupTags, setGroupTags] = useState<DropdownItems[]>([])
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -204,45 +214,76 @@ const TeamDetail = () => {
     }
   }
 
+  const handleDropdownOnSelect = (item: DropdownItems) => {
+    const teamGroupsTags = [...groupTags, item]
+    setGroupTags(teamGroupsTags)
+  }
+
+  const handleTagOnClick = (item: DropdownItems) => {
+    const teamGroupsTags = groupTags.filter((items) => items !== item)
+    setGroupTags(teamGroupsTags)
+  }
+
   const renderSidebarModal = () => {
-    return (
-      <SidebarModal
-        open={openSidebar}
-        onClose={() => setOpenSidebar(false)}
-        header={{
-          modalType: 'Medlem',
-          modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-          modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-        }}
-        footer={{
-          submitButtonText: 'Legg til medlem',
-          handleSubmit: () => {
-            setOpenSidebar(false)
-          },
-        }}
-        body={{
-          modalBodyTitle: 'Legg person til teamet',
-          modalBody: (
-            <>
-              <Input className={styles.fields} label='Navn' />
-              <Dropdown
-                className={styles.fields}
-                header='Tilgangsgrupper(r)'
-                selectedItem={{ id: 'velg', title: 'Velg ...' }}
-              />
-              <div className={styles.modalBodyDialog}>
-                <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-              </div>
-            </>
-          ),
-        }}
-      />
-    )
+    if (teamDetailData) {
+      const teamGroups = (teamDetailData?.team as Team).groups ?? []
+      return (
+        <SidebarModal
+          open={openSidebar}
+          onClose={() => setOpenSidebar(false)}
+          header={{
+            modalType: 'Medlem',
+            modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+            modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+          }}
+          footer={{
+            submitButtonText: 'Legg til medlem',
+            handleSubmit: () => {
+              setOpenSidebar(false)
+            },
+          }}
+          body={{
+            modalBodyTitle: 'Legg person til teamet',
+            modalBody: (
+              <>
+                <Input
+                  className={styles.fields}
+                  label='Navn'
+                  value={addUserNameInput}
+                  handleChange={(value: string) => setAddUserNameInput(value)}
+                />
+                <Dropdown
+                  className={styles.fields}
+                  header='Tilgangsgrupper(r)'
+                  selectedItem={{ id: 'velg', title: 'Velg ...' }}
+                  items={teamGroups.map(({ uniform_name }) => ({
+                    id: uniform_name,
+                    title: getGroupType(uniform_name),
+                  }))}
+                  onSelect={handleDropdownOnSelect}
+                />
+                <div className={styles.tagsContainer}>
+                  {groupTags &&
+                    groupTags.map((group) => (
+                      <Tag icon={<XCircle size={14} />} onClick={() => handleTagOnClick(group)}>
+                        {group.title}
+                      </Tag>
+                    ))}
+                </div>
+                <div className={styles.modalBodyDialog}>
+                  <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+                </div>
+              </>
+            ),
+          }}
+        />
+      )
+    }
   }
 
   return (
     <>
-      {teamDetailData && renderSidebarModal()}
+      {renderSidebarModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (

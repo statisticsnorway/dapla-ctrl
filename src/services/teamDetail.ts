@@ -57,7 +57,7 @@ export interface Metrics {
 
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
-  const embeds = ['users', 'users.groups', 'managers']
+  const embeds = ['users', 'users.groups', 'managers', 'groups']
   const selects = [
     'uniform_name',
     'display_name',
@@ -69,6 +69,7 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
     'users.display_name',
     'users.section_name',
     'users.groups.uniform_name',
+    'groups.uniform_name',
   ]
 
   teamsUrl.searchParams.set('embed', embeds.join(','))
@@ -79,6 +80,7 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
     const flattendTeams = flattenEmbedded(teamDetailData)
     if (!flattendTeams) return {} as Team
     if (!flattendTeams.users) flattendTeams.users = []
+    if (!flattendTeams.groups) flattendTeams.groups = []
     if (!flattendTeams.managers || flattendTeams.managers.length === 0) {
       flattendTeams.manager = {
         display_name: 'Ikke funnet',
