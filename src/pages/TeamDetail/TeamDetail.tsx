@@ -25,7 +25,7 @@ import {
   Tag,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import { Skeleton } from '@mui/material'
+import { Skeleton, CircularProgress } from '@mui/material'
 import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
@@ -66,6 +66,17 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
+const defaultEmail = {
+  error: false,
+  errorMessage: `Ugyldig epost`,
+  value: '',
+}
+
+const defaultSelectedItem = {
+  id: 'velg', 
+  title: 'Velg ...' 
+}
+
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
 
@@ -80,18 +91,15 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
-  const [userInput, setUserInput] = useState({
-    error: false,
-    errorMessage: `Ugyldig navn`,
-    value: '',
-  })
+  const [email, setEmail] = useState(defaultEmail)
+  const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
-    error: false,
-    errorMessage: 'Velg minst én tilgangsgruppe',
+    error: false, 
+    errorMessage: 'Velg minst én tilgangsgruppe'
   })
-  const [showAddUserToTeamAlert, setShowAddUserToTeamAlert] = useState<boolean>(false)
   const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
+  const [showSpinner, setShowSpinner] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -220,7 +228,7 @@ const TeamDetail = () => {
   }
 
   const handleAddTeamGroupTag = (item: DropdownItems) => {
-    const teamGroupsTags = [...teamGroupTags, item]
+    const teamGroupsTags = [...teamGroupTags, item] // TODO: Remove duplicates
     setTeamGroupTags(teamGroupsTags)
     setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
   }
@@ -235,23 +243,24 @@ const TeamDetail = () => {
     // eslint-disable-next-line max-len
     const regEx =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    const userVal = value || userInput.value
+    const userVal = value || email.value
     const testUser = userVal.match(regEx)
     return !!testUser
   }
 
   const handleAddUserOnSubmit = () => {
-    if (userInput.value === '') setUserInput({ ...userInput, error: true })
+    if (email.value === '') setEmail({ ...email, error: true })
     if (!teamGroupTags.length)
       setTeamGroupTagsError({
         ...teamGroupTagsError,
         error: true,
       })
 
-    if (userInput.value !== '' && teamGroupTags.length) {
+    if (email.value !== '' && teamGroupTags.length) {
+      setShowSpinner(true)
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
-        userInput.value
+        email.value
       )
         .then((response) => {
           const errorsList = response
@@ -263,19 +272,28 @@ const TeamDetail = () => {
             })
             .filter((str) => str !== '')
 
-          if (errorsList.length) setAddUserToTeamErrors(errorsList)
+          if (!errorsList.length) {
+            setAddUserToTeamErrors(errorsList)
+          } else { 
+            setOpenSidebar(false)
+            setEmail(defaultEmail)
+            setSelectedItem(defaultSelectedItem)
+            setTeamGroupTags([])
+          }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
-        .finally(() => setShowAddUserToTeamAlert(true))
+        .finally(() => setShowSpinner(false))
     }
   }
 
   const renderSidebarModalAlert = () => {
-    if (showAddUserToTeamAlert) {
-      return (
-        <div className={styles.modalBodyDialog}>
-          {addUserToTeamErrors ? (
-            <Dialog title='An error occured' type='warning'>
+    return (
+      <div className={styles.modalBodyDialog}>
+        <Dialog type='info'>
+              Det kan ta opp til 45 minutter før personen kan bruke tilgangen
+        </Dialog>
+        {addUserToTeamErrors.length ? (
+            <Dialog type='warning'>
               {typeof addUserToTeamErrors === 'string' ? (
                 addUserToTeamErrors
               ) : (
@@ -286,14 +304,10 @@ const TeamDetail = () => {
                 </ul>
               )}
             </Dialog>
-          ) : (
-            <Dialog title='Brukeren har blitt lagt til' type='info'>
-              Det kan ta opp til 45 minutter før personen kan bruke tilgangen
-            </Dialog>
-          )}
-        </div>
-      )
-    }
+          ) : null}
+        {showSpinner && <CircularProgress />}
+      </div>
+    )
   }
 
   const renderSidebarModal = () => {
@@ -316,31 +330,30 @@ const TeamDetail = () => {
             modalBodyTitle: 'Legg person til teamet',
             modalBody: (
               <>
-                {/* TODO: Burde hete noe annet enn navn hvis det er principal_name som skal skrives inn her */}
                 <Input
                   className={styles.inputSpacing}
-                  label='Navn'
-                  value={userInput.value}
-                  error={userInput.error}
-                  errorMessage={userInput.errorMessage}
+                  label='Kort e-post'
+                  value={email.value}
+                  error={email.error}
+                  errorMessage={email.errorMessage}
                   onBlur={() =>
-                    setUserInput({
-                      ...userInput,
+                    setEmail({
+                      ...email,
                       error: !isUserInputValid(),
                     })
                   }
                   handleChange={(value: string) =>
-                    setUserInput({
-                      ...userInput,
+                    setEmail({
+                      ...email,
                       value,
-                      error: userInput.error ? !isUserInputValid(value) : false,
+                      error: email.error ? !isUserInputValid(value) : false,
                     })
                   }
                 />
                 <Dropdown
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
-                  selectedItem={{ id: 'velg', title: 'Velg ...' }}
+                  selectedItem={selectedItem}
                   items={teamGroups.map(({ uniform_name }) => ({
                     id: uniform_name,
                     title: getGroupType(uniform_name),

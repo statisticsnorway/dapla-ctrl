@@ -3,7 +3,12 @@
 .modalBodyDialog {
     height: 50%;
     display: flex;
+    flex-direction: column;
     align-items: center;
+
+    > * {
+        margin-bottom: 1.5rem;
+    }
 
     @media #{variables.$mobile} {
         height: auto;
