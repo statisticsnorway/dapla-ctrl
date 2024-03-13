@@ -254,12 +254,14 @@ const TeamDetail = () => {
         userInput.value
       )
         .then((response) => {
-          const errorsList = response.map(({ status, detail }) => {
-            if (detail && status === 'ERROR' || detail && status === 'IGNORED') {
-              return detail
-            }
-            return ""
-          }).filter((str) => str !== "")
+          const errorsList = response
+            .map(({ status, detail }) => {
+              if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
+                return detail
+              }
+              return ''
+            })
+            .filter((str) => str !== '')
 
           if (errorsList.length) setAddUserToTeamErrors(errorsList)
         })
