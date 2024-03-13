@@ -2,13 +2,13 @@
 import pageStyles from '../../components/PageLayout/pagelayout.module.scss'
 import styles from './teamDetail.module.scss'
 
-import { TabProps } from '../../@types/pageTypes'
+import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail, Team, SharedBuckets } from '../../services/teamDetail'
+import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
-import { ApiError } from '../../utils/services'
+import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
@@ -22,9 +22,11 @@ import {
   Button,
   Input,
   Dropdown,
+  Tag,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import { Skeleton } from '@mui/material'
+import { Skeleton, CircularProgress } from '@mui/material'
+import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 
@@ -64,8 +66,14 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
+const defaultSelectedItem = {
+  id: 'velg',
+  title: 'Velg ...',
+}
+
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
+  const [tokenData, setTokenData] = useState<TokenData>()
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
@@ -76,7 +84,21 @@ const TeamDetail = () => {
     TEAM_USERS_TAB.columns
   )
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
+
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
+  const [email, setEmail] = useState({
+    error: false,
+    errorMessage: `Ugyldig epost`,
+    value: '',
+  })
+  const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
+  const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
+  const [teamGroupTagsError, setTeamGroupTagsError] = useState({
+    error: false,
+    errorMessage: 'Velg minst én tilgangsgruppe',
+  })
+  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
+  const [showSpinner, setShowSpinner] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -109,7 +131,7 @@ const TeamDetail = () => {
               <FormattedTableColumn
                 href={`/teammedlemmer/${principal_name}`}
                 linkText={formatDisplayName(display_name)}
-                text={section_name ?? 'Mangler seksjon'} // TODO: Should be handled in services
+                text={section_name}
               />
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
@@ -127,6 +149,9 @@ const TeamDetail = () => {
 
   useEffect(() => {
     if (!teamId) return
+    fetchUserInformationFromAuthToken()
+      .then((tokenData) => setTokenData(tokenData))
+      .catch((error) => setError(error as ApiError))
     getTeamDetail(teamId)
       .then((response) => {
         const formattedResponse = response as TeamDetailData
@@ -204,45 +229,162 @@ const TeamDetail = () => {
     }
   }
 
-  const renderSidebarModal = () => {
-    return (
-      <SidebarModal
-        open={openSidebar}
-        onClose={() => setOpenSidebar(false)}
-        header={{
-          modalType: 'Medlem',
-          modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-          modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-        }}
-        footer={{
-          submitButtonText: 'Legg til medlem',
-          handleSubmit: () => {
+  const handleAddTeamGroupTag = (item: DropdownItems) => {
+    const teamGroupsTags = [...teamGroupTags, item].reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
+      const ids = acc.map((obj) => obj.id)
+      if (!ids.includes(dropdownItem.id)) {
+        acc.push(dropdownItem)
+      }
+      return acc
+    }, [])
+    setTeamGroupTags(teamGroupsTags)
+    setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
+  }
+
+  const handleDeleteGroupTag = (item: DropdownItems) => {
+    const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
+    setTeamGroupTags(teamGroupsTags)
+  }
+
+  const isUserInputValid = (value?: string) => {
+    const regEx = /^[\w-]+@ssb\.no$/
+    const userVal = value || email.value
+    const testUser = userVal.match(regEx)
+    return !!testUser
+  }
+
+  const handleAddUserOnSubmit = () => {
+    if (email.value === '') setEmail({ ...email, error: true })
+    if (!teamGroupTags.length)
+      setTeamGroupTagsError({
+        ...teamGroupTagsError,
+        error: true,
+      })
+
+    if (email.value !== '' && teamGroupTags.length) {
+      setShowSpinner(true)
+      addUserToGroups(
+        teamGroupTags.map((group) => group.id),
+        email.value
+      )
+        .then((response) => {
+          const errorsList = response
+            .map(({ status, detail }) => {
+              if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
+                return detail
+              }
+              return ''
+            })
+            .filter((str) => str !== '')
+
+          if (errorsList.length) {
+            setAddUserToTeamErrors(errorsList)
+          } else {
             setOpenSidebar(false)
-          },
-        }}
-        body={{
-          modalBodyTitle: 'Legg person til teamet',
-          modalBody: (
-            <>
-              <Input className={styles.fields} label='Navn' />
-              <Dropdown
-                className={styles.fields}
-                header='Tilgangsgrupper(r)'
-                selectedItem={{ id: 'velg', title: 'Velg ...' }}
-              />
-              <div className={styles.modalBodyDialog}>
-                <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-              </div>
-            </>
-          ),
-        }}
-      />
+            setEmail({ ...email, value: '' })
+            setSelectedItem({ ...defaultSelectedItem })
+            // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
+          }
+        })
+        .catch((e) => setAddUserToTeamErrors(e.message))
+        .finally(() => setShowSpinner(false))
+    }
+  }
+
+  const renderSidebarModalAlert = () => {
+    return (
+      <div className={styles.modalBodyDialog}>
+        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+        {addUserToTeamErrors.length ? (
+          <Dialog type='warning'>
+            {typeof addUserToTeamErrors === 'string' ? (
+              addUserToTeamErrors
+            ) : (
+              <ul>
+                {addUserToTeamErrors.map((errors) => (
+                  <li>{errors}</li>
+                ))}
+              </ul>
+            )}
+          </Dialog>
+        ) : null}
+        {showSpinner && <CircularProgress />}
+      </div>
     )
+  }
+
+  const renderSidebarModal = () => {
+    if (teamDetailData) {
+      const teamGroups = (teamDetailData?.team as Team).groups ?? []
+      return (
+        <SidebarModal
+          open={openSidebar}
+          onClose={() => setOpenSidebar(false)}
+          header={{
+            modalType: 'Medlem',
+            modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+            modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+          }}
+          footer={{
+            submitButtonText: 'Legg til medlem',
+            handleSubmit: handleAddUserOnSubmit,
+          }}
+          body={{
+            modalBodyTitle: 'Legg person til teamet',
+            modalBody: (
+              <>
+                <Input
+                  className={styles.inputSpacing}
+                  label='Kort epost'
+                  value={email.value}
+                  error={email.error}
+                  errorMessage={email.errorMessage}
+                  onBlur={() =>
+                    setEmail({
+                      ...email,
+                      error: !isUserInputValid(),
+                    })
+                  }
+                  handleChange={(value: string) =>
+                    setEmail({
+                      ...email,
+                      value,
+                      error: email.error ? !isUserInputValid(value) : false,
+                    })
+                  }
+                />
+                <Dropdown
+                  className={styles.dropdownSpacing}
+                  header='Tilgangsgrupper(r)'
+                  selectedItem={selectedItem}
+                  items={teamGroups.map(({ uniform_name }) => ({
+                    id: uniform_name,
+                    title: getGroupType(uniform_name),
+                  }))}
+                  onSelect={handleAddTeamGroupTag}
+                  error={teamGroupTagsError.error}
+                  errorMessage={teamGroupTagsError.errorMessage}
+                />
+                <div className={styles.tagsContainer}>
+                  {teamGroupTags &&
+                    teamGroupTags.map((group) => (
+                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group)}>
+                        {group.title}
+                      </Tag>
+                    ))}
+                </div>
+                {renderSidebarModalAlert()}
+              </>
+            ),
+          }}
+        />
+      )
+    }
   }
 
   return (
     <>
-      {teamDetailData && renderSidebarModal()}
+      {renderSidebarModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
@@ -252,7 +394,11 @@ const TeamDetail = () => {
           )
         }
         content={renderContent()}
-        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
+        button={
+          tokenData?.email === (teamDetailData?.team as Team).manager?.principal_name ? (
+            <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
+          ) : undefined
+        }
       />
     </>
   )
