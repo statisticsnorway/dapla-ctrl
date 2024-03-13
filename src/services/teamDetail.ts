@@ -86,6 +86,9 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
     const flattendTeams = flattenEmbedded(teamDetailData)
     if (!flattendTeams) return {} as Team
     if (!flattendTeams.users) flattendTeams.users = []
+    flattendTeams.users.forEach((user: User) => {
+      if (!user.section_name || user.section_name === '') user.section_name = 'Mangler seksjon'
+    })
     if (!flattendTeams.groups) flattendTeams.groups = []
     if (!flattendTeams.managers || flattendTeams.managers.length === 0) {
       flattendTeams.manager = {

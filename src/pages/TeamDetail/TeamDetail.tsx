@@ -131,7 +131,7 @@ const TeamDetail = () => {
               <FormattedTableColumn
                 href={`/teammedlemmer/${principal_name}`}
                 linkText={formatDisplayName(display_name)}
-                text={section_name ?? 'Mangler seksjon'} // TODO: Should be handled in services
+                text={section_name}
               />
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
