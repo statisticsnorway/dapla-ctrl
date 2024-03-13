@@ -249,16 +249,19 @@ const TeamDetail = () => {
       })
 
     if (userInput.value !== '' && teamGroupTags.length) {
-      const addUserToTeamErrorsList: Array<string> = []
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
         userInput.value
       )
         .then((response) => {
-          response.forEach(({ status, details }) => {
-            if (status === 'ERROR' && details) addUserToTeamErrorsList.push(details)
-          })
-          if (addUserToTeamErrorsList.length) setAddUserToTeamErrors(addUserToTeamErrorsList)
+          const errorsList = response.map(({ status, detail }) => {
+            if (detail && status === 'ERROR' || detail && status === 'IGNORED') {
+              return detail
+            }
+            return ""
+          }).filter((str) => str !== "")
+
+          if (errorsList.length) setAddUserToTeamErrors(errorsList)
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
         .finally(() => setShowAddUserToTeamAlert(true))
