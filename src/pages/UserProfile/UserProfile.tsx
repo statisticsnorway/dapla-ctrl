@@ -41,7 +41,7 @@ const UserProfile = () => {
         ansvarlig: formatDisplayName(manager.display_name),
       }))
     },
-    [userProfileData]
+    [principalName, userProfileData]
   )
 
   useEffect(() => {
