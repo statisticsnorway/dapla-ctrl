@@ -8,7 +8,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
-import { ApiError } from '../../utils/services'
+import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
@@ -73,6 +73,7 @@ const defaultSelectedItem = {
 
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
+  const [tokenData, setTokenData] = useState<TokenData>()
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
@@ -148,6 +149,9 @@ const TeamDetail = () => {
 
   useEffect(() => {
     if (!teamId) return
+    fetchUserInformationFromAuthToken()
+      .then((tokenData) => setTokenData(tokenData))
+      .catch((error) => setError(error as ApiError))
     getTeamDetail(teamId)
       .then((response) => {
         const formattedResponse = response as TeamDetailData
@@ -279,7 +283,7 @@ const TeamDetail = () => {
             setOpenSidebar(false)
             setEmail({ ...email, value: '' })
             setSelectedItem({ ...defaultSelectedItem })
-            setTeamGroupTags([])
+            // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
@@ -390,7 +394,11 @@ const TeamDetail = () => {
           )
         }
         content={renderContent()}
-        button={<Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>}
+        button={
+          tokenData?.email === (teamDetailData?.team as Team).manager?.principal_name ? (
+            <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
+          ) : undefined
+        }
       />
     </>
   )

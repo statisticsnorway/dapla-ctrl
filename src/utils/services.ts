@@ -11,7 +11,7 @@ export const fetchAPIData = async (url: string): Promise<any> => {
   return response.json()
 }
 
-interface TokenData {
+export interface TokenData {
   name: string
   given_name: string
   family_name: string

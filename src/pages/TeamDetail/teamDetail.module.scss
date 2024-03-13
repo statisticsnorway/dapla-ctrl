@@ -1,7 +1,6 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .modalBodyDialog {
-    height: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -28,7 +27,8 @@
 }
 
 .tagsContainer {
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
     gap: .5rem;
     margin-bottom: 2.5rem;
 }
