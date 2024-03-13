@@ -190,7 +190,7 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
     const response = await fetch(groupsUrl, {
       method: 'POST',
       headers: {
-        "content-type": 'application/json'
+        'content-type': 'application/json',
       },
       body: JSON.stringify({
         users: [userPrincipalName],

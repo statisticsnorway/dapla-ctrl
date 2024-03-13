@@ -66,15 +66,9 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
-const defaultEmail = {
-  error: false,
-  errorMessage: `Ugyldig epost`,
-  value: '',
-}
-
 const defaultSelectedItem = {
-  id: 'velg', 
-  title: 'Velg ...' 
+  id: 'velg',
+  title: 'Velg ...',
 }
 
 const TeamDetail = () => {
@@ -91,12 +85,16 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
-  const [email, setEmail] = useState(defaultEmail)
+  const [email, setEmail] = useState({
+    error: false,
+    errorMessage: `Ugyldig epost`,
+    value: '',
+  })
   const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
-    error: false, 
-    errorMessage: 'Velg minst én tilgangsgruppe'
+    error: false,
+    errorMessage: 'Velg minst én tilgangsgruppe',
   })
   const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
   const [showSpinner, setShowSpinner] = useState<boolean>(false)
@@ -228,7 +226,13 @@ const TeamDetail = () => {
   }
 
   const handleAddTeamGroupTag = (item: DropdownItems) => {
-    const teamGroupsTags = [...teamGroupTags, item] // TODO: Remove duplicates
+    const teamGroupsTags = [...teamGroupTags, item].reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
+      const ids = acc.map((obj) => obj.id)
+      if (!ids.includes(dropdownItem.id)) {
+        acc.push(dropdownItem)
+      }
+      return acc
+    }, [])
     setTeamGroupTags(teamGroupsTags)
     setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
   }
@@ -239,10 +243,7 @@ const TeamDetail = () => {
   }
 
   const isUserInputValid = (value?: string) => {
-    // TODO: Is there a better way to sanitize email input?
-    // eslint-disable-next-line max-len
-    const regEx =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    const regEx = /^[\w-]+@ssb\.no$/
     const userVal = value || email.value
     const testUser = userVal.match(regEx)
     return !!testUser
@@ -272,12 +273,12 @@ const TeamDetail = () => {
             })
             .filter((str) => str !== '')
 
-          if (!errorsList.length) {
+          if (errorsList.length) {
             setAddUserToTeamErrors(errorsList)
-          } else { 
+          } else {
             setOpenSidebar(false)
-            setEmail(defaultEmail)
-            setSelectedItem(defaultSelectedItem)
+            setEmail({ ...email, value: '' })
+            setSelectedItem({ ...defaultSelectedItem })
             setTeamGroupTags([])
           }
         })
@@ -289,22 +290,20 @@ const TeamDetail = () => {
   const renderSidebarModalAlert = () => {
     return (
       <div className={styles.modalBodyDialog}>
-        <Dialog type='info'>
-              Det kan ta opp til 45 minutter før personen kan bruke tilgangen
-        </Dialog>
+        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
         {addUserToTeamErrors.length ? (
-            <Dialog type='warning'>
-              {typeof addUserToTeamErrors === 'string' ? (
-                addUserToTeamErrors
-              ) : (
-                <ul>
-                  {addUserToTeamErrors.map((errors) => (
-                    <li>{errors}</li>
-                  ))}
-                </ul>
-              )}
-            </Dialog>
-          ) : null}
+          <Dialog type='warning'>
+            {typeof addUserToTeamErrors === 'string' ? (
+              addUserToTeamErrors
+            ) : (
+              <ul>
+                {addUserToTeamErrors.map((errors) => (
+                  <li>{errors}</li>
+                ))}
+              </ul>
+            )}
+          </Dialog>
+        ) : null}
         {showSpinner && <CircularProgress />}
       </div>
     )
@@ -332,7 +331,7 @@ const TeamDetail = () => {
               <>
                 <Input
                   className={styles.inputSpacing}
-                  label='Kort e-post'
+                  label='Kort epost'
                   value={email.value}
                   error={email.error}
                   errorMessage={email.errorMessage}
