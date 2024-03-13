@@ -1,7 +1,7 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .modalBodyDialog {
-    height: 55%;
+    height: 50%;
     display: flex;
     align-items: center;
 
@@ -10,11 +10,20 @@
     }
 }
 
-.fields {
-    margin-bottom: 2.5rem;
+.inputSpacing, .dropdownSpacing {
     min-width: 100%;
+}
+
+.inputSpacing {
+    margin-bottom: 2.5rem;
+}
+
+.dropdownSpacing {
+    margin-bottom: 1.5rem;
 }
 
 .tagsContainer {
     display: inline-flex;
+    gap: .5rem;
+    margin-bottom: 2.5rem;
 }

@@ -231,6 +231,7 @@ const TeamDetail = () => {
   }
 
   const isUserInputValid = (value?: string) => {
+    // TODO: Is there a better way to sanitize email input?
     // eslint-disable-next-line max-len
     const regEx =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -312,7 +313,7 @@ const TeamDetail = () => {
               <>
                 {/* TODO: Burde hete noe annet enn navn hvis det er principal_name som skal skrives inn her */}
                 <Input
-                  className={styles.fields}
+                  className={styles.inputSpacing}
                   label='Navn'
                   value={userInput.value}
                   error={userInput.error}
@@ -332,7 +333,7 @@ const TeamDetail = () => {
                   }
                 />
                 <Dropdown
-                  className={styles.fields}
+                  className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
                   selectedItem={{ id: 'velg', title: 'Velg ...' }}
                   items={teamGroups.map(({ uniform_name }) => ({
