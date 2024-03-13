@@ -382,6 +382,7 @@ const TeamDetail = () => {
     }
   }
 
+  const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
   return (
     <>
       {renderSidebarModal()}
@@ -395,7 +396,7 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          tokenData?.email === (teamDetailData?.team as Team).manager?.principal_name ? (
+          tokenData?.email === teamManager ? (
             <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
           ) : undefined
         }
