@@ -262,6 +262,7 @@ const TeamDetail = () => {
       })
 
     if (email.value !== '' && teamGroupTags.length) {
+      setAddUserToTeamErrors([])
       setShowSpinner(true)
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
@@ -281,7 +282,7 @@ const TeamDetail = () => {
             setAddUserToTeamErrors(errorsList)
           } else {
             setOpenSidebar(false)
-            setEmail({ ...email, value: '' })
+            // setEmail({ ...email, value: '' })
             setSelectedItem({ ...defaultSelectedItem })
             // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
           }
