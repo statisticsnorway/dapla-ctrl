@@ -278,7 +278,7 @@ const TeamDetail = () => {
             })
             .filter((str) => str !== '')
 
-          if (!errorsList.length) {
+          if (errorsList.length) {
             setAddUserToTeamErrors(errorsList)
           } else {
             setOpenSidebar(false)
