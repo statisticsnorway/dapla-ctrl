@@ -23,6 +23,7 @@ import {
   Input,
   Dropdown,
   Tag,
+  Link,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
@@ -45,6 +46,10 @@ const TEAM_USERS_TAB = {
     {
       id: 'epost',
       label: 'Epost ?',
+    },
+    {
+      id: 'editUser',
+      label: '',
     },
   ],
 }
@@ -73,6 +78,7 @@ const defaultSelectedItem = {
 
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
+  const [showSpinner, setShowSpinner] = useState<boolean>(false)
   const [tokenData, setTokenData] = useState<TokenData>()
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -85,7 +91,8 @@ const TeamDetail = () => {
   )
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
-  const [openSidebar, setOpenSidebar] = useState<boolean>(false)
+  // Add users to team
+  const [openAddUserSidebarModal, setAddUserSidebarModal] = useState<boolean>(false)
   const [email, setEmail] = useState({
     error: false,
     errorMessage: `Ugyldig epost`,
@@ -98,7 +105,9 @@ const TeamDetail = () => {
     errorMessage: 'Velg minst én tilgangsgruppe',
   })
   const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
-  const [showSpinner, setShowSpinner] = useState<boolean>(false)
+
+  // Edit users in team
+  const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -140,6 +149,7 @@ const TeamDetail = () => {
               .map((group) => getGroupType(group.uniform_name))
               .join(', '),
             epost: principal_name,
+            editUser: <Link onClick={() => setOpenEditUserSidebarModal(true)}>Endre</Link>,
           }
         })
       }
@@ -281,7 +291,7 @@ const TeamDetail = () => {
           if (errorsList.length) {
             setAddUserToTeamErrors(errorsList)
           } else {
-            setOpenSidebar(false)
+            setAddUserSidebarModal(false)
             // setEmail({ ...email, value: '' })
             setSelectedItem({ ...defaultSelectedItem })
             // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
@@ -314,13 +324,14 @@ const TeamDetail = () => {
     )
   }
 
-  const renderSidebarModal = () => {
+  const renderAddUserSidebarModal = () => {
     if (teamDetailData) {
       const teamGroups = (teamDetailData?.team as Team).groups ?? []
+      // TODO: modal header is the same for both renderAddUserSidebarModal and renderEditUserSidebarModal
       return (
         <SidebarModal
-          open={openSidebar}
-          onClose={() => setOpenSidebar(false)}
+          open={openAddUserSidebarModal}
+          onClose={() => setAddUserSidebarModal(false)}
           header={{
             modalType: 'Medlem',
             modalTitle: `${(teamDetailData?.team as Team).display_name}`,
@@ -383,10 +394,36 @@ const TeamDetail = () => {
     }
   }
 
+  const renderEditUserSidebarModal = () => {
+    const display_name = ''
+    if (teamDetailData) {
+      return (
+        <SidebarModal
+          open={openEditUserSidebarModal}
+          onClose={() => setOpenEditUserSidebarModal(false)}
+          header={{
+            modalType: 'Medlem',
+            modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+            modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+          }}
+          footer={{
+            submitButtonText: 'Oppdater Tilgang',
+            handleSubmit: () => {},
+          }}
+          body={{
+            modalBodyTitle: `Endre tilgang til ${display_name}`,
+            modalBody: <></>,
+          }}
+        />
+      )
+    }
+  }
+
   const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
   return (
     <>
-      {renderSidebarModal()}
+      {renderAddUserSidebarModal()}
+      {renderEditUserSidebarModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
@@ -398,7 +435,7 @@ const TeamDetail = () => {
         content={renderContent()}
         button={
           tokenData?.email === teamManager ? (
-            <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
+            <Button onClick={() => setAddUserSidebarModal(true)}>+ Nytt medlem</Button>
           ) : undefined
         }
       />
