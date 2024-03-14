@@ -6,7 +6,15 @@ import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups, removeUserFromGroups } from '../../services/teamDetail'
+import {
+  TeamDetailData,
+  getTeamDetail,
+  Team,
+  SharedBuckets,
+  addUserToGroups,
+  removeUserFromGroups,
+  Group,
+} from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
 
@@ -30,6 +38,12 @@ import { Skeleton, CircularProgress } from '@mui/material'
 import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
+
+interface UserInfo {
+  name?: string
+  email?: string
+  groups: Group[]
+}
 
 const TEAM_USERS_TAB = {
   title: 'Teammedlemmer',
@@ -108,6 +122,7 @@ const TeamDetail = () => {
 
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
+  const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -134,8 +149,13 @@ const TeamDetail = () => {
         if (!teamUsers) return []
 
         return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
+          const userFullName = formatDisplayName(display_name)
+          const userGroups = groups?.filter((group) =>
+            group.uniform_name.startsWith((response.team as Team).uniform_name)
+          )
+
           return {
-            id: formatDisplayName(display_name),
+            id: userFullName,
             navn: (
               <FormattedTableColumn
                 href={`/teammedlemmer/${principal_name}`}
@@ -144,12 +164,24 @@ const TeamDetail = () => {
               />
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
-            gruppe: groups
-              ?.filter((group) => group.uniform_name.startsWith((response.team as Team).uniform_name))
-              .map((group) => getGroupType(group.uniform_name))
-              .join(', '),
+            gruppe: userGroups.map((group) => getGroupType(group.uniform_name)).join(', '),
             epost: principal_name,
-            editUser: <Link onClick={() => setOpenEditUserSidebarModal(true)}>Endre</Link>,
+            editUser: (
+              <span>
+                <Link
+                  onClick={() => {
+                    setOpenEditUserSidebarModal(true)
+                    setEditUserInfo({
+                      name: formatDisplayName(display_name),
+                      email: principal_name,
+                      groups: userGroups,
+                    })
+                  }}
+                >
+                  Endre
+                </Link>
+              </span>
+            ),
           }
         })
       }
@@ -305,6 +337,7 @@ const TeamDetail = () => {
   const renderSidebarModalAlert = () => {
     return (
       <div className={styles.modalBodyDialog}>
+        {/* TODO: Also used in edit user in team */}
         <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
         {addUserToTeamErrors.length ? (
           <Dialog type='warning'>
@@ -326,7 +359,7 @@ const TeamDetail = () => {
 
   const renderAddUserSidebarModal = () => {
     if (teamDetailData) {
-      const teamGroups = (teamDetailData?.team as Team).groups ?? []
+      const teamGroups = (teamDetailData?.team as Team).groups ?? [] // TODO: Duplicate
       // TODO: modal header is the same for both renderAddUserSidebarModal and renderEditUserSidebarModal
       return (
         <SidebarModal
@@ -395,8 +428,8 @@ const TeamDetail = () => {
   }
 
   const renderEditUserSidebarModal = () => {
-    const display_name = ''
-    if (teamDetailData) {
+    if (teamDetailData && editUserInfo) {
+      const teamGroups = (teamDetailData?.team as Team).groups ?? []
       return (
         <SidebarModal
           open={openEditUserSidebarModal}
@@ -411,8 +444,29 @@ const TeamDetail = () => {
             handleSubmit: () => {},
           }}
           body={{
-            modalBodyTitle: `Endre tilgang til ${display_name}`,
-            modalBody: <></>,
+            modalBodyTitle: `Endre tilgang til "${editUserInfo.name}"`,
+            modalBody: (
+              <>
+                <Dropdown
+                  className={styles.dropdownSpacing}
+                  header='Tilgangsgrupper(r)'
+                  selectedItem={defaultSelectedItem}
+                  items={teamGroups.map(({ uniform_name }) => ({
+                    id: uniform_name,
+                    title: getGroupType(uniform_name),
+                  }))}
+                  onSelect={() => {}}
+                />
+                <div className={styles.tagsContainer}>
+                  {editUserInfo.groups.length &&
+                    editUserInfo.groups.map(({ uniform_name }) => (
+                      <Tag icon={<XCircle size={14} />} onClick={() => {}}>
+                        {getGroupType(uniform_name)}
+                      </Tag>
+                    ))}
+                </div>
+              </>
+            ),
           }}
         />
       )

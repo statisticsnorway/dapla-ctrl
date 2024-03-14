@@ -33,7 +33,7 @@ export interface User {
   groups: Group[]
 }
 
-interface Group {
+export interface Group {
   uniform_name: string
   display_name: string
 }
