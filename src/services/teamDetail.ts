@@ -215,6 +215,9 @@ const updateGroupMembership = async (
   method: Method
 ): Promise<JobResponse> => {
   const groupsUrl = `${GROUPS_URL}/${groupId}/users`
+  console.log(JSON.stringify({
+    users: [userPrincipalName],
+  }))
   try {
     const response = await fetch(groupsUrl, {
       method: method,

@@ -14,6 +14,7 @@ import {
   addUserToGroups,
   removeUserFromGroups,
   Group,
+  JobResponse,
 } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
@@ -34,7 +35,7 @@ import {
   Link,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import { Skeleton, CircularProgress } from '@mui/material'
+import { Skeleton, CircularProgress, useRadioGroup } from '@mui/material'
 import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
@@ -42,6 +43,7 @@ import SidebarModal from '../../components/SidebarModal/SidebarModal'
 interface UserInfo {
   name?: string
   email?: string
+  groups?: Group[]
 }
 
 const TEAM_USERS_TAB = {
@@ -121,7 +123,7 @@ const TeamDetail = () => {
 
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
-  const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '' })
+  const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
 
   const { teamId } = useParams<{ teamId: string }>()
@@ -173,6 +175,7 @@ const TeamDetail = () => {
                     setEditUserInfo({
                       name: formatDisplayName(display_name),
                       email: principal_name,
+                      groups: userGroups,
                     })
                     setUserGroupTags(
                       userGroups.map(({ uniform_name }) => {
@@ -355,6 +358,55 @@ const TeamDetail = () => {
     }
   }
 
+  const handleEditUserOnSubmit = () => {
+    const addedGroups =
+      userGroupTags?.filter((groupTag) => !editUserInfo.groups?.some((group) => groupTag.id === group.uniform_name)) ??
+      []
+    const removedGroups =
+      editUserInfo.groups?.filter((group) => !userGroupTags?.some((groupTag) => groupTag.id === group.uniform_name)) ??
+      []
+    if (addedGroups.length && removedGroups.length) {
+      console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
+      console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
+      Promise.all([
+        addUserToGroups(
+          addedGroups.map((group) => group.id),
+          editUserInfo?.email as string
+        ),
+        removeUserFromGroups(
+          removedGroups.map((group) => group.uniform_name),
+          editUserInfo?.email as string
+        ),
+      ])
+        .then((response) => {
+          const flattenedResponse = [...response[0], ...response[1]]
+          console.log(flattenedResponse)
+        })
+        .catch((e) => {
+          console.log(e)
+        })
+      return
+    }
+
+    if (removedGroups.length) {
+      console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
+      removeUserFromGroups(
+        removedGroups?.map((group) => group.uniform_name),
+        editUserInfo.email as string
+        )
+        return
+      }
+      
+    if (addedGroups.length) {
+      console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
+      addUserToGroups(
+        addedGroups.map((group) => group.id),
+        editUserInfo?.email as string
+      )
+      return
+    }
+  }
+
   const renderSidebarModalAlert = () => {
     return (
       <div className={styles.modalBodyDialog}>
@@ -462,7 +514,7 @@ const TeamDetail = () => {
           }}
           footer={{
             submitButtonText: 'Oppdater Tilgang',
-            handleSubmit: () => {},
+            handleSubmit: handleEditUserOnSubmit,
           }}
           body={{
             modalBodyTitle: `Endre tilgang til "${editUserInfo.name}"`,
