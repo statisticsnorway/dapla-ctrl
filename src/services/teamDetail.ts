@@ -61,6 +61,8 @@ export interface JobResponse {
   detail?: string
 }
 
+type Method = 'POST' | 'DELETE' // POST = ADD, DELETE = REMOVE
+
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
   const embeds = ['users', 'users.groups', 'managers', 'groups']
@@ -173,7 +175,9 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
 
 export const addUserToGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
   try {
-    const jobResponses = await Promise.all(groupIds.map((groupId) => addUserToGroup(groupId, userPrincipalName)))
+    const jobResponses = await Promise.all(
+      groupIds.map((groupId) => updateGroupMembership(groupId, userPrincipalName, 'POST'))
+    )
     return jobResponses
   } catch (error) {
     if (error instanceof ApiError) {
@@ -187,11 +191,33 @@ export const addUserToGroups = async (groupIds: string[], userPrincipalName: str
   }
 }
 
-const addUserToGroup = async (groupId: string, userPrincipalName: string): Promise<JobResponse> => {
+export const removeUserFromGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
+  try {
+    const jobResponses = await Promise.all(
+      groupIds.map((groupId) => updateGroupMembership(groupId, userPrincipalName, 'DELETE'))
+    )
+    return jobResponses
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to remove user from groups: ', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to remove user from groups: ', apiError)
+      throw apiError
+    }
+  }
+}
+
+const updateGroupMembership = async (
+  groupId: string,
+  userPrincipalName: string,
+  method: Method
+): Promise<JobResponse> => {
   const groupsUrl = `${GROUPS_URL}/${groupId}/users`
   try {
     const response = await fetch(groupsUrl, {
-      method: 'POST',
+      method: method,
       headers: {
         'content-type': 'application/json',
       },
@@ -212,11 +238,11 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
     return flattendResponse
   } catch (error) {
     if (error instanceof ApiError) {
-      console.error('Failed to add user to group: ', error)
+      console.error('Failed to update group membership: ', error)
       throw error
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred')
-      console.error('Failed to add user to group: ', apiError)
+      console.error('Failed to update group membership: ', apiError)
       throw apiError
     }
   }

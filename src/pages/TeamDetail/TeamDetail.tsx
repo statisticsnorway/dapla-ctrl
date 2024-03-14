@@ -6,7 +6,7 @@ import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
-import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups } from '../../services/teamDetail'
+import { TeamDetailData, getTeamDetail, Team, SharedBuckets, addUserToGroups, removeUserFromGroups } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
 
