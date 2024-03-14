@@ -42,7 +42,6 @@ import SidebarModal from '../../components/SidebarModal/SidebarModal'
 interface UserInfo {
   name?: string
   email?: string
-  groups: Group[]
 }
 
 const TEAM_USERS_TAB = {
@@ -122,7 +121,8 @@ const TeamDetail = () => {
 
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
-  const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
+  const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '' })
+  const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -153,7 +153,6 @@ const TeamDetail = () => {
           const userGroups = groups?.filter((group) =>
             group.uniform_name.startsWith((response.team as Team).uniform_name)
           )
-
           return {
             id: userFullName,
             navn: (
@@ -174,8 +173,12 @@ const TeamDetail = () => {
                     setEditUserInfo({
                       name: formatDisplayName(display_name),
                       email: principal_name,
-                      groups: userGroups,
                     })
+                    setUserGroupTags(
+                      userGroups.map(({ uniform_name }) => {
+                        return { id: uniform_name, title: getGroupType(uniform_name) }
+                      })
+                    )
                   }}
                 >
                   Endre
@@ -271,21 +274,39 @@ const TeamDetail = () => {
     }
   }
 
-  const handleAddTeamGroupTag = (item: DropdownItems) => {
-    const teamGroupsTags = [...teamGroupTags, item].reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
+  const removeDuplicateDropdownItems = (items: DropdownItems[]) => {
+    return items.reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
       const ids = acc.map((obj) => obj.id)
       if (!ids.includes(dropdownItem.id)) {
         acc.push(dropdownItem)
       }
       return acc
     }, [])
-    setTeamGroupTags(teamGroupsTags)
-    setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
   }
 
-  const handleDeleteGroupTag = (item: DropdownItems) => {
-    const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
-    setTeamGroupTags(teamGroupsTags)
+  const handleAddGroupTag = (item: DropdownItems, action: string) => {
+    if (action === 'add') {
+      const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
+      setTeamGroupTags(teamGroupsTags)
+      setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
+    }
+
+    if (action === 'edit') {
+      const userGroupsTagsList = removeDuplicateDropdownItems([...userGroupTags, item])
+      setUserGroupTags(userGroupsTagsList)
+    }
+  }
+
+  const handleDeleteGroupTag = (item: DropdownItems, action: string) => {
+    if (action === 'add') {
+      const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
+      setTeamGroupTags(teamGroupsTags)
+    }
+
+    if (action === 'edit') {
+      const userGroupsTags = userGroupTags.filter((items) => items !== item)
+      setUserGroupTags(userGroupsTags)
+    }
   }
 
   const isUserInputValid = (value?: string) => {
@@ -406,14 +427,14 @@ const TeamDetail = () => {
                     id: uniform_name,
                     title: getGroupType(uniform_name),
                   }))}
-                  onSelect={handleAddTeamGroupTag}
+                  onSelect={(item: DropdownItems) => handleAddGroupTag(item, 'add')}
                   error={teamGroupTagsError.error}
                   errorMessage={teamGroupTagsError.errorMessage}
                 />
                 <div className={styles.tagsContainer}>
                   {teamGroupTags &&
                     teamGroupTags.map((group) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group)}>
+                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group, 'add')}>
                         {group.title}
                       </Tag>
                     ))}
@@ -455,13 +476,13 @@ const TeamDetail = () => {
                     id: uniform_name,
                     title: getGroupType(uniform_name),
                   }))}
-                  onSelect={() => {}}
+                  onSelect={(item: DropdownItems) => handleAddGroupTag(item, 'edit')}
                 />
                 <div className={styles.tagsContainer}>
-                  {editUserInfo.groups.length &&
-                    editUserInfo.groups.map(({ uniform_name }) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => {}}>
-                        {getGroupType(uniform_name)}
+                  {userGroupTags &&
+                    userGroupTags.map((group) => (
+                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group, 'edit')}>
+                        {group.title}
                       </Tag>
                     ))}
                 </div>
@@ -473,7 +494,8 @@ const TeamDetail = () => {
     }
   }
 
-  const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
+  //const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
+  const teamManager = 'jnk@ssb.no' // TODO: REPLACE WITH ABOVE
   return (
     <>
       {renderAddUserSidebarModal()}
