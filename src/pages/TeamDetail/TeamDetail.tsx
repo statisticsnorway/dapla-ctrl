@@ -35,7 +35,7 @@ import {
   Link,
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import { Skeleton, CircularProgress, useRadioGroup } from '@mui/material'
+import { Skeleton, CircularProgress } from '@mui/material'
 import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
@@ -125,6 +125,7 @@ const TeamDetail = () => {
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
   const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
+  const [editUserErrors, setEditUserErrors] = useState<Array<string>>([])
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -393,10 +394,10 @@ const TeamDetail = () => {
       removeUserFromGroups(
         removedGroups?.map((group) => group.uniform_name),
         editUserInfo.email as string
-        )
-        return
-      }
-      
+      )
+      return
+    }
+
     if (addedGroups.length) {
       console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
       addUserToGroups(
@@ -407,42 +408,55 @@ const TeamDetail = () => {
     }
   }
 
-  const renderSidebarModalAlert = () => {
+  const renderSidebarModalWarning = (errorList: string[]) => {
+    return (
+      <Dialog type='warning'>
+        {typeof errorList === 'string' ? (
+          errorList
+        ) : (
+          <ul>
+            {errorList.map((errors) => (
+              <li>{errors}</li>
+            ))}
+          </ul>
+        )}
+      </Dialog>
+    )
+  }
+
+  const renderSidebarModalInfo = (action: string) => {
+    const shownInAddUserToTeamModal = action === 'add' && addUserToTeamErrors.length
+    const showInEditUserModal = action === 'edit' && editUserErrors.length
+
     return (
       <div className={styles.modalBodyDialog}>
-        {/* TODO: Also used in edit user in team */}
         <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-        {addUserToTeamErrors.length ? (
-          <Dialog type='warning'>
-            {typeof addUserToTeamErrors === 'string' ? (
-              addUserToTeamErrors
-            ) : (
-              <ul>
-                {addUserToTeamErrors.map((errors) => (
-                  <li>{errors}</li>
-                ))}
-              </ul>
-            )}
-          </Dialog>
-        ) : null}
-        {showSpinner && <CircularProgress />}
+        {shownInAddUserToTeamModal ? renderSidebarModalWarning(addUserToTeamErrors) : null}
+        {showInEditUserModal ? renderSidebarModalWarning(editUserErrors) : null}
+        {showSpinner && (shownInAddUserToTeamModal || showInEditUserModal) && <CircularProgress />}
       </div>
     )
   }
 
+  const teamModalHeader = teamDetailData
+    ? {
+        modalType: 'Medlem',
+        modalTitle: `${(teamDetailData?.team as Team).display_name}`,
+        modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
+      }
+    : {
+        modalType: '',
+        modalTitle: '',
+        modalDescription: '',
+      }
+  const teamGroups = teamDetailData ? ((teamDetailData.team as Team).groups as Group[]) : []
   const renderAddUserSidebarModal = () => {
     if (teamDetailData) {
-      const teamGroups = (teamDetailData?.team as Team).groups ?? [] // TODO: Duplicate
-      // TODO: modal header is the same for both renderAddUserSidebarModal and renderEditUserSidebarModal
       return (
         <SidebarModal
           open={openAddUserSidebarModal}
           onClose={() => setAddUserSidebarModal(false)}
-          header={{
-            modalType: 'Medlem',
-            modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-            modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-          }}
+          header={teamModalHeader}
           footer={{
             submitButtonText: 'Legg til medlem',
             handleSubmit: handleAddUserOnSubmit,
@@ -491,7 +505,7 @@ const TeamDetail = () => {
                       </Tag>
                     ))}
                 </div>
-                {renderSidebarModalAlert()}
+                {renderSidebarModalInfo('add')}
               </>
             ),
           }}
@@ -502,16 +516,11 @@ const TeamDetail = () => {
 
   const renderEditUserSidebarModal = () => {
     if (teamDetailData && editUserInfo) {
-      const teamGroups = (teamDetailData?.team as Team).groups ?? []
       return (
         <SidebarModal
           open={openEditUserSidebarModal}
           onClose={() => setOpenEditUserSidebarModal(false)}
-          header={{
-            modalType: 'Medlem',
-            modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-            modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-          }}
+          header={teamModalHeader}
           footer={{
             submitButtonText: 'Oppdater Tilgang',
             handleSubmit: handleEditUserOnSubmit,
@@ -538,6 +547,7 @@ const TeamDetail = () => {
                       </Tag>
                     ))}
                 </div>
+                {renderSidebarModalInfo('edit')}
               </>
             ),
           }}
