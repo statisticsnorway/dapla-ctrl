@@ -215,7 +215,7 @@ const updateGroupMembership = async (
   method: Method
 ): Promise<JobResponse> => {
   let groupsUrl = `${GROUPS_URL}/${groupId}/users`
-  let fetchOptions: RequestInit = {
+  const fetchOptions: RequestInit = {
     method: method,
     headers: {
       Accept: '*/*',
@@ -232,7 +232,6 @@ const updateGroupMembership = async (
     // Don't include body in fetch options for DELETE method
     delete fetchOptions.body
   }
-  
 
   try {
     const response = await fetch(groupsUrl, fetchOptions)
