@@ -397,6 +397,14 @@ const TeamDetail = () => {
   }
 
   const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
+  const testAdminUsersConditionals: boolean[] = []
+  const DAPLA_CTRL_TEST_ADMIN_USERS = import.meta.env.VITE_DAPLA_CTRL_TEST_ADMIN_USERS
+  if (!import.meta.env.PROD && DAPLA_CTRL_TEST_ADMIN_USERS) {
+    DAPLA_CTRL_TEST_ADMIN_USERS.split(';').map((testAdminUser: string) =>
+      testAdminUsersConditionals.push(tokenData?.email === testAdminUser)
+    )
+  }
+  const testAdminUsers = testAdminUsersConditionals.length ? eval(testAdminUsersConditionals.join(' || ')) : ''
   return (
     <>
       {renderSidebarModal()}
@@ -410,7 +418,7 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          tokenData?.email === teamManager ? (
+          tokenData?.email === teamManager || testAdminUsers ? (
             <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
           ) : undefined
         }
