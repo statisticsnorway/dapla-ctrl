@@ -14,7 +14,6 @@ import {
   addUserToGroups,
   removeUserFromGroups,
   Group,
-  JobResponse,
 } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
@@ -60,7 +59,7 @@ const TEAM_USERS_TAB = {
     },
     {
       id: 'epost',
-      label: 'Epost ?',
+      label: 'Epost',
     },
     {
       id: 'editUser',
@@ -81,12 +80,20 @@ const SHARED_BUCKETS_TAB = {
       id: 'tilgang',
       label: 'Tilgang',
     },
-    { id: 'delte_data', label: 'Delte data' },
+    // { id: 'delte_data', label: 'Delte data' },
     { id: 'antall_personer', label: 'Antall personer' },
   ],
 }
 
+const defaultEmail = {
+  key: 'add-user-email',
+  error: false,
+  errorMessage: `Ugyldig epost`,
+  value: '',
+}
+
 const defaultSelectedItem = {
+  key: 'add-user-selected-group',
   id: 'velg',
   title: 'Velg ...',
 }
@@ -108,11 +115,7 @@ const TeamDetail = () => {
 
   // Add users to team
   const [openAddUserSidebarModal, setAddUserSidebarModal] = useState<boolean>(false)
-  const [email, setEmail] = useState({
-    error: false,
-    errorMessage: `Ugyldig epost`,
-    value: '',
-  })
+  const [email, setEmail] = useState(defaultEmail)
   const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
@@ -143,7 +146,7 @@ const TeamDetail = () => {
             id: short_name,
             navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
             tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
-            delte_data: metrics?.groups_count,
+            // delte_data: '-', // To be implemented; data does not exist in the API yet.
             antall_personer: metrics?.users_count,
           }
         })
@@ -293,6 +296,7 @@ const TeamDetail = () => {
       const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
       setTeamGroupTags(teamGroupsTags)
       setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
+      setSelectedItem({ ...item, key: `${selectedItem.key}-${item.id}` })
     }
 
     if (action === 'edit') {
@@ -329,6 +333,7 @@ const TeamDetail = () => {
       })
 
     if (email.value !== '' && teamGroupTags.length) {
+      setEmail({ ...email, key: `add-user-${email.value}` })
       setAddUserToTeamErrors([])
       setShowSpinner(true)
       addUserToGroups(
@@ -349,9 +354,10 @@ const TeamDetail = () => {
             setAddUserToTeamErrors(errorsList)
           } else {
             setAddUserSidebarModal(false)
-            // setEmail({ ...email, value: '' })
+            setTeamGroupTags([])
+            // Reset fields with their respective keys; re-initializes component
+            setEmail({ ...defaultEmail })
             setSelectedItem({ ...defaultSelectedItem })
-            // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
@@ -466,6 +472,7 @@ const TeamDetail = () => {
             modalBody: (
               <>
                 <Input
+                  key={email.key}
                   className={styles.inputSpacing}
                   label='Kort epost'
                   value={email.value}
@@ -486,6 +493,7 @@ const TeamDetail = () => {
                   }
                 />
                 <Dropdown
+                  key={selectedItem.key}
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
                   selectedItem={selectedItem}
@@ -500,7 +508,11 @@ const TeamDetail = () => {
                 <div className={styles.tagsContainer}>
                   {teamGroupTags &&
                     teamGroupTags.map((group) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group, 'add')}>
+                      <Tag
+                        key={`team-group-tag-${group.id}`}
+                        icon={<XCircle size={14} />}
+                        onClick={() => handleDeleteGroupTag(group, 'add')}
+                      >
                         {group.title}
                       </Tag>
                     ))}
