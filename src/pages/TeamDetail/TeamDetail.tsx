@@ -44,7 +44,7 @@ const TEAM_USERS_TAB = {
     },
     {
       id: 'epost',
-      label: 'Epost ?',
+      label: 'Epost',
     },
   ],
 }
@@ -61,7 +61,7 @@ const SHARED_BUCKETS_TAB = {
       id: 'tilgang',
       label: 'Tilgang',
     },
-    { id: 'delte_data', label: 'Delte data' },
+    // { id: 'delte_data', label: 'Delte data' },
     { id: 'antall_personer', label: 'Antall personer' },
   ],
 }
@@ -120,7 +120,7 @@ const TeamDetail = () => {
             id: short_name,
             navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
             tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
-            delte_data: metrics?.groups_count,
+            // delte_data: '-', // To be implemented; data does not exist in the API yet.
             antall_personer: metrics?.users_count,
           }
         })
