@@ -66,7 +66,15 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
+const defaultEmail = {
+  key: 'add-user-email',
+  error: false,
+  errorMessage: `Ugyldig epost`,
+  value: '',
+}
+
 const defaultSelectedItem = {
+  key: 'add-user-selected-group',
   id: 'velg',
   title: 'Velg ...',
 }
@@ -86,11 +94,7 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   const [openSidebar, setOpenSidebar] = useState<boolean>(false)
-  const [email, setEmail] = useState({
-    error: false,
-    errorMessage: `Ugyldig epost`,
-    value: '',
-  })
+  const [email, setEmail] = useState(defaultEmail)
   const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
@@ -239,6 +243,7 @@ const TeamDetail = () => {
     }, [])
     setTeamGroupTags(teamGroupsTags)
     setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
+    setSelectedItem({ ...item, key: `${selectedItem.key}-${item.id}` })
   }
 
   const handleDeleteGroupTag = (item: DropdownItems) => {
@@ -262,6 +267,7 @@ const TeamDetail = () => {
       })
 
     if (email.value !== '' && teamGroupTags.length) {
+      setEmail({ ...email, key: `add-user-${email.value}` })
       setAddUserToTeamErrors([])
       setShowSpinner(true)
       addUserToGroups(
@@ -282,9 +288,10 @@ const TeamDetail = () => {
             setAddUserToTeamErrors(errorsList)
           } else {
             setOpenSidebar(false)
-            // setEmail({ ...email, value: '' })
+            setTeamGroupTags([])
+            // Reset fields with their respective keys; re-initializes component
+            setEmail({ ...defaultEmail })
             setSelectedItem({ ...defaultSelectedItem })
-            // setTeamGroupTags([]) // TODO: Re-implement when clearing input fields work
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
@@ -335,6 +342,7 @@ const TeamDetail = () => {
             modalBody: (
               <>
                 <Input
+                  key={email.key}
                   className={styles.inputSpacing}
                   label='Kort epost'
                   value={email.value}
@@ -355,6 +363,7 @@ const TeamDetail = () => {
                   }
                 />
                 <Dropdown
+                  key={selectedItem.key}
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
                   selectedItem={selectedItem}
@@ -369,7 +378,11 @@ const TeamDetail = () => {
                 <div className={styles.tagsContainer}>
                   {teamGroupTags &&
                     teamGroupTags.map((group) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group)}>
+                      <Tag
+                        key={`team-group-tag-${group.id}`}
+                        icon={<XCircle size={14} />}
+                        onClick={() => handleDeleteGroupTag(group)}
+                      >
                         {group.title}
                       </Tag>
                     ))}
