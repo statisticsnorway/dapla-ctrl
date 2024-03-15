@@ -398,8 +398,8 @@ const TeamDetail = () => {
 
   const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
   const testAdminUsersConditionals: boolean[] = []
-  const DAPLA_CTRL_TEST_ADMIN_USERS = import.meta.env.VITE_DAPLA_CTRL_TEST_ADMIN_USERS
-  if (!import.meta.env.PROD && DAPLA_CTRL_TEST_ADMIN_USERS) {
+  const DAPLA_CTRL_TEST_ADMIN_USERS = import.meta.env.DAPLA_CTRL_TEST_ADMIN_USERS
+  if (DAPLA_CTRL_TEST_ADMIN_USERS) {
     DAPLA_CTRL_TEST_ADMIN_USERS.split(';').map((testAdminUser: string) =>
       testAdminUsersConditionals.push(tokenData?.email === testAdminUser)
     )
