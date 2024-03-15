@@ -214,20 +214,28 @@ const updateGroupMembership = async (
   userPrincipalName: string,
   method: Method
 ): Promise<JobResponse> => {
-  const groupsUrl = `${GROUPS_URL}/${groupId}/users`
-  console.log(JSON.stringify({
-    users: [userPrincipalName],
-  }))
+  let groupsUrl = `${GROUPS_URL}/${groupId}/users`
+  let fetchOptions: RequestInit = {
+    method: method,
+    headers: {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      users: [userPrincipalName],
+    }),
+  }
+
+  // TODO: Remove me once DELETE with proxy is fixed
+  if (method === 'DELETE') {
+    groupsUrl = `/localApi/groups/${groupId}/${userPrincipalName}`
+    // Don't include body in fetch options for DELETE method
+    delete fetchOptions.body
+  }
+  
+
   try {
-    const response = await fetch(groupsUrl, {
-      method: method,
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        users: [userPrincipalName],
-      }),
-    })
+    const response = await fetch(groupsUrl, fetchOptions)
 
     if (!response.ok) {
       const errorMessage = (await response.text()) || 'An error occurred'
@@ -236,9 +244,9 @@ const updateGroupMembership = async (
     }
 
     const responseJson = await response.json()
-    const flattendResponse = { ...responseJson._embedded.results[0] }
+    const flattenedResponse = { ...responseJson._embedded.results[0] }
 
-    return flattendResponse
+    return flattenedResponse
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to update group membership: ', error)

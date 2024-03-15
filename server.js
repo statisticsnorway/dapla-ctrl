@@ -16,6 +16,10 @@ const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team
 app.use(
   '/api',
   proxy(DAPLA_TEAM_API_URL, {
+    proxyReqBodyDecorator: function (bodyContent, srcReq) {
+      console.log(`Request Body: ${bodyContent}`)
+      return bodyContent
+    },
     proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
       console.log(`Request Headers:`, srcReq.headers)
       if (srcReq.body) {
@@ -32,6 +36,10 @@ app.use(
       console.log(`Response Status: ${proxyRes.statusCode}`)
       console.log(`Response Headers:`, proxyRes.headers)
       return proxyResData
+    },
+    proxyErrorHandler: function (err, res) {
+      console.error('Proxy Error:', err)
+      res.status(500).send('Proxy Error')
     },
   })
 )
@@ -64,6 +72,39 @@ async function fetchPhoto(accessToken, url, fallbackErrorMessage) {
   const photoBuffer = Buffer.from(arrayBuffer)
   return photoBuffer.toString('base64')
 }
+
+//TODO: Remove me once DELETE with proxy is fixed
+app.delete('/localApi/groups/:groupUniformName/:userPrincipalName', async (req, res) => {
+  const token = req.headers.authorization
+  const groupUniformName = req.params.groupUniformName
+  const userPrincipalName = req.params.userPrincipalName
+  const groupsUrl = `${DAPLA_TEAM_API_URL}/groups/${groupUniformName}/users`
+
+  try {
+    const response = await fetch(groupsUrl, {
+      method: 'DELETE',
+      headers: {
+        Accept: '*/*',
+        'Content-Type': 'application/json',
+        Authorization: token,
+      },
+      body: JSON.stringify({
+        users: [userPrincipalName],
+      }),
+    })
+
+    if (!response.ok) {
+      const err = await response.text()
+      res.status(response.status).send(err)
+    } else {
+      const data = await response.json()
+      res.status(response.status).send(data)
+    }
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Internal Server Error')
+  }
+})
 
 app.get('/localApi/fetch-token', (req, res) => {
   if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer')) {
