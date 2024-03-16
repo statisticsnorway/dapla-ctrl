@@ -97,8 +97,6 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
         principal_name: 'Ikke funnet',
         section_name: 'Ikke funnet',
       }
-    } else {
-      flattendTeams.managers = flattendTeams.managers
     }
 
     if (flattendTeams._links && flattendTeams._links.section_manager) {
