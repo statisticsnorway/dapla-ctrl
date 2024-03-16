@@ -100,7 +100,9 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
     }
 
     if (flattendTeams._links && flattendTeams._links.section_manager) {
-      flattendTeams.section_manager = await fetchTeamSectionManager(flattendTeams._links.section_manager.href)
+      const sectionManagerUrl = new URL(flattendTeams._links.section_manager.href)
+      const path = sectionManagerUrl.pathname
+      flattendTeams.section_manager = await fetchTeamSectionManager(`${DAPLA_TEAM_API_URL}${path}`)
     } else {
       flattendTeams.section_manager = { display_name: 'Seksjonsleder ikke funnet', principal_name: 'Ikkefunnet@ssb.no' }
     }
