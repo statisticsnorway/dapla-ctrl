@@ -205,7 +205,7 @@ const TeamDetail = () => {
             <Text medium className={pageStyles.descriptionSpacing}>
               {(teamDetailData.team as Team).uniform_name ?? ''}
             </Text>
-            <Text medium>{formatDisplayName((teamDetailData.team as Team).manager?.display_name ?? '')}</Text>
+            <Text medium>{formatDisplayName((teamDetailData.team as Team).section_manager.display_name ?? '')}</Text>
             <Text medium>{(teamDetailData.team as Team).section_name ?? ''}</Text>
           </LeadParagraph>
           <Tabs
@@ -396,7 +396,7 @@ const TeamDetail = () => {
     }
   }
 
-  const teamManager = teamDetailData ? (teamDetailData?.team as Team).manager?.principal_name : ''
+  const teamManager = teamDetailData ? (teamDetailData?.team as Team).managers : []
   return (
     <>
       {renderSidebarModal()}
@@ -410,7 +410,7 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          tokenData?.email === teamManager ? (
+          teamManager?.some((manager) => manager.principal_name === tokenData?.email) ? (
             <Button onClick={() => setOpenSidebar(true)}>+ Nytt medlem</Button>
           ) : undefined
         }
