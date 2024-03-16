@@ -18,7 +18,7 @@ export interface Team {
   display_name: string
   section_name: string
   section_code: string
-  manager: TeamManager
+  managers: TeamManager[]
   users: User[]
   groups: Group[]
   // eslint-disable-next-line
@@ -75,13 +75,24 @@ const fetchAllTeams = async (): Promise<TeamsData> => {
     })
 
     const flattedTeamsWithManager = flattedTeams.teams.map((team: Team) => {
-      const managers = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+      const managersGroup = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+
+      const managers =
+        managersGroup && managersGroup.users && managersGroup.users.length > 0
+          ? managersGroup.users.map((manager) => ({
+              display_name: manager.display_name,
+              principal_name: manager.principal_name,
+            }))
+          : [
+              {
+                display_name: 'Mangler ansvarlig',
+                principal_name: 'ManglerAnsvarlig@ssb.no',
+              },
+            ]
+
       return {
         ...team,
-        manager:
-          managers && managers.users && managers.users.length > 0
-            ? { display_name: managers.users[0].display_name, principal_name: managers.users[0].principal_name }
-            : { display_name: 'Mangler manager', principal_name: 'ManglerManager@ssb.no' },
+        managers: managers,
       }
     })
 
@@ -129,13 +140,24 @@ const fetchTeamsForPrincipalName = async (principalName: string): Promise<TeamsD
     })
 
     const flattedTeamsWithManager = flattedTeams.teams.map((team: Team) => {
-      const managers = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+      const managersGroup = team.groups.find((group) => group.uniform_name === `${team.uniform_name}-managers`)
+
+      const managers =
+        managersGroup && managersGroup.users && managersGroup.users.length > 0
+          ? managersGroup.users.map((manager) => ({
+              display_name: manager.display_name,
+              principal_name: manager.principal_name,
+            }))
+          : [
+              {
+                display_name: 'Mangler ansvarlig',
+                principal_name: 'ManglerAnsvarlig@ssb.no',
+              },
+            ]
+
       return {
         ...team,
-        manager:
-          managers && managers.users && managers.users.length > 0
-            ? { display_name: managers.users[0].display_name, principal_name: managers.users[0].principal_name }
-            : { display_name: 'Mangler ansvarlig', principal_name: 'ManglerAnsvarlig@ssb.no' },
+        managers: managers,
       }
     })
 
