@@ -92,8 +92,9 @@ const defaultEmail = {
   value: '',
 }
 
-const defaultSelectedItem = {
-  key: 'add-user-selected-group',
+const defaultAddUserKey = 'add-user-selected-group'
+const defaultEditUserKey = 'edit-user-selected-group'
+const defaultSelectedGroup = {
   id: 'velg',
   title: 'Velg ...',
 }
@@ -116,7 +117,10 @@ const TeamDetail = () => {
   // Add users to team
   const [openAddUserSidebarModal, setAddUserSidebarModal] = useState<boolean>(false)
   const [email, setEmail] = useState(defaultEmail)
-  const [selectedItem, setSelectedItem] = useState(defaultSelectedItem)
+  const [selectedGroupAddUser, setSelectedGroupAddUser] = useState({
+    ...defaultSelectedGroup,
+    key: defaultAddUserKey,
+  })
   const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
     error: false,
@@ -127,6 +131,10 @@ const TeamDetail = () => {
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
   const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
+  const [selectedGroupEditUser, setSelectedGroupEditUser] = useState({
+    ...defaultSelectedGroup,
+    key: defaultEditUserKey,
+  })
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
   const [editUserErrors, setEditUserErrors] = useState<Array<string>>([])
 
@@ -158,7 +166,7 @@ const TeamDetail = () => {
           const userFullName = formatDisplayName(display_name)
           const userGroups = groups?.filter((group) =>
             group.uniform_name.startsWith((response.team as Team).uniform_name)
-          )
+          ) as Group[]
           return {
             id: userFullName,
             navn: (
@@ -296,12 +304,13 @@ const TeamDetail = () => {
       const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
       setTeamGroupTags(teamGroupsTags)
       setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
-      setSelectedItem({ ...item, key: `${selectedItem.key}-${item.id}` })
+      setSelectedGroupAddUser({ ...item, key: `${defaultAddUserKey}-${item.id}` })
     }
 
     if (action === 'edit') {
       const userGroupsTagsList = removeDuplicateDropdownItems([...userGroupTags, item])
       setUserGroupTags(userGroupsTagsList)
+      setSelectedGroupEditUser({ ...item, key: `${defaultEditUserKey}-${item.id}` })
     }
   }
 
@@ -315,13 +324,6 @@ const TeamDetail = () => {
       const userGroupsTags = userGroupTags.filter((items) => items !== item)
       setUserGroupTags(userGroupsTags)
     }
-  }
-
-  const isUserInputValid = (value?: string) => {
-    const regEx = /^[\w-]+@ssb\.no$/
-    const userVal = value || email.value
-    const testUser = userVal.match(regEx)
-    return !!testUser
   }
 
   const handleAddUserOnSubmit = () => {
@@ -357,7 +359,7 @@ const TeamDetail = () => {
             setTeamGroupTags([])
             // Reset fields with their respective keys; re-initializes component
             setEmail({ ...defaultEmail })
-            setSelectedItem({ ...defaultSelectedItem })
+            setSelectedGroupAddUser({ ...defaultSelectedGroup, key: defaultAddUserKey })
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
@@ -439,9 +441,17 @@ const TeamDetail = () => {
         <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
         {shownInAddUserToTeamModal ? renderSidebarModalWarning(addUserToTeamErrors) : null}
         {showInEditUserModal ? renderSidebarModalWarning(editUserErrors) : null}
-        {showSpinner && (shownInAddUserToTeamModal || showInEditUserModal) && <CircularProgress />}
+        {showSpinner && (shownInAddUserToTeamModal || showInEditUserModal) && <CircularProgress />}{' '}
+        {/* TODO: Fix; currently shows on both modals still */}
       </div>
     )
+  }
+
+  const isUserInputValid = (value?: string) => {
+    const regEx = /^[\w-]+@ssb\.no$/
+    const userVal = value || email.value
+    const testUser = userVal.match(regEx)
+    return !!testUser
   }
 
   const teamModalHeader = teamDetailData
@@ -493,10 +503,10 @@ const TeamDetail = () => {
                   }
                 />
                 <Dropdown
-                  key={selectedItem.key}
+                  key={selectedGroupAddUser.key}
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
-                  selectedItem={selectedItem}
+                  selectedItem={selectedGroupAddUser}
                   items={teamGroups.map(({ uniform_name }) => ({
                     id: uniform_name,
                     title: getGroupType(uniform_name),
@@ -542,9 +552,10 @@ const TeamDetail = () => {
             modalBody: (
               <>
                 <Dropdown
+                  key={selectedGroupEditUser.key}
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
-                  selectedItem={defaultSelectedItem}
+                  selectedItem={defaultSelectedGroup}
                   items={teamGroups.map(({ uniform_name }) => ({
                     id: uniform_name,
                     title: getGroupType(uniform_name),
