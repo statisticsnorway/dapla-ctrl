@@ -382,8 +382,6 @@ const TeamDetail = () => {
       editUserInfo.groups?.filter((group) => !userGroupTags?.some((groupTag) => groupTag.id === group.uniform_name)) ??
       []
     if (addedGroups.length && removedGroups.length) {
-      console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
-      console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
       setEditUserErrors([])
       setShowEditUserSpinner(true)
       Promise.all([
@@ -398,7 +396,6 @@ const TeamDetail = () => {
       ])
         .then((response) => {
           const flattenedResponse = [...response[0], ...response[1]]
-          console.log(flattenedResponse)
           const errorsList = getErrorList(flattenedResponse)
           if (errorsList.length) {
             setEditUserErrors(errorsList)
@@ -414,7 +411,6 @@ const TeamDetail = () => {
     }
 
     if (removedGroups.length) {
-      console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
       setEditUserErrors([])
       setShowEditUserSpinner(true)
       removeUserFromGroups(
@@ -437,7 +433,6 @@ const TeamDetail = () => {
     }
 
     if (addedGroups.length) {
-      console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
       setEditUserErrors([])
       setShowEditUserSpinner(true)
       addUserToGroups(
