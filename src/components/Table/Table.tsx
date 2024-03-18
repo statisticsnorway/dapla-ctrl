@@ -14,11 +14,13 @@ interface TableProps extends TableData {
 interface TableDesktopViewProps extends TableData {
   activeTab?: string
 }
+
 export interface TableData {
   columns: {
     id: string
     label: string
     unsortable?: boolean
+    align?: string
   }[]
   data: {
     id: string
@@ -133,7 +135,9 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
               return (
                 <tr key={row.id + index} className={conditionalStyling(index)}>
                   {columns.map((column) => (
-                    <td key={column.id}>{row[column.id]}</td>
+                    <td key={column.id} className={column.align === 'center' ? styles.centerText : undefined}>
+                      {row[column.id]}
+                    </td>
                   ))}
                 </tr>
               )

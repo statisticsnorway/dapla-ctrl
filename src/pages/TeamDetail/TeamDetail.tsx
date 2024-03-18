@@ -65,6 +65,8 @@ const TEAM_USERS_TAB = {
     {
       id: 'editUser',
       label: '',
+      unsortable: true,
+      align: 'center',
     },
   ],
 }

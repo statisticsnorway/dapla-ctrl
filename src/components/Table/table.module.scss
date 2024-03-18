@@ -135,3 +135,10 @@
     display: flex;
   }
 }
+
+.centerText {
+  span {
+    display: flex;
+    justify-content: center;
+  }
+}
