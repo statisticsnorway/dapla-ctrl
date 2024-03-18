@@ -36,7 +36,7 @@ import {
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
-import { XCircle } from 'react-feather'
+import { XCircle, Trash2 } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 
@@ -455,6 +455,29 @@ const TeamDetail = () => {
     }
   }
 
+  const handleDeleteUser = () => {
+    if (editUserInfo.groups && editUserInfo.groups.length) {
+      setEditUserErrors([])
+      setShowEditUserSpinner(true)
+      removeUserFromGroups(
+        editUserInfo.groups.map(({ uniform_name }) => uniform_name),
+        editUserInfo.email as string
+      )
+        .then((response) => {
+          const errorsList = getErrorList(response)
+          if (errorsList.length) {
+            setEditUserErrors(errorsList)
+          } else {
+            setOpenEditUserSidebarModal(false)
+            // Reset fields with their respective keys; re-initializes component
+            setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
+          }
+        })
+        .catch((e) => setEditUserErrors(e.message))
+        .finally(() => setShowEditUserSpinner(false))
+    }
+  }
+
   const renderSidebarModalInfo = (children: ReactElement) => {
     return (
       <div className={styles.modalBodyDialog}>
@@ -613,6 +636,11 @@ const TeamDetail = () => {
                     ))}
                 </div>
                 <div className={styles.modalBodyDialog}>
+                  {/* TODO: Should be its own component */}
+                  <a className={styles.removeUserWrapper} tabIndex={0} onClick={handleDeleteUser}>
+                    <Trash2 size={22} />
+                    <span>Fjern fra teamet</span>
+                  </a>
                   {renderSidebarModalInfo(
                     <>
                       {editUserErrors.length ? renderSidebarModalWarning(editUserErrors) : null}
