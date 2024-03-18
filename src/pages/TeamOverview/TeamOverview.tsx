@@ -34,12 +34,12 @@ const TeamOverview = () => {
 
   const prepTeamData = useCallback(
     (response: TeamOverviewData): TableData['data'] => {
-      return response[teamTab].teams.map(({ uniform_name, section_name, users, manager }) => ({
+      return response[teamTab].teams.map(({ uniform_name, section_name, users, managers }) => ({
         id: uniform_name,
         seksjon: section_name, // Makes section name searchable and sortable in table by including the field
         navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
         teammedlemmer: users.length,
-        ansvarlig: formatDisplayName(manager.display_name),
+        ansvarlig: managers ? managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', ') : '',
       }))
     },
     [activeTab]

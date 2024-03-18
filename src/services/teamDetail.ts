@@ -14,7 +14,8 @@ export interface Team {
   display_name: string
   section_name: string
   section_code?: string
-  manager?: TeamManager
+  section_manager: User
+  managers?: TeamManager[]
   users?: User[]
   groups?: Group[]
   // eslint-disable-next-line
@@ -30,7 +31,7 @@ export interface User {
   display_name: string
   principal_name: string
   section_name: string
-  groups: Group[]
+  groups?: Group[]
 }
 
 export interface Group {
@@ -98,10 +99,15 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
         principal_name: 'Ikke funnet',
         section_name: 'Ikke funnet',
       }
-    } else {
-      flattendTeams.manager = flattendTeams.managers[0]
     }
-    delete flattendTeams.managers
+
+    if (flattendTeams._links && flattendTeams._links.section_manager) {
+      const sectionManagerUrl = new URL(flattendTeams._links.section_manager.href)
+      const path = sectionManagerUrl.pathname
+      flattendTeams.section_manager = await fetchTeamSectionManager(`${DAPLA_TEAM_API_URL}${path}`)
+    } else {
+      flattendTeams.section_manager = { display_name: 'Seksjonsleder ikke funnet', principal_name: 'Ikkefunnet@ssb.no' }
+    }
 
     return flattendTeams
   } catch (error) {
@@ -151,6 +157,23 @@ export const fetchSharedBuckets = async (teamId: string): Promise<SharedBuckets 
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred')
       console.error('Failed to fetch shared buckets:', apiError)
+      throw apiError
+    }
+  }
+}
+
+const fetchTeamSectionManager = async (url: string) => {
+  try {
+    const response = await fetchAPIData(url)
+
+    return response
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch team section manager:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch team section manager:', apiError)
       throw apiError
     }
   }

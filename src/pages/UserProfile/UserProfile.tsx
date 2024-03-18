@@ -28,7 +28,7 @@ const UserProfile = () => {
 
   const prepTeamData = useCallback(
     (response: TeamsData): TableData['data'] => {
-      return response.teams.map(({ uniform_name, section_name, groups, manager }) => ({
+      return response.teams.map(({ uniform_name, section_name, groups, managers }) => ({
         id: uniform_name,
         seksjon: section_name, // Makes section name searchable and sortable in table by including the field
         navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
@@ -38,7 +38,7 @@ const UserProfile = () => {
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
           : 'INGEN FUNNET',
-        ansvarlig: formatDisplayName(manager.display_name),
+        ansvarlig: managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', '),
       }))
     },
     [principalName, userProfileData]
