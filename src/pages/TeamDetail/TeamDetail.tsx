@@ -4,7 +4,7 @@ import styles from './teamDetail.module.scss'
 
 import { DropdownItems, TabProps } from '../../@types/pageTypes'
 
-import { useCallback, useContext, useEffect, useState } from 'react'
+import { ReactElement, useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import {
   TeamDetailData,
@@ -102,7 +102,6 @@ const defaultSelectedGroup = {
 
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
-  const [showSpinner, setShowSpinner] = useState<boolean>(false)
   const [tokenData, setTokenData] = useState<TokenData>()
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -116,7 +115,7 @@ const TeamDetail = () => {
   const [teamDetailTableData, setTeamDetailTableData] = useState<TableData['data']>()
 
   // Add users to team
-  const [openAddUserSidebarModal, setAddUserSidebarModal] = useState<boolean>(false)
+  const [openAddUserSidebarModal, setOpenAddUserSidebarModal] = useState<boolean>(false)
   const [email, setEmail] = useState(defaultEmail)
   const [selectedGroupAddUser, setSelectedGroupAddUser] = useState({
     ...defaultSelectedGroup,
@@ -128,6 +127,7 @@ const TeamDetail = () => {
     errorMessage: 'Velg minst én tilgangsgruppe',
   })
   const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
+  const [showAddUserSpinner, setShowAddUserSpinner] = useState<boolean>(false)
 
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
@@ -138,6 +138,7 @@ const TeamDetail = () => {
   })
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
   const [editUserErrors, setEditUserErrors] = useState<Array<string>>([])
+  const [showEditUserSpinner, setShowEditUserSpinner] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -300,28 +301,28 @@ const TeamDetail = () => {
     }, [])
   }
 
-  const handleAddGroupTag = (item: DropdownItems, action: string) => {
-    if (action === 'add') {
+  const handleAddGroupTag = (item: DropdownItems) => {
+    if (openAddUserSidebarModal) {
       const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
       setTeamGroupTags(teamGroupsTags)
       setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
       setSelectedGroupAddUser({ ...item, key: `${defaultAddUserKey}-${item.id}` })
     }
 
-    if (action === 'edit') {
+    if (openEditUserSidebarModal) {
       const userGroupsTagsList = removeDuplicateDropdownItems([...userGroupTags, item])
       setUserGroupTags(userGroupsTagsList)
       setSelectedGroupEditUser({ ...item, key: `${defaultEditUserKey}-${item.id}` })
     }
   }
 
-  const handleDeleteGroupTag = (item: DropdownItems, action: string) => {
-    if (action === 'add') {
+  const handleDeleteGroupTag = (item: DropdownItems) => {
+    if (openAddUserSidebarModal) {
       const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
       setTeamGroupTags(teamGroupsTags)
     }
 
-    if (action === 'edit') {
+    if (openEditUserSidebarModal) {
       const userGroupsTags = userGroupTags.filter((items) => items !== item)
       setUserGroupTags(userGroupsTags)
     }
@@ -349,7 +350,7 @@ const TeamDetail = () => {
     if (email.value !== '' && teamGroupTags.length) {
       setEmail({ ...email, key: `add-user-${email.value}` })
       setAddUserToTeamErrors([])
-      setShowSpinner(true)
+      setShowAddUserSpinner(true)
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
         email.value
@@ -359,7 +360,7 @@ const TeamDetail = () => {
           if (errorsList.length) {
             setAddUserToTeamErrors(errorsList)
           } else {
-            setAddUserSidebarModal(false)
+            setOpenAddUserSidebarModal(false)
             setTeamGroupTags([])
             // Reset fields with their respective keys; re-initializes component
             setEmail({ ...defaultEmail })
@@ -367,7 +368,7 @@ const TeamDetail = () => {
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
-        .finally(() => setShowSpinner(false))
+        .finally(() => setShowAddUserSpinner(false))
     }
   }
 
@@ -382,7 +383,7 @@ const TeamDetail = () => {
       console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
       console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
       setEditUserErrors([])
-      setShowSpinner(true)
+      setShowEditUserSpinner(true)
       Promise.all([
         addUserToGroups(
           addedGroups.map((group) => group.id),
@@ -406,14 +407,14 @@ const TeamDetail = () => {
           }
         })
         .catch((e) => setEditUserErrors(e.message))
-        .finally(() => setShowSpinner(false))
+        .finally(() => setShowEditUserSpinner(false))
       return
     }
 
     if (removedGroups.length) {
       console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
       setEditUserErrors([])
-      setShowSpinner(true)
+      setShowEditUserSpinner(true)
       removeUserFromGroups(
         removedGroups?.map((group) => group.uniform_name),
         editUserInfo.email as string
@@ -429,14 +430,14 @@ const TeamDetail = () => {
           }
         })
         .catch((e) => setEditUserErrors(e.message))
-        .finally(() => setShowSpinner(false))
+        .finally(() => setShowEditUserSpinner(false))
       return
     }
 
     if (addedGroups.length) {
       console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
       setEditUserErrors([])
-      setShowSpinner(true)
+      setShowEditUserSpinner(true)
       addUserToGroups(
         addedGroups.map((group) => group.id),
         editUserInfo?.email as string
@@ -452,9 +453,18 @@ const TeamDetail = () => {
           }
         })
         .catch((e) => setEditUserErrors(e.message))
-        .finally(() => setShowSpinner(false))
+        .finally(() => setShowEditUserSpinner(false))
       return
     }
+  }
+
+  const renderSidebarModalInfo = (children: ReactElement) => {
+    return (
+      <div className={styles.modalBodyDialog}>
+        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+        {children}
+      </div>
+    )
   }
 
   const renderSidebarModalWarning = (errorList: string[]) => {
@@ -473,22 +483,6 @@ const TeamDetail = () => {
     )
   }
 
-  const renderSidebarModalInfo = (action: string) => {
-    const shownInAddUserToTeamModal = action === 'add' && addUserToTeamErrors.length
-    const showInEditUserModal = action === 'edit' && editUserErrors.length
-
-    return (
-      <div className={styles.modalBodyDialog}>
-        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-        {shownInAddUserToTeamModal ? renderSidebarModalWarning(addUserToTeamErrors) : null}
-        {showInEditUserModal ? renderSidebarModalWarning(editUserErrors) : null}
-        {/* TODO: Fix; currently shows on both modals still */}
-        {showSpinner && action === 'add' && <CircularProgress />}
-        {showSpinner && action === 'edit' && <CircularProgress />}
-      </div>
-    )
-  }
-
   const isUserInputValid = (value?: string) => {
     const regEx = /^[\w-]+@ssb\.no$/
     const userVal = value || email.value
@@ -503,9 +497,7 @@ const TeamDetail = () => {
         modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
       }
     : {
-        modalType: '',
         modalTitle: '',
-        modalDescription: '',
       }
   const teamGroups = teamDetailData ? ((teamDetailData.team as Team).groups as Group[]) : []
   const renderAddUserSidebarModal = () => {
@@ -513,7 +505,7 @@ const TeamDetail = () => {
       return (
         <SidebarModal
           open={openAddUserSidebarModal}
-          onClose={() => setAddUserSidebarModal(false)}
+          onClose={() => setOpenAddUserSidebarModal(false)}
           header={teamModalHeader}
           footer={{
             submitButtonText: 'Legg til medlem',
@@ -553,7 +545,7 @@ const TeamDetail = () => {
                     id: uniform_name,
                     title: getGroupType(uniform_name),
                   }))}
-                  onSelect={(item: DropdownItems) => handleAddGroupTag(item, 'add')}
+                  onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
                   error={teamGroupTagsError.error}
                   errorMessage={teamGroupTagsError.errorMessage}
                 />
@@ -563,13 +555,20 @@ const TeamDetail = () => {
                       <Tag
                         key={`team-group-tag-${group.id}`}
                         icon={<XCircle size={14} />}
-                        onClick={() => handleDeleteGroupTag(group, 'add')}
+                        onClick={() => handleDeleteGroupTag(group)}
                       >
                         {group.title}
                       </Tag>
                     ))}
                 </div>
-                {renderSidebarModalInfo('add')}
+                <div className={styles.modalBodyDialog}>
+                  {renderSidebarModalInfo(
+                    <>
+                      {addUserToTeamErrors.length ? renderSidebarModalWarning(addUserToTeamErrors) : null}
+                      {showAddUserSpinner && <CircularProgress />}
+                    </>
+                  )}
+                </div>
               </>
             ),
           }}
@@ -602,7 +601,7 @@ const TeamDetail = () => {
                     id: uniform_name,
                     title: getGroupType(uniform_name),
                   }))}
-                  onSelect={(item: DropdownItems) => handleAddGroupTag(item, 'edit')}
+                  onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
                 />
                 <div className={styles.tagsContainer}>
                   {userGroupTags &&
@@ -610,13 +609,20 @@ const TeamDetail = () => {
                       <Tag
                         key={`user-group-tag-${group.id}`}
                         icon={<XCircle size={14} />}
-                        onClick={() => handleDeleteGroupTag(group, 'edit')}
+                        onClick={() => handleDeleteGroupTag(group)}
                       >
                         {group.title}
                       </Tag>
                     ))}
                 </div>
-                {renderSidebarModalInfo('edit')}
+                <div className={styles.modalBodyDialog}>
+                  {renderSidebarModalInfo(
+                    <>
+                      {editUserErrors.length ? renderSidebarModalWarning(editUserErrors) : null}
+                      {showEditUserSpinner && <CircularProgress />}
+                    </>
+                  )}
+                </div>
               </>
             ),
           }}
@@ -641,7 +647,7 @@ const TeamDetail = () => {
         content={renderContent()}
         button={
           teamManager?.some((manager) => manager.principal_name === tokenData?.email) ? (
-            <Button onClick={() => setAddUserSidebarModal(true)}>+ Nytt medlem</Button>
+            <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button>
           ) : undefined
         }
       />
