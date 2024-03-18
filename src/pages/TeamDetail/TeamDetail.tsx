@@ -14,6 +14,7 @@ import {
   addUserToGroups,
   removeUserFromGroups,
   Group,
+  JobResponse,
 } from '../../services/teamDetail'
 import { useParams } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
@@ -326,6 +327,17 @@ const TeamDetail = () => {
     }
   }
 
+  const getErrorList = (response: JobResponse[]) => {
+    return response
+      .map(({ status, detail }) => {
+        if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
+          return detail
+        }
+        return ''
+      })
+      .filter((str) => str !== '')
+  }
+
   const handleAddUserOnSubmit = () => {
     if (email.value === '') setEmail({ ...email, error: true })
     if (!teamGroupTags.length)
@@ -343,15 +355,7 @@ const TeamDetail = () => {
         email.value
       )
         .then((response) => {
-          const errorsList = response
-            .map(({ status, detail }) => {
-              if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
-                return detail
-              }
-              return ''
-            })
-            .filter((str) => str !== '')
-
+          const errorsList = getErrorList(response)
           if (errorsList.length) {
             setAddUserToTeamErrors(errorsList)
           } else {
@@ -377,6 +381,8 @@ const TeamDetail = () => {
     if (addedGroups.length && removedGroups.length) {
       console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
       console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
+      setEditUserErrors([])
+      setShowSpinner(true)
       Promise.all([
         addUserToGroups(
           addedGroups.map((group) => group.id),
@@ -390,28 +396,63 @@ const TeamDetail = () => {
         .then((response) => {
           const flattenedResponse = [...response[0], ...response[1]]
           console.log(flattenedResponse)
+          const errorsList = getErrorList(flattenedResponse)
+          if (errorsList.length) {
+            setEditUserErrors(errorsList)
+          } else {
+            setOpenEditUserSidebarModal(false)
+            // Reset fields with their respective keys; re-initializes component
+            setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
+          }
         })
-        .catch((e) => {
-          console.log(e)
-        })
+        .catch((e) => setEditUserErrors(e.message))
+        .finally(() => setShowSpinner(false))
       return
     }
 
     if (removedGroups.length) {
       console.log(`Removing user from groups: ${JSON.stringify(removedGroups)}`)
+      setEditUserErrors([])
+      setShowSpinner(true)
       removeUserFromGroups(
         removedGroups?.map((group) => group.uniform_name),
         editUserInfo.email as string
       )
+        .then((response) => {
+          const errorsList = getErrorList(response)
+          if (errorsList.length) {
+            setEditUserErrors(errorsList)
+          } else {
+            setOpenEditUserSidebarModal(false)
+            // Reset fields with their respective keys; re-initializes component
+            setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
+          }
+        })
+        .catch((e) => setEditUserErrors(e.message))
+        .finally(() => setShowSpinner(false))
       return
     }
 
     if (addedGroups.length) {
       console.log(`Adding user to groups: ${JSON.stringify(addedGroups)}`)
+      setEditUserErrors([])
+      setShowSpinner(true)
       addUserToGroups(
         addedGroups.map((group) => group.id),
         editUserInfo?.email as string
       )
+        .then((response) => {
+          const errorsList = getErrorList(response)
+          if (errorsList.length) {
+            setEditUserErrors(errorsList)
+          } else {
+            setOpenEditUserSidebarModal(false)
+            // Reset fields with their respective keys; re-initializes component
+            setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
+          }
+        })
+        .catch((e) => setEditUserErrors(e.message))
+        .finally(() => setShowSpinner(false))
       return
     }
   }
@@ -441,8 +482,9 @@ const TeamDetail = () => {
         <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
         {shownInAddUserToTeamModal ? renderSidebarModalWarning(addUserToTeamErrors) : null}
         {showInEditUserModal ? renderSidebarModalWarning(editUserErrors) : null}
-        {showSpinner && (shownInAddUserToTeamModal || showInEditUserModal) && <CircularProgress />}{' '}
         {/* TODO: Fix; currently shows on both modals still */}
+        {showSpinner && action === 'add' && <CircularProgress />}
+        {showSpinner && action === 'edit' && <CircularProgress />}
       </div>
     )
   }
@@ -565,7 +607,11 @@ const TeamDetail = () => {
                 <div className={styles.tagsContainer}>
                   {userGroupTags &&
                     userGroupTags.map((group) => (
-                      <Tag icon={<XCircle size={14} />} onClick={() => handleDeleteGroupTag(group, 'edit')}>
+                      <Tag
+                        key={`user-group-tag-${group.id}`}
+                        icon={<XCircle size={14} />}
+                        onClick={() => handleDeleteGroupTag(group, 'edit')}
+                      >
                         {group.title}
                       </Tag>
                     ))}
