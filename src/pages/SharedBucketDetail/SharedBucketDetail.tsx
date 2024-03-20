@@ -17,7 +17,7 @@ import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
 import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import { Dialog, LeadParagraph, Text } from '@statisticsnorway/ssb-component-library'
+import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
 import { formatDisplayName, getGroupType, stripSuffixes } from '../../utils/utils'
 
 const SharedBucketDetail = () => {
@@ -60,7 +60,9 @@ const SharedBucketDetail = () => {
             team_navn: stripSuffixes(uniform_name),
             gruppe: [getGroupType(uniform_name)],
             team: (
-              <FormattedTableColumn href={`/${stripSuffixes(uniform_name)}`} linkText={stripSuffixes(uniform_name)} />
+              <span>
+                <Link href={`/${stripSuffixes(uniform_name)}`}>{stripSuffixes(uniform_name)}</Link>
+              </span>
             ),
           }
         } else {
