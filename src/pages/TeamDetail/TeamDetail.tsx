@@ -140,7 +140,15 @@ const TeamDetail = () => {
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
             gruppe: groups
-              ?.filter((group) => group.uniform_name.startsWith((response.team as Team).uniform_name))
+              ?.filter((group) => {
+                const baseUniformName = (response.team as Team).uniform_name
+                const allowedSuffixes = ['-managers', '-developers', '-data-admins', '-support', '-consumers']
+                if (group.uniform_name.startsWith(baseUniformName)) {
+                  const suffix = group.uniform_name.slice(baseUniformName.length)
+                  return allowedSuffixes.some((allowedSuffix) => suffix.startsWith(allowedSuffix))
+                }
+                return false
+              })
               .map((group) => getGroupType(group.uniform_name))
               .join(', '),
             epost: principal_name,
