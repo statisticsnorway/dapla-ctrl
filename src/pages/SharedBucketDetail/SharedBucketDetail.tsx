@@ -32,35 +32,35 @@ const SharedBucketDetail = () => {
 
   const prepSharedBucketTableData = (response: SharedBucketDetailType): TableData['data'] => {
     const usersMap: {
-      [displayName: string]: {
+      [principalName: string]: {
         id: string
         navn: JSX.Element
         seksjon: string
+        principal_name: string
         gruppe: string[]
         team: JSX.Element
+        team_navn: string
       }
     } = {}
 
     ;(response['sharedBucket'] as SharedBucket).groups.forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
-        const displayName = formatDisplayName(user.display_name)
         if (!usersMap[user.principal_name]) {
           usersMap[user.principal_name] = {
             id: user.display_name,
             navn: (
               <FormattedTableColumn
                 href={`/teammedlemmer/${user.principal_name}`}
-                linkText={displayName}
+                linkText={formatDisplayName(user.display_name)}
                 text={user.section_name}
               />
             ),
             seksjon: user.section_name,
+            principal_name: user.principal_name,
+            team_navn: stripSuffixes(uniform_name),
             gruppe: [getGroupType(uniform_name)],
             team: (
-              <FormattedTableColumn
-                href={`/${stripSuffixes(uniform_name)}`}
-                linkText={stripSuffixes(uniform_name) ?? ''}
-              />
+              <FormattedTableColumn href={`/${stripSuffixes(uniform_name)}`} linkText={stripSuffixes(uniform_name)} />
             ),
           }
         } else {
