@@ -47,7 +47,7 @@ const SharedBucketDetail = () => {
       ;(users ?? []).forEach((user) => {
         if (!usersMap[user.principal_name]) {
           usersMap[user.principal_name] = {
-            id: user.display_name,
+            id: formatDisplayName(user.display_name),
             navn: (
               <FormattedTableColumn
                 href={`/teammedlemmer/${user.principal_name}`}
