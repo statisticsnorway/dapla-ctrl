@@ -62,12 +62,6 @@ const TEAM_USERS_TAB = {
       id: 'epost',
       label: 'Epost',
     },
-    {
-      id: 'editUser',
-      label: '',
-      unsortable: true,
-      align: 'center',
-    },
   ],
 }
 
@@ -211,6 +205,11 @@ const TeamDetail = () => {
     [activeTab]
   )
 
+  const isTeamManager = () => {
+    const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
+    return teamManagers?.some((manager) => manager.principal_name === tokenData?.email)
+  }
+
   useEffect(() => {
     if (!teamId) return
     fetchUserInformationFromAuthToken()
@@ -232,13 +231,39 @@ const TeamDetail = () => {
   }, [])
 
   useEffect(() => {
+    if (isTeamManager()) {
+      setTeamDetailTableHeaderColumns([
+        ...TEAM_USERS_TAB.columns,
+        {
+          id: 'editUser',
+          label: '',
+          unsortable: true,
+          align: 'center',
+        },
+      ])
+    }
+  }, [tokenData, teamDetailData])
+
+  useEffect(() => {
     if (teamDetailData) {
       if (teamDetailTab === SHARED_BUCKETS_TAB.path) {
         setTeamDetailTableTitle(SHARED_BUCKETS_TAB.title)
         setTeamDetailTableHeaderColumns(SHARED_BUCKETS_TAB.columns)
       } else {
         setTeamDetailTableTitle(TEAM_USERS_TAB.title)
-        setTeamDetailTableHeaderColumns(TEAM_USERS_TAB.columns)
+        if (isTeamManager()) {
+          setTeamDetailTableHeaderColumns([
+            ...TEAM_USERS_TAB.columns,
+            {
+              id: 'editUser',
+              label: '',
+              unsortable: true,
+              align: 'center',
+            },
+          ])
+        } else {
+          setTeamDetailTableHeaderColumns(TEAM_USERS_TAB.columns)
+        }
       }
       setTeamDetailTableData(prepTeamData(teamDetailData))
     }
@@ -656,7 +681,6 @@ const TeamDetail = () => {
     }
   }
 
-  const teamManager = teamDetailData ? (teamDetailData?.team as Team).managers : []
   return (
     <>
       {renderAddUserSidebarModal()}
@@ -671,9 +695,7 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          teamManager?.some((manager) => manager.principal_name === tokenData?.email) ? (
-            <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button>
-          ) : undefined
+          isTeamManager() ? <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button> : undefined
         }
       />
     </>
