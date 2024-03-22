@@ -34,7 +34,7 @@ export interface User {
   groups?: Group[]
 }
 
-interface Group {
+export interface Group {
   uniform_name: string
   display_name: string
 }
@@ -61,6 +61,8 @@ export interface JobResponse {
   status: string
   detail?: string
 }
+
+type Method = 'POST' | 'DELETE' // POST = ADD, DELETE = REMOVE
 
 export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> => {
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
@@ -196,7 +198,9 @@ export const getTeamDetail = async (teamId: string): Promise<TeamDetailData> => 
 
 export const addUserToGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
   try {
-    const jobResponses = await Promise.all(groupIds.map((groupId) => addUserToGroup(groupId, userPrincipalName)))
+    const jobResponses = await Promise.all(
+      groupIds.map((groupId) => updateGroupMembership(groupId, userPrincipalName, 'POST'))
+    )
     return jobResponses
   } catch (error) {
     if (error instanceof ApiError) {
@@ -210,18 +214,50 @@ export const addUserToGroups = async (groupIds: string[], userPrincipalName: str
   }
 }
 
-const addUserToGroup = async (groupId: string, userPrincipalName: string): Promise<JobResponse> => {
-  const groupsUrl = `${GROUPS_URL}/${groupId}/users`
+export const removeUserFromGroups = async (groupIds: string[], userPrincipalName: string): Promise<JobResponse[]> => {
   try {
-    const response = await fetch(groupsUrl, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        users: [userPrincipalName],
-      }),
-    })
+    const jobResponses = await Promise.all(
+      groupIds.map((groupId) => updateGroupMembership(groupId, userPrincipalName, 'DELETE'))
+    )
+    return jobResponses
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to remove user from groups: ', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to remove user from groups: ', apiError)
+      throw apiError
+    }
+  }
+}
+
+const updateGroupMembership = async (
+  groupId: string,
+  userPrincipalName: string,
+  method: Method
+): Promise<JobResponse> => {
+  let groupsUrl = `${GROUPS_URL}/${groupId}/users`
+  const fetchOptions: RequestInit = {
+    method: method,
+    headers: {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      users: [userPrincipalName],
+    }),
+  }
+
+  // TODO: Remove me once DELETE with proxy is fixed
+  if (method === 'DELETE') {
+    groupsUrl = `/localApi/groups/${groupId}/${userPrincipalName}`
+    // Don't include body in fetch options for DELETE method
+    delete fetchOptions.body
+  }
+
+  try {
+    const response = await fetch(groupsUrl, fetchOptions)
 
     if (!response.ok) {
       const errorMessage = (await response.text()) || 'An error occurred'
@@ -230,16 +266,16 @@ const addUserToGroup = async (groupId: string, userPrincipalName: string): Promi
     }
 
     const responseJson = await response.json()
-    const flattendResponse = { ...responseJson._embedded.results[0] }
+    const flattenedResponse = { ...responseJson._embedded.results[0] }
 
-    return flattendResponse
+    return flattenedResponse
   } catch (error) {
     if (error instanceof ApiError) {
-      console.error('Failed to add user to group: ', error)
+      console.error('Failed to update group membership: ', error)
       throw error
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred')
-      console.error('Failed to add user to group: ', apiError)
+      console.error('Failed to update group membership: ', apiError)
       throw apiError
     }
   }
