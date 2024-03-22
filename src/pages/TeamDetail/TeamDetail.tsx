@@ -578,19 +578,21 @@ const TeamDetail = () => {
   }
 
   const renderSidebarModalWarning = (errorList: string[]) => {
-    return (
-      <Dialog type='warning'>
-        {typeof errorList === 'string' ? (
-          errorList
-        ) : (
-          <ul>
-            {errorList.map((errors) => (
-              <li>{errors}</li>
-            ))}
-          </ul>
-        )}
-      </Dialog>
-    )
+    if (errorList.length) {
+      return (
+        <Dialog type='warning'>
+          {typeof errorList === 'string' ? (
+            errorList
+          ) : (
+            <ul>
+              {errorList.map((errors) => (
+                <li>{errors}</li>
+              ))}
+            </ul>
+          )}
+        </Dialog>
+      )
+    }
   }
 
   const teamModalHeader = teamDetailData
