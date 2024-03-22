@@ -104,9 +104,6 @@ const defaultSelectedGroup = {
   title: 'Velg ...',
 }
 
-/* TODO: States that we want to keep the history of when editing user
- * Selected group */
-
 const TeamDetail = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(TEAM_USERS_TAB)
   const [tokenData, setTokenData] = useState<TokenData>()
@@ -211,6 +208,10 @@ const TeamDetail = () => {
                       name: formatDisplayName(display_name),
                       email: principal_name,
                       groups: userGroups,
+                    })
+                    setSelectedGroupEditUser({
+                      ...defaultSelectedGroup,
+                      key: `${defaultEditUserKey}-${principal_name}`,
                     })
                     setUserGroupTags(
                       userGroups.map(({ uniform_name }) => {
