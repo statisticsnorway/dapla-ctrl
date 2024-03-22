@@ -43,10 +43,11 @@ const SharedBucketDetail = () => {
       }
     } = {}
 
-    ;(response['sharedBucket'] as SharedBucket).groups.forEach(({ uniform_name, users }) => {
+    ;((response['sharedBucket'] as SharedBucket).groups ?? []).forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
-        if (!usersMap[user.principal_name]) {
-          usersMap[user.principal_name] = {
+        const key = `${user.principal_name}-${stripSuffixes(uniform_name)}`
+        if (!usersMap[key]) {
+          usersMap[key] = {
             id: formatDisplayName(user.display_name),
             navn: (
               <FormattedTableColumn
@@ -66,7 +67,7 @@ const SharedBucketDetail = () => {
             ),
           }
         } else {
-          usersMap[user.principal_name].gruppe.push(getGroupType(uniform_name))
+          usersMap[key].gruppe.push(getGroupType(uniform_name))
         }
       })
     })
