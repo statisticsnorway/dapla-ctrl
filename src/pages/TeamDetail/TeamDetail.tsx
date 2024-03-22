@@ -47,8 +47,8 @@ interface UserInfo {
   groups?: Group[]
 }
 
-interface EditUserLoading {
-  [key: string]: boolean
+interface EditUserStates {
+  [key: string]: boolean | Array<string>
 }
 
 const TEAM_USERS_TAB = {
@@ -105,8 +105,6 @@ const defaultSelectedGroup = {
 }
 
 /* TODO: States that we want to keep the history of when editing user
- * Loading
- * Error
  * Selected group */
 
 const TeamDetail = () => {
@@ -149,8 +147,8 @@ const TeamDetail = () => {
     key: defaultEditUserKey,
   })
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
-  const [editUserErrors, setEditUserErrors] = useState<Array<string>>([])
-  const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserLoading>({})
+  const [editUserErrors, setEditUserErrors] = useState<EditUserStates>({})
+  const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserStates>({})
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -456,6 +454,11 @@ const TeamDetail = () => {
     }
   }
 
+  const resetEditUserValues = () => {
+    setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: [] })
+    setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: true })
+  }
+
   const handleEditUserOnSubmit = () => {
     const addedGroups =
       userGroupTags?.filter((groupTag) => !editUserInfo.groups?.some((group) => groupTag.id === group.uniform_name)) ??
@@ -465,9 +468,9 @@ const TeamDetail = () => {
       []
 
     if ((addedGroups.length && removedGroups.length) || addedGroups.length || removedGroups.length) {
-      setEditUserErrors([])
-      setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: true })
+      resetEditUserValues()
     }
+
     if (addedGroups.length && removedGroups.length) {
       Promise.all([
         addUserToGroups(
@@ -483,15 +486,16 @@ const TeamDetail = () => {
           const flattenedResponse = [...response[0], ...response[1]]
           const errorsList = getErrorList(flattenedResponse)
           if (errorsList.length) {
-            setEditUserErrors(errorsList)
+            setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: errorsList })
           } else {
             setOpenEditUserSidebarModal(false)
             // Reset fields with their respective keys; re-initializes component
             setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
           }
         })
-        .catch((e) => setEditUserErrors(e.message))
+        .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
         .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+
       return
     }
 
@@ -503,15 +507,16 @@ const TeamDetail = () => {
         .then((response) => {
           const errorsList = getErrorList(response)
           if (errorsList.length) {
-            setEditUserErrors(errorsList)
+            setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: errorsList })
           } else {
             setOpenEditUserSidebarModal(false)
             // Reset fields with their respective keys; re-initializes component
             setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
           }
         })
-        .catch((e) => setEditUserErrors(e.message))
+        .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
         .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+
       return
     }
 
@@ -523,23 +528,24 @@ const TeamDetail = () => {
         .then((response) => {
           const errorsList = getErrorList(response)
           if (errorsList.length) {
-            setEditUserErrors(errorsList)
+            setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: errorsList })
           } else {
             setOpenEditUserSidebarModal(false)
             // Reset fields with their respective keys; re-initializes component
             setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
           }
         })
-        .catch((e) => setEditUserErrors(e.message))
+        .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
         .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+
       return
     }
   }
 
   const handleDeleteUser = () => {
     if (editUserInfo.groups && editUserInfo.groups.length) {
-      setEditUserErrors([])
-      setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: true })
+      resetEditUserValues()
+
       removeUserFromGroups(
         editUserInfo.groups.map(({ uniform_name }) => uniform_name),
         editUserInfo.email as string
@@ -547,15 +553,16 @@ const TeamDetail = () => {
         .then((response) => {
           const errorsList = getErrorList(response)
           if (errorsList.length) {
-            setEditUserErrors(errorsList)
+            setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: errorsList })
           } else {
             setOpenEditUserSidebarModal(false)
             // Reset fields with their respective keys; re-initializes component
             setSelectedGroupEditUser({ ...defaultSelectedGroup, key: defaultEditUserKey })
           }
         })
-        .catch((e) => setEditUserErrors(e.message))
+        .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
         .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+
       return
     }
   }
@@ -717,8 +724,9 @@ const TeamDetail = () => {
                   </DeleteLink>
                   {renderSidebarModalInfo(
                     <>
-                      {editUserErrors.length ? renderSidebarModalWarning(editUserErrors) : null}
-                      {/* {showEditUserSpinner && <CircularProgress />} */}
+                      {editUserErrors?.[editUserInfo.email as string]
+                        ? renderSidebarModalWarning(editUserErrors?.[editUserInfo.email as string] as string[])
+                        : null}
                       {showEditUserSpinner?.[editUserInfo.email as string] && <CircularProgress />}
                     </>
                   )}
