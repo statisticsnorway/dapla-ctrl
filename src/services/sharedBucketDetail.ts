@@ -10,13 +10,24 @@ export interface SharedBucketDetail {
 export interface SharedBucket {
   short_name: string
   bucket_name: string
-  teams: Team[]
+  groups: Group[]
 }
 
 export interface Team {
   uniform_name: string
   display_name?: string
   section_name: string
+}
+
+export interface User {
+  display_name: string
+  principal_name: string
+  section_name: string
+}
+
+export interface Group {
+  uniform_name: string
+  users?: User[]
 }
 
 const fetchTeamDetail = async (teamId: string): Promise<Team> => {
@@ -48,8 +59,13 @@ const fetchTeamDetail = async (teamId: string): Promise<Team> => {
 export const fetchSharedBucketDetailData = async (teamId: string, shortName: string): Promise<SharedBucket> => {
   const sharedBucketUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets/${shortName}`, window.location.origin)
 
-  const embeds = ['teams']
-  const selects = ['teams.uniform_name', 'teams.display_name', 'teams.section_name']
+  const embeds = ['groups', 'groups.users']
+  const selects = [
+    'groups.uniform_name',
+    'groups.users.principal_name',
+    'groups.users.display_name',
+    'groups.users.section_name',
+  ]
 
   sharedBucketUrl.searchParams.set('embed', embeds.join(','))
   sharedBucketUrl.searchParams.set('selects', selects.join(','))

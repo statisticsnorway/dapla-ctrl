@@ -17,7 +17,8 @@ import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
 import { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import { Dialog, LeadParagraph, Text } from '@statisticsnorway/ssb-component-library'
+import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
+import { formatDisplayName, getGroupType, stripSuffixes } from '../../utils/utils'
 
 const SharedBucketDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName, setBreadcrumbBucketDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -30,12 +31,49 @@ const SharedBucketDetail = () => {
   const { shortName } = useParams<{ shortName: string }>()
 
   const prepSharedBucketTableData = (response: SharedBucketDetailType): TableData['data'] => {
-    return (response['sharedBucket'] as SharedBucket).teams.map(({ display_name, uniform_name, section_name }) => {
-      return {
-        id: display_name ?? '',
-        team: <FormattedTableColumn href={`/${uniform_name}`} linkText={display_name} text={section_name} />,
+    const usersMap: {
+      [principalName: string]: {
+        id: string
+        navn: JSX.Element
+        seksjon: string
+        principal_name: string
+        gruppe: string[]
+        team: JSX.Element
+        team_navn: string
       }
+    } = {}
+
+    ;(response['sharedBucket'] as SharedBucket).groups.forEach(({ uniform_name, users }) => {
+      ;(users ?? []).forEach((user) => {
+        if (!usersMap[user.principal_name]) {
+          usersMap[user.principal_name] = {
+            id: formatDisplayName(user.display_name),
+            navn: (
+              <FormattedTableColumn
+                href={`/teammedlemmer/${user.principal_name}`}
+                linkText={formatDisplayName(user.display_name)}
+                text={user.section_name}
+              />
+            ),
+            seksjon: user.section_name,
+            principal_name: user.principal_name,
+            team_navn: stripSuffixes(uniform_name),
+            gruppe: [getGroupType(uniform_name)],
+            team: (
+              <span>
+                <Link href={`/${stripSuffixes(uniform_name)}`}>{stripSuffixes(uniform_name)}</Link>
+              </span>
+            ),
+          }
+        } else {
+          usersMap[user.principal_name].gruppe.push(getGroupType(uniform_name))
+        }
+      })
     })
+    return Object.values(usersMap).map((user) => ({
+      ...user,
+      gruppe: user.gruppe.join(', '),
+    }))
   }
 
   useEffect(() => {
@@ -72,8 +110,16 @@ const SharedBucketDetail = () => {
     if (sharedBucketData) {
       const sharedBucketsTableHeaderColumns = [
         {
+          id: 'navn',
+          label: 'Navn',
+        },
+        {
           id: 'team',
           label: 'Team',
+        },
+        {
+          id: 'gruppe',
+          label: 'Gruppe',
         },
       ]
 

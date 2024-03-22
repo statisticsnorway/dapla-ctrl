@@ -22,6 +22,14 @@ export const getGroupType = (groupName: string) => {
   }
 }
 
+export const stripSuffixes = (inputString: string) => {
+  // Regular expression to match the specified suffixes
+  const suffixesPattern = /-(data-admins|managers|developers|consumers|support)$/
+
+  // Replace matched suffix with an empty string
+  return inputString.replace(suffixesPattern, '')
+}
+
 export const formatDisplayName = (displayName: string) => {
   return displayName.split(', ').reverse().join(' ')
 }
