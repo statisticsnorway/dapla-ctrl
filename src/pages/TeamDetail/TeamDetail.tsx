@@ -205,10 +205,10 @@ const TeamDetail = () => {
     [activeTab]
   )
 
-  const isTeamManager = () => {
+  const isTeamManager = useCallback(() => {
     const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
     return teamManagers?.some((manager) => manager.principal_name === tokenData?.email)
-  }
+  }, [tokenData, teamDetailData])
 
   useEffect(() => {
     if (!teamId) return
@@ -242,7 +242,7 @@ const TeamDetail = () => {
         },
       ])
     }
-  }, [tokenData, teamDetailData])
+  }, [isTeamManager])
 
   useEffect(() => {
     if (teamDetailData) {
