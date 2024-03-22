@@ -29,7 +29,6 @@ import {
   Divider,
   Tabs,
   Button,
-  Input,
   Dropdown,
   Tag,
   Link,
@@ -40,6 +39,7 @@ import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
+import { fetchUserSearchData, User } from '../../services/teamMembers'
 
 interface UserInfo {
   name?: string
@@ -83,11 +83,14 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
-const defaultEmail = {
-  key: 'add-user-email',
+const defaultSelectedUserDropdown = {
+  key: 'add-selected-user',
   error: false,
-  errorMessage: `Ugyldig epost`,
-  value: '',
+  errorMessage: `Ugyldig navn`,
+}
+const defaultSelectedUser = {
+  id: 'search',
+  title: 'Søk ...',
 }
 
 const defaultAddUserKey = 'add-user-selected-group'
@@ -104,7 +107,9 @@ const TeamDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
+  const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
+  const [userData, setUserData] = useState<User[]>()
   const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
   const [teamDetailTableHeaderColumns, setTeamDetailTableHeaderColumns] = useState<TableData['columns']>(
     TEAM_USERS_TAB.columns
@@ -113,7 +118,8 @@ const TeamDetail = () => {
 
   // Add users to team
   const [openAddUserSidebarModal, setOpenAddUserSidebarModal] = useState<boolean>(false)
-  const [email, setEmail] = useState(defaultEmail)
+  const [selectedUserDropdown, setSelectedUserDropdown] = useState(defaultSelectedUserDropdown)
+  const [selectedUser, setSelectedUser] = useState(defaultSelectedUser)
   const [selectedGroupAddUser, setSelectedGroupAddUser] = useState({
     ...defaultSelectedGroup,
     key: defaultAddUserKey,
@@ -281,6 +287,31 @@ const TeamDetail = () => {
     }
   }, [prepTeamData])
 
+  const getUsersAutoCompleteData = () => {
+    if (userData) return
+    setLoadingUsers(true)
+    fetchUserSearchData()
+      .then((users) => {
+        const filteredUsers = users.filter(
+          (allUsers) =>
+            !(teamDetailData?.team as Team).users?.some(
+              (teamUsers) => allUsers.principal_name === teamUsers.principal_name
+            )
+        )
+        setUserData(filteredUsers)
+      })
+      .catch((error) => {
+        setError(error as ApiError)
+      })
+      .finally(() => setLoadingUsers(false))
+  }
+
+  useEffect(() => {
+    if (openAddUserSidebarModal) {
+      getUsersAutoCompleteData()
+    }
+  }, [openAddUserSidebarModal])
+
   const handleTabClick = (tab: string) => setActiveTab(tab)
 
   const renderErrorAlert = () => {
@@ -328,6 +359,11 @@ const TeamDetail = () => {
         </>
       )
     }
+  }
+
+  const handleAddUser = (item: DropdownItems) => {
+    setSelectedUserDropdown({ ...selectedUserDropdown, key: `${defaultSelectedUserDropdown.key}-${item.id}` })
+    setSelectedUser(item)
   }
 
   const removeDuplicateDropdownItems = (items: DropdownItems[]) => {
@@ -379,20 +415,20 @@ const TeamDetail = () => {
   }
 
   const handleAddUserOnSubmit = () => {
-    if (email.value === '') setEmail({ ...email, error: true })
+    const isSelectedUserValid = selectedUser.id !== 'search'
+    if (!isSelectedUserValid) setSelectedUserDropdown({ ...selectedUserDropdown, error: true })
     if (!teamGroupTags.length)
       setTeamGroupTagsError({
         ...teamGroupTagsError,
         error: true,
       })
 
-    if (email.value !== '' && teamGroupTags.length) {
-      setEmail({ ...email, key: `add-user-${email.value}` })
+    if (isSelectedUserValid && teamGroupTags.length) {
       setAddUserToTeamErrors([])
       setShowAddUserSpinner(true)
       addUserToGroups(
         teamGroupTags.map((group) => group.id),
-        email.value
+        selectedUser.id
       )
         .then((response) => {
           const errorsList = getErrorList(response)
@@ -402,7 +438,7 @@ const TeamDetail = () => {
             setOpenAddUserSidebarModal(false)
             setTeamGroupTags([])
             // Reset fields with their respective keys; re-initializes component
-            setEmail({ ...defaultEmail })
+            setSelectedUserDropdown({ ...defaultSelectedUserDropdown })
             setSelectedGroupAddUser({ ...defaultSelectedGroup, key: defaultAddUserKey })
           }
         })
@@ -540,13 +576,6 @@ const TeamDetail = () => {
     )
   }
 
-  const isUserInputValid = (value?: string) => {
-    const regEx = /^[\w-]+@ssb\.no$/
-    const userVal = value || email.value
-    const testUser = userVal.match(regEx)
-    return !!testUser
-  }
-
   const teamModalHeader = teamDetailData
     ? {
         modalType: 'Medlem',
@@ -572,27 +601,28 @@ const TeamDetail = () => {
             modalBodyTitle: 'Legg person til teamet',
             modalBody: (
               <>
-                <Input
-                  key={email.key}
-                  className={styles.inputSpacing}
-                  label='Kort epost'
-                  value={email.value}
-                  error={email.error}
-                  errorMessage={email.errorMessage}
-                  onBlur={() =>
-                    setEmail({
-                      ...email,
-                      error: !isUserInputValid(),
-                    })
-                  }
-                  handleChange={(value: string) =>
-                    setEmail({
-                      ...email,
-                      value,
-                      error: email.error ? !isUserInputValid(value) : false,
-                    })
-                  }
-                />
+                {!loadingUsers ? (
+                  <Dropdown
+                    key={selectedUserDropdown.key}
+                    className={styles.inputSpacing}
+                    header='Navn'
+                    selectedItem={selectedUser}
+                    items={userData?.map(({ principal_name, display_name }) => {
+                      return {
+                        id: principal_name,
+                        title: formatDisplayName(display_name),
+                      }
+                    })}
+                    onSelect={(item: DropdownItems) => handleAddUser(item)}
+                    error={selectedUserDropdown.error}
+                    errorMessage={selectedUserDropdown.errorMessage}
+                    searchable
+                  />
+                ) : (
+                  <div className={styles.inputSpacing}>
+                    <Skeleton variant='rectangular' animation='wave' height={65} />
+                  </div>
+                )}
                 <Dropdown
                   key={selectedGroupAddUser.key}
                   className={styles.dropdownSpacing}

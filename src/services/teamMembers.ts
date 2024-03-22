@@ -7,7 +7,7 @@ export interface TeamMembersData {
   [key: string]: UsersData // myUsers, allUsers
 }
 
-interface UsersData {
+export interface UsersData {
   users: User[]
 }
 
@@ -167,6 +167,41 @@ export const fetchAllTeamMembersData = async (principalName: string): Promise<Te
     } else {
       const apiError = new ApiError(500, 'An unexpected error occurred while fetching team members data')
       console.error('Failed to fetch team members data:', apiError)
+      throw apiError
+    }
+  }
+}
+
+export const fetchUserSearchData = async (): Promise<User[]> => {
+  const usersUrl = new URL(`${USERS_URL}`, window.location.origin)
+  const selects = ['display_name', 'principal_name', 'section_name']
+
+  usersUrl.searchParams.append('select', selects.join(','))
+
+  try {
+    const allUsersData = await fetchAPIData(usersUrl.toString())
+
+    if (!allUsersData) throw new ApiError(500, 'No json data returned')
+    if (!allUsersData._embedded || !allUsersData._embedded.users) throw new ApiError(500, 'Did not receive users data')
+
+    const prepData = allUsersData._embedded.users.map((user: User) => {
+      const prepUserData = {
+        ...user,
+        ...user._embedded,
+      }
+      delete prepUserData._embedded
+      return prepUserData
+    })
+    delete prepData._embedded
+
+    return prepData
+  } catch (error) {
+    if (error instanceof ApiError) {
+      console.error('Failed to fetch user search data:', error)
+      throw error
+    } else {
+      const apiError = new ApiError(500, 'An unexpected error occurred')
+      console.error('Failed to fetch user search data:', apiError)
       throw apiError
     }
   }
