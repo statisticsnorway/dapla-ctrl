@@ -627,7 +627,7 @@ const TeamDetail = () => {
                     items={userData?.map(({ principal_name, display_name }) => {
                       return {
                         id: principal_name,
-                        title: formatDisplayName(display_name),
+                        title: `${formatDisplayName(display_name)} (${principal_name})`,
                       }
                     })}
                     onSelect={(item: DropdownItems) => handleAddUser(item)}
