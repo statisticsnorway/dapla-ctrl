@@ -32,24 +32,3 @@
     gap: .5rem;
     margin-bottom: 2.5rem;
 }
-
-.removeUserWrapper {
-    display: inline-flex;
-    align-items: center;
-    color: variables.$ssb-red-3;
-    padding: .5rem;
-    line-height: 1.7;
-    cursor: pointer;
-
-    svg {
-        margin-right: .5rem;
-    }
-    
-    span {
-        border-bottom: 1px solid;
-    }
-
-    &:focus {
-        @include variables.focus-marker;
-    }
-}

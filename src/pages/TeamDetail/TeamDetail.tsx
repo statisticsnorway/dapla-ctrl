@@ -36,9 +36,10 @@ import {
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
-import { XCircle, Trash2 } from 'react-feather'
+import { XCircle } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
+import DeleteLink from '../../components/DeleteLink/DeleteLink'
 
 interface UserInfo {
   name?: string
@@ -661,11 +662,9 @@ const TeamDetail = () => {
                     ))}
                 </div>
                 <div className={styles.modalBodyDialog}>
-                  {/* TODO: Should be its own component */}
-                  <a className={styles.removeUserWrapper} tabIndex={0} onClick={handleDeleteUser}>
-                    <Trash2 size={22} />
-                    <span>Fjern fra teamet</span>
-                  </a>
+                  <DeleteLink handleDeleteUser={handleDeleteUser} icon>
+                    Fjern fra teamet
+                  </DeleteLink>
                   {renderSidebarModalInfo(
                     <>
                       {editUserErrors.length ? renderSidebarModalWarning(editUserErrors) : null}
