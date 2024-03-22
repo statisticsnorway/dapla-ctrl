@@ -653,7 +653,7 @@ const TeamDetail = () => {
                   key={selectedGroupEditUser.key}
                   className={styles.dropdownSpacing}
                   header='Tilgangsgrupper(r)'
-                  selectedItem={defaultSelectedGroup}
+                  selectedItem={selectedGroupEditUser}
                   items={teamGroups.map(({ uniform_name }) => ({
                     id: uniform_name,
                     title: getGroupType(uniform_name),
