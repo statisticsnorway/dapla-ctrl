@@ -43,7 +43,7 @@ const SharedBucketDetail = () => {
       }
     } = {}
 
-    ;(response['sharedBucket'] as SharedBucket).groups.forEach(({ uniform_name, users }) => {
+    ;((response['sharedBucket'] as SharedBucket).groups ?? []).forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
         const key = `${user.principal_name}-${stripSuffixes(uniform_name)}`
         if (!usersMap[key]) {
