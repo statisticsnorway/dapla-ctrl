@@ -33,6 +33,7 @@ const conditionalStyling = (index: number) => {
 
 const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater</p>
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type MixedElement = string | number | React.ReactElement<any>
 
 const extractStringValue = (child: MixedElement): string | number => {
