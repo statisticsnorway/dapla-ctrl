@@ -1,6 +1,6 @@
 import styles from './table.module.scss'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 import { ArrowUp, ArrowDown } from 'react-feather'
@@ -32,6 +32,22 @@ const conditionalStyling = (index: number) => {
 }
 
 const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater</p>
+
+type MixedElement = string | number | React.ReactElement<any>
+
+const extractStringValue = (child: MixedElement): string => {
+  if (typeof child === 'string' || typeof child === 'number') {
+    return child.toString()
+  } else if (React.isValidElement(child)) {
+    const props = child.props as { children?: MixedElement; linkText?: MixedElement }
+    if (props.children) {
+      return extractStringValue(props.children)
+    } else if (props.linkText) {
+      return extractStringValue(props.linkText)
+    }
+  }
+  return ''
+}
 
 const TableMobileView = ({ columns, data }: TableData) => (
   <div className={styles.tableContainerMobile}>
@@ -71,8 +87,8 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
   const sortTableData = (id: string) => {
     data.sort((a, b) => {
       // Sort by id for the first column;
-      const valueA = typeof a[id] === 'object' ? a['id'] : a[id]
-      const valueB = typeof b[id] === 'object' ? b['id'] : b[id]
+      const valueA = extractStringValue(a[id] as MixedElement)
+      const valueB = extractStringValue(b[id] as MixedElement)
 
       // Sort by number
       if (typeof valueA === 'number' && typeof valueB === 'number')
