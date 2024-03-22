@@ -35,9 +35,11 @@ const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater<
 
 type MixedElement = string | number | React.ReactElement<any>
 
-const extractStringValue = (child: MixedElement): string => {
-  if (typeof child === 'string' || typeof child === 'number') {
-    return child.toString()
+const extractStringValue = (child: MixedElement): string | number => {
+  if (typeof child === 'string') {
+    return child
+  } else if (typeof child === 'number') {
+    return child
   } else if (React.isValidElement(child)) {
     const props = child.props as { children?: MixedElement; linkText?: MixedElement }
     if (props.children) {
