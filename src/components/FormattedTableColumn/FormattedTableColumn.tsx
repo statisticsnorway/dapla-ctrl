@@ -1,6 +1,6 @@
 import styles from './formattedtablecolumn.module.scss'
 
-import { Text, Link } from '@statisticsnorway/ssb-component-library'
+import { Link } from '@statisticsnorway/ssb-component-library'
 
 interface FormattedTableColumnProps {
   href?: string
@@ -22,7 +22,7 @@ const FormattedTableColumn = (props: FormattedTableColumnProps) => {
       </span>
       {text && (
         <span className={styles.text_wrapper}>
-          <Text>{text}</Text>
+          {text}
         </span>
       )}
     </>
