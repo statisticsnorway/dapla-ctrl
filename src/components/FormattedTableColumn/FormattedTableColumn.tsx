@@ -13,14 +13,14 @@ const FormattedTableColumn = (props: FormattedTableColumnProps) => {
 
   return (
     <>
-      <span className={styles.link_text_wrapper}>
+      <span className={styles.linkTextWrapper}>
         {href && linkText && (
           <Link href={href}>
             <b>{linkText}</b>
           </Link>
         )}
       </span>
-      {text && <span className={styles.text_wrapper}>{text}</span>}
+      {text && <span className={styles.textWrapper}>{text}</span>}
     </>
   )
 }
