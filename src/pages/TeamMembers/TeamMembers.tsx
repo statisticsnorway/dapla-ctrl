@@ -46,7 +46,7 @@ const TeamMembers = () => {
           ),
           team: teams.length,
           epost: principal_name,
-          data_admins: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
+          data_admin: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
           seksjon: section_name, // Makes section name searchable and sortable in table by including the field
           seksjonsleder: formatDisplayName(
             section_manager && section_manager.length > 0
@@ -113,8 +113,8 @@ const TeamMembers = () => {
           label: 'Team',
         },
         {
-          id: 'data_admins',
-          label: 'Som data-admin',
+          id: 'data_admin',
+          label: 'Data-admin roller',
         },
         {
           id: 'seksjonsleder',
