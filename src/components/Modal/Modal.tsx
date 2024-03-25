@@ -6,7 +6,7 @@ import { Title, Divider } from '@statisticsnorway/ssb-component-library'
 interface Modal {
   open: boolean
   onClose: CallableFunction
-  modalTitle?: string
+  modalTitle?: string | JSX.Element
   body?: JSX.Element
   footer?: JSX.Element
 }
@@ -14,17 +14,17 @@ interface Modal {
 const Modal = ({ open, onClose, modalTitle, body, footer }: Modal) => {
   return (
     <MUIModal open={open} onClose={() => onClose()}>
-      <div className={styles.deleteConfirmationModalContainer}>
+      <div className={styles.modalContainer}>
         {modalTitle && (
-          <div className={styles.deleteConfirmationModalHeader}>
+          <div className={styles.modalHeader}>
             <Title size={2}>{modalTitle}</Title>
           </div>
         )}
-        {body && <div className={styles.deleteConfirmationModalBody}>{body}</div>}
+        {body && <div className={styles.modalBody}>{body}</div>}
         {footer && (
           <>
             <Divider light />
-            <div className={styles.deleteConfirmationModalFooter}>{footer}</div>
+            <div className={styles.modalFooter}>{footer}</div>
           </>
         )}
       </div>

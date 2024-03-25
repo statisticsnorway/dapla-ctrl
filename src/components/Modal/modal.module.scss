@@ -1,6 +1,6 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
-.deleteConfirmationModalContainer {
+.modalContainer {
     position: absolute;
     top: 40vh;
     left: 41vw;
@@ -10,22 +10,26 @@
     width: 20vw;
     background-color: variables.$ssb-white;
 
-    .deleteConfirmationModalHeader, .deleteConfirmationModalFooter {
+    .modalHeader, .modalFooter {
         margin: 1rem 2rem;
     }
 
-    .deleteConfirmationModalHeader {
+    .modalHeader {
         h2 {
             margin: 0;
         }
+
+        svg {
+            margin-right: .75rem;
+        }
     }
 
-    .deleteConfirmationModalBody {
+    .modalBody {
         background-color: variables.$ssb-green-1;
         padding: 2rem;        
     }
 
-    .deleteConfirmationModalFooter {
+    .modalFooter {
         display: inline-flex;
         align-items: center;
         justify-content: space-between;

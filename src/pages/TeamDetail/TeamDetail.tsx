@@ -35,7 +35,7 @@ import {
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
-import { XCircle } from 'react-feather'
+import { XCircle, Trash2 } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
@@ -749,7 +749,12 @@ const TeamDetail = () => {
       <Modal
         open={openDeleteUserConfirmation}
         onClose={() => setOpenDeleteUserConfirmation(false)}
-        modalTitle='Fjern fra teamet'
+        modalTitle={
+          <>
+            <Trash2 size={24} />
+            Fjern fra teamet
+          </>
+        }
         body={
           <>{`Fjern "${editUserInfo.name}" fra ${teamDetailData ? (teamDetailData?.team as Team).display_name : ''}?`}</>
         }

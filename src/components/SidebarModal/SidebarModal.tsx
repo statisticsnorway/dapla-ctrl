@@ -1,4 +1,4 @@
-import styles from './sidebar.module.scss'
+import styles from './sidebarmodal.module.scss'
 
 import { useRef, useEffect } from 'react'
 import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
@@ -77,7 +77,7 @@ const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => 
   }, [])
 
   return (
-    <div className={`${styles.container} ${open ? styles.open : ''}`} ref={sidebarModalRef}>
+    <div className={`${styles.modalContainer} ${open ? styles.open : ''}`} ref={sidebarModalRef}>
       <div>
         <button className={styles.closeButton} onClick={onClose}>
           <X className={styles.xIcon} size={32} />
