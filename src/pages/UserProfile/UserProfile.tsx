@@ -37,6 +37,8 @@ const UserProfile = () => {
               ?.filter(
                 (group) =>
                   group.users.some((user) => user.principal_name === principalName) &&
+                  // making sure uniform name of the group and uniform name of the team are same
+                  // this is to combat this issue: https://github.com/statisticsnorway/dapla-team-api-redux/issues/63
                   stripSuffixes(group.uniform_name) === uniform_name
               ) // Filter groups based on principalName presence
               .map((group) => getGroupType(group.uniform_name))
