@@ -85,8 +85,8 @@ const fetchAllTeams = async (): Promise<TeamsData> => {
             }))
           : [
               {
-                display_name: 'Mangler ansvarlig',
-                principal_name: 'ManglerAnsvarlig@ssb.no',
+                display_name: 'Mangler managers',
+                principal_name: 'ManglerManagers@ssb.no',
               },
             ]
 
@@ -150,8 +150,8 @@ const fetchTeamsForPrincipalName = async (principalName: string): Promise<TeamsD
             }))
           : [
               {
-                display_name: 'Mangler ansvarlig',
-                principal_name: 'ManglerAnsvarlig@ssb.no',
+                display_name: 'Mangler manager',
+                principal_name: 'ManglerManagers@ssb.no',
               },
             ]
 

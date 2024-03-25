@@ -4,6 +4,7 @@ import express from 'express'
 import { getReasonPhrase } from 'http-status-codes'
 import proxy from 'express-http-proxy'
 import dotenv from 'dotenv'
+import cache from 'memory-cache'
 
 if (!process.env.DAPLA_TEAM_API_URL) {
   dotenv.config({ path: './.env.local' })
@@ -58,6 +59,43 @@ app.get('/localApi/photo/:principalName', async (req, res, next) => {
     return res.send({ photo: photoData })
   } catch (error) {
     next(error)
+  }
+})
+
+app.get('/localApi/users', async (req, res) => {
+  const cacheKey = 'usersForSearch'
+  const cachedData = cache.get(cacheKey)
+
+  const token = req.headers.authorization
+  const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
+  const selects = ['display_name', 'principal_name', 'section_name']
+
+  usersUrl.searchParams.append('select', selects.join(','))
+  if (cachedData) {
+    res.json(cachedData)
+  } else {
+    try {
+      const response = await fetch(usersUrl.toString(), {
+        method: 'GET',
+        headers: {
+          Accept: '*/*',
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+      })
+
+      if (!response.ok) {
+        const err = await response.text()
+        res.status(response.status).send(err)
+      } else {
+        const data = await response.json()
+        cache.put(cacheKey, data, 3600000)
+        res.status(response.status).send(data)
+      }
+    } catch (error) {
+      console.log(error)
+      res.status(500).send('Internal Server Error')
+    }
   }
 })
 

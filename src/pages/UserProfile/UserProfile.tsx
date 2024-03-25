@@ -9,14 +9,14 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
-import { getGroupType, formatDisplayName } from '../../utils/utils'
+import { getGroupType, formatDisplayName, stripSuffixes } from '../../utils/utils'
 
 import { getUserProfileTeamData, TeamsData } from '../../services/userProfile'
 
 import { useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
 import { ApiError } from '../../utils/services'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 
 const UserProfile = () => {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
@@ -34,11 +34,17 @@ const UserProfile = () => {
         navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
         gruppe: principalName
           ? groups
-              ?.filter((group) => group.users.some((user) => user.principal_name === principalName)) // Filter groups based on principalName presence
+              ?.filter(
+                (group) =>
+                  group.users.some((user) => user.principal_name === principalName) &&
+                  // making sure uniform name of the group and uniform name of the team are same
+                  // this is to combat this issue: https://github.com/statisticsnorway/dapla-team-api-redux/issues/63
+                  stripSuffixes(group.uniform_name) === uniform_name
+              ) // Filter groups based on principalName presence
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
           : 'INGEN FUNNET',
-        ansvarlig: managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', '),
+        managers: managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', '),
       }))
     },
     [principalName, userProfileData]
@@ -83,8 +89,8 @@ const UserProfile = () => {
           label: 'Gruppe',
         },
         {
-          id: 'ansvarlig',
-          label: 'Ansvarlig',
+          id: 'managers',
+          label: 'Managers',
         },
       ]
       return (

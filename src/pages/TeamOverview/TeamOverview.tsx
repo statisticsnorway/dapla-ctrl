@@ -10,7 +10,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { fetchTeamOverviewData, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -39,7 +39,7 @@ const TeamOverview = () => {
         seksjon: section_name, // Makes section name searchable and sortable in table by including the field
         navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
         teammedlemmer: users.length,
-        ansvarlig: managers ? managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', ') : '',
+        managers: managers ? managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', ') : '',
       }))
     },
     [activeTab]
@@ -100,8 +100,8 @@ const TeamOverview = () => {
           label: 'Teammedlemmer',
         },
         {
-          id: 'ansvarlig',
-          label: 'Ansvarlig',
+          id: 'managers',
+          label: 'Managers',
         },
       ]
 

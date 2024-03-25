@@ -1,0 +1,19 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.linkTextWrapper {
+    margin-bottom: .75em;
+}
+
+.textWrapper {
+    margin-top: .75em;
+}
+
+@media #{variables.$mobile} {
+    .linkTextWrapper {
+        margin-bottom: 2px;
+    }
+  
+    .textWrapper {
+        margin-top: 2px;
+    }
+}

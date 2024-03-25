@@ -35,8 +35,9 @@ import {
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
+
 import { XCircle, Trash2 } from 'react-feather'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { fetchUserSearchData, User } from '../../services/teamMembers'
@@ -66,7 +67,7 @@ const TEAM_USERS_TAB = {
     },
     {
       id: 'epost',
-      label: 'Epost',
+      label: 'E-post',
     },
   ],
 }
