@@ -1,6 +1,6 @@
 import styles from './table.module.scss'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useMediaQuery } from 'react-responsive'
 import { Title, Dropdown, Input, Text } from '@statisticsnorway/ssb-component-library'
 import { ArrowUp, ArrowDown } from 'react-feather'
@@ -29,7 +29,6 @@ export interface TableData {
 }
 
 const conditionalStyling = (index: number) => {
-  // Add conditional styling for the first element, then third etc
   return (index + 1) % 2 !== 0 ? styles.greenBackground : undefined
 }
 
@@ -39,9 +38,7 @@ const NoResultText = () => <p className={styles.noResult}>Fant ingen resultater<
 type MixedElement = string | number | React.ReactElement<any>
 
 const extractStringValue = (child: MixedElement): string | number => {
-  if (typeof child === 'string') {
-    return child
-  } else if (typeof child === 'number') {
+  if (typeof child === 'string' || typeof child === 'number') {
     return child
   } else if (React.isValidElement(child)) {
     const props = child.props as { children?: MixedElement; linkText?: MixedElement }
@@ -89,13 +86,14 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
-  const sortTableData = (id: string) => {
-    data.sort((a, b) => {
-      // Sort by id for the first column;
-      const valueA = extractStringValue(a[id] as MixedElement)
-      const valueB = extractStringValue(b[id] as MixedElement)
+  const sortedData = useMemo(() => {
+    const sorted = [...data]
+    sorted.sort((a, b) => {
+      // Sort by id for the first column
+      const valueA = extractStringValue(a[sortBy] as MixedElement)
+      const valueB = extractStringValue(b[sortBy] as MixedElement)
 
-      // Sort by number
+      // sort by number
       if (typeof valueA === 'number' && typeof valueB === 'number')
         return sortByDirection === 'asc' ? valueA - valueB : valueB - valueA
 
@@ -104,16 +102,17 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
         if (valueA.toLowerCase() < valueB.toLowerCase()) return sortByDirection === 'asc' ? -1 : 1
         if (valueA.toLowerCase() > valueB.toLowerCase()) return sortByDirection === 'asc' ? 1 : -1
       }
+
       return 0
 
       // TODO: Sort by date
     })
-  }
+    return sorted
+  }, [data, sortBy, sortByDirection])
 
   const handleSortBy = (id: string) => {
     setSortBy(id)
     setSortByDirection((prevState) => (prevState === 'asc' ? 'desc' : 'asc'))
-    sortTableData(id)
   }
 
   const renderSortByArrow = (selectedColumn: boolean, sortByDirection: string) => {
@@ -149,8 +148,8 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
           </tr>
         </thead>
         <tbody>
-          {data.length ? (
-            data.map((row, index) => {
+          {sortedData.length ? (
+            sortedData.map((row, index) => {
               return (
                 <tr key={row.id + index} className={conditionalStyling(index)}>
                   {columns.map((column) => (

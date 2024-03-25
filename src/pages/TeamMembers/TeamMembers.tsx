@@ -10,7 +10,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { fetchAllTeamMembersData, TeamMembersData } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 
 const MY_USERS_TAB = {
   title: 'Mine teammedlemmer',
@@ -46,7 +46,7 @@ const TeamMembers = () => {
           ),
           team: teams.length,
           epost: principal_name,
-          data_admin_roller: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
+          data_admins: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
           seksjon: section_name, // Makes section name searchable and sortable in table by including the field
           seksjonsleder: formatDisplayName(
             section_manager && section_manager.length > 0
@@ -113,8 +113,8 @@ const TeamMembers = () => {
           label: 'Team',
         },
         {
-          id: 'data_admin_roller',
-          label: 'Data-admin-roller',
+          id: 'data_admins',
+          label: 'Som data-admin',
         },
         {
           id: 'seksjonsleder',

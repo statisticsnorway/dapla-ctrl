@@ -1,4 +1,6 @@
-import { Text, Link } from '@statisticsnorway/ssb-component-library'
+import styles from './formattedtablecolumn.module.scss'
+
+import { Link } from '@statisticsnorway/ssb-component-library'
 
 interface FormattedTableColumnProps {
   href?: string
@@ -11,14 +13,14 @@ const FormattedTableColumn = (props: FormattedTableColumnProps) => {
 
   return (
     <>
-      <span>
+      <span className={styles.linkTextWrapper}>
         {href && linkText && (
           <Link href={href}>
             <b>{linkText}</b>
           </Link>
         )}
       </span>
-      {text && <Text>{text}</Text>}
+      {text && <span className={styles.textWrapper}>{text}</span>}
     </>
   )
 }

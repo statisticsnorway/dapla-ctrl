@@ -173,13 +173,10 @@ export const fetchAllTeamMembersData = async (principalName: string): Promise<Te
 }
 
 export const fetchUserSearchData = async (): Promise<User[]> => {
-  const usersUrl = new URL(`${USERS_URL}`, window.location.origin)
-  const selects = ['display_name', 'principal_name', 'section_name']
-
-  usersUrl.searchParams.append('select', selects.join(','))
+  const usersUrl = '/localApi/users'
 
   try {
-    const allUsersData = await fetchAPIData(usersUrl.toString())
+    const allUsersData = await fetchAPIData(usersUrl)
 
     if (!allUsersData) throw new ApiError(500, 'No json data returned')
     if (!allUsersData._embedded || !allUsersData._embedded.users) throw new ApiError(500, 'Did not receive users data')

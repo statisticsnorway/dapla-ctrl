@@ -8,15 +8,15 @@ export const getGroupType = (groupName: string) => {
   const role = match ? match[0] : null
   switch (role) {
     case 'managers':
-      return 'Manager'
+      return 'managers'
     case 'developers':
-      return 'Developers'
+      return 'developers'
     case 'data-admins':
-      return 'Data-admins'
+      return 'data-admins'
     case 'support':
-      return 'Support'
+      return 'support'
     case 'consumers':
-      return 'Consumers'
+      return 'consumers'
     default:
       return groupName
   }
