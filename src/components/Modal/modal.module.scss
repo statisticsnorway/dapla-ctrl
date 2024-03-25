@@ -1,0 +1,33 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.deleteConfirmationModalContainer {
+    position: absolute;
+    top: 40vh;
+    left: 41vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 20vw;
+    background-color: variables.$ssb-white;
+
+    .deleteConfirmationModalHeader, .deleteConfirmationModalFooter {
+        margin: 1rem 2rem;
+    }
+
+    .deleteConfirmationModalHeader {
+        h2 {
+            margin: 0;
+        }
+    }
+
+    .deleteConfirmationModalBody {
+        background-color: variables.$ssb-green-1;
+        padding: 2rem;        
+    }
+
+    .deleteConfirmationModalFooter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

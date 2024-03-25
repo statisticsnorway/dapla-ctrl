@@ -40,6 +40,7 @@ import FormattedTableColumn from '../../components/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { fetchUserSearchData, User } from '../../services/teamMembers'
+import Modal from '../../components/Modal/Modal'
 
 interface UserInfo {
   name?: string
@@ -146,6 +147,7 @@ const TeamDetail = () => {
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
   const [editUserErrors, setEditUserErrors] = useState<EditUserStates>({})
   const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserStates>({})
+  const [openDeleteUserConfirmation, setOpenDeleteUserConfirmation] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -722,7 +724,7 @@ const TeamDetail = () => {
                     ))}
                 </div>
                 <div className={styles.modalBodyDialog}>
-                  <DeleteLink handleDeleteUser={handleDeleteUser} icon>
+                  <DeleteLink handleDeleteUser={() => setOpenDeleteUserConfirmation(true)} icon>
                     Fjern fra teamet
                   </DeleteLink>
                   {renderSidebarModalInfo(
@@ -742,9 +744,40 @@ const TeamDetail = () => {
     }
   }
 
+  const renderDeleteUserConfirmationModal = () => {
+    return (
+      <Modal
+        open={openDeleteUserConfirmation}
+        onClose={() => setOpenDeleteUserConfirmation(false)}
+        modalTitle='Fjern fra teamet'
+        body={
+          <>{`Fjern "${editUserInfo.name}" fra ${teamDetailData ? (teamDetailData?.team as Team).display_name : ''}?`}</>
+        }
+        footer={
+          <>
+            <span>
+              <Link
+                onClick={() => {
+                  setOpenDeleteUserConfirmation(false)
+                  setOpenEditUserSidebarModal(true) // TODO: Override backdrop code in a different way
+                }}
+              >
+                Avbryt
+              </Link>
+            </span>
+            <Button onClick={handleDeleteUser} primary>
+              Fjern
+            </Button>
+          </>
+        }
+      />
+    )
+  }
+
   return (
     <>
       {renderAddUserSidebarModal()}
+      {renderDeleteUserConfirmationModal()}
       {renderEditUserSidebarModal()}
       <PageLayout
         title={
