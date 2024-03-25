@@ -752,11 +752,11 @@ const TeamDetail = () => {
         modalTitle={
           <>
             <Trash2 size={24} />
-            Fjern fra teamet
+            Fjern tilgang
           </>
         }
         body={
-          <>{`Fjern "${editUserInfo.name}" fra ${teamDetailData ? (teamDetailData?.team as Team).display_name : ''}?`}</>
+          <>{`Er du sikker på at du vil fjerne "${editUserInfo.name}" fra ${teamDetailData ? (teamDetailData?.team as Team).display_name : ''}?`}</>
         }
         footer={
           <>
@@ -764,7 +764,6 @@ const TeamDetail = () => {
               <Link
                 onClick={() => {
                   setOpenDeleteUserConfirmation(false)
-                  setOpenEditUserSidebarModal(true) // TODO: Override backdrop code in a different way
                 }}
               >
                 Avbryt
