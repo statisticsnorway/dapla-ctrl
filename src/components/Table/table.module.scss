@@ -72,28 +72,27 @@
     }
 
     .sortableColumn {
+      position: relative;
       cursor: pointer;
-
-      svg {
-        display: none;
-        color: variables.$ssb-green-4; 
-        margin-left: .25rem;
-      }
-      
+    
       span {
-        display: flex;
-        align-items: center;
+        display: inline-block;
+        position: relative;
+        padding-right: 30px;
+        white-space: nowrap;
+    
+        svg {
+          position: absolute;
+          top: 50%;
+          right: 5px;
+          transform: translateY(-50%);
+          display: none;
+        }
       }
-      
-      .displayArrowOnSelectedColumn {
-        display: initial;
-      }
-      
-      &:hover {
-        span {
-          color: variables.$ssb-green-4; 
-        } 
-
+    
+      &:hover span {
+        color: variables.$ssb-green-4;
+    
         svg {
           display: initial;
         }
