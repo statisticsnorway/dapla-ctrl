@@ -89,7 +89,12 @@
           display: none;
         }
       }
-    
+      
+      .displayArrowOnSelectedColumn {
+        display: initial;
+        color: variables.$ssb-green-4;
+      }
+
       &:hover span {
         color: variables.$ssb-green-4;
     
