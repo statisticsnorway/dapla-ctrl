@@ -11,7 +11,7 @@ interface DeleteLink {
 
 const DeleteLink = ({ children, tabIndex, icon, handleDeleteUser }: DeleteLink) => {
   return (
-    <a className={styles.deleteLinkWrapper} tabIndex={tabIndex ?? 0} onClick={() => handleDeleteUser}>
+    <a className={styles.deleteLinkWrapper} tabIndex={tabIndex ?? 0} onClick={() => handleDeleteUser()}>
       {icon && <Trash2 size={22} />}
       <span>{children}</span>
     </a>
