@@ -127,7 +127,7 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
         <thead>
           <tr>
             {columns.map((column) => {
-              const sortableColumn = !column.unsortable
+              const sortableColumn = data.length && !column.unsortable
               return (
                 <th
                   key={column.id}
