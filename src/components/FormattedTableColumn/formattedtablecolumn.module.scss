@@ -1,10 +1,19 @@
-// formattedtablecolumn.module.scss
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .link_text_wrapper {
-    margin-bottom: 12px; // Adjust this value as needed for the desired gap
+    margin-bottom: 12px
 }
-  
+
 .text_wrapper {
-    margin-top: 12px; // Adjust this value as needed for the desired gap
+    margin-top: 12px;
 }
+
+@media #{variables.$mobile} {
+    .link_text_wrapper {
+        margin-bottom: 2px;
+    }
   
+    .text_wrapper {
+        margin-top: 2px;
+    }
+}
