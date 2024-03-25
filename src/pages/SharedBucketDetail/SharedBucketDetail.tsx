@@ -3,7 +3,7 @@ import styles from '../../components/PageLayout/pagelayout.module.scss'
 
 import PageLayout from '../../components/PageLayout/PageLayout'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 import Table, { TableData } from '../../components/Table/Table'
 import { ApiError } from '../../utils/services'
 import {

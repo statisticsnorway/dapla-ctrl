@@ -10,7 +10,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { fetchAllTeamMembersData, TeamMembersData } from '../../services/teamMembers'
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 
 const MY_USERS_TAB = {
   title: 'Mine teammedlemmer',

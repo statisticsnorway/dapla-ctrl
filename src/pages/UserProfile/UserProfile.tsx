@@ -16,7 +16,7 @@ import { getUserProfileTeamData, TeamsData } from '../../services/userProfile'
 import { useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
 import { ApiError } from '../../utils/services'
-import FormattedTableColumn from '../../components/FormattedTableColumn'
+import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 
 const UserProfile = () => {
   const { setBreadcrumbUserProfileDisplayName } = useContext(DaplaCtrlContext)
