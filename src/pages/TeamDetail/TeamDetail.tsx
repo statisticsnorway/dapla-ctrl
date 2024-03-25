@@ -693,7 +693,7 @@ const TeamDetail = () => {
           onClose={() => setOpenEditUserSidebarModal(false)}
           header={teamModalHeader}
           footer={{
-            submitButtonText: 'Oppdater Tilgang',
+            submitButtonText: 'Oppdater tilgang',
             handleSubmit: handleEditUserOnSubmit,
           }}
           body={{
@@ -781,8 +781,8 @@ const TeamDetail = () => {
   return (
     <>
       {renderAddUserSidebarModal()}
-      {renderDeleteUserConfirmationModal()}
       {renderEditUserSidebarModal()}
+      {renderDeleteUserConfirmationModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
