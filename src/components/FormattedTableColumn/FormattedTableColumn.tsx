@@ -20,11 +20,7 @@ const FormattedTableColumn = (props: FormattedTableColumnProps) => {
           </Link>
         )}
       </span>
-      {text && (
-        <span className={styles.text_wrapper}>
-          {text}
-        </span>
-      )}
+      {text && <span className={styles.text_wrapper}>{text}</span>}
     </>
   )
 }

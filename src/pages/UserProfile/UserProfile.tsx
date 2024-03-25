@@ -38,7 +38,7 @@ const UserProfile = () => {
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
           : 'INGEN FUNNET',
-        ansvarlig: managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', '),
+        managers: managers.map((managerObj) => formatDisplayName(managerObj.display_name)).join(', '),
       }))
     },
     [principalName, userProfileData]
@@ -83,8 +83,8 @@ const UserProfile = () => {
           label: 'Gruppe',
         },
         {
-          id: 'ansvarlig',
-          label: 'Ansvarlig',
+          id: 'managers',
+          label: 'Managers',
         },
       ]
       return (

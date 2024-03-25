@@ -92,7 +92,7 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
     'teams.section_name',
     'teams.display_name',
     'teams.uniform_name',
-    'team.groups.uniform_name',
+    'teams.groups.uniform_name',
     'teams.groups.users.principal_name',
     'teams.groups.users.display_name',
   ]
@@ -126,8 +126,8 @@ export const getUserProfileTeamData = async (principalName: string): Promise<Tea
             }))
           : [
               {
-                display_name: 'Mangler ansvarlig',
-                principal_name: 'ManglerAnsvarlig@ssb.no',
+                display_name: 'Mangler managers',
+                principal_name: 'ManglerManagers@ssb.no',
               },
             ]
 

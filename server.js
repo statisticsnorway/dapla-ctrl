@@ -4,7 +4,7 @@ import express from 'express'
 import { getReasonPhrase } from 'http-status-codes'
 import proxy from 'express-http-proxy'
 import dotenv from 'dotenv'
-import cache from 'memory-cache';
+import cache from 'memory-cache'
 
 if (!process.env.DAPLA_TEAM_API_URL) {
   dotenv.config({ path: './.env.local' })
@@ -63,8 +63,8 @@ app.get('/localApi/photo/:principalName', async (req, res, next) => {
 })
 
 app.get('/localApi/users', async (req, res) => {
-  const cacheKey = 'usersForSearch';
-  const cachedData = cache.get(cacheKey);
+  const cacheKey = 'usersForSearch'
+  const cachedData = cache.get(cacheKey)
 
   const token = req.headers.authorization
   const usersUrl = new URL(`${DAPLA_TEAM_API_URL}/users`)
@@ -81,7 +81,7 @@ app.get('/localApi/users', async (req, res) => {
           Accept: '*/*',
           'Content-Type': 'application/json',
           Authorization: token,
-        }
+        },
       })
 
       if (!response.ok) {

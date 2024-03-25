@@ -65,7 +65,7 @@ const TEAM_USERS_TAB = {
     },
     {
       id: 'epost',
-      label: 'Epost',
+      label: 'E-post',
     },
   ],
 }
