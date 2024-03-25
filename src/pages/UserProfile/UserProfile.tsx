@@ -9,7 +9,7 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { useCallback, useContext, useEffect, useState } from 'react'
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
-import { getGroupType, formatDisplayName } from '../../utils/utils'
+import { getGroupType, formatDisplayName, stripSuffixes } from '../../utils/utils'
 
 import { getUserProfileTeamData, TeamsData } from '../../services/userProfile'
 
@@ -34,7 +34,11 @@ const UserProfile = () => {
         navn: <FormattedTableColumn href={`/${uniform_name}`} linkText={uniform_name} text={section_name} />,
         gruppe: principalName
           ? groups
-              ?.filter((group) => group.users.some((user) => user.principal_name === principalName)) // Filter groups based on principalName presence
+              ?.filter(
+                (group) =>
+                  group.users.some((user) => user.principal_name === principalName) &&
+                  stripSuffixes(group.uniform_name) === uniform_name
+              ) // Filter groups based on principalName presence
               .map((group) => getGroupType(group.uniform_name))
               .join(', ')
           : 'INGEN FUNNET',
