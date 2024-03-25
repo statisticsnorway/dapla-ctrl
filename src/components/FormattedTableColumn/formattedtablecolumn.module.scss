@@ -1,12 +1,11 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .link_text_wrapper {
-    margin-bottom: 8px
+    margin-bottom: .75em;
 }
 
 .text_wrapper {
-    margin-top: 8px;
-    font-size: 14px;
+    margin-top: .75em;
 }
 
 @media #{variables.$mobile} {
