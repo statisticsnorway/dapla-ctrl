@@ -1,0 +1,44 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.modalContainer {
+    position: absolute;
+    top: 40vh;
+    left: 41vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 20vw;
+    background-color: variables.$ssb-white;
+
+    @media #{variables.$mobile} {
+        top: 30vh;
+        left: 0;
+        width: auto;
+        margin: .75rem;
+    }
+
+    .modalHeader, .modalFooter {
+        margin: 1rem 2rem;
+    }
+
+    .modalHeader {
+        h2 {
+            margin: 0;
+        }
+
+        svg {
+            margin-right: .75rem;
+        }
+    }
+
+    .modalBody {
+        background-color: variables.$ssb-green-1;
+        padding: 2rem;        
+    }
+
+    .modalFooter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

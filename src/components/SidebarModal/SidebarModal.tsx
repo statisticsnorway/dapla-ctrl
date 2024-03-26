@@ -1,8 +1,9 @@
-import styles from './sidebar.module.scss'
+import styles from './sidebarmodal.module.scss'
 
-import { useRef, useEffect } from 'react'
 import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
+
+import { Drawer } from '@mui/material'
 
 interface SidebarHeader {
   modalType?: string
@@ -62,31 +63,26 @@ const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: Sidebar
 }
 
 const SidebarModal = ({ open, onClose, header, footer, body }: SidebarModal) => {
-  const sidebarModalRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleBackdropOnClick = (e: Event) => {
-      if (sidebarModalRef.current && !sidebarModalRef?.current?.contains(e.target as Node)) onClose()
-    }
-
-    window.addEventListener('mousedown', handleBackdropOnClick)
-    return () => {
-      window.removeEventListener('mousedown', handleBackdropOnClick)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   return (
-    <div className={`${styles.container} ${open ? styles.open : ''}`} ref={sidebarModalRef}>
-      <div>
-        <button className={styles.closeButton} onClick={onClose}>
-          <X className={styles.xIcon} size={32} />
-        </button>
+    <Drawer
+      anchor='right'
+      transitionDuration={300} // milliseconds
+      elevation={0} // no shadow styling
+      ModalProps={{ BackdropProps: { invisible: true } }}
+      open={open}
+      onClose={onClose}
+    >
+      <div className={styles.modalContainer}>
+        <div>
+          <button className={styles.closeButton} onClick={onClose}>
+            <X className={styles.xIcon} size={32} />
+          </button>
+        </div>
+        <SidebarModalHeader {...header} />
+        <SidebarModalBody {...body} />
+        <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
       </div>
-      <SidebarModalHeader {...header} />
-      <SidebarModalBody {...body} />
-      <SidebarModalFooter {...footer} onClose={footer.onClose ? footer.onClose : onClose} />
-    </div>
+    </Drawer>
   )
 }
 

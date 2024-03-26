@@ -35,11 +35,13 @@ import {
 } from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton, CircularProgress } from '@mui/material'
-import { XCircle } from 'react-feather'
+
+import { XCircle, Trash2 } from 'react-feather'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { fetchUserSearchData, User } from '../../services/teamMembers'
+import Modal from '../../components/Modal/Modal'
 
 interface UserInfo {
   name?: string
@@ -146,6 +148,7 @@ const TeamDetail = () => {
   const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
   const [editUserErrors, setEditUserErrors] = useState<EditUserStates>({})
   const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserStates>({})
+  const [openDeleteUserConfirmation, setOpenDeleteUserConfirmation] = useState<boolean>(false)
 
   const { teamId } = useParams<{ teamId: string }>()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
@@ -544,6 +547,8 @@ const TeamDetail = () => {
   }
 
   const handleDeleteUser = () => {
+    setOpenDeleteUserConfirmation(false)
+
     if (editUserInfo.groups && editUserInfo.groups.length) {
       resetEditUserValues()
 
@@ -691,7 +696,7 @@ const TeamDetail = () => {
           onClose={() => setOpenEditUserSidebarModal(false)}
           header={teamModalHeader}
           footer={{
-            submitButtonText: 'Oppdater Tilgang',
+            submitButtonText: 'Oppdater tilgang',
             handleSubmit: handleEditUserOnSubmit,
           }}
           body={{
@@ -722,7 +727,7 @@ const TeamDetail = () => {
                     ))}
                 </div>
                 <div className={styles.modalBodyDialog}>
-                  <DeleteLink handleDeleteUser={handleDeleteUser} icon>
+                  <DeleteLink handleDeleteUser={() => setOpenDeleteUserConfirmation(true)} icon>
                     Fjern fra teamet
                   </DeleteLink>
                   {renderSidebarModalInfo(
@@ -742,10 +747,45 @@ const TeamDetail = () => {
     }
   }
 
+  const renderDeleteUserConfirmationModal = () => {
+    return (
+      <Modal
+        open={openDeleteUserConfirmation}
+        onClose={() => setOpenDeleteUserConfirmation(false)}
+        modalTitle={
+          <>
+            <Trash2 size={24} />
+            Fjern tilgang
+          </>
+        }
+        body={
+          <>{`Er du sikker på at du vil fjerne "${editUserInfo.name}" fra ${teamDetailData ? (teamDetailData?.team as Team).display_name : ''}?`}</>
+        }
+        footer={
+          <>
+            <span>
+              <Link
+                onClick={() => {
+                  setOpenDeleteUserConfirmation(false)
+                }}
+              >
+                Avbryt
+              </Link>
+            </span>
+            <Button onClick={handleDeleteUser} primary>
+              Fjern
+            </Button>
+          </>
+        }
+      />
+    )
+  }
+
   return (
     <>
       {renderAddUserSidebarModal()}
       {renderEditUserSidebarModal()}
+      {renderDeleteUserConfirmationModal()}
       <PageLayout
         title={
           !loadingTeamData && teamDetailData ? (
