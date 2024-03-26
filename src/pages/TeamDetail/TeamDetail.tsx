@@ -547,6 +547,8 @@ const TeamDetail = () => {
   }
 
   const handleDeleteUser = () => {
+    setOpenDeleteUserConfirmation(false)
+
     if (editUserInfo.groups && editUserInfo.groups.length) {
       resetEditUserValues()
 
