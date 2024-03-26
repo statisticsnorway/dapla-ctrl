@@ -3,17 +3,11 @@
 .modalContainer {
     width: 375px;
     height: 100%;
-    position: fixed;
     display: flex;
     flex-direction: column;
     background-color: variables.$ssb-white;
     border-left: 1px solid variables.$ssb-dark-2;
-    top: 0;
-    right: 0;
-    z-index: 1;
     overflow-x: hidden;
-    transition: transform 0.3s ease;
-    transform: translateX(100%);
 
     @media #{variables.$mobile} {
         width: 100%;
@@ -58,8 +52,4 @@
     justify-content: space-between;
     align-items: center;
     margin: 1rem 2.5rem;
-}
-
-.open {
-    transform: translateX(0);
 }
