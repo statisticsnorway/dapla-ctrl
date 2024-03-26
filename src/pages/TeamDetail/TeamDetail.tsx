@@ -83,7 +83,7 @@ const SHARED_BUCKETS_TAB = {
       label: 'Tilgang',
     },
     // { id: 'delte_data', label: 'Delte data' },
-    { id: 'antall_personer', label: 'Antall personer' },
+    { id: 'antall_personer', label: 'Antall personer', align: 'right' },
   ],
 }
 

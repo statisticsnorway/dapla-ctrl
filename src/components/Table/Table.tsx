@@ -121,6 +121,12 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
     return <ArrowUp className={selectedColumn ? styles.displayArrowOnSelectedColumn : undefined} size={18} />
   }
 
+  const alignCell = (alignment?: string) => {
+    if (alignment === 'center') return styles.alignTextCenter
+    if (alignment === 'right') return styles.alignTextRight
+    return ''
+  }
+
   return (
     <div className={styles.tableContainer}>
       <table className={styles.table}>
@@ -131,7 +137,7 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
               return (
                 <th
                   key={column.id}
-                  className={sortableColumn ? styles.sortableColumn : undefined}
+                  className={`${sortableColumn ? styles.sortableColumn : undefined} ${alignCell(column.align)}`}
                   onClick={sortableColumn ? () => handleSortBy(column.id) : undefined}
                 >
                   {sortableColumn ? (
@@ -153,7 +159,7 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
               return (
                 <tr key={row.id + index} className={conditionalStyling(index)}>
                   {columns.map((column) => (
-                    <td key={column.id} className={column.align === 'center' ? styles.centerText : undefined}>
+                    <td key={column.id} className={alignCell(column.align)}>
                       {row[column.id]}
                     </td>
                   ))}
