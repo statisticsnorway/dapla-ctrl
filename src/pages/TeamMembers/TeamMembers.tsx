@@ -111,10 +111,12 @@ const TeamMembers = () => {
         {
           id: 'team',
           label: 'Team',
+          align: 'right',
         },
         {
           id: 'data_admin',
           label: 'Data-admin roller',
+          align: 'right',
         },
         {
           id: 'seksjonsleder',

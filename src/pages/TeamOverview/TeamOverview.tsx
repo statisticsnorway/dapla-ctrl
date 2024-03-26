@@ -98,6 +98,7 @@ const TeamOverview = () => {
         {
           id: 'teammedlemmer',
           label: 'Teammedlemmer',
+          align: 'right',
         },
         {
           id: 'managers',

@@ -78,13 +78,13 @@
       span {
         display: inline-block;
         position: relative;
-        padding-right: 30px;
+        padding-right: 2rem;
         white-space: nowrap;
     
         svg {
           position: absolute;
           top: 50%;
-          right: 5px;
+          right: .5rem;
           transform: translateY(-50%);
           display: none;
         }
@@ -117,7 +117,7 @@
     padding: .5rem;
     border-bottom: 1px inset variables.$ssb-dark-2;
 
-    >* {
+    > * {
       display: flex;
       flex-direction: column;
 
@@ -140,9 +140,21 @@
   }
 }
 
-.centerText {
+.alignTextCenter {
   span {
     display: flex;
     justify-content: center;
+  }
+}
+
+.alignTextRight {
+  text-align: right !important;
+
+  span {
+    padding-right: 0 !important;
+
+    svg {
+      left: -1.75rem;
+    }
   }
 }
