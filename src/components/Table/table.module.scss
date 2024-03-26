@@ -84,7 +84,7 @@
         svg {
           position: absolute;
           top: 50%;
-          right: 5px;
+          right: .5rem;
           transform: translateY(-50%);
           display: none;
         }
@@ -149,4 +149,12 @@
 
 .alignTextRight {
   text-align: right !important;
+
+  span {
+    padding-right: 0 !important;
+
+    svg {
+      left: -1.5rem;
+    }
+  }
 }
