@@ -308,7 +308,6 @@ const TeamDetail = () => {
         modalTitle: '',
       }
   const teamGroups = teamDetailData ? ((teamDetailData.team as Team).groups as Group[]) : []
-
   return (
     <>
       <AddTeamMember

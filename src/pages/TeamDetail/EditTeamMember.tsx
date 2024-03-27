@@ -190,7 +190,6 @@ const EditTeamMember = ({
     }
   }
 
-  // TODO: Duplicate in AddTeamMember
   const renderSidebarModalInfo = (children: JSX.Element) => {
     return (
       <div className={styles.modalBodyDialog}>
