@@ -42,6 +42,7 @@ import SidebarModal from '../../components/SidebarModal/SidebarModal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { fetchUserSearchData, User } from '../../services/teamMembers'
 import Modal from '../../components/Modal/Modal'
+import AddTeamMember from './AddTeamMember'
 
 interface UserInfo {
   name?: string
@@ -89,17 +90,6 @@ const SHARED_BUCKETS_TAB = {
   ],
 }
 
-const defaultSelectedUserDropdown = {
-  key: 'add-selected-user',
-  error: false,
-  errorMessage: `Ugyldig navn`,
-}
-const defaultSelectedUser = {
-  id: 'search',
-  title: 'Søk ...',
-}
-
-const defaultAddUserKey = 'add-user-selected-group'
 const defaultEditUserKey = 'edit-user-selected-group'
 const defaultSelectedGroup = {
   id: 'velg',
@@ -124,19 +114,6 @@ const TeamDetail = () => {
 
   // Add users to team
   const [openAddUserSidebarModal, setOpenAddUserSidebarModal] = useState<boolean>(false)
-  const [selectedUserDropdown, setSelectedUserDropdown] = useState(defaultSelectedUserDropdown)
-  const [selectedUser, setSelectedUser] = useState(defaultSelectedUser)
-  const [selectedGroupAddUser, setSelectedGroupAddUser] = useState({
-    ...defaultSelectedGroup,
-    key: defaultAddUserKey,
-  })
-  const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
-  const [teamGroupTagsError, setTeamGroupTagsError] = useState({
-    error: false,
-    errorMessage: 'Velg minst én tilgangsgruppe',
-  })
-  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
-  const [showAddUserSpinner, setShowAddUserSpinner] = useState<boolean>(false)
 
   // Edit users in team
   const [openEditUserSidebarModal, setOpenEditUserSidebarModal] = useState<boolean>(false)
@@ -372,11 +349,6 @@ const TeamDetail = () => {
     }
   }
 
-  const handleAddUser = (item: DropdownItems) => {
-    setSelectedUserDropdown({ ...selectedUserDropdown, key: `${defaultSelectedUserDropdown.key}-${item.id}` })
-    setSelectedUser(item)
-  }
-
   const removeDuplicateDropdownItems = (items: DropdownItems[]) => {
     return items.reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
       const ids = acc.map((obj) => obj.id)
@@ -388,13 +360,6 @@ const TeamDetail = () => {
   }
 
   const handleAddGroupTag = (item: DropdownItems) => {
-    if (openAddUserSidebarModal) {
-      const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
-      setTeamGroupTags(teamGroupsTags)
-      setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
-      setSelectedGroupAddUser({ ...item, key: `${defaultAddUserKey}-${item.id}` })
-    }
-
     if (openEditUserSidebarModal) {
       const userGroupsTagsList = removeDuplicateDropdownItems([...userGroupTags, item])
       setUserGroupTags(userGroupsTagsList)
@@ -403,11 +368,6 @@ const TeamDetail = () => {
   }
 
   const handleDeleteGroupTag = (item: DropdownItems) => {
-    if (openAddUserSidebarModal) {
-      const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
-      setTeamGroupTags(teamGroupsTags)
-    }
-
     if (openEditUserSidebarModal) {
       const userGroupsTags = userGroupTags.filter((items) => items !== item)
       setUserGroupTags(userGroupsTags)
@@ -423,39 +383,6 @@ const TeamDetail = () => {
         return ''
       })
       .filter((str) => str !== '')
-  }
-
-  const handleAddUserOnSubmit = () => {
-    const isSelectedUserValid = selectedUser.id !== 'search'
-    if (!isSelectedUserValid) setSelectedUserDropdown({ ...selectedUserDropdown, error: true })
-    if (!teamGroupTags.length)
-      setTeamGroupTagsError({
-        ...teamGroupTagsError,
-        error: true,
-      })
-
-    if (isSelectedUserValid && teamGroupTags.length) {
-      setAddUserToTeamErrors([])
-      setShowAddUserSpinner(true)
-      addUserToGroups(
-        teamGroupTags.map((group) => group.id),
-        selectedUser.id
-      )
-        .then((response) => {
-          const errorsList = getErrorList(response)
-          if (errorsList.length) {
-            setAddUserToTeamErrors(errorsList)
-          } else {
-            setOpenAddUserSidebarModal(false)
-            setTeamGroupTags([])
-            // Reset fields with their respective keys; re-initializes component
-            setSelectedUserDropdown({ ...defaultSelectedUserDropdown })
-            setSelectedGroupAddUser({ ...defaultSelectedGroup, key: defaultAddUserKey })
-          }
-        })
-        .catch((e) => setAddUserToTeamErrors(e.message))
-        .finally(() => setShowAddUserSpinner(false))
-    }
   }
 
   const resetEditUserValues = () => {
@@ -610,83 +537,6 @@ const TeamDetail = () => {
         modalTitle: '',
       }
   const teamGroups = teamDetailData ? ((teamDetailData.team as Team).groups as Group[]) : []
-  const renderAddUserSidebarModal = () => {
-    if (teamDetailData) {
-      return (
-        <SidebarModal
-          open={openAddUserSidebarModal}
-          onClose={() => setOpenAddUserSidebarModal(false)}
-          header={teamModalHeader}
-          footer={{
-            submitButtonText: 'Legg til medlem',
-            handleSubmit: handleAddUserOnSubmit,
-          }}
-          body={{
-            modalBodyTitle: 'Legg person til teamet',
-            modalBody: (
-              <>
-                {!loadingUsers ? (
-                  <Dropdown
-                    key={selectedUserDropdown.key}
-                    className={styles.inputSpacing}
-                    header='Navn'
-                    selectedItem={selectedUser}
-                    items={userData?.map(({ principal_name, display_name }) => {
-                      return {
-                        id: principal_name,
-                        title: `${formatDisplayName(display_name)} (${principal_name})`,
-                      }
-                    })}
-                    onSelect={(item: DropdownItems) => handleAddUser(item)}
-                    error={selectedUserDropdown.error}
-                    errorMessage={selectedUserDropdown.errorMessage}
-                    searchable
-                  />
-                ) : (
-                  <div className={styles.inputSpacing}>
-                    <Skeleton variant='rectangular' animation='wave' height={65} />
-                  </div>
-                )}
-                <Dropdown
-                  key={selectedGroupAddUser.key}
-                  className={styles.dropdownSpacing}
-                  header='Tilgangsgrupper(r)'
-                  selectedItem={selectedGroupAddUser}
-                  items={teamGroups.map(({ uniform_name }) => ({
-                    id: uniform_name,
-                    title: getGroupType(uniform_name),
-                  }))}
-                  onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
-                  error={teamGroupTagsError.error}
-                  errorMessage={teamGroupTagsError.errorMessage}
-                />
-                <div className={styles.tagsContainer}>
-                  {teamGroupTags &&
-                    teamGroupTags.map((group) => (
-                      <Tag
-                        key={`team-group-tag-${group.id}`}
-                        icon={<XCircle size={14} />}
-                        onClick={() => handleDeleteGroupTag(group)}
-                      >
-                        {group.title}
-                      </Tag>
-                    ))}
-                </div>
-                <div className={styles.modalBodyDialog}>
-                  {renderSidebarModalInfo(
-                    <>
-                      {addUserToTeamErrors.length ? renderSidebarModalWarning(addUserToTeamErrors) : null}
-                      {showAddUserSpinner && <CircularProgress />}
-                    </>
-                  )}
-                </div>
-              </>
-            ),
-          }}
-        />
-      )
-    }
-  }
 
   const renderEditUserSidebarModal = () => {
     if (teamDetailData && editUserInfo) {
@@ -783,7 +633,13 @@ const TeamDetail = () => {
 
   return (
     <>
-      {renderAddUserSidebarModal()}
+      <AddTeamMember
+        loadingUsers={loadingUsers}
+        userData={userData}
+        teamDetailData={teamDetailData}
+        open={openAddUserSidebarModal}
+        onClose={() => setOpenAddUserSidebarModal(false)}
+      />
       {renderEditUserSidebarModal()}
       {renderDeleteUserConfirmationModal()}
       <PageLayout
@@ -796,7 +652,9 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          isTeamManager() ? <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button> : undefined
+          isTeamManager() && teamDetailData ? (
+            <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button>
+          ) : undefined
         }
       />
     </>
