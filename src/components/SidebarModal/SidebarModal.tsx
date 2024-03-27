@@ -5,7 +5,7 @@ import { X } from 'react-feather'
 
 import { Drawer } from '@mui/material'
 
-interface SidebarHeader {
+export interface SidebarHeader {
   modalType?: string
   modalTitle: string
   modalDescription?: string

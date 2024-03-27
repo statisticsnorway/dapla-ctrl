@@ -1,11 +1,11 @@
 import styles from './teamDetail.module.scss'
 
 import { useState } from 'react'
-import { TeamDetailData, Team, addUserToGroups, Group } from '../../services/teamDetail'
+import { TeamDetailData, addUserToGroups, Group } from '../../services/teamDetail'
 import { User } from '../../services/teamMembers'
 import { formatDisplayName, getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
 import { DropdownItems } from '../../@types/pageTypes'
-import SidebarModal from '../../components/SidebarModal/SidebarModal'
+import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
 
 import { Dialog, Dropdown, Tag } from '@statisticsnorway/ssb-component-library'
 import { Skeleton, CircularProgress } from '@mui/material'
@@ -15,6 +15,8 @@ interface AddMember {
   loadingUsers: boolean
   userData: User[] | undefined
   teamDetailData: TeamDetailData | undefined
+  teamModalHeader: SidebarHeader
+  teamGroups: Group[]
   open: boolean
   onClose: CallableFunction
 }
@@ -35,7 +37,15 @@ const defaultSelectedGroup = {
   title: 'Velg ...',
 }
 
-const AddTeamMember = ({ loadingUsers, userData, teamDetailData, open, onClose }: AddMember) => {
+const AddTeamMember = ({
+  loadingUsers,
+  userData,
+  teamDetailData,
+  teamModalHeader,
+  teamGroups,
+  open,
+  onClose,
+}: AddMember) => {
   const [selectedUserDropdown, setSelectedUserDropdown] = useState(defaultSelectedUserDropdown)
   const [selectedUser, setSelectedUser] = useState(defaultSelectedUser)
   const [selectedGroupAddUser, setSelectedGroupAddUser] = useState({
@@ -127,16 +137,6 @@ const AddTeamMember = ({ loadingUsers, userData, teamDetailData, open, onClose }
     }
   }
 
-  const teamModalHeader = teamDetailData
-    ? {
-        modalType: 'Medlem',
-        modalTitle: `${(teamDetailData?.team as Team).display_name}`,
-        modalDescription: `${(teamDetailData?.team as Team).uniform_name}`,
-      }
-    : {
-        modalTitle: '',
-      }
-  const teamGroups = teamDetailData ? ((teamDetailData.team as Team).groups as Group[]) : []
   if (teamDetailData) {
     return (
       <SidebarModal
@@ -212,7 +212,6 @@ const AddTeamMember = ({ loadingUsers, userData, teamDetailData, open, onClose }
       />
     )
   }
-
   return
 }
 
