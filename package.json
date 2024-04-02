@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/styled": "^11.11.5",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@mui/material": "^5.15.14",
     "@statisticsnorway/ssb-component-library": "^2.0.98",
@@ -38,8 +38,8 @@
     "vite-express": "0.16.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.71",
-    "@types/react-dom": "^18.2.22",
+    "@types/react": "^18.2.73",
+    "@types/react-dom": "^18.2.23",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "@vitejs/plugin-react-swc": "^3.6.0",
@@ -47,6 +47,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "typescript": "^5.4.3",
-    "vite": "^5.2.6"
+    "vite": "^5.2.7"
   }
 }
