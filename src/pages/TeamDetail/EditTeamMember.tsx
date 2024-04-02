@@ -8,8 +8,9 @@ import { getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../
 import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
 import Modal from '../../components/Modal/Modal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
+import { renderSidebarModalInfo, renderSidebarModalWarning } from './teamDetailDialog'
 
-import { Dialog, Dropdown, Tag, Link, Button } from '@statisticsnorway/ssb-component-library'
+import { Dropdown, Tag, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { CircularProgress } from '@mui/material'
 import { XCircle, Trash2 } from 'react-feather'
 
@@ -187,33 +188,6 @@ const EditTeamMember = ({
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
         .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
       return
-    }
-  }
-
-  const renderSidebarModalInfo = (children: JSX.Element) => {
-    return (
-      <div className={styles.modalBodyDialog}>
-        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-        {children}
-      </div>
-    )
-  }
-
-  const renderSidebarModalWarning = (errorList: string[]) => {
-    if (errorList.length) {
-      return (
-        <Dialog type='warning'>
-          {typeof errorList === 'string' ? (
-            errorList
-          ) : (
-            <ul>
-              {errorList.map((errors) => (
-                <li>{errors}</li>
-              ))}
-            </ul>
-          )}
-        </Dialog>
-      )
     }
   }
 

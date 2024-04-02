@@ -6,8 +6,9 @@ import { User } from '../../services/teamMembers'
 import { formatDisplayName, getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
 import { DropdownItems } from '../../@types/pageTypes'
 import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
+import { renderSidebarModalInfo, renderSidebarModalWarning } from './teamDetailDialog'
 
-import { Dialog, Dropdown, Tag } from '@statisticsnorway/ssb-component-library'
+import { Dropdown, Tag } from '@statisticsnorway/ssb-component-library'
 import { Skeleton, CircularProgress } from '@mui/material'
 import { XCircle } from 'react-feather'
 
@@ -107,33 +108,6 @@ const AddTeamMember = ({
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
         .finally(() => setShowAddUserSpinner(false))
-    }
-  }
-
-  const renderSidebarModalInfo = (children: JSX.Element) => {
-    return (
-      <div className={styles.modalBodyDialog}>
-        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
-        {children}
-      </div>
-    )
-  }
-
-  const renderSidebarModalWarning = (errorList: string[]) => {
-    if (errorList.length) {
-      return (
-        <Dialog type='warning'>
-          {typeof errorList === 'string' ? (
-            errorList
-          ) : (
-            <ul>
-              {errorList.map((errors) => (
-                <li>{errors}</li>
-              ))}
-            </ul>
-          )}
-        </Dialog>
-      )
     }
   }
 
