@@ -1,6 +1,9 @@
 // https://vitejs.dev/config/server-options.html
 // https://github.com/garronej/vite-envs
 
+import { DropdownItems } from '../@types/pageTypes'
+import { JobResponse } from '../services/teamDetail'
+
 export const DAPLA_TEAM_API_URL = `/api`
 
 export const getGroupType = (groupName: string) => {
@@ -50,4 +53,25 @@ export const flattenEmbedded = (json: any): any => {
   }
 
   return json
+}
+
+export const removeDuplicateDropdownItems = (items: DropdownItems[]) => {
+  return items.reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
+    const ids = acc.map((obj) => obj.id)
+    if (!ids.includes(dropdownItem.id)) {
+      acc.push(dropdownItem)
+    }
+    return acc
+  }, [])
+}
+
+export const getErrorList = (response: JobResponse[]) => {
+  return response
+    .map(({ status, detail }) => {
+      if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
+        return detail
+      }
+      return ''
+    })
+    .filter((str) => str !== '')
 }
