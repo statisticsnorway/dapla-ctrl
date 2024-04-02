@@ -14,6 +14,7 @@ import { XCircle } from 'react-feather'
 
 interface AddMember {
   loadingUsers: boolean
+  setRefreshData: React.Dispatch<React.SetStateAction<boolean>>
   userData: User[] | undefined
   teamDetailData: TeamDetailData | undefined
   teamModalHeader: SidebarHeader
@@ -40,6 +41,7 @@ const defaultSelectedGroup = {
 
 const AddTeamMember = ({
   loadingUsers,
+  setRefreshData,
   userData,
   teamDetailData,
   teamModalHeader,
@@ -107,7 +109,10 @@ const AddTeamMember = ({
           }
         })
         .catch((e) => setAddUserToTeamErrors(e.message))
-        .finally(() => setShowAddUserSpinner(false))
+        .finally(() => {
+          setShowAddUserSpinner(false)
+          setRefreshData(true)
+        })
     }
   }
 

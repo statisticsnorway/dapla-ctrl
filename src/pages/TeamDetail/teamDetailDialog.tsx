@@ -5,7 +5,7 @@ import { Dialog } from '@statisticsnorway/ssb-component-library'
 export const renderSidebarModalInfo = (children: JSX.Element) => {
   return (
     <div className={styles.modalBodyDialog}>
-      <Dialog type='info'>Det kan ta litt tid før du ser endringen.</Dialog>
+      <Dialog type='info'>Det tar 1-2 minutter før tilgangen er aktivert og tabellen er oppdatert.</Dialog>
       {children}
     </div>
   )
