@@ -576,7 +576,7 @@ const TeamDetail = () => {
   const renderSidebarModalInfo = (children: ReactElement) => {
     return (
       <div className={styles.modalBodyDialog}>
-        <Dialog type='info'>Det kan ta opp til 45 minutter før personen kan bruke tilgangen</Dialog>
+        <Dialog type='info'>Det kan ta litt tid før du ser endringen.</Dialog>
         {children}
       </div>
     )
