@@ -197,7 +197,10 @@ const EditTeamMember = ({
           }
         })
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
-        .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+        .finally(() => {
+          setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false })
+          setRefreshData(true)
+        })
       return
     }
   }
