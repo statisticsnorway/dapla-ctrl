@@ -16,7 +16,7 @@ import {
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
 import { useState, useEffect, useContext } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
 import { formatDisplayName, getGroupType, stripSuffixes } from '../../utils/utils'
 
@@ -29,6 +29,7 @@ const SharedBucketDetail = () => {
 
   const { teamId } = useParams<{ teamId: string }>()
   const { shortName } = useParams<{ shortName: string }>()
+  const navigate = useNavigate()
 
   const prepSharedBucketTableData = (response: SharedBucketDetailType): TableData['data'] => {
     const usersMap: {
@@ -92,6 +93,7 @@ const SharedBucketDetail = () => {
       })
       .finally(() => setLoadingSharedBucketsData(false))
       .catch((error) => {
+        if (error?.code === 404) return navigate('/not-found')
         setError(error as ApiError)
       })
   }, [])

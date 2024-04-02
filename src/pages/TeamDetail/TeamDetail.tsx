@@ -5,7 +5,7 @@ import { TabProps } from '../../@types/pageTypes'
 import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import { TeamDetailData, getTeamDetail, Team, SharedBuckets, Group } from '../../services/teamDetail'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
@@ -86,6 +86,7 @@ const TeamDetail = () => {
   const [editUserInfo, setEditUserInfo] = useState<UserInfo>({ name: '', email: '', groups: [] })
 
   const { teamId } = useParams<{ teamId: string }>()
+  const navigate = useNavigate()
   const teamDetailTab = (activeTab as TabProps)?.path ?? activeTab
 
   const prepTeamData = useCallback(
@@ -181,6 +182,7 @@ const TeamDetail = () => {
       })
       .finally(() => setLoadingTeamData(false))
       .catch((error) => {
+        if (error?.code === 404) return navigate('/not-found')
         setError(error as ApiError)
       })
   }, [])

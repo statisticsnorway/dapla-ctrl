@@ -18,7 +18,7 @@ const App = () => {
         <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
         <Route path='/:teamId' element={<TeamDetail />} />
         <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
-        <Route path='*' element={<NotFound />} />
+        <Route path='/not-found' element={<NotFound />} />
       </Route>
     </Routes>
   )
