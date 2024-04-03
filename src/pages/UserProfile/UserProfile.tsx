@@ -13,7 +13,7 @@ import { getGroupType, formatDisplayName, stripSuffixes } from '../../utils/util
 
 import { getUserProfileTeamData, TeamsData } from '../../services/userProfile'
 
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Skeleton } from '@mui/material'
 import { ApiError } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
@@ -24,7 +24,9 @@ const UserProfile = () => {
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [userProfileData, setUserProfileData] = useState<TeamsData>()
   const [teamUserProfileTableData, setUserProfileTableData] = useState<TableData['data']>()
+
   const { principalName } = useParams()
+  const navigate = useNavigate()
 
   const prepTeamData = useCallback(
     (response: TeamsData): TableData['data'] => {
@@ -62,6 +64,7 @@ const UserProfile = () => {
       })
       .finally(() => setLoadingTeamData(false))
       .catch((error) => {
+        if (error?.code === 404) return navigate('/not-found')
         setError(error as ApiError)
       })
   }, [principalName, setBreadcrumbUserProfileDisplayName])
