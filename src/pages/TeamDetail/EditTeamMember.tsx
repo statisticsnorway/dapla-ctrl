@@ -20,6 +20,7 @@ interface EditUserStates {
 
 interface EditTeamMember {
   editUserInfo: UserInfo
+  setRefreshData: React.Dispatch<React.SetStateAction<boolean>>
   teamDetailData: TeamDetailData | undefined
   teamModalHeader: SidebarHeader
   teamGroups: Group[]
@@ -35,6 +36,7 @@ const defaultSelectedGroup = {
 
 const EditTeamMember = ({
   editUserInfo,
+  setRefreshData,
   teamDetailData,
   teamModalHeader,
   teamGroups,
@@ -124,7 +126,10 @@ const EditTeamMember = ({
           }
         })
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
-        .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+        .finally(() => {
+          setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false })
+          setRefreshData(true)
+        })
 
       return
     }
@@ -143,7 +148,10 @@ const EditTeamMember = ({
           }
         })
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
-        .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+        .finally(() => {
+          setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false })
+          setRefreshData(true)
+        })
 
       return
     }
@@ -162,7 +170,10 @@ const EditTeamMember = ({
           }
         })
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
-        .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+        .finally(() => {
+          setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false })
+          setRefreshData(true)
+        })
       return
     }
   }
@@ -186,7 +197,10 @@ const EditTeamMember = ({
           }
         })
         .catch((e) => setEditUserErrors({ ...editUserErrors, [`${editUserInfo.email}`]: e.message }))
-        .finally(() => setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false }))
+        .finally(() => {
+          setShowEditUserSpinner({ ...showEditUserSpinner, [`${editUserInfo.email}`]: false })
+          setRefreshData(true)
+        })
       return
     }
   }

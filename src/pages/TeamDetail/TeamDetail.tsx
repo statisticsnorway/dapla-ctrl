@@ -68,6 +68,7 @@ const TeamDetail = () => {
 
   const { setBreadcrumbTeamDetailDisplayName } = useContext(DaplaCtrlContext)
   const [error, setError] = useState<ApiError | undefined>()
+  const [refreshData, setRefreshData] = useState<boolean>(false)
   const [loadingTeamData, setLoadingTeamData] = useState<boolean>(true)
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
@@ -180,12 +181,36 @@ const TeamDetail = () => {
         const displayName = formatDisplayName((formattedResponse.team as Team).display_name)
         setBreadcrumbTeamDetailDisplayName({ displayName })
       })
-      .finally(() => setLoadingTeamData(false))
+      .finally(() => {
+        setLoadingTeamData(false)
+        setRefreshData(false)
+      })
       .catch((error) => {
         if (error?.code === 404) return navigate('/not-found')
         setError(error as ApiError)
       })
   }, [])
+
+  useEffect(() => {
+    if (!teamId || refreshData === false) return
+    setLoadingTeamData(true)
+    getTeamDetail(teamId)
+      .then((response) => {
+        const formattedResponse = response as TeamDetailData
+        setTeamDetailData(formattedResponse)
+        setTeamDetailTableData(prepTeamData(formattedResponse))
+
+        const displayName = formatDisplayName((formattedResponse.team as Team).display_name)
+        setBreadcrumbTeamDetailDisplayName({ displayName })
+      })
+      .finally(() => {
+        setLoadingTeamData(false)
+        setRefreshData(false)
+      })
+      .catch((error) => {
+        setError(error as ApiError)
+      })
+  }, [refreshData])
 
   useEffect(() => {
     if (isTeamManager()) {
@@ -314,6 +339,7 @@ const TeamDetail = () => {
     <>
       <AddTeamMember
         loadingUsers={loadingUsers}
+        setRefreshData={setRefreshData}
         userData={userData}
         teamDetailData={teamDetailData}
         teamModalHeader={teamModalHeader}
@@ -323,6 +349,7 @@ const TeamDetail = () => {
       />
       <EditTeamMember
         editUserInfo={editUserInfo}
+        setRefreshData={setRefreshData}
         teamDetailData={teamDetailData}
         teamModalHeader={teamModalHeader}
         teamGroups={teamGroups}
