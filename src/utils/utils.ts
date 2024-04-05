@@ -7,7 +7,7 @@ import { JobResponse } from '../services/teamDetail'
 export const DAPLA_TEAM_API_URL = `/api`
 
 export const getGroupType = (groupName: string) => {
-  const match = groupName.match(/(managers|developers|data-admins|support|consumers)$/)
+  const match = groupName.match(/(managers|developers|data-admins|support|consumers|editor)$/)
   const role = match ? match[0] : null
   switch (role) {
     case 'managers':
@@ -20,6 +20,8 @@ export const getGroupType = (groupName: string) => {
       return 'support'
     case 'consumers':
       return 'consumers'
+    case 'editor':
+      return 'editor'
     default:
       return groupName
   }
