@@ -129,7 +129,14 @@ const TeamDetail = () => {
             gruppe: groups
               ?.filter((group) => {
                 const baseUniformName = (response.team as Team).uniform_name
-                const allowedSuffixes = ['-managers', '-developers', '-data-admins', '-support', '-consumers']
+                const allowedSuffixes = [
+                  '-managers',
+                  '-developers',
+                  '-data-admins',
+                  '-support',
+                  '-consumers',
+                  '-editor',
+                ]
                 if (group.uniform_name.startsWith(baseUniformName)) {
                   const suffix = group.uniform_name.slice(baseUniformName.length)
                   return allowedSuffixes.some((allowedSuffix) => suffix.startsWith(allowedSuffix))
