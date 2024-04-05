@@ -116,7 +116,6 @@ const TeamDetail = () => {
           const userGroups = groups?.filter((group) =>
             group.uniform_name.startsWith((response.team as Team).uniform_name)
           ) as Group[]
-          console.log(userGroups)
           return {
             id: userFullName,
             navn: (
