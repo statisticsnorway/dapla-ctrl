@@ -171,7 +171,7 @@ const TeamDetail = () => {
 
   const isTeamManager = useCallback(() => {
     const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
-    return teamManagers?.some((manager) => manager.principal_name === tokenData?.email)
+    return teamManagers?.some((manager) => manager.principal_name.toLowerCase() === tokenData?.email.toLowerCase())
   }, [tokenData, teamDetailData])
 
   useEffect(() => {
