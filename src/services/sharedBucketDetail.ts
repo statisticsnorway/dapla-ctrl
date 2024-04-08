@@ -33,7 +33,7 @@ export interface Group {
 const fetchTeamDetail = async (teamId: string): Promise<Team> => {
   const teamUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
 
-  const selects = ['uniform_name', 'section_name']
+  const selects = ['uniform_name', 'section_name', 'groups.uniform_name']
 
   teamUrl.searchParams.set('selects', selects.join(','))
 

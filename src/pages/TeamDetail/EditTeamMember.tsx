@@ -60,7 +60,7 @@ const EditTeamMember = ({
       ) as Group[]
       setUserGroupTags(
         userGroups.map(({ uniform_name }) => {
-          return { id: uniform_name, title: getGroupType(uniform_name) }
+          return { id: uniform_name, title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name) }
         })
       )
       setSelectedGroupEditUser({
@@ -260,7 +260,7 @@ const EditTeamMember = ({
                 selectedItem={selectedGroupEditUser}
                 items={teamGroups.map(({ uniform_name }) => ({
                   id: uniform_name,
-                  title: getGroupType(uniform_name),
+                  title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name),
                 }))}
                 onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
               />

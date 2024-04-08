@@ -1,7 +1,7 @@
 import styles from './teamDetail.module.scss'
 
 import { useState } from 'react'
-import { TeamDetailData, addUserToGroups, Group } from '../../services/teamDetail'
+import { TeamDetailData, addUserToGroups, Group, Team } from '../../services/teamDetail'
 import { User } from '../../services/teamMembers'
 import { formatDisplayName, getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
 import { DropdownItems } from '../../@types/pageTypes'
@@ -159,7 +159,7 @@ const AddTeamMember = ({
                 selectedItem={selectedGroupAddUser}
                 items={teamGroups.map(({ uniform_name }) => ({
                   id: uniform_name,
-                  title: getGroupType(uniform_name),
+                  title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name),
                 }))}
                 onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
                 error={teamGroupTagsError.error}

@@ -46,7 +46,9 @@ const SharedBucketDetail = () => {
 
     ;((response['sharedBucket'] as SharedBucket).groups ?? []).forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
-        const key = `${user.principal_name}-${stripSuffixes(uniform_name)}`
+        const team_name = stripSuffixes(uniform_name)
+        const group_type = getGroupType(team_name, uniform_name)
+        const key = `${user.principal_name}-${team_name}`
         if (!usersMap[key]) {
           usersMap[key] = {
             id: formatDisplayName(user.display_name),
@@ -59,16 +61,16 @@ const SharedBucketDetail = () => {
             ),
             seksjon: user.section_name,
             principal_name: user.principal_name,
-            team_navn: stripSuffixes(uniform_name),
-            gruppe: [getGroupType(uniform_name)],
+            team_navn: team_name,
+            gruppe: [group_type],
             team: (
               <span>
-                <Link href={`/${stripSuffixes(uniform_name)}`}>{stripSuffixes(uniform_name)}</Link>
+                <Link href={`/${team_name}`}>{team_name}</Link>
               </span>
             ),
           }
         } else {
-          usersMap[key].gruppe.push(getGroupType(uniform_name))
+          usersMap[key].gruppe.push(getGroupType(team_name, uniform_name))
         }
       })
     })
