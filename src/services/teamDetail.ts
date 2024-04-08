@@ -15,6 +15,7 @@ export interface Team {
   section_name: string
   section_code?: string
   section_manager: User
+  autonomy_level: string
   managers?: TeamManager[]
   users?: User[]
   groups?: Group[]
@@ -68,6 +69,7 @@ export const fetchTeamInfo = async (teamId: string): Promise<Team | ApiError> =>
   const teamsUrl = new URL(`${TEAMS_URL}/${teamId}`, window.location.origin)
   const embeds = ['users', 'users.groups', 'managers', 'groups']
   const selects = [
+    'autonomy_level',
     'uniform_name',
     'display_name',
     'section_name',

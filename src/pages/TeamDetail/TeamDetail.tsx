@@ -129,21 +129,9 @@ const TeamDetail = () => {
             gruppe: groups
               ?.filter((group) => {
                 const baseUniformName = (response.team as Team).uniform_name
-                const allowedSuffixes = [
-                  '-managers',
-                  '-developers',
-                  '-data-admins',
-                  '-support',
-                  '-consumers',
-                  '-editor',
-                ]
-                if (group.uniform_name.startsWith(baseUniformName)) {
-                  const suffix = group.uniform_name.slice(baseUniformName.length)
-                  return allowedSuffixes.some((allowedSuffix) => suffix.startsWith(allowedSuffix))
-                }
-                return false
+                return group.uniform_name.startsWith(baseUniformName)
               })
-              .map((group) => getGroupType(group.uniform_name))
+              .map((group) => getGroupType((response.team as Team).uniform_name, group.uniform_name))
               .join(', '),
             epost: principal_name,
             editUser: (
@@ -171,6 +159,8 @@ const TeamDetail = () => {
 
   const isTeamManager = useCallback(() => {
     const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
+    const autonomy_level = (teamDetailData && (teamDetailData.team as Team).autonomy_level) ?? ''
+    if (autonomy_level !== 'MANAGED') return false
     return teamManagers?.some((manager) => manager.principal_name.toLowerCase() === tokenData?.email.toLowerCase())
   }, [tokenData, teamDetailData])
 

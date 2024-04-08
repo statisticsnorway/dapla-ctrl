@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
-import { Dialog, Tabs, Divider } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Tabs, Divider, Button } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
 import PageLayout from '../../components/PageLayout/PageLayout'
@@ -133,7 +133,16 @@ const TeamOverview = () => {
     }
   }
 
-  return <PageLayout title='Teamoversikt' content={renderContent()} />
+  return (
+    <PageLayout
+      title='Teamoversikt'
+      content={renderContent()}
+      button={
+        // TODO: URL should be an environment variable set using vite envs or fetch from server.js as an api call
+        <Button onClick={() => window.open('https://start.dapla.ssb.no', '_blank')}>+ Opprett team</Button>
+      }
+    />
+  )
 }
 
 export default TeamOverview
