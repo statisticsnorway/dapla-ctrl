@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     viteEnvs({
+      declarationFile: '.env',
       computedEnv: async ({ resolvedConfig }) => {
         const path = await import('path')
         const fs = await import('fs/promises')
