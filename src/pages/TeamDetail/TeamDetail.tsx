@@ -6,7 +6,7 @@ import { useCallback, useContext, useEffect, useState } from 'react'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import { TeamDetailData, getTeamDetail, Team, SharedBuckets, Group } from '../../services/teamDetail'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ApiError, TokenData, fetchUserInformationFromAuthToken } from '../../utils/services'
+import { ApiError, TokenData, fetchUserInformationFromAuthToken, isDaplaAdmin } from '../../utils/services'
 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
@@ -73,6 +73,7 @@ const TeamDetail = () => {
   const [loadingUsers, setLoadingUsers] = useState<boolean>(false)
   const [teamDetailData, setTeamDetailData] = useState<TeamDetailData>()
   const [userData, setUserData] = useState<User[]>()
+  const [isManager, setIsManager] = useState<boolean>(false)
   const [teamDetailTableTitle, setTeamDetailTableTitle] = useState<string>(TEAM_USERS_TAB.title)
   const [teamDetailTableHeaderColumns, setTeamDetailTableHeaderColumns] = useState<TableData['columns']>(
     TEAM_USERS_TAB.columns
@@ -157,11 +158,25 @@ const TeamDetail = () => {
     [activeTab]
   )
 
-  const isTeamManager = useCallback(() => {
-    const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
-    const autonomy_level = (teamDetailData && (teamDetailData.team as Team).autonomy_level) ?? ''
-    if (autonomy_level !== 'MANAGED') return false
-    return teamManagers?.some((manager) => manager.principal_name.toLowerCase() === tokenData?.email.toLowerCase())
+  useEffect(() => {
+    const checkIsTeamManager = async () => {
+      const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
+      if (tokenData) {
+        const isAdmin = await isDaplaAdmin(tokenData.email.toLowerCase())
+        if (isAdmin) {
+          setIsManager(true)
+          return
+        }
+        const isManagerResult = teamManagers.some(
+          (manager) => manager.principal_name.toLowerCase() === tokenData.email.toLowerCase()
+        )
+        setIsManager(isManagerResult)
+      } else {
+        setIsManager(false)
+      }
+    }
+
+    checkIsTeamManager()
   }, [tokenData, teamDetailData])
 
   useEffect(() => {
@@ -210,7 +225,7 @@ const TeamDetail = () => {
   }, [refreshData])
 
   useEffect(() => {
-    if (isTeamManager()) {
+    if (isManager) {
       setTeamDetailTableHeaderColumns([
         ...TEAM_USERS_TAB.columns,
         {
@@ -221,7 +236,7 @@ const TeamDetail = () => {
         },
       ])
     }
-  }, [isTeamManager])
+  }, [isManager])
 
   useEffect(() => {
     if (teamDetailData) {
@@ -230,7 +245,7 @@ const TeamDetail = () => {
         setTeamDetailTableHeaderColumns(SHARED_BUCKETS_TAB.columns)
       } else {
         setTeamDetailTableTitle(TEAM_USERS_TAB.title)
-        if (isTeamManager()) {
+        if (isManager) {
           setTeamDetailTableHeaderColumns([
             ...TEAM_USERS_TAB.columns,
             {
@@ -363,7 +378,7 @@ const TeamDetail = () => {
         }
         content={renderContent()}
         button={
-          isTeamManager() && teamDetailData ? (
+          isManager && teamDetailData ? (
             <Button onClick={() => setOpenAddUserSidebarModal(true)}>+ Nytt medlem</Button>
           ) : undefined
         }

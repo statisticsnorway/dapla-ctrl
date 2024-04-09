@@ -16,11 +16,7 @@ const Header = () => {
       </h2>
       <div className={styles.navigation}>
         <div className={styles.links}>
-          <Link
-            href='https://statistics-norway.atlassian.net/wiki/spaces/DAPLA/pages/3803611153/Dapla+Ctrl'
-            isExternal={true}
-            icon={<BookOpen size='20' />}
-          >
+          <Link href={import.meta.env.DAPLA_CTRL_DOCUMENTATION_URL} isExternal={true} icon={<BookOpen size='20' />}>
             Dokumentasjon
           </Link>
           <Link href='/teammedlemmer'>Teammedlemmer</Link>

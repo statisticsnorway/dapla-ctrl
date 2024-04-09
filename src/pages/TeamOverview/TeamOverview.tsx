@@ -138,8 +138,9 @@ const TeamOverview = () => {
       title='Teamoversikt'
       content={renderContent()}
       button={
-        // TODO: URL should be an environment variable set using vite envs or fetch from server.js as an api call
-        <Button onClick={() => window.open('https://start.dapla.ssb.no', '_blank')}>+ Opprett team</Button>
+        <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL, 'noopener')}>
+          + Opprett team
+        </Button>
       }
     />
   )
