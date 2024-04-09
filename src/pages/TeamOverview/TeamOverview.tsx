@@ -138,7 +138,7 @@ const TeamOverview = () => {
       title='Teamoversikt'
       content={renderContent()}
       button={
-        <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
+        <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL, 'noopener')}>
           + Opprett team
         </Button>
       }
