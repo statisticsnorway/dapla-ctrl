@@ -11,7 +11,7 @@ WORKDIR /usr/local/app
 COPY --from=builder /usr/local/app/dist ./dist
 COPY package*.json server.js ./
 
-RUN npm install --save-exact express vite-express
+RUN npm install --ignore-scripts --save-exact express vite-express
 
 ENV PORT=8080
 EXPOSE 8080
