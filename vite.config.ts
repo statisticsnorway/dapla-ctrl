@@ -21,10 +21,7 @@ export default defineConfig({
          */
         return {
           BUILD_TIME: Date.now(),
-          VERSION: packageJson.version,
-          DAPLA_CTRL_ADMIN_GROUPS: process.env.DAPLA_CTRL_ADMIN_GROUPS,
-          DAPLA_CTRL_DOCUMENTATION_URL: process.env.DAPLA_CTRL_DOCUMENTATION_URL,
-          DAPLA_CTRL_DAPLA_START_URL: process.env.DAPLA_CTRL_DAPLA_START_URL,
+          VERSION: packageJson.version
         }
       },
     }),

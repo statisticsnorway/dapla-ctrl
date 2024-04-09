@@ -8,6 +8,7 @@ type ImportMetaEnv = {
   PROD: boolean
   BUILD_TIME: number
   VERSION: string
+  DAPLA_TEAM_API_URL: string
   DAPLA_CTRL_ADMIN_GROUPS: string
   DAPLA_CTRL_DOCUMENTATION_URL: string
   DAPLA_CTRL_DAPLA_START_URL: string

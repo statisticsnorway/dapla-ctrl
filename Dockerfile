@@ -6,16 +6,15 @@ RUN npm ci && npm run build
 
 FROM node:20-alpine
 
-COPY --from=builder /usr/local/app/dist /usr/local/app/dist
 WORKDIR /usr/local/app
 
-COPY package*.json .
-COPY server.js .
+COPY --from=builder /usr/local/app/dist ./dist
+COPY package*.json server.js ./
 
-RUN npm i --save-exact express vite-express
-RUN cp -R /usr/local/app/dist/* .
+RUN npm install --save-exact express vite-express \
+    && cp -r dist/* .
 
-ENV PORT 8080
+ENV PORT=8080
 EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "./vite-envs.sh && npm run prod"]
