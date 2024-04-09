@@ -1,5 +1,5 @@
 FROM node:20-alpine AS builder
-WORKDIR /usr/local/app
+WORKDIR /usr/local/app/dist
 
 COPY . .
 RUN npm ci && npm run build
@@ -17,4 +17,4 @@ RUN npm i --save-exact express vite-express
 ENV PORT 8080
 EXPOSE 8080
 
-CMD ["npm", "run", "prod"]
+ENTRYPOINT sh -c "./vite-envs.sh && npm run prod"
