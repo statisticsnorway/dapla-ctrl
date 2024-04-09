@@ -159,8 +159,6 @@ const TeamDetail = () => {
 
   const isTeamManager = useCallback(() => {
     const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
-    const autonomy_level = (teamDetailData && (teamDetailData.team as Team).autonomy_level) ?? ''
-    if (autonomy_level !== 'MANAGED') return false
     return teamManagers?.some((manager) => manager.principal_name.toLowerCase() === tokenData?.email.toLowerCase())
   }, [tokenData, teamDetailData])
 
