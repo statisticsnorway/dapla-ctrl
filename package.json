@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "prepare": "npx vite-envs update-types",
     "dev": "nodemon server.js -w server.js",
     "prod": "NODE_ENV=production node server.js",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
     "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepare": "npx vite-envs update-types"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -48,7 +48,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "typescript": "^5.4.4",
-    "vite-envs": "^4.0.6",
     "vite": "^5.2.8"
   }
 }
