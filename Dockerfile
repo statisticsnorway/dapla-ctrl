@@ -1,5 +1,5 @@
 FROM node:20-alpine AS builder
-WORKDIR /usr/local/app/dist
+WORKDIR /usr/local/app
 
 COPY . .
 RUN npm ci && npm run build
@@ -13,6 +13,7 @@ COPY package*.json .
 COPY server.js .
 
 RUN npm i --save-exact express vite-express
+WORKDIR  /usr/local/app/dist
 
 ENV PORT 8080
 EXPOSE 8080
