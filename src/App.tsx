@@ -10,7 +10,6 @@ import SharedBucketDetail from './pages/SharedBucketDetail/SharedBucketDetail.ts
 import { Routes, Route } from 'react-router-dom'
 
 const App = () => {
-
   console.log(import.meta.env)
 
   return (

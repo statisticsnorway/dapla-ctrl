@@ -21,7 +21,7 @@ export default defineConfig({
          */
         return {
           BUILD_TIME: Date.now(),
-          VERSION: packageJson.version
+          VERSION: packageJson.version,
         }
       },
     }),
