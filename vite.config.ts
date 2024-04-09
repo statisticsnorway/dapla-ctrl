@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     react(),
     viteEnvs({
-      declarationFile: ".env",
+      declarationFile: '.env',
       computedEnv: async ({ resolvedConfig }) => {
         const path = await import('path')
         const fs = await import('fs/promises')
@@ -24,7 +24,7 @@ export default defineConfig({
           VERSION: packageJson.version,
           DAPLA_CTRL_ADMIN_GROUPS: process.env.DAPLA_CTRL_ADMIN_GROUPS,
           DAPLA_CTRL_DOCUMENTATION_URL: process.env.DAPLA_CTRL_DOCUMENTATION_URL,
-          DAPLA_CTRL_DAPLA_START_URL: process.env.DAPLA_CTRL_DAPLA_START_URL
+          DAPLA_CTRL_DAPLA_START_URL: process.env.DAPLA_CTRL_DAPLA_START_URL,
         }
       },
     }),
