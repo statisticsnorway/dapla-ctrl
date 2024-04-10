@@ -30,10 +30,11 @@ interface TeamManager {
   principal_name: string
 }
 
-interface User {
+export interface User {
   display_name: string
   principal_name: string
   section_name: string
+  job_title: string
   azure_ad_id?: string
   first_name?: string
   last_name?: string
@@ -57,6 +58,7 @@ export const getUserProfile = async (principalName: string): Promise<User | ApiE
     'section_name',
     'division_name',
     'phone',
+    'job_title',
     'section_manager.display_name',
     'section_manager.principal_name',
   ]

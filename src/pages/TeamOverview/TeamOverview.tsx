@@ -9,8 +9,9 @@ import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 
 import { fetchTeamOverviewData, TeamOverviewData } from '../../services/teamOverview'
 import { formatDisplayName } from '../../utils/utils'
-import { ApiError, fetchUserInformationFromAuthToken } from '../../utils/services'
+import { ApiError, fetchUserInformationFromAuthToken, isDaplaAdmin } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
+import { User } from '../../services/userProfile'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -24,6 +25,7 @@ const ALL_TEAMS_TAB = {
 
 const TeamOverview = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(MY_TEAMS_TAB)
+  const [isSectionManager, SetIsSectionManager] = useState<boolean>(false)
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
@@ -62,6 +64,27 @@ const TeamOverview = () => {
     }
 
     fetchData()
+  }, [])
+
+  useEffect(() => {
+    const userProfileItem = localStorage.getItem('userProfile')
+    if (!userProfileItem) return
+
+    const user = JSON.parse(userProfileItem) as User
+    if (!user) return
+
+    const allowViewCreateTeamButton = async () => {
+      const isAdmin = await isDaplaAdmin(user.principal_name)
+      if (isAdmin) {
+        SetIsSectionManager(true)
+        return
+      }
+      if (user.job_title.toLowerCase() === 'seksjonssjef') {
+        SetIsSectionManager(true)
+      }
+    }
+
+    allowViewCreateTeamButton()
   }, [])
 
   useEffect(() => {
@@ -138,9 +161,13 @@ const TeamOverview = () => {
       title='Teamoversikt'
       content={renderContent()}
       button={
-        <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
-          + Opprett team
-        </Button>
+        <>
+          {teamOverviewData && isSectionManager && (
+            <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
+              + Opprett team
+            </Button>
+          )}
+        </>
       }
     />
   )
