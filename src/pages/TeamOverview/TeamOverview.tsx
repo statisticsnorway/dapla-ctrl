@@ -67,10 +67,9 @@ const TeamOverview = () => {
   }, [])
 
   useEffect(() => {
-
-    const userProfileItem = localStorage.getItem("userProfile")
+    const userProfileItem = localStorage.getItem('userProfile')
     if (!userProfileItem) return
-    
+
     const user = JSON.parse(userProfileItem) as User
     if (!user) return
 
@@ -163,13 +162,12 @@ const TeamOverview = () => {
       content={renderContent()}
       button={
         <>
-          { isSectionManager && 
+          {isSectionManager && (
             <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
-            + Opprett team
+              + Opprett team
             </Button>
-          }
+          )}
         </>
-        
       }
     />
   )
