@@ -12,7 +12,7 @@ const Header = () => {
   return (
     <div className={styles.header}>
       <h2 className={styles.title} onClick={() => navigate('/')}>
-        Dapla ctrl
+        Dapla Ctrl
       </h2>
       <div className={styles.navigation}>
         <div className={styles.links}>
