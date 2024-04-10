@@ -162,7 +162,7 @@ const TeamOverview = () => {
       content={renderContent()}
       button={
         <>
-          {isSectionManager && (
+          {teamOverviewData && isSectionManager && (
             <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
               + Opprett team
             </Button>
