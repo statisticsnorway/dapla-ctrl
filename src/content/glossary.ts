@@ -5,13 +5,13 @@ interface AutonomyLevel {
 
 export const AUTONOMY_LEVEL: Record<string, AutonomyLevel> = {
     MANAGED: {
-        text: "Team is Managed"
+        text: "Et managed Dapla-team er et team som kun kan bruke tjenester som er tilbys på Dapla."
     },
     SELF_MANAGED: {
-        text: "Self managed"
+        text: "Et self-managed Dapla-team er et team som står helt fritt til å definere sin egen infrastruktur og er ansvarlig for at den er satt opp iht SSBs krav. "
     },
     SEMI_MANAGED: {
-        text: "Semi managed"
+        text: "Et semi-managed Dapla-team er et team som stort sett benytter seg tjenestene som tilbys på Dapla, men de har også noe frihet til å ta ansvar for deler av sin egen infrastruktur."
     },
     UNDEFINED: {
         text: "Autonomy level is undefined"

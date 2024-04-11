@@ -305,7 +305,7 @@ const TeamDetail = () => {
 
     if (teamDetailData && teamDetailTableHeaderColumns && teamDetailTableData) {
       const autonomy_level: string = (teamDetailData.team as Team).autonomy_level || "UNDEFINED"
-      const autonomy_description: string = AUTONOMY_LEVEL[autonomy_level]?.text || "Autonomy level is undefined"
+      const autonomy_description: string = AUTONOMY_LEVEL[autonomy_level]?.text || "Autonomy level description is undefined"
       return (
         <>
           <LeadParagraph className={pageStyles.description}>
