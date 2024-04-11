@@ -11,7 +11,16 @@ import { ApiError, TokenData, fetchUserInformationFromAuthToken, isDaplaAdmin } 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { Text, Dialog, LeadParagraph, Divider, Tabs, Button, Link } from '@statisticsnorway/ssb-component-library'
+import {
+  Text,
+  Dialog,
+  LeadParagraph,
+  Divider,
+  Tabs,
+  Button,
+  Link,
+  Glossary,
+} from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 
@@ -19,6 +28,7 @@ import FormattedTableColumn from '../../components/FormattedTableColumn/Formatte
 import { fetchUserSearchData, User } from '../../services/teamMembers'
 import AddTeamMember from './AddTeamMember'
 import EditTeamMember from './EditTeamMember'
+import { AUTONOMY_LEVEL } from '../../content/glossary'
 
 export interface UserInfo {
   name?: string
@@ -303,6 +313,9 @@ const TeamDetail = () => {
     if (loadingTeamData) return <PageSkeleton hasDescription />
 
     if (teamDetailData && teamDetailTableHeaderColumns && teamDetailTableData) {
+      const autonomy_level: string = (teamDetailData.team as Team).autonomy_level || 'UNDEFINED'
+      const autonomy_description: string =
+        AUTONOMY_LEVEL[autonomy_level]?.text || 'Autonomy level description is undefined'
       return (
         <>
           <LeadParagraph className={pageStyles.description}>
@@ -312,6 +325,9 @@ const TeamDetail = () => {
             <Text medium>{formatDisplayName((teamDetailData.team as Team).section_manager.display_name ?? '')}</Text>
             <Text medium>{(teamDetailData.team as Team).section_name ?? ''}</Text>
           </LeadParagraph>
+          <Text>
+            <Glossary explanation={autonomy_description}>{autonomy_level}</Glossary>
+          </Text>
           <Tabs
             onClick={handleTabClick}
             activeOnInit={TEAM_USERS_TAB.path}
