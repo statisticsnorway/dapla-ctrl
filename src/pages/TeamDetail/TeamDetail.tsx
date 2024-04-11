@@ -11,7 +11,16 @@ import { ApiError, TokenData, fetchUserInformationFromAuthToken, isDaplaAdmin } 
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import Table, { TableData } from '../../components/Table/Table'
 import { formatDisplayName, getGroupType } from '../../utils/utils'
-import { Text, Dialog, LeadParagraph, Divider, Tabs, Button, Link, Glossary } from '@statisticsnorway/ssb-component-library'
+import {
+  Text,
+  Dialog,
+  LeadParagraph,
+  Divider,
+  Tabs,
+  Button,
+  Link,
+  Glossary,
+} from '@statisticsnorway/ssb-component-library'
 import PageSkeleton from '../../components/PageSkeleton/PageSkeleton'
 import { Skeleton } from '@mui/material'
 
@@ -304,8 +313,9 @@ const TeamDetail = () => {
     if (loadingTeamData) return <PageSkeleton hasDescription />
 
     if (teamDetailData && teamDetailTableHeaderColumns && teamDetailTableData) {
-      const autonomy_level: string = (teamDetailData.team as Team).autonomy_level || "UNDEFINED"
-      const autonomy_description: string = AUTONOMY_LEVEL[autonomy_level]?.text || "Autonomy level description is undefined"
+      const autonomy_level: string = (teamDetailData.team as Team).autonomy_level || 'UNDEFINED'
+      const autonomy_description: string =
+        AUTONOMY_LEVEL[autonomy_level]?.text || 'Autonomy level description is undefined'
       return (
         <>
           <LeadParagraph className={pageStyles.description}>
