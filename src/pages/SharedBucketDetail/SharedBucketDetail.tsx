@@ -44,9 +44,10 @@ const SharedBucketDetail = () => {
       }
     } = {}
 
+    const allTeams = response['allTeams'] as Team[]
     ;((response['sharedBucket'] as SharedBucket).groups ?? []).forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
-        const team_name = getTeamFromGroup(response['allTeams'] as Team[], uniform_name)
+        const team_name = getTeamFromGroup(allTeams, uniform_name)
         const group_type = getGroupType(team_name, uniform_name)
         const key = `${user.principal_name}-${team_name}`
         if (!usersMap[key]) {
