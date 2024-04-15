@@ -100,7 +100,7 @@ export const fetchAllTeams = async (): Promise<Team[]> => {
   try {
     const teams = await fetchAPIData(teamsUrl.toString())
     if (!teams) throw new ApiError(500, 'No json data returned')
-    if (!teams._embedded || !teams._embedded.teams) return {} as Team[]
+    if (!teams._embedded?.teams) return {} as Team[]
 
     const flattedTeams = flattenEmbedded({ ...teams })
     return flattedTeams.teams
