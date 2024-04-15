@@ -18,7 +18,7 @@ import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 import { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
-import { formatDisplayName, getGroupType, stripSuffixes } from '../../utils/utils'
+import { formatDisplayName, getGroupType, getTeamFromGroup } from '../../utils/utils'
 
 const SharedBucketDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName, setBreadcrumbBucketDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -46,7 +46,7 @@ const SharedBucketDetail = () => {
 
     ;((response['sharedBucket'] as SharedBucket).groups ?? []).forEach(({ uniform_name, users }) => {
       ;(users ?? []).forEach((user) => {
-        const team_name = stripSuffixes(uniform_name)
+        const team_name = getTeamFromGroup(response['allTeams'] as Team[], uniform_name)
         const group_type = getGroupType(team_name, uniform_name)
         const key = `${user.principal_name}-${team_name}`
         if (!usersMap[key]) {

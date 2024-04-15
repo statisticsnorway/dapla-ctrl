@@ -3,6 +3,7 @@
 
 import { DropdownItems } from '../@types/pageTypes'
 import { JobResponse } from '../services/teamDetail'
+import { Team } from '../services/sharedBucketDetail'
 
 export const DAPLA_TEAM_API_URL = `/api`
 
@@ -11,16 +12,27 @@ export const getGroupType = (teamName: string, groupName: string): string => {
   return groupName.slice(teamName.length + 1)
 }
 
-export const stripSuffixes = (inputString: string) => {
-  // Regular expression to match the specified suffixes
+// TODO: Replaced by the getTeamFromGroup function; consider removing
+// export const stripSuffixes = (inputString: string) => {
+//   // Regular expression to match the specified suffixes
 
-  // TODO: Get suffixes from function parameters (which is passed from query response), this because we dont know
-  // all the custom groups, and they can be created at any time
-  // this may require a re-write of how we fetch and aggregate data in SharedBucketDetail.tsx
-  const suffixesPattern = /-(data-admins|managers|developers|consumers|support|editor|admin)$/
+//   // TODO: Get suffixes from function parameters (which is passed from query response), this because we dont know
+//   // all the custom groups, and they can be created at any time
+//   // this may require a re-write of how we fetch and aggregate data in SharedBucketDetail.tsx
+//   const suffixesPattern = /-(data-admins|managers|developers|consumers|support|editor|admin)$/
 
-  // Replace matched suffix with an empty string
-  return inputString.replace(suffixesPattern, '')
+//   // Replace matched suffix with an empty string
+//   return inputString.replace(suffixesPattern, '')
+// }
+
+export const getTeamFromGroup = (allTeams: Team[], groupName: string): string => {
+  if (allTeams?.length) {
+    const teamName = allTeams.filter(({ uniform_name }) => {
+      if (groupName.includes(uniform_name)) return uniform_name
+    })
+    return teamName[0].uniform_name
+  }
+  return ''
 }
 
 export const formatDisplayName = (displayName: string) => {
