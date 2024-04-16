@@ -177,6 +177,12 @@ const TeamDetail = () => {
           setIsManager(true)
           return
         }
+        // if autonomy_level is not 'MANAGED' then you should not be able to see
+        // what managers sees, unless you are an admin
+        if (teamDetailData && (teamDetailData.team as Team).autonomy_level !== 'MANAGED') {
+          setIsManager(false)
+          return
+        }
         const isManagerResult = teamManagers.some(
           (manager) => manager.principal_name.toLowerCase() === tokenData.email.toLowerCase()
         )
