@@ -44,7 +44,7 @@ const TeamMembers = () => {
               text={section_name}
             />
           ),
-          team: teams.length,
+          team: teams?.length ?? 0,
           epost: principal_name,
           data_admin: groups.filter((group) => group.uniform_name.endsWith('data-admins')).length,
           seksjon: section_name, // Makes section name searchable and sortable in table by including the field

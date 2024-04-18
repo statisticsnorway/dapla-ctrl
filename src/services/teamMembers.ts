@@ -92,7 +92,7 @@ export const fetchManagedUsersManagers = async (principalName: string): Promise<
         }
         delete prepData._embedded
 
-        return prepData
+        return { ...prepData, teams: prepData.teams?.length ? prepData.teams : [] }
       })
     )
 
@@ -138,7 +138,7 @@ export const fetchAllUsers = async (): Promise<UsersData> => {
         ...user._embedded,
       }
       delete prepUserData._embedded
-      return prepUserData
+      return { ...prepUserData, teams: prepUserData.teams?.length ? prepUserData.teams : [] }
     })
     delete prepData._embedded
 
