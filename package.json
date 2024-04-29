@@ -18,7 +18,7 @@
     "@emotion/styled": "^11.11.5",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@mui/material": "^5.15.15",
-    "@statisticsnorway/ssb-component-library": "^2.0.98",
+    "@statisticsnorway/ssb-component-library": "^2.0.99",
     "dotenv": "^16.4.5",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
