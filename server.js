@@ -18,14 +18,9 @@ app.use(
   '/api',
   proxy(DAPLA_TEAM_API_URL, {
     proxyReqBodyDecorator: function (bodyContent, srcReq) {
-      console.log(`Request Body: ${bodyContent}`)
       return bodyContent
     },
     proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
-      console.log(`Request Headers:`, srcReq.headers)
-      if (srcReq.body) {
-        console.log(`Request Body:`, srcReq.body)
-      }
       return proxyReqOpts
     },
     proxyReqPathResolver: function (req) {
