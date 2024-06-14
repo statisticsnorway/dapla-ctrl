@@ -8,6 +8,6 @@ import { Schema, PropertySignature } from '@effect/schema/Schema'
  * @returns {Schema.PropertySignature<':', A, string, ':', I, false, R>}
  * */
 export const withKeyEncoding = <A, I, R>(
-    key: string,
-    schema: Schema<A, I, R>
+  key: string,
+  schema: Schema<A, I, R>
 ): PropertySignature<':', A, string, ':', I, false, R> => S.fromKey(key)(S.propertySignature(schema))

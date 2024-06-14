@@ -57,6 +57,7 @@ export const getUserSectionCode = (principalName: string): Effect.Effect<number,
     Http.request.appendUrlParam('select', 'section_code'),
     Http.client.fetchOk,
     Http.response.json,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Effect.flatMap((jsonResponse: any) =>
       Effect.try({
         try: () => parseInt(jsonResponse.section_code),

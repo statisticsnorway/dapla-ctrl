@@ -108,7 +108,7 @@ const CreateTeamForm = () => {
   }, [formErrors])
 
   useEffect(() => {
-    Effect.gen(function* (_) {
+    Effect.gen(function* () {
       const sections: DisplaySSBSection[] = yield* _(
         Klass.fetchSSBSectionInformation().pipe(
           Effect.map((sections: Klass.SSBSections) =>
@@ -147,7 +147,7 @@ const CreateTeamForm = () => {
         features: [],
       }
 
-      Effect.gen(function* (_) {
+      Effect.gen(function* () {
         const clientResponse = yield* createTeam(req)
         yield* Console.log('ClientResponse', clientResponse)
         return O.some(
