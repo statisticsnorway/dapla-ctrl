@@ -16,6 +16,7 @@ import { Skeleton } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import { Array as A, Console, Effect, Option as O, pipe } from 'effect'
 
+import FormSubmissionResult from './FormSubmissionResult.tsx'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
 import { AutonomyLevel, CreateTeamRequest, createTeam } from '../../services/createTeam'
@@ -248,20 +249,6 @@ const CreateTeamForm = () => {
       </Card>
     )
 
-  const renderFormSubmissionResult = () =>
-    O.match(formSubmissionResult, {
-      onNone: () => undefined,
-      onSome: (res) => {
-        const title = res.success ? 'Skjema ble innsendt' : 'Feil oppstod ved innsending av skjema'
-        const dialogType = res.success ? 'info' : 'warning'
-        return (
-          <Dialog className={styles.warning} type={dialogType} title={title}>
-            {res.message}
-          </Dialog>
-        )
-      },
-    })
-
   const renderContent = () => (
     <form className={styles.form} onSubmit={handleSubmit}>
       <Input
@@ -313,7 +300,7 @@ const CreateTeamForm = () => {
           </div>
         </Dialog>
       )}
-      {renderFormSubmissionResult()}
+      <FormSubmissionResult formSubmissionResult={formSubmissionResult} />
     </form>
   )
 

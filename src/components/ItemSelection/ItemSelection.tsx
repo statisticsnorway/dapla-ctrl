@@ -3,8 +3,8 @@ import { Tag } from '@statisticsnorway/ssb-component-library'
 import styles from './itemSelection.module.scss'
 
 export interface Item {
-    id: number
-    text: string
+    readonly id: number
+    readonly text: string
 }
 
 interface ItemSelectionProps {
