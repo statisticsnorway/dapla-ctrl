@@ -14,7 +14,7 @@ import {
 import * as C from '@statisticsnorway/ssb-component-library'
 import { Skeleton } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
-import { Array as A, Console, Effect, Option as O, pipe } from 'effect'
+import { Array as A, Console, Effect, Option as O, Record as R, pipe } from 'effect'
 
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
@@ -32,6 +32,7 @@ interface DisplaySSBSection {
 }
 
 interface FormError {
+  id: number
   field: string
   errorMessage: string
 }
@@ -89,7 +90,8 @@ const CreateTeamForm = () => {
           { guard: '' !== uniformNameErrorMsg, field: uniformNameLabel, errorMessage: validationErrorMessage },
           { guard: O.isNone(selectedSection), field: sectionLabel, errorMessage: missingFieldErrorMessage },
         ],
-        A.flatMap((mapping) => (mapping.guard ? [{ field: mapping.field, errorMessage: mapping.errorMessage }] : []))
+        (errors) => A.zipWith(A.range(0, errors.length), errors, (idx, error) => R.set('id', idx)(error)),
+        A.flatMap((mapping) => (mapping.guard ? [R.remove(mapping, 'guard') as FormError] : []))
       ),
     [displayName, uniformName, selectedSection, uniformNameErrorMsg]
   )
@@ -302,8 +304,8 @@ const CreateTeamForm = () => {
           <div>
             <p>{'Skjemaet har noen feil:'}</p>
             <ul>
-              {formErrors.map((formError, index) => (
-                <li key={index}>{`${formError.field} ${formError.errorMessage}`}</li>
+              {formErrors.map((formError) => (
+                <li key={formError.id}>{`${formError.field} ${formError.errorMessage}`}</li>
               ))}
             </ul>
           </div>

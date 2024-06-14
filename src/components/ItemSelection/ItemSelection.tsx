@@ -8,9 +8,9 @@ export interface Item {
 }
 
 interface ItemSelectionProps {
-    header: string
-    items: Item[]
-    onSelectionChange: (selectedItems: Item[]) => void
+    readonly header: string
+    readonly items: Item[]
+    readonly onSelectionChange: (selectedItems: Item[]) => void
 }
 function ItemSelection({ header, items, onSelectionChange }: ItemSelectionProps) {
     const [selectedItems, setSelectedItems] = useState<Item[]>([])
