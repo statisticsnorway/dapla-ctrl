@@ -14,7 +14,7 @@ import {
 import * as C from '@statisticsnorway/ssb-component-library'
 import { Skeleton } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
-import { Array as A, Console, Effect, Option as O, Record as R, pipe } from 'effect'
+import { Array as A, Console, Effect, Option as O, pipe } from 'effect'
 
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
@@ -90,8 +90,10 @@ const CreateTeamForm = () => {
           { guard: '' !== uniformNameErrorMsg, field: uniformNameLabel, errorMessage: validationErrorMessage },
           { guard: O.isNone(selectedSection), field: sectionLabel, errorMessage: missingFieldErrorMessage },
         ],
-        (errors) => A.zipWith(A.range(0, errors.length), errors, (idx, error) => R.set('id', idx)(error)),
-        A.flatMap((mapping) => (mapping.guard ? [R.remove(mapping, 'guard') as FormError] : []))
+        (errors) => A.zipWith(A.range(0, errors.length), errors, (idx, error) => ({ id: idx, ...error })),
+        A.flatMap((mapping) =>
+          mapping.guard ? [{ id: mapping.id, field: mapping.field, errorMessage: mapping.errorMessage }] : []
+        )
       ),
     [displayName, uniformName, selectedSection, uniformNameErrorMsg]
   )
