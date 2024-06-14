@@ -1,0 +1,24 @@
+.rootComponent {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    font-family: 'Roboto', sans-serif;
+    font-strect: normal;
+}
+
+.header {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.itemSelection {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    gap: 1.3rem;
+}
+.selectedItem {
+    background-color: #00824d;
+    color: white;
+}
