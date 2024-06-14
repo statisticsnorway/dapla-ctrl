@@ -1,6 +1,10 @@
 import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
+import { Effect } from 'effect'
+import * as Http from '@effect/platform/HttpClient'
+import { HttpClientError } from '@effect/platform/Http/ClientError'
+
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
 export interface UserProfileTeamData {
@@ -34,6 +38,7 @@ export interface User {
   display_name: string
   principal_name: string
   section_name: string
+  section_code: string
   job_title: string
   azure_ad_id?: string
   first_name?: string
@@ -47,31 +52,42 @@ interface Group {
   users: User[]
 }
 
+export const getUserSectionCode = (principalName: string): Effect.Effect<number, Error | HttpClientError, never> =>
+  Http.request.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(
+    Http.request.appendUrlParam('select', 'section_code'),
+    Http.client.fetchOk,
+    Http.response.json,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Effect.flatMap((jsonResponse: any) =>
+      Effect.try({
+        try: () => parseInt(jsonResponse.section_code),
+        catch: (error) => new Error(`Failed to get section_code: ${error}`),
+      })
+    )
+  )
+
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
-  const embeds = ['section_manager']
   const selects = [
     'principal_name',
     'display_name',
     'first_name',
     'last_name',
     'section_name',
+    'section_code',
     'division_name',
     'phone',
     'job_title',
-    'section_manager.display_name',
-    'section_manager.principal_name',
   ]
 
-  usersUrl.searchParams.set('embed', embeds.join(','))
-  usersUrl.searchParams.append('select', selects.join(','))
+  usersUrl.searchParams.set('select', selects.join(','))
 
   try {
     const [userData, userPhoto] = await Promise.all([fetchAPIData(usersUrl.toString()), fetchPhoto(principalName)])
 
     userData.photo = userPhoto
 
-    return flattenEmbedded({ ...userData })
+    return { ...userData }
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to fetch userProfile data:', error)

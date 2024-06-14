@@ -15,6 +15,25 @@ const PORT = process.env.PORT || 3000
 const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
 
 app.use(
+  '/klass',
+  proxy('https://data.ssb.no/api/klass/v1', {
+    proxyReqPathResolver: (req) => {
+      return '/api/klass/v1' + req.url
+    },
+
+    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+      console.log('Response Status:', proxyRes.statusCode)
+      console.log('Response Headers:', proxyRes.headers)
+      console.log('User Request Headers:', userReq.headers)
+      if (userRes.body) {
+        console.log('User Response:', userRes.body)
+      }
+      return proxyResData
+    },
+  })
+)
+
+app.use(
   '/api',
   proxy(DAPLA_TEAM_API_URL, {
     proxyReqBodyDecorator: function (bodyContent, srcReq) {

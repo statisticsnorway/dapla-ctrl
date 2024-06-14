@@ -5,9 +5,9 @@ import styles from './pagelayout.module.scss'
 import { Title } from '@statisticsnorway/ssb-component-library'
 
 interface PageLayoutProps {
-  title?: string | JSX.Element
-  button?: JSX.Element
-  content?: JSX.Element
+  title?: string | JSX.Element | undefined
+  button?: JSX.Element | undefined
+  content?: JSX.Element | undefined
 }
 
 const PageLayout = ({ title, button, content }: PageLayoutProps) => {
