@@ -1,0 +1,76 @@
+$breakpoint: 1070px;
+.form {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    gap: 1.5rem;
+    width: 100%;
+    max-height: 45rem;
+
+    @media (max-width: $breakpoint) {
+        max-height: 100%;
+    }
+}
+
+.services {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+}
+
+.preview {
+    cursor: text;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    background: #fff;
+    border: 1px solid #274247;
+    box-sizing: border-box;
+    color: #162327;
+    font-size: 16px;
+    height: 44px;
+    padding: 12px;
+    text-overflow: ellipsis;
+    margin-top: 5px;
+
+    &:hover {
+        border: 1px solid #274247;
+    }
+}
+
+.uniform_name_glossary {
+    position: relative;
+    font-size: 14px;
+}
+
+.section {
+    width: 50rem;
+
+    input::placeholder {
+        color: black !important;
+    }
+}
+
+.teamowner {
+    width: auto;
+    max-width: 400px;
+
+    @media (max-width: $breakpoint) {
+        order: -1;
+    }
+}
+
+.submitButton {
+    @media (max-width: $breakpoint) {
+        order: 99;
+    }
+}
+
+.warning {
+    min-width: auto;
+    max-width: 400px;
+}

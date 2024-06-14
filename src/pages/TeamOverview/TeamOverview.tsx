@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, Tabs, Divider, Button } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
@@ -31,6 +32,8 @@ const TeamOverview = () => {
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
+
+  const navigate = useNavigate()
 
   const teamTab = (activeTab as TabProps)?.path ?? activeTab
 
@@ -163,9 +166,7 @@ const TeamOverview = () => {
       button={
         <>
           {teamOverviewData && isSectionManager && (
-            <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
-              + Opprett team
-            </Button>
+            <Button onClick={() => navigate('opprett-team')}>+ Opprett team</Button>
           )}
         </>
       }
