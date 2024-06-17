@@ -46,7 +46,6 @@ supports things like displaying Dapla team members, adding team members and crea
 In Dapla Ctrl we use [effect](https://effect.website) as the standard library for typescript as it bring with it some
 powerful primitives for managing asynchrounous effects in a sane way with strong observability support. Furthermore, it provides schema validation for data and a complete set of funmany handy utilityctions for manipulating data in an immutable manner. Prefer writing in a functional style using `effect` when developing Dapla Ctrl.
 
-
 ## Setup
 
 1. Clone the repo using tools like `git clone` or `gh repo clone`.
@@ -57,7 +56,7 @@ powerful primitives for managing asynchrounous effects in a sane way with strong
 3. Start the Nix development environment
    ```sh
    nix develop
-   ``` 
+   ```
 4. Install NPM packages
    ```sh
    npm install
@@ -66,7 +65,7 @@ powerful primitives for managing asynchrounous effects in a sane way with strong
    ```sh
    npm run dev
    ```
-   
+
 ### Tips
 
 You can use [direnv](https://github.com/direnv/direnv) to automatically hook into your nix shell environment
@@ -80,6 +79,7 @@ If you don't want to use the Nix development environment you have to follow thes
   ```sh
   npm install -g nodemon
   ```
+
 - Set environment variables needed by the application:
 
   ```sh
@@ -100,7 +100,7 @@ To automatically fix linting and formatting issues across all files, you can use
 npm run lint:fix && npm run lint:format
 ```
 
-### IDE Support 
+### IDE Support
 
 For seamless integration with popular IDEs such as Visual Studio Code and IntelliJ, consider installing the following plugins:
 
