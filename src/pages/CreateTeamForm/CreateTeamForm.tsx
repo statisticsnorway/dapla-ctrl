@@ -8,6 +8,7 @@ import {
   Dropdown,
   Glossary,
   Input,
+  Link,
   Text,
   TextArea,
 } from '@statisticsnorway/ssb-component-library'
@@ -47,22 +48,18 @@ const CreateTeamForm = () => {
     { id: 'semi-managed', title: 'Semi-Managed' },
     { id: 'autonomous', title: 'Self-Managed' },
   ]
-  const teamNameGlossaryExplanation = `
-      Teamets navn i et lesevennlig format. Navnet bør bestå av et hoveddomenet og et subdomenet, f.eks. "Skatt Næring" og det er tillatt med mellomrom og norske tegn (Æ, Ø, Å).
-    `
-  const uniformNameGlossaryExplanation = `
-      Teamets navn i et maskinvennlig format som bl.a. benyttes i filstier til lagringsbøtter. Det er ikke tillatt med mellomrom og norske tegn (Æ, Ø, Å).
-    `
+  const teamNameGlossaryExplanation =
+    'Teamets navn i et lesevennlig format. Navnet bør bestå av et hoveddomenet og et subdomenet, f.eks. "Skatt Næring" og det er tillatt med mellomrom og norske tegn (Æ, Ø, Å).'
+  const uniformNameGlossaryExplanation =
+    'Teamets navn i et maskinvennlig format som bl.a. benyttes i filstier til lagringsbøtter. Det er ikke tillatt med mellomrom og norske tegn (Æ, Ø, Å).'
 
   const sectionGlossaryExplanation = 'Ansvarlig seksjon for teamet.'
 
-  const autonomyLevelGlossaryExplanation = `
-      Nivå av frihet et team har til å definere sin egen infrastruktur. Statistikkproduserende team er vanligvis i kategorien "Managed", mens IT-team er "Self Managed". Les mer her.
-    `
+  const autonomyLevelGlossaryExplanation =
+    'Nivå av frihet et team har til å definere sin egen infrastruktur. Statistikkproduserende team er vanligvis i kategorien "Managed", mens IT-team er "Self-Managed".'
 
-  const additionalInformationGlossaryExplanation = `
-      Informasjon som kan være nyttig for den som oppretter teamet. F.eks. kan man liste opp hvem som skal legges i tilgangsgruppene data-admins og developers her.
-`
+  const additionalInformationGlossaryExplanation =
+    'Informasjon som kan være nyttig for den som oppretter teamet. F.eks. kan man liste opp hvem som skal legges i tilgangsgruppene data-admins og developers her.'
 
   const displayNameLabel = 'Visningsnavn'
   const [displayName, setDisplayName] = useState('')
@@ -317,7 +314,18 @@ const CreateTeamForm = () => {
         onSelect={(section: DisplaySSBSection) => setSelectedSection(O.some(section))}
       />
       <Dropdown
-        header={<Glossary explanation={autonomyLevelGlossaryExplanation}>{'Autonomitetsnivå'}</Glossary>}
+        header={
+          <span>
+            <Glossary explanation={autonomyLevelGlossaryExplanation}>{'Autonomitetsnivå'}</Glossary>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <Link
+              isExternal={true}
+              href='https://manual.dapla.ssb.no/statistikkere/hva-er-dapla-team.html#autonomitetsniv%C3%A5'
+            >
+              Les mer her
+            </Link>
+          </span>
+        }
         selectedItem={selectedAutonomyLevel}
         items={teamAutonomyLevels}
         onSelect={(autonomyLevel: DisplayAutonomyLevel) => setSelectedAutonomyLevel(autonomyLevel)}
