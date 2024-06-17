@@ -1,6 +1,6 @@
 <a name="readme-top"></a>
 
-<h3 align="center">Dapla ctrl</h3>
+<h1 align="center">Dapla Ctrl</h3>
 
   <p align="center">
     A web interface for performing administrative tasks related to Dapla teams.
@@ -18,20 +18,16 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
     </li>
+    <li><a href="#developing">Developing</a></li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+      <a href="#setup">Setup</a>
       <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#tips">Tips</a></li>
+        <li><a href="#eslint-and-prettier">ESLint and Prettier</a></li>
+<li><a href="#ide-support">IDE Support</a></li>
       </ul>
     </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
   </ol>
 </details>
 
@@ -39,65 +35,56 @@
 
 ## About The Project
 
-A web interface for performing administrative tasks related to Dapla teams. TODO: Put more info here.
+[![Vite][Vite.js]][Vite-url]
+[![React][React.js]][React-url]
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+A web interface for performing administrative tasks related to Dapla teams which
+supports things like displaying Dapla team members, adding team members and creating new teams.
 
-### Built With
+## Developing
 
-- [![Vite][Vite.js]][Vite-url]
-- [![React][React.js]][React-url]
+In Dapla Ctrl we use [effect](https://effect.website) as the standard library for typescript as it bring with it some
+powerful primitives for managing asynchrounous effects in a sane way with strong observability support. Furthermore, it provides schema validation for data and a complete set of funmany handy utilityctions for manipulating data in an immutable manner. Prefer writing in a functional style using `effect` when developing Dapla Ctrl.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- GETTING STARTED -->
+## Setup
 
-## Getting Started
-
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
-
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
-- Install nodemon (required to run the development server)
-  ```
-  npm install -g nodemon
-  ```
-- If you want to test against local version of dapla-team-api-redux. [Click here for step by step guide to set it up](https://example.com)
-- Create .env.local (note you must replace dummy names with real values)
-  If testing with local version of dapla-team-api-redux put this:
-  ```sh
-  touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://localhost:8080"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\nVITE_SSB_BEARER_URL="https://your-http-bin.domain.com/bearer"' >> .env.local
-  ```
-  If testing with dapla-team-api-redux in production, put this:
-  ```sh
-  touch .env.local && printf 'VITE_DAPLA_TEAM_API_URL="http://your-running-application.domain.com"\nVITE_JWKS_URI="https://your-keycloak.domain.com/auth/realms/ssb/protocol/openid-connect/certs"\nVITE_SSB_BEARER_URL="https://your-http-bin.domain.com/bearer"' >> .env.local
-  ```
-
-### Installation
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/statisticsnorway/dapla-ctrl.git
-   ```
-2. Navigate into the repository
+1. Clone the repo using tools like `git clone` or `gh repo clone`.
+2. Navigate into the repository root directory
    ```sh
    cd dapla-ctrl
    ```
-3. Install NPM packages
+3. Start the Nix development environment
+   ```sh
+   nix develop
+   ``` 
+4. Install NPM packages
    ```sh
    npm install
    ```
-4. Start the development server and access the application at http://localhost:3000
+5. Start the development server and access the application at http://localhost:3000
    ```sh
    npm run dev
    ```
+   
+### Tips
+
+You can use [direnv](https://github.com/direnv/direnv) to automatically hook into your nix shell environment
+when `cd`ing into the project's root directory. There also exists plugins like [direnv for vscode](https://marketplace.visualstudio.com/items?itemName=mkhl.direnv) for code editors to hook into this
+environment as well.
+
+If you don't want to use the Nix development environment you have to follow these extra manual steps:
+
+- Install nodemon (required to run the development server)
+
+  ```sh
+  npm install -g nodemon
+  ```
+- Set environment variables needed by the application:
+
+  ```sh
+  touch .env.local && printf 'DAPLA_TEAM_API_URL=https://dapla-team-api-v2.staging-bip-app.ssb.no\nPORT=3000\nDAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers\nDAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g' >> .env.local
+  ```
 
 ### ESLint and Prettier
 
@@ -113,7 +100,7 @@ To automatically fix linting and formatting issues across all files, you can use
 npm run lint:fix && npm run lint:format
 ```
 
-### Integrated Development Environments (IDEs) Support
+### IDE Support 
 
 For seamless integration with popular IDEs such as Visual Studio Code and IntelliJ, consider installing the following plugins:
 
@@ -136,32 +123,7 @@ For seamless integration with popular IDEs such as Visual Studio Code and Intell
 By incorporating these plugins into your development environment, you can take full advantage of ESLint and Prettier to maintain code quality and consistent formatting throughout your project.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- CONTRIBUTING -->
-
-## Contributing
-
-Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/amazing-feature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- LICENSE -->
-
-## License
-
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
+ 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
@@ -173,7 +135,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 [stars-url]: https://github.com/github_username/repo_name/stargazers
 [issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
 [issues-url]: https://github.com/github_username/repo_name/issues
-[Vite.js]: https://avatars.githubusercontent.com/u/65625612?s=48&v=4
+[Vite.js]: https://img.shields.io/badge/Vite-2023A?style=for-the-badge&logo=vite&logoColor=61DAFB
 [Vite-url]: https://vitejs.dev/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
