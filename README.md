@@ -12,25 +12,6 @@
   </p>
 </div>
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-    </li>
-    <li><a href="#developing">Developing</a></li>
-    <li>
-      <a href="#setup">Setup</a>
-      <ul>
-        <li><a href="#tips">Tips</a></li>
-        <li><a href="#eslint-and-prettier">ESLint and Prettier</a></li>
-<li><a href="#ide-support">IDE Support</a></li>
-      </ul>
-    </li>
-  </ol>
-</details>
-
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
@@ -65,6 +46,12 @@ powerful primitives for managing asynchrounous effects in a sane way with strong
    ```sh
    npm run dev
    ```
+
+### Note about local development
+
+Dapla Ctrl assumes all requests include an authorization header when sending requests to the API. Therefore, when developing locally you will need to have a browser plugin that modifies the header with your bearer token. For example you can use [header editor](https://addons.mozilla.org/en-US/firefox/addon/header-editor) for firefox. Add a new rule which matches the URL for the development server and add an authorization header with `Bearer <token>`, don't forget the space between "Bearer" and the token.
+
+![Screenshot showing how to modify request headers in a browser extension](docs/images/modify_header.png)
 
 ### Tips
 
