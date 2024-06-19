@@ -8,6 +8,7 @@ import {
   Dropdown,
   Glossary,
   Input,
+  Link,
   Text,
   TextArea,
 } from '@statisticsnorway/ssb-component-library'
@@ -16,11 +17,12 @@ import { Skeleton } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
 import { Array as A, Console, Effect, Option as O, pipe } from 'effect'
 
-import FormSubmissionResult from './FormSubmissionResult.tsx'
+import FormSubmissionResult, { FormSubmissionResultProps } from './FormSubmissionResult.tsx'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
 import { AutonomyLevel, CreateTeamRequest, createTeam } from '../../services/createTeam'
 import { User } from '../../@types/user'
+import * as Utils from '../../utils/utils.ts'
 
 interface DisplayAutonomyLevel {
   id: AutonomyLevel
@@ -38,26 +40,26 @@ interface FormError {
   errorMessage: string
 }
 
-interface FormSubmissionResult {
-  success: boolean
-  message: string
-}
-
 const CreateTeamForm = () => {
   const uniformNameLengthLimit = 17
   // TODO: These should be fetched from the dapla-team-api instead of being hardcoded
   const teamAutonomyLevels: DisplayAutonomyLevel[] = [
     { id: 'managed', title: 'Managed' },
     { id: 'semi-managed', title: 'Semi-Managed' },
-    { id: 'autonomous', title: 'Autonomous' },
+    { id: 'autonomous', title: 'Self-Managed' },
   ]
-  const teamNameGlossaryExplanation = `
-    Teamets navn (for eksempel: "Pålegg Brunost"). Dette kan endres senere.
-    `
+  const teamNameGlossaryExplanation =
+    'Teamets navn i et lesevennlig format. Navnet bør bestå av et hoveddomenet og et subdomenet, f.eks. "Skatt Næring" og det er tillatt med mellomrom og norske tegn (Æ, Ø, Å).'
   const uniformNameGlossaryExplanation =
-    'Det tekniske teamnavnet som brukes internt i IT-systemene. Her er det flere restriksjoner på hvilke tegn som kan brukes.'
+    'Teamets navn i et maskinvennlig format som bl.a. benyttes i filstier til lagringsbøtter. Det er ikke tillatt med mellomrom og norske tegn (Æ, Ø, Å).'
 
-  const sectionGlossaryExplanation = 'SSB seksjonen som teamet tilhører.'
+  const sectionGlossaryExplanation = 'Ansvarlig seksjon for teamet.'
+
+  const autonomyLevelGlossaryExplanation =
+    'Nivå av frihet et team har til å definere sin egen infrastruktur. Statistikkproduserende team er vanligvis i kategorien "Managed", mens IT-team er "Self-Managed".'
+
+  const additionalInformationGlossaryExplanation =
+    'Informasjon som kan være nyttig for den som oppretter teamet. F.eks. kan man liste opp hvem som skal legges i tilgangsgruppene data-admins og developers her.'
 
   const displayNameLabel = 'Visningsnavn'
   const [displayName, setDisplayName] = useState('')
@@ -71,7 +73,7 @@ const CreateTeamForm = () => {
   const [sections, setSections] = useState<DisplaySSBSection[]>([])
   const [selectedSection, setSelectedSection] = useState<O.Option<DisplaySSBSection>>(O.none())
 
-  const [userName, setUserName] = useState<O.Option<string>>(O.none)
+  const [user, setUser] = useState<O.Option<User>>(O.none)
 
   const [selectedAutonomyLevel, setSelectedAutonomyLevel] = useState<DisplayAutonomyLevel>(teamAutonomyLevels[0])
 
@@ -82,13 +84,29 @@ const CreateTeamForm = () => {
   const missingFieldErrorMessage = 'mangler'
   const validationErrorMessage = 'har en valideringsfeil'
 
+  const resetForm = () => {
+    setDisplayName('')
+    setUniformName('')
+    setOverrideUniformName(false)
+    setUniformNameErrorMsg('')
+    setSelectedSection(O.none())
+
+    setSelectedAutonomyLevel(teamAutonomyLevels[0])
+    setAdditionalInformation('')
+    setSubmitButtonClicked(false)
+  }
+
   const formErrors: FormError[] = useMemo(
     () =>
       pipe(
         [
           { guard: displayName === '', field: displayNameLabel, errorMessage: missingFieldErrorMessage },
           { guard: uniformName === '', field: uniformNameLabel, errorMessage: missingFieldErrorMessage },
-          { guard: '' !== uniformNameErrorMsg, field: uniformNameLabel, errorMessage: validationErrorMessage },
+          {
+            guard: '' !== uniformNameErrorMsg,
+            field: uniformNameLabel,
+            errorMessage: validationErrorMessage,
+          },
           { guard: O.isNone(selectedSection), field: sectionLabel, errorMessage: missingFieldErrorMessage },
         ],
         (errors) => A.zipWith(A.range(0, errors.length), errors, (idx, error) => ({ id: idx, ...error })),
@@ -99,13 +117,10 @@ const CreateTeamForm = () => {
     [displayName, uniformName, selectedSection, uniformNameErrorMsg]
   )
 
-  const [formSubmissionResult, setFormSubmissionResult] = useState<O.Option<FormSubmissionResult>>(O.none())
-
-  useEffect(() => {
-    if (A.isNonEmptyArray(formErrors)) {
-      setFormSubmissionResult(O.none())
-    }
-  }, [formErrors])
+  const [formSubmissionResult, setFormSubmissionResult] = useState<FormSubmissionResultProps>({
+    loading: false,
+    formSubmissionResult: O.none(),
+  })
 
   useEffect(() => {
     Effect.gen(function* (_) {
@@ -128,24 +143,27 @@ const CreateTeamForm = () => {
       )
       // Setting the selectedSection won't be visible beause of a ssb-component bug: https://github.com/statisticsnorway/ssb-component-library/pull/1111
       //const sectionCode = yield* getUserSectionCode(userProfile.principal_name)
-      setUserName(O.some(userProfile.display_name))
+      setUser(O.some(userProfile))
       setSections(sections)
       //setSelectedSection(A.findFirst(sections, (s) => s.id === sectionCode))
     }).pipe(Effect.runPromise)
   }, [])
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: Event) => {
     event.preventDefault()
     // Only submit the form if no form errors are present
     if (A.isEmptyArray(formErrors)) {
+      const userPrincipalName = O.getOrThrow(user).principal_name
       const req: CreateTeamRequest = {
         teamDisplayName: displayName,
         uniformTeamName: uniformName,
         sectionCode: O.getOrThrow(selectedSection).id.toString(),
-        additionalInformation: additionalInformation,
+        additionalInformation: `This PR was created through Dapla Ctrl. Additional information from user ${userPrincipalName}:\n ${additionalInformation}`,
         autonomyLevel: selectedAutonomyLevel.id,
         features: [],
       }
+
+      setFormSubmissionResult({ loading: true, formSubmissionResult: O.none() })
 
       Effect.gen(function* () {
         const clientResponse = yield* createTeam(req)
@@ -168,7 +186,18 @@ const CreateTeamForm = () => {
           }),
           Effect.runPromise
         )
-        .then(setFormSubmissionResult)
+        .then((res: O.Option<{ success: boolean; message: string }>) => {
+          if (
+            Utils.option(
+              res,
+              () => false,
+              (r) => r.success
+            )
+          ) {
+            resetForm()
+          }
+          setFormSubmissionResult({ loading: false, formSubmissionResult: res })
+        })
     }
   }
 
@@ -245,12 +274,19 @@ const CreateTeamForm = () => {
       <Skeleton variant='rectangular' animation='wave' width={350} height={200} />
     ) : (
       <Card className={styles.teamowner} title='Teamansvarlig (Managers)'>
-        <Text>{`${O.getOrElse(userName, () => 'loading')} blir teamansvarlig for dette teamet. Hvis noen andre skal være ansvarlig kan det oppgis nedenfor.`}</Text>
+        <Text>
+          {`${Utils.option(
+            user,
+            () => 'loading',
+            (u: User) => u.display_name
+          )} blir teamansvarlig for dette teamet. Hvis noen andre skal være ansvarlig kan det oppgis i feltet `}
+          <em>Tilleggsinformasjon</em>.
+        </Text>
       </Card>
     )
 
   const renderContent = () => (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={styles.form} onSubmit={(e: React.FormEvent<HTMLFormElement>) => e.preventDefault()}>
       <Input
         label={<Glossary explanation={teamNameGlossaryExplanation}>{displayNameLabel}</Glossary>}
         id='display_name'
@@ -278,16 +314,39 @@ const CreateTeamForm = () => {
         onSelect={(section: DisplaySSBSection) => setSelectedSection(O.some(section))}
       />
       <Dropdown
-        header='Autonomitetsnivå'
+        header={
+          <span>
+            <Glossary explanation={autonomyLevelGlossaryExplanation}>{'Autonomitetsnivå'}</Glossary>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <Link
+              isExternal={true}
+              href='https://manual.dapla.ssb.no/statistikkere/hva-er-dapla-team.html#autonomitetsniv%C3%A5'
+            >
+              Les mer her
+            </Link>
+          </span>
+        }
         selectedItem={selectedAutonomyLevel}
         items={teamAutonomyLevels}
         onSelect={(autonomyLevel: DisplayAutonomyLevel) => setSelectedAutonomyLevel(autonomyLevel)}
       />
-      <TextArea label='Tilleggsinformasjon' cols={40} rows={5} handleChange={setAdditionalInformation} />
-      <Button className={styles.submitButton} type='submit' onClick={() => setSubmitButtonClicked(true)}>
+      <TextArea
+        label={<Glossary explanation={additionalInformationGlossaryExplanation}>{'Tilleggsinformasjon'}</Glossary>}
+        cols={40}
+        rows={5}
+        handleChange={setAdditionalInformation}
+      />
+      <Button
+        className={styles.submitButton}
+        type='submit'
+        onClick={(e: Event) => {
+          setSubmitButtonClicked(true)
+          handleSubmit(e)
+        }}
+      >
         Opprett Team
       </Button>
-      {renderTeamOwnerCard(O.isNone(userName))}
+      {renderTeamOwnerCard(O.isNone(user))}
       {submitButtonClicked && A.isNonEmptyArray(formErrors) && (
         <Dialog className={styles.warning} type='warning' title={'Valideringsfeil i skjemaet'}>
           <div>
@@ -300,7 +359,7 @@ const CreateTeamForm = () => {
           </div>
         </Dialog>
       )}
-      <FormSubmissionResult formSubmissionResult={formSubmissionResult} />
+      <FormSubmissionResult {...formSubmissionResult} />
     </form>
   )
 

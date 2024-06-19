@@ -4,8 +4,33 @@
 import { DropdownItems } from '../@types/pageTypes'
 import { JobResponse } from '../services/teamDetail'
 import { Team } from '../services/sharedBucketDetail'
+import { Option as O } from 'effect'
+import { LazyArg, dual } from 'effect/Function'
 
 export const DAPLA_TEAM_API_URL = `/api`
+
+/**
+ * Eliminator for the Option type. Given a mapping function and a default value
+ * applies the mapping function and returns the result if Option type contains a value,
+ * otherwise returns the default value.
+ *
+ * @example
+ * import { Option as O } from 'effect'
+ * const result = option(O.none(), -1, (x) => x + 5)
+ *
+ * assert.deepStrictEqual(result, -1)
+ *
+ * @example
+ * import { Option as O } from 'effect'
+ * const result = option(O.some(10), -1, (x) => x + 5)
+ *
+ * assert.deepStrictEqual(result, 15)
+ *
+ */
+export const option: {
+  <B, A>(z: LazyArg<B>, f: (a: A) => B): (value: O.Option<A>) => B
+  <A, B>(value: O.Option<A>, z: LazyArg<B>, f: (a: A) => B): B
+} = dual(3, <A, B>(value: O.Option<A>, z: LazyArg<B>, f: (a: A) => B): B => value.pipe(O.map(f), O.getOrElse(z)))
 
 export const getGroupType = (teamName: string, groupName: string): string => {
   if (teamName === undefined || groupName === undefined || !teamName.length || !groupName.length) return ''
