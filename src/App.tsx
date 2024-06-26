@@ -1,6 +1,7 @@
 import ProtectedRoute from './components/ProtectedRoute'
 
 import CreateTeamForm from './pages/CreateTeamForm/CreateTeamForm.tsx'
+import TeamCreated from './pages/CreateTeamForm/TeamCreated.tsx'
 import NotFound from './pages/NotFound/NotFound.tsx'
 import TeamOverview from './pages/TeamOverview/TeamOverview'
 import UserProfile from './pages/UserProfile/UserProfile'
@@ -20,6 +21,7 @@ const App = () => {
         <Route path='/:teamId' element={<TeamDetail />} />
         <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
         <Route path='/opprett-team' element={<CreateTeamForm />} />
+        <Route path='/opprett-team/suksess' element={<TeamCreated />} />
         <Route path='/not-found' element={<NotFound />} />
       </Route>
     </Routes>

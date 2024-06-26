@@ -15,12 +15,13 @@ import {
 import * as C from '@statisticsnorway/ssb-component-library'
 import { Skeleton } from '@mui/material'
 import { useEffect, useState, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Array as A, Console, Effect, Option as O, pipe } from 'effect'
 
-import FormSubmissionResult, { FormSubmissionResultProps } from './FormSubmissionResult.tsx'
+import FormSubmissionError, { FormSubmissionErrorProps } from './FormSubmissionError.tsx'
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
-import { AutonomyLevel, CreateTeamRequest, createTeam } from '../../services/createTeam'
+import { AutonomyLevel, CreateTeamRequest, CreateTeamResponse, createTeam } from '../../services/createTeam'
 import { User } from '../../@types/user'
 import * as Utils from '../../utils/utils.ts'
 
@@ -41,6 +42,7 @@ interface FormError {
 }
 
 const CreateTeamForm = () => {
+  const navigate = useNavigate()
   const uniformNameLengthLimit = 17
   // TODO: These should be fetched from the dapla-team-api instead of being hardcoded
   const teamAutonomyLevels: DisplayAutonomyLevel[] = [
@@ -81,20 +83,10 @@ const CreateTeamForm = () => {
 
   const [submitButtonClicked, setSubmitButtonClicked] = useState(false)
 
+  const [createTeamResponseLoading, setCreateTeamResponseLoading] = useState(false)
+
   const missingFieldErrorMessage = 'mangler'
   const validationErrorMessage = 'har en valideringsfeil'
-
-  const resetForm = () => {
-    setDisplayName('')
-    setUniformName('')
-    setOverrideUniformName(false)
-    setUniformNameErrorMsg('')
-    setSelectedSection(O.none())
-
-    setSelectedAutonomyLevel(teamAutonomyLevels[0])
-    setAdditionalInformation('')
-    setSubmitButtonClicked(false)
-  }
 
   const formErrors: FormError[] = useMemo(
     () =>
@@ -117,9 +109,8 @@ const CreateTeamForm = () => {
     [displayName, uniformName, selectedSection, uniformNameErrorMsg]
   )
 
-  const [formSubmissionResult, setFormSubmissionResult] = useState<FormSubmissionResultProps>({
-    loading: false,
-    formSubmissionResult: O.none(),
+  const [formSubmissionError, setFormSubmissionError] = useState<FormSubmissionErrorProps>({
+    formSubmissionError: O.none(),
   })
 
   useEffect(() => {
@@ -153,50 +144,55 @@ const CreateTeamForm = () => {
     event.preventDefault()
     // Only submit the form if no form errors are present
     if (A.isEmptyArray(formErrors)) {
-      const userPrincipalName = O.getOrThrow(user).principal_name
       const req: CreateTeamRequest = {
         teamDisplayName: displayName,
         uniformTeamName: uniformName,
         sectionCode: O.getOrThrow(selectedSection).id.toString(),
-        additionalInformation: `This PR was created through Dapla Ctrl. Additional information from user ${userPrincipalName}:\n ${additionalInformation}`,
+        additionalInformation: `This PR was created through Dapla Ctrl. Additional information from author:\n\n ${additionalInformation}`,
         autonomyLevel: selectedAutonomyLevel.id,
         features: [],
       }
 
-      setFormSubmissionResult({ loading: true, formSubmissionResult: O.none() })
+      setCreateTeamResponseLoading(true)
+      setFormSubmissionError({ formSubmissionError: O.none() })
 
       Effect.gen(function* () {
-        const clientResponse = yield* createTeam(req)
-        yield* Console.log('ClientResponse', clientResponse)
-        return O.some(
-          clientResponse.status !== 200
-            ? {
-                success: false,
-                message: `Det oppstod en feil ved opprettelse av team. Statuskode: ${clientResponse.status}`,
-              }
-            : { success: true, message: 'Opprettelse av team ble registert.' }
-        )
+        const createTeamResponse = yield* createTeam(req)
+        yield* Console.log('CreateTeamResponse:', createTeamResponse)
+        return {
+          success: true,
+          message: 'Opprettelse av team ble registert.',
+          body: O.some(createTeamResponse),
+        }
       })
         .pipe(
           Effect.catchTags({
-            ResponseError: (error) => Effect.succeed(O.some({ success: false, message: error.message })),
-            RequestError: (error) => Effect.succeed(O.some({ success: false, message: error.message })),
+            ResponseError: (error) => Effect.succeed({ success: false, message: error.message, body: O.none() }),
+            RequestError: (error) => Effect.succeed({ success: false, message: error.message, body: O.none() }),
             BodyError: (error) =>
-              Effect.succeed(O.some({ success: false, message: `Failed to parse body: ${error.reason._tag}` })),
+              Effect.succeed({
+                success: false,
+                message: `Failed to parse http request body: ${error.reason._tag}`,
+                body: O.none(),
+              }),
+            ParseError: (error) =>
+              Effect.succeed({
+                success: false,
+                message: `Failed to parse http response: ${error.message}`,
+                body: O.none(),
+              }),
           }),
           Effect.runPromise
         )
-        .then((res: O.Option<{ success: boolean; message: string }>) => {
-          if (
-            Utils.option(
-              res,
-              () => false,
-              (r) => r.success
-            )
-          ) {
-            resetForm()
+        .then((result: { success: boolean; message: string; body: O.Option<CreateTeamResponse> }) => {
+          if (result.success) {
+            navigate('/opprett-team/suksess', {
+              replace: true,
+              state: { kubenPullRequestUrl: O.getOrThrow(result.body).kubenPullRequestUrl },
+            })
+          } else {
+            setFormSubmissionError({ formSubmissionError: O.some(result.message) })
           }
-          setFormSubmissionResult({ loading: false, formSubmissionResult: res })
         })
     }
   }
@@ -359,7 +355,7 @@ const CreateTeamForm = () => {
           </div>
         </Dialog>
       )}
-      <FormSubmissionResult {...formSubmissionResult} />
+      {createTeamResponseLoading && <FormSubmissionError {...formSubmissionError} />}
     </form>
   )
 
