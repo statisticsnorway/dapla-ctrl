@@ -21,7 +21,7 @@ const App = () => {
         <Route path='/:teamId' element={<TeamDetail />} />
         <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
         <Route path='/opprett-team' element={<CreateTeamForm />} />
-        <Route path='/opprett-team/suksess' element={<TeamCreated />} />
+        <Route path='/opprett-team/kvittering' element={<TeamCreated />} />
         <Route path='/not-found' element={<NotFound />} />
       </Route>
     </Routes>

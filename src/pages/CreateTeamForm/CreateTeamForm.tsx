@@ -186,7 +186,7 @@ const CreateTeamForm = () => {
         )
         .then((result: { success: boolean; message: string; body: O.Option<CreateTeamResponse> }) => {
           if (result.success) {
-            navigate('/opprett-team/suksess', {
+            navigate('/opprett-team/kvittering', {
               replace: true,
               state: { kubenPullRequestUrl: O.getOrThrow(result.body).kubenPullRequestUrl },
             })

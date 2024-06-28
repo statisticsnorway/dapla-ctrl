@@ -11,9 +11,10 @@ export interface TeamCreatedProps {
 const TeamCreated = () => {
   const { state }: { state: TeamCreatedProps } = useLocation()
   const renderContent = () => (
-    <Dialog className={styles.warning} type={'info'} title={'Skjema ble innsendt'}>
-      <span>{`Opprettelse av team ble registert. Prosessen kan følges `}</span>
-      <Link href={state.kubenPullRequestUrl}>her</Link>
+    <Dialog className={styles.warning} type={'info'} title={'Skjema er sendt inn'}>
+      <span>{`Team Skyinfrastruktur vil gi beskjed til seksjonsleder når teamet er opprettet og klar til bruk. Søknaden er `}</span>
+      <Link href={state.kubenPullRequestUrl}>dokumentert på GitHub. </Link>
+      <span>{'Opprett en Kundeservice-sak hvis du ønsker å gjøre endringer før teamet er opprettet.'}</span>
     </Dialog>
   )
 
