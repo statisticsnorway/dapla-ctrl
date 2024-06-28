@@ -1,8 +1,8 @@
 import { Effect } from 'effect'
-import { Schema } from '@effect/schema'
+import { ParseResult, Schema } from '@effect/schema'
 import * as Http from '@effect/platform/HttpClient'
 import { HttpClientError } from '@effect/platform/Http/ClientError'
-import { ClientResponse } from '@effect/platform/Http/ClientResponse'
+import * as ClientResponse from '@effect/platform/Http/ClientResponse'
 import { BodyError } from '@effect/platform/Http/Body'
 import { DAPLA_TEAM_API_URL } from '../utils/utils'
 import { withKeyEncoding } from '../utils/schema'
@@ -26,13 +26,21 @@ export type AutonomyLevel = Schema.Schema.Type<typeof AutonomyLevelSchema>
 export type Feature = Schema.Schema.Type<typeof FeatureSchema>
 export type CreateTeamRequest = Schema.Schema.Type<typeof CreateTeamRequestSchema>
 
+const CreateTeamResponse = Schema.Struct({
+  uniformTeamName: withKeyEncoding('uniform_team_name', Schema.String),
+  kubenPullRequestId: withKeyEncoding('kuben_pull_request_id', Schema.Number),
+  kubenPullRequestUrl: withKeyEncoding('kuben_pull_request_url', Schema.String),
+})
+
+export type CreateTeamResponse = Schema.Schema.Type<typeof CreateTeamResponse>
+
 export const createTeam = (
   createTeamRequest: CreateTeamRequest
-): Effect.Effect<ClientResponse, BodyError | HttpClientError> =>
+): Effect.Effect<CreateTeamResponse, BodyError | HttpClientError | ParseResult.ParseError> =>
   Http.request
     .post(new URL(CREATE_TEAM_URL, window.location.origin))
     .pipe(
       Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
-      Effect.flatMap(Http.client.fetch),
-      Effect.scoped
+      Effect.flatMap(Http.client.fetchOk),
+      ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
     )
