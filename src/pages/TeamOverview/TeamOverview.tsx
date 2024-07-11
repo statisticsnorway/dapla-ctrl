@@ -77,11 +77,11 @@ const TeamOverview = () => {
     const user = JSON.parse(userProfileItem) as User
     if (!user) return
 
-    // TODO: Once dapla-team-api supports creating teams for section managers
-    // add `if (user.job_title.toLowerCase() === 'seksjonssjef') { setSectionManager(true) }` back.
     Effect.promise(() => isDaplaAdmin(user.principal_name))
       .pipe(Effect.runPromise)
-      .then(setIsSectionManager)
+      .then((isDaplaAdmin: boolean) =>
+        setIsSectionManager(isDaplaAdmin || user.job_title.toLowerCase() === 'seksjonssjef')
+      )
   }, [])
 
   useEffect(() => {
