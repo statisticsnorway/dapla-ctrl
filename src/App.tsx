@@ -1,4 +1,5 @@
 import ProtectedRoute from './components/ProtectedRoute'
+import ProtectedAuthorizedUserRoute from './components/ProtectedAuthorizedUserRoute'
 
 import CreateTeamForm from './pages/CreateTeamForm/CreateTeamForm.tsx'
 import TeamCreated from './pages/CreateTeamForm/TeamCreated.tsx'
@@ -20,8 +21,8 @@ const App = () => {
         <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
         <Route path='/:teamId' element={<TeamDetail />} />
         <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
-        <Route path='/opprett-team' element={<CreateTeamForm />} />
-        <Route path='/opprett-team/kvittering' element={<TeamCreated />} />
+        <Route path='/opprett-team' element={<ProtectedAuthorizedUserRoute component={<CreateTeamForm />} />} />
+        <Route path='/opprett-team/kvittering' element={<ProtectedAuthorizedUserRoute component={<TeamCreated />} />} />
         <Route path='/not-found' element={<NotFound />} />
       </Route>
     </Routes>
