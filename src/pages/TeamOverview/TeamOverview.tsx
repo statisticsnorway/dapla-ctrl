@@ -13,6 +13,7 @@ import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken, isDaplaAdmin } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 import { User } from '../../services/userProfile'
+import { isAuthorizedToCreateTeam } from '../../services/createTeam'
 import { Effect } from 'effect'
 
 const MY_TEAMS_TAB = {
@@ -27,7 +28,7 @@ const ALL_TEAMS_TAB = {
 
 const TeamOverview = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(MY_TEAMS_TAB)
-  const [isSectionManager, setIsSectionManager] = useState<boolean>(false)
+  const [isAuthorized, setIsAuthorized] = useState(false)
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
@@ -79,9 +80,7 @@ const TeamOverview = () => {
 
     Effect.promise(() => isDaplaAdmin(user.principal_name))
       .pipe(Effect.runPromise)
-      .then((isDaplaAdmin: boolean) =>
-        setIsSectionManager(isDaplaAdmin || user.job_title.toLowerCase() === 'seksjonssjef')
-      )
+      .then((isDaplaAdmin: boolean) => setIsAuthorized(isAuthorizedToCreateTeam(isDaplaAdmin, user.job_title)))
   }, [])
 
   useEffect(() => {
@@ -159,9 +158,7 @@ const TeamOverview = () => {
       content={renderContent()}
       button={
         <>
-          {teamOverviewData && isSectionManager && (
-            <Button onClick={() => navigate('opprett-team')}>+ Opprett team</Button>
-          )}
+          {teamOverviewData && isAuthorized && <Button onClick={() => navigate('opprett-team')}>+ Opprett team</Button>}
         </>
       }
     />
