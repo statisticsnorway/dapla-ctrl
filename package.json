@@ -22,6 +22,7 @@
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@mui/material": "^5.15.15",
     "@statisticsnorway/ssb-component-library": "^2.0.99",
+    "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
     "effect": "^3.3.1",
     "eslint-config-prettier": "^9.1.0",
