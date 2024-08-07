@@ -5,6 +5,7 @@ import { getReasonPhrase } from 'http-status-codes'
 import proxy from 'express-http-proxy'
 import dotenv from 'dotenv'
 import cache from 'memory-cache'
+import bodyParser from 'body-parser'
 
 if (!process.env.DAPLA_TEAM_API_URL) {
   dotenv.config({ path: './.env.local' })
@@ -32,6 +33,11 @@ app.use(
     },
   })
 )
+
+app.post('/log', bodyParser.text({ type: '*/*' }), (req, res) => {
+  console.log(req.body)
+  res.send('Ok')
+})
 
 app.use(
   '/api',

@@ -15,6 +15,7 @@ import FormattedTableColumn from '../../components/FormattedTableColumn/Formatte
 import { User } from '../../services/userProfile'
 import { isAuthorizedToCreateTeam } from '../../services/createTeam'
 import { Effect } from 'effect'
+import { customLogger } from '../../utils/logger.ts'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -79,7 +80,15 @@ const TeamOverview = () => {
     if (!user) return
 
     Effect.promise(() => isDaplaAdmin(user.principal_name))
-      .pipe(Effect.runPromise)
+      .pipe(
+        Effect.tap((isDaplaAdmin: boolean) =>
+          Effect.logInfo(
+            `username: ${user.principal_name}; job-title: ${user.job_title}; is-dapla-admin: ${isDaplaAdmin}`
+          )
+        ),
+        Effect.provide(customLogger),
+        Effect.runPromise
+      )
       .then((isDaplaAdmin: boolean) => setIsAuthorized(isAuthorizedToCreateTeam(isDaplaAdmin, user.job_title)))
   }, [])
 
