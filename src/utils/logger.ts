@@ -3,7 +3,6 @@ import * as Http from '@effect/platform/HttpClient'
 
 const logger = Logger.make(({ logLevel, message }) => {
   const logMsg = `[${logLevel.label}] ${message}`
-  globalThis.console.log(logMsg)
   Console.log(logMsg).pipe(
     Effect.zipRight(Http.request.post('/log').pipe(Http.request.textBody(logMsg), Http.client.fetchOk, Effect.scoped)),
     Effect.runPromise
