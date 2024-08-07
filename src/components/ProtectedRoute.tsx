@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
 import { getUserProfile } from '../services/userProfile'
 import { fetchUserInformationFromAuthToken } from '../utils/services'
+import { Effect } from 'effect'
+import { customLogger } from '../utils/logger.ts'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -17,7 +19,12 @@ const ProtectedRoute = () => {
         }
 
         const userProfileData = await fetchUserInformationFromAuthToken()
-        localStorage.setItem('userProfile', JSON.stringify(await getUserProfile(userProfileData.email)))
+        const userProfile = JSON.stringify(await getUserProfile(userProfileData.email))
+        Effect.logInfo(`UserProfile set in localStorage: ${userProfile}`).pipe(
+          Effect.provide(customLogger),
+          Effect.runSync
+        )
+        localStorage.setItem('userProfile', userProfile)
         setIsAuthenticated(true)
       } catch (error) {
         console.error('Error occurred when updating userProfile data')
