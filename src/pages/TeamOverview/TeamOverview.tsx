@@ -74,6 +74,10 @@ const TeamOverview = () => {
 
   useEffect(() => {
     const userProfileItem = localStorage.getItem('userProfile')
+    Effect.logInfo(`UserProfile from localStorage: ${userProfileItem}`).pipe(
+      Effect.provide(customLogger),
+      Effect.runSync
+    )
     if (!userProfileItem) return
 
     const user = JSON.parse(userProfileItem) as User
