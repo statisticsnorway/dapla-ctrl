@@ -35,7 +35,7 @@ const CreateTeamResponse = Schema.Struct({
 export type CreateTeamResponse = Schema.Schema.Type<typeof CreateTeamResponse>
 
 export const isAuthorizedToCreateTeam = (isDaplaAdmin: boolean, userJobTitle: string) =>
-  isDaplaAdmin || userJobTitle.toLowerCase() === 'seksjonssjef'
+  isDaplaAdmin || ['seksjonssjef', 'forskningsleder'].includes(userJobTitle.toLowerCase())
 
 export const createTeam = (
   createTeamRequest: CreateTeamRequest
