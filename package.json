@@ -54,6 +54,6 @@
     "eslint-plugin-react-refresh": "^0.4.7",
     "typescript": "^5.4.5",
     "vite": "^5.2.10",
-    "vite-envs": "^4.2.2"
+    "vite-envs": "^4.4.5"
   }
 }
