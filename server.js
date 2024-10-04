@@ -5,6 +5,7 @@ import { getReasonPhrase } from 'http-status-codes'
 import proxy from 'express-http-proxy'
 import dotenv from 'dotenv'
 import cache from 'memory-cache'
+import bodyParser from 'body-parser'
 
 if (!process.env.DAPLA_TEAM_API_URL) {
   dotenv.config({ path: './.env.local' })
@@ -13,6 +14,30 @@ if (!process.env.DAPLA_TEAM_API_URL) {
 const app = express()
 const PORT = process.env.PORT || 3000
 const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
+
+app.use(
+  '/klass',
+  proxy('https://data.ssb.no/api/klass/v1', {
+    proxyReqPathResolver: (req) => {
+      return '/api/klass/v1' + req.url
+    },
+
+    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+      console.log('Response Status:', proxyRes.statusCode)
+      console.log('Response Headers:', proxyRes.headers)
+      console.log('User Request Headers:', userReq.headers)
+      if (userRes.body) {
+        console.log('User Response:', userRes.body)
+      }
+      return proxyResData
+    },
+  })
+)
+
+app.post('/log', bodyParser.text({ type: '*/*' }), (req, res) => {
+  console.log(req.body)
+  res.send('Ok')
+})
 
 app.use(
   '/api',

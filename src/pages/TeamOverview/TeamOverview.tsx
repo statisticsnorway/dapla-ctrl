@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Dialog, Tabs, Divider, Button } from '@statisticsnorway/ssb-component-library'
 
 import { TabProps } from '../../@types/pageTypes'
@@ -12,6 +13,9 @@ import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken, isDaplaAdmin } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
 import { User } from '../../services/userProfile'
+import { isAuthorizedToCreateTeam } from '../../services/createTeam'
+import { Effect } from 'effect'
+import { customLogger } from '../../utils/logger.ts'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -25,12 +29,14 @@ const ALL_TEAMS_TAB = {
 
 const TeamOverview = () => {
   const [activeTab, setActiveTab] = useState<TabProps | string>(MY_TEAMS_TAB)
-  const [isSectionManager, SetIsSectionManager] = useState<boolean>(false)
+  const [isAuthorized, setIsAuthorized] = useState(false)
   const [teamOverviewData, setTeamOverviewData] = useState<TeamOverviewData>()
   const [teamOverviewTableData, setTeamOverviewTableData] = useState<TableData['data']>()
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
+
+  const navigate = useNavigate()
 
   const teamTab = (activeTab as TabProps)?.path ?? activeTab
 
@@ -68,23 +74,26 @@ const TeamOverview = () => {
 
   useEffect(() => {
     const userProfileItem = localStorage.getItem('userProfile')
+    Effect.logInfo(`UserProfile from localStorage: ${userProfileItem}`).pipe(
+      Effect.provide(customLogger),
+      Effect.runSync
+    )
     if (!userProfileItem) return
 
     const user = JSON.parse(userProfileItem) as User
     if (!user) return
 
-    const allowViewCreateTeamButton = async () => {
-      const isAdmin = await isDaplaAdmin(user.principal_name)
-      if (isAdmin) {
-        SetIsSectionManager(true)
-        return
-      }
-      if (user.job_title.toLowerCase() === 'seksjonssjef') {
-        SetIsSectionManager(true)
-      }
-    }
-
-    allowViewCreateTeamButton()
+    Effect.promise(() => isDaplaAdmin(user.principal_name))
+      .pipe(
+        Effect.tap((isDaplaAdmin: boolean) =>
+          Effect.logInfo(
+            `username: ${user.principal_name}; job-title: ${user.job_title}; is-dapla-admin: ${isDaplaAdmin}`
+          )
+        ),
+        Effect.provide(customLogger),
+        Effect.runPromise
+      )
+      .then((isDaplaAdmin: boolean) => setIsAuthorized(isAuthorizedToCreateTeam(isDaplaAdmin, user.job_title)))
   }, [])
 
   useEffect(() => {
@@ -162,11 +171,7 @@ const TeamOverview = () => {
       content={renderContent()}
       button={
         <>
-          {teamOverviewData && isSectionManager && (
-            <Button onClick={() => window.open(import.meta.env.DAPLA_CTRL_DAPLA_START_URL ?? '', 'noopener')}>
-              + Opprett team
-            </Button>
-          )}
+          {teamOverviewData && isAuthorized && <Button onClick={() => navigate('opprett-team')}>+ Opprett team</Button>}
         </>
       }
     />
