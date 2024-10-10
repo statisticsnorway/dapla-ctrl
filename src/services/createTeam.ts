@@ -11,7 +11,7 @@ const CREATE_TEAM_URL = `${DAPLA_TEAM_API_URL}/teams/create`
 
 const FeatureSchema = Schema.Literal('kildomaten', 'daplabuckets', 'transferservice')
 
-const AutonomyLevelSchema = Schema.Literal('managed', 'semi-managed', 'autonomous')
+const AutonomyLevelSchema = Schema.Literal('managed', 'semi-managed', 'self-managed')
 
 const CreateTeamRequestSchema = Schema.Struct({
   uniformTeamName: withKeyEncoding('uniform_team_name', Schema.String),
