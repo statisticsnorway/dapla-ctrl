@@ -6,6 +6,7 @@ import * as ClientResponse from '@effect/platform/Http/ClientResponse'
 import { BodyError } from '@effect/platform/Http/Body'
 import { DAPLA_TEAM_API_URL } from '../utils/utils'
 import { withKeyEncoding } from '../utils/schema'
+import { customLogger } from '../utils/logger'
 
 const CREATE_TEAM_URL = `${DAPLA_TEAM_API_URL}/teams/create`
 
@@ -40,10 +41,13 @@ export const isAuthorizedToCreateTeam = (isDaplaAdmin: boolean, userJobTitle: st
 export const createTeam = (
   createTeamRequest: CreateTeamRequest
 ): Effect.Effect<CreateTeamResponse, BodyError | HttpClientError | ParseResult.ParseError> =>
-  Http.request
-    .post(new URL(CREATE_TEAM_URL, window.location.origin))
-    .pipe(
-      Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
-      Effect.flatMap(Http.client.fetchOk),
-      ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
-    )
+  Effect.zipRight(
+    Effect.logInfo('CreateTeamRequest', createTeamRequest).pipe(Effect.provide(customLogger)),
+    Http.request
+      .post(new URL(CREATE_TEAM_URL, window.location.origin))
+      .pipe(
+        Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
+        Effect.flatMap(Http.client.fetchOk),
+        ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
+      )
+  )
