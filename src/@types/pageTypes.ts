@@ -3,7 +3,8 @@ export interface TabProps {
   path: string
 }
 
-export interface DropdownItems {
+export interface DropdownItem {
   id: string
   title: string
+  disabled: boolean
 }

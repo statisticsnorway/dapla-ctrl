@@ -30,6 +30,8 @@ import AddTeamMember from './AddTeamMember'
 import EditTeamMember from './EditTeamMember'
 import { AUTONOMY_LEVEL } from '../../content/glossary'
 
+import { Effect } from 'effect'
+
 export interface UserInfo {
   name?: string
   email?: string
@@ -169,30 +171,20 @@ const TeamDetail = () => {
   )
 
   useEffect(() => {
-    const checkIsTeamManager = async () => {
+    const checkIsTeamManager = Effect.gen(function* () {
       const teamManagers = (teamDetailData && (teamDetailData.team as Team).managers) ?? []
+      let isManager = false
       if (tokenData) {
-        const isAdmin = await isDaplaAdmin(tokenData.email.toLowerCase())
-        if (isAdmin) {
-          setIsManager(true)
-          return
-        }
-        // if autonomy_level is not 'MANAGED' then you should not be able to see
-        // what managers sees, unless you are an admin
-        if (teamDetailData && (teamDetailData.team as Team).autonomy_level !== 'MANAGED') {
-          setIsManager(false)
-          return
-        }
+        const isAdmin = yield* Effect.promise(() => isDaplaAdmin(tokenData.email.toLowerCase()))
         const isManagerResult = teamManagers.some(
           (manager) => manager.principal_name.toLowerCase() === tokenData.email.toLowerCase()
         )
-        setIsManager(isManagerResult)
-      } else {
-        setIsManager(false)
+        isManager = isAdmin || isManagerResult
       }
-    }
+      yield* Effect.sync(() => setIsManager(isManager))
+    })
 
-    checkIsTeamManager()
+    checkIsTeamManager.pipe(Effect.runPromise)
   }, [tokenData, teamDetailData])
 
   useEffect(() => {
