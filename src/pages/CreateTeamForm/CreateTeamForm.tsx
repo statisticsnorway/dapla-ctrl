@@ -48,7 +48,7 @@ const CreateTeamForm = () => {
   const teamAutonomyLevels: DisplayAutonomyLevel[] = [
     { id: 'managed', title: 'Managed' },
     { id: 'semi-managed', title: 'Semi-Managed' },
-    { id: 'autonomous', title: 'Self-Managed' },
+    { id: 'self-managed', title: 'Self-Managed' },
   ]
   const teamNameGlossaryExplanation =
     'Teamets navn i et lesevennlig format. Navnet bør bestå av et hoveddomenet og et subdomenet, f.eks. "Skatt Næring" og det er tillatt med mellomrom og norske tegn (Æ, Ø, Å).'
