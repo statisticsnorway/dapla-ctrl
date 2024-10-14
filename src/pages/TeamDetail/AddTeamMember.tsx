@@ -3,14 +3,15 @@ import styles from './teamDetail.module.scss'
 import { useState } from 'react'
 import { TeamDetailData, addUserToGroups, Group, Team } from '../../services/teamDetail'
 import { User } from '../../services/teamMembers'
-import { formatDisplayName, getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
-import { DropdownItems } from '../../@types/pageTypes'
+import { formatDisplayName, getErrorList, removeDuplicateDropdownItems } from '../../utils/utils'
+import { DropdownItem } from '../../@types/pageTypes'
 import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
 import { renderSidebarModalInfo, renderSidebarModalWarning } from './teamDetailDialog'
 
 import { Dropdown, Tag } from '@statisticsnorway/ssb-component-library'
 import { Skeleton, CircularProgress } from '@mui/material'
 import { XCircle } from 'react-feather'
+import { displayGroupItem } from './common'
 
 interface AddMember {
   loadingUsers: boolean
@@ -55,7 +56,7 @@ const AddTeamMember = ({
     ...defaultSelectedGroup,
     key: defaultAddUserKey,
   })
-  const [teamGroupTags, setTeamGroupTags] = useState<DropdownItems[]>([])
+  const [teamGroupTags, setTeamGroupTags] = useState<DropdownItem[]>([])
   const [teamGroupTagsError, setTeamGroupTagsError] = useState({
     error: false,
     errorMessage: 'Velg minst én tilgangsgruppe',
@@ -63,19 +64,19 @@ const AddTeamMember = ({
   const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
   const [showAddUserSpinner, setShowAddUserSpinner] = useState<boolean>(false)
 
-  const handleAddUser = (item: DropdownItems) => {
+  const handleAddUser = (item: DropdownItem) => {
     setSelectedUserDropdown({ ...selectedUserDropdown, key: `${defaultSelectedUserDropdown.key}-${item.id}` })
     setSelectedUser(item)
   }
 
-  const handleAddGroupTag = (item: DropdownItems) => {
+  const handleAddGroupTag = (item: DropdownItem) => {
     const teamGroupsTags = removeDuplicateDropdownItems([...teamGroupTags, item])
     setTeamGroupTags(teamGroupsTags)
     setTeamGroupTagsError({ ...teamGroupTagsError, error: false })
     setSelectedGroupAddUser({ ...item, key: `${defaultAddUserKey}-${item.id}` })
   }
 
-  const handleDeleteGroupTag = (item: DropdownItems) => {
+  const handleDeleteGroupTag = (item: DropdownItem) => {
     const teamGroupsTags = teamGroupTags.filter((items) => items !== item)
     setTeamGroupTags(teamGroupsTags)
   }
@@ -142,7 +143,7 @@ const AddTeamMember = ({
                       title: `${formatDisplayName(display_name)} (${principal_name})`,
                     }
                   })}
-                  onSelect={(item: DropdownItems) => handleAddUser(item)}
+                  onSelect={(item: DropdownItem) => handleAddUser(item)}
                   error={selectedUserDropdown.error}
                   errorMessage={selectedUserDropdown.errorMessage}
                   searchable
@@ -157,11 +158,8 @@ const AddTeamMember = ({
                 className={styles.dropdownSpacing}
                 header='Tilgangsgrupper(r)'
                 selectedItem={selectedGroupAddUser}
-                items={teamGroups.map(({ uniform_name }) => ({
-                  id: uniform_name,
-                  title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name),
-                }))}
-                onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
+                items={teamGroups.map(displayGroupItem(teamDetailData['team'] as Team))}
+                onSelect={(item: DropdownItem) => handleAddGroupTag(item)}
                 error={teamGroupTagsError.error}
                 errorMessage={teamGroupTagsError.errorMessage}
               />

@@ -1,7 +1,7 @@
 // https://vitejs.dev/config/server-options.html
 // https://github.com/garronej/vite-envs
 
-import { DropdownItems } from '../@types/pageTypes'
+import { DropdownItem } from '../@types/pageTypes'
 import { JobResponse } from '../services/teamDetail'
 import { Team } from '../services/sharedBucketDetail'
 import { Option as O } from 'effect'
@@ -69,8 +69,8 @@ export const flattenEmbedded = (json: any): any => {
   return json
 }
 
-export const removeDuplicateDropdownItems = (items: DropdownItems[]) => {
-  return items.reduce((acc: DropdownItems[], dropdownItem: DropdownItems) => {
+export const removeDuplicateDropdownItems = (items: DropdownItem[]) => {
+  return items.reduce((acc: DropdownItem[], dropdownItem: DropdownItem) => {
     const ids = acc.map((obj) => obj.id)
     if (!ids.includes(dropdownItem.id)) {
       acc.push(dropdownItem)

@@ -3,12 +3,13 @@ import styles from './teamDetail.module.scss'
 import { useState, useEffect } from 'react'
 import { UserInfo } from './TeamDetail'
 import { TeamDetailData, Team, Group, addUserToGroups, removeUserFromGroups } from '../../services/teamDetail'
-import { DropdownItems } from '../../@types/pageTypes'
+import { DropdownItem } from '../../@types/pageTypes'
 import { getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
 import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
 import Modal from '../../components/Modal/Modal'
 import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { renderSidebarModalInfo, renderSidebarModalWarning } from './teamDetailDialog'
+import { displayGroupItem, standardGroups } from './common'
 
 import { Dropdown, Tag, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { CircularProgress } from '@mui/material'
@@ -47,7 +48,7 @@ const EditTeamMember = ({
     ...defaultSelectedGroup,
     key: defaultEditUserKey,
   })
-  const [userGroupTags, setUserGroupTags] = useState<DropdownItems[]>([])
+  const [userGroupTags, setUserGroupTags] = useState<DropdownItem[]>([])
   const [editUserErrors, setEditUserErrors] = useState<EditUserStates>({})
   const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserStates>({})
 
@@ -60,7 +61,8 @@ const EditTeamMember = ({
       ) as Group[]
       setUserGroupTags(
         userGroups.map(({ uniform_name }) => {
-          return { id: uniform_name, title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name) }
+          const groupType = getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name)
+          return { id: uniform_name, title: groupType, disabled: !standardGroups.includes(groupType) }
         })
       )
       setSelectedGroupEditUser({
@@ -71,13 +73,13 @@ const EditTeamMember = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editUserInfo])
 
-  const handleAddGroupTag = (item: DropdownItems) => {
+  const handleAddGroupTag = (item: DropdownItem) => {
     const userGroupsTagsList = removeDuplicateDropdownItems([...userGroupTags, item])
     setUserGroupTags(userGroupsTagsList)
     setSelectedGroupEditUser({ ...item, key: `${defaultEditUserKey}-${item.id}` })
   }
 
-  const handleDeleteGroupTag = (item: DropdownItems) => {
+  const handleDeleteGroupTag = (item: DropdownItem) => {
     const userGroupsTags = userGroupTags.filter((items) => items !== item)
     setUserGroupTags(userGroupsTags)
   }
@@ -258,19 +260,16 @@ const EditTeamMember = ({
                 className={styles.dropdownSpacing}
                 header='Tilgangsgrupper(r)'
                 selectedItem={selectedGroupEditUser}
-                items={teamGroups.map(({ uniform_name }) => ({
-                  id: uniform_name,
-                  title: getGroupType((teamDetailData['team'] as Team).uniform_name, uniform_name),
-                }))}
-                onSelect={(item: DropdownItems) => handleAddGroupTag(item)}
+                items={teamGroups.map(displayGroupItem(teamDetailData['team'] as Team))}
+                onSelect={(item: DropdownItem) => handleAddGroupTag(item)}
               />
               <div className={styles.tagsContainer}>
                 {userGroupTags &&
-                  userGroupTags.map((group) => (
+                  userGroupTags.map((group: DropdownItem) => (
                     <Tag
                       key={`user-group-tag-${group.id}`}
                       icon={<XCircle size={14} />}
-                      onClick={() => handleDeleteGroupTag(group)}
+                      onClick={() => (group.disabled ? undefined : handleDeleteGroupTag(group))}
                     >
                       {group.title}
                     </Tag>
@@ -296,7 +295,6 @@ const EditTeamMember = ({
       />
     )
   }
-  return
 }
 
 export default EditTeamMember
