@@ -11,7 +11,7 @@ import DeleteLink from '../../components/DeleteLink/DeleteLink'
 import { renderSidebarModalInfo, renderSidebarModalWarning } from './teamDetailDialog'
 import { displayGroupItem, standardGroups } from './common'
 
-import { Dropdown, Tag, Link, Button } from '@statisticsnorway/ssb-component-library'
+import { Dialog, Dropdown, Tag, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { CircularProgress } from '@mui/material'
 import { XCircle, Trash2 } from 'react-feather'
 
@@ -53,6 +53,7 @@ const EditTeamMember = ({
   const [showEditUserSpinner, setShowEditUserSpinner] = useState<EditUserStates>({})
 
   const [openDeleteUserConfirmation, setOpenDeleteUserConfirmation] = useState<boolean>(false)
+  const [managedGroupsWarning, setManagedGroupsWarning] = useState(false)
 
   useEffect(() => {
     if (teamDetailData) {
@@ -224,13 +225,7 @@ const EditTeamMember = ({
         footer={
           <>
             <span>
-              <Link
-                onClick={() => {
-                  setOpenDeleteUserConfirmation(false)
-                }}
-              >
-                Avbryt
-              </Link>
+              <Link onClick={() => setOpenDeleteUserConfirmation(false)}>Avbryt</Link>
             </span>
             <Button onClick={handleDeleteUser} primary>
               Fjern
@@ -245,7 +240,10 @@ const EditTeamMember = ({
     return (
       <SidebarModal
         open={open}
-        onClose={() => onClose()}
+        onClose={() => {
+          setManagedGroupsWarning(false)
+          onClose()
+        }}
         header={teamModalHeader}
         footer={{
           submitButtonText: 'Oppdater tilgang',
@@ -269,12 +267,17 @@ const EditTeamMember = ({
                     <Tag
                       key={`user-group-tag-${group.id}`}
                       icon={<XCircle size={14} />}
-                      onClick={() => (group.disabled ? undefined : handleDeleteGroupTag(group))}
+                      onClick={() => (group.disabled ? setManagedGroupsWarning(true) : handleDeleteGroupTag(group))}
                     >
                       {group.title}
                     </Tag>
                   ))}
               </div>
+              {managedGroupsWarning && (
+                <Dialog type='warning' title='Bare standard grupper kan fjernes'>
+                  Dapla Ctrl støtter ikke å fjerne andre grupper enn "data-admins", "developers" og "managers".
+                </Dialog>
+              )}
               <div className={styles.modalBodyDialog}>
                 <DeleteLink handleDeleteUser={() => setOpenDeleteUserConfirmation(true)} icon>
                   Fjern fra teamet
