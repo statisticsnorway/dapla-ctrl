@@ -20,7 +20,7 @@
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.11.5",
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
-    "@mui/material": "^5.15.15",
+    "@mui/material": "^6.1.4",
     "@statisticsnorway/ssb-component-library": "^2.0.99",
     "body-parser": "^1.20.2",
     "dotenv": "^16.4.5",
