@@ -12,7 +12,7 @@
       perSystem = {pkgs, ...}: {
         devShells.default = pkgs.mkShell {
           shellHook = ''
-            export DAPLA_TEAM_API_URL=https://dapla-team-api-v2.staging-bip-app.ssb.no
+            export DAPLA_TEAM_API_URL=https://dapla-team-api.intern.test.ssb.no
             export PORT=3000
             export DAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers
             export DAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g

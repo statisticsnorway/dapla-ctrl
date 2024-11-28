@@ -13,7 +13,7 @@ if (!process.env.DAPLA_TEAM_API_URL) {
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api-v2.staging-bip-app.ssb.no'
+const DAPLA_TEAM_API_URL = process.env.DAPLA_TEAM_API_URL || 'https://dapla-team-api.intern.test.ssb.no'
 
 app.use(
   '/klass',
