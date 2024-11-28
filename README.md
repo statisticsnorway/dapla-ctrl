@@ -70,7 +70,7 @@ If you don't want to use the Nix development environment you have to follow thes
 - Set environment variables needed by the application:
 
   ```sh
-  touch .env.local && printf 'DAPLA_TEAM_API_URL=https://dapla-team-api-v2.staging-bip-app.ssb.no\nPORT=3000\nDAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers\nDAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g' >> .env.local
+  touch .env.local && printf 'DAPLA_TEAM_API_URL=https://dapla-team-api.intern.test.ssb.no\nPORT=3000\nDAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers\nDAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g' >> .env.local
   ```
 
 ### ESLint and Prettier
