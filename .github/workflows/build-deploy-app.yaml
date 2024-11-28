@@ -88,7 +88,7 @@ jobs:
           team: dapla-stat
           tag: ${{ needs.setup-build-push-deploy.outputs.nais-image }}
           pull: false
-          project_id: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
 
       - name: Deploy
