@@ -2,6 +2,8 @@ on:
   release:
     types: [published]
   push:
+    # FIXME: Remove this line, just for testing in PR
+    pull_request:
     branches:
       - develop
     paths-ignore:
