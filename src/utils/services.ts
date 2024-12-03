@@ -38,6 +38,7 @@ interface Group {
 const GROUPS_URL = `${DAPLA_TEAM_API_URL}/groups`
 
 const fetchGroupMembership = async (groupUniformName: string): Promise<Group> => {
+  console.log(`API CALL /groups/{groupName}/users for groupName: ${groupUniformName}`)
   const groupsUrl = new URL(`${GROUPS_URL}/${groupUniformName}/users`, window.location.origin)
   const embeds = ['users']
   const selects = ['uniform_name', 'users.principal_name']
