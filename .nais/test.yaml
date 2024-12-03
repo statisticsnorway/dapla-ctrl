@@ -59,5 +59,3 @@ spec:
       value: 'dapla-stat-developers,dapla-skyinfra-developers'
     - name: 'DAPLA_CTRL_DOCUMENTATION_URL'
       value: 'https://manual.dapla.ssb.no/statistikkere/dapla-ctrl'
-    - name: 'WONDERWALL_OPENID_AUDIENCES'
-      value: 'dapla-team-api'
