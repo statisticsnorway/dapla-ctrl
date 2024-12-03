@@ -64,12 +64,14 @@ const fetchGroupMembership = async (groupUniformName: string): Promise<Group> =>
 
 export const isDaplaAdmin = async (userPrincipalName: string): Promise<boolean> => {
   const adminGroups = import.meta.env.DAPLA_CTRL_ADMIN_GROUPS ?? ''
-  const daplaAdminGroupsSeperated = adminGroups.split(',')
+  const daplaAdminGroupsSeperated: string[] = adminGroups.split(',')
   if (daplaAdminGroupsSeperated.length === 0) return false
+
+  console.log(`daplaAdminGroupsSeparated:`, daplaAdminGroupsSeperated)
 
   try {
     const adminGroupUsers = await Promise.all(
-      daplaAdminGroupsSeperated.map((groupUniformName) => fetchGroupMembership(groupUniformName))
+      daplaAdminGroupsSeperated.map((groupUniformName: string) => fetchGroupMembership(groupUniformName))
     )
 
     return adminGroupUsers.some(
