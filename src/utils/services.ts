@@ -68,8 +68,6 @@ export const isDaplaAdmin = async (userPrincipalName: string): Promise<boolean> 
   const daplaAdminGroupsSeperated: string[] = adminGroups.split(',')
   if (daplaAdminGroupsSeperated.length === 0) return false
 
-  console.log(`daplaAdminGroupsSeparated:`, daplaAdminGroupsSeperated)
-
   try {
     const adminGroupUsers = await Promise.all(
       daplaAdminGroupsSeperated.map((groupUniformName: string) => fetchGroupMembership(groupUniformName))
