@@ -11,6 +11,8 @@ WORKDIR /usr/local/app
 COPY --from=builder /usr/local/app/dist ./dist
 COPY package*.json server.js ./
 
+# Let user write to dist directory, this is necessary for vite-envs script to work
+RUN chmod -R 777 ./dist
 RUN npm install --ignore-scripts --save-exact express vite-express
 
 ENV PORT=8080
