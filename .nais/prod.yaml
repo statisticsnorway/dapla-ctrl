@@ -1,0 +1,64 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-ctrl
+  namespace: dapla-stat
+  annotations:
+    nais.io/read-only-file-system: "false"
+    nais.io/run-as-user: "1001"
+spec:
+  image: '{{image}}'
+
+  port: 8080
+
+  resources:
+    requests:
+      memory: '512Mi'
+      cpu: '200m'
+    limits:
+      memory: '1024Mi'
+
+  replicas:
+    disableAutoScaling: true
+    max: 1
+    min: 1
+
+  readiness:
+    path: /ready
+    port: 9000
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /live
+    port: 9000
+    failureThreshold: 3
+
+  ingresses:
+    - https://dapla-ctrl.intern.ssb.no
+
+  accessPolicy:
+    outbound:
+      rules:
+        - application: 'dapla-team-api'
+          namespace: 'dapla-platform'
+      external:
+        - host: 'auth.ssb.no'
+
+  envFrom:
+    - secret: login-config-dapla-ctrl # contains: WONDERWALL_OPENID_CLIENT_ID, WONDERWALL_OPENID_CLIENT_SECRET, WONDERWALL_OPENID_AUDIENCES
+
+  # Uses wonderwall
+  login:
+    provider: openid
+    enforce:
+      enabled: true
+
+  env:
+    - name: 'DAPLA_TEAM_API_URL'
+      value: 'http://dapla-team-api.dapla-platform' # uses Service discovery
+    - name: 'DAPLA_CTRL_ADMIN_GROUPS'
+      value: 'dapla-stat-developers,dapla-skyinfra-developers'
+    - name: 'DAPLA_CTRL_DOCUMENTATION_URL'
+      value: 'https://manual.dapla.ssb.no/statistikkere/dapla-ctrl'
