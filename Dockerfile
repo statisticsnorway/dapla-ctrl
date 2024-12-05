@@ -6,13 +6,25 @@ RUN npm ci && npm run build
 
 FROM node:20-alpine
 
-WORKDIR /usr/local/app
+# Create a user with a specific UID, GID, and home directory
+ARG USERNAME=appuser
+ARG UID=1001
+ARG GID=1001
+ARG HOME_DIR=/home/appuser
 
-COPY --from=builder /usr/local/app/dist ./dist
+RUN addgroup -g ${GID} ${USERNAME}
+RUN adduser -D -u ${UID} -G ${USERNAME} -h ${HOME_DIR} ${USERNAME}
+RUN mkdir -p ${HOME_DIR} && chown -R ${UID}:${GID} ${HOME_DIR}
+WORKDIR ${HOME_DIR}/app
+
+COPY --from=builder /usr/local/app/dist ${HOME_DIR}/app/dist
 COPY package*.json server.js ./
 
-# Let user write to dist directory, this is necessary for vite-envs script to work
-RUN chown -R 0:0 ./dist
+# Ensure appuser owns all files in /home/appuser/app
+RUN chown -R ${UID}:${GID} ${HOME_DIR}/app
+
+USER ${USERNAME}
+
 RUN npm install --ignore-scripts --save-exact express vite-express
 
 ENV PORT=8080
