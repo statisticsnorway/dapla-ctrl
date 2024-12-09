@@ -23,6 +23,7 @@
             nodePackages.nodemon
             nodePackages.typescript-language-server
             pandoc
+            yaml-language-server
           ];
         };
         formatter = pkgs.alejandra;
