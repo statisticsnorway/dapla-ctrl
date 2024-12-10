@@ -19,7 +19,7 @@ const ProtectedRoute = () => {
     Effect.gen(function* () {
       const userProfileData = yield* Effect.promise(fetchUserInformationFromAuthToken)
       const userProfile = yield* Effect.tryPromise(() => getUserProfile(userProfileData.email)).pipe(
-        Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x))),
+        Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x)))
       )
       yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
       yield* Effect.sync(() => setUser(userProfile))
