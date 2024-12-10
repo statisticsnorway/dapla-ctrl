@@ -38,13 +38,13 @@ powerful primitives for managing asynchrounous effects in a sane way with strong
    ```sh
    nix develop
    ```
-4. Install NPM packages
+4. Install PNPM packages
    ```sh
-   npm install
+   pnpm install
    ```
 5. Start the development server and access the application at http://localhost:3000
    ```sh
-   npm run dev
+   pnpm run dev
    ```
 
 ### Note about local development
@@ -64,7 +64,7 @@ If you don't want to use the Nix development environment you have to follow thes
 - Install nodemon (required to run the development server)
 
   ```sh
-  npm install -g nodemon
+  pnpm add -g nodemon
   ```
 
 - Set environment variables needed by the application:
@@ -78,13 +78,13 @@ If you don't want to use the Nix development environment you have to follow thes
 For ensuring code consistency and adhering to coding standards, our project utilizes ESLint and Prettier. To view linting warnings and errors in the console, it's recommended to run the following script during development:
 
 ```sh
-npm run lint
+pnpm run lint
 ```
 
 To automatically fix linting and formatting issues across all files, you can use the following scripts (Note: While these scripts resolve many ESLint warnings or errors, some issues may require manual intervention):
 
 ```sh
-npm run lint:fix && npm run lint:format
+pnpm run lint:fix && pnpm run lint:format
 ```
 
 ### IDE Support
