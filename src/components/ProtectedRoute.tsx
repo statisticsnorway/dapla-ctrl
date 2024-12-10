@@ -20,9 +20,8 @@ const ProtectedRoute = () => {
       const userProfileData = yield* Effect.promise(fetchUserInformationFromAuthToken)
       const userProfile = yield* Effect.tryPromise(() => getUserProfile(userProfileData.email)).pipe(
         Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x))),
-        Effect.map(JSON.stringify)
       )
-      yield* Effect.sync(() => localStorage.setItem('userProfile', userProfile))
+      yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
       yield* Effect.sync(() => setUser(userProfile))
       yield* Effect.sync(() => setIsAuthenticated(true))
     }).pipe(Effect.provide(customLogger))
