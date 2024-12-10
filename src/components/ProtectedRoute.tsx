@@ -5,11 +5,13 @@ import { fetchUserInformationFromAuthToken } from '../utils/services'
 import { Cause, Effect, Option as O } from 'effect'
 import { customLogger } from '../utils/logger.ts'
 import { ApiError } from '../utils/services.ts'
+import { useUserProfileStore } from '../services/store.ts'
 
 import { User } from '../services/userProfile.ts'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const setUser = useUserProfileStore((state) => state.setUser)
   const navigate = useNavigate()
   const from = location.pathname
 
@@ -20,8 +22,8 @@ const ProtectedRoute = () => {
         Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x))),
         Effect.map(JSON.stringify)
       )
-      yield* Effect.logInfo(`UserProfile set in localStorage: ${userProfile}`)
       yield* Effect.sync(() => localStorage.setItem('userProfile', userProfile))
+      yield* Effect.sync(() => setUser(userProfile))
       yield* Effect.sync(() => setIsAuthenticated(true))
     }).pipe(Effect.provide(customLogger))
 
@@ -34,7 +36,10 @@ const ProtectedRoute = () => {
       onSome: (userProfile) =>
         // invalidate cached user profile if 'job_title' field is missing
         userProfile.job_title
-          ? Effect.sync(() => setIsAuthenticated(true))
+          ? Effect.zip(
+              Effect.sync(() => setIsAuthenticated(true)),
+              Effect.sync(() => setUser(userProfile))
+            )
           : Effect.zipRight(
               Effect.logInfo("'job_title' field missing, invalidating UserProfile cache"),
               fetchUserProfile()
