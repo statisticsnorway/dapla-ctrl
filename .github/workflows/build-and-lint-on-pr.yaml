@@ -15,11 +15,16 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
         
       - name: Build application
-        run: npm run build
+        run: pnpm run build
 
       - name: Check for ESLint warnings and errors
-        run: npm run lint
+        run: pnpm run lint
