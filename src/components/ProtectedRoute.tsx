@@ -15,18 +15,18 @@ const ProtectedRoute = () => {
   const navigate = useNavigate()
   const from = location.pathname
 
-  const fetchUserProfile = (): Effect.Effect<void, Cause.UnknownException | ApiError> =>
-    Effect.gen(function* () {
-      const userProfileData = yield* Effect.promise(fetchUserInformationFromAuthToken)
-      const userProfile = yield* Effect.tryPromise(() => getUserProfile(userProfileData.email)).pipe(
-        Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x)))
-      )
-      yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
-      yield* Effect.sync(() => setUser(userProfile))
-      yield* Effect.sync(() => setIsAuthenticated(true))
-    }).pipe(Effect.provide(customLogger))
-
   useEffect(() => {
+    const fetchUserProfile = (): Effect.Effect<void, Cause.UnknownException | ApiError> =>
+      Effect.gen(function* () {
+        const userProfileData = yield* Effect.promise(fetchUserInformationFromAuthToken)
+        const userProfile = yield* Effect.tryPromise(() => getUserProfile(userProfileData.email)).pipe(
+          Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x)))
+        )
+        yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
+        yield* Effect.sync(() => setUser(userProfile))
+        yield* Effect.sync(() => setIsAuthenticated(true))
+      }).pipe(Effect.provide(customLogger))
+
     const cachedUserProfile: O.Option<User> = O.fromNullable(localStorage.getItem('userProfile')).pipe(
       O.flatMap(O.liftThrowable(JSON.parse))
     )
@@ -44,7 +44,7 @@ const ProtectedRoute = () => {
               fetchUserProfile()
             ).pipe(Effect.provide(customLogger)),
     }).pipe(Effect.runPromise)
-  }, [from, navigate, fetchUserProfile, setUser])
+  }, [from, navigate, setUser])
 
   return isAuthenticated ? <Outlet /> : null
 }

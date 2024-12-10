@@ -25,7 +25,7 @@ const ProtectedAuthorizedUserRoute = () => {
       const daplaAdmin: boolean = yield* Effect.promise(() => isDaplaAdmin(user.principal_name))
 
       yield* Effect.sync(() => setIsAuthorized(O.some(isAuthorizedToCreateTeam(daplaAdmin, user.job_title))))
-   }).pipe(Effect.runPromise)
+    }).pipe(Effect.runPromise)
   })
 
   return option(
