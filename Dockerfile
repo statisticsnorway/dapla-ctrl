@@ -4,9 +4,8 @@ RUN apk add pnpm
 
 COPY . .
 
-RUN rm -rf node_modules
-
-RUN pnpm i && pnpm run build
+RUN rm -rf node_modules && \
+    pnpm install && pnpm run build
 
 FROM node:20-alpine
 
