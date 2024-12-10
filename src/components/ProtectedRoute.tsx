@@ -44,7 +44,7 @@ const ProtectedRoute = () => {
               fetchUserProfile()
             ).pipe(Effect.provide(customLogger)),
     }).pipe(Effect.runPromise)
-  }, [from, navigate])
+  }, [from, navigate, fetchUserProfile, setUser])
 
   return isAuthenticated ? <Outlet /> : null
 }
