@@ -28,6 +28,12 @@ bump-version-minor: ## Bump minor version, e.g. 0.0.1 -> 0.1.0
 bump-version-major: ## Bump major version, e.g. 0.0.1 -> 1.0.0
 	bump-my-version bump major
 
+SHELL?=bash
+
+.PHONY: shell
+develop:
+	nix develop -c $(SHELL)
+
 include .env.local
 run-docker-local:
 	docker run -it -p 8080:8080 -e VITE_JWKS_URI=${VITE_JWKS_URI} dapla-ctrl
