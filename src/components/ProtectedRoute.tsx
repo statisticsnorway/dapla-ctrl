@@ -11,7 +11,7 @@ import { User } from '../services/userProfile.ts'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const setUser = useUserProfileStore((state) => state.setUser)
+  const setLoggedInUser = useUserProfileStore((state) => state.setLoggedInUser)
   const navigate = useNavigate()
   const from = location.pathname
 
@@ -23,7 +23,7 @@ const ProtectedRoute = () => {
           Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x)))
         )
         yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
-        yield* Effect.sync(() => setUser(userProfile))
+        yield* Effect.sync(() => setLoggedInUser(userProfile))
         yield* Effect.sync(() => setIsAuthenticated(true))
       }).pipe(Effect.provide(customLogger))
 
@@ -37,14 +37,14 @@ const ProtectedRoute = () => {
         userProfile.job_title
           ? Effect.zip(
               Effect.sync(() => setIsAuthenticated(true)),
-              Effect.sync(() => setUser(userProfile))
+              Effect.sync(() => setLoggedInUser(userProfile))
             )
           : Effect.zipRight(
               Effect.logInfo("'job_title' field missing, invalidating UserProfile cache"),
               fetchUserProfile()
             ).pipe(Effect.provide(customLogger)),
     }).pipe(Effect.runPromise)
-  }, [from, navigate, setUser])
+  }, [from, navigate, setLoggedInUser])
 
   return isAuthenticated ? <Outlet /> : null
 }

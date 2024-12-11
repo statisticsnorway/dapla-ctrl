@@ -10,7 +10,7 @@ type UserProfileStoreState = {
 }
 
 type UserProfileStoreActions = {
-  setUser: (user: User) => void
+  setLoggedInUser: (user: User) => void
 }
 
 export type UserProfileStore = UserProfileStoreState & UserProfileStoreActions
