@@ -17,12 +17,16 @@ const App = () => {
     <Routes>
       <Route element={<ProtectedRoute />}>
         <Route path='/' element={<TeamOverview />} />
-        <Route path='/teammedlemmer' element={<TeamMembers />} />
-        <Route path='/teammedlemmer/:principalName' element={<UserProfile />} />
-        <Route path='/:teamId' element={<TeamDetail />} />
-        <Route path='/:teamId/:shortName' element={<SharedBucketDetail />} />
-        <Route path='/opprett-team' element={<ProtectedAuthorizedUserRoute component={<CreateTeamForm />} />} />
-        <Route path='/opprett-team/kvittering' element={<ProtectedAuthorizedUserRoute component={<TeamCreated />} />} />
+        <Route path='teammedlemmer' element={<TeamMembers />}>
+          <Route path=':principalName' element={<UserProfile />} />
+        </Route>
+        <Route path='opprett-team' element={<ProtectedAuthorizedUserRoute />}>
+          <Route path='' element={<CreateTeamForm />} />
+          <Route path='kvittering' element={<TeamCreated />} />
+        </Route>
+        <Route path=':teamId' element={<TeamDetail />}>
+          <Route path=':shortName' element={<SharedBucketDetail />} />
+        </Route>
         <Route path='/not-found' element={<NotFound />} />
       </Route>
     </Routes>
