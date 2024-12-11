@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "prepare": "npx vite-envs update-types",
     "dev": "nodemon server.js -w server.js",
     "prod": "NODE_ENV=production node server.js",
