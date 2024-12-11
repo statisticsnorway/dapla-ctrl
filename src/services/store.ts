@@ -18,7 +18,7 @@ export type UserProfileStore = UserProfileStoreState & UserProfileStoreActions
 export const useUserProfileStore = create<UserProfileStore>()(
   subscribeWithSelector((set) => ({
     loggedInUser: O.none(),
-    setUser: (user: User) => set(() => ({ loggedInUser: O.some(user) })),
+    setLoggedInUser: (user: User) => set(() => ({ loggedInUser: O.some(user) })),
   }))
 )
 
