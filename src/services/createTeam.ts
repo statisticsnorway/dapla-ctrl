@@ -1,9 +1,15 @@
 import { Effect } from 'effect'
-import { ParseResult, Schema } from '@effect/schema'
-import * as Http from '@effect/platform/HttpClient'
-import { HttpClientError } from '@effect/platform/Http/ClientError'
-import * as ClientResponse from '@effect/platform/Http/ClientResponse'
-import { BodyError } from '@effect/platform/Http/Body'
+import { ParseResult, Schema } from 'effect'
+// import * as Http from '@effect/platform/HttpClient'
+// import { HttpClientError } from '@effect/platform/Http/ClientError'
+// import * as ClientResponse from '@effect/platform/HttpClientResponse'
+// import { BodyError } from '@effect/platform/Http/Body'
+
+import { FetchHttpClient, HttpClientRequest, HttpClientResponse } from '@effect/platform'
+import { HttpClient } from '@effect/platform/HttpClient'
+import { HttpClientError } from '@effect/platform/HttpClientError'
+import { HttpBodyError } from '@effect/platform/HttpBody'
+
 import { DAPLA_TEAM_API_URL } from '../utils/utils'
 import { withKeyEncoding } from '../utils/schema'
 import { customLogger } from '../utils/logger'
@@ -27,27 +33,38 @@ export type AutonomyLevel = Schema.Schema.Type<typeof AutonomyLevelSchema>
 export type Feature = Schema.Schema.Type<typeof FeatureSchema>
 export type CreateTeamRequest = Schema.Schema.Type<typeof CreateTeamRequestSchema>
 
-const CreateTeamResponse = Schema.Struct({
+const CreateTeamResponseSchema = Schema.Struct({
   uniformTeamName: withKeyEncoding('uniform_team_name', Schema.String),
   kubenPullRequestId: withKeyEncoding('kuben_pull_request_id', Schema.Number),
   kubenPullRequestUrl: withKeyEncoding('kuben_pull_request_url', Schema.String),
 })
 
-export type CreateTeamResponse = Schema.Schema.Type<typeof CreateTeamResponse>
+export type CreateTeamResponse = Schema.Schema.Type<typeof CreateTeamResponseSchema>
 
 export const isAuthorizedToCreateTeam = (isDaplaAdmin: boolean, userJobTitle: string) =>
   isDaplaAdmin || ['seksjonssjef', 'forskningsleder'].includes(userJobTitle.toLowerCase())
 
 export const createTeam = (
   createTeamRequest: CreateTeamRequest
-): Effect.Effect<CreateTeamResponse, BodyError | HttpClientError | ParseResult.ParseError> =>
+): Effect.Effect<CreateTeamResponse, HttpBodyError | HttpClientError | ParseResult.ParseError> =>
   Effect.zipRight(
     Effect.logInfo('CreateTeamRequest', createTeamRequest).pipe(Effect.provide(customLogger)),
-    Http.request
-      .post(new URL(CREATE_TEAM_URL, window.location.origin))
-      .pipe(
-        Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
-        Effect.flatMap(Http.client.fetchOk),
-        ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
-      )
+    HttpClient.pipe(
+      Effect.flatMap((client) =>
+        HttpClientRequest.post(new URL(CREATE_TEAM_URL, window.location.origin)).pipe(
+          HttpClientRequest.schemaBodyJson(CreateTeamRequestSchema)(createTeamRequest),
+          Effect.flatMap(client.execute)
+        )
+      ),
+      Effect.flatMap(HttpClientResponse.schemaBodyJson(CreateTeamResponseSchema)),
+      Effect.scoped,
+      Effect.provide(FetchHttpClient.layer)
+    )
+    //Http.request
+    //  .post(new URL(CREATE_TEAM_URL, window.location.origin))
+    //  .pipe(
+    //    Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
+    //    Effect.flatMap(Http.client.fetchOk),
+    //    ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
+    //  )
   )

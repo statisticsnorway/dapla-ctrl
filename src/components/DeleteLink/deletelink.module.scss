@@ -1,22 +1,22 @@
 @use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
 
 .deleteLinkWrapper {
-    display: inline-flex;
-    align-items: center;
-    color: variables.$ssb-red-3;
-    padding: .5rem;
-    line-height: 1.7;
-    cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  color: variables.$ssb-red-3;
+  padding: 0.5rem;
+  line-height: 1.7;
+  cursor: pointer;
 
-    svg {
-        margin-right: .5rem;
-    }
-    
-    span {
-        border-bottom: 1px solid;
-    }
+  svg {
+    margin-right: 0.5rem;
+  }
 
-    &:focus {
-        @include variables.focus-marker;
-    }
+  span {
+    border-bottom: 1px solid;
+  }
+
+  &:focus {
+    @include variables.focus-ring;
+  }
 }

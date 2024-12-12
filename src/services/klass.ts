@@ -1,8 +1,9 @@
 import { Array as A, Effect, Either, Option as O, pipe } from 'effect'
-import { Schema } from '@effect/schema'
-import { ParseError } from '@effect/schema/ParseResult'
-import * as Http from '@effect/platform/HttpClient'
-import { HttpClientError } from '@effect/platform/Http/ClientError'
+import { Schema } from 'effect'
+import { ParseError } from 'effect/ParseResult'
+import { FetchHttpClient, HttpClientRequest } from '@effect/platform'
+import { HttpClient } from '@effect/platform/HttpClient'
+import { HttpClientError } from '@effect/platform/HttpClientError'
 
 const KLASS_URL = '/klass'
 
@@ -17,12 +18,15 @@ const OrgUnitVersionsSchema = Schema.NonEmptyArray(
 
 export type OrgUnitVersions = typeof OrgUnitVersionsSchema.Type
 
-const fetchOrgUnitVersions = (): Effect.Effect<OrgUnitVersions, HttpClientError | ParseError, never> =>
-  Http.request.get(new URL(`${KLASS_URL}/classifications/83`, window.location.origin)).pipe(
-    Http.request.appendUrlParam('language', 'en'),
-    Http.request.appendUrlParam('includeFuture', 'true'),
-    Http.client.fetchOk,
-    Http.response.json,
+const fetchOrgUnitVersions = (): Effect.Effect<OrgUnitVersions, HttpClientError | ParseError> =>
+  HttpClient.pipe(
+    Effect.flatMap((client) =>
+      HttpClientRequest.get(new URL(`${KLASS_URL}/classifications/83`, window.location.origin)).pipe(
+        HttpClientRequest.appendUrlParams({ language: 'en', includeFuture: true }),
+        client.execute,
+        Effect.flatMap((res) => res.json)
+      )
+    ),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Effect.flatMap((jsonResponse: any) =>
       Either.match(Schema.decodeEither(OrgUnitVersionsSchema)(jsonResponse.versions), {
@@ -30,8 +34,24 @@ const fetchOrgUnitVersions = (): Effect.Effect<OrgUnitVersions, HttpClientError 
         onRight: (v: OrgUnitVersions) => Effect.succeed(v),
       })
     ),
-    Effect.scoped
+    Effect.scoped,
+    Effect.provide(FetchHttpClient.layer)
   )
+
+//  Http.request.get(new URL(`${KLASS_URL}/classifications/83`, window.location.origin)).pipe(
+//    Http.request.appendUrlParam('language', 'en'),
+//    Http.request.appendUrlParam('includeFuture', 'true'),
+//    Http.client.fetchOk,
+//    Http.response.json,
+//    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//    Effect.flatMap((jsonResponse: any) =>
+//      Either.match(Schema.decodeEither(OrgUnitVersionsSchema)(jsonResponse.versions), {
+//        onLeft: (error) => Effect.fail(error),
+//        onRight: (v: OrgUnitVersions) => Effect.succeed(v),
+//      })
+//    ),
+//    Effect.scoped
+//  )
 
 const SSBSectionSchema = Schema.Struct({
   code: Schema.NumberFromString,
@@ -56,12 +76,10 @@ const mapToProxyUrl = (str: string) => pipe(str.match(/\/versions\/\d+/g), O.fro
 const removeSSBDepartments = (sections: SSBSections): SSBSections =>
   A.filter(sections, (section) => section.parentCode !== '')
 
-const fetchSSBSectionsAndDepartments = (
-  versionUrl: string
-): Effect.Effect<SSBSections, HttpClientError | ParseError, never> =>
-  Http.request.get(`/klass${O.getOrThrow(mapToProxyUrl(versionUrl))}`).pipe(
-    Http.client.fetchOk,
-    Http.response.json,
+const fetchSSBSectionsAndDepartments = (versionUrl: string): Effect.Effect<SSBSections, HttpClientError | ParseError> =>
+  HttpClient.pipe(
+    Effect.flatMap((client) => client.get(`/klass${O.getOrThrow(mapToProxyUrl(versionUrl))}`)),
+    Effect.flatMap((res) => res.json),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Effect.flatMap((jsonResponse: any) => {
       return Either.match(Schema.decodeEither(SSBSectionsSchema)(jsonResponse.classificationItems), {
@@ -69,7 +87,7 @@ const fetchSSBSectionsAndDepartments = (
         onRight: (v: SSBSections) => Effect.succeed(v),
       })
     })
-  )
+  ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
 export const fetchSSBSectionInformation = (): Effect.Effect<SSBSections, HttpClientError | ParseError, never> =>
   Effect.gen(function* () {
