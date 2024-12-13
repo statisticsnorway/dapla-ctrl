@@ -1,8 +1,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /usr/local/app
+RUN apk add pnpm
 
 COPY . .
-RUN npm ci && npm run build
+
+RUN rm -rf node_modules && \
+    pnpm install && pnpm run build
 
 FROM node:20-alpine
 
@@ -23,9 +26,10 @@ COPY package*.json server.js ./
 # Ensure appuser owns all files in /home/appuser/app
 RUN chown -R ${UID}:${GID} ${HOME_DIR}/app
 
+RUN apk add pnpm
 USER ${USERNAME}
 
-RUN npm install --ignore-scripts --save-exact express vite-express
+RUN pnpm install --ignore-scripts vite-express
 
 ENV PORT=8080
 EXPOSE 8080

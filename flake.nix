@@ -27,6 +27,7 @@
               nodejs
               nodePackages.nodemon
               nodePackages.typescript-language-server
+              pnpm
               pandoc
               yaml-language-server
             ])

@@ -7,14 +7,14 @@ help:
 
 .PHONY: build
 build: ## Build the app
-	npm install
+	pnpm install
 
 build-docker-local:
 	docker build -t dapla-ctrl .
 
 .PHONY: run-dev 
 run-dev: ## Run the app in dev mode
-	npm run dev
+	pnpm run dev
 
 .PHONY: bump-version-patch
 bump-version-patch: ## Bump patch version, e.g. 0.0.1 -> 0.0.2
