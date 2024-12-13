@@ -38,21 +38,6 @@ const fetchOrgUnitVersions = (): Effect.Effect<OrgUnitVersions, HttpClientError 
     Effect.provide(FetchHttpClient.layer)
   )
 
-//  Http.request.get(new URL(`${KLASS_URL}/classifications/83`, window.location.origin)).pipe(
-//    Http.request.appendUrlParam('language', 'en'),
-//    Http.request.appendUrlParam('includeFuture', 'true'),
-//    Http.client.fetchOk,
-//    Http.response.json,
-//    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//    Effect.flatMap((jsonResponse: any) =>
-//      Either.match(Schema.decodeEither(OrgUnitVersionsSchema)(jsonResponse.versions), {
-//        onLeft: (error) => Effect.fail(error),
-//        onRight: (v: OrgUnitVersions) => Effect.succeed(v),
-//      })
-//    ),
-//    Effect.scoped
-//  )
-
 const SSBSectionSchema = Schema.Struct({
   code: Schema.NumberFromString,
   parentCode: Schema.String,

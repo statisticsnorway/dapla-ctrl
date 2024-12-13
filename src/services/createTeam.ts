@@ -1,10 +1,5 @@
 import { Effect } from 'effect'
 import { ParseResult, Schema } from 'effect'
-// import * as Http from '@effect/platform/HttpClient'
-// import { HttpClientError } from '@effect/platform/Http/ClientError'
-// import * as ClientResponse from '@effect/platform/HttpClientResponse'
-// import { BodyError } from '@effect/platform/Http/Body'
-
 import { FetchHttpClient, HttpClientRequest, HttpClientResponse } from '@effect/platform'
 import { HttpClient } from '@effect/platform/HttpClient'
 import { HttpClientError } from '@effect/platform/HttpClientError'
@@ -60,11 +55,4 @@ export const createTeam = (
       Effect.scoped,
       Effect.provide(FetchHttpClient.layer)
     )
-    //Http.request
-    //  .post(new URL(CREATE_TEAM_URL, window.location.origin))
-    //  .pipe(
-    //    Http.request.schemaBody(CreateTeamRequestSchema)(createTeamRequest),
-    //    Effect.flatMap(Http.client.fetchOk),
-    //    ClientResponse.schemaBodyJsonScoped(CreateTeamResponse)
-    //  )
   )
