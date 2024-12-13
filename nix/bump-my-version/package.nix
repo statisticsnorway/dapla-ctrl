@@ -12,7 +12,6 @@
   wcmatch,
   fetchPypi,
 }:
-
 buildPythonApplication rec {
   pname = "bump-my-version";
   version = "0.28.1";
