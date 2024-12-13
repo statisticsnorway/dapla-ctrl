@@ -2,8 +2,7 @@ import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 
 import { Effect } from 'effect'
-import * as Http from '@effect/platform/HttpClient'
-import { HttpClientError } from '@effect/platform/Http/ClientError'
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientError } from '@effect/platform'
 
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
@@ -52,11 +51,17 @@ interface Group {
   users: User[]
 }
 
-export const getUserSectionCode = (principalName: string): Effect.Effect<number, Error | HttpClientError, never> =>
-  Http.request.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(
-    Http.request.appendUrlParam('select', 'section_code'),
-    Http.client.fetchOk,
-    Http.response.json,
+export const getUserSectionCode = (
+  principalName: string
+): Effect.Effect<number, Error | HttpClientError.HttpClientError> =>
+  HttpClient.HttpClient.pipe(
+    Effect.flatMap((client) =>
+      HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(
+        HttpClientRequest.appendUrlParam('select', 'section_code'),
+        client.execute,
+        Effect.flatMap((res) => res.json)
+      )
+    ),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Effect.flatMap((jsonResponse: any) =>
       Effect.try({
@@ -64,7 +69,7 @@ export const getUserSectionCode = (principalName: string): Effect.Effect<number,
         catch: (error) => new Error(`Failed to get section_code: ${error}`),
       })
     )
-  )
+  ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)

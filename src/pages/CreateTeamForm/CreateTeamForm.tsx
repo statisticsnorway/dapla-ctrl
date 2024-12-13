@@ -169,7 +169,7 @@ const CreateTeamForm = () => {
           Effect.catchTags({
             ResponseError: (error) => Effect.succeed({ success: false, message: error.message, body: O.none() }),
             RequestError: (error) => Effect.succeed({ success: false, message: error.message, body: O.none() }),
-            BodyError: (error) =>
+            HttpBodyError: (error) =>
               Effect.succeed({
                 success: false,
                 message: `Failed to parse http request body: ${error.reason._tag}`,

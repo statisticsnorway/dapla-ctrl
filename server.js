@@ -42,7 +42,7 @@ app.post('/log', bodyParser.text({ type: '*/*' }), (req, res) => {
 app.use(
   '/api',
   proxy(DAPLA_TEAM_API_URL, {
-    proxyReqBodyDecorator: function (bodyContent, srcReq) {
+    proxyReqBodyDecorator: function (bodyContent) {
       console.log(`Request Body: ${bodyContent}`)
       return bodyContent
     },
@@ -60,7 +60,7 @@ app.use(
       console.log(`Forwarding to: ${DAPLA_TEAM_API_URL}${newPath}`)
       return newPath
     },
-    userResDecorator: function (proxyRes, proxyResData, userReq, userRes) {
+    userResDecorator: function (proxyRes, proxyResData) {
       console.log(`Response Status: ${proxyRes.statusCode}`)
       console.log(`Response Headers:`, proxyRes.headers)
       return proxyResData
