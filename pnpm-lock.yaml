@@ -127,8 +127,8 @@ importers:
         specifier: ^5.4.8
         version: 5.4.8(@types/node@22.10.2)(sass@1.82.0)
       vite-envs:
-        specifier: ^4.4.5
-        version: 4.4.5
+        specifier: ^4.4.10
+        version: 4.4.10
 
 packages:
 
@@ -2320,8 +2320,8 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vite-envs@4.4.5:
-    resolution: {integrity: sha512-/fFJB2fkUM8U/qb3AAf9H1tt6vltAiiqMZScoAzne4pm0WPivWKS6hyJV4ei64C5M869FyBQ00M7wkuRVCy/9Q==}
+  vite-envs@4.4.10:
+    resolution: {integrity: sha512-x2Cbud8UCIz6fO3d8e3UGot7QxXXctA6ULyzTMcn3jZkS+uedo374P/delh3lUHCnuY1Dw2MLfOcFrRzBcaFwA==}
     hasBin: true
 
   vite-express@0.16.0:
@@ -4521,7 +4521,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-envs@4.4.5: {}
+  vite-envs@4.4.10: {}
 
   vite-express@0.16.0:
     dependencies:
