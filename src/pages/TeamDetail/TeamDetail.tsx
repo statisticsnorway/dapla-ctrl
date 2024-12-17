@@ -106,68 +106,80 @@ const TeamDetail = () => {
   const prepTeamData = useCallback(
     (response: TeamDetailData): TableData['data'] => {
       const sharedBucketsTab = SHARED_BUCKETS_TAB.path
+
       if (teamDetailTab === sharedBucketsTab) {
-        const sharedBuckets = (response[sharedBucketsTab] as SharedBuckets).items
-        if (!sharedBuckets) return []
-
-        return sharedBuckets.map(({ short_name, bucket_name, metrics }) => {
-          const teams_count = metrics?.teams_count
-          return {
-            id: short_name,
-            navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
-            tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
-            // delte_data: '-', // To be implemented; data does not exist in the API yet.
-            antall_personer: metrics?.users_count,
-          }
-        })
+        return getSharedBucketsData(response, sharedBucketsTab)
       } else {
-        const teamUsers = (response[TEAM_USERS_TAB.path] as Team).users
-        const teamGroups = (response.team as Team).groups ?? []
-
-        if (!teamUsers) return []
-
-        return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
-          const userFullName = formatDisplayName(display_name)
-
-          // we use the groups from the team to filter the groups of the users
-          const userGroups = groups?.filter((userGroup: Group) => {
-            return teamGroups.some((teamGroup: Group) => userGroup.uniform_name === teamGroup.uniform_name)
-          }) as Group[]
-          return {
-            id: userFullName,
-            navn: (
-              <FormattedTableColumn
-                href={`/teammedlemmer/${principal_name}`}
-                linkText={formatDisplayName(display_name)}
-                text={section_name}
-              />
-            ),
-            seksjon: section_name, // Makes section name searchable and sortable in table by including the field
-            gruppe: userGroups
-              .map((group) => getGroupType((response.team as Team).uniform_name, group.uniform_name))
-              .join(', '),
-            epost: principal_name,
-            editUser: (
-              <span>
-                <Link
-                  onClick={() => {
-                    setOpenEditUserSidebarModal(true)
-                    setEditUserInfo({
-                      name: formatDisplayName(display_name),
-                      email: principal_name,
-                      groups: userGroups,
-                    })
-                  }}
-                >
-                  Endre
-                </Link>
-              </span>
-            ),
-          }
-        })
+        return getTeamUsersData(response)
       }
     },
-    [activeTab]
+    [teamDetailTab, teamId, setOpenEditUserSidebarModal, setEditUserInfo]
+  )
+
+  const getSharedBucketsData = (response: TeamDetailData, sharedBucketsTab: string): TableData['data'] => {
+    const sharedBuckets = (response[sharedBucketsTab] as SharedBuckets).items
+    if (!sharedBuckets) return []
+
+    return sharedBuckets.map(({ short_name, bucket_name, metrics }) => {
+      const teams_count = metrics?.teams_count
+      return {
+        id: short_name,
+        navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
+        tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
+        antall_personer: metrics?.users_count,
+      }
+    })
+  }
+
+  const getTeamUsersData = (response: TeamDetailData): TableData['data'] => {
+    const teamUsers = (response[TEAM_USERS_TAB.path] as Team).users
+    const teamGroups = (response.team as Team).groups ?? []
+    if (!teamUsers) return []
+
+    return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
+      const userFullName = formatDisplayName(display_name)
+
+      const userGroups = filterUserGroups(groups, teamGroups)
+      return {
+        id: userFullName,
+        navn: (
+          <FormattedTableColumn
+            href={`/teammedlemmer/${principal_name}`}
+            linkText={formatDisplayName(display_name)}
+            text={section_name}
+          />
+        ),
+        seksjon: section_name,
+        gruppe: formatUserGroups(response.team as Team, userGroups),
+        epost: principal_name,
+        editUser: renderEditUserLink(display_name, principal_name, userGroups),
+      }
+    })
+  }
+
+  const filterUserGroups = (userGroups: Group[] | undefined, teamGroups: Group[]) =>
+    userGroups?.filter((userGroup) =>
+      teamGroups.some((teamGroup) => userGroup.uniform_name === teamGroup.uniform_name)
+    ) as Group[]
+
+  const formatUserGroups = (team: Team, userGroups: Group[]) =>
+    userGroups.map((group) => getGroupType(team.uniform_name, group.uniform_name)).join(', ')
+
+  const renderEditUserLink = (display_name: string, principal_name: string, userGroups: Group[]) => (
+    <span>
+      <Link
+        onClick={() => {
+          setOpenEditUserSidebarModal(true)
+          setEditUserInfo({
+            name: formatDisplayName(display_name),
+            email: principal_name,
+            groups: userGroups,
+          })
+        }}
+      >
+        Endre
+      </Link>
+    </span>
   )
 
   useEffect(() => {
