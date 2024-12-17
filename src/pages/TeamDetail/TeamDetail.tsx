@@ -150,7 +150,7 @@ const TeamDetail = () => {
             text={section_name}
           />
         ),
-        seksjon: section_name,
+        seksjon: section_name, // Makes section name searchable and sortable in table by including the field
         gruppe: formatUserGroups(response.team as Team, userGroups),
         epost: principal_name,
         editUser: renderEditUserLink(display_name, principal_name, userGroups),
