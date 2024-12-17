@@ -126,9 +126,13 @@ const TeamDetail = () => {
 
         return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
           const userFullName = formatDisplayName(display_name)
-          const userGroups = groups?.filter((group) =>
-            group.uniform_name.startsWith((response.team as Team).uniform_name)
-          ) as Group[]
+          const teamUniformName = (response.team as Team).uniform_name
+          // Because we dont yet support custom groups, we can filter out the groups that are not relevant
+          // TODO: Remove this when custom groups are supported
+          const validEndings = ['managers', 'developers', 'data-admins']
+          const userGroups = groups?.filter((group) => {
+            return validEndings.some((ending) => group.uniform_name === `${teamUniformName}-${ending}`)
+          }) as Group[]
           return {
             id: userFullName,
             navn: (
@@ -139,11 +143,7 @@ const TeamDetail = () => {
               />
             ),
             seksjon: section_name, // Makes section name searchable and sortable in table by including the field
-            gruppe: groups
-              ?.filter((group) => {
-                const baseUniformName = (response.team as Team).uniform_name
-                return group.uniform_name.startsWith(baseUniformName)
-              })
+            gruppe: userGroups
               .map((group) => getGroupType((response.team as Team).uniform_name, group.uniform_name))
               .join(', '),
             epost: principal_name,
