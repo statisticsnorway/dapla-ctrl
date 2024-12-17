@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@effect/platform':
-        specifier: ^0.70.7
-        version: 0.70.7(effect@3.11.7)
+        specifier: ^0.71.3
+        version: 0.71.3(effect@3.11.7)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@18.3.2)(react@18.3.1)
@@ -173,10 +173,10 @@ packages:
     resolution: {integrity: sha512-vN5p+1kl59GVKMvTHt55NzzmYVxprfJD+ql7U9NFIfKCBkYE55LYtS+WtPlaYOyzydrKI8Nezd+aZextrd+FMA==}
     engines: {node: '>=6.9.0'}
 
-  '@effect/platform@0.70.7':
-    resolution: {integrity: sha512-TbNwj/mOJhycPygbmicGBS7CNtv5Z8WVheRbLUdP3oPAe/nbSOJVLc8ZPvOejhquF/1vJMKuqY5MWfkcBpvi/g==}
+  '@effect/platform@0.71.3':
+    resolution: {integrity: sha512-dHJ2G/q6tR24Hp7qNBFJLnq3k0EW8VOyw/UhLiRT905+Wi/oxWRv8mHrDveBVnkS7zPUYNL/yaa89txKEXK4kg==}
     peerDependencies:
-      effect: ^3.11.5
+      effect: ^3.11.7
 
   '@emotion/babel-plugin@11.13.5':
     resolution: {integrity: sha512-pxHCpT2ex+0q+HH91/zsdHkw/lXd468DIN2zvfvLtPKLLMo6gQj7oLObq8PhkrxOZb/gGCq03S3Z7PDhS8pduQ==}
@@ -2457,7 +2457,7 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@effect/platform@0.70.7(effect@3.11.7)':
+  '@effect/platform@0.71.3(effect@3.11.7)':
     dependencies:
       effect: 3.11.7
       find-my-way-ts: 0.1.5
