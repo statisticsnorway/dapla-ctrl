@@ -126,6 +126,7 @@ const TeamDetail = () => {
         id: short_name,
         navn: <FormattedTableColumn href={`/${teamId}/${short_name}`} linkText={short_name} text={bucket_name} />,
         tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
+        // delte_data: '-', // To be implemented; data does not exist in the API yet.
         antall_personer: metrics?.users_count,
       }
     })
