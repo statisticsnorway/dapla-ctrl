@@ -122,16 +122,16 @@ const TeamDetail = () => {
         })
       } else {
         const teamUsers = (response[TEAM_USERS_TAB.path] as Team).users
+        const teamGroups = (response.team as Team).groups ?? []
+
         if (!teamUsers) return []
 
         return teamUsers.map(({ display_name, principal_name, section_name, groups }) => {
           const userFullName = formatDisplayName(display_name)
-          const teamUniformName = (response.team as Team).uniform_name
-          // Because we dont yet support custom groups, we can filter out the groups that are not relevant
-          // TODO: Remove this when custom groups are supported
-          const validEndings = ['managers', 'developers', 'data-admins']
-          const userGroups = groups?.filter((group) => {
-            return validEndings.some((ending) => group.uniform_name === `${teamUniformName}-${ending}`)
+
+          // we use the groups from the team to filter the groups of the users
+          const userGroups = groups?.filter((userGroup: Group) => {
+            return teamGroups.some((teamGroup: Group) => userGroup.uniform_name === teamGroup.uniform_name)
           }) as Group[]
           return {
             id: userFullName,
