@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@effect/platform':
-        specifier: ^0.70.7
-        version: 0.70.7(effect@3.11.8)
+        specifier: ^0.71.5
+        version: 0.71.5(effect@3.11.8)
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@18.3.2)(react@18.3.1)
@@ -320,10 +320,10 @@ packages:
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
     engines: {node: '>=12'}
 
-  '@effect/platform@0.70.7':
-    resolution: {integrity: sha512-TbNwj/mOJhycPygbmicGBS7CNtv5Z8WVheRbLUdP3oPAe/nbSOJVLc8ZPvOejhquF/1vJMKuqY5MWfkcBpvi/g==}
+  '@effect/platform@0.71.5':
+    resolution: {integrity: sha512-F+v7uYZ1ObGUmh3qqUS/1Dynj141ZDx+Oa697822Yc5QRu6xDfTBEHviByseVYK451bwSvsyidi4aCloH0GrLg==}
     peerDependencies:
-      effect: ^3.11.5
+      effect: ^3.11.8
 
   '@emotion/babel-plugin@11.13.5':
     resolution: {integrity: sha512-pxHCpT2ex+0q+HH91/zsdHkw/lXd468DIN2zvfvLtPKLLMo6gQj7oLObq8PhkrxOZb/gGCq03S3Z7PDhS8pduQ==}
@@ -3553,7 +3553,7 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@effect/platform@0.70.7(effect@3.11.8)':
+  '@effect/platform@0.71.5(effect@3.11.8)':
     dependencies:
       effect: 3.11.8
       find-my-way-ts: 0.1.5
