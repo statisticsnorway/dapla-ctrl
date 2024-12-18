@@ -29,3 +29,6 @@ jobs:
 
       - name: Check for ESLint warnings and errors
         run: pnpm run lint
+      
+      - name: Run tests
+        run: pnpm run tests

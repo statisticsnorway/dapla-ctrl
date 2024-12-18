@@ -39,13 +39,13 @@ export const getGroupType = (teamName: string, groupName: string): string => {
 
 // Returns the closest match of a team name from a group name
 export const getTeamFromGroup = (allTeams: Team[], groupName: string): string => {
-  if (allTeams?.length) {
-    const teamName = allTeams
-      .filter(({ uniform_name }) => groupName.includes(uniform_name))
-      .sort((a, b) => b.uniform_name.length - a.uniform_name.length)
-    return teamName.length ? teamName[0].uniform_name : ''
-  }
-  return ''
+  if (!allTeams?.length) return ''
+
+  const matchedTeams = allTeams
+    .filter(({ uniform_name }) => groupName.includes(uniform_name))
+    .sort((a, b) => b.uniform_name.length - a.uniform_name.length)
+
+  return matchedTeams.length ? matchedTeams[0].uniform_name : ''
 }
 
 export const formatDisplayName = (displayName: string) => {
