@@ -1,6 +1,4 @@
 on:
-  # FIXME: Remove this line, just for testing in PR
-  pull_request:
   release:
     types: [published]
   push:
@@ -66,9 +64,6 @@ jobs:
           else
             echo "cluster=test" >> "$GITHUB_OUTPUT"
             echo "nais_config_path=.nais/test.yaml" >> "$GITHUB_OUTPUT"
-            # TODO: Remove temporary prod deploy
-            echo "cluster=prod" >> "$GITHUB_OUTPUT"
-            echo "nais_config_path=.nais/prod.yaml" >> "$GITHUB_OUTPUT"
           fi
 
   build-push-deploy:
