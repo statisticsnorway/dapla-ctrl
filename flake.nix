@@ -9,7 +9,11 @@
   outputs = inputs @ {flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
-      perSystem = {pkgs, ...}: {
+      perSystem = {
+        pkgs,
+        self',
+        ...
+      }: {
         devShells.default = pkgs.mkShell {
           shellHook = ''
             export DAPLA_TEAM_API_URL=https://dapla-team-api.intern.test.ssb.no
@@ -17,16 +21,21 @@
             export DAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers
             export DAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g
           '';
-          packages = with pkgs; [
-            nixd
-            nodejs
-            nodePackages.nodemon
-            nodePackages.typescript-language-server
-            pnpm
-            pandoc
-          ];
+          packages =
+            (with pkgs; [
+              nixd
+              nodejs
+              nodePackages.nodemon
+              nodePackages.typescript-language-server
+              pnpm
+              pandoc
+              yaml-language-server
+            ])
+            ++ [self'.packages.bump-my-version];
         };
         formatter = pkgs.alejandra;
+
+        packages.bump-my-version = pkgs.python3Packages.callPackage ./nix/bump-my-version/package.nix {};
       };
     };
 }
