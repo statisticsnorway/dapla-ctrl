@@ -1,5 +1,5 @@
-import { Schema as S } from '@effect/schema'
-import { Schema, PropertySignature } from '@effect/schema/Schema'
+import { Schema as S } from 'effect'
+import { Schema, PropertySignature } from 'effect/Schema'
 
 /**
  * Utility function to make tagging fields with different encoding key names less verbose.
