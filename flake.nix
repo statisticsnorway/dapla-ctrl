@@ -21,21 +21,17 @@
             export DAPLA_CTRL_ADMIN_GROUPS=dapla-stat-developers,dapla-skyinfra-developers,dapla-utvik-developers
             export DAPLA_CTRL_DOCUMENTATION_URL=https://statistics-norway.atlassian.net/wiki/x/EYC24g
           '';
-          packages =
-            (with pkgs; [
-              nixd
-              nodejs
-              nodePackages.nodemon
-              nodePackages.typescript-language-server
-              pnpm
-              pandoc
-              yaml-language-server
-            ])
-            ++ [self'.packages.bump-my-version];
+          packages = with pkgs; [
+            nixd
+            nodejs
+            nodePackages.nodemon
+            nodePackages.typescript-language-server
+            pnpm
+            pandoc
+            yaml-language-server
+          ];
         };
         formatter = pkgs.alejandra;
-
-        packages.bump-my-version = pkgs.python3Packages.callPackage ./nix/bump-my-version/package.nix {};
       };
     };
 }
