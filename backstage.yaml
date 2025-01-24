@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dapla-ctrl
+  title: Dapla Ctrl
+  description: |
+    A web interface for performing administrative tasks related to Dapla teams
+  tags:
+    - typescript
+    - react
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-ctrl
+spec:
+  type: website
+  owner: dapla-stat-developers
+  lifecycle: production
+  system: kuben
+  consumesApi:
+    - dapla-team-api
