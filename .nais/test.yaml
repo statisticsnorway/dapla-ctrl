@@ -45,6 +45,7 @@ spec:
           namespace: 'dapla-platform'
       external:
         - host: 'auth.test.ssb.no'
+        - host: 'data.ssb.no'
 
   envFrom:
     - secret: login-config-dapla-ctrl # contains: WONDERWALL_OPENID_CLIENT_ID, WONDERWALL_OPENID_CLIENT_SECRET, WONDERWALL_OPENID_AUDIENCES
