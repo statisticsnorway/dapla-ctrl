@@ -271,7 +271,7 @@ const updateGroupMembership = async (
     const responseJson = await response.json()
     const flattenedResponse = { ...responseJson._embedded.results[0] }
 
-    return {...flattenedResponse, statusCode: response.status}
+    return { ...flattenedResponse, statusCode: response.status }
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to update group membership: ', error)

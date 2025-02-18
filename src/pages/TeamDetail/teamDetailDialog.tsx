@@ -16,14 +16,12 @@ export const renderSidebarModalWarning = (errorList: JobResponse[]) => {
   if (!errorList.length) return null
 
   return (
-    <Dialog type="warning" title="API-feil oppstod">
+    <Dialog type='warning' title='API-feil oppstod'>
       <div>
         <p>Det oppstod følgende feil under forespørselen:</p>
         <ul>
           {errorList.map((error, index) => (
-            <li
-              key={index}
-            >
+            <li key={index}>
               <p>
                 <strong>Error Code:</strong> {error.statusCode}
               </p>
