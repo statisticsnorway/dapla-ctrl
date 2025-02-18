@@ -2,7 +2,7 @@ import styles from './teamDetail.module.scss'
 
 import { useState, useEffect } from 'react'
 import { UserInfo } from './TeamDetail'
-import { TeamDetailData, Team, Group, addUserToGroups, removeUserFromGroups } from '../../services/teamDetail'
+import { TeamDetailData, Team, Group, addUserToGroups, removeUserFromGroups, JobResponse } from '../../services/teamDetail'
 import { DropdownItem } from '../../@types/pageTypes'
 import { getErrorList, getGroupType, removeDuplicateDropdownItems } from '../../utils/utils'
 import SidebarModal, { SidebarHeader } from '../../components/SidebarModal/SidebarModal'
@@ -16,7 +16,7 @@ import { CircularProgress } from '@mui/material'
 import { XCircle, Trash2 } from 'react-feather'
 
 interface EditUserStates {
-  [key: string]: boolean | Array<string>
+  [key: string]: boolean | string[] | JobResponse[];
 }
 
 interface EditTeamMember {
@@ -286,7 +286,7 @@ const EditTeamMember = ({
                 {renderSidebarModalInfo(
                   <>
                     {editUserErrors?.[editUserInfo.email as string]
-                      ? renderSidebarModalWarning(editUserErrors?.[editUserInfo.email as string] as string[])
+                      ? renderSidebarModalWarning(editUserErrors?.[editUserInfo.email as string] as JobResponse[])
                       : null}
                     {showEditUserSpinner?.[editUserInfo.email as string] && <CircularProgress />}
                   </>

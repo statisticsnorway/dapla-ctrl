@@ -1,7 +1,7 @@
 import styles from './teamDetail.module.scss'
 
 import { useState } from 'react'
-import { TeamDetailData, addUserToGroups, Group, Team } from '../../services/teamDetail'
+import { TeamDetailData, addUserToGroups, Group, Team, JobResponse } from '../../services/teamDetail'
 import { User } from '../../services/teamMembers'
 import { formatDisplayName, getErrorList, removeDuplicateDropdownItems } from '../../utils/utils'
 import { DropdownItem } from '../../@types/pageTypes'
@@ -61,7 +61,7 @@ const AddTeamMember = ({
     error: false,
     errorMessage: 'Velg minst én tilgangsgruppe',
   })
-  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<string>>([])
+  const [addUserToTeamErrors, setAddUserToTeamErrors] = useState<Array<JobResponse>>([])
   const [showAddUserSpinner, setShowAddUserSpinner] = useState<boolean>(false)
 
   const handleAddUser = (item: DropdownItem) => {

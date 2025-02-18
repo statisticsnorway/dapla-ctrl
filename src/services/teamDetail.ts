@@ -60,6 +60,7 @@ export interface Metrics {
 
 export interface JobResponse {
   status: string
+  statusCode?: number
   detail?: string
 }
 
@@ -263,14 +264,14 @@ const updateGroupMembership = async (
 
     if (!response.ok) {
       const errorMessage = (await response.text()) || 'An error occurred'
-      const { detail, status } = JSON.parse(errorMessage)
-      throw new ApiError(status, detail)
+      const { detail } = JSON.parse(errorMessage)
+      throw new ApiError(response.status, detail)
     }
 
     const responseJson = await response.json()
     const flattenedResponse = { ...responseJson._embedded.results[0] }
 
-    return flattenedResponse
+    return {...flattenedResponse, statusCode: response.status}
   } catch (error) {
     if (error instanceof ApiError) {
       console.error('Failed to update group membership: ', error)

@@ -1,3 +1,4 @@
+import { JobResponse } from '../../services/teamDetail'
 import styles from './teamDetail.module.scss'
 
 import { Dialog } from '@statisticsnorway/ssb-component-library'
@@ -11,20 +12,28 @@ export const renderSidebarModalInfo = (children: JSX.Element) => {
   )
 }
 
-export const renderSidebarModalWarning = (errorList: string[]) => {
-  if (errorList.length) {
-    return (
-      <Dialog type='warning'>
-        {typeof errorList === 'string' ? (
-          errorList
-        ) : (
-          <ul>
-            {errorList.map((errors) => (
-              <li>{errors}</li>
-            ))}
-          </ul>
-        )}
-      </Dialog>
-    )
-  }
+export const renderSidebarModalWarning = (errorList: JobResponse[]) => {
+  if (!errorList.length) return null
+
+  return (
+    <Dialog type="warning" title="API-feil oppstod">
+      <div>
+        <p>Det oppstod følgende feil under forespørselen:</p>
+        <ul>
+          {errorList.map((error, index) => (
+            <li
+              key={index}
+            >
+              <p>
+                <strong>Error Code:</strong> {error.statusCode}
+              </p>
+              <p>
+                <strong>Detaljer:</strong> {error.detail}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Dialog>
+  )
 }

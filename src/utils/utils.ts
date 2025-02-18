@@ -82,9 +82,9 @@ export const removeDuplicateDropdownItems = (items: DropdownItem[]) => {
 
 export const getErrorList = (response: JobResponse[]) => {
   return response
-    .map(({ status, detail }) => {
+    .map(({ status, detail, statusCode }) => {
       if ((detail && status === 'ERROR') || (detail && status === 'IGNORED')) {
-        return detail
+        return { status, detail, statusCode } as JobResponse
       }
       return ''
     })
