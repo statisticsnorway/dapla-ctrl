@@ -4,7 +4,7 @@ run-name: Deploy alerts for Dapla Ctrl to test and prod
 on:
   push:
     branches:
-      - master
+      - develop
     paths:
       - '.nais/alerts.yaml'
       - '.github/workflows/alert-deploy.yml'
