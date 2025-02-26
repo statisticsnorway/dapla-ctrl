@@ -7,7 +7,7 @@ on:
       - develop
     paths:
       - '.nais/alerts.yaml'
-      - '.github/workflows/alert-deploy.yml'
+      - '.github/workflows/alert-deploy.yaml'
   workflow_dispatch:
 permissions:
   id-token: write
