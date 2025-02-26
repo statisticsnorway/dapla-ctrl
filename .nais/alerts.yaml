@@ -20,6 +20,8 @@ spec:
             service: dapla-ctrl
             namespace: dapla-stat
             severity: critical
+            alertmanager_custom_config: dapla-stat
+            alert_type: custom
 
         - alert: Dapla Ctrl is unavailable
           expr: kube_deployment_status_replicas_available{deployment="dapla-ctrl"} == 0
@@ -31,3 +33,5 @@ spec:
             service: dapla-ctrl
             namespace: dapla-stat
             severity: critical
+            alertmanager_custom_config: dapla-stat
+            alert_type: custom
