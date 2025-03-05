@@ -6,6 +6,8 @@ metadata:
   annotations:
     nais.io/read-only-file-system: "false"
     nais.io/run-as-user: "1001"
+    # set timeout against dapla-team-api, since awx uses some time to preform its job
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "310"
 spec:
   image: '{{image}}'
 
