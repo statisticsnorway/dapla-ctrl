@@ -47,6 +47,7 @@ spec:
       external:
         - host: 'auth.ssb.no'
         - host: 'data.ssb.no'
+        - host: 'dapla-team-api.intern.ssb.no'
 
   envFrom:
     - secret: login-config-dapla-ctrl # contains: WONDERWALL_OPENID_CLIENT_ID, WONDERWALL_OPENID_CLIENT_SECRET, WONDERWALL_OPENID_AUDIENCES
@@ -59,7 +60,7 @@ spec:
 
   env:
     - name: 'DAPLA_TEAM_API_URL'
-      value: 'http://dapla-team-api.dapla-platform' # uses Service discovery
+      value: 'https://dapla-team-api.intern.ssb.no' # use internal load balancer
     - name: 'DAPLA_CTRL_ADMIN_GROUPS'
       value: 'dapla-stat-developers,dapla-skyinfra-developers'
     - name: 'DAPLA_CTRL_DOCUMENTATION_URL'
