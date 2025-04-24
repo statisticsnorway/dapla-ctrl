@@ -31,7 +31,7 @@ import EditTeamMember from './EditTeamMember'
 import { AUTONOMY_LEVEL } from '../../content/glossary'
 
 import { Effect } from 'effect'
-import {capitalize} from "effect/String";
+import { capitalize } from 'effect/String'
 
 export interface UserInfo {
   name?: string
