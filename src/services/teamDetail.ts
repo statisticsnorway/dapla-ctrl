@@ -49,6 +49,7 @@ export interface SharedBuckets {
 export interface SharedBucket {
   short_name: string
   bucket_name: string
+  type: string
   metrics?: Metrics
 }
 
@@ -128,7 +129,7 @@ export const fetchSharedBuckets = async (teamId: string): Promise<SharedBuckets 
   const sharedBucketsUrl = new URL(`${TEAMS_URL}/${teamId}/shared/buckets`, window.location.origin)
 
   const embeds = ['metrics']
-  const selects = ['short_name', 'bucket_name', 'metrics.teams_count', 'metrics.groups_count', 'metrics.users_count']
+  const selects = ['short_name', 'bucket_name', 'type', 'metrics.teams_count', 'metrics.groups_count', 'metrics.users_count']
 
   sharedBucketsUrl.searchParams.set('embed', embeds.join(','))
   sharedBucketsUrl.searchParams.append('select', selects.join(','))

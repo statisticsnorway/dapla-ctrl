@@ -31,6 +31,7 @@ import EditTeamMember from './EditTeamMember'
 import { AUTONOMY_LEVEL } from '../../content/glossary'
 
 import { Effect } from 'effect'
+import {capitalize} from "effect/String";
 
 export interface UserInfo {
   name?: string
@@ -65,11 +66,11 @@ const SHARED_BUCKETS_TAB = {
       id: 'navn',
       label: 'Navn',
     },
+    { id: 'type', label: 'Type' },
     {
       id: 'tilgang',
       label: 'Tilgang',
     },
-    // { id: 'delte_data', label: 'Delte data' },
     { id: 'antall_personer', label: 'Antall personer', align: 'right' },
   ],
 }
@@ -120,7 +121,7 @@ const TeamDetail = () => {
     const sharedBuckets = (response[sharedBucketsTab] as SharedBuckets).items
     if (!sharedBuckets) return []
 
-    return sharedBuckets.map(({ short_name, bucket_name, metrics }) => {
+    return sharedBuckets.map(({ short_name, bucket_name, type, metrics }) => {
       const teams_count = metrics?.teams_count
       return {
         id: short_name,
@@ -128,6 +129,7 @@ const TeamDetail = () => {
         tilgang: typeof teams_count === 'number' ? `${teams_count} team` : teams_count,
         // delte_data: '-', // To be implemented; data does not exist in the API yet.
         antall_personer: metrics?.users_count,
+        type: capitalize(type),
       }
     })
   }

@@ -10,6 +10,7 @@ export interface SharedBucketDetail {
 export interface SharedBucket {
   short_name: string
   bucket_name: string
+  type: string
   groups: Group[]
 }
 
