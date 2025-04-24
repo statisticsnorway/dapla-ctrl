@@ -19,6 +19,7 @@ import { useState, useEffect, useContext } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
 import { formatDisplayName, getGroupType, getTeamFromGroup } from '../../utils/utils'
+import { capitalize } from 'effect/String'
 
 const SharedBucketDetail = () => {
   const { setBreadcrumbTeamDetailDisplayName, setBreadcrumbBucketDetailDisplayName } = useContext(DaplaCtrlContext)
@@ -132,8 +133,9 @@ const SharedBucketDetail = () => {
       return (
         <>
           <LeadParagraph className={styles.description}>
+            <Text medium>{(sharedBucketData.sharedBucket as SharedBucket).bucket_name}</Text>
             <Text medium className={styles.descriptionSpacing}>
-              {(sharedBucketData.sharedBucket as SharedBucket).bucket_name}
+              {capitalize((sharedBucketData.sharedBucket as SharedBucket).type)}
             </Text>
             <Text medium>{(sharedBucketData.team as Team).display_name}</Text>
             <Text medium>{(sharedBucketData.team as Team).section_name}</Text>
