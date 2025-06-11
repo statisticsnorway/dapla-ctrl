@@ -4,8 +4,8 @@ import { User } from '../../@types/user'
 import styles from './avatar.module.scss'
 
 const Avatar = () => {
-  const [userProfileData, setUserProfileData] = useState<User>(null)
-  const [imageSrc, setImageSrc] = useState<URL>(null)
+  const [userProfileData, setUserProfileData] = useState<User>()
+  const [imageSrc, setImageSrc] = useState<string>()
   const [fallbackInitials, setFallbackInitials] = useState<string>('??')
   const [encodedURI, setEncodedURI] = useState<string>('')
 
@@ -36,7 +36,7 @@ const Avatar = () => {
 
       const byteArray = new Uint8Array(byteNumbers)
       const blob: Blob = new Blob([byteArray], { type: 'image/png' })
-      const blobUrl: URL = URL.createObjectURL(blob)
+      const blobUrl: string = URL.createObjectURL(blob)
 
       setImageSrc(blobUrl)
 
