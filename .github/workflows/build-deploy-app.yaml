@@ -3,7 +3,7 @@ on:
     types: [published]
   push:
     branches:
-      - develop
+      - main
     paths-ignore:
       - '**/*.md'
       - '.gitignore'
