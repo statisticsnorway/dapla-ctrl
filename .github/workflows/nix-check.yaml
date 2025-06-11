@@ -2,7 +2,11 @@ name: Nix tests
 
 on:
   pull_request:
-    paths: '**/*.nix'
+    paths:
+      - '**/*.nix'
+
+permissions:
+  contents: read
 
 jobs:
   nix-tests:

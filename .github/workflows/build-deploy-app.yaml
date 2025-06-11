@@ -3,10 +3,13 @@ on:
     types: [published]
   push:
     branches:
-      - develop
+      - main
     paths-ignore:
       - '**/*.md'
       - '.gitignore'
+      # No need to build and deploy if only the nix development environment changes
+      - 'flake.nix'
+      - 'flake.lock'
 
 env:
   REGISTRY: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/dapla-stat/dapla-ctrl
