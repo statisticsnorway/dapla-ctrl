@@ -2,51 +2,46 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { User } from '../../@types/user'
 import styles from './avatar.module.scss'
+import { Effect, Option as O } from 'effect'
+import { useUserProfileStore } from '../../services/store'
+
+// Convert base64 string to Blob URL while handling potential errors
+const base64ToBlobUrl = (base64Image: string): Effect.Effect<string, Error> =>
+  Effect.try({
+    try: () => {
+      const byteArray = new Uint8Array(Array.from(atob(base64Image), (c) => c.charCodeAt(0)))
+      const blob = new Blob([byteArray], { type: 'image/png' })
+      return URL.createObjectURL(blob)
+    },
+    catch: (unknownError) => new Error(`Failed to convert base64 avatar photo to Blob URL: ${unknownError.message}`),
+  })
 
 const Avatar = () => {
-  const [userProfileData, setUserProfileData] = useState<User>()
   const [imageSrc, setImageSrc] = useState<string>()
   const [fallbackInitials, setFallbackInitials] = useState<string>('??')
   const [encodedURI, setEncodedURI] = useState<string>('')
+  const maybeUser: O.Option<User> = useUserProfileStore((state) => state.loggedInUser)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    const storedUserProfile = localStorage.getItem('userProfile')
-    if (!storedUserProfile) {
-      return
-    }
-
-    const userProfile = JSON.parse(storedUserProfile) as User
-    if (!userProfile) return
-
-    setUserProfileData(userProfile)
-    setEncodedURI(`/teammedlemmer/${userProfile.principal_name}`)
-    setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0])
-
-    const base64Image = userProfile?.photo
-    if (!base64Image) return
-
-    try {
-      const byteCharacters = atob(base64Image)
-      const byteNumbers = new Array(byteCharacters.length)
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i)
-      }
-
-      const byteArray = new Uint8Array(byteNumbers)
-      const blob: Blob = new Blob([byteArray], { type: 'image/png' })
-      const blobUrl: string = URL.createObjectURL(blob)
-
-      setImageSrc(blobUrl)
-
-      // Cleanup: revoke the blob URL when the component unmounts
-      return () => {
-        URL.revokeObjectURL(blobUrl)
-      }
-    } catch (error) {
-      console.error('Failed to convert base64 string of the avatar photo to Blob URL', error)
-    }
+    Effect.gen(function* () {
+      const user: User = yield* O.match(maybeUser, {
+        onNone: () => Effect.fail(new Error('User not logged in!')),
+        onSome: (user) => Effect.succeed(user),
+      })
+      yield* Effect.sync(() => {
+        setEncodedURI(`/teammedlemmer/${user.principal_name}`)
+        setFallbackInitials(user.first_name[0] + user.last_name[0])
+      })
+      const base64Image = yield* O.match(O.fromNullable(user?.photo), {
+        onNone: () => Effect.fail(new Error("User object doesn't contain photo")),
+        onSome: (photo) => Effect.succeed(photo),
+      })
+      return yield* base64ToBlobUrl(base64Image)
+    })
+      .pipe(Effect.runPromise)
+      .then((blobUrl) => setImageSrc(blobUrl))
   }, [])
 
   const handleClick = () => {
@@ -56,11 +51,7 @@ const Avatar = () => {
 
   return (
     <div className={styles.avatar} onClick={handleClick}>
-      {imageSrc ? (
-        <img src={imageSrc} alt='User' />
-      ) : (
-        <div className={styles.initials}>{userProfileData ? `${fallbackInitials}` : '??'}</div>
-      )}
+      {imageSrc ? <img src={imageSrc} alt='User' /> : <div className={styles.initials}>{fallbackInitials}</div>}
     </div>
   )
 }
