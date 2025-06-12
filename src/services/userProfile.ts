@@ -62,10 +62,10 @@ export const getUserSectionCode = (
         Effect.flatMap((res) => res.json)
       )
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Effect.flatMap((jsonResponse: any) =>
+    Effect.flatMap((jsonResponse: unknown) =>
       Effect.try({
-        try: () => parseInt(jsonResponse.section_code),
+        // We need a type assertion here because `jsonResponse` is of type unknown
+        try: () => (jsonResponse as { section_code: number }).section_code,
         catch: (error) => new Error(`Failed to get section_code: ${error}`),
       })
     )
