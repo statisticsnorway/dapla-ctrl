@@ -28,7 +28,7 @@ const Avatar = () => {
     })
       .pipe(Effect.runPromise)
       .then((blobUrl) => setImageSrc(blobUrl))
-  }, [])
+  }, [maybeLoggedInUser])
 
   const handleClick = () => {
     if (encodedURI === '') return
