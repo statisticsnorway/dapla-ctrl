@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserProfile } from '../../@types/user'
+import { UserNotLoggedIn } from '../../@types/error'
 import styles from './avatar.module.scss'
 import { Effect, Option as O } from 'effect'
 import { useUserProfileStore } from '../../services/store'
@@ -16,8 +17,8 @@ const Avatar = () => {
   useEffect(() => {
     Effect.gen(function* () {
       const user: UserProfile = yield* O.match(maybeLoggedInUser, {
-        onNone: () => Effect.fail(new Error('User not logged in!')),
-        onSome: (user) => Effect.succeed(user),
+        onNone: () => Effect.fail(new UserNotLoggedIn('Could not find UserProfile object in the zustand store!')),
+        onSome: Effect.succeed,
       })
       yield* Effect.sync(() => {
         setEncodedURI(`/teammedlemmer/${user.principalName}`)
