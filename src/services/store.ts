@@ -1,16 +1,16 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { User } from '../services/userProfile.ts'
+import { UserProfile } from '../@types/user'
 import { Effect, Option as O } from 'effect'
 
 import { customLogger } from '../utils/logger.ts'
 
 type UserProfileStoreState = {
-  loggedInUser: O.Option<User>
+  loggedInUser: O.Option<UserProfile>
 }
 
 type UserProfileStoreActions = {
-  setLoggedInUser: (user: User) => void
+  setLoggedInUser: (user: UserProfile) => void
 }
 
 export type UserProfileStore = UserProfileStoreState & UserProfileStoreActions
@@ -18,7 +18,7 @@ export type UserProfileStore = UserProfileStoreState & UserProfileStoreActions
 export const useUserProfileStore = create<UserProfileStore>()(
   subscribeWithSelector((set) => ({
     loggedInUser: O.none(),
-    setLoggedInUser: (user: User) => set(() => ({ loggedInUser: O.some(user) })),
+    setLoggedInUser: (user: UserProfile) => set(() => ({ loggedInUser: O.some(user) })),
   }))
 )
 

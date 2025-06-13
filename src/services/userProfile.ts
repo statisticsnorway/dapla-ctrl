@@ -1,8 +1,10 @@
 import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
+import { ConversionError } from '../@types/error'
+import { UserData, UserProfile, UserPhoto } from '../@types/user'
 
-import { Effect } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientError } from '@effect/platform'
+import { Effect, ParseResult } from 'effect'
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse, HttpClientError } from '@effect/platform'
 
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
@@ -71,6 +73,51 @@ export const getUserSectionCode = (
     )
   ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
+export const getUserData = (
+  principalName: string
+): Effect.Effect<UserData, HttpClientError.HttpClientError | ParseResult.ParseError> =>
+  HttpClient.HttpClient.pipe(
+    Effect.flatMap((client) =>
+      HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(client.execute)
+    ),
+    Effect.flatMap(HttpClientResponse.schemaBodyJson(UserData)),
+    Effect.scoped,
+    Effect.provide(FetchHttpClient.layer)
+  )
+
+// Convert base64 string to Blob URL while handling potential errors
+const base64ToBlobUrl = (base64Image: string): Effect.Effect<string, ConversionError> =>
+  Effect.try({
+    try: () => {
+      const byteArray = new Uint8Array(Array.from(atob(base64Image), (c) => c.charCodeAt(0)))
+      const blob = new Blob([byteArray], { type: 'image/png' })
+      return URL.createObjectURL(blob)
+    },
+    catch: (unknown) =>
+      new ConversionError(`Failed to convert base64 avatar photo to Blob URL: ${(unknown as Error).message}`),
+  })
+
+// Fetch a users data and photo, then combine them to the UserProfile type
+export const getUserProfileE = (
+  principalName: string
+): Effect.Effect<UserProfile, HttpClientError.HttpClientError | ParseResult.ParseError | Error> =>
+  Effect.gen(function* () {
+    const userData = yield* getUserData(principalName)
+
+    const base64Image: UserPhoto = yield* HttpClient.HttpClient.pipe(
+      Effect.flatMap((client) => HttpClientRequest.get(`/localApi/photo/${principalName}`).pipe(client.execute)),
+      Effect.flatMap(HttpClientResponse.schemaBodyJson(UserPhoto)),
+      Effect.scoped,
+      Effect.provide(FetchHttpClient.layer)
+    )
+
+    const photoBlobUrl: string = yield* base64ToBlobUrl(base64Image.photo)
+
+    return { ...userData, photo: photoBlobUrl }
+  })
+
+// TODO: Remove this function once its last use site in `getUserProfileTeamData` is
+// rewritten
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const selects = [
