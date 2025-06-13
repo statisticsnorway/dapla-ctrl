@@ -73,6 +73,7 @@ export const getUserSectionCode = (
     )
   ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
+// Fetch a user's UserData
 export const getUserData = (
   principalName: string
 ): Effect.Effect<UserData, HttpClientError.HttpClientError | ParseResult.ParseError> =>
@@ -97,7 +98,7 @@ const base64ToBlobUrl = (base64Image: string): Effect.Effect<string, ConversionE
       new ConversionError(`Failed to convert base64 avatar photo to Blob URL: ${(unknown as Error).message}`),
   })
 
-// Fetch a users data and photo, then combine them to the UserProfile type
+// Fetch a user's UserData and photo, then combine them to the UserProfile type
 export const getUserProfileE = (
   principalName: string
 ): Effect.Effect<UserProfile, HttpClientError.HttpClientError | ParseResult.ParseError | Error> =>
