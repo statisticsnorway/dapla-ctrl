@@ -24,5 +24,9 @@ export const useUserProfileStore = create<UserProfileStore>()(
 
 useUserProfileStore.subscribe(
   (state) => state.loggedInUser,
-  (user) => Effect.log('USER LOGGED IN:', O.getOrNull(user)).pipe(Effect.provide(customLogger), Effect.runPromise)
+  (user) =>
+    Effect.log('Retrieving logged in user from store:', O.getOrNull(user)).pipe(
+      Effect.provide(customLogger),
+      Effect.runPromise
+    )
 )
