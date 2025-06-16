@@ -3,8 +3,10 @@ import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
 import { ConversionError } from '../@types/error'
 import { UserData, UserProfile, UserPhoto } from '../@types/user'
 
-import { Effect, ParseResult } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse, HttpClientError } from '@effect/platform'
+import { Effect } from 'effect'
+import { ParseError } from 'effect/ParseResult'
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from '@effect/platform'
+import { HttpClientError } from '@effect/platform/HttpClientError'
 
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
@@ -53,9 +55,7 @@ interface Group {
   users: User[]
 }
 
-export const getUserSectionCode = (
-  principalName: string
-): Effect.Effect<number, Error | HttpClientError.HttpClientError> =>
+export const getUserSectionCode = (principalName: string): Effect.Effect<number, Error | HttpClientError> =>
   HttpClient.HttpClient.pipe(
     Effect.flatMap((client) =>
       HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(
@@ -74,9 +74,7 @@ export const getUserSectionCode = (
   ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
 // Fetch a user's UserData
-export const getUserData = (
-  principalName: string
-): Effect.Effect<UserData, HttpClientError.HttpClientError | ParseResult.ParseError> =>
+export const getUserData = (principalName: string): Effect.Effect<UserData, HttpClientError | ParseError> =>
   HttpClient.HttpClient.pipe(
     Effect.flatMap((client) =>
       HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(client.execute)
@@ -101,16 +99,18 @@ const base64ToBlobUrl = (base64Image: string): Effect.Effect<string, ConversionE
 // Fetch a user's UserData and photo, then combine them to the UserProfile type
 export const getUserProfileE = (
   principalName: string
-): Effect.Effect<UserProfile, HttpClientError.HttpClientError | ParseResult.ParseError | Error> =>
+): Effect.Effect<UserProfile, HttpClientError | ParseError | Error> =>
   Effect.gen(function* () {
-    const userData = yield* getUserData(principalName)
-
-    const base64Image: UserPhoto = yield* HttpClient.HttpClient.pipe(
+    const fetchBase64Image: Effect.Effect<UserPhoto, HttpClientError | ParseError> = HttpClient.HttpClient.pipe(
       Effect.flatMap((client) => HttpClientRequest.get(`/localApi/photo/${principalName}`).pipe(client.execute)),
       Effect.flatMap(HttpClientResponse.schemaBodyJson(UserPhoto)),
       Effect.scoped,
       Effect.provide(FetchHttpClient.layer)
     )
+
+    const [userData, base64Image] = yield* Effect.all([getUserData(principalName), fetchBase64Image], {
+      concurrency: 'unbounded',
+    })
 
     const photoBlobUrl: string = yield* base64ToBlobUrl(base64Image.photo)
 
