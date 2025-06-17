@@ -1,33 +1,34 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { User } from '../../@types/user'
+import { UserProfile } from '../../@types/user'
+import { UserNotLoggedIn } from '../../@types/error'
 import styles from './avatar.module.scss'
+import { Effect, Option as O } from 'effect'
+import { useUserProfileStore } from '../../services/store'
 
 const Avatar = () => {
-  const [userProfileData, setUserProfileData] = useState<User>()
   const [imageSrc, setImageSrc] = useState<string>()
   const [fallbackInitials, setFallbackInitials] = useState<string>('??')
   const [encodedURI, setEncodedURI] = useState<string>('')
+  const maybeLoggedInUser: O.Option<UserProfile> = useUserProfileStore((state) => state.loggedInUser)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    const storedUserProfile = localStorage.getItem('userProfile')
-    if (!storedUserProfile) {
-      return
-    }
-
-    const userProfile = JSON.parse(storedUserProfile) as User
-    if (!userProfile) return
-
-    setUserProfileData(userProfile)
-    setEncodedURI(`/teammedlemmer/${userProfile.principal_name}`)
-    setFallbackInitials(userProfile.first_name[0] + userProfile.last_name[0])
-
-    const base64Image = userProfile?.photo
-    if (!base64Image) return
-    setImageSrc(`data:image/png;base64,${base64Image}`)
-  }, [])
+    Effect.gen(function* () {
+      const user: UserProfile = yield* O.match(maybeLoggedInUser, {
+        onNone: () => Effect.fail(new UserNotLoggedIn('Could not find UserProfile object in the zustand store!')),
+        onSome: Effect.succeed,
+      })
+      yield* Effect.sync(() => {
+        setEncodedURI(`/teammedlemmer/${user.principalName}`)
+        setFallbackInitials(user.firstName[0] + user.lastName[0])
+      })
+      return user.photo
+    })
+      .pipe(Effect.runPromise)
+      .then((blobUrl) => setImageSrc(blobUrl))
+  }, [maybeLoggedInUser])
 
   const handleClick = () => {
     if (encodedURI === '') return
@@ -36,11 +37,7 @@ const Avatar = () => {
 
   return (
     <div className={styles.avatar} onClick={handleClick}>
-      {imageSrc ? (
-        <img src={imageSrc} alt='User' />
-      ) : (
-        <div className={styles.initials}>{userProfileData ? `${fallbackInitials}` : '??'}</div>
-      )}
+      {imageSrc ? <img src={imageSrc} alt='User' /> : <div className={styles.initials}>{fallbackInitials}</div>}
     </div>
   )
 }

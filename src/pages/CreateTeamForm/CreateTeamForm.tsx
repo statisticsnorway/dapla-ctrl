@@ -22,8 +22,9 @@ import FormSubmissionError, { FormSubmissionErrorProps } from './FormSubmissionE
 import PageLayout from '../../components/PageLayout/PageLayout'
 import * as Klass from '../../services/klass'
 import { AutonomyLevel, CreateTeamRequest, CreateTeamResponse, createTeam } from '../../services/createTeam'
-import { User } from '../../@types/user'
+import { UserProfile } from '../../@types/user'
 import * as Utils from '../../utils/utils.ts'
+import { useUserProfileStore } from '../../services/store'
 
 interface DisplayAutonomyLevel {
   id: AutonomyLevel
@@ -75,7 +76,7 @@ const CreateTeamForm = () => {
   const [sections, setSections] = useState<DisplaySSBSection[]>([])
   const [selectedSection, setSelectedSection] = useState<O.Option<DisplaySSBSection>>(O.none())
 
-  const [user, setUser] = useState<O.Option<User>>(O.none)
+  const user: O.Option<UserProfile> = useUserProfileStore((state) => state.loggedInUser)
 
   const [selectedAutonomyLevel, setSelectedAutonomyLevel] = useState<DisplayAutonomyLevel>(teamAutonomyLevels[0])
 
@@ -123,18 +124,8 @@ const CreateTeamForm = () => {
         )
       )
 
-      const storedUserProfile = localStorage.getItem('userProfile')
-      const maybeUserProfile: O.Option<User> = O.fromNullable(storedUserProfile).pipe(O.map(JSON.parse))
-
-      const userProfile: User = yield* _(
-        Effect.try({
-          try: () => O.getOrThrow(maybeUserProfile),
-          catch: (error) => new Error(`Element not present: ${error}`),
-        })
-      )
       // Setting the selectedSection won't be visible beause of a ssb-component bug: https://github.com/statisticsnorway/ssb-component-library/pull/1111
       //const sectionCode = yield* getUserSectionCode(userProfile.principal_name)
-      setUser(O.some(userProfile))
       setSections(sections)
       //setSelectedSection(A.findFirst(sections, (s) => s.id === sectionCode))
     }).pipe(Effect.runPromise)
@@ -274,7 +265,7 @@ const CreateTeamForm = () => {
           {`${Utils.option(
             user,
             () => 'loading',
-            (u: User) => u.display_name
+            (u: UserProfile) => u.displayName
           )} blir teamansvarlig for dette teamet. Hvis noen andre skal være ansvarlig kan det oppgis i feltet `}
           <em>Tilleggsinformasjon</em>.
         </Text>

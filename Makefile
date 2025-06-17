@@ -3,14 +3,12 @@ default: | help
 
 .PHONY: help
 help:
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST)\
+	|awk -F ':[[:space:]]*## ' '{split($$1, a, ":"); printf "%-30s %s\n", a[2], $$2}'
 
 .PHONY: build
 build: ## Build the app
 	pnpm install
-
-build-docker-local:
-	docker build -t dapla-ctrl .
 
 .PHONY: run-dev 
 run-dev: ## Run the app in dev mode
@@ -31,9 +29,14 @@ bump-version-major: ## Bump major version, e.g. 0.0.1 -> 1.0.0
 SHELL?=bash
 
 .PHONY: shell
-develop:
+develop: ## Start the nix development shell
 	nix develop -c $(SHELL)
 
+.PHONY: build-local-docker
+build-docker-local: ## Build the docker container
+	docker build -t dapla-ctrl .
+
 include .env.local
-run-docker-local:
+.PHONY: run-docker-local
+run-docker-local: ## Run the docker container
 	docker run -it -p 8080:8080 -e VITE_JWKS_URI=${VITE_JWKS_URI} dapla-ctrl

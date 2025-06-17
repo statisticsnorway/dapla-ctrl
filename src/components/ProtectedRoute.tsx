@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Outlet } from 'react-router-dom'
-import { getUserProfile } from '../services/userProfile'
 import { fetchUserInformationFromAuthToken } from '../utils/services'
-import { Cause, Effect, Option as O } from 'effect'
+import { Effect, Option as O, Schema } from 'effect'
+import { ParseError } from 'effect/ParseResult'
+import { HttpClientError } from '@effect/platform/HttpClientError'
 import { customLogger } from '../utils/logger.ts'
-import { ApiError } from '../utils/services.ts'
 import { useUserProfileStore } from '../services/store.ts'
-
-import { User } from '../services/userProfile.ts'
+import { UserProfile } from '../@types/user.ts'
+import { getUserProfileE } from '../services/userProfile'
 
 const ProtectedRoute = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -16,33 +16,28 @@ const ProtectedRoute = () => {
   const from = location.pathname
 
   useEffect(() => {
-    const fetchUserProfile = (): Effect.Effect<void, Cause.UnknownException | ApiError> =>
+    const fetchAndStoreUserProfile = (): Effect.Effect<void, HttpClientError | ParseError | Error> =>
       Effect.gen(function* () {
         const userProfileData = yield* Effect.promise(fetchUserInformationFromAuthToken)
-        const userProfile = yield* Effect.tryPromise(() => getUserProfile(userProfileData.email)).pipe(
-          Effect.flatMap((x) => (x instanceof ApiError ? Effect.fail(x) : Effect.succeed(x)))
-        )
-        yield* Effect.sync(() => localStorage.setItem('userProfile', JSON.stringify(userProfile)))
-        yield* Effect.sync(() => setLoggedInUser(userProfile))
-        yield* Effect.sync(() => setIsAuthenticated(true))
+        const userProfile: UserProfile = yield* getUserProfileE(userProfileData.email)
+        yield* Effect.sync(() => {
+          localStorage.setItem('userProfile', JSON.stringify(userProfile))
+          setLoggedInUser(userProfile)
+          setIsAuthenticated(true)
+        })
       }).pipe(Effect.provide(customLogger))
 
-    const cachedUserProfile: O.Option<User> = O.fromNullable(localStorage.getItem('userProfile')).pipe(
-      O.flatMap(O.liftThrowable(JSON.parse))
+    const cachedUserProfile: O.Option<UserProfile> = O.fromNullable(localStorage.getItem('userProfile')).pipe(
+      O.flatMap(Schema.decodeUnknownOption(UserProfile))
     )
+
     O.match(cachedUserProfile, {
-      onNone: () => fetchUserProfile(),
+      onNone: () => fetchAndStoreUserProfile(),
       onSome: (userProfile) =>
-        // invalidate cached user profile if 'job_title' field is missing
-        userProfile.job_title
-          ? Effect.zip(
-              Effect.sync(() => setIsAuthenticated(true)),
-              Effect.sync(() => setLoggedInUser(userProfile))
-            )
-          : Effect.zipRight(
-              Effect.logInfo("'job_title' field missing, invalidating UserProfile cache"),
-              fetchUserProfile()
-            ).pipe(Effect.provide(customLogger)),
+        Effect.sync(() => {
+          setIsAuthenticated(true)
+          setLoggedInUser(userProfile)
+        }),
     }).pipe(Effect.runPromise)
   }, [from, navigate, setLoggedInUser])
 

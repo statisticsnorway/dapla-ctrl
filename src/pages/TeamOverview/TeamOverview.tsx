@@ -12,10 +12,11 @@ import { fetchTeamOverviewData, TeamOverviewData } from '../../services/teamOver
 import { formatDisplayName } from '../../utils/utils'
 import { ApiError, fetchUserInformationFromAuthToken, isDaplaAdmin } from '../../utils/services'
 import FormattedTableColumn from '../../components/FormattedTableColumn/FormattedTableColumn'
-import { User } from '../../services/userProfile'
+import { UserProfile } from '../../@types/user.ts'
 import { isAuthorizedToCreateTeam } from '../../services/createTeam'
-import { Effect } from 'effect'
+import { Effect, Option as O } from 'effect'
 import { customLogger } from '../../utils/logger.ts'
+import { useUserProfileStore } from '../../services/store'
 
 const MY_TEAMS_TAB = {
   title: 'Mine team',
@@ -35,6 +36,7 @@ const TeamOverview = () => {
   const [teamOverviewTableTitle, setTeamOverviewTableTitle] = useState<string>(MY_TEAMS_TAB.title)
   const [error, setError] = useState<ApiError | undefined>()
   const [loading, setLoading] = useState<boolean>(true)
+  const maybeLoggedInUser: O.Option<UserProfile> = useUserProfileStore((state) => state.loggedInUser)
 
   const navigate = useNavigate()
 
@@ -73,27 +75,20 @@ const TeamOverview = () => {
   }, [])
 
   useEffect(() => {
-    const userProfileItem = localStorage.getItem('userProfile')
-    Effect.logInfo(`UserProfile from localStorage: ${userProfileItem}`).pipe(
-      Effect.provide(customLogger),
-      Effect.runSync
-    )
-    if (!userProfileItem) return
+    const user = O.getOrThrow(maybeLoggedInUser)
+    Effect.logInfo(`UserProfile from zustand store: ${user}`).pipe(Effect.provide(customLogger), Effect.runSync)
 
-    const user = JSON.parse(userProfileItem) as User
-    if (!user) return
-
-    Effect.promise(() => isDaplaAdmin(user.principal_name))
+    Effect.promise(() => isDaplaAdmin(user.principalName))
       .pipe(
         Effect.tap((isDaplaAdmin: boolean) =>
           Effect.logInfo(
-            `username: ${user.principal_name}; job-title: ${user.job_title}; is-dapla-admin: ${isDaplaAdmin}`
+            `username: ${user.principalName}; job-title: ${user.jobTitle}; is-dapla-admin: ${isDaplaAdmin}`
           )
         ),
         Effect.provide(customLogger),
         Effect.runPromise
       )
-      .then((isDaplaAdmin: boolean) => setIsAuthorized(isAuthorizedToCreateTeam(isDaplaAdmin, user.job_title)))
+      .then((isDaplaAdmin: boolean) => setIsAuthorized(isAuthorizedToCreateTeam(isDaplaAdmin, user.jobTitle)))
   }, [])
 
   useEffect(() => {

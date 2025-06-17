@@ -1,8 +1,12 @@
 import { ApiError, fetchAPIData } from '../utils/services'
 import { flattenEmbedded, DAPLA_TEAM_API_URL } from '../utils/utils'
+import { ConversionError } from '../@types/error'
+import { UserData, UserProfile, UserPhoto } from '../@types/user'
 
 import { Effect } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientError } from '@effect/platform'
+import { ParseError } from 'effect/ParseResult'
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from '@effect/platform'
+import { HttpClientError } from '@effect/platform/HttpClientError'
 
 const USERS_URL = `${DAPLA_TEAM_API_URL}/users`
 
@@ -51,9 +55,7 @@ interface Group {
   users: User[]
 }
 
-export const getUserSectionCode = (
-  principalName: string
-): Effect.Effect<number, Error | HttpClientError.HttpClientError> =>
+export const getUserSectionCode = (principalName: string): Effect.Effect<number, Error | HttpClientError> =>
   HttpClient.HttpClient.pipe(
     Effect.flatMap((client) =>
       HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(
@@ -62,15 +64,61 @@ export const getUserSectionCode = (
         Effect.flatMap((res) => res.json)
       )
     ),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Effect.flatMap((jsonResponse: any) =>
+    Effect.flatMap((jsonResponse: unknown) =>
       Effect.try({
-        try: () => parseInt(jsonResponse.section_code),
+        // We need a type assertion here because `jsonResponse` is of type unknown
+        try: () => (jsonResponse as { section_code: number }).section_code,
         catch: (error) => new Error(`Failed to get section_code: ${error}`),
       })
     )
   ).pipe(Effect.scoped, Effect.provide(FetchHttpClient.layer))
 
+// Fetch a user's UserData
+export const getUserData = (principalName: string): Effect.Effect<UserData, HttpClientError | ParseError> =>
+  HttpClient.HttpClient.pipe(
+    Effect.flatMap((client) =>
+      HttpClientRequest.get(new URL(`${USERS_URL}/${principalName}`, window.location.origin)).pipe(client.execute)
+    ),
+    Effect.flatMap(HttpClientResponse.schemaBodyJson(UserData)),
+    Effect.scoped,
+    Effect.provide(FetchHttpClient.layer)
+  )
+
+// Convert base64 string to Blob URL while handling potential errors
+const base64ToBlobUrl = (base64Image: string): Effect.Effect<string, ConversionError> =>
+  Effect.try({
+    try: () => {
+      const byteArray = new Uint8Array(Array.from(atob(base64Image), (c) => c.charCodeAt(0)))
+      const blob = new Blob([byteArray], { type: 'image/png' })
+      return URL.createObjectURL(blob)
+    },
+    catch: (unknown) =>
+      new ConversionError(`Failed to convert base64 avatar photo to Blob URL: ${(unknown as Error).message}`),
+  })
+
+// Fetch a user's UserData and photo, then combine them to the UserProfile type
+export const getUserProfileE = (
+  principalName: string
+): Effect.Effect<UserProfile, HttpClientError | ParseError | Error> =>
+  Effect.gen(function* () {
+    const fetchBase64Image: Effect.Effect<UserPhoto, HttpClientError | ParseError> = HttpClient.HttpClient.pipe(
+      Effect.flatMap((client) => HttpClientRequest.get(`/localApi/photo/${principalName}`).pipe(client.execute)),
+      Effect.flatMap(HttpClientResponse.schemaBodyJson(UserPhoto)),
+      Effect.scoped,
+      Effect.provide(FetchHttpClient.layer)
+    )
+
+    const [userData, base64Image] = yield* Effect.all([getUserData(principalName), fetchBase64Image], {
+      concurrency: 'unbounded',
+    })
+
+    const photoBlobUrl: string = yield* base64ToBlobUrl(base64Image.photo)
+
+    return { ...userData, photo: photoBlobUrl }
+  })
+
+// TODO: Remove this function once its last use site in `getUserProfileTeamData` is
+// rewritten
 export const getUserProfile = async (principalName: string): Promise<User | ApiError> => {
   const usersUrl = new URL(`${USERS_URL}/${principalName}`, window.location.origin)
   const selects = [
