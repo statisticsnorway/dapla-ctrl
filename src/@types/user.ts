@@ -23,7 +23,7 @@ export const UserData = Schema.Struct({
   firstName: withKeyEncoding('first_name', Schema.String),
   lastName: withKeyEncoding('last_name', Schema.String),
   email: Schema.String,
-  phone: Schema.String,
+  phone: Schema.optional(Schema.String),
   jobTitle: withKeyEncoding('job_title', Schema.String),
   divisionName: withKeyEncoding('division_name', Schema.String),
   divisionCode: withKeyEncoding('division_code', Schema.NumberFromString),
