@@ -7,11 +7,6 @@ COPY . .
 RUN pnpm install && pnpm run build
 RUN pnpm install --ignore-scripts vite-express
 
-# This is suboptimal because new envvars
-# can only be injected at build time, but there
-# is no shell available in distroless images at runtime.
-# RUN ./dist/vite-envs.sh
-
 FROM gcr.io/distroless/nodejs20-debian12:debug
 COPY --from=builder /usr/local/app/dist /app/dist/
 COPY --from=builder /usr/local/app/node_modules /app/node_modules
