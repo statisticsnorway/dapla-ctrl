@@ -10,7 +10,7 @@ help:
 build: ## Build the app
 	pnpm install
 
-.PHONY: run-dev 
+.PHONY: run-dev
 run-dev: ## Run the app in dev mode
 	pnpm run dev
 
@@ -34,9 +34,9 @@ develop: ## Start the nix development shell
 
 .PHONY: build-local-docker
 build-docker-local: ## Build the docker container
-	docker build -t dapla-ctrl .
+	docker build --platform linux/amd64 -t dapla-ctrl:latest .
 
 include .env.local
 .PHONY: run-docker-local
 run-docker-local: ## Run the docker container
-	docker run -it -p 8080:8080 -e VITE_JWKS_URI=${VITE_JWKS_URI} dapla-ctrl
+	./bin/run-docker.sh
