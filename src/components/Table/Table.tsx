@@ -188,20 +188,8 @@ const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }:
         : data,
     [searchFilterKeyword, data]
   )
-  //const [filteredTableData, setFilteredTableData] = useState(data)
 
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
-
-  //useEffect(() => {
-  //  if (searchFilterKeyword !== '' && data.length) {
-  //    const filterTableData = data.filter((row) =>
-  //      Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
-  //    )
-  //    setFilteredTableData(filterTableData)
-  //  } else {
-  //    setFilteredTableData(data) // Reset filter
-  //  }
-  //}, [searchFilterKeyword, data])
 
   const handleChange = (value: string) => {
     setSearchFilterKeyword(value)
