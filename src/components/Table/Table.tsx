@@ -181,20 +181,15 @@ const TableDesktopView = ({ columns, data, activeTab }: TableDesktopViewProps) =
 
 const Table = ({ title, dropdownAriaLabel, dropdownFilterItems, columns, data }: TableProps) => {
   const [searchFilterKeyword, setSearchFilterKeyword] = useState('')
-  const [filteredTableData, setFilteredTableData] = useState(data)
+  const filteredTableData = useMemo(
+    () =>
+      searchFilterKeyword !== '' && data.length
+        ? data.filter((row) => Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase()))
+        : data,
+    [searchFilterKeyword, data]
+  )
 
   const isOnMobile = useMediaQuery({ query: 'screen and (max-width: 767px)' }) // $mobile variable from ssb-component-library
-
-  useEffect(() => {
-    if (searchFilterKeyword !== '' && data.length) {
-      const filterTableData = data.filter((row) =>
-        Object.values(row).toString().toLowerCase().includes(searchFilterKeyword.toLowerCase())
-      )
-      setFilteredTableData(filterTableData)
-    } else {
-      setFilteredTableData(data) // Reset filter
-    }
-  }, [searchFilterKeyword, data])
 
   const handleChange = (value: string) => {
     setSearchFilterKeyword(value)
