@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 docker run --platform linux/amd64 \
   --rm -it \
   -p3000:3000 \
