@@ -20,7 +20,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.4",
-    "@statisticsnorway/ssb-component-library": "^2.5.2",
+    "@statisticsnorway/ssb-component-library": "^2.5.4",
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.3",
     "effect": "^3.18.4",
