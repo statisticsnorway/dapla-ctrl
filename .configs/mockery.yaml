@@ -1,10 +1,8 @@
-with-expecter: true
-disable-version-string: true
-resolve-type-alias: false
-issue-845-fix: true
-inpackage: true
-dir: "{{.InterfaceDir}}"
-filename: "mock_{{.InterfaceNameSnake}}.go"
+dir: "{{ .InterfaceDir }}"
+filename: "mock_{{.InterfaceName | snakecase }}.go"
+template: testify
+template-data:
+  unroll-variadic: true
 packages:
   github.com/statisticsnorway/dapla-api/internal/auth/authn:
     interfaces:
@@ -14,5 +12,6 @@ packages:
       AuthenticatedUser:
   github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi:
     config:
-      include-regex: ".*Server"
-      exclude-regex: "Unsafe.*"
+      include-interface-regex: .*Server
+      exclude-interface-regex: Unsafe.*
+
