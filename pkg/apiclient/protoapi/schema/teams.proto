@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+option go_package = "./pkg/apiclient/protoapi";
+
+import "google/protobuf/timestamp.proto";
+import "pagination.proto";
+import "users.proto";
+
+message Team {
+  string slug = 1;
+  string purpose = 2;
+  optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
+}
+
+service Teams {
+  rpc Get(GetTeamRequest) returns (GetTeamResponse) {}
+  rpc List(ListTeamsRequest) returns (ListTeamsResponse) {}
+  rpc Members(ListTeamMembersRequest) returns (ListTeamMembersResponse) {}
+  rpc Environments(ListTeamEnvironmentsRequest) returns (ListTeamEnvironmentsResponse) {}
+  rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
+}
+
+message DeleteTeamRequest {
+  string slug = 1;
+}
+
+message DeleteTeamResponse {}
+
+message ListTeamEnvironmentsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string slug = 3;
+}
+
+message ListTeamEnvironmentsResponse {
+  repeated TeamEnvironment nodes = 1;
+  PageInfo page_info = 2;
+}
+
+message TeamEnvironment {
+  string id = 1;
+  string slug = 2;
+  string environment_name = 3;
+}
+
+message GetTeamResponse {
+  Team team = 1;
+}
+
+message GetTeamRequest {
+  string slug = 1;
+}
+
+message ListTeamsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+
+message ListTeamsResponse {
+  repeated Team nodes = 1;
+  PageInfo page_info = 2;
+}
+
+message ListTeamMembersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string slug = 3;
+}
+
+message ListTeamMembersResponse {
+  repeated TeamMember nodes = 1;
+  PageInfo page_info = 2;
+}
+
+message TeamMember {
+  User user = 1;
+}

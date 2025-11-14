@@ -1,0 +1,18 @@
+with-expecter: true
+disable-version-string: true
+resolve-type-alias: false
+issue-845-fix: true
+inpackage: true
+dir: "{{.InterfaceDir}}"
+filename: "mock_{{.InterfaceNameSnake}}.go"
+packages:
+  github.com/statisticsnorway/dapla-api/internal/auth/authn:
+    interfaces:
+      Handler:
+  github.com/statisticsnorway/dapla-api/internal/auth/authz:
+    interfaces:
+      AuthenticatedUser:
+  github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi:
+    config:
+      include-regex: ".*Server"
+      exclude-regex: "Unsafe.*"

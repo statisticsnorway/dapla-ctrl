@@ -1,0 +1,7 @@
+apiVersion: v2
+name: dapla-api
+description: The amazing Dapla API
+type: application
+version: v0.1.0
+sources:
+  - https://github.com/statisticsnorway/dapla-api/tree/main/charts

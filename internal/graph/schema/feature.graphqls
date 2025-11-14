@@ -1,0 +1,13 @@
+type Features implements Node {
+	"""
+	Unique identifier for the feature container.
+	"""
+	id: ID!
+}
+
+extend type Query {
+	"""
+	Feature flags.
+	"""
+	features: Features!
+}
