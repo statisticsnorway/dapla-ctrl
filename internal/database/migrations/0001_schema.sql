@@ -255,7 +255,7 @@ CREATE TABLE users (
 	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
 	email TEXT NOT NULL UNIQUE,
 	name TEXT NOT NULL,
-	external_id string NOT NULL UNIQUE,
+	external_id TEXT NOT NULL UNIQUE,
 	admin BOOLEAN NOT NULL DEFAULT FALSE
 )
 ;
