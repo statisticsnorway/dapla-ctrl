@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.34.0"
 )
 
 func newResource() (*resource.Resource, error) {
@@ -60,7 +60,7 @@ func newMeterProvider(ctx context.Context) (*metric.MeterProvider, promClient.Ga
 				resource.NewWithAttributes(
 					semconv.SchemaURL,
 					semconv.ServiceNameKey.String("api"),
-					semconv.ServiceNamespace("nais.io"),
+					semconv.ServiceNamespace("dapla"),
 				)),
 		)
 		otel.SetTracerProvider(tp)
