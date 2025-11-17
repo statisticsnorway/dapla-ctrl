@@ -14,14 +14,20 @@ type usersyncConfig struct {
 	Enabled bool `env:"USERSYNC_ENABLED"`
 
 	// AdminGroupPrefix The prefix of the admin group email address.
-	AdminGroupPrefix string `env:"USERSYNC_ADMIN_GROUP_PREFIX,default=console-admins"`
+	AdminGroup string `env:"USERSYNC_ADMIN_GROUP"`
 
-	// Service account to impersonate during user sync
-	ServiceAccount string `env:"USERSYNC_SERVICE_ACCOUNT"`
+	// Entra ID client ID to use for authenticating
+	EntraIdClientId string `env:"ENTRA_ID_CLIENT_ID"`
 
-	// SubjectEmail The email address to impersonate during user sync. This is an email address of a user
-	// with the necessary permissions to read the Google organization.
-	SubjectEmail string `env:"USERSYNC_SUBJECT_EMAIL"`
+	// Entra ID client secret
+	EntraIdClientSecret string `env:"ENTRA_ID_CLIENT_SECRET"`
+
+	// Entra ID tenant ID
+	EntraIdTenantId string `env:"ENTRA_ID_TENANT_ID"`
+
+	// Entra ID group containing all valid users
+	// Required when usersyncer is enabled
+	AllUsersGroup string `env:"ENTRA_ID_ALL_USERS_GROUP"`
 }
 
 // costConfig is the configuration for the cost service

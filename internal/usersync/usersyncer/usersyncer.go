@@ -7,25 +7,27 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
+	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
-	admindirectoryv1 "google.golang.org/api/admin/directory/v1"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/impersonate"
-	"google.golang.org/api/option"
 	"k8s.io/utils/ptr"
 )
 
 type Usersynchronizer struct {
-	pool             *pgxpool.Pool
-	querier          *usersyncsql.Queries
-	adminGroupPrefix string
-	tenantDomain     string
-	service          *admindirectoryv1.Service
-	log              logrus.FieldLogger
+	pool          *pgxpool.Pool
+	querier       *usersyncsql.Queries
+	adminGroup    string
+	allUsersGroup string
+	tenantDomain  string
+	service       *msgraphsdk.GraphServiceClient
+
+	log logrus.FieldLogger
 }
 
 type userMap struct {
@@ -34,58 +36,52 @@ type userMap struct {
 	byEmail      map[string]*usersyncsql.User
 }
 
-type googleUser struct {
+type entraIdUser struct {
 	ID    string
 	Email string
-	Name  admindirectoryv1.UserName
+	Name  string
 }
 
-func New(pool *pgxpool.Pool, adminGroupPrefix, tenantDomain string, service *admindirectoryv1.Service, log logrus.FieldLogger) *Usersynchronizer {
+func New(pool *pgxpool.Pool, allUsersGroup, adminGroup, tenantDomain string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
 	return &Usersynchronizer{
-		pool:             pool,
-		querier:          usersyncsql.New(pool),
-		adminGroupPrefix: adminGroupPrefix,
-		tenantDomain:     tenantDomain,
-		service:          service,
-		log:              log,
+		pool:          pool,
+		querier:       usersyncsql.New(pool),
+		allUsersGroup: allUsersGroup,
+		adminGroup:    adminGroup,
+		tenantDomain:  tenantDomain,
+		service:       service,
+		log:           log,
 	}
 }
 
-func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, serviceAccount, subjectEmail, tenantDomain, adminGroupPrefix string, log logrus.FieldLogger) (*Usersynchronizer, error) {
-	ts, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
-		Scopes: []string{
-			admindirectoryv1.AdminDirectoryUserReadonlyScope,
-			admindirectoryv1.AdminDirectoryGroupScope,
-		},
-		Subject:         subjectEmail,
-		TargetPrincipal: serviceAccount,
-	})
+func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, clientSecret, tenantId, tenantDomain, allUsersGroup, adminGroup string, log logrus.FieldLogger) (*Usersynchronizer, error) {
+	cred, err := azidentity.NewClientSecretCredential(tenantId, clientId, clientSecret, nil)
 	if err != nil {
-		return nil, fmt.Errorf("create token source: %w", err)
+		return nil, fmt.Errorf("create credentials: %w", err)
 	}
 
-	srv, err := admindirectoryv1.NewService(ctx, option.WithTokenSource(ts))
+	srv, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
-		return nil, fmt.Errorf("create admin directory client: %w", err)
+		return nil, fmt.Errorf("create graph service client: %w", err)
 	}
 
-	return New(pool, adminGroupPrefix, tenantDomain, srv, log), nil
+	return New(pool, allUsersGroup, adminGroup, tenantDomain, srv, log), nil
 }
 
-// Sync fetches all users from the Google Directory of the tenant and adds them as users in Nais API.
+// Sync fetches all users from Entra ID and adds them as users in Nais API.
 //
-// If a user already exist in Nais API the user will get the name and email potentially updated if it has changed in the
-// Google Directory.
+// If a user already exist in Nais API the user will get the name and email potentially updated if it has changed in
+// Entra ID
 //
 // After all users have been synced, users that have an email address that matches the tenant domain that no longer
-// exist in the Google Directory will be removed.
+// exist in Entra ID will be removed.
 //
-// All users present in the admin group in the Google Directory will also be granted the admin role in Nais API, and
+// All users present in the admin group in Entra ID will also be granted the admin role in Nais API, and
 // existing admins that no longer exist in the admin group will get the admin role revoked.
 func (s *Usersynchronizer) Sync(ctx context.Context) error {
-	googleUsers, err := getGoogleUsers(ctx, s.service.Users, s.tenantDomain, s.log)
+	entraIdUsers, err := s.getEntraIdUsers(ctx, s.log)
 	if err != nil {
-		return fmt.Errorf("get users from Google Directory: %w", err)
+		return fmt.Errorf("get users from entra id: %w", err)
 	}
 
 	tx, err := s.pool.Begin(ctx)
@@ -106,28 +102,28 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 		return fmt.Errorf("get existing users: %w", err)
 	}
 
-	googleUserMap := make(map[string]*usersyncsql.User)
-	for _, gu := range googleUsers {
-		user, err := getOrCreateUserFromGoogleUser(ctx, querier, gu, users, s.log)
+	entraIdUserMap := make(map[string]*usersyncsql.User)
+	for _, eu := range entraIdUsers {
+		user, err := getOrCreateUserFromEntraIdUser(ctx, querier, eu, users, s.log)
 		if err != nil {
-			return fmt.Errorf("get or create user %q: %w", gu.Email, err)
+			return fmt.Errorf("get or create user %q: %w", eu.Email, err)
 		}
 
-		if userIsOutdated(user, gu) {
+		if userIsOutdated(user, eu) {
 			if err := querier.Update(ctx, usersyncsql.UpdateParams{
 				ID:         user.ID,
-				Name:       gu.Name.FullName,
-				Email:      gu.Email,
-				ExternalID: gu.ID,
+				Name:       eu.Name,
+				Email:      eu.Email,
+				ExternalID: eu.ID,
 			}); err != nil {
-				return fmt.Errorf("update user %q: %w", gu.Email, err)
+				return fmt.Errorf("update user %q: %w", eu.Email, err)
 			}
 
 			if err := querier.CreateLogEntry(ctx, usersyncsql.CreateLogEntryParams{
 				Action:       usersyncsql.UsersyncLogEntryActionUpdateUser,
 				UserID:       user.ID,
-				UserName:     gu.Name.FullName,
-				UserEmail:    gu.Email,
+				UserName:     eu.Name,
+				UserEmail:    eu.Email,
 				OldUserName:  &user.Name,
 				OldUserEmail: &user.Email,
 			}); err != nil {
@@ -135,9 +131,9 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 			}
 		}
 
-		googleUserMap[gu.ID] = user
+		entraIdUserMap[eu.ID] = user
 
-		// remove user from map to keep track of users that no longer exist in the Google Directory
+		// remove user from map to keep track of users that no longer exist in Entra ID
 		delete(users.byID, user.ID)
 	}
 
@@ -145,7 +141,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 		return err
 	}
 
-	if err := assignAdmins(ctx, querier, s.service.Members, s.adminGroupPrefix, s.tenantDomain, googleUserMap, s.log); err != nil {
+	if err := s.assignAdmins(ctx, querier, entraIdUserMap, s.log); err != nil {
 		return err
 	}
 
@@ -167,7 +163,7 @@ func AssignDefaultPermissionsToUser(ctx context.Context, querier usersyncsql.Que
 	return nil
 }
 
-// deleteUnknownUsers will delete users from Nais API that does not exist in the Google Directory.
+// deleteUnknownUsers will delete users from Nais API that does not exist in Entra ID.
 func deleteUnknownUsers(ctx context.Context, querier usersyncsql.Querier, unknownUsers map[uuid.UUID]*usersyncsql.User, log logrus.FieldLogger) error {
 	for _, user := range unknownUsers {
 		if err := querier.Delete(ctx, user.ID); err != nil {
@@ -186,10 +182,10 @@ func deleteUnknownUsers(ctx context.Context, querier usersyncsql.Querier, unknow
 	return nil
 }
 
-// assignAdmins assigns the global admin role to members of the admin group in the Google Directory of the tenant.
+// assignAdmins assigns the global admin role to members of the admin group in the Entra ID.
 // Existing admins that is no longer a member of the admin group will have the admin role revoked.
-func assignAdmins(ctx context.Context, querier usersyncsql.Querier, membersService *admindirectoryv1.MembersService, adminGroupPrefix, tenantDomain string, googleUsers map[string]*usersyncsql.User, log logrus.FieldLogger) error {
-	admins, err := getAdminGroupMembers(ctx, membersService, adminGroupPrefix, tenantDomain, googleUsers, log)
+func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql.Querier, entraIdUsers map[string]*usersyncsql.User, log logrus.FieldLogger) error {
+	admins, err := s.getAdminGroupMembers(ctx, entraIdUsers, log)
 	if err != nil {
 		return err
 	}
@@ -240,39 +236,29 @@ func assignAdmins(ctx context.Context, querier usersyncsql.Querier, membersServi
 	return nil
 }
 
-// getAdminGroupMembers fetches all users in the admin group from the Google Directory of the tenant.
-func getAdminGroupMembers(ctx context.Context, membersService *admindirectoryv1.MembersService, adminGroupPrefix, tenantDomain string, googleUsers map[string]*usersyncsql.User, log logrus.FieldLogger) (map[uuid.UUID]*usersyncsql.User, error) {
-	adminGroup := adminGroupPrefix + "@" + tenantDomain
-	groupMembers := make([]*admindirectoryv1.Member, 0)
-	callback := func(fragments *admindirectoryv1.Members) error {
-		for _, member := range fragments.Members {
-			if member.Type == "USER" && member.Status == "ACTIVE" {
-				groupMembers = append(groupMembers, member)
-			}
-		}
-		return nil
-	}
-	admins := make(map[uuid.UUID]*usersyncsql.User)
-	err := membersService.
-		List(adminGroup).
-		IncludeDerivedMembership(true).
-		Pages(ctx, callback)
+// getAdminGroupMembers fetches all users in the admin group from the Entra ID group of the tenant.
+func (s *Usersynchronizer) getAdminGroupMembers(ctx context.Context, entraIdUsers map[string]*usersyncsql.User, log logrus.FieldLogger) (map[uuid.UUID]*usersyncsql.User, error) {
+	collection, err := s.service.Groups().ByGroupId(s.adminGroup).TransitiveMembers().Get(ctx, nil)
 	if err != nil {
-		if googleError, ok := err.(*googleapi.Error); ok && googleError.Code == 404 {
-			// Special case: When the group does not exist we want to remove all existing admins. The group might have
-			// never been created by the tenant admins in the first place, or it might have been deleted. In any case,
-			// we want to treat this case as if the group exists, and that it is empty, effectively removing all admins.
-			log.WithField("group_name", adminGroup).Warnf("api admins group does not exist")
-			return admins, nil
-		}
-
-		return nil, fmt.Errorf("list members in api admins group: %w", err)
+		return nil, fmt.Errorf("get admin group members: %w", err)
 	}
+
+	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](collection, s.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+
+	groupMembers := make([]models.Userable, 0)
+	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
+		groupMembers = append(groupMembers, user)
+		return true
+	}); err != nil {
+		return nil, fmt.Errorf("iterate through admin group members: %w", err)
+	}
+
+	admins := make(map[uuid.UUID]*usersyncsql.User)
 
 	for _, member := range groupMembers {
-		admin, exists := googleUsers[member.Id]
+		admin, exists := entraIdUsers[*member.GetId()]
 		if !exists {
-			log.WithField("email", member.Email).Errorf("unknown user in admins groups")
+			log.WithField("email", *member.GetMail()).Errorf("unknown user in admins groups")
 			continue
 		}
 
@@ -283,36 +269,36 @@ func getAdminGroupMembers(ctx context.Context, membersService *admindirectoryv1.
 }
 
 // userIsOutdated checks if a user needs to get its name or its email address updated.
-func userIsOutdated(user *usersyncsql.User, gu *googleUser) bool {
-	if user.Name != gu.Name.FullName {
+func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
+	if user.Name != eu.Name {
 		return true
 	}
 
-	if !strings.EqualFold(user.Email, gu.Email) {
+	if !strings.EqualFold(user.Email, eu.Email) {
 		return true
 	}
 
-	if user.ExternalID != gu.ID {
+	if user.ExternalID != eu.ID {
 		return true
 	}
 
 	return false
 }
 
-// getOrCreateUserFromGoogleUser will return a user for a Google user, creating it first if needed.
-func getOrCreateUserFromGoogleUser(ctx context.Context, querier usersyncsql.Querier, googleUser *googleUser, existingUsers *userMap, log logrus.FieldLogger) (*usersyncsql.User, error) {
-	if existingUser, exists := existingUsers.byExternalID[googleUser.ID]; exists {
+// getOrCreateUserFromEntraIdUser will return a user for an Entra ID user, creating it first if needed.
+func getOrCreateUserFromEntraIdUser(ctx context.Context, querier usersyncsql.Querier, entraIdUser *entraIdUser, existingUsers *userMap, log logrus.FieldLogger) (*usersyncsql.User, error) {
+	if existingUser, exists := existingUsers.byExternalID[entraIdUser.ID]; exists {
 		return existingUser, nil
 	}
 
-	if existingUser, exists := existingUsers.byEmail[googleUser.Email]; exists {
+	if existingUser, exists := existingUsers.byEmail[entraIdUser.Email]; exists {
 		return existingUser, nil
 	}
 
 	createdUser, err := querier.Create(ctx, usersyncsql.CreateParams{
-		Name:       googleUser.Name.FullName,
-		Email:      googleUser.Email,
-		ExternalID: googleUser.ID,
+		Name:       entraIdUser.Name,
+		Email:      entraIdUser.Email,
+		ExternalID: entraIdUser.ID,
 	})
 	if err != nil {
 		return nil, err
@@ -334,33 +320,35 @@ func getOrCreateUserFromGoogleUser(ctx context.Context, querier usersyncsql.Quer
 	return createdUser, nil
 }
 
-// getGoogleUsers fetches all users from the Google Directory.
-func getGoogleUsers(ctx context.Context, svc *admindirectoryv1.UsersService, tenantDomain string, log logrus.FieldLogger) ([]*googleUser, error) {
-	users := make([]*googleUser, 0)
-	callback := func(fragments *admindirectoryv1.Users) error {
-		log.WithField("num", len(fragments.Users)).Debugf("fetched batch of users from from Google Directory")
-		for _, user := range fragments.Users {
-			users = append(users, &googleUser{
-				ID:    user.Id,
-				Email: strings.ToLower(user.PrimaryEmail),
-				Name:  *user.Name,
-			})
-		}
-		return nil
+// getEntraIdUsers fetches all users from Entra ID.
+func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.FieldLogger) ([]*entraIdUser, error) {
+	users := make([]*entraIdUser, 0)
+
+	log.Debugf("start fetching users from Entra ID")
+	t := time.Now()
+
+	usersResponse, err := s.service.Groups().ByGroupId(s.allUsersGroup).TransitiveMembers().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("get all users group: %w", err)
 	}
 
-	log.Debugf("start fetching users from Google Directory")
-	t := time.Now()
-	err := svc.
-		List().
-		Domain(tenantDomain).
-		ShowDeleted("false").
-		Query("isSuspended=false").
-		Pages(ctx, callback)
+	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](usersResponse, s.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+
+	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
+		users = append(users, &entraIdUser{
+			ID:    *user.GetId(),
+			Email: strings.ToLower(*user.GetUserPrincipalName()),
+			Name:  *user.GetDisplayName(),
+		})
+		return true
+	}); err != nil {
+		return nil, fmt.Errorf("list all users group members: %w", err)
+	}
+
 	log.WithFields(logrus.Fields{
 		"duration":  time.Since(t),
 		"num_users": len(users),
-	}).Debugf("finished fetching users from Google Directory")
+	}).Debugf("finished fetching users from Entra ID")
 	return users, err
 }
 
