@@ -33,10 +33,16 @@ func Response(status string, body string) *http.Response {
 	parts := strings.Fields(status)
 	statusCode, _ := strconv.Atoi(parts[0])
 
+	resBody := bytes.NewBufferString(body)
+
+	headers := make(http.Header)
+	headers.Add("Content-Type", "application/json")
+
 	return &http.Response{
-		Status:     status,
-		StatusCode: statusCode,
-		Body:       io.NopCloser(bytes.NewBufferString(body)),
-		Header:     make(http.Header),
+		Status:        status,
+		StatusCode:    statusCode,
+		Body:          io.NopCloser(resBody),
+		Header:        headers,
+		ContentLength: int64(len(resBody.Bytes())),
 	}
 }

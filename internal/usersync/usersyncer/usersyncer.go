@@ -258,7 +258,7 @@ func (s *Usersynchronizer) getAdminGroupMembers(ctx context.Context, entraIdUser
 	for _, member := range groupMembers {
 		admin, exists := entraIdUsers[*member.GetId()]
 		if !exists {
-			log.WithField("email", *member.GetMail()).Errorf("unknown user in admins groups")
+			log.WithField("email", *member.GetUserPrincipalName()).Errorf("unknown user in admins groups")
 			continue
 		}
 
@@ -333,6 +333,9 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 	}
 
 	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](usersResponse, s.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		return nil, fmt.Errorf("create pageiterator: %w", err)
+	}
 
 	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
 		users = append(users, &entraIdUser{

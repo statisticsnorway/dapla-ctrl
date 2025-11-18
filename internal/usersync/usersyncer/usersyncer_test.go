@@ -1,14 +1,15 @@
-//go:build integration_test
-
 package usersyncer_test
 
 import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/microsoft/kiota-abstractions-go/authentication"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/sirupsen/logrus"
 	logrustest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/statisticsnorway/dapla-api/internal/database"
@@ -19,13 +20,12 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	admindirectoryv1 "google.golang.org/api/admin/directory/v1"
-	"google.golang.org/api/option"
 )
 
 const (
-	domain           = "example.com"
-	adminGroupPrefix = "console-admins"
+	domain        = "example.com"
+	allUsersGroup = "all-users"
+	adminGroup    = "api-admins"
 )
 
 func TestSync(t *testing.T) {
@@ -48,24 +48,28 @@ func TestSync(t *testing.T) {
 
 		httpClient := test.NewTestHttpClient(
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"users":[]}`)
+				return test.Response("200 OK", `{"value":[]}`)
 			},
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"members":[]}`)
+				return test.Response("200 OK", `{"value":[]}`)
 			},
 		)
 
-		svc, err := admindirectoryv1.NewService(ctx, option.WithHTTPClient(httpClient))
+		auth := authentication.NewBaseBearerTokenAuthenticationProvider(&fakeCred{})
+		adapter, err := msgraphsdk.NewGraphRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(
+			auth, nil, nil, httpClient,
+		)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		// TODO: Add tests for Zitadel API operations
+		client := msgraphsdk.NewGraphServiceClient(adapter)
+
 		err = usersyncer.
-			New(pool, adminGroupPrefix, domain, nil, svc, log).
+			New(pool, allUsersGroup, adminGroup, domain, client, log).
 			Sync(ctx)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("failed to sync: %v", err)
 		}
 
 		p, _ := pagination.ParsePage(nil, nil, nil, nil)
@@ -111,19 +115,25 @@ func TestSync(t *testing.T) {
 
 		httpClient := test.NewTestHttpClient(
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"users":[]}`)
+				return test.Response("200 OK", `{"value":[]}`)
 			},
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"members":[]}`)
+				return test.Response("200 OK", `{"value":[]}`)
 			},
 		)
-		svc, err := admindirectoryv1.NewService(ctx, option.WithHTTPClient(httpClient))
+
+		auth := authentication.NewBaseBearerTokenAuthenticationProvider(&fakeCred{})
+		adapter, err := msgraphsdk.NewGraphRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(
+			auth, nil, nil, httpClient,
+		)
 		if err != nil {
 			t.Fatal(err)
 		}
 
+		client := msgraphsdk.NewGraphServiceClient(adapter)
+
 		err = usersyncer.
-			New(pool, adminGroupPrefix, domain, nil, svc, log).
+			New(pool, allUsersGroup, adminGroup, domain, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -183,27 +193,31 @@ func TestSync(t *testing.T) {
 
 		httpClient := test.NewTestHttpClient(
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"users":[`+
-					`{"id": "1", "primaryEmail":"user1@example.com","name":{"fullName":"Correct Name"}},`+ // Will update name of local user
-					`{"id": "2", "primaryEmail":"user2@example.com","name":{"fullName":"Some Name"}},`+ // Will update email of local user
-					`{"id": "4", "primaryEmail":"should-lose-admin@example.com","name":{"fullName":"Should Lose Admin"}},`+ // Will lose admin role
-					`{"id": "5", "primaryEmail":"create-me@example.com","name":{"fullName":"Create Me"}}]}`) // Will be created
+				return test.Response("200 OK", `{"value":[`+
+					`{"@odata.type": "#microsoft.graph.user", "id": "1", "userPrincipalName":"user1@example.com","displayName":"Correct Name"},`+ // Will update name of local user
+					`{"@odata.type": "#microsoft.graph.user", "id": "2", "userPrincipalName":"user2@example.com","displayName":"Some Name"},`+ // Will update euserPrincipalName of local user
+					`{"@odata.type": "#microsoft.graph.user", "id": "4", "userPrincipalName":"should-lose-admin@example.com","displayName":"Should Lose Admin"},`+ // Will lose admin role
+					`{"@odata.type": "#microsoft.graph.user", "id": "5", "userPrincipalName":"create-me@example.com","displayName":"Create Me"}]}`) // Will be created
 			},
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"members":[`+
-					`{"id": "2", "email":"user2@example.com", "status": "ACTIVE", "type": "USER"},`+ // Will be granted admin role
-					`{"Id": "6", "email":"some-group@example.com", "type": "GROUP"},`+ // Group type, will be ignored
-					`{"Id": "7", "email":"unknown-admin@example.com", "status": "ACTIVE", "type": "USER"},`+ // Unknown user, will be logged
-					`{"Id": "8", "email":"inactive-user@example.com", "status":"SUSPENDED", "type": "USER"}]}`) // Invalid status, will be ignored
+				return test.Response("200 OK", `{"value":[`+
+					`{"@odata.type": "#microsoft.graph.user", "id": "2", "userPrincipalName":"user2@example.com", "displayName":"Some Name"},`+ // Will be granted admin role
+					`{"@odata.type": "#microsoft.graph.user", "id": "7", "userPrincipalName":"unknown-admin@example.com", "displayName": "Unknown Admin"}]}`) // Unknown user, will be logged
 			},
 		)
-		svc, err := admindirectoryv1.NewService(ctx, option.WithHTTPClient(httpClient))
+
+		auth := authentication.NewBaseBearerTokenAuthenticationProvider(&fakeCred{})
+		adapter, err := msgraphsdk.NewGraphRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(
+			auth, nil, nil, httpClient,
+		)
 		if err != nil {
 			t.Fatal(err)
 		}
 
+		client := msgraphsdk.NewGraphServiceClient(adapter)
+
 		err = usersyncer.
-			New(pool, adminGroupPrefix, domain, nil, svc, log).
+			New(pool, allUsersGroup, adminGroup, domain, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -302,4 +316,16 @@ func getConnection(ctx context.Context, t *testing.T, container *postgres.Postgr
 	})
 
 	return pool
+}
+
+type fakeCred struct{}
+
+var _ authentication.AccessTokenProvider = (*fakeCred)(nil)
+
+func (b fakeCred) GetAuthorizationToken(context context.Context, url *url.URL, additionalAuthenticationContext map[string]any) (string, error) {
+	return "HI", nil
+}
+
+func (b fakeCred) GetAllowedHostsValidator() *authentication.AllowedHostsValidator {
+	return nil
 }
