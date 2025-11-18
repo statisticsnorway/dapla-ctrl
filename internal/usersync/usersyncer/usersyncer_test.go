@@ -1,3 +1,5 @@
+//go:build integration_test
+
 package usersyncer_test
 
 import (
