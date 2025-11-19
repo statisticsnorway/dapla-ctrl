@@ -15,5 +15,5 @@ spec:
   owner: dapla-stat-developers
   lifecycle: production
   system: kuben
-  consumesApi:
+  consumesApis:
     - dapla-team-api
