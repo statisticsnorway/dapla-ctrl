@@ -1,0 +1,154 @@
+<script lang="ts">
+	import { enhance } from '$app/forms';
+	import WarningIcon from '$lib/icons/WarningIcon.svelte';
+	import { Button, ErrorSummary, Heading, TextField } from '@nais/ds-svelte-community';
+	import { FloppydiskIcon } from '@nais/ds-svelte-community/icons';
+	import type { PageProps } from './$houdini';
+
+	let { form = $bindable() }: PageProps = $props();
+	let saving = $state(false);
+
+	let teamSlugError = $state('');
+
+	let purposeError = $state('');
+
+	let disabled = $derived(teamSlugError !== 'no_error' || purposeError !== 'no_error');
+
+	const reservedSlugs = [
+		'nais-system',
+		'kube-system',
+		'kube-node-lease',
+		'kube-public',
+		'kyverno',
+		'cnrm-system',
+		'configconnector-operator-system',
+		'default'
+	];
+	const slugPattern = /^[a-z](-?[a-z0-9]+)+$/;
+
+	function handleTeamSlugInput(event: Event) {
+		if (!event) return;
+		const input = event.target as HTMLInputElement | null;
+		if (input) {
+			const slug = input.value;
+
+			// Check if the slug is reserved
+			if (reservedSlugs.includes(slug)) {
+				teamSlugError = 'This slug is reserved.';
+				return;
+			}
+
+			// Check if the slug starts with "nais"
+			if (slug.startsWith('nais')) {
+				teamSlugError =
+					"The name prefix 'nais' is reserved. Try again with a different name, perhaps just removing the prefix?";
+				return;
+			}
+
+			// Check if the slug starts with "team"
+			if (slug.startsWith('team')) {
+				teamSlugError =
+					"The name prefix 'team' is redundant. When you create a team, it is by definition a team. Try again with a different name, perhaps just removing the prefix?";
+				return;
+			}
+
+			// Check the length of the slug
+			if (slug.length < 3) {
+				teamSlugError = 'A team slug must be at least 3 characters long.';
+				return;
+			}
+
+			if (slug.length > 30) {
+				teamSlugError = 'A team slug must be at most 30 characters long.';
+				return;
+			}
+
+			// Validate the slug against the pattern
+			if (!slugPattern.test(slug)) {
+				teamSlugError =
+					'A team slug must begin with a lowercase letter and may include lowercase letters, numbers, and hyphens. However, it cannot start or end with a hyphen, nor can it contain consecutive hyphens.';
+				return;
+			}
+
+			// If all validations pass, clear the error
+			teamSlugError = 'no_error';
+		}
+	}
+
+	function handlePurposeInput(event: Event) {
+		if (!event) return;
+		const input = event.target as HTMLInputElement | null;
+		if (input) {
+			if (input.value.length < 3) {
+				purposeError = 'The purpose must be at least 3 characters long.';
+			} else {
+				purposeError = 'no_error';
+			}
+		}
+	}
+</script>
+
+<div class="container">
+	<Heading level="1" size="large" spacing>Create a New Team</Heading>
+	{#if form?.errors && form.errors.length > 0}
+		<ErrorSummary heading="Error creating team">
+			{#each form.errors as error (error)}
+				<li style="color:inherit!important">{error.message}</li>
+			{/each}
+		</ErrorSummary>
+	{/if}
+	<p>
+		Creating a team in Nais will grant access to certain Nais features, such as Google Cloud
+		projects, Kubernetes namespaces, or your own GitHub team. After the team is created, you will
+		become the administrator of that team, granting privileges to add and remove team members. The
+		identifier is the primary key, and will be used across systems so that they are easily
+		recognizable.
+	</p>
+	<form
+		method="POST"
+		use:enhance={() => {
+			saving = true;
+			return async ({ update }) => {
+				saving = false;
+				update({ reset: false });
+			};
+		}}
+	>
+		<TextField name="name" value={form?.input.slug} oninput={handleTeamSlugInput}>
+			{#snippet label()}
+				Identifier / Name
+			{/snippet}
+			{#snippet description()}
+				Example: my-team-name<br />
+				<WarningIcon class="text-aligned-icon" /> It is not possible to change the identifier after creation,
+				so choose wisely.
+			{/snippet}
+		</TextField>
+		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
+			<p style:color="var(--ax-text-danger, --a-text-danger)">{teamSlugError}</p>
+		{/if}
+		<br />
+		<TextField name="description" value={form?.input.purpose} oninput={handlePurposeInput}>
+			{#snippet label()}
+				Purpose of the team
+			{/snippet}
+			{#snippet description()}
+				Example: Making sure users have a good experience
+			{/snippet}
+		</TextField>
+		{#if purposeError !== 'no_error' && purposeError !== ''}
+			<p style:color="var(--ax-text-danger, --a-text-danger)">{purposeError}</p>
+		{/if}
+		<br />
+
+		<Button loading={saving} {disabled} icon={FloppydiskIcon}>Create team</Button>
+	</form>
+</div>
+
+<style>
+	.container {
+		padding-top: 4rem;
+		margin-inline: auto;
+		max-width: 620px;
+	}
+</style>

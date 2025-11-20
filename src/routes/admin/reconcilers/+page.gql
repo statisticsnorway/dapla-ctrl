@@ -1,0 +1,8 @@
+query AdminReconcilers {
+	reconcilers(first: 100) {
+		nodes {
+			id
+			...ReconcilerFragment
+		}
+	}
+}

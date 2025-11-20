@@ -1,0 +1,17 @@
+query TeamDeleteKey($team: Slug!, $key: String!) {
+	team(slug: $team) {
+		deleteKey(key: $key) {
+			team {
+				slug
+			}
+			createdAt
+			createdBy {
+				id
+				name
+				email
+			}
+			expires
+			key
+		}
+	}
+}
