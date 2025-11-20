@@ -6,25 +6,15 @@
 		type ActivityLogEntryFragment,
 		type ActivityLogEntryResourceType$options
 	} from '$houdini';
-	import { envTagVariant } from '$lib/envTagVariant';
 	import Time from '$lib/Time.svelte';
-	import { BodyShort, Tag } from '@nais/ds-svelte-community';
+	import { BodyShort } from '@nais/ds-svelte-community';
 
 	const resourceLink = (
-		environmentName: string,
 		resourceType: ActivityLogEntryResourceType$options,
 		resourceName: string,
 		teamSlug: string | null
 	) => {
 		switch (resourceType) {
-			case ActivityLogEntryResourceType.APP:
-				return `/team/${teamSlug}/${environmentName}/app/${resourceName}`;
-			case ActivityLogEntryResourceType.JOB:
-				return `/team/${teamSlug}/${environmentName}/job/${resourceName}`;
-			case ActivityLogEntryResourceType.UNLEASH:
-				return `/team/${teamSlug}/unleash`;
-			case ActivityLogEntryResourceType.SECRET:
-				return `/team/${teamSlug}/${environmentName}/secret/${resourceName}`;
 			case ActivityLogEntryResourceType.TEAM:
 				return `/team/${teamSlug}`;
 			default:
@@ -60,52 +50,7 @@
 <div class="activity">
 	<div>
 		<BodyShort size="small" spacing>
-			{#if $data.__typename === 'SecretValueAddedActivityLogEntry'}
-				Added value of
-				<strong>{$data.secretValueAdded?.valueName}</strong> to secret {@const link = resourceLink(
-					$data.environmentName ? $data.environmentName : '',
-					$data.resourceType,
-					$data.resourceName,
-					$data.teamSlug
-				)}
-				{#if link}
-					<a href={link}>{$data.resourceName}</a>
-				{/if}
-			{:else if $data.__typename === 'SecretValueRemovedActivityLogEntry'}
-				Removed value of
-				<strong>{$data.secretValueRemoved?.valueName}</strong> from secret
-				{@const link = resourceLink(
-					$data.environmentName ? $data.environmentName : '',
-					$data.resourceType,
-					$data.resourceName,
-					$data.teamSlug
-				)}
-				{#if link}
-					<a href={link}>{$data.resourceName}</a>
-				{/if}
-			{:else if $data.__typename === 'SecretValueUpdatedActivityLogEntry'}
-				Updated value of
-				<strong>{$data.secretValueUpdated?.valueName}</strong> in secret {@const link =
-					resourceLink(
-						$data.environmentName ? $data.environmentName : '',
-						$data.resourceType,
-						$data.resourceName,
-						$data.teamSlug
-					)}
-				{#if link}
-					<a href={link}>{$data.resourceName}</a>
-				{/if}
-			{:else if $data.__typename === 'SecretDeletedActivityLogEntry'}
-				{$data.message}
-				<strong>{$data.resourceName}</strong>
-			{:else if $data.__typename === 'TeamEnvironmentUpdatedActivityLogEntry'}
-				{$data.message}
-				{#if $data.teamEnvironmentUpdated.updatedFields.length > 0}
-					{#each $data.teamEnvironmentUpdated.updatedFields as field (field)}
-						{field.field}. Changed from {field.oldValue} to {field.newValue}.
-					{/each}
-				{/if}
-			{:else if $data.__typename === 'TeamMemberAddedActivityLogEntry'}
+			{#if $data.__typename === 'TeamMemberAddedActivityLogEntry'}
 				{#if $data.teamMemberAdded}
 					Added member {$data.teamMemberAdded.userEmail !== ''
 						? $data.teamMemberAdded.userEmail
@@ -157,31 +102,16 @@
 			{:else if $data.__typename === 'ApplicationRestartedActivityLogEntry'}
 				Application <strong>{$data.resourceName}</strong> was restarted
 			{:else if $data.__typename === 'JobTriggeredActivityLogEntry'}
-				Job <a
-					href={resourceLink(
-						$data.environmentName ? $data.environmentName : '',
-						$data.resourceType,
-						$data.resourceName,
-						$data.teamSlug
-					)}>{$data.resourceName}</a
+				Job <a href={resourceLink($data.resourceType, $data.resourceName, $data.teamSlug)}
+					>{$data.resourceName}</a
 				>
 				was triggered
 			{:else}
 				{$data.message}
-				{@const link = resourceLink(
-					$data.environmentName ? $data.environmentName : '',
-					$data.resourceType,
-					$data.resourceName,
-					$data.teamSlug
-				)}
+				{@const link = resourceLink($data.resourceType, $data.resourceName, $data.teamSlug)}
 				{#if link}
 					<a href={link}>{$data.resourceName}</a>
 				{/if}
-			{/if}
-			{#if $data.environmentName}
-				in <Tag size="small" variant={envTagVariant($data.environmentName)}>
-					{$data.environmentName}
-				</Tag>.
 			{/if}
 		</BodyShort>
 	</div>

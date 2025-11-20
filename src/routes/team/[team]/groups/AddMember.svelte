@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { graphql, type AddGroupMemberInput } from '$houdini';
-	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
+	import { Alert, Button, Heading, Modal, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 	import { createEventDispatcher } from 'svelte';
 	import type { AddMemberQueryVariables } from './$houdini';

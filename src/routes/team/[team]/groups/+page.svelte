@@ -5,13 +5,13 @@
 	import ListItem from '$lib/components/list/ListItem.svelte';
 	import OrderByMenu from '$lib/components/OrderByMenu.svelte';
 	import GraphErrors from '$lib/GraphErrors.svelte';
-	import Pagination from '$lib/Pagination.svelte';
-	import { changeParams } from '$lib/utils/searchparams';
+	// import Pagination from '$lib/Pagination.svelte';
+	// import { changeParams } from '$lib/utils/searchparams';
 	import { BodyShort, Button, Heading } from '@nais/ds-svelte-community';
-	import { PencilIcon, PlusIcon, TrashIcon } from '@nais/ds-svelte-community/icons';
+	import { PlusIcon, TrashIcon } from '@nais/ds-svelte-community/icons';
 	import type { PageProps } from './$houdini';
 	import AddMember from './AddMember.svelte';
-	import EditMember from './EditMember.svelte';
+	import CreateGroup from './CreateGroup.svelte';
 
 	let { data }: PageProps = $props();
 	let { Groups, UserInfo, viewerIsOwner } = $derived(data);
@@ -34,8 +34,7 @@
 	};
 
 	let addMemberProps: { open: boolean; group: string } = $state({ open: false, group: '' });
-	let editUser: string | null = $state(null);
-	let editUserOpen = $state(false);
+	let createGroupOpen: boolean = $state(false);
 	let deleteUser: { email: string; name: string; group: string } | null = $state(null);
 	let deleteUserOpen = $state(false);
 
@@ -43,20 +42,20 @@
 		viewerIsOwner === true || (UserInfo.data?.me.__typename == 'User' && UserInfo.data?.me.isAdmin)
 	);
 
-	let after: string = $state($Groups.variables?.after ?? '');
-	let before: string = $state($Groups.variables?.before ?? '');
+	// let after: string = $state($Groups.variables?.after ?? '');
+	// let before: string = $state($Groups.variables?.before ?? '');
 
-	const changeQuery = (
-		params: {
-			after?: string;
-			before?: string;
-		} = {}
-	) => {
-		changeParams({
-			before: params.before ?? before,
-			after: params.after ?? after
-		});
-	};
+	// const changeQuery = (
+	// 	params: {
+	// 		after?: string;
+	// 		before?: string;
+	// 	} = {}
+	// ) => {
+	// 	changeParams({
+	// 		before: params.before ?? before,
+	// 		after: params.after ?? after
+	// 	});
+	// };
 </script>
 
 <GraphErrors errors={$Groups.errors} />
@@ -81,10 +80,10 @@
 								>
 							</div>
 						{/if}
-						<!-- <OrderByMenu
+						<OrderByMenu
 							orderField={GroupMemberOrderField}
 							defaultOrderField={GroupMemberOrderField.NAME}
-						/> -->
+						/>
 					{/snippet}
 					{#if edge.node.members.edges}
 						{#each edge.node.members.edges as memberEdge (memberEdge.node.user.email)}
@@ -132,6 +131,18 @@
 					{/if}
 				</List>
 			{/each}
+
+			{#if canEdit}
+				<div class="button">
+					<Button
+						size="small"
+						onclick={() => {
+							createGroupOpen = !createGroupOpen;
+						}}
+						icon={PlusIcon}>Create Group</Button
+					>
+				</div>
+			{/if}
 			<!-- <Pagination
 				page={$Members.data?.team.members.pageInfo}
 				loaders={{
@@ -154,6 +165,8 @@
 	</div>
 	{#if team}
 		<AddMember bind:open={addMemberProps.open} group={addMemberProps.group} on:created={refetch} />
+
+		<CreateGroup bind:open={createGroupOpen} team={team.slug} on:created={refetch} />
 
 		{#if deleteUser && deleteUserOpen}
 			{@const group = deleteUser.group}
@@ -198,12 +211,5 @@
 		justify-content: space-between;
 		align-items: center;
 		width: 200px;
-	}
-	.role {
-		color: var(--ax-text-subtle, --a-text-subtle);
-		text-transform: lowercase;
-	}
-	.role::first-letter {
-		text-transform: uppercase;
 	}
 </style>

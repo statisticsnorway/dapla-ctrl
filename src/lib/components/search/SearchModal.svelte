@@ -2,13 +2,7 @@
 	import { graphql } from '$houdini';
 	import { envTagVariant } from '$lib/envTagVariant';
 	import { Modal } from '@nais/ds-svelte-community';
-	import {
-		BriefcaseClockIcon,
-		BucketIcon,
-		DatabaseIcon,
-		PackageIcon,
-		PersonGroupIcon
-	} from '@nais/ds-svelte-community/icons';
+	import { PersonGroupIcon } from '@nais/ds-svelte-community/icons';
 	import Search from './Search.svelte';
 
 	let { open = $bindable() }: { open: boolean } = $props();

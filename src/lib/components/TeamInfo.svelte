@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { graphql, PendingValue } from '$houdini';
 	import { BodyShort, Heading, Skeleton } from '@nais/ds-svelte-community';
-	import { get } from 'svelte/store';
 	import type { TeamInfoVariables } from './$houdini';
 
 	interface Props {
@@ -23,7 +21,6 @@
 			}
 		}
 	`);
-	const githubOrganization = get(page).data.githubOrganization;
 </script>
 
 <div class="wrapper">

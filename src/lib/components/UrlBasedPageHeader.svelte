@@ -1,16 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import GitHubIcon from '$lib/icons/GitHubIcon.svelte';
-	import SlackIcon from '$lib/icons/SlackIcon.svelte';
 	import { urlToPageHeader } from '$lib/urlToPageHeader';
 	import { BodyShort } from '@nais/ds-svelte-community';
-	import IconLabel from './IconLabel.svelte';
 	import PageHeader from './PageHeader.svelte';
 
 	interface Props {
 		purpose?: string;
 		gitHubOrganization?: string;
 		memberCount: number;
+		groupCount: number;
 		viewerIsMember: boolean;
 	}
 

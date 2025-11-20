@@ -1,10 +1,10 @@
 import { OrderDirection, TeamMemberOrderField } from '$houdini';
 import { urlToOrderDirection, urlToOrderField } from '$lib/components/OrderByMenu.svelte';
-import type { MembersVariables } from './$houdini';
+import type { GroupsVariables } from './$houdini';
 
 const rows = 25;
 
-export const _MembersVariables: MembersVariables = ({ url }) => {
+export const _MembersVariables: GroupsVariables = ({ url }) => {
 	const after = url.searchParams.get('after') || '';
 	const before = url.searchParams.get('before') || '';
 
