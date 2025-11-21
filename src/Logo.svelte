@@ -10,7 +10,7 @@
 	<defs>
 		<style>
 			.cls-1 {
-				fill: #274247;
+				fill: light-dark(#274247, white);
 			}
 		</style>
 	</defs>

@@ -31,10 +31,10 @@
 	let feedbackOpen = $state(false);
 </script>
 
-<InternalHeader>
+<InternalHeader allowLightMode={true}>
 	<InternalHeaderTitle as="a" href="/">
 		<div class="logo">
-			<Logo height="1.8rem" />
+			<Logo height="2.0rem" />
 			<span>Ctrl</span>
 		</div>
 	</InternalHeaderTitle>
@@ -82,13 +82,9 @@
 		color: var(--ax-text-default, --a-text-on-inverted);
 		text-decoration: none;
 		display: flex;
-		gap: 1rem;
+		gap: 0.5rem;
 		font-size: 1.5rem;
 		font-weight: 700;
-	}
-	.feedback-button-wrapper {
-		display: flex;
-		place-items: center;
-		padding: 0 1rem;
+		align-items: center;
 	}
 </style>
