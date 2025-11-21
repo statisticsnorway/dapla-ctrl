@@ -19,7 +19,7 @@
 				<div>
 					<BodyLong spacing
 						>The Activity Log provides an overview of changes made to your team and its resources
-						within the Nais Console application.</BodyLong
+						within the Dapla Ctrl application.</BodyLong
 					>
 					<List title="{ae.pageInfo.totalCount} entries">
 						{#each ae.nodes || [] as item (item.id)}

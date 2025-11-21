@@ -22,7 +22,7 @@
 		>{[
 			pageHeaderProps.heading,
 			...pageHeaderProps.breadcrumbs.toReversed().map((b) => b.label)
-		].join(' - ')} - Nais Console</title
+		].join(' - ')} - Dapla Ctrl</title
 	></svelte:head
 >
 

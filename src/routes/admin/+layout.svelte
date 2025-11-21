@@ -38,7 +38,7 @@
 	};
 </script>
 
-<svelte:head><title>Admin - Nais Console</title></svelte:head>
+<svelte:head><title>Admin - Dapla Ctrl</title></svelte:head>
 
 <div class="page">
 	<PageHeader heading="Administration" />

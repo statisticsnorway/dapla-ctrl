@@ -36,7 +36,7 @@
 	<InternalHeaderTitle as="a" href="/">
 		<div class="logo">
 			<Logo height="1.8rem" />
-			<span>Console</span>
+			<span>Ctrl</span>
 		</div>
 	</InternalHeaderTitle>
 	<InternalHeaderButton

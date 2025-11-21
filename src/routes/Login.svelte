@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>Log in - Nais Console</title>
+	<title>Log in - Dapla Ctrl</title>
 	<style>
 		body {
 			background: var(--ax-bg-default, --a-bg-default);
@@ -26,7 +26,7 @@
 	<div class="login">
 		<Heading level="1" size="large" spacing>
 			<Logo height=".8em" />
-			Nais Console
+			Dapla Ctrl
 		</Heading>
 		{#if $page.url.searchParams?.get('error')}
 			{@const error = $page.url.searchParams.get('error')}
@@ -44,7 +44,7 @@
 		<p>To access this page you need to log in with your Google Workspace account.</p>
 
 		<Button as="a" href="/oauth2/login?redirect_uri={redirectPath($page.url)}" variant="primary"
-			>Log in to Nais Console</Button
+			>Log in to Dapla Ctrl</Button
 		>
 	</div>
 </div>

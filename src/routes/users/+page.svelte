@@ -31,7 +31,7 @@
 </script>
 
 <div class="container">
-	<Heading level="1" size="large" spacing>Nais Console Users</Heading>
+	<Heading level="1" size="large" spacing>Dapla Ctrl Users</Heading>
 	<List
 		title="{$People.data?.users.pageInfo.totalCount} user{$People.data?.users.pageInfo
 			.totalCount !== 1

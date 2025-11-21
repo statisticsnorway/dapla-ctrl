@@ -18,7 +18,7 @@
 	);
 </script>
 
-<svelte:head><title>Nais Console</title></svelte:head>
+<svelte:head><title>Dapla Ctrl</title></svelte:head>
 
 {#if userTeams === 0}
 	<div class="page">
