@@ -17,36 +17,36 @@
 
 <svelte:head><title>Dapla Ctrl</title></svelte:head>
 
-	<div class="page">
-		<div class="content-wrapper">
-			<div class="header">
-				<Heading level="1" size="large">Teamoversikt</Heading>
-				<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
-			</div>
-			{#if $UserTeams.data}
-				{#if $UserTeams.data.me.__typename == 'User'}
-					<List>
-						{#each $UserTeams.data.me.teams.nodes as node (node.team.id)}
-							<TeamListItem team={node.team} />
-						{:else}
-							<BodyLong>
-								You don't seem to belong to any teams at the moment. You can create a new team or
-								search for the team you'd like to join. Once you find it, locate one of the owners
-								in the members list on the team page to request membership.
-							</BodyLong>
-						{/each}
-					</List>
-					<Pagination
-						page={$UserTeams.data.me.teams.pageInfo}
-						loaders={{
-							loadPreviousPage: UserTeams.loadPreviousPage,
-							loadNextPage: UserTeams.loadNextPage
-						}}
-					/>
-				{/if}
-			{/if}
+<div class="page">
+	<div class="content-wrapper">
+		<div class="header">
+			<Heading level="1" size="large">Teamoversikt</Heading>
+			<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
 		</div>
+		{#if $UserTeams.data}
+			{#if $UserTeams.data.me.__typename == 'User'}
+				<List>
+					{#each $UserTeams.data.me.teams.nodes as node (node.team.id)}
+						<TeamListItem team={node.team} />
+					{:else}
+						<BodyLong>
+							You don't seem to belong to any teams at the moment. You can create a new team or
+							search for the team you'd like to join. Once you find it, locate one of the owners in
+							the members list on the team page to request membership.
+						</BodyLong>
+					{/each}
+				</List>
+				<Pagination
+					page={$UserTeams.data.me.teams.pageInfo}
+					loaders={{
+						loadPreviousPage: UserTeams.loadPreviousPage,
+						loadNextPage: UserTeams.loadNextPage
+					}}
+				/>
+			{/if}
+		{/if}
 	</div>
+</div>
 
 <style>
 	.page {
