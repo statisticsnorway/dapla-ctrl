@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import SearchButton from '$lib/components/search/SearchButton.svelte';
-	import { docURL } from '$lib/doc';
 	import Feedback from '$lib/feedback/Feedback.svelte';
 	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import { Button } from '@nais/ds-svelte-community';
@@ -39,32 +38,11 @@
 			<span>Ctrl</span>
 		</div>
 	</InternalHeaderTitle>
-	<InternalHeaderButton
-		as="a"
-		href="/utilization"
-		class={{ active: page.url.pathname === '/utilization' }}
-	>
-		Utilization
-	</InternalHeaderButton>
-	<InternalHeaderButton as="a" href={docURL()}>Docs</InternalHeaderButton>
+	<InternalHeaderButton as="a" href="https://manual.dapla.ssb.no">Manual</InternalHeaderButton>
+	<InternalHeaderButton as="a" href="https://lab.dapla.ssb.no/">Lab</InternalHeaderButton>
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
-	<div class="feedback-button-wrapper">
-		<Button
-			variant="primary-neutral"
-			icon={ChatElipsisIcon}
-			size="small"
-			onclick={() => {
-				feedbackOpen = true;
-			}}
-		>
-			<span style="font-weight: 400">Feedback</span>
-		</Button>
-	</div>
-	{#if feedbackOpen}
-		<Feedback close={() => (feedbackOpen = false)} />
-	{/if}
-	<SearchButton />
+
 	<ActionMenu>
 		{#snippet trigger(props)}
 			<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />

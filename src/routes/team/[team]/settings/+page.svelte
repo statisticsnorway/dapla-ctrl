@@ -6,7 +6,6 @@
 		graphql,
 		type QueryResult
 	} from '$houdini';
-	import { docURL } from '$lib/doc';
 	import GraphErrors from '$lib/GraphErrors.svelte';
 	import WarningIcon from '$lib/icons/WarningIcon.svelte';
 	import Time from '$lib/Time.svelte';
