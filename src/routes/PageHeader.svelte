@@ -16,6 +16,7 @@
 	} from '@nais/ds-svelte-community/experimental';
 	import { ChatElipsisIcon, CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
 	import Logo from '../Logo.svelte';
+	import { PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL } from '$env/static/public';
 
 	interface Props {
 		user:
@@ -38,11 +39,10 @@
 			<span>Ctrl</span>
 		</div>
 	</InternalHeaderTitle>
-	<InternalHeaderButton as="a" href="https://manual.dapla.ssb.no">Manual</InternalHeaderButton>
-	<InternalHeaderButton as="a" href="https://lab.dapla.ssb.no/">Lab</InternalHeaderButton>
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
+	<InternalHeaderButton as="a"  href={PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL}>Dokumentasjon</InternalHeaderButton>
 	<ActionMenu>
 		{#snippet trigger(props)}
 			<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />
