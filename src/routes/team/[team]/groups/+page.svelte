@@ -17,6 +17,10 @@
 	let { Groups, UserInfo, viewerIsOwner } = $derived(data);
 	let team = $derived($Groups.data?.team);
 
+	let groupNames = $derived.by(() => {
+		return team?.groups.edges.map((group) => group.node.name) ?? [];
+	});
+
 	const removeGroupMember = graphql(`
 		mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
 			removeGroupMember(input: $input) {
@@ -33,7 +37,7 @@
 		});
 	};
 
-	let addMemberProps: { open: boolean; group: string } = $state({ open: false, group: '' });
+	let addMemberProps: { open: boolean } = $state({ open: false });
 	let createGroupOpen: boolean = $state(false);
 	let deleteUser: { email: string; name: string; group: string } | null = $state(null);
 	let deleteUserOpen = $state(false);
@@ -66,20 +70,6 @@
 				{@const memberCount = edge.node.members.pageInfo.totalCount}
 				<List title="{edge.node.name}: {memberCount} user{memberCount !== 1 ? 's' : ''}">
 					{#snippet menu()}
-						{#if canEdit}
-							<div class="button">
-								<Button
-									size="small"
-									onclick={() => {
-										addMemberProps = {
-											open: !addMemberProps.open,
-											group: edge.node.name
-										};
-									}}
-									icon={PlusIcon}>Add member</Button
-								>
-							</div>
-						{/if}
 						<OrderByMenu
 							orderField={GroupMemberOrderField}
 							defaultOrderField={GroupMemberOrderField.NAME}
@@ -137,6 +127,17 @@
 					<Button
 						size="small"
 						onclick={() => {
+							addMemberProps = {
+								open: !addMemberProps.open
+							};
+						}}
+						icon={PlusIcon}>Add member</Button
+					>
+				</div>
+				<div class="button">
+					<Button
+						size="small"
+						onclick={() => {
 							createGroupOpen = !createGroupOpen;
 						}}
 						icon={PlusIcon}>Create Group</Button
@@ -164,7 +165,7 @@
 		<!--div>Here be documentation of teams, members and roles</div-->
 	</div>
 	{#if team}
-		<AddMember bind:open={addMemberProps.open} group={addMemberProps.group} on:created={refetch} />
+		<AddMember bind:open={addMemberProps.open} groups={groupNames} on:created={refetch} />
 
 		<CreateGroup bind:open={createGroupOpen} team={team.slug} on:created={refetch} />
 

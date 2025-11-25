@@ -2074,8 +2074,6 @@ Time is a string in [RFC 3339](https://rfc-editor.org/rfc/rfc3339.html) format, 
 """
 scalar Time
 
-scalar UUID
-
 input UpdateServiceAccountInput {
   """
   The new description of the service account.

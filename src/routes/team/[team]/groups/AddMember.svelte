@@ -1,16 +1,18 @@
 <script lang="ts">
 	import { graphql, type AddGroupMemberInput } from '$houdini';
-	import { Alert, Button, Heading, Modal, TextField } from '@nais/ds-svelte-community';
+	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 	import { createEventDispatcher } from 'svelte';
 	import type { AddMemberQueryVariables } from './$houdini';
 
 	interface Props {
 		open: boolean;
-		group: string;
+		groups: string[];
 	}
 
-	let { open = $bindable(), group }: Props = $props();
+	let { open = $bindable(), groups }: Props = $props();
+
+	let group = $derived(groups[0]);
 
 	const dispatcher = createEventDispatcher<{ created: null }>();
 
@@ -101,7 +103,7 @@
 
 <Modal bind:open>
 	{#snippet header()}
-		<Heading>Add Member to {group}</Heading>
+		<Heading>Add Member</Heading>
 	{/snippet}
 
 	{#each errors as error (error)}
@@ -116,6 +118,11 @@
 		class="wrapper"
 	>
 		<p>Group members are given access to the some of the team's resources.</p>
+		<Select label="Group" bind:value={group}>
+			{#each groups as groupName (groupName)}
+				<option value={groupName}>{groupName}</option>
+			{/each}
+		</Select>
 		<TextField list="add-member-email" type="email" bind:value={email}>
 			{#snippet label()}
 				Email
