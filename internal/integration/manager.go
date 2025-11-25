@@ -51,10 +51,6 @@ func TestRunner(ctx context.Context, skipSetup bool) (*testmanager.Manager, func
 	}, nil
 }
 
-func clusters() []string {
-	return []string{"dev", "staging", "dev-fss", "dev-gcp"}
-}
-
 func newManager(ctx context.Context, container *postgres.PostgresContainer, connStr string, skipSetup bool) testmanager.SetupFunc {
 	if skipSetup {
 		return func(ctx context.Context, _ string, _ any) (retCtx context.Context, runners []spec.Runner, close func(), err error) {

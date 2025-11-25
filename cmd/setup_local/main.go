@@ -191,10 +191,6 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		const (
 			adminName = "admin usersen"
 			devName   = "dev usersen"
-
-			devEnvironment  = "dev"
-			prodEnvironment = "superprod"
-			kindEnvironment = "kind-kind"
 		)
 
 		var err error

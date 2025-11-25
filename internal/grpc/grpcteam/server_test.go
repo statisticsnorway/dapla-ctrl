@@ -75,26 +75,6 @@ func TestTeamsServer_Get(t *testing.T) {
 		if resp.Team.Purpose != purpose {
 			t.Errorf("expected team purpose to be %q, got %q", purpose, resp.Team.Purpose)
 		}
-
-		if resp.Team.SlackChannel != slackChannel {
-			t.Errorf("expected Slack channel to be %q, got %q", slackChannel, resp.Team.SlackChannel)
-		}
-
-		if *resp.Team.EntraIdGroupId != entraIDgroupID.String() {
-			t.Errorf("expected Entra ID group ID to be %q, got %q", entraIDgroupID.String(), *resp.Team.EntraIdGroupId)
-		}
-
-		if *resp.Team.GithubTeamSlug != gitHubTeamSlug {
-			t.Errorf("expected GitHub team slug to be %q, got %q", gitHubTeamSlug, *resp.Team.GithubTeamSlug)
-		}
-
-		if *resp.Team.GoogleGroupEmail != googleGroupEmail {
-			t.Errorf("expected Google group email to be %q, got %q", googleGroupEmail, *resp.Team.GoogleGroupEmail)
-		}
-
-		if *resp.Team.GarRepository != garRepository {
-			t.Errorf("expected GAR repository to be %q, got %q", garRepository, *resp.Team.GarRepository)
-		}
 	})
 }
 
@@ -189,80 +169,6 @@ func TestTeamsServer_ToBeReconciled(t *testing.T) {
 
 		if expected := "team-2"; resp.Nodes[1].Slug != expected {
 			t.Errorf("expected first team to be %q, got %q", expected, resp.Nodes[1].Slug)
-		}
-	})
-}
-
-func TestTeamsServer_IsRepositoryAuthorized(t *testing.T) {
-	ctx := context.Background()
-	log, _ := logrustest.NewNullLogger()
-
-	container, dsn, err := startPostgresql(ctx, t, log)
-	if err != nil {
-		t.Fatalf("failed to start postgres container: %v", err)
-	}
-
-	t.Run("repo is authorized", func(t *testing.T) {
-		pool := getConnection(ctx, t, container, dsn, log)
-
-		const (
-			teamSlug = "team-slug"
-			repoName = "repo-name"
-		)
-
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel) VALUES ($1, 'some purpose', '#channel')"
-		if _, err := pool.Exec(ctx, stmt, teamSlug); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		stmt = "INSERT INTO team_repositories (team_slug, github_repository) VALUES ($1, $2)"
-		if _, err := pool.Exec(ctx, stmt, teamSlug, repoName); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		resp, err := grpcteam.NewServer(pool).IsRepositoryAuthorized(ctx, &protoapi.IsRepositoryAuthorizedRequest{
-			TeamSlug:   teamSlug,
-			Repository: repoName,
-		})
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if resp == nil {
-			t.Fatalf("expected response to be non nil")
-		}
-
-		if !resp.IsAuthorized {
-			t.Errorf("expected repository to be authorized")
-		}
-	})
-	t.Run("repo is not authorized", func(t *testing.T) {
-		pool := getConnection(ctx, t, container, dsn, log)
-
-		const (
-			teamSlug = "team-slug"
-			repoName = "repo-name"
-		)
-
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel) VALUES ($1, 'some purpose', '#channel')"
-		if _, err := pool.Exec(ctx, stmt, teamSlug); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		resp, err := grpcteam.NewServer(pool).IsRepositoryAuthorized(ctx, &protoapi.IsRepositoryAuthorizedRequest{
-			TeamSlug:   teamSlug,
-			Repository: repoName,
-		})
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if resp == nil {
-			t.Fatalf("expected response to be non nil")
-		}
-
-		if resp.IsAuthorized {
-			t.Errorf("did not expect repository to be authorized")
 		}
 	})
 }

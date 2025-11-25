@@ -30,24 +30,6 @@ type usersyncConfig struct {
 	AllUsersGroup string `env:"ENTRA_ID_ALL_USERS_GROUP"`
 }
 
-// costConfig is the configuration for the cost service
-type costConfig struct {
-	ImportEnabled     bool   `env:"COST_DATA_IMPORT_ENABLED"`
-	BigQueryProjectID string `env:"BIGQUERY_PROJECTID,default=*detect-project-id*"`
-}
-
-// vulnerabilitiesConfig is the configuration for the vulnerability manager using the v13s api
-type vulnerabilitiesConfig struct {
-	Endpoint       string `env:"VULNERABILITIES_ENDPOINT,default=fake"`
-	ServiceAccount string `env:"VULNERABILITIES_SERVICE_ACCOUNT,default=service-account"`
-}
-
-// hookdConfig is the configuration for the hookd service
-type hookdConfig struct {
-	Endpoint string `env:"HOOKD_ENDPOINT,default=http://hookd"`
-	PSK      string `env:"HOOKD_PSK"`
-}
-
 type oAuthConfig struct {
 	// Issuer The issuer of the OAuth 2.0 client to use for the OAuth login flow.
 	Issuer string `env:"OAUTH_ISSUER,default=https://accounts.google.com"`

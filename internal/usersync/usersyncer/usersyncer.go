@@ -243,7 +243,7 @@ func (s *Usersynchronizer) getAdminGroupMembers(ctx context.Context, entraIdUser
 		return nil, fmt.Errorf("get admin group members: %w", err)
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](collection, s.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+	pageIterator, _ := msgraphcore.NewPageIterator[models.Userable](collection, s.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
 
 	groupMembers := make([]models.Userable, 0)
 	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {

@@ -3,7 +3,6 @@ pin = true
 
 [tools]
 go = "1.25.3"
-helm = "3.17.1"
 node = "lts"
 protoc = "29.3"
 protoc-gen-go = "1.36.4"

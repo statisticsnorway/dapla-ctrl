@@ -34,10 +34,6 @@ func newTeamIdent(slug slug.Slug) ident.Ident {
 	return ident.NewIdent(identTeam, slug.String())
 }
 
-func newTeamEnvironmentIdent(slug slug.Slug, envName string) ident.Ident {
-	return ident.NewIdent(identTeamEnvironment, slug.String(), envName)
-}
-
 // parseTeamIdent returns the team slug from a team identifier. If the identifier is invalid, an error is returned.
 func parseTeamIdent(id ident.Ident) (slug.Slug, error) {
 	parts := id.Parts()

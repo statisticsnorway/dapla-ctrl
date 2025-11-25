@@ -54,8 +54,6 @@ fmt:
 prettier:
 	mise run fmt:prettier
 
-helm-lint:
-	mise run check:helm-lint
 
 graphql-lint:
 	mise run check:graphql-lint

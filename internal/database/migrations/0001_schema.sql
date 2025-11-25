@@ -79,8 +79,8 @@ RETURN NULL;
 END;
 $$ LANGUAGE plpgsql
 ;
--- +goose StatementEnd
 
+-- +goose StatementEnd
 -- types
 CREATE DOMAIN slug AS TEXT CHECK (value ~ '^[a-z][a-z0-9-]{0,15}[a-z]$'::TEXT)
 ;
@@ -89,19 +89,16 @@ CREATE TYPE repository_authorization_enum AS ENUM('deploy')
 ;
 
 CREATE TYPE usersync_log_entry_action AS ENUM(
-       'create_user',
-       'update_user',
-       'delete_user',
-       'assign_role',
-       'revoke_role'
+	'create_user',
+	'update_user',
+	'delete_user',
+	'assign_role',
+	'revoke_role'
 )
 ;
 
 -- tables
-CREATE TABLE authorizations (
-    name TEXT PRIMARY KEY,
-    description TEXT NOT NULL
-)
+CREATE TABLE authorizations (name TEXT PRIMARY KEY, description TEXT NOT NULL)
 ;
 
 CREATE TABLE activity_log_entries (
@@ -261,20 +258,19 @@ CREATE TABLE users (
 ;
 
 CREATE TABLE usersync_log_entries (
-       id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
-       created_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
-       action usersync_log_entry_action NOT NULL,
-       user_id UUID NOT NULL,
-       user_name TEXT NOT NULL,
-       user_email TEXT NOT NULL,
-       old_user_name TEXT,
-       old_user_email TEXT,
-       role_name TEXT
+	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	created_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
+	action usersync_log_entry_action NOT NULL,
+	user_id UUID NOT NULL,
+	user_name TEXT NOT NULL,
+	user_email TEXT NOT NULL,
+	old_user_name TEXT,
+	old_user_email TEXT,
+	role_name TEXT
 )
 ;
 
 -- views
-
 -- additional indexes
 CREATE INDEX activity_log_entries_team_slug_idx ON activity_log_entries (team_slug)
 ;
@@ -297,15 +293,12 @@ CREATE UNIQUE INDEX ON service_account_roles USING btree (service_account_id, ro
 CREATE UNIQUE INDEX ON service_account_tokens USING btree (service_account_id, name)
 ;
 
-
 CREATE INDEX ON teams (delete_key_confirmed_at)
 ;
 
 CREATE UNIQUE INDEX ON user_roles USING btree (user_id, role_name)
 WHERE
-	(
-		(target_team_slug IS NULL)
-	)
+	((target_team_slug IS NULL))
 ;
 
 CREATE UNIQUE INDEX ON user_roles USING btree (user_id, role_name, target_team_slug)
