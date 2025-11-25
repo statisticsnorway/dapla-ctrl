@@ -39,6 +39,66 @@
 		direction: 'descending'
 	});
 
+	let teamsTable: TeamsData[] = $state([]);
+
+	$effect(() => {
+		teamsTable = getTeamsTableDataSorted(
+			teamsData,
+			sortState.orderBy,
+			sortState.direction
+		);
+	});
+	//
+	// function getTeamsTableDataSorted (
+	// 	data: TeamsData | null,
+	// 	sortedBy: string,
+	// 	sortDirection: string
+	// ): TeamsData[] {
+	// 	const teamMap = new Map<string, TeamsData>();
+	//
+	// 	if (!data) {
+	// 		return [];
+	// 	}
+	//
+	//
+	//
+	// 	return Array.from(teamMap.values()).sort((a, b) => {
+	// 		if (sortedBy === 'NAME') {
+	// 			if (sortDirection === 'descending') {
+	// 				if (a.teamSlug > b.teamSlug) return -1;
+	// 				if (a.teamSlug < b.teamSlug) return 1;
+	// 				return 0;
+	// 			} else {
+	// 				if (a.teamSlug > b.teamSlug) return 1;
+	// 				if (a.teamSlug < b.teamSlug) return -1;
+	// 				return 0;
+	// 			}
+	// 		} else if (sortedBy === 'CPU') {
+	// 			if (sortDirection === 'descending') {
+	// 				if (a.unusedCpu > b.unusedCpu) return -1;
+	// 				if (a.unusedCpu < b.unusedCpu) return 1;
+	// 				return 0;
+	// 			} else {
+	// 				if (a.unusedCpu > b.unusedCpu) return 1;
+	// 				if (a.unusedCpu < b.unusedCpu) return -1;
+	// 				return 0;
+	// 			}
+	// 		} else if (sortedBy === 'MEMORY') {
+	// 			if (sortDirection === 'descending') {
+	// 				if (a.unusedMem > b.unusedMem) return -1;
+	// 				if (a.unusedMem < b.unusedMem) return 1;
+	// 				return 0;
+	// 			} else {
+	// 				if (a.unusedMem > b.unusedMem) return 1;
+	// 				if (a.unusedMem < b.unusedMem) return -1;
+	// 				return 0;
+	// 			}
+	// 		}
+	// 		return 0;
+	// 	});
+	// }
+
+
 </script>
 
 <div class="container">
@@ -60,7 +120,7 @@
 			</Tr>
 			</Thead>
 			<Tbody>
-			{#each teamsData as team (team.slug)}
+			{#each teamsTable as team (team.slug)}
 				<Tr>
 					<Td>
 						<a href={`/team/${team.slug}/`}>
@@ -85,5 +145,4 @@
         flex-direction: column;
         gap: var(--spacing-layout);
     }
-
 </style>
