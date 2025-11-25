@@ -4,7 +4,7 @@ import type { Handle, HandleFetch } from '@sveltejs/kit';
 export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 	const cookies = event.request.headers.get('cookie');
 	if (
-		(request.url.startsWith('http://nais-api/') ||
+		(request.url.startsWith('http://dapla-api/') ||
 			request.url == import.meta.env.VITE_GRAPHQL_ENDPOINT) &&
 		cookies
 	) {
