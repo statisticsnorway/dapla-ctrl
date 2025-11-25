@@ -1,5 +1,6 @@
 <script lang="ts">
 	import List from '$lib/components/list/List.svelte';
+	import TeamsTable from './TeamsTable.svelte';
 	import TeamListItem from '$lib/components/list/TeamListItem.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 	import { BodyLong, Button, Heading } from '@nais/ds-svelte-community';
@@ -25,6 +26,11 @@
 		</div>
 		{#if $UserTeams.data}
 			{#if $UserTeams.data.me.__typename == 'User'}
+			    <TeamsTable teamsData={$UserTeams.data.me.teams.nodes.map(node => {return {
+						slug: node.team.slug,
+						memberCount: node.team.members.pageInfo.totalCount,
+						managers: node.team.groups.nodes.filter(group => group.category === "managers").flatMap(managerGroup => managerGroup.members.nodes.map(member => member.user))
+			    }})}  />
 				<List>
 					{#each $UserTeams.data.me.teams.nodes as node (node.team.id)}
 						<TeamListItem team={node.team} />

@@ -16,7 +16,25 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 					team {
 						id
 						slug
-						purpose
+                        members {
+                            pageInfo {
+                                totalCount
+                            }
+                        }
+                        groups {
+                            nodes {
+                                name
+								category
+                                members {
+                                    nodes {
+                                        user {
+                                            name
+                                            email
+                                        }
+                                    }
+                                }
+                            }
+                        }
 					}
 				}
 			}
