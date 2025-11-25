@@ -4,6 +4,7 @@ package gengql
 
 import (
 	pagination "github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	group "github.com/statisticsnorway/dapla-api/internal/group"
 	search "github.com/statisticsnorway/dapla-api/internal/search"
 	team "github.com/statisticsnorway/dapla-api/internal/team"
 	user "github.com/statisticsnorway/dapla-api/internal/user"
@@ -12,6 +13,12 @@ import (
 func NewComplexityRoot() ComplexityRoot {
 	c := ComplexityRoot{}
 
+	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Query.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Query.Reconcilers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
@@ -46,6 +53,9 @@ func NewComplexityRoot() ComplexityRoot {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Team.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int {

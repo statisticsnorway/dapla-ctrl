@@ -21,6 +21,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/database/notify"
 	"github.com/statisticsnorway/dapla-api/internal/feature"
 	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/reconciler"
 	"github.com/statisticsnorway/dapla-api/internal/search"
 	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
@@ -164,6 +165,7 @@ func ConfigureGraph(
 		ctx = session.NewLoaderContext(ctx, pool)
 		ctx = search.NewLoaderContext(ctx, pool, searcher)
 		ctx = feature.NewLoaderContext(ctx)
+		ctx = group.NewLoaderContext(ctx, pool)
 		return ctx
 	}
 

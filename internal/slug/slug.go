@@ -17,7 +17,7 @@ func (s *Slug) UnmarshalGQLContext(_ context.Context, v any) error {
 		return fmt.Errorf("slug must be a string")
 	}
 
-	*s = Slug(strings.TrimSpace(input))
+	*s = Slug(strings.ToLower(strings.TrimSpace(input)))
 	return s.Validate()
 }
 
@@ -43,15 +43,18 @@ func (e *ErrInvalidSlug) GraphError() string {
 	return e.Message
 }
 
-var slugPattern = regexp.MustCompile(`^[a-z](-?[a-z0-9]+)+$`)
+var slugPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,15}[a-z]$`)
 
 func (s Slug) Validate() error {
 	if len(s) < 3 {
 		return invalid("A team slug must be at least 3 characters long.")
 	}
 
-	if len(s) > 30 {
-		return invalid("A team slug must be at most 30 characters long.")
+	if len(s) > 17 {
+		return invalid("A team slug must be at most 17 characters long.")
+	}
+	if strings.Contains(s.String(), "--") {
+		return invalid("A team slug must not contain two dashes after another")
 	}
 
 	if !slugPattern.MatchString(s.String()) {

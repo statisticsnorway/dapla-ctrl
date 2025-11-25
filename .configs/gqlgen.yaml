@@ -30,6 +30,7 @@ autobind:
   - "github.com/statisticsnorway/dapla-api/internal/auth/authz"
   - "github.com/statisticsnorway/dapla-api/internal/feature"
   - "github.com/statisticsnorway/dapla-api/internal/graph/model"
+  - "github.com/statisticsnorway/dapla-api/internal/group"
   - "github.com/statisticsnorway/dapla-api/internal/reconciler"
   - "github.com/statisticsnorway/dapla-api/internal/search"
   - "github.com/statisticsnorway/dapla-api/internal/serviceaccount"

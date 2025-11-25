@@ -102,26 +102,11 @@ function TestFunctionTpubsub.check(topic, resp)
 	print("check")
 end
 
----@class TestFunctionTk8s
-local TestFunctionTk8s = {}
-
---- Check if a resource exists in a cluster
----@param apiVersion string
----@param kind string
----@param cluster string
----@param namespace string
----@param name string
----@param resp table
-function TestFunctionTk8s.check(apiVersion, kind, cluster, namespace, name, resp)
-	print("check")
-end
-
 --- Test case
 ---@class Test
 ---@field gql fun(name: string, fn: fun(t: TestFunctionTgql))
 ---@field sql fun(name: string, fn: fun(t: TestFunctionTsql))
 ---@field pubsub fun(name: string, fn: fun(t: TestFunctionTpubsub))
----@field k8s fun(name: string, fn: fun(t: TestFunctionTk8s))
 Test = {}
 
 --- Helper functions
@@ -157,12 +142,6 @@ end
 ---@param topic string
 function Helper.emptyPubSubTopic(topic)
 	print("emptyPubSubTopic")
-end
-
---- Read in k8s resources from a directory
----@param dir string
-function Helper.readK8sResources(dir)
-	print("readK8sResources")
 end
 
 --- Type metatables

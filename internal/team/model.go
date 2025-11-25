@@ -24,6 +24,8 @@ type (
 	TeamEdge             = pagination.Edge[*Team]
 	TeamMemberConnection = pagination.Connection[*TeamMember]
 	TeamMemberEdge       = pagination.Edge[*TeamMember]
+	TeamGroupConnection  = pagination.Connection[*TeamGroup]
+	TeamGroupEdge        = pagination.Edge[*TeamGroup]
 )
 
 type Team struct {
@@ -311,6 +313,12 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 	verr := validate.New()
 	i.Purpose = strings.TrimSpace(i.Purpose)
 
+	if slices.ContainsFunc([]string{"managers", "consumers", "data-admins", "developers"}, func(category string) bool {
+		return strings.Contains(i.Slug.String(), category)
+	}) {
+		verr.Add("slug", "Team slug cannot contain a group category.")
+	}
+
 	if available, err := db(ctx).SlugAvailable(ctx, i.Slug); err != nil {
 		return err
 	} else if !available {
@@ -427,4 +435,9 @@ type TeamInventoryCounts struct {
 
 type TeamExternalResources struct {
 	team *Team
+}
+
+type TeamGroup struct {
+	TeamSlug  slug.Slug `json:"teamSlug"`
+	GroupName string    `json:"groupName"`
 }

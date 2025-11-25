@@ -170,8 +170,16 @@ func CanCreateTeam(ctx context.Context) error {
 	return requireGlobalAuthorization(ctx, "teams:create")
 }
 
+func CanCreateGroup(ctx context.Context, teamSlug slug.Slug) error {
+	return requireTeamAuthorization(ctx, teamSlug, "teams:groups:create")
+}
+
 func CanManageTeamMembers(ctx context.Context, teamSlug slug.Slug) error {
 	return requireTeamAuthorization(ctx, teamSlug, "teams:members:admin")
+}
+
+func CanManageGroupMembers(ctx context.Context, teamSlug slug.Slug) error {
+	return requireTeamAuthorization(ctx, teamSlug, "teams:groups:members:admin")
 }
 
 func CanUpdateTeamMetadata(ctx context.Context, teamSlug slug.Slug) error {

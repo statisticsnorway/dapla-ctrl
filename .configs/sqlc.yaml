@@ -41,6 +41,15 @@ sql:
             go_type: "github.com/google/uuid.UUID"
 
   - <<: *default_domain
+    name: "Groups SQL"
+    queries: "../internal/group/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "groupsql"
+        out: "../internal/group/groupsql"
+
+  - <<: *default_domain
     name: "Service accounts SQL"
     queries: "../internal/serviceaccount/queries"
     gen:
