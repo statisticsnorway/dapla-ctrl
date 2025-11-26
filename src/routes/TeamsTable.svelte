@@ -5,13 +5,17 @@
 		teamsData: TeamsData[];
 	}
 
-
 	let { teamsData }: Props = $props();
+
+	export type User = {
+		name: string;
+		email: string;
+	}
 
 	export type TeamsData = {
 		slug: string;
 		memberCount: number;
-		managers: string[];
+		managers: User[];
 	};
 
 
@@ -23,7 +27,14 @@
 				orderBy: key,
 				direction: 'descending'
 			};
+		} else if (sortState.orderBy === key) {
+			if (sortState.direction === 'ascending') {
+				sortState.direction = 'descending';
+			} else {
+				sortState.direction = 'ascending';
+			}
 		} else {
+			sortState.orderBy = key;
 			if (sortState.direction === 'ascending') {
 				sortState.direction = 'descending';
 			} else {
@@ -48,55 +59,52 @@
 			sortState.direction
 		);
 	});
-	//
-	// function getTeamsTableDataSorted (
-	// 	data: TeamsData | null,
-	// 	sortedBy: string,
-	// 	sortDirection: string
-	// ): TeamsData[] {
-	// 	const teamMap = new Map<string, TeamsData>();
-	//
-	// 	if (!data) {
-	// 		return [];
-	// 	}
-	//
-	//
-	//
-	// 	return Array.from(teamMap.values()).sort((a, b) => {
-	// 		if (sortedBy === 'NAME') {
-	// 			if (sortDirection === 'descending') {
-	// 				if (a.teamSlug > b.teamSlug) return -1;
-	// 				if (a.teamSlug < b.teamSlug) return 1;
-	// 				return 0;
-	// 			} else {
-	// 				if (a.teamSlug > b.teamSlug) return 1;
-	// 				if (a.teamSlug < b.teamSlug) return -1;
-	// 				return 0;
-	// 			}
-	// 		} else if (sortedBy === 'CPU') {
-	// 			if (sortDirection === 'descending') {
-	// 				if (a.unusedCpu > b.unusedCpu) return -1;
-	// 				if (a.unusedCpu < b.unusedCpu) return 1;
-	// 				return 0;
-	// 			} else {
-	// 				if (a.unusedCpu > b.unusedCpu) return 1;
-	// 				if (a.unusedCpu < b.unusedCpu) return -1;
-	// 				return 0;
-	// 			}
-	// 		} else if (sortedBy === 'MEMORY') {
-	// 			if (sortDirection === 'descending') {
-	// 				if (a.unusedMem > b.unusedMem) return -1;
-	// 				if (a.unusedMem < b.unusedMem) return 1;
-	// 				return 0;
-	// 			} else {
-	// 				if (a.unusedMem > b.unusedMem) return 1;
-	// 				if (a.unusedMem < b.unusedMem) return -1;
-	// 				return 0;
-	// 			}
-	// 		}
-	// 		return 0;
-	// 	});
-	// }
+
+	function getTeamsTableDataSorted(
+		data: TeamsData[] | null,
+		sortedBy: string,
+		sortDirection: string
+	): TeamsData[] {
+		if (!data) {
+			return [];
+		}
+
+
+		return data.sort((a, b) => {
+			if (sortedBy === 'NAME') {
+				if (sortDirection === 'descending') {
+					if (a.slug > b.slug) return -1;
+					if (a.slug < b.slug) return 1;
+					return 0;
+				} else {
+					if (a.slug > b.slug) return 1;
+					if (a.slug < b.slug) return -1;
+					return 0;
+				}
+			} else if (sortedBy === 'MEMBER_COUNT') {
+				if (sortDirection === 'descending') {
+					if (a.memberCount > b.memberCount) return -1;
+					if (a.memberCount < b.memberCount) return 1;
+					return 0;
+				} else {
+					if (a.memberCount > b.memberCount) return 1;
+					if (a.memberCount < b.memberCount) return -1;
+					return 0;
+				}
+			} else if (sortedBy === 'MANAGER') {
+				if (sortDirection === 'descending') {
+					if (a.managers > b.managers) return -1;
+					if (a.managers < b.managers) return 1;
+					return 0;
+				} else {
+					if (a.managers > b.managers) return 1;
+					if (a.managers < b.managers) return -1;
+					return 0;
+				}
+			}
+			return 0;
+		});
+	}
 
 
 </script>
@@ -130,7 +138,9 @@
 					<Td>
 						{team.memberCount}
 					</Td>
-					<Td>{@html team.managers.map(user => { return `<a href="/user${user.email}">${user.name}</a>`}).join(", ")}</Td>
+					<Td>{@html team.managers.map(user => {
+						return `<a href="/user/${user.email}">${user.name}</a>`
+					}).join(", ")}</Td>
 				</Tr>
 			{/each}
 			</Tbody>
