@@ -12,7 +12,7 @@ metadata:
     github.com/project-slug: statisticsnorway/dapla-ctrl
 spec:
   type: website
-  owner: dapla-stat-developers
+  owner: dapla-skyinfra-developers
   lifecycle: production
   system: kuben
   consumesApis:
