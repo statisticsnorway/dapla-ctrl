@@ -1,4 +1,6 @@
 name: 'Build and Lint on Pull Requests'
+permissions:
+  contents: read
 on:
   pull_request:
 
