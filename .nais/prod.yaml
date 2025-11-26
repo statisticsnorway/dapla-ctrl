@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: dapla-ctrl
-  namespace: dapla-stat
+  namespace: dapla-platform
   annotations:
     nais.io/read-only-file-system: "false"
     nais.io/run-as-user: "1001"
