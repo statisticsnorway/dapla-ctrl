@@ -32,7 +32,7 @@
 				{/if}
 			</span>
 
-			of {page.totalCount}
+			av {page.totalCount}
 		</BodyShort>
 
 		<span class="pagination-buttons">
