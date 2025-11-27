@@ -1,0 +1,7 @@
+[settings]
+pin = true
+task_output = "prefix"
+
+[tools]
+go = "1.24.2"
+helm = "3.17.1"
