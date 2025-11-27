@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcgroup"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcreconciler"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcteam"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcuser"
@@ -29,6 +30,7 @@ func Run(ctx context.Context, listenAddress string, pool *pgxpool.Pool, log logr
 	}
 	s := grpc.NewServer(opts...)
 
+	protoapi.RegisterGroupsServer(s, grpcgroup.NewServer(pool))
 	protoapi.RegisterTeamsServer(s, grpcteam.NewServer(pool))
 	protoapi.RegisterUsersServer(s, grpcuser.NewServer(pool))
 	protoapi.RegisterReconcilersServer(s, grpcreconciler.NewServer(pool))

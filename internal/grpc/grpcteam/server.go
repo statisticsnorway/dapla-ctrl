@@ -77,6 +77,33 @@ func (t *Server) List(ctx context.Context, req *protoapi.ListTeamsRequest) (*pro
 	return resp, nil
 }
 
+func (t *Server) Groups(ctx context.Context, req *protoapi.ListTeamGroupsRequest) (*protoapi.ListTeamGroupsResponse, error) {
+	limit, offset := grpcpagination.Pagination(req)
+	groups, err := t.querier.ListGroups(ctx, grpcteamsql.ListGroupsParams{
+		TeamSlug: slug.Slug(req.Slug),
+		Offset:   offset,
+		Limit:    limit,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to list team groups: %s", err)
+	}
+
+	total, err := t.querier.CountGroups(ctx, slug.Slug(req.Slug))
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get team group count: %s", err)
+	}
+
+	resp := &protoapi.ListTeamGroupsResponse{
+		PageInfo: grpcpagination.PageInfo(req, int(total)),
+		Nodes:    make([]*protoapi.TeamGroup, len(groups)),
+	}
+	for i, group := range groups {
+		resp.Nodes[i] = toProtoTeamGroup(group)
+	}
+
+	return resp, nil
+}
+
 func (t *Server) Members(ctx context.Context, req *protoapi.ListTeamMembersRequest) (*protoapi.ListTeamMembersResponse, error) {
 	limit, offset := grpcpagination.Pagination(req)
 	users, err := t.querier.ListMembers(ctx, grpcteamsql.ListMembersParams{
@@ -124,6 +151,16 @@ func toProtoTeamMember(u *grpcteamsql.User) *protoapi.TeamMember {
 			Name:       u.Name,
 			Email:      u.Email,
 			ExternalId: u.ExternalID,
+		},
+	}
+}
+
+func toProtoTeamGroup(group *grpcteamsql.ListGroupsRow) *protoapi.TeamGroup {
+	return &protoapi.TeamGroup{
+		Group: &protoapi.Group{
+			TeamSlug:   group.TeamSlug.String(),
+			Name:       group.Name,
+			ExternalId: group.ExternalID,
 		},
 	}
 }

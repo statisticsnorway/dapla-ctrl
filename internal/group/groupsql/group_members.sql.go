@@ -31,8 +31,8 @@ const getMember = `-- name: GetMember :one
 SELECT
 	users.id, users.email, users.name, users.external_id, users.admin
 FROM
-    group_members
-    JOIN users ON users.id = group_members.user_id
+	group_members
+	JOIN users ON users.id = group_members.user_id
 WHERE
 	group_members.group_name = $1
 	AND group_members.user_id = $2
@@ -60,8 +60,8 @@ const getMemberByEmail = `-- name: GetMemberByEmail :one
 SELECT
 	users.id, users.email, users.name, users.external_id, users.admin
 FROM
-    group_members
-    JOIN users ON users.id = group_members.user_id
+	group_members
+	JOIN users ON users.id = group_members.user_id
 WHERE
 	group_members.group_name = $1
 	AND users.email = $2
@@ -91,7 +91,7 @@ SELECT
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
-    group_members
+	group_members
 	JOIN groups ON groups.name = group_members.group_name
 	JOIN users ON users.id = group_members.user_id
 WHERE
@@ -166,11 +166,11 @@ SELECT
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
-    group_members
+	group_members
 	JOIN groups ON groups.name = group_members.group_name
 	JOIN users ON users.id = group_members.user_id
 WHERE
-    group_members.group_name = $1
+	group_members.group_name = $1
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:asc' THEN LOWER(users.name)

@@ -32,6 +32,10 @@ func (a *APIClient) Teams() protoapi.TeamsClient {
 	return protoapi.NewTeamsClient(a.conn)
 }
 
+func (a *APIClient) Groups() protoapi.GroupsClient {
+	return protoapi.NewGroupsClient(a.conn)
+}
+
 func (a *APIClient) Close() error {
 	return a.conn.Close()
 }

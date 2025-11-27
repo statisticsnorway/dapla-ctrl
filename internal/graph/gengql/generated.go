@@ -4064,15 +4064,14 @@ type Group implements Node {
 		"Ordering options for items returned from the connection."
 		orderBy: GroupMemberOrder
 	): GroupMemberConnection!
-
 }
 
 type GroupMember {
-    "Group instance."
-    group: Group!
+	"Group instance."
+	group: Group!
 
-    "User instance."
-    user: User!
+	"User instance."
+	user: User!
 }
 
 """
@@ -4146,7 +4145,7 @@ input GroupOrder {
 
 "Ordering options for group members."
 input GroupMemberOrder {
-    "The field to order items by."
+	"The field to order items by."
 	field: GroupMemberOrderField!
 
 	"The direction to order items by."
@@ -4179,48 +4178,48 @@ enum GroupMemberOrderField {
 }
 
 type CreateGroupPayload {
-    "The newly created group."
-    group: Group
+	"The newly created group."
+	group: Group
 }
 
 "The added group member."
 type AddGroupMemberPayload {
-    member: GroupMember
+	member: GroupMember
 }
 
 type RemoveGroupMemberPayload {
-    "The user who was removed from the group."
-    user: User
+	"The user who was removed from the group."
+	user: User
 
-    "The group the user was removed from."
-    group: Group
+	"The group the user was removed from."
+	group: Group
 }
 
 input CreateGroupInput {
-    "Slug of the team the group belongs to."
-    teamSlug: Slug!
+	"Slug of the team the group belongs to."
+	teamSlug: Slug!
 
-    "Category of the group."
-    category: String!
+	"Category of the group."
+	category: String!
 
-    "Suffix of the group."
-    suffix: String
+	"Suffix of the group."
+	suffix: String
 }
 
 input AddGroupMemberInput {
-    "Name of the group that should receive a new member."
-    groupName: String!
+	"Name of the group that should receive a new member."
+	groupName: String!
 
-    "Email of the user to add to the group."
-    userEmail: String!
+	"Email of the user to add to the group."
+	userEmail: String!
 }
 
 input RemoveGroupMemberInput {
-    "Name of the group that the member should be removed from."
-    groupName: String!
+	"Name of the group that the member should be removed from."
+	groupName: String!
 
-    "Email of the user to remove from the group."
-    userEmail: String!
+	"Email of the user to remove from the group."
+	userEmail: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/reconcilers.graphqls", Input: `extend type Mutation {
@@ -5731,20 +5730,20 @@ type Team implements Node {
 	): TeamMemberConnection!
 
 	groups(
-        "Get the first n items in the connection. This can be used in combination with the after parameter."
-        first: Int
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
 
-        "Get items after this cursor."
-        after: Cursor
+		"Get items after this cursor."
+		after: Cursor
 
-        "Get the last n items in the connection. This can be used in combination with the before parameter."
-        last: Int
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
 
-        "Get items before this cursor."
-        before: Cursor
+		"Get items before this cursor."
+		before: Cursor
 
-        "Ordering options for items returned from the connection."
-        orderBy: GroupOrder
+		"Ordering options for items returned from the connection."
+		orderBy: GroupOrder
 	): GroupConnection!
 
 	"Timestamp of the last successful synchronization of the team."

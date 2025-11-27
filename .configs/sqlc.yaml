@@ -95,6 +95,15 @@ sql:
         out: "../internal/reconciler/reconcilersql"
 
   - <<: *default_domain
+    name: "Groups SQL for gRPC"
+    queries: "../internal/grpc/grpcgroup/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "grpcgroupsql"
+        out: "../internal/grpc/grpcgroup/grpcgroupsql"
+
+  - <<: *default_domain
     name: "Teams SQL for gRPC"
     queries: "../internal/grpc/grpcteam/queries"
     gen:

@@ -242,6 +242,74 @@ func (_c *MockTeamsServer_Get_Call) RunAndReturn(run func(context1 context.Conte
 	return _c
 }
 
+// Groups provides a mock function for the type MockTeamsServer
+func (_mock *MockTeamsServer) Groups(context1 context.Context, listTeamGroupsRequest *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error) {
+	ret := _mock.Called(context1, listTeamGroupsRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Groups")
+	}
+
+	var r0 *ListTeamGroupsResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)); ok {
+		return returnFunc(context1, listTeamGroupsRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListTeamGroupsRequest) *ListTeamGroupsResponse); ok {
+		r0 = returnFunc(context1, listTeamGroupsRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ListTeamGroupsResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *ListTeamGroupsRequest) error); ok {
+		r1 = returnFunc(context1, listTeamGroupsRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTeamsServer_Groups_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Groups'
+type MockTeamsServer_Groups_Call struct {
+	*mock.Call
+}
+
+// Groups is a helper method to define mock.On call
+//   - context1 context.Context
+//   - listTeamGroupsRequest *ListTeamGroupsRequest
+func (_e *MockTeamsServer_Expecter) Groups(context1 interface{}, listTeamGroupsRequest interface{}) *MockTeamsServer_Groups_Call {
+	return &MockTeamsServer_Groups_Call{Call: _e.mock.On("Groups", context1, listTeamGroupsRequest)}
+}
+
+func (_c *MockTeamsServer_Groups_Call) Run(run func(context1 context.Context, listTeamGroupsRequest *ListTeamGroupsRequest)) *MockTeamsServer_Groups_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *ListTeamGroupsRequest
+		if args[1] != nil {
+			arg1 = args[1].(*ListTeamGroupsRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTeamsServer_Groups_Call) Return(listTeamGroupsResponse *ListTeamGroupsResponse, err error) *MockTeamsServer_Groups_Call {
+	_c.Call.Return(listTeamGroupsResponse, err)
+	return _c
+}
+
+func (_c *MockTeamsServer_Groups_Call) RunAndReturn(run func(context1 context.Context, listTeamGroupsRequest *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)) *MockTeamsServer_Groups_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // List provides a mock function for the type MockTeamsServer
 func (_mock *MockTeamsServer) List(context1 context.Context, listTeamsRequest *ListTeamsRequest) (*ListTeamsResponse, error) {
 	ret := _mock.Called(context1, listTeamsRequest)

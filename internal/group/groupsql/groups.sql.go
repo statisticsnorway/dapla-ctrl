@@ -13,7 +13,13 @@ const create = `-- name: Create :one
 INSERT INTO
 	groups (name, team_slug, category, suffix, external_id)
 VALUES
-	($1, $2, $3, $4, $5)
+	(
+		$1,
+		$2,
+		$3,
+		$4,
+		$5
+	)
 RETURNING
 	name, team_slug, category, suffix, external_id
 `
@@ -49,7 +55,7 @@ const get = `-- name: Get :one
 SELECT
 	name, team_slug, category, suffix, external_id
 FROM
-    groups
+	groups
 WHERE
 	name = $1
 `
@@ -71,7 +77,7 @@ const getByNames = `-- name: GetByNames :many
 SELECT
 	name, team_slug, category, suffix, external_id
 FROM
-    groups
+	groups
 WHERE
 	name = ANY ($1::TEXT[])
 ORDER BY
@@ -110,9 +116,11 @@ const groupExists = `-- name: GroupExists :one
 SELECT
 	EXISTS (
 		SELECT
-		    team_slug, category, suffix
+			team_slug,
+			category,
+			suffix
 		FROM
-		    groups
+			groups
 		WHERE
 			team_slug = $1
 			AND category = $2
@@ -138,7 +146,7 @@ SELECT
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
-    groups
+	groups
 ORDER BY
 	CASE
 		WHEN $1::TEXT = 'slug:asc' THEN team_slug
@@ -195,11 +203,11 @@ const listByTeamSlug = `-- name: ListByTeamSlug :many
 SELECT
 	name, team_slug, category, suffix, external_id
 FROM
-    groups
+	groups
 WHERE
 	team_slug = $1::slug
 ORDER BY
-CASE
+	CASE
 		WHEN $2::TEXT = 'slug:asc' THEN team_slug
 	END ASC,
 	CASE
@@ -243,9 +251,9 @@ const teamExists = `-- name: TeamExists :one
 SELECT
 	EXISTS (
 		SELECT
-		    slug
+			slug
 		FROM
-            teams
+			teams
 		WHERE
 			slug = $1
 			AND delete_key_confirmed_at IS NULL

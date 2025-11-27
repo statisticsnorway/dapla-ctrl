@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
@@ -39,6 +40,9 @@ func (r *mutationResolver) CreateGroup(ctx context.Context, input group.CreateGr
 		return nil, err
 	}
 
+	correlationId := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationId)
+
 	return &group.CreateGroupPayload{
 		Group: g,
 	}, nil
@@ -65,6 +69,9 @@ func (r *mutationResolver) AddGroupMember(ctx context.Context, input group.AddGr
 	if err := group.AddMember(ctx, input, actor); err != nil {
 		return nil, err
 	}
+
+	correlationId := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, g.TeamSlug, correlationId)
 
 	return &group.AddGroupMemberPayload{
 		Member: &group.GroupMember{
@@ -95,6 +102,9 @@ func (r *mutationResolver) RemoveGroupMember(ctx context.Context, input group.Re
 	if err := group.RemoveMember(ctx, input, actor); err != nil {
 		return nil, err
 	}
+
+	correlationId := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, g.TeamSlug, correlationId)
 
 	return &group.RemoveGroupMemberPayload{
 		GroupName: input.GroupName,

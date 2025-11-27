@@ -68,3 +68,29 @@ FROM
 WHERE
 	user_roles.target_team_slug = @team_slug::slug
 ;
+
+-- name: ListGroups :many
+SELECT
+	name,
+	team_slug,
+	external_id
+FROM
+	groups
+WHERE
+	team_slug = @team_slug::slug
+ORDER BY
+	name ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;
+
+-- name: CountGroups :one
+SELECT
+	COUNT(*) AS total
+FROM
+	groups
+WHERE
+	team_slug = @team_slug::slug
+;

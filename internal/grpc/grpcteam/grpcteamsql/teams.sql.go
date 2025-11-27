@@ -23,6 +23,22 @@ func (q *Queries) Count(ctx context.Context) (int64, error) {
 	return total, err
 }
 
+const countGroups = `-- name: CountGroups :one
+SELECT
+  COUNT(*) as total
+FROM
+    groups
+WHERE
+    team_slug = $1::slug
+`
+
+func (q *Queries) CountGroups(ctx context.Context, teamSlug slug.Slug) (int64, error) {
+	row := q.db.QueryRow(ctx, countGroups, teamSlug)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
 const countMembers = `-- name: CountMembers :one
 SELECT
 	COUNT(user_roles.*) AS total
@@ -106,6 +122,53 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*Team, error) {
 			&i.LastSuccessfulSync,
 			&i.DeleteKeyConfirmedAt,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listGroups = `-- name: ListGroups :many
+SELECT
+    name, team_slug, external_id
+FROM
+    groups
+WHERE
+    team_slug = $1::slug
+ORDER BY
+	name ASC
+LIMIT
+	$3
+OFFSET
+	$2
+`
+
+type ListGroupsParams struct {
+	TeamSlug slug.Slug
+	Offset   int32
+	Limit    int32
+}
+
+type ListGroupsRow struct {
+	Name       string
+	TeamSlug   slug.Slug
+	ExternalID *string
+}
+
+func (q *Queries) ListGroups(ctx context.Context, arg ListGroupsParams) ([]*ListGroupsRow, error) {
+	rows, err := q.db.Query(ctx, listGroups, arg.TeamSlug, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListGroupsRow{}
+	for rows.Next() {
+		var i ListGroupsRow
+		if err := rows.Scan(&i.Name, &i.TeamSlug, &i.ExternalID); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

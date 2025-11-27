@@ -10,10 +10,12 @@ import (
 
 type Querier interface {
 	Count(ctx context.Context) (int64, error)
+	CountGroups(ctx context.Context, teamSlug slug.Slug) (int64, error)
 	CountMembers(ctx context.Context, teamSlug slug.Slug) (int64, error)
 	Delete(ctx context.Context, argSlug slug.Slug) error
 	Get(ctx context.Context, argSlug slug.Slug) (*Team, error)
 	List(ctx context.Context, arg ListParams) ([]*Team, error)
+	ListGroups(ctx context.Context, arg ListGroupsParams) ([]*ListGroupsRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*User, error)
 	SetLastSuccessfulSync(ctx context.Context, argSlug slug.Slug) error
 }
