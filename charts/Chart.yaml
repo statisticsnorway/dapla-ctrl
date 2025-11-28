@@ -1,7 +1,0 @@
-apiVersion: v2
-name: console-frontend
-description: Frontend for Nais console
-type: application
-version: 2024-02-13-104003-46227aa
-sources:
-  - https://github.com/nais/console-frontend/tree/main/charts
