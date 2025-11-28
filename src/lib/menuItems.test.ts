@@ -106,7 +106,7 @@ describe('menuItems', () => {
 					isAdmin: false
 				})
 					.flatMap((g) => g)
-					.find((i) => ['Secrets', 'Activity Log', 'Settings'].includes(i.label))
+					.find((i) => ['Secrets', 'Settings'].includes(i.label))
 			).toBeUndefined();
 		});
 
@@ -116,16 +116,6 @@ describe('menuItems', () => {
 				features,
 				member: true,
 				isAdmin: false,
-				inventory: {
-					applications: { total: 42 },
-					jobs: { total: 1 },
-					sqlInstances: { total: 7 },
-					buckets: { total: 1337 },
-					valkeyInstances: { total: 11 },
-					openSearchInstances: { total: 17 },
-					kafkaTopics: { total: 23 },
-					bigQueryDatasets: { total: 49 }
-				}
 			});
 
 			expect(
@@ -134,14 +124,6 @@ describe('menuItems', () => {
 					.filter((i) => i.count)
 					.map((i) => ({ label: i.label, count: i.count }))
 			).toEqual([
-				{ label: 'Applications', count: 42 },
-				{ label: 'Jobs', count: 1 },
-				{ label: 'Postgres', count: 7 },
-				{ label: 'Buckets', count: 1337 },
-				{ label: 'Valkey', count: 11 },
-				{ label: 'OpenSearch', count: 17 },
-				{ label: 'Kafka Topics', count: 23 },
-				{ label: 'BigQuery', count: 49 }
 			]);
 		});
 		test('show settings when admin', () => {
@@ -178,10 +160,15 @@ describe('menuItems', () => {
 						href: '/team/devteam/dev/app/app-w-all-storage/deploys'
 					},
 					{ label: 'Cost', href: '/team/devteam/dev/app/app-w-all-storage/cost' },
+					{ label: 'Issues', href: '/team/devteam/dev/app/app-w-all-storage/issues' },
 					{
 						label: 'Utilization',
 						href: '/team/devteam/dev/app/app-w-all-storage/utilization',
 						active: true
+					},
+					{
+						href: '/team/devteam/dev/app/app-w-all-storage/ingresses',
+						label: 'Ingresses'
 					},
 					{ label: 'Logs', href: '/team/devteam/dev/app/app-w-all-storage/logs' }
 				],

@@ -1,12 +1,18 @@
 <script lang="ts">
-	import TeamsTable from './TeamsTable.svelte';
-	import Pagination from '$lib/Pagination.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import { Button, Heading } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
+	import TeamsTable from './TeamsTable.svelte';
 
 	let { data }: PageProps = $props();
 
-	let UserTeams = $derived(data.UserTeams);
+	let { UserTeams, UserInfo } = $derived(data);
+
+	let userTeams = $derived(
+		$UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.nodes.length
+	);
+
+	let name = $derived($UserInfo.data?.me.__typename == 'User' ? $UserInfo.data.me.name : '');
 </script>
 
 <svelte:head><title>Dapla Ctrl</title></svelte:head>
@@ -41,10 +47,10 @@
 		padding-top: 4rem;
 	}
 	.content-wrapper {
-		background: var(--ax-bg-default, --a-surface-default);
+		background: var(--ax-bg-default);
 		position: relative;
 		top: -40px;
-		padding: var(--ax-space-24, --a-spacing-6);
+		padding: var(--ax-space-24);
 		border-radius: 12px;
 		max-width: 900px;
 		margin-inline: auto;
@@ -54,6 +60,6 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: var(--ax-space-16, --a-spacing-4);
+		margin-bottom: var(--ax-space-16);
 	}
 </style>

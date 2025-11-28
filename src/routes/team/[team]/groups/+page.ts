@@ -1,5 +1,5 @@
 import { OrderDirection, TeamMemberOrderField } from '$houdini';
-import { urlToOrderDirection, urlToOrderField } from '$lib/components/OrderByMenu.svelte';
+import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
 import type { GroupsVariables } from './$houdini';
 
 const rows = 25;

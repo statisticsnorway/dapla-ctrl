@@ -1,11 +1,9 @@
-import { load_TeamRoles, type TeamRoles$result } from '$houdini';
+import { load_TeamRoles } from '$houdini';
+import { addPageMeta } from '$lib/utils/pageMeta.js';
 import { error } from '@sveltejs/kit';
 import { get } from 'svelte/store';
-import type { LayoutLoad } from './$types';
 
-export const load: LayoutLoad = async (
-	event
-): Promise<TeamRoles$result['team'] & { teamSlug: string }> => {
+export async function load(event) {
 	const roles = await load_TeamRoles({
 		event,
 		variables: { team: event.params.team },
@@ -30,7 +28,20 @@ export const load: LayoutLoad = async (
 		error(500, 'Something went wrong when loading the page');
 	}
 
+	const meta = await addPageMeta(event, {
+		breadcrumbs:
+			event.route.id === '/team/[team]'
+				? undefined
+				: [
+						{
+							label: event.params.team,
+							href: '/team/[team]'
+						}
+					]
+	});
+
 	return {
+		...meta,
 		...(current.data
 			? current.data.team
 			: {
@@ -45,4 +56,4 @@ export const load: LayoutLoad = async (
 				}),
 		teamSlug: event.params.team
 	};
-};
+}

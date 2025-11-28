@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { isPossiblyInModal } from '$lib/ui/PageModal.svelte';
 	import WarningIcon from '$lib/icons/WarningIcon.svelte';
 	import { Button, ErrorSummary, Heading, TextField } from '@nais/ds-svelte-community';
 	import { FloppydiskIcon } from '@nais/ds-svelte-community/icons';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 
-	let { form = $bindable() }: PageProps = $props();
+	let { form }: PageProps = $props();
 	let saving = $state(false);
 
 	let teamSlugError = $state('');
@@ -88,8 +89,14 @@
 	}
 </script>
 
-<div class="container">
-	<Heading level="1" size="large" spacing>Create a New Team</Heading>
+<svelte:head>
+	<title>Create a New Team - Dapla Ctrl</title>
+</svelte:head>
+
+<div class="container" class:partOfModal={isPossiblyInModal()}>
+	{#if !isPossiblyInModal()}
+		<Heading level="1" size="large" spacing>Create a New Team</Heading>
+	{/if}
 	{#if form?.errors && form.errors.length > 0}
 		<ErrorSummary heading="Error creating team">
 			{#each form.errors as error (error)}
@@ -125,7 +132,7 @@
 			{/snippet}
 		</TextField>
 		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
-			<p style:color="var(--ax-text-danger, --a-text-danger)">{teamSlugError}</p>
+			<p style:color="var(--ax-text-danger)">{teamSlugError}</p>
 		{/if}
 		<br />
 		<TextField name="description" value={form?.input.purpose} oninput={handlePurposeInput}>
@@ -137,10 +144,9 @@
 			{/snippet}
 		</TextField>
 		{#if purposeError !== 'no_error' && purposeError !== ''}
-			<p style:color="var(--ax-text-danger, --a-text-danger)">{purposeError}</p>
+			<p style:color="var(--ax-text-danger)">{purposeError}</p>
 		{/if}
 		<br />
-
 		<Button loading={saving} {disabled} icon={FloppydiskIcon}>Create team</Button>
 	</form>
 </div>
@@ -150,5 +156,9 @@
 		padding-top: 4rem;
 		margin-inline: auto;
 		max-width: 620px;
+
+		&.partOfModal {
+			padding-top: 0;
+		}
 	}
 </style>

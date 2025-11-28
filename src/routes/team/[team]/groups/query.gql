@@ -1,0 +1,31 @@
+query Groups($team: Slug!) {
+	team(slug: $team) {
+		slug
+		groups(first: 20) {
+			edges {
+				node {
+					name
+					members(first: 20) {
+						pageInfo {
+							totalCount
+							hasNextPage
+							hasPreviousPage
+							pageStart
+							pageEnd
+							startCursor
+							endCursor
+						}
+						edges {
+							node {
+								user {
+									name
+									email
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

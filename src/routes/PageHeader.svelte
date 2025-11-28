@@ -1,9 +1,6 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import SearchButton from '$lib/components/search/SearchButton.svelte';
-	import Feedback from '$lib/feedback/Feedback.svelte';
+
 	import { themeSwitch } from '$lib/stores/theme.svelte';
-	import { Button } from '@nais/ds-svelte-community';
 	import {
 		ActionMenu,
 		ActionMenuCheckboxItem,
@@ -14,7 +11,7 @@
 		InternalHeaderTitle,
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
-	import { ChatElipsisIcon, CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
+	import { CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
 	import Logo from '../Logo.svelte';
 	import { PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL } from '$env/static/public';
 
@@ -29,7 +26,6 @@
 
 	let { user }: Props = $props();
 
-	let feedbackOpen = $state(false);
 </script>
 
 <InternalHeader allowLightMode={true}>
@@ -49,9 +45,8 @@
 		{/snippet}
 
 		{#if user?.isAdmin}
-			<ActionMenuItem
-				><a href="/admin" class="action-menu-link" style="text-decoration: none;"
-					><CogIcon />Admin</a
+			<ActionMenuItem>
+				<a href="/admin" class="action-menu-link" style="text-decoration: none;"><CogIcon />Admin</a
 				></ActionMenuItem
 			>
 			<ActionMenuDivider />
@@ -79,12 +74,16 @@
 
 <style>
 	.logo {
-		color: var(--ax-text-default, --a-text-on-inverted);
+		color: var(--ax-text-neutral);
 		text-decoration: none;
 		display: flex;
-		gap: 0.5rem;
+		align-items: center;
+		gap: 0.25rem;
 		font-size: 1.5rem;
 		font-weight: 700;
-		align-items: center;
+	}
+	.action-menu-link {
+		color: var(--ax-text-neutral);
+		text-decoration: none;
 	}
 </style>

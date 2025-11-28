@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ActivityLogItem from '$lib/components/ActivityLogItem.svelte';
-	import { Alert, Heading } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import { AlertState } from '$houdini';
+	import GraphErrors from '$lib/ui/GraphErrors.svelte';
+	import { Alert, BodyShort } from '@nais/ds-svelte-community';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	let { TeamOverview, teamSlug, viewerIsMember } = $derived(data);
+	let { TeamOverview, teamSlug, purpose } = $derived(data);
 </script>
+
+<div class="team-info">
+	<div>
+		<BodyShort>{purpose}</BodyShort>
+	</div>
+</div>
 
 {#if page.url.searchParams.has('deleted')}
 	{@const msgParts = (page.url.searchParams.get('deleted') || '').split('/')}
@@ -38,66 +45,16 @@
 
 <style>
 	.wrapper {
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: 1fr 300px;
 		gap: var(--spacing-layout);
 	}
-	.raised {
-		border-radius: 8px;
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
 
-		> div {
-			background-color: var(--ax-bg-default, --a-surface-default);
-			padding: var(--ax-space-8, --a-spacing-2) var(--ax-space-20, --a-spacing-5);
-		}
-
-		> div:first-child {
-			border-top-left-radius: 8px;
-			border-top-right-radius: 8px;
-			padding-top: var(--ax-space-12, --a-spacing-3);
-		}
-
-		> div:last-child {
-			padding-bottom: var(--ax-space-12, --a-spacing-3);
-			border-bottom-left-radius: 8px;
-			border-bottom-right-radius: 8px;
-		}
-	}
-
-	.card {
-		background-color: var(--ax-bg-sunken, --a-surface-subtle);
-		padding: var(--ax-space-16, --a-spacing-4) var(--ax-space-20, --a-spacing-5);
-		border-radius: 12px;
-		align-items: stretch;
-	}
-
-	.activity {
-		grid-column: span 2;
-		word-wrap: break-word;
-		display: flex;
-		flex-direction: column;
-		gap: var(--ax-space-16, --a-spacing-4);
-		min-height: 100%;
-
-		> a {
-			align-self: end;
-		}
-	}
-
-	.grid {
+	.team-info {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-		gap: 1rem;
-		grid-auto-flow: dense;
-	}
-	.grid:not(:first-child) {
-		margin-top: 1rem;
-	}
-	.alerts-wrapper {
-		display: flex;
-		flex-direction: column;
-		gap: var(--ax-space-8, --a-spacing-2);
+		grid-template-columns: 1fr 300px;
+		gap: var(--spacing-layout);
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--spacing-layout);
 	}
 </style>

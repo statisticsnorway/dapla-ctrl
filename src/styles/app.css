@@ -1,5 +1,13 @@
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@nais/ds-svelte-community/css' layer(components);
+@source '../node_modules/layerchart/dist';
+@import './layerchart.css' layer(components);
+
 :root {
-	--spacing-layout: var(--ax-space-40, --a-spacing-10);
+	--spacing-layout: var(--ax-space-40);
 }
 
 html,
@@ -18,7 +26,7 @@ html {
 }
 
 .text-aligned-icon {
-	height: var(--ax-font-line-height-large, --a-font-line-height-large);
+	height: var(--ax-font-line-height-large);
 	vertical-align: bottom;
 }
 

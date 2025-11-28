@@ -6,5 +6,5 @@
 
 <ExclamationmarkTriangleFillIcon
 	{...props}
-	style="color:var(--ax-text-warning-icon, --a-icon-warning);{props.style}"
+	style="color:var(--ax-text-warning-decoration);{props.style}"
 />

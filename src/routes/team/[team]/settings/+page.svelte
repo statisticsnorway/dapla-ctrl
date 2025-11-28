@@ -8,11 +8,9 @@
 	} from '$houdini';
 	import GraphErrors from '$lib/GraphErrors.svelte';
 	import WarningIcon from '$lib/icons/WarningIcon.svelte';
-	import Time from '$lib/Time.svelte';
 	import {
 		Alert,
 		BodyLong,
-		BodyShort,
 		Button,
 		CopyButton,
 		Heading,
@@ -20,12 +18,9 @@
 		TextField
 	} from '@nais/ds-svelte-community';
 	import {
-		ArrowsCirclepathIcon,
-		EyeIcon,
-		EyeSlashIcon,
 		TrashIcon
 	} from '@nais/ds-svelte-community/icons';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 	import EditText from './EditText.svelte';
 
 	let { data }: PageProps = $props();
@@ -65,7 +60,6 @@
 
 	let teamSettings = $derived($TeamSettings.data?.team);
 
-	let showKey = $state(false);
 	let showDeleteTeam = $state(false);
 
 	let descriptionErrors: { message: string }[] | undefined = $state();
@@ -147,7 +141,7 @@
 		{:else if deleteKeyResp?.data}
 			{@const key =
 				window.location + '/confirm_delete?key=' + deleteKeyResp.data.requestTeamDeletion.key?.key}
-			<Alert>
+			<Alert variant="info">
 				Deletion of <strong>{teamSlug}</strong> has been requested. To finalize the deletion send
 				this link to another team owner and let them confirm the deletion.
 
@@ -207,35 +201,18 @@
 <style>
 	.wrapper {
 		display: grid;
-		grid-template-columns: 1fr 300px;
+		grid-template-columns: 1fr 320px;
 		gap: var(--spacing-layout);
 	}
-	.card {
-		background-color: var(--ax-bg-sunken, --a-surface-subtle);
-		padding: var(--ax-space-16, --a-spacing-4) var(--ax-space-20, --a-spacing-5);
-		border-radius: 12px;
-		align-self: start;
-	}
 	.danger-zone {
-		padding: var(--ax-space-16, --a-spacing-4);
+		padding: var(--ax-space-16);
 		border-radius: 8px;
-		border: 1px solid var(--ax-border-danger, --a-border-danger);
+		border: 1px solid var(--ax-border-danger);
 	}
 
-	dl {
-		display: block;
-		margin-block-start: 0.2em;
-		margin-block-end: 1em;
-		margin-inline-start: 0px;
-		margin-inline-end: 0px;
-	}
-	dt {
-		font-weight: bold;
-	}
-	dd {
-		margin-inline-start: 40px;
+	.deployKey {
 		font-family: monospace;
-		font-size: 1rem;
+		padding-bottom: 1rem;
 	}
 
 	.buttons {
@@ -260,11 +237,5 @@
 
 	.deletewrapper div {
 		flex-grow: 1;
-	}
-	.last-sync {
-		width: 100%;
-		color: var(--ax-text-subtle, --a-text-subtle);
-		font-size: 0.9rem;
-		text-align: right;
 	}
 </style>

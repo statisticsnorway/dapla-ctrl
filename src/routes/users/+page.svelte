@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { UserOrderField } from '$houdini';
-	import IconLabel from '$lib/components/IconLabel.svelte';
-	import List from '$lib/components/list/List.svelte';
-	import ListItem from '$lib/components/list/ListItem.svelte';
-	import OrderByMenu from '$lib/components/OrderByMenu.svelte';
+	import IconLabel from '$lib/ui/IconLabel.svelte';
+	import List from '$lib/ui/List.svelte';
+	import ListItem from '$lib/ui/ListItem.svelte';
+	import OrderByMenu from '$lib/ui/OrderByMenu.svelte';
 	import Pagination from '$lib/Pagination.svelte';
 	import { changeParams } from '$lib/utils/searchparams';
 	import { BodyShort, Heading } from '@nais/ds-svelte-community';

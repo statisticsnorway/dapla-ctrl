@@ -1,12 +1,42 @@
 export function percentageFormatter(value: number, maximumFractionDigits: number = 2): string {
-	if (isNaN(value) || value == 0) {
-		return '0';
+	if (isNaN(value) || value === 0) {
+		return '0 %';
 	}
-	return value.toLocaleString('en-GB', { maximumFractionDigits }) + '%';
+
+	const fraction = value / 100;
+
+	return fraction.toLocaleString('nb-NO', {
+		style: 'percent',
+		maximumFractionDigits
+	});
 }
 
 export function capitalizeFirstLetter(sentence: string): string {
 	return sentence.length ? sentence.charAt(0).toUpperCase() + sentence.slice(1) : sentence;
+}
+
+export function numberFormatter(value: number, maximumFractionDigits: number = 2): string {
+	if (isNaN(value)) {
+		return '0';
+	}
+	return value.toLocaleString('no-NO', { maximumFractionDigits });
+}
+
+export function euroValueFormatter(
+	value?: number,
+	{ maximumFractionDigits = 2 }: Intl.NumberFormatOptions = {}
+): string {
+	if (value === undefined) {
+		return '';
+	}
+
+	return value.toLocaleString('nb-NO', {
+		style: 'currency',
+		currency: 'EUR',
+		maximumFractionDigits,
+		maximumSignificantDigits: 2,
+		roundingPriority: 'morePrecision'
+	});
 }
 
 export function formatKubernetesMemory(bytes: number): string {
@@ -21,25 +51,32 @@ export function formatKubernetesMemory(bytes: number): string {
 
 		// Check if the byte size is greater than or equal to the current unit size.
 		if (bytes >= unitSize) {
-			// Ensure the smallest unit is used if no match
 			// Calculate the raw value in the current unit.
 			const raw = bytes / unitSize;
 
-			// Round the value based on its size:
-			// - If >= 10, round to the nearest integer.
-			// - Otherwise, round to two decimal places.
-			const rounded = raw >= 10 ? Math.floor(raw) : Math.round(raw * 100) / 100;
+			// Check if this divides evenly (is a whole number in this unit)
+			const isWholeNumber = bytes % unitSize === 0;
 
-			let str = rounded.toString();
-			if (str.includes('.')) {
-				str = str.replace(/0+$/, '');
-				if (str.endsWith('.')) {
-					str = str.slice(0, -1);
-				}
+			// If it's a whole number in this unit, use it (e.g., 3Gi instead of 3072Mi)
+			if (isWholeNumber) {
+				return `${Math.floor(raw)}${units[i]}`;
 			}
 
-			// Return the formatted string with the appropriate unit.
-			return `${str}${units[i]}`;
+			// If value is >= 10, round up and use this unit
+			if (raw >= 10) {
+				return `${Math.ceil(raw)}${units[i]}`;
+			}
+
+			// If the value would have decimals and is < 10,
+			// use the next smaller unit instead to get an integer value.
+			// This ensures Kubernetes manifest compatibility (pattern: ^\d+[KMG]i$)
+			if (i < units.length - 1) {
+				const smallerUnitSize = Math.pow(factor, powers[i + 1]);
+				const valueInSmallerUnit = Math.ceil(bytes / smallerUnitSize);
+				return `${valueInSmallerUnit}${units[i + 1]}`;
+			}
+
+			return `${Math.ceil(raw)}${units[i]}`;
 		}
 	}
 

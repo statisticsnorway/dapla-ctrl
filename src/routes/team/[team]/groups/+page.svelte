@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { graphql, GroupMemberOrderField } from '$houdini';
-	import Confirm from '$lib/components/Confirm.svelte';
-	import List from '$lib/components/list/List.svelte';
-	import ListItem from '$lib/components/list/ListItem.svelte';
-	import OrderByMenu from '$lib/components/OrderByMenu.svelte';
+	import Confirm from '$lib/ui/Confirm.svelte';
+	import List from '$lib/ui/List.svelte';
+	import ListItem from '$lib/ui/ListItem.svelte';
+	import OrderByMenu from '$lib/ui/OrderByMenu.svelte';
 	import GraphErrors from '$lib/GraphErrors.svelte';
 	// import Pagination from '$lib/Pagination.svelte';
 	// import { changeParams } from '$lib/utils/searchparams';

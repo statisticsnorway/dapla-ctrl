@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { graphql, type AddGroupMemberInput } from '$houdini';
+	import { graphql, type AddGroupMemberInput, type AddMemberQueryVariables } from '$houdini';
 	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 	import { createEventDispatcher } from 'svelte';
-	import type { AddMemberQueryVariables } from './$houdini';
 
 	interface Props {
 		open: boolean;
@@ -21,14 +20,14 @@
 	};
 
 	const store = graphql(`
-		query AddMemberQuery($group: String!) @load {
-			users(first: 10000) {
+		query AddMemberQuery($group: String!) {
+			users(first: 10000) @loading {
 				nodes {
 					id
 					email
 				}
 			}
-			group(name: $group) {
+			group(name: $group) @loading {
 				members {
 					nodes {
 						user {

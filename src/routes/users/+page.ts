@@ -1,5 +1,5 @@
 import { OrderDirection, UserOrderField } from '$houdini';
-import { urlToOrderDirection, urlToOrderField } from '$lib/components/OrderByMenu.svelte';
+import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
 import type { PeopleVariables } from './$houdini';
 
 const rows = 25;

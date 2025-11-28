@@ -6,11 +6,11 @@
 		type ConfirmTeamDeletion$result,
 		type QueryResult
 	} from '$houdini';
-	import GraphErrors from '$lib/GraphErrors.svelte';
-	import Time from '$lib/Time.svelte';
+	import GraphErrors from '$lib/ui/GraphErrors.svelte';
+	import Time from '$lib/ui/Time.svelte';
 	import { Alert, BodyLong, Button, Modal } from '@nais/ds-svelte-community';
 	import { TrashIcon } from '@nais/ds-svelte-community/icons';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
@@ -30,9 +30,11 @@
 	`);
 </script>
 
+<GraphErrors errors={$TeamDeleteKey.errors} />
+
 {#if $TeamDeleteKey.data}
 	{@const key = $TeamDeleteKey.data.team.deleteKey}
-	{#if UserInfo.data?.me.__typename == 'User' && UserInfo.data.me.id == key.createdBy.id}
+	{#if $UserInfo.data?.me.__typename == 'User' && $UserInfo.data.me.id == key.createdBy.id}
 		<Alert variant="error">You can not confirm your own delete request.</Alert>
 	{:else if Date.now() - +key.expires > 0}
 		<Alert variant="error">The delete key has expired.</Alert>
@@ -89,6 +91,4 @@
 			{/snippet}
 		</Modal>
 	{/if}
-{:else}
-	<GraphErrors errors={$TeamDeleteKey?.errors || []} />
 {/if}

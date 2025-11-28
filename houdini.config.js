@@ -1,16 +1,18 @@
 /// <references types="houdini-svelte">
 
 /** @type {import('houdini').ConfigFile} */
+
 const config = {
+	runtimeDir: '.houdini',
 	defaultPaginateMode: 'SinglePage',
 	watchSchema: {
 		interval: 0,
-		url: 'http://127.0.0.1:3000/graphql',
+		url: 'env:VITE_SCHEMA_ENDPOINT',
 		headers: {
-			'x-user-email': 'tni@ssb.no'
-			// cookie: 'session_id='
+			'x-user-email': 'dev.usersen@example.com'
 		}
 	},
+	defaultCachePolicy: 'CacheAndNetwork',
 	plugins: {
 		'houdini-svelte': {
 			forceRunesMode: true
@@ -47,7 +49,8 @@ const config = {
 			marshal(date) {
 				return date.toISOString();
 			}
-		}
+		},
+		TimeOfDay: { type: 'string' }
 	}
 };
 
