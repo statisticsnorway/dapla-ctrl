@@ -1,4 +1,4 @@
-query Groups($team: Slug!) {
+query Groups($team: Slug!) @blocking {
 	team(slug: $team) {
 		slug
 		groups(first: 20) {

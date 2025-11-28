@@ -1,4 +1,4 @@
-import { OrderDirection, TeamMemberOrderField } from '$houdini';
+import { load_Groups, OrderDirection, TeamMemberOrderField } from '$houdini';
 import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
 import type { GroupsVariables } from './$houdini';
 
@@ -16,3 +16,13 @@ export const _MembersVariables: GroupsVariables = ({ url }) => {
 		...(before ? { before, last: rows } : { after, first: rows })
 	};
 };
+
+
+
+export async function load(event) {
+	return {
+		...(await load_Groups({
+			event
+		}))
+	};
+}
