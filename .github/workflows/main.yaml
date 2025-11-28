@@ -1,12 +1,15 @@
-name: Build and push image and chart
+name: Build and push image
 on:
+  pull_request:
   push:
     branches:
       - main
-    paths-ignore: scripts/tunnel.sh
+    paths-ignore:
+      - '**.md'
+  workflow_dispatch:
 
 env:
-  NAME: console-frontend
+  NAME: dapla-console
   IMAGE_REPOSITORY: oci://europe-north1-docker.pkg.dev/nais-io/nais
 jobs:
   build_push:
@@ -18,37 +21,30 @@ jobs:
     name: Build and push
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # ratchet:actions/checkout@v3
-      - run: npm install && npm run lint && npm run build && npm run check
-      - uses: nais/platform-build-push-sign@main # ratchet:nais/platform-build-push-sign@main
-        id: build-push-sign
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
         with:
-          name: ${{ env.NAME }}
-          google_service_account: gh-${{ env.NAME }}
-          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
-          push: true
-      - uses: azure/setup-helm@18bc76811624f360dbd7f18c2d4ecb32c7b87bab # ratchet:azure/setup-helm@v1
-        name: 'Setup Helm'
+          node-version: '20'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run check
+      - name: Run tests
+        run: npm run test -- --run
+      - name: Build and push image and SBOM to Nais OCI registry
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
         with:
-          version: '3.8.0'
-      - name: Build Chart
-        run: |-
-          sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/Chart.yaml
-          cat charts/Chart.yaml
-          helm package charts
-      - name: Push Chart
-        run: |-
-          helm push ${{ env.NAME }}*.tgz ${{ env.IMAGE_REPOSITORY }}
-  rollout:
-    needs:
-      - build_push
-    # Only do this if on main
-    if: endsWith(github.ref, '/main')
-    runs-on: fasit-deploy
-    permissions:
-      id-token: write
-    steps:
-      - uses: nais/fasit-deploy@v2
-        with:
-          chart: ${{ env.IMAGE_REPOSITORY }}/${{ env.NAME }}
-          version: ${{ needs.build_push.outputs.version }}
+          team: dapla-platform
+  # rollout:
+  #   needs:
+  #     - build_push
+  #   # Only do this if on main
+  #   if: endsWith(github.ref, '/main')
+  #   permissions:
+  #     id-token: write
+  #   steps:
+  #     - #todo deploy
