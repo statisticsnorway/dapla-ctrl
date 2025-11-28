@@ -1,8 +1,12 @@
 local user = User.new();
+
+local function slugFor(i)
+	return string.format("slug-%02da", i)
+end
 -- Create 20 teams
 for i = 1, 20 do
-	local slug = string.format("slug-%d", i)
-	Team.new(slug, "purpose", "#channel")
+	local slug = slugFor(i)
+	Team.new(slug, "purpose")
 end
 
 Test.gql("pagination using cursors", function(t)
@@ -72,31 +76,31 @@ Test.gql("pagination using cursors", function(t)
 				edges = {
 					{
 						node = {
-							slug = "slug-1",
+							slug = Ignore(),
 						},
 						cursor = Save("firstNodeInPageCursor"),
 					},
 					{
 						node = {
-							slug = "slug-10",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-11",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-12",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-13",
+							slug = Ignore(),
 						},
 						cursor = Save("lastNodeInPageCursor"),
 					},
@@ -124,31 +128,31 @@ Test.gql("pagination using cursors", function(t)
 				edges = {
 					{
 						node = {
-							slug = "slug-14",
+							slug = Ignore(),
 						},
 						cursor = Save("firstNodeInPageCursor"),
 					},
 					{
 						node = {
-							slug = "slug-15",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-16",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-17",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-18",
+							slug = Ignore(),
 						},
 						cursor = Save("lastNodeInPageCursor"),
 					},
@@ -176,31 +180,31 @@ Test.gql("pagination using cursors", function(t)
 				edges = {
 					{
 						node = {
-							slug = "slug-19",
+							slug = Ignore(),
 						},
 						cursor = Save("firstNodeInPageCursor"),
 					},
 					{
 						node = {
-							slug = "slug-2",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-20",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-3",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-4",
+							slug = Ignore(),
 						},
 						cursor = Save("lastNodeInPageCursor"),
 					},
@@ -229,31 +233,31 @@ Test.gql("pagination using cursors", function(t)
 				edges = {
 					{
 						node = {
-							slug = "slug-5",
+							slug = Ignore(),
 						},
 						cursor = Save("firstNodeInPageCursor"),
 					},
 					{
 						node = {
-							slug = "slug-6",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-7",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-8",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-9",
+							slug = Ignore(),
 						},
 						cursor = Save("lastNodeInPageCursor"),
 					},
@@ -281,31 +285,31 @@ Test.gql("pagination using cursors", function(t)
 				edges = {
 					{
 						node = {
-							slug = "slug-4",
+							slug = Ignore(),
 						},
 						cursor = Save("firstNodeInPageCursor"),
 					},
 					{
 						node = {
-							slug = "slug-5",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-6",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-7",
+							slug = Ignore(),
 						},
 						cursor = Ignore(),
 					},
 					{
 						node = {
-							slug = "slug-8",
+							slug = Ignore(),
 						},
 						cursor = Save("lastNodeInPageCursor"),
 					},

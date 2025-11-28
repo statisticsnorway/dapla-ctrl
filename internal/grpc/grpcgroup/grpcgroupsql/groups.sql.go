@@ -27,11 +27,13 @@ func (q *Queries) CountMembers(ctx context.Context, groupName string) (int64, er
 
 const get = `-- name: Get :one
 SELECT
-    name, external_id, team_slug
+	name,
+	external_id,
+	team_slug
 FROM
-    groups
+	groups
 WHERE
-    name = $1
+	name = $1
 `
 
 type GetRow struct {
@@ -53,11 +55,11 @@ SELECT
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
-    group_members
+	group_members
 	JOIN groups ON groups.name = group_members.group_name
 	JOIN users ON users.id = group_members.user_id
 WHERE
-    group_members.group_name = $1
+	group_members.group_name = $1
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:asc' THEN LOWER(users.name)
@@ -130,12 +132,11 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 }
 
 const updateExternalId = `-- name: UpdateExternalId :exec
-UPDATE
-    groups
+UPDATE groups
 SET
-    external_id = $1
+	external_id = $1
 WHERE
-    name = $2
+	name = $2
 `
 
 type UpdateExternalIdParams struct {

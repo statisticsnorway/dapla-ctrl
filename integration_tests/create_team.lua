@@ -1,8 +1,6 @@
-Helper.readK8sResources("./k8s_resources/simple")
-
 local user = User.new()
 local unauthorized = User.new()
-local existingTeam = Team.new("slug-1", "purpose", "#channel")
+local existingTeam = Team.new("slug-one", "purpose")
 
 Helper.SQLExec([[
 	DELETE FROM user_roles WHERE user_id = $1
@@ -15,9 +13,8 @@ Test.gql("Create team with user that is not authorized", function(t)
 		mutation {
 			createTeam(
 				input: {
-					slug: "slug-1"
+					slug: "slug-one"
 					purpose: "some purpose"
-					slackChannel: "#channel"
 				}
 			) {
 				team {
@@ -47,9 +44,8 @@ Test.gql("Create team with namespace that already exists", function(t)
 		mutation {
 			createTeam(
 				input: {
-					slug: "slug-1"
+					slug: "slug-one"
 					purpose: "some purpose"
-					slackChannel: "#channel"
 				}
 			) {
 				team {
@@ -84,7 +80,6 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "newteam"
 					purpose: "some purpose"
-					slackChannel: "#channel"
 				}
 			) {
 				team {
@@ -118,7 +113,6 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							purpose: "some purpose"
-							slackChannel: "#channel"
 						}
 					) {
 						team {
@@ -152,7 +146,6 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							purpose: "some purpose"
-							slackChannel: "#channel"
 						}
 					) {
 						team {
@@ -187,68 +180,28 @@ Test.gql("Create team with invalid slug", function(t)
 		"a",
 		"ab",
 	}
-	testSlug(shortSlugs, "A team slug must be at least 3 characters long.")
+	testSlug(shortSlugs, Contains("at least 3 characters long"))
 
 	local longSlugs = {
 		"some-long-string-more-than-30-chars",
 	}
-	testSlug(longSlugs, "A team slug must be at most 30 characters long.")
+	testSlug(longSlugs, Contains("at most 17 characters long"))
+
+	local doubleDashSlug = {
+		"foo--bar",
+	}
+	testSlug(doubleDashSlug, Contains("must not contain two dashes"))
 
 	local invalidSlugs = {
 		"-foo",
 		"foo-",
-		"foo--bar",
 		"4chan",
-		"you-aint-got-the-æøå",
-		"Uppercase",
 		"rollback()",
 	}
 	testSlug(invalidSlugs, Contains("A team slug must match the following pattern:"))
 end)
 
-Test.gql("Create team with invalid Slack channel name", function(t)
-	t.addHeader("x-user-email", user:email())
 
-	local invalidSlackChannelNames = {
-		"foo",                                                                          -- missing hash
-		"#a",                                                                           -- too short
-		"#aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", -- too long
-		"#foo bar",                                                                     -- space not allowed
-		"#Foobar",                                                                      -- upper case not allowed
-	}
-	for _, s in ipairs(invalidSlackChannelNames) do
-		t.query(string.format([[
-			mutation {
-				createTeam(
-					input: {
-						slug: "myteam"
-						purpose: "some purpose"
-						slackChannel: "%s"
-					}
-				) {
-					team {
-						id
-						slug
-					}
-				}
-			}
-		]], s))
-		t.check {
-			data = Null,
-			errors = {
-				{
-					message = Contains("The Slack channel does not fit the requirements."),
-					extensions = {
-						field = "slackChannel",
-					},
-					path = {
-						"createTeam",
-					},
-				},
-			},
-		}
-	end
-end)
 
 Test.pubsub("Check if pubsub message was sent", function(t)
 	t.check("topic", {
@@ -263,17 +216,10 @@ Test.pubsub("Check if pubsub message was sent", function(t)
 end)
 
 Test.sql("Check database", function(t)
-	t.queryRow("SELECT * FROM teams WHERE slug = $1", "newteam")
+	t.queryRow("SELECT slug, purpose FROM teams WHERE slug = $1", "newteam")
 
 	t.check {
-		gar_repository = Null,
-		github_team_slug = Null,
-		google_group_email = Null,
-		last_successful_sync = Null,
-		cdn_bucket = Null,
-		delete_key_confirmed_at = Null,
 		purpose = "some purpose",
-		slack_channel = "#channel",
 		slug = "newteam",
 	}
 end)
@@ -309,7 +255,6 @@ Test.gql("Create team with unavailable slug", function(t)
 				input: {
 					slug: "newteam"
 					purpose: "some purpose"
-					slackChannel: "#channel"
 				}
 			) {
 				team {

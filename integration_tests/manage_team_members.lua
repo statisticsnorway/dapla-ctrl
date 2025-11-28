@@ -1,4 +1,4 @@
-local teamSlug = "slug-1"
+local teamSlug = "slug-alpha"
 local user = User.new("original_user", "orig@team.com", "o")
 
 local memberToAdd = User.new("member", "member@team.com", "3")
@@ -13,7 +13,6 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "%s",
 					purpose: "some purpose",
-					slackChannel: "#channel"
 				}
 			) {
 				team {

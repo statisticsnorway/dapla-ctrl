@@ -85,14 +85,12 @@ Test.gql("Create new team as service account without permission", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
-					slackChannel: "#some-channel"
 				}
 			) {
 				team {
 					id
 					slug
 					purpose
-					slackChannel
 				}
 			}
 		}
@@ -159,14 +157,12 @@ Test.gql("Create new team as service account", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
-					slackChannel: "#some-channel"
 				}
 			) {
 				team {
 					id
 					slug
 					purpose
-					slackChannel
 				}
 			}
 		}
@@ -179,7 +175,6 @@ Test.gql("Create new team as service account", function(t)
 					id = NotNull(),
 					slug = teamSlug,
 					purpose = "some purpose",
-					slackChannel = "#some-channel",
 				},
 			},
 		},

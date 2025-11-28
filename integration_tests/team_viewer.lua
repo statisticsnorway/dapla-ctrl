@@ -1,6 +1,6 @@
-local memberTeam = Team.new("member", "Member", "#member")
-local ownerTeam = Team.new("owner", "Owner", "#owner")
-local notAMemberTeam = Team.new("not-a-member", "not-a-member", "#not-a-member")
+local memberTeam = Team.new("member", "Member")
+local ownerTeam = Team.new("owner", "Owner")
+local notAMemberTeam = Team.new("not-a-member", "not-a-member")
 
 local user = User.new("authenticated", "authenticated@example.com", "some-id")
 

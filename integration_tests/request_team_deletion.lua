@@ -1,4 +1,4 @@
-local team = Team.new("delete-me", "Delete me", "#delete-me")
+local team = Team.new("delete-me", "Delete me")
 local user = User.new("Authenticated User", "auth@example.com", "auth-external-id")
 team:addOwner(user)
 

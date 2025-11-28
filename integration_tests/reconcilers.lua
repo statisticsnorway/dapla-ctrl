@@ -1,6 +1,6 @@
 local user = User.new("user", "user@user.com", "ext")
-Team.new("slug-1", "team-1", "#team")
-Team.new("slug-2", "team-1", "#team")
+Team.new("slug-one", "team-1")
+Team.new("slug-two", "team-1")
 
 local reconcilers = { "reconciler-1", "reconciler-2" }
 
@@ -335,12 +335,15 @@ end)
 Test.gql("list reconciler errors", function(t)
 	t.addHeader("x-user-email", user:email())
 
+	Team.new("slugone", "team one")
+	Team.new("slugtwo", "team two")
+
 	Helper.SQLExec [[
 		INSERT INTO reconciler_errors (correlation_id, reconciler, created_at, error_message, team_slug)
 		VALUES
-		(gen_random_uuid(), 'reconciler-1', CLOCK_TIMESTAMP(), 'first error for reconciler-1', 'slug-1'),
-		(gen_random_uuid(), 'reconciler-1', CLOCK_TIMESTAMP(), 'second error for reconciler-1', 'slug-2'),
-		(gen_random_uuid(), 'reconciler-2', CLOCK_TIMESTAMP(), 'will not be displayed because reconciler is disabled', 'slug-1')
+		(gen_random_uuid(), 'reconciler-1', CLOCK_TIMESTAMP(), 'first error for reconciler-1', 'slugone'),
+		(gen_random_uuid(), 'reconciler-1', CLOCK_TIMESTAMP(), 'second error for reconciler-1', 'slugtwo'),
+		(gen_random_uuid(), 'reconciler-2', CLOCK_TIMESTAMP(), 'will not be displayed because reconciler is disabled', 'slugone')
 	]]
 
 	t.query [[

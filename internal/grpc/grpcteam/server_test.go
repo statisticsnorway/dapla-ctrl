@@ -47,15 +47,11 @@ func TestTeamsServer_Get(t *testing.T) {
 
 		teamSlug := "team"
 		purpose := "purpose"
-		slackChannel := "#channel"
-		gitHubTeamSlug := "github-team-slug"
-		googleGroupEmail := "mail@example.com"
-		garRepository := "gar-repository"
 
 		stmt := `
-			INSERT INTO teams (slug, purpose, slack_channel, github_team_slug, google_group_email, gar_repository) VALUES
-			($1, $2, $3, $4, $5, $6, $7)`
-		if _, err = pool.Exec(ctx, stmt, teamSlug, purpose, slackChannel, gitHubTeamSlug, googleGroupEmail, garRepository); err != nil {
+			INSERT INTO teams (slug, purpose) VALUES
+			($1, $2)`
+		if _, err = pool.Exec(ctx, stmt, teamSlug, purpose); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
 
@@ -105,7 +101,7 @@ func TestTeamsServer_Delete(t *testing.T) {
 
 		teamSlug := "team-slug"
 
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel, delete_key_confirmed_at) VALUES ($1, 'some purpose', '#channel', NOW())"
+		stmt := "INSERT INTO teams (slug, purpose, delete_key_confirmed_at) VALUES ($1, 'some purpose', NOW())"
 		if _, err := pool.Exec(ctx, stmt, teamSlug); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -141,12 +137,12 @@ func TestTeamsServer_ToBeReconciled(t *testing.T) {
 	t.Run("fetch teams", func(t *testing.T) {
 		pool := getConnection(ctx, t, container, dsn, log)
 
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel) VALUES ('team-1', 'some purpose', '#channel')"
+		stmt := "INSERT INTO teams (slug, purpose) VALUES ('teamone', 'some purpose')"
 		if _, err := pool.Exec(ctx, stmt); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
 
-		stmt = "INSERT INTO teams (slug, purpose, slack_channel) VALUES ('team-2', 'some purpose', '#channel')"
+		stmt = "INSERT INTO teams (slug, purpose) VALUES ('teamtwo', 'some purpose')"
 		if _, err := pool.Exec(ctx, stmt); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -163,11 +159,11 @@ func TestTeamsServer_ToBeReconciled(t *testing.T) {
 			t.Errorf("expected 2 teams, got %v", resp.Nodes)
 		}
 
-		if expected := "team-1"; resp.Nodes[0].Slug != expected {
+		if expected := "teamone"; resp.Nodes[0].Slug != expected {
 			t.Errorf("expected first team to be %q, got %q", expected, resp.Nodes[0].Slug)
 		}
 
-		if expected := "team-2"; resp.Nodes[1].Slug != expected {
+		if expected := "teamtwo"; resp.Nodes[1].Slug != expected {
 			t.Errorf("expected first team to be %q, got %q", expected, resp.Nodes[1].Slug)
 		}
 	})
@@ -186,7 +182,7 @@ func TestTeamsServer_Members(t *testing.T) {
 		teamSlug := slug.Slug("my-team")
 		pool := getConnection(ctx, t, container, dsn, log)
 
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel) VALUES ($1, 'some purpose', '#channel')"
+		stmt := "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
 		if _, err := pool.Exec(ctx, stmt, teamSlug); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -205,13 +201,13 @@ func TestTeamsServer_Members(t *testing.T) {
 		pool := getConnection(ctx, t, container, dsn, log)
 
 		teamSlug1 := slug.Slug("my-team")
-		stmt := "INSERT INTO teams (slug, purpose, slack_channel) VALUES ($1, 'some purpose', '#channel')"
+		stmt := "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
 		if _, err := pool.Exec(ctx, stmt, teamSlug1); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
 
 		teamSlug2 := slug.Slug("other-team")
-		stmt = "INSERT INTO teams (slug, purpose, slack_channel) VALUES ($1, 'some purpose', '#channel')"
+		stmt = "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
 		if _, err := pool.Exec(ctx, stmt, teamSlug2); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}

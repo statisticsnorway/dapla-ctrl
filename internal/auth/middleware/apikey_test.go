@@ -84,7 +84,7 @@ func TestApiKeyAuthentication(t *testing.T) {
 
 		stmt = `
 			INSERT INTO service_account_roles (role_name, service_account_id) VALUES
-		   ('Deploy key viewer', (SELECT id FROM service_accounts WHERE name = 'sa1')),
+		   ('Service account owner', (SELECT id FROM service_accounts WHERE name = 'sa1')),
 		   ('Team creator', (SELECT id FROM service_accounts WHERE name = 'sa2'))`
 		if _, err = pool.Exec(ctx, stmt); err != nil {
 			t.Fatalf("failed to insert service account roles: %v", err)
@@ -100,7 +100,7 @@ func TestApiKeyAuthentication(t *testing.T) {
 				t.Fatalf("expected %q, got %q", expected, actor.User.Identity())
 			} else if len(actor.Roles) != 1 {
 				t.Fatal("expected one role")
-			} else if expected := "Deploy key viewer"; actor.Roles[0].Name != expected {
+			} else if expected := "Service account owner"; actor.Roles[0].Name != expected {
 				t.Fatalf("expected role to be %q, got: %#v", expected, actor.Roles[0])
 			}
 		})

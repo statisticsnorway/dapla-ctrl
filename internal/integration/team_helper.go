@@ -12,9 +12,8 @@ import (
 const luaTeamTypeName = "Team"
 
 type Team struct {
-	Slug         slug.Slug
-	Purpose      string
-	SlackChannel string
+	Slug    slug.Slug
+	Purpose string
 }
 
 func teamMetatable() *spec.Typemetatable {
@@ -32,11 +31,6 @@ func teamMetatable() *spec.Typemetatable {
 					Name: "purpose",
 					Type: []spec.ArgumentType{spec.ArgumentTypeString},
 					Doc:  "The purpose of the team to create",
-				},
-				{
-					Name: "slackChannel",
-					Type: []spec.ArgumentType{spec.ArgumentTypeString},
-					Doc:  "The slack channel of the team to create",
 				},
 			},
 			Func: createTeam,

@@ -20,7 +20,6 @@ service Teams {
   rpc List(ListTeamsRequest) returns (ListTeamsResponse) {}
   rpc Groups(ListTeamGroupsRequest) returns (ListTeamGroupsResponse) {}
   rpc Members(ListTeamMembersRequest) returns (ListTeamMembersResponse) {}
-  rpc Environments(ListTeamEnvironmentsRequest) returns (ListTeamEnvironmentsResponse) {}
   rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
 }
 
@@ -29,23 +28,6 @@ message DeleteTeamRequest {
 }
 
 message DeleteTeamResponse {}
-
-message ListTeamEnvironmentsRequest {
-  int64 limit = 1;
-  int64 offset = 2;
-  string slug = 3;
-}
-
-message ListTeamEnvironmentsResponse {
-  repeated TeamEnvironment nodes = 1;
-  PageInfo page_info = 2;
-}
-
-message TeamEnvironment {
-  string id = 1;
-  string slug = 2;
-  string environment_name = 3;
-}
 
 message GetTeamResponse {
   Team team = 1;

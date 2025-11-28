@@ -2,7 +2,7 @@ local user = User.new("user", "user@usersen.com", "123")
 local admin = User.new("admin", "admin@adminsen.com", "4332")
 admin:admin(true)
 
-Team.new("someteamname", "purpose", "#slack_channel")
+Team.new("someteamname", "purpose")
 
 Test.gql("Create global service account as non-admin", function(t)
 	t.addHeader("x-user-email", user:email())
@@ -427,7 +427,7 @@ Test.gql("Revoke unassigned role from service account as admin", function(t)
 		data = Null,
 		errors = {
 			{
-				message = Contains("does not have the \"Deploy key viewer\" role assigned"),
+				message = Contains("Object was not found"),
 				path = {
 					"revokeRoleFromServiceAccount",
 				},

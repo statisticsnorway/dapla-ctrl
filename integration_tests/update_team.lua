@@ -11,7 +11,6 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
-					slackChannel: "#channel"
 				}
 			) {
 				team {
@@ -41,16 +40,10 @@ Test.gql("Update team", function(t)
 				input: {
 					slug: "%s"
 					purpose: "new-purpose"
-					slackChannel: "#new-slack-channel"
 				}
 			) {
 				team {
 					purpose
-					slackChannel
-					environments {
-						name
-						slackAlertsChannel
-					}
 				}
 			}
 		}
@@ -61,25 +54,6 @@ Test.gql("Update team", function(t)
 			updateTeam = {
 				team = {
 					purpose = "new-purpose",
-					slackChannel = "#new-slack-channel",
-					environments = {
-						{
-							name = "dev",
-							slackAlertsChannel = "#new-slack-channel",
-						},
-						{
-							name = "dev-fss",
-							slackAlertsChannel = "#new-slack-channel",
-						},
-						{
-							name = "dev-gcp",
-							slackAlertsChannel = "#new-slack-channel",
-						},
-						{
-							name = "staging",
-							slackAlertsChannel = "#new-slack-channel",
-						},
-					},
 				},
 			},
 		},

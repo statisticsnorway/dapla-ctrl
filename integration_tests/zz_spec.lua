@@ -150,9 +150,8 @@ Team = {}
 --- Create a new team
 ---@param slug string
 ---@param purpose string
----@param slackChannel string
 ---@return Team
-function Team.new(slug, purpose, slackChannel)
+function Team.new(slug, purpose)
 	print("new")
 	return {}
 end

@@ -25,11 +25,11 @@ func (q *Queries) Count(ctx context.Context) (int64, error) {
 
 const countGroups = `-- name: CountGroups :one
 SELECT
-  COUNT(*) as total
+	COUNT(*) AS total
 FROM
-    groups
+	groups
 WHERE
-    team_slug = $1::slug
+	team_slug = $1::slug
 `
 
 func (q *Queries) CountGroups(ctx context.Context, teamSlug slug.Slug) (int64, error) {
@@ -134,11 +134,13 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*Team, error) {
 
 const listGroups = `-- name: ListGroups :many
 SELECT
-    name, team_slug, external_id
+	name,
+	team_slug,
+	external_id
 FROM
-    groups
+	groups
 WHERE
-    team_slug = $1::slug
+	team_slug = $1::slug
 ORDER BY
 	name ASC
 LIMIT

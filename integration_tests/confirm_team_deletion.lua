@@ -1,4 +1,4 @@
-local team = Team.new("some-team", "purpose", "#channel")
+local team = Team.new("some-team", "purpose")
 local user1 = User.new()
 local user2 = User.new()
 
