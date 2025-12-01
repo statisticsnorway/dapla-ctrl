@@ -208,26 +208,6 @@
 		border: 1px solid var(--ax-border-danger);
 	}
 
-	.deployKey {
-		font-family: monospace;
-		padding-bottom: 1rem;
-	}
-
-	.buttons {
-		display: flex;
-		flex-direction: row;
-		gap: 1rem;
-	}
-	.button {
-		width: 130px;
-	}
-
-	.channel {
-		display: flex;
-		flex-direction: row;
-		gap: 0.5rem;
-	}
-
 	.deletewrapper {
 		display: flex;
 		gap: 0.2rem;

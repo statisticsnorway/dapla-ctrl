@@ -1,18 +1,23 @@
-import { OrderDirection, UserOrderField } from '$houdini';
+import { load_People, OrderDirection, UserOrderField } from '$houdini';
 import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
-import type { PeopleVariables } from './$houdini';
+import { addPageMeta } from '$lib/utils/pageMeta';
 
 const rows = 25;
 
-export const _PeopleVariables: PeopleVariables = ({ url }) => {
-	const after = url.searchParams.get('after') || '';
-	const before = url.searchParams.get('before') || '';
-
+export async function load(event) {
+	const after = event.url.searchParams.get('after') || '';
+	const before = event.url.searchParams.get('before') || '';
 	return {
-		orderBy: {
-			field: urlToOrderField(UserOrderField, UserOrderField.NAME, url),
-			direction: urlToOrderDirection(url, OrderDirection.ASC)
-		},
-		...(before ? { before, last: rows } : { after, first: rows })
+		...(await addPageMeta(event, { title: 'Brukere' })),
+		...(await load_People({
+			event,
+			variables: {
+				orderBy: {
+					field: urlToOrderField(UserOrderField, UserOrderField.NAME, event.url),
+					direction: urlToOrderDirection(event.url, OrderDirection.ASC)
+				},
+				...(before ? { before, last: rows } : { after, first: rows })
+			}
+		}))
 	};
-};
+}
