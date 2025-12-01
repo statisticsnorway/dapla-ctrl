@@ -8,7 +8,7 @@ help:
 
 .PHONY: build
 build: ## Build the app
-	pnpm install
+	pnpm install --ignore-scripts
 
 .PHONY: run-dev
 run-dev: ## Run the app in dev mode
