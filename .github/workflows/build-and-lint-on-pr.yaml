@@ -27,7 +27,9 @@ jobs:
         run: pnpm install --ignore-scripts
 
       - name: Build application
-        run: pnpm run build
+        run: |
+          pnpm prepare
+          pnpm run build
 
       - name: Check for ESLint warnings and errors
         run: pnpm run lint
