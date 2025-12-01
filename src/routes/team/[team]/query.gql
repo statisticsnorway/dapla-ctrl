@@ -3,6 +3,7 @@ query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
 		purpose
 		activityLog(first: 5) {
 			nodes {
+			    __typename
 				id
 			}
 		}

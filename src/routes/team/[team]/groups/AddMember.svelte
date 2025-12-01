@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { graphql, type AddGroupMemberInput, type AddMemberQueryVariables } from '$houdini';
+	import { graphql, type AddGroupMemberInput } from '$houdini';
 	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 	import { createEventDispatcher } from 'svelte';
@@ -15,19 +15,15 @@
 
 	const dispatcher = createEventDispatcher<{ created: null }>();
 
-	export const _AddMemberQueryVariables: AddMemberQueryVariables = () => {
-		return { group: group };
-	};
-
 	const store = graphql(`
 		query AddMemberQuery($group: String!) {
-			users(first: 10000) @loading {
+			users(first: 10000) {
 				nodes {
 					id
 					email
 				}
 			}
-			group(name: $group) @loading {
+			group(name: $group) {
 				members {
 					nodes {
 						user {
@@ -38,6 +34,14 @@
 			}
 		}
 	`);
+
+	$effect(() => {
+		store.fetch({
+			variables: {
+				group: group
+			}
+		});
+	});
 
 	const create = graphql(`
 		mutation CreateMemberMutation($input: AddGroupMemberInput!) {

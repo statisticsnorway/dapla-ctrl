@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { AlertState } from '$houdini';
-	import GraphErrors from '$lib/ui/GraphErrors.svelte';
-	import { Alert, BodyShort } from '@nais/ds-svelte-community';
+	import { Alert, BodyShort, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	let { TeamOverview, teamSlug, purpose } = $derived(data);
+	let { TeamOverview, purpose } = $derived(data);
 </script>
 
 <div class="team-info">
@@ -30,14 +28,9 @@
 			{#if $TeamOverview.data}
 				<div class="raised">
 					{#each $TeamOverview.data.team.activityLog.nodes as item (item.id)}
-						<div><ActivityLogItem {item} /></div>
+						<div>{item.__typename}</div>
 					{/each}
 				</div>
-			{/if}
-			{#if viewerIsMember}
-				<a href="/team/{teamSlug}/activity-log" style:align-self="end" style:margin-top="auto"
-					>View Activity Log</a
-				>
 			{/if}
 		</div>
 	</div>

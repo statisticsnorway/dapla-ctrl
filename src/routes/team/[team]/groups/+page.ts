@@ -1,28 +1,19 @@
-import { load_Groups, OrderDirection, TeamMemberOrderField } from '$houdini';
-import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
-import type { GroupsVariables } from './$houdini';
+import { load_Groups } from '$houdini';
+import { addPageMeta } from '$lib/utils/pageMeta';
 
 const rows = 25;
 
-export const _MembersVariables: GroupsVariables = ({ url }) => {
-	const after = url.searchParams.get('after') || '';
-	const before = url.searchParams.get('before') || '';
-
-	return {
-		orderBy: {
-			field: urlToOrderField(TeamMemberOrderField, TeamMemberOrderField.NAME, url),
-			direction: urlToOrderDirection(url, OrderDirection.ASC)
-		},
-		...(before ? { before, last: rows } : { after, first: rows })
-	};
-};
-
-
-
 export async function load(event) {
+	const after = event.url.searchParams.get('after') || '';
+	const before = event.url.searchParams.get('before') || '';
 	return {
+		...(await addPageMeta(event, { title: 'Grupper' })),
 		...(await load_Groups({
-			event
+			event,
+			variables: {
+				team: event.params.team,
+				...(before ? { before, last: rows } : { after, first: rows })
+			}
 		}))
 	};
 }
