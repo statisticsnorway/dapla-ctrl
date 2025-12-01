@@ -6,13 +6,11 @@
 
 	let { data }: PageProps = $props();
 
-	let { UserTeams, UserInfo } = $derived(data);
+	let { UserTeams } = $derived(data);
 
-	let userTeams = $derived(
+	let userTeamsCount = $derived(
 		$UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.nodes.length
 	);
-
-	let name = $derived($UserInfo.data?.me.__typename == 'User' ? $UserInfo.data.me.name : '');
 </script>
 
 <svelte:head><title>Dapla Ctrl</title></svelte:head>
@@ -25,17 +23,25 @@
 		</div>
 		{#if $UserTeams.data}
 			{#if $UserTeams.data.me.__typename == 'User'}
-				<TeamsTable
-					teamsData={$UserTeams.data.me.teams.nodes.map((node) => {
-						return {
-							slug: node.team.slug,
-							memberCount: node.team.members.pageInfo.totalCount,
-							managers: node.team.groups.nodes
-								.filter((group) => group.category === 'managers')
-								.flatMap((managerGroup) => managerGroup.members.nodes.map((member) => member.user))
-						};
-					})}
-				/>
+				<div class="container">
+					<div>
+						<Heading level="2" spacing>Mine Team ({userTeamsCount})</Heading>
+
+						<TeamsTable
+							teamsData={$UserTeams.data.me.teams.nodes.map((node) => {
+								return {
+									slug: node.team.slug,
+									memberCount: node.team.members.pageInfo.totalCount,
+									managers: node.team.groups.nodes
+										.filter((group) => group.category === 'managers')
+										.flatMap((managerGroup) =>
+											managerGroup.members.nodes.map((member) => member.user)
+										)
+								};
+							})}
+						/>
+					</div>
+				</div>
 				<Pagination
 					page={$UserTeams.data.me.teams.pageInfo}
 					loaders={{
@@ -67,5 +73,12 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: var(--ax-space-16);
+	}
+
+	.container {
+		margin-top: var(--spacing-layout);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-layout);
 	}
 </style>

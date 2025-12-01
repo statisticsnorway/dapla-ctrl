@@ -1,14 +1,5 @@
 <script lang="ts">
-	import {
-		Heading,
-		Table,
-		type TableSortState,
-		Tbody,
-		Td,
-		Th,
-		Thead,
-		Tr
-	} from '@nais/ds-svelte-community';
+	import { Table, type TableSortState, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
 
 	interface Props {
 		teamsData: TeamsData[];
@@ -58,11 +49,9 @@
 		direction: 'descending'
 	});
 
-	let teamsTable: TeamsData[] = $state([]);
-
-	$effect(() => {
-		teamsTable = getTeamsTableDataSorted(teamsData, sortState.orderBy, sortState.direction);
-	});
+	let teamsTable: TeamsData[] = $derived(
+		getTeamsTableDataSorted(teamsData, sortState.orderBy, sortState.direction)
+	);
 
 	function getTeamsTableDataSorted(
 		data: TeamsData[] | null,
@@ -108,56 +97,54 @@
 			return 0;
 		});
 	}
+
+	// team.managers
+	// 	.map((user) => {
+	// 		return `<a href="/user/${user.email}">${user.name}</a>`;
+	// 	})
+	// 	.join(', ');
 </script>
 
-<div class="container">
-	<div>
-		<Heading level="2" spacing>Mine Team</Heading>
-
-		<Table
-			size="small"
-			sort={sortState}
-			onsortchange={(key) => {
-				sortState = sortTable(key as SortBy, sortState);
-			}}
-		>
-			<Thead>
-				<Tr>
-					<Th sortable={true} sortKey="NAME">Navn</Th>
-					<Th sortable={true} sortKey="MEMBER_COUNT">Teammedlemmer</Th>
-					<Th sortable={true} sortKey="MANAGER">Managers</Th>
-				</Tr>
-			</Thead>
-			<Tbody>
-				{#each teamsTable as team (team.slug)}
-					<Tr>
-						<Td>
-							<a href={`/team/${team.slug}/`}>
-								{team.slug}
-							</a>
-						</Td>
-						<Td>
-							{team.memberCount}
-						</Td>
-						<Td
-							>{@html team.managers
-								.map((user) => {
-									return `<a href="/user/${user.email}">${user.name}</a>`;
-								})
-								.join(', ')}</Td
-						>
-					</Tr>
-				{/each}
-			</Tbody>
-		</Table>
-	</div>
-</div>
+<Table
+	size="small"
+	sort={sortState}
+	onsortchange={(key) => {
+		sortState = sortTable(key as SortBy, sortState);
+	}}
+>
+	<Thead>
+		<Tr>
+			<Th sortable={true} sortKey="NAME">Navn</Th>
+			<Th sortable={true} sortKey="MEMBER_COUNT">Teammedlemmer</Th>
+			<Th sortable={true} sortKey="MANAGER">Managers</Th>
+		</Tr>
+	</Thead>
+	<Tbody>
+		{#each teamsTable as team (team.slug)}
+			<Tr>
+				<Td>
+					<a href={`/team/${team.slug}/`}>
+						{team.slug}
+					</a>
+				</Td>
+				<Td>
+					{team.memberCount}
+				</Td>
+				<Td
+					>{#each team.managers as manager, i (manager.email)}
+						<a href="/bruker/${manager.email}"> {manager.name}</a>{#if i < team.managers.length - 1}
+							<span>,</span>
+						{/if}
+					{/each}</Td
+				>
+			</Tr>
+		{/each}
+	</Tbody>
+</Table>
 
 <style>
-	.container {
-		margin-top: var(--spacing-layout);
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-layout);
-	}
+    span::after {
+         /* Avoid 'svelte/no-useless-mustaches' by adding space after comma with css*/
+        content: ' ';
+    }
 </style>

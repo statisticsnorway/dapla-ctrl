@@ -7,12 +7,10 @@
 		member,
 		isAdmin,
 		features,
-		teamSlug
 	}: {
 		member: boolean;
 		isAdmin: boolean;
 		features?: object;
-		teamSlug: string;
 	} = $props();
 </script>
 
