@@ -143,8 +143,8 @@
 </Table>
 
 <style>
-    span::after {
-         /* Avoid 'svelte/no-useless-mustaches' by adding space after comma with css*/
-        content: ' ';
-    }
+	span::after {
+		/* Avoid 'svelte/no-useless-mustaches' by adding space after comma with css*/
+		content: ' ';
+	}
 </style>

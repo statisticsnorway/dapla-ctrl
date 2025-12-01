@@ -6,7 +6,7 @@
 	const {
 		member,
 		isAdmin,
-		features,
+		features
 	}: {
 		member: boolean;
 		isAdmin: boolean;
