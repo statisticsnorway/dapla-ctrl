@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import {
 		ActionMenu,
@@ -25,7 +24,6 @@
 	}
 
 	let { user }: Props = $props();
-
 </script>
 
 <InternalHeader allowLightMode={true}>
@@ -38,7 +36,9 @@
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
-	<InternalHeaderButton as="a"  href={PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL}>Dokumentasjon</InternalHeaderButton>
+	<InternalHeaderButton as="a" href={PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL}
+		>Dokumentasjon</InternalHeaderButton
+	>
 	<ActionMenu>
 		{#snippet trigger(props)}
 			<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />

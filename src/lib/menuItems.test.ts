@@ -115,7 +115,7 @@ describe('menuItems', () => {
 				path: '/team/tbd/jobs',
 				features,
 				member: true,
-				isAdmin: false,
+				isAdmin: false
 			});
 
 			expect(
@@ -123,8 +123,7 @@ describe('menuItems', () => {
 					.flatMap((g) => g)
 					.filter((i) => i.count)
 					.map((i) => ({ label: i.label, count: i.count }))
-			).toEqual([
-			]);
+			).toEqual([]);
 		});
 		test('show settings when admin', () => {
 			expect(

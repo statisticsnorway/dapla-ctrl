@@ -17,9 +17,7 @@
 		Modal,
 		TextField
 	} from '@nais/ds-svelte-community';
-	import {
-		TrashIcon
-	} from '@nais/ds-svelte-community/icons';
+	import { TrashIcon } from '@nais/ds-svelte-community/icons';
 	import type { PageProps } from './$types';
 	import EditText from './EditText.svelte';
 

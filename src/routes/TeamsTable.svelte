@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Heading, Table, type TableSortState, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
+	import {
+		Heading,
+		Table,
+		type TableSortState,
+		Tbody,
+		Td,
+		Th,
+		Thead,
+		Tr
+	} from '@nais/ds-svelte-community';
 
 	interface Props {
 		teamsData: TeamsData[];
@@ -10,14 +19,13 @@
 	export type User = {
 		name: string;
 		email: string;
-	}
+	};
 
 	export type TeamsData = {
 		slug: string;
 		memberCount: number;
 		managers: User[];
 	};
-
 
 	type SortBy = 'NAME' | 'MEMBER_COUNT' | 'MANAGER';
 
@@ -53,11 +61,7 @@
 	let teamsTable: TeamsData[] = $state([]);
 
 	$effect(() => {
-		teamsTable = getTeamsTableDataSorted(
-			teamsData,
-			sortState.orderBy,
-			sortState.direction
-		);
+		teamsTable = getTeamsTableDataSorted(teamsData, sortState.orderBy, sortState.direction);
 	});
 
 	function getTeamsTableDataSorted(
@@ -68,7 +72,6 @@
 		if (!data) {
 			return [];
 		}
-
 
 		return data.sort((a, b) => {
 			if (sortedBy === 'NAME') {
@@ -105,8 +108,6 @@
 			return 0;
 		});
 	}
-
-
 </script>
 
 <div class="container">
@@ -117,42 +118,46 @@
 			size="small"
 			sort={sortState}
 			onsortchange={(key) => {
-					sortState = sortTable(key as SortBy, sortState);
-				}}
+				sortState = sortTable(key as SortBy, sortState);
+			}}
 		>
 			<Thead>
-			<Tr>
-				<Th sortable={true} sortKey="NAME">Navn</Th>
-				<Th sortable={true} sortKey="MEMBER_COUNT">Teammedlemmer</Th>
-				<Th sortable={true} sortKey="MANAGER">Managers</Th>
-			</Tr>
+				<Tr>
+					<Th sortable={true} sortKey="NAME">Navn</Th>
+					<Th sortable={true} sortKey="MEMBER_COUNT">Teammedlemmer</Th>
+					<Th sortable={true} sortKey="MANAGER">Managers</Th>
+				</Tr>
 			</Thead>
 			<Tbody>
-			{#each teamsTable as team (team.slug)}
-				<Tr>
-					<Td>
-						<a href={`/team/${team.slug}/`}>
-							{team.slug}
-						</a>
-					</Td>
-					<Td>
-						{team.memberCount}
-					</Td>
-					<Td>{@html team.managers.map(user => {
-						return `<a href="/user/${user.email}">${user.name}</a>`
-					}).join(", ")}</Td>
-				</Tr>
-			{/each}
+				{#each teamsTable as team (team.slug)}
+					<Tr>
+						<Td>
+							<a href={`/team/${team.slug}/`}>
+								{team.slug}
+							</a>
+						</Td>
+						<Td>
+							{team.memberCount}
+						</Td>
+						<Td
+							>{@html team.managers
+								.map((user) => {
+									return `<a href="/user/${user.email}">${user.name}</a>`;
+								})
+								.join(', ')}</Td
+						>
+					</Tr>
+				{/each}
 			</Tbody>
 		</Table>
 	</div>
 </div>
 
 <style>
-    .container {
-        margin-top: var(--spacing-layout);
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-layout);
-    }
+	.container {
+		margin-top: var(--spacing-layout);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-layout);
+	}
 </style>

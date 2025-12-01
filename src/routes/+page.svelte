@@ -25,11 +25,17 @@
 		</div>
 		{#if $UserTeams.data}
 			{#if $UserTeams.data.me.__typename == 'User'}
-			    <TeamsTable teamsData={$UserTeams.data.me.teams.nodes.map(node => {return {
-						slug: node.team.slug,
-						memberCount: node.team.members.pageInfo.totalCount,
-						managers: node.team.groups.nodes.filter(group => group.category === "managers").flatMap(managerGroup => managerGroup.members.nodes.map(member => member.user))
-			    }})}  />
+				<TeamsTable
+					teamsData={$UserTeams.data.me.teams.nodes.map((node) => {
+						return {
+							slug: node.team.slug,
+							memberCount: node.team.members.pageInfo.totalCount,
+							managers: node.team.groups.nodes
+								.filter((group) => group.category === 'managers')
+								.flatMap((managerGroup) => managerGroup.members.nodes.map((member) => member.user))
+						};
+					})}
+				/>
 				<Pagination
 					page={$UserTeams.data.me.teams.pageInfo}
 					loaders={{

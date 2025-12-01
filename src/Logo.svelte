@@ -6,7 +6,13 @@
 	let { height }: Props = $props();
 </script>
 
-<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74 26" {height} aria-label="Dapla">
+<svg
+	id="Layer_1"
+	xmlns="http://www.w3.org/2000/svg"
+	viewBox="0 0 74 26"
+	{height}
+	aria-label="Dapla"
+>
 	<defs>
 		<style>
 			.cls-1 {
