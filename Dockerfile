@@ -4,7 +4,8 @@ RUN apk add pnpm
 
 COPY . .
 
-RUN pnpm install
+RUN pnpm install --ignore-scripts
+RUN pnpm prepare
 RUN pnpm run build
 # Delete node_modules that contain dev deps and only install runtime deps
 # in the version that is copied to the final output
