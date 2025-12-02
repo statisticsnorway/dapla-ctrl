@@ -68,7 +68,7 @@
 		<div>
 			{#each team.groups.edges as edge (edge.node.name)}
 				{@const memberCount = edge.node.members.pageInfo.totalCount}
-				<List title="{edge.node.name}: {memberCount} user{memberCount !== 1 ? 's' : ''}">
+				<List title="{edge.node.name}: {memberCount} bruker{memberCount !== 1 ? 'e' : ''}">
 					{#snippet menu()}
 						<OrderByMenu
 							orderField={GroupMemberOrderField}
@@ -94,7 +94,7 @@
 										{#if canEdit}
 											<div>
 												<Button
-													title="Delete member"
+													title="Slett medlem"
 													size="small"
 													variant="tertiary-neutral"
 													onclick={() => {
@@ -131,7 +131,7 @@
 								open: !addMemberProps.open
 							};
 						}}
-						icon={PlusIcon}>Add member</Button
+						icon={PlusIcon}>Legg til medlem</Button
 					>
 				</div>
 				<div class="button">
@@ -140,7 +140,7 @@
 						onclick={() => {
 							createGroupOpen = !createGroupOpen;
 						}}
-						icon={PlusIcon}>Create Group</Button
+						icon={PlusIcon}>Opprett gruppe</Button
 					>
 				</div>
 			{/if}
@@ -174,7 +174,7 @@
 			{@const userId = deleteUser.email}
 			<Confirm
 				bind:open={deleteUserOpen}
-				confirmText="Delete"
+				confirmText="Slett"
 				variant="danger"
 				onconfirm={async () => {
 					await removeGroupMember.mutate({ input: { groupName: group, userEmail: userId } });
@@ -182,9 +182,9 @@
 				}}
 			>
 				{#snippet header()}
-					<Heading>Delete Member</Heading>
+					<Heading>Slett medlem</Heading>
 				{/snippet}
-				Are you sure you want to remove <b>{deleteUser.name}</b> from this group?
+				Er du sikker på at du vil fjerne <b>{deleteUser.name}</b> fra denne gruppen?
 			</Confirm>
 		{/if}
 	{/if}

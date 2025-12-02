@@ -35,16 +35,16 @@
 {#if $TeamDeleteKey.data}
 	{@const key = $TeamDeleteKey.data.team.deleteKey}
 	{#if $UserInfo.data?.me.__typename == 'User' && $UserInfo.data.me.id == key.createdBy.id}
-		<Alert variant="error">You can not confirm your own delete request.</Alert>
+		<Alert variant="error">Du kan ikke bekrefte din egen slettingsforespørsel.</Alert>
 	{:else if Date.now() - +key.expires > 0}
-		<Alert variant="error">The delete key has expired.</Alert>
+		<Alert variant="error">Slettingsnøkkelen har utløpt.</Alert>
 	{:else}
 		<BodyLong style="padding-bottom: 1rem;">
-			The deletion was initiated by <strong>{key.createdBy.name}</strong> and expires
-			<strong><Time distance={true} time={key.expires}></Time></strong>. Deleting the team will
-			permanently delete all managed resources and all resources within them. All applications,
-			databases and jobs owned by the team will be irreversibly deleted. When you click delete team
-			there is now way back.
+			Slettingen ble initiert av <strong>{key.createdBy.name}</strong> og utløper
+			<strong><Time distance={true} time={key.expires}></Time></strong>. Å slette teamet vil permanent
+			slette alle administrerte ressurser og alle ressurser innenfor dem. Alle applikasjoner,
+			databaser og jobber eid av teamet vil bli uopprettelig slettet. Når du klikker på slett team
+			er det ingen vei tilbake.
 		</BodyLong>
 
 		<Button
@@ -54,13 +54,13 @@
 			variant="danger"
 			icon={TrashIcon}
 		>
-			Delete team
+			Slett team
 		</Button>
 
-		<Modal bind:open={showConfirmDeleteTeam} header="Confirm team deletion">
+		<Modal bind:open={showConfirmDeleteTeam} header="Bekreft team-sletting">
 			<BodyLong>
-				Confirm that you intend to delete <strong>{key.team.slug}</strong> and all resources related
-				to it.
+				Bekreft at du har til hensikt å slette <strong>{key.team.slug}</strong> og alle ressurser
+				relatert til det.
 			</BodyLong>
 
 			{#if deleteTeamResp?.errors}
@@ -78,7 +78,7 @@
 							team: key.team.slug
 						});
 						goto('/team/' + key.team.slug, { replaceState: true });
-					}}>Confirm</Button
+					}}>Bekreft</Button
 				>
 				<Button
 					variant="tertiary"
@@ -86,7 +86,7 @@
 					type="reset"
 					onclick={() => {
 						showConfirmDeleteTeam = false;
-					}}>Cancel</Button
+					}}>Avbryt</Button
 				>
 			{/snippet}
 		</Modal>

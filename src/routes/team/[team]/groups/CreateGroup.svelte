@@ -53,7 +53,7 @@
 
 <Modal bind:open>
 	{#snippet header()}
-		<Heading>Create group for team {team}</Heading>
+		<Heading>Opprett gruppe for team {team}</Heading>
 	{/snippet}
 
 	{#each errors as error (error)}
@@ -67,20 +67,20 @@
 		}}
 		class="wrapper"
 	>
-		<p>Group members are given access to the some of the team's resources.</p>
-		<Select label="Category" bind:value={groupCategory}>
+		<p>Gruppemedlemmer får tilgang til noen av teamets ressurser.</p>
+		<Select label="Kategori" bind:value={groupCategory}>
 			<option value="data-admins">data-admins</option>
 			<option value="developers">developers</option>
 		</Select>
 		<TextField list="create-group-suffix" type="text" bind:value={groupSuffix}>
 			{#snippet label()}
-				Suffix (for custom groups)
+				Suffiks (for egendefinerte grupper)
 			{/snippet}
 		</TextField>
 	</form>
 
 	{#snippet footer()}
-		<Button type="submit" onclick={submit} icon={PlusIcon}>Create group</Button>
+		<Button type="submit" onclick={submit} icon={PlusIcon}>Opprett gruppe</Button>
 	{/snippet}
 </Modal>
 

@@ -31,11 +31,11 @@
 </script>
 
 <div class="container">
-	<Heading level="1" size="large" spacing>Dapla Ctrl Users</Heading>
+	<Heading level="1" size="large" spacing>Dapla Ctrl brukere</Heading>
 	<List
-		title="{$People.data?.users.pageInfo.totalCount} user{$People.data?.users.pageInfo
+		title="{$People.data?.users.pageInfo.totalCount} bruker{$People.data?.users.pageInfo
 			.totalCount !== 1
-			? 's'
+			? 'e'
 			: ''}"
 	>
 		{#snippet menu()}

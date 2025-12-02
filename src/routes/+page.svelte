@@ -25,7 +25,7 @@
 			{#if $UserTeams.data.me.__typename == 'User'}
 				<div class="container">
 					<div>
-						<Heading level="2" spacing>Mine Team ({userTeamsCount})</Heading>
+						<Heading level="2" spacing>Mine team ({userTeamsCount})</Heading>
 
 						<TeamsTable
 							teamsData={$UserTeams.data.me.teams.nodes.map((node) => {

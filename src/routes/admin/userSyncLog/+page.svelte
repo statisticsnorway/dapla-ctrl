@@ -9,16 +9,16 @@
 	let { UserSyncLogs } = $derived(data);
 </script>
 
-<Heading level="2" size="medium" spacing>User Synchronization Log</Heading>
+<Heading level="2" size="medium" spacing>Brukersynkroniseringslogg</Heading>
 <GraphErrors errors={$UserSyncLogs.errors} />
 {#if $UserSyncLogs.data}
 	<Table size="small">
 		<Thead>
 			<Tr>
-				<Th>Action</Th>
-				<Th>Name</Th>
-				<Th>Email</Th>
-				<Th>Timestamp</Th>
+				<Th>Handling</Th>
+				<Th>Navn</Th>
+				<Th>E-post</Th>
+				<Th>Tidsstempel</Th>
 			</Tr>
 		</Thead>
 		<Tbody>
@@ -26,9 +26,9 @@
 				<Tr>
 					<Td>
 						{#if entry.__typename === 'RoleAssignedUserSyncLogEntry'}
-							Assigned role <em>{entry.roleName}</em>
+							Tildelt rolle <em>{entry.roleName}</em>
 						{:else if entry.__typename === 'RoleRevokedUserSyncLogEntry'}
-							Revoked role <em>{entry.roleName}</em>
+							Tilbaketrukket rolle <em>{entry.roleName}</em>
 						{:else}
 							{entry.message}
 						{/if}
@@ -49,7 +49,7 @@
 				</Tr>
 			{:else}
 				<Tr>
-					<Td colspan={99}>No user sync log entries found</Td>
+					<Td colspan={99}>ngen brukersynkroniseringslogg-oppføringer funnet</Td>
 				</Tr>
 			{/each}
 		</Tbody>

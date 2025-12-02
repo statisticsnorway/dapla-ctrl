@@ -79,7 +79,7 @@
 		errors = [];
 		const userID = $store.data?.users.nodes.find((u) => u.email === email)?.email;
 		if (!userID) {
-			errors = ['User not found'];
+			errors = ['Bruker ikke funnet'];
 			return;
 		}
 
@@ -106,7 +106,7 @@
 
 <Modal bind:open>
 	{#snippet header()}
-		<Heading>Add Member</Heading>
+		<Heading>Legg til medlem</Heading>
 	{/snippet}
 
 	{#each errors as error (error)}
@@ -120,15 +120,15 @@
 		}}
 		class="wrapper"
 	>
-		<p>Group members are given access to the some of the team's resources.</p>
-		<Select label="Group" bind:value={group}>
+		<p>Gruppemedlemmer får tilgang til noen av teamets ressurser.</p>
+		<Select label="Gruppe" bind:value={group}>
 			{#each groups as groupName (groupName)}
 				<option value={groupName}>{groupName}</option>
 			{/each}
 		</Select>
 		<TextField list="add-member-email" type="email" bind:value={email}>
 			{#snippet label()}
-				Email
+				E-post
 			{/snippet}
 		</TextField>
 		<datalist id="add-member-email">
@@ -139,7 +139,7 @@
 	</form>
 
 	{#snippet footer()}
-		<Button type="submit" onclick={submit} icon={PlusIcon}>Add member</Button>
+		<Button type="submit" onclick={submit} icon={PlusIcon}>Legg til medlem</Button>
 	{/snippet}
 </Modal>
 

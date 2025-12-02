@@ -8,15 +8,15 @@
 	let { AdminUsers } = $derived(data);
 </script>
 
-<Heading level="2" size="medium" spacing>Users</Heading>
+<Heading level="2" size="medium" spacing>Brukere</Heading>
 {#if $AdminUsers.data}
 	<Table size="small">
 		<Thead>
 			<Tr>
-				<Th>Name</Th>
-				<Th>Email</Th>
-				<Th>External ID</Th>
-				<Th>Nais admin</Th>
+				<Th>Navn</Th>
+				<Th>E-post</Th>
+				<Th>Ekstern ID</Th>
+				<Th>Nais-administrator</Th>
 			</Tr>
 		</Thead>
 		<Tbody>
@@ -25,11 +25,11 @@
 					<Td>{user.name}</Td>
 					<Td>{user.email}</Td>
 					<Td>{user.externalID}</Td>
-					<Td>{user.isAdmin ? 'Yes' : ''}</Td>
+					<Td>{user.isAdmin ? 'Ja' : ''}</Td>
 				</Tr>
 			{:else}
 				<Tr>
-					<Td colspan={99}>No users found</Td>
+					<Td colspan={99}>Ingen brukere funnet</Td>
 				</Tr>
 			{/each}
 		</Tbody>

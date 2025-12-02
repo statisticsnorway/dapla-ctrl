@@ -35,39 +35,39 @@
 
 			// Check if the slug is reserved
 			if (reservedSlugs.includes(slug)) {
-				teamSlugError = 'This slug is reserved.';
+				teamSlugError = 'Denne slug-en er reservert.';
 				return;
 			}
 
 			// Check if the slug starts with "nais"
 			if (slug.startsWith('nais')) {
 				teamSlugError =
-					"The name prefix 'nais' is reserved. Try again with a different name, perhaps just removing the prefix?";
+					"Navneprefikset 'nais' er reservert. Prøv igjen med et annet navn, kanskje bare ved å fjerne prefikset?";
 				return;
 			}
 
 			// Check if the slug starts with "team"
 			if (slug.startsWith('team')) {
 				teamSlugError =
-					"The name prefix 'team' is redundant. When you create a team, it is by definition a team. Try again with a different name, perhaps just removing the prefix?";
+					"Navneprefikset 'team' er overflødig. Når du oppretter et team, er det per definisjon et team. Prøv igjen med et annet navn, kanskje bare ved å fjerne prefikset?";
 				return;
 			}
 
 			// Check the length of the slug
 			if (slug.length < 3) {
-				teamSlugError = 'A team slug must be at least 3 characters long.';
+				teamSlugError = 'En team-slug må være minst 3 tegn lang.';
 				return;
 			}
 
 			if (slug.length > 30) {
-				teamSlugError = 'A team slug must be at most 30 characters long.';
+				teamSlugError = 'En team-slug må være maksimalt 30 tegn lang.';
 				return;
 			}
 
 			// Validate the slug against the pattern
 			if (!slugPattern.test(slug)) {
 				teamSlugError =
-					'A team slug must begin with a lowercase letter and may include lowercase letters, numbers, and hyphens. However, it cannot start or end with a hyphen, nor can it contain consecutive hyphens.';
+					'En team-slug må begynne med en liten bokstav og kan inneholde små bokstaver, tall og bindestreker. Den kan imidlertid ikke starte eller slutte med en bindestrek, og kan ikke inneholde påfølgende bindestreker.';
 				return;
 			}
 
@@ -81,7 +81,7 @@
 		const input = event.target as HTMLInputElement | null;
 		if (input) {
 			if (input.value.length < 3) {
-				purposeError = 'The purpose must be at least 3 characters long.';
+				purposeError = 'Formålet må være minst 3 tegn langt.';
 			} else {
 				purposeError = 'no_error';
 			}
@@ -90,26 +90,26 @@
 </script>
 
 <svelte:head>
-	<title>Create a New Team - Dapla Ctrl</title>
+	<title>Opprett et nytt team - Dapla Ctrl</title>
 </svelte:head>
 
 <div class="container" class:partOfModal={isPossiblyInModal()}>
 	{#if !isPossiblyInModal()}
-		<Heading level="1" size="large" spacing>Create a New Team</Heading>
+		<Heading level="1" size="large" spacing>Opprett et nytt team</Heading>
 	{/if}
 	{#if form?.errors && form.errors.length > 0}
-		<ErrorSummary heading="Error creating team">
+		<ErrorSummary heading="Feil ved opprettelse av team">
 			{#each form.errors as error (error)}
 				<li style="color:inherit!important">{error.message}</li>
 			{/each}
 		</ErrorSummary>
 	{/if}
 	<p>
-		Creating a team in Nais will grant access to certain Nais features, such as Google Cloud
-		projects, Kubernetes namespaces, or your own GitHub team. After the team is created, you will
-		become the administrator of that team, granting privileges to add and remove team members. The
-		identifier is the primary key, and will be used across systems so that they are easily
-		recognizable.
+		Å opprette et team i Nais gir tilgang til visse Nais-funksjoner, som Google Cloud-prosjekter,
+		Kubernetes-namespacer eller ditt eget GitHub-team. Etter at teamet er opprettet, blir du
+		administrator for teamet, med rettigheter til å legge til og fjerne teammedlemmer.
+		Identifikatoren er den primære nøkkelen og vil bli brukt på tvers av systemer slik at de
+		enkelt kan gjenkjennes.
 	</p>
 	<form
 		method="POST"
@@ -123,12 +123,12 @@
 	>
 		<TextField name="name" value={form?.input.slug} oninput={handleTeamSlugInput}>
 			{#snippet label()}
-				Identifier / Name
+				Identifikator / Navn
 			{/snippet}
 			{#snippet description()}
-				Example: my-team-name<br />
-				<WarningIcon class="text-aligned-icon" /> It is not possible to change the identifier after creation,
-				so choose wisely.
+				Eksempel: mitt-team-navn<br />
+				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre identifikatoren etter
+				opprettelse, så velg klokt.
 			{/snippet}
 		</TextField>
 		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
@@ -137,17 +137,17 @@
 		<br />
 		<TextField name="description" value={form?.input.purpose} oninput={handlePurposeInput}>
 			{#snippet label()}
-				Purpose of the team
+				Teamets formål
 			{/snippet}
 			{#snippet description()}
-				Example: Making sure users have a good experience
+				Eksempel: Sørger for at brukere får en god opplevelse
 			{/snippet}
 		</TextField>
 		{#if purposeError !== 'no_error' && purposeError !== ''}
 			<p style:color="var(--ax-text-danger)">{purposeError}</p>
 		{/if}
 		<br />
-		<Button loading={saving} {disabled} icon={FloppydiskIcon}>Create team</Button>
+		<Button loading={saving} {disabled} icon={FloppydiskIcon}>Opprette team</Button>
 	</form>
 </div>
 

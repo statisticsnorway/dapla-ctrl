@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Log in - Dapla Ctrl</title>
+	<title>Logg inn - Dapla Ctrl</title>
 	<style>
 		body {
 			background: var(--ax-bg-default);
@@ -33,25 +33,25 @@
 			{@const error = $page.url.searchParams.get('error')}
 			<Alert variant="error">
 				{#if error == 'unknown-user'}
-					Error during login: Unknown user.<br />
-					Please contact the system administrator.
+					Feil under innlogging: Ukjent bruker.<br />
+					Vennligst kontakt systemadministratoren.
 				{:else}
 					<!-- "unable-to-create-session", "invalid-state", and "unauthenticated" are known. -->
-					Error during login, please try again.
+					Feil under innlogging, vennligst prøv igjen.
 				{/if}
 			</Alert>
 		{/if}
 
-		<p>To access this page you need to log in with your Google Workspace account.</p>
+		<p>For å få tilgang til denne siden må du logge inn med din Google Workspace-konto.</p>
 
 		<Button as="a" href="/oauth2/login?redirect_uri={redirectPath($page.url)}" variant="primary">
-			Log in to Dapla Ctrl
+			Logg inn på Dapla Ctrl
 		</Button>
 
 		{#if isNaisdevice() && chrome}
 			<p class="help">
-				If you tried to open a page before logging into naisdevice, Chrome will not notice it until
-				you have deleted the open sockets. You can do this by navigating to:
+				Hvis du prøvde å åpne en side før du logget inn på naisdevice, vil Chrome ikke legge merke
+				til det før du har slettet de åpne socketene. Du kan gjøre dette ved å navigere til:
 			</p>
 			<div class="line">
 				<TextField

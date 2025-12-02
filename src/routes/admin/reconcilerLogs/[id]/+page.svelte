@@ -14,9 +14,9 @@
 	<Table size="small">
 		<Thead>
 			<Tr>
-				<Th>Message</Th>
+				<Th>Melding</Th>
 				<Th>Team</Th>
-				<Th>Timestamp</Th>
+				<Th>Tidsstempel</Th>
 			</Tr>
 		</Thead>
 		<Tbody>
@@ -28,7 +28,7 @@
 						<Td><Time time={error.createdAt} distance={true} /></Td>
 					</Tr>
 				{:else}
-					<Tr><Td colspan={999}><em>No reconciler errors at the moment.</em></Td></Tr>
+					<Tr><Td colspan={999}><em>Ingen reconciler-feil for øyeblikket.</em></Td></Tr>
 				{/each}
 			{/if}
 		</Tbody>

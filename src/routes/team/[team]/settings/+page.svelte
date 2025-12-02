@@ -69,7 +69,7 @@
 	<div class="wrapper">
 		<div style="display: flex; flex-direction: column; gap: var(--spacing-layout)">
 			<div>
-				<Heading level="2">Description</Heading>
+				<Heading level="2">Beskrivelse</Heading>
 				<EditText
 					text={teamSettings.purpose}
 					on:save={async (e) => {
@@ -93,17 +93,17 @@
 
 			{#if viewerIsOwner}
 				<div>
-					<Heading level="2"><WarningIcon class="heading-aligned-icon" /> Danger Zone</Heading>
+					<Heading level="2"><WarningIcon class="heading-aligned-icon" /> Faresone</Heading>
 					<div class="danger-zone">
 						<BodyLong spacing>
-							Deleting the team will permanently delete all managed resources and all resources
-							within them. All applications, databases and jobs owned by the team will be
-							irreversibly deleted.
+							Å slette teamet vil permanent slette alle administrerte ressurser og alle ressurser
+							innenfor dem. Alle applikasjoner, databaser og jobber eid av teamet vil bli
+							uopprettelig slettet.
 						</BodyLong>
 						<BodyLong spacing>
-							When you request deletion a delete key will be generated for this team. It is valid
-							for 1 hour. Another team-owner will have to confirm the deletion by using a generated
-							link before the team is irreversibly deleted.
+							Når du ber om sletting, vil en slettingsnøkkel bli generert for dette teamet. Den er
+							gyldig i 1 time. En annen team-eier må bekrefte slettingen ved å bruke en generert
+							lenke før teamet blir uopprettelig slettet.
 						</BodyLong>
 
 						<Button
@@ -114,8 +114,8 @@
 							}}
 							icon={TrashIcon}
 						>
-							Request team deletion</Button
-						>
+							Be om team-sletting
+						</Button>
 					</div>
 				</div>
 			{/if}
@@ -125,12 +125,12 @@
 {#if browser}
 	<Modal bind:open={showDeleteTeam}>
 		{#snippet header()}
-			<Heading level="1" size="medium">Request Team Deletion</Heading>
+			<Heading level="1" size="medium">Be om team-sletting</Heading>
 		{/snippet}
 
 		{#if !deleteKeyResp?.data}
 			<BodyLong>
-				Confirm that you intend to delete <strong>{teamSlug}</strong> and all resources related to it.
+				Bekreft at du har til hensikt å slette <strong>{teamSlug}</strong> og alle ressurser relatert til det.
 			</BodyLong>
 		{/if}
 
@@ -140,13 +140,13 @@
 			{@const key =
 				window.location + '/confirm_delete?key=' + deleteKeyResp.data.requestTeamDeletion.key?.key}
 			<Alert variant="info">
-				Deletion of <strong>{teamSlug}</strong> has been requested. To finalize the deletion send
-				this link to another team owner and let them confirm the deletion.
+				Sletting av <strong>{teamSlug}</strong> har blitt forespurt. For å fullføre slettingen, send
+				denne lenken til en annen team-eier og la dem bekrefte slettingen.
 
 				<div class="deletewrapper">
 					<div>
 						<TextField
-							label="Sharable url"
+							label="Delbar URL"
 							hideLabel={true}
 							readonly={true}
 							size="small"
@@ -154,8 +154,8 @@
 						></TextField>
 					</div>
 					<CopyButton
-						text="Copy URL"
-						activeText="URL copied"
+						text="Kopier URL"
+						activeText="URL kopiert"
 						variant="action"
 						copyText={key}
 						size="small"
@@ -175,7 +175,7 @@
 							input: { slug: teamSlug }
 						});
 						deleteKeyLoading = false;
-					}}>Confirm</Button
+					}}>Bekreft</Button
 				>
 				<Button
 					variant="tertiary"
@@ -183,13 +183,13 @@
 					type="reset"
 					onclick={() => {
 						showDeleteTeam = !showDeleteTeam;
-					}}>Cancel</Button
+					}}>Avbryt</Button
 				>
 			{:else}
 				<Button
 					onclick={() => {
 						showDeleteTeam = !showDeleteTeam;
-					}}>Close</Button
+					}}>Lukk</Button
 				>
 			{/if}
 		{/snippet}
