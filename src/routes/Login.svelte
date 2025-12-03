@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { Alert, Button, CopyButton, Heading, TextField } from '@nais/ds-svelte-community';
 	import Logo from '../Logo.svelte';
-	import { isNaisdevice } from './Naisdevice.svelte';
 
 	const redirectPath = (url: URL) => {
 		return encodeURIComponent(url.pathname + url.search + url.hash);
@@ -47,23 +46,6 @@
 		<Button as="a" href="/oauth2/login?redirect_uri={redirectPath($page.url)}" variant="primary">
 			Logg inn på Dapla Ctrl
 		</Button>
-
-		{#if isNaisdevice() && chrome}
-			<p class="help">
-				Hvis du prøvde å åpne en side før du logget inn på naisdevice, vil Chrome ikke legge merke
-				til det før du har slettet de åpne socketene. Du kan gjøre dette ved å navigere til:
-			</p>
-			<div class="line">
-				<TextField
-					label="Chrome net-internals url"
-					hideLabel={true}
-					type="text"
-					readonly
-					value="chrome://net-internals#sockets"
-				/>
-				<CopyButton copyText="chrome://net-internals#sockets" />
-			</div>
-		{/if}
 	</div>
 </div>
 

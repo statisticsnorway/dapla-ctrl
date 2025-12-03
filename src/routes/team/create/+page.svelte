@@ -16,7 +16,6 @@
 	let disabled = $derived(teamSlugError !== 'no_error' || purposeError !== 'no_error');
 
 	const reservedSlugs = [
-		'nais-system',
 		'kube-system',
 		'kube-node-lease',
 		'kube-public',
@@ -36,13 +35,6 @@
 			// Check if the slug is reserved
 			if (reservedSlugs.includes(slug)) {
 				teamSlugError = 'Denne slug-en er reservert.';
-				return;
-			}
-
-			// Check if the slug starts with "nais"
-			if (slug.startsWith('nais')) {
-				teamSlugError =
-					"Navneprefikset 'nais' er reservert. Prøv igjen med et annet navn, kanskje bare ved å fjerne prefikset?";
 				return;
 			}
 

@@ -16,7 +16,7 @@
 				<Th>Navn</Th>
 				<Th>E-post</Th>
 				<Th>Ekstern ID</Th>
-				<Th>Nais-administrator</Th>
+				<Th>Dapla-administrator</Th>
 			</Tr>
 		</Thead>
 		<Tbody>
