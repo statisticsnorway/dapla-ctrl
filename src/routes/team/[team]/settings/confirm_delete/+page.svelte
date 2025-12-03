@@ -41,10 +41,10 @@
 	{:else}
 		<BodyLong style="padding-bottom: 1rem;">
 			Slettingen ble initiert av <strong>{key.createdBy.name}</strong> og utløper
-			<strong><Time distance={true} time={key.expires}></Time></strong>. Å slette teamet vil permanent
-			slette alle administrerte ressurser og alle ressurser innenfor dem. Alle applikasjoner,
-			databaser og jobber eid av teamet vil bli uopprettelig slettet. Når du klikker på slett team
-			er det ingen vei tilbake.
+			<strong><Time distance={true} time={key.expires}></Time></strong>. Å slette teamet vil
+			permanent slette alle administrerte ressurser og alle ressurser innenfor dem. Alle
+			applikasjoner, databaser og jobber eid av teamet vil bli uopprettelig slettet. Når du klikker
+			på slett team er det ingen vei tilbake.
 		</BodyLong>
 
 		<Button
@@ -59,8 +59,8 @@
 
 		<Modal bind:open={showConfirmDeleteTeam} header="Bekreft team-sletting">
 			<BodyLong>
-				Bekreft at du har til hensikt å slette <strong>{key.team.slug}</strong> og alle ressurser
-				relatert til det.
+				Bekreft at du har til hensikt å slette <strong>{key.team.slug}</strong> og alle ressurser relatert
+				til det.
 			</BodyLong>
 
 			{#if deleteTeamResp?.errors}

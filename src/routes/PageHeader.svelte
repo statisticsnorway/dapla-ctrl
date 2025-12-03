@@ -12,7 +12,6 @@
 	} from '@nais/ds-svelte-community/experimental';
 	import { CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
 	import Logo from '../Logo.svelte';
-	import { PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL } from '$env/static/public';
 
 	interface Props {
 		user:
@@ -36,7 +35,7 @@
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
-	<InternalHeaderButton as="a" href={PUBLIC_DAPLA_CTRL_DOCUMENTATION_URL}
+	<InternalHeaderButton as="a" href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
 		>Dokumentasjon</InternalHeaderButton
 	>
 	<ActionMenu>

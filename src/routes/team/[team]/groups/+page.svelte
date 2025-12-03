@@ -43,7 +43,8 @@
 	let deleteUserOpen = $state(false);
 
 	let canEdit = $derived(
-		viewerIsOwner === true || (UserInfo.data?.me.__typename == 'User' && UserInfo.data?.me.isAdmin)
+		viewerIsOwner === true ||
+			($UserInfo.data?.me.__typename == 'User' && $UserInfo.data?.me.isAdmin)
 	);
 
 	// let after: string = $state($Groups.variables?.after ?? '');

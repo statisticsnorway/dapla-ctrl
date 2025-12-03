@@ -1,15 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Alert, Button, CopyButton, Heading, TextField } from '@nais/ds-svelte-community';
+	import { Alert, Button, Heading } from '@nais/ds-svelte-community';
 	import Logo from '../Logo.svelte';
 
 	const redirectPath = (url: URL) => {
 		return encodeURIComponent(url.pathname + url.search + url.hash);
 	};
-
-	let { userAgent }: { userAgent: string } = $props();
-
-	let chrome: boolean = $derived(userAgent.indexOf('Chrome/') > 0);
 </script>
 
 <svelte:head>
@@ -60,21 +56,5 @@
 	.login {
 		text-align: center;
 		max-width: 600px;
-	}
-
-	.help {
-		color: var(--ax-text-neutral-subtle);
-		margin-top: var(--ax-space-64);
-		text-align: left;
-	}
-
-	.line {
-		display: flex;
-		gap: 1rem;
-		align-items: center;
-
-		:global(> *:first-child) {
-			flex-grow: 1;
-		}
 	}
 </style>

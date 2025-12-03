@@ -15,7 +15,7 @@
 	import PageHeader from './PageHeader.svelte';
 
 	let { data, children }: LayoutProps = $props();
-	let { UserInfo, userAgent } = $derived(data);
+	let { UserInfo } = $derived(data);
 
 	themeSwitch.theme = data.theme;
 
@@ -86,7 +86,7 @@
 
 			{#if !$isAuthenticated || isUnauthenticated($UserInfo.errors)}
 				<!-- logged out. We check both to support both  -->
-				<Login {userAgent} />
+				<Login />
 			{:else}
 				{#if user?.__typename === 'User'}
 					<PageHeader {user} />

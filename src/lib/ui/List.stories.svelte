@@ -34,8 +34,6 @@
 			purpose: 'The Nais platform team'
 		}
 	];
-
-
 </script>
 
 <Story name="Teams" asChild>

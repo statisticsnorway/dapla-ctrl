@@ -130,7 +130,8 @@
 
 		{#if !deleteKeyResp?.data}
 			<BodyLong>
-				Bekreft at du har til hensikt å slette <strong>{teamSlug}</strong> og alle ressurser relatert til det.
+				Bekreft at du har til hensikt å slette <strong>{teamSlug}</strong> og alle ressurser relatert
+				til det.
 			</BodyLong>
 		{/if}
 
@@ -145,12 +146,7 @@
 
 				<div class="deletewrapper">
 					<div>
-						<TextField
-							label="Delbar URL"
-							hideLabel={true}
-							readonly={true}
-							size="small"
-							value={key}
+						<TextField label="Delbar URL" hideLabel={true} readonly={true} size="small" value={key}
 						></TextField>
 					</div>
 					<CopyButton

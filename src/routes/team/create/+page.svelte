@@ -100,8 +100,8 @@
 		Å opprette et team i Nais gir tilgang til visse Nais-funksjoner, som Google Cloud-prosjekter,
 		Kubernetes-namespacer eller ditt eget GitHub-team. Etter at teamet er opprettet, blir du
 		administrator for teamet, med rettigheter til å legge til og fjerne teammedlemmer.
-		Identifikatoren er den primære nøkkelen og vil bli brukt på tvers av systemer slik at de
-		enkelt kan gjenkjennes.
+		Identifikatoren er den primære nøkkelen og vil bli brukt på tvers av systemer slik at de enkelt
+		kan gjenkjennes.
 	</p>
 	<form
 		method="POST"
@@ -119,8 +119,8 @@
 			{/snippet}
 			{#snippet description()}
 				Eksempel: mitt-team-navn<br />
-				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre identifikatoren etter
-				opprettelse, så velg klokt.
+				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre identifikatoren etter opprettelse,
+				så velg klokt.
 			{/snippet}
 		</TextField>
 		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
