@@ -2,17 +2,18 @@
 
 ## Development
 
+We use [pnpm](https://pnpm.io/) as package manager.
 The following snippet contains the most important commands for development.
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env # Copy the example environment file
-npm run build # Build the project
-npm run dev # Starts a development server on port 5173
+pnpm run build # Build the project
+pnpm run dev # Starts a development server on port 5173
 
-npm run check # Check for various issues
-npm run lint # Lint the code
-npm run format # Format the code (Or use a Prettier extension in  your editor)
+pnpm run check # Check for various issues
+pnpm run lint # Lint the code
+pnpm run format # Format the code (Or use a Prettier extension in  your editor)
 ```
 
 ## User

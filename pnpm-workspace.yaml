@@ -1,0 +1,6 @@
+# https://pnpm.io/settings
+minimumReleaseAge: 10080 # 7 days, 60min*24 hour * 7days
+strictSsl: true
+autoInstallPeers: false
+saveExact: false
+lockfile: true
