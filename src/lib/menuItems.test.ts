@@ -20,81 +20,11 @@ describe('menuItems', () => {
 			).toEqual([
 				[{ label: 'Team Overview', href: '/team/devteam', active: true }],
 				[
-					{ label: 'Applications', href: '/team/devteam/applications' },
-					{ label: 'Jobs', href: '/team/devteam/jobs' }
-				],
-				[
-					{ label: 'Secrets', href: '/team/devteam/secrets' },
-					{ label: 'Postgres', href: '/team/devteam/postgres' },
-					{ label: 'Buckets', href: '/team/devteam/buckets' },
-					{ label: 'Valkey', href: '/team/devteam/valkey' },
-					{ label: 'OpenSearch', href: '/team/devteam/opensearch' },
-					{ label: 'Kafka Topics', href: '/team/devteam/kafka' },
-					{ label: 'BigQuery', href: '/team/devteam/bigquery' },
-					{ label: 'Unleash', href: '/team/devteam/unleash' }
-				],
-				[
-					{ label: 'Deployments', href: '/team/devteam/deploy' },
-					{ label: 'Cost', href: '/team/devteam/cost' },
-					{ label: 'Utilization', href: '/team/devteam/utilization' },
-					{ label: 'Vulnerabilities', href: '/team/devteam/vulnerabilities' }
-				],
-				[
-					{ label: 'Members', href: '/team/devteam/members' },
-					{ label: 'Repositories', href: '/team/devteam/repositories' },
+					{ label: 'Groups', href: '/team/devteam/groups' },
 					{ label: 'Settings', href: '/team/devteam/settings' },
 					{ label: 'Activity Log', href: '/team/devteam/activity-log' }
 				]
 			]);
-		});
-
-		test('secrets active for sub-pages', () => {
-			expect(
-				menuItems({
-					path: '/team/nais/prod-gcp/secret/github-backup-config',
-					member: true,
-					isAdmin: false
-				})
-					.flatMap((g) => g)
-					.find((i) => i.label === 'Secrets')?.active
-			).toBe(true);
-		});
-
-		test('postgres active for sub-pages', () => {
-			expect(
-				menuItems({
-					path: '/team/nais/prod-gcp/postgres/gemini',
-					member: true,
-					isAdmin: false
-				})
-					.flatMap((g) => g)
-					.find((i) => i.label === 'Postgres')?.active
-			).toBe(true);
-		});
-
-		test('valkey active for sub-pages with feature toogling', () => {
-			expect(
-				menuItems({
-					path: '/team/nais/prod-gcp/valkey/gemini',
-					features,
-					member: true,
-					isAdmin: false
-				})
-					.flatMap((g) => g)
-					.find((i) => i.label === 'Valkey')?.active
-			).toBe(true);
-		});
-
-		test('no features', () => {
-			expect(
-				menuItems({
-					path: '/team/devteam/jobs',
-					member: true,
-					isAdmin: false
-				})
-					.flatMap((g) => g)
-					.find((i) => ['Valkey', 'OpenSearch', 'Kafka Topics', 'Unleash'].includes(i.label))
-			).toBeUndefined();
 		});
 
 		test('when not member', () => {
@@ -106,7 +36,7 @@ describe('menuItems', () => {
 					isAdmin: false
 				})
 					.flatMap((g) => g)
-					.find((i) => ['Secrets', 'Settings'].includes(i.label))
+					.find((i) => ['Settings'].includes(i.label))
 			).toBeUndefined();
 		});
 
@@ -136,61 +66,6 @@ describe('menuItems', () => {
 					.flatMap((g) => g)
 					.find((i) => ['Settings'].includes(i.label))
 			).toBeDefined();
-		});
-	});
-
-	describe('workload menu', () => {
-		test('full', () => {
-			expect(
-				menuItems({
-					path: '/team/devteam/dev/app/app-w-all-storage/utilization',
-					member: true,
-					isAdmin: false
-				})
-			).toEqual([
-				[{ label: 'App Overview', href: '/team/devteam/dev/app/app-w-all-storage' }],
-				[
-					{
-						label: 'Vulnerability Report',
-						href: '/team/devteam/dev/app/app-w-all-storage/vulnerability-report'
-					},
-					{
-						label: 'Deployments',
-						href: '/team/devteam/dev/app/app-w-all-storage/deploys'
-					},
-					{ label: 'Cost', href: '/team/devteam/dev/app/app-w-all-storage/cost' },
-					{ label: 'Issues', href: '/team/devteam/dev/app/app-w-all-storage/issues' },
-					{
-						label: 'Utilization',
-						href: '/team/devteam/dev/app/app-w-all-storage/utilization',
-						active: true
-					},
-					{
-						href: '/team/devteam/dev/app/app-w-all-storage/ingresses',
-						label: 'Ingresses'
-					},
-					{ label: 'Logs', href: '/team/devteam/dev/app/app-w-all-storage/logs' }
-				],
-				[
-					{
-						label: 'Manifest',
-						href: '/team/devteam/dev/app/app-w-all-storage/manifest'
-					}
-				],
-				[{ label: 'Delete', href: '/team/devteam/dev/app/app-w-all-storage/delete' }]
-			]);
-		});
-
-		test('when not member', () => {
-			expect(
-				menuItems({
-					path: '/team/devteam/dev/job/dataproduct-apps-topics/vulnerability-report',
-					member: false,
-					isAdmin: false
-				})
-					.flatMap((g) => g)
-					.find((i) => ['Delete'].includes(i.label))
-			).toBeUndefined();
 		});
 	});
 });

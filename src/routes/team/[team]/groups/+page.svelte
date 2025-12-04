@@ -4,7 +4,7 @@
 	import List from '$lib/ui/List.svelte';
 	import ListItem from '$lib/ui/ListItem.svelte';
 	import OrderByMenu from '$lib/ui/OrderByMenu.svelte';
-	import GraphErrors from '$lib/GraphErrors.svelte';
+	import GraphErrors from '$lib/ui/GraphErrors.svelte';
 	// import Pagination from '$lib/Pagination.svelte';
 	// import { changeParams } from '$lib/utils/searchparams';
 	import { BodyShort, Button, Heading } from '@nais/ds-svelte-community';

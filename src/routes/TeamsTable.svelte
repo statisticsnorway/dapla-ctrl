@@ -62,7 +62,7 @@
 			return [];
 		}
 
-		return data.sort((a, b) => {
+		return [...data].sort((a, b) => {
 			if (sortedBy === 'NAME') {
 				if (sortDirection === 'descending') {
 					if (a.slug > b.slug) return -1;
@@ -97,12 +97,6 @@
 			return 0;
 		});
 	}
-
-	// team.managers
-	// 	.map((user) => {
-	// 		return `<a href="/user/${user.email}">${user.name}</a>`;
-	// 	})
-	// 	.join(', ');
 </script>
 
 <Table

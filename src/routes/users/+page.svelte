@@ -4,7 +4,7 @@
 	import List from '$lib/ui/List.svelte';
 	import ListItem from '$lib/ui/ListItem.svelte';
 	import OrderByMenu from '$lib/ui/OrderByMenu.svelte';
-	import Pagination from '$lib/Pagination.svelte';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import { changeParams } from '$lib/utils/searchparams';
 	import { BodyShort, Heading } from '@nais/ds-svelte-community';
 	import { PersonGroupIcon } from '@nais/ds-svelte-community/icons';

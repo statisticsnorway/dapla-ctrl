@@ -1,23 +1,25 @@
 FROM node:22-alpine AS node-with-deps
 WORKDIR /usr/app
+RUN apk add pnpm
 
-COPY package*.json svelte.config.js .npmrc ./
+COPY package.json pnpm*.yaml svelte.config.js .npmrc ./
 
-RUN npm ci --quiet
+RUN pnpm install
 
 COPY . ./
 
-ENV VITE_GRAPHQL_ENDPOINT=http://nais-api/graphql
+ENV VITE_GRAPHQL_ENDPOINT=http://dapla-api/graphql
 
-RUN npm run build
+RUN pnpm run build
 
 FROM node:22-alpine
 WORKDIR /usr/app
 
+RUN apk add pnpm
 ENV NODE_ENV=production
 
 COPY --from=node-with-deps /usr/app/package*.json /usr/app/.npmrc ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN pnpm install -P --ignore-scripts
 
 COPY --from=node-with-deps /usr/app/build ./
 
