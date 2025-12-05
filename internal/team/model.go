@@ -31,6 +31,7 @@ type (
 type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
 	Purpose              string     `json:"purpose"`
+	SectionCode          string     `json:"sectionCode"`
 	LastSuccessfulSync   *time.Time `json:"lastSuccessfulSync"`
 	DeleteKeyConfirmedAt *time.Time `json:"-"`
 }
@@ -104,8 +105,9 @@ func (e TeamOrderField) MarshalGQL(w io.Writer) {
 
 func toGraphTeam(m *teamsql.Team) *Team {
 	ret := &Team{
-		Slug:    m.Slug,
-		Purpose: m.Purpose,
+		Slug:        m.Slug,
+		Purpose:     m.Purpose,
+		SectionCode: m.SectionCode,
 	}
 
 	if m.LastSuccessfulSync.Valid {
@@ -305,8 +307,9 @@ func (e UserTeamOrderField) MarshalGQL(w io.Writer) {
 }
 
 type CreateTeamInput struct {
-	Slug    slug.Slug `json:"slug"`
-	Purpose string    `json:"purpose"`
+	Slug        slug.Slug `json:"slug"`
+	Purpose     string    `json:"purpose"`
+	SectionCode string    `json:"sectionCode"`
 }
 
 func (i *CreateTeamInput) Validate(ctx context.Context) error {

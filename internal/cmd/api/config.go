@@ -83,7 +83,7 @@ type Config struct {
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
 
-	Fakes    Fakes
+	Fakes Fakes
 }
 
 type Fakes struct {

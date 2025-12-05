@@ -107,6 +107,9 @@ type Team implements Node {
 	"Purpose of the team."
 	purpose: String!
 
+	"Section who owns the team"
+	section: Section!
+
 	"Get a specific member of the team."
 	member(email: String!): TeamMember!
 

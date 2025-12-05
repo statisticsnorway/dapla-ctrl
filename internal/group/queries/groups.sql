@@ -103,10 +103,10 @@ ORDER BY
 
 -- name: ListAllForSearch :many
 SELECT
-    name,
-    team_slug
+	name,
+	team_slug
 FROM
-    groups
+	groups
 ORDER BY
-    name ASC
+	name ASC
 ;

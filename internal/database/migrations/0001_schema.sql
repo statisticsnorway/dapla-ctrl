@@ -366,7 +366,7 @@ AFTER INSERT
 OR
 UPDATE
 OR DELETE ON teams FOR EACH ROW
-EXECUTE PROCEDURE api_notify ("slug", "purpose")
+EXECUTE PROCEDURE api_notify ("slug", "purpose", "section_code")
 ;
 
 -- initial values

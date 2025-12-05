@@ -6,6 +6,7 @@ import (
 	pagination "github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	group "github.com/statisticsnorway/dapla-api/internal/group"
 	search "github.com/statisticsnorway/dapla-api/internal/search"
+	section "github.com/statisticsnorway/dapla-api/internal/section"
 	team "github.com/statisticsnorway/dapla-api/internal/team"
 	user "github.com/statisticsnorway/dapla-api/internal/user"
 )
@@ -26,6 +27,9 @@ func NewComplexityRoot() ComplexityRoot {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.Search = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter search.SearchFilter) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Query.Sections = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *section.SectionOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.ServiceAccounts = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {

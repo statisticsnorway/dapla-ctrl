@@ -13,6 +13,7 @@ type Team struct {
 	Purpose              string
 	LastSuccessfulSync   pgtype.Timestamp
 	DeleteKeyConfirmedAt pgtype.Timestamptz
+	SectionCode          string
 }
 
 type User struct {

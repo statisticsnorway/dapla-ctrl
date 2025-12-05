@@ -10,6 +10,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
+	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
@@ -235,6 +236,10 @@ func (r *removeTeamMemberPayloadResolver) User(ctx context.Context, obj *team.Re
 
 func (r *removeTeamMemberPayloadResolver) Team(ctx context.Context, obj *team.RemoveTeamMemberPayload) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *teamResolver) Section(ctx context.Context, obj *team.Team) (*section.Section, error) {
+	return section.Get(ctx, obj.SectionCode)
 }
 
 func (r *teamResolver) Member(ctx context.Context, obj *team.Team, email string) (*team.TeamMember, error) {

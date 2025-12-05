@@ -26,8 +26,9 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 	err := database.Transaction(ctx, func(ctx context.Context) error {
 		var err error
 		team, err = db(ctx).Create(ctx, teamsql.CreateParams{
-			Slug:    input.Slug,
-			Purpose: input.Purpose,
+			Slug:        input.Slug,
+			Purpose:     input.Purpose,
+			SectionCode: input.SectionCode,
 		})
 		if err != nil {
 			return err

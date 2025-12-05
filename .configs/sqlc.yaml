@@ -140,6 +140,15 @@ sql:
         out: "../internal/usersync/usersyncsql"
 
   - <<: *default_domain
+    name: "Section SQL"
+    queries: "../internal/section/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "sectionsql"
+        out: "../internal/section/sectionsql"
+
+  - <<: *default_domain
     name: "Session SQL"
     queries: "../internal/session/queries"
     gen:

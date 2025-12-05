@@ -1,0 +1,121 @@
+extend type Query {
+	"""
+	Get a list of sections.
+	"""
+	sections(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: SectionOrder
+	): SectionConnection!
+
+	"""
+	Get a section by its code, e.g. '724'.
+	"""
+	section(code: String!): Section!
+}
+
+"""
+The section type represents a section of the Nais platform and the Nais GraphQL API.
+"""
+type Section implements Node {
+	"""
+	The globally unique ID of the section.
+	"""
+	id: ID!
+
+	"""
+	Code of the section.
+	"""
+	code: String!
+
+	"""
+	Full name of section.
+	"""
+	name: String!
+
+	"""
+	The manager of the section.
+	"""
+	manager: User
+}
+
+"""
+section connection.
+"""
+type SectionConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [Section!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [SectionEdge!]!
+}
+
+"""
+section edge.
+"""
+type SectionEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The section.
+	"""
+	node: Section!
+}
+
+"""
+Ordering options when fetching sections.
+"""
+input SectionOrder {
+	"""
+	The field to order items by.
+	"""
+	field: SectionOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order sections by.
+"""
+enum SectionOrderField {
+	"""
+	The code of the section.
+	"""
+	CODE
+}

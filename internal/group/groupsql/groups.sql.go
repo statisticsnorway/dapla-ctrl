@@ -201,12 +201,12 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 
 const listAllForSearch = `-- name: ListAllForSearch :many
 SELECT
-    name,
-    team_slug
+	name,
+	team_slug
 FROM
-    groups
+	groups
 ORDER BY
-    name ASC
+	name ASC
 `
 
 type ListAllForSearchRow struct {

@@ -24,6 +24,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/reconciler"
 	"github.com/statisticsnorway/dapla-api/internal/search"
+	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
 	"github.com/statisticsnorway/dapla-api/internal/session"
 	"github.com/statisticsnorway/dapla-api/internal/team"
@@ -164,6 +165,7 @@ func ConfigureGraph(
 		ctx = reconciler.NewLoaderContext(ctx, pool)
 		ctx = serviceaccount.NewLoaderContext(ctx, pool)
 		ctx = session.NewLoaderContext(ctx, pool)
+		ctx = section.NewLoaderContext(ctx, pool)
 		ctx = search.NewLoaderContext(ctx, pool, searcher)
 		ctx = feature.NewLoaderContext(ctx)
 		ctx = group.NewLoaderContext(ctx, pool)

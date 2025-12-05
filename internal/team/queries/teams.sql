@@ -1,8 +1,8 @@
 -- name: Create :one
 INSERT INTO
-	teams (slug, purpose)
+	teams (slug, purpose, section_code)
 VALUES
-	(@slug, @purpose)
+	(@slug, @purpose, @section_code)
 RETURNING
 	*
 ;
@@ -126,7 +126,8 @@ FROM
 -- name: ListAllForSearch :many
 SELECT
 	slug,
-	purpose
+	purpose,
+	section_code
 FROM
 	teams
 ORDER BY

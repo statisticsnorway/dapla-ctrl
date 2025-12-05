@@ -269,8 +269,9 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		devteam, err = team.Get(ctx, "devteam")
 		if err != nil {
 			input := &team.CreateTeamInput{
-				Slug:    "devteam",
-				Purpose: "dev-purpose",
+				Slug:        "devteam",
+				Purpose:     "dev-purpose",
+				SectionCode: "724",
 			}
 			devteam, err = team.Create(ctx, input, actor)
 			if err != nil {
@@ -289,8 +290,9 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			}
 
 			input := &team.CreateTeamInput{
-				Slug:    name,
-				Purpose: "some purpose",
+				Slug:        name,
+				Purpose:     "some purpose",
+				SectionCode: "724",
 			}
 			t, err := team.Create(ctx, input, actor)
 			if err != nil {
