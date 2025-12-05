@@ -47,11 +47,6 @@ type oAuthConfig struct {
 	AdditionalScopes []string `env:"OAUTH_ADDITIONAL_SCOPES"`
 }
 
-type unleashConfig struct {
-	// BifrostApiEndpoint is the endpoint for the Bifrost API
-	BifrostApiUrl string `env:"UNLEASH_BIFROST_API_URL,default=*fake*"`
-}
-
 type Config struct {
 	// Tenant is the active tenant
 	Tenant string `env:"TENANT,default=dev-nais"`
@@ -87,7 +82,7 @@ type Config struct {
 
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
-	Unleash  unleashConfig
+
 	Fakes    Fakes
 }
 
