@@ -17,6 +17,7 @@ type Querier interface {
 	GetMemberByEmail(ctx context.Context, arg GetMemberByEmailParams) (*User, error)
 	GroupExists(ctx context.Context, arg GroupExistsParams) (bool, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
+	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)
 	ListByTeamSlug(ctx context.Context, arg ListByTeamSlugParams) ([]*Group, error)
 	ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)

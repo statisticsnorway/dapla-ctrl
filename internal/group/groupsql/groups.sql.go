@@ -199,6 +199,41 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 	return items, nil
 }
 
+const listAllForSearch = `-- name: ListAllForSearch :many
+SELECT
+    name,
+    team_slug
+FROM
+    groups
+ORDER BY
+    name ASC
+`
+
+type ListAllForSearchRow struct {
+	Name     string
+	TeamSlug slug.Slug
+}
+
+func (q *Queries) ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error) {
+	rows, err := q.db.Query(ctx, listAllForSearch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListAllForSearchRow{}
+	for rows.Next() {
+		var i ListAllForSearchRow
+		if err := rows.Scan(&i.Name, &i.TeamSlug); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listByTeamSlug = `-- name: ListByTeamSlug :many
 SELECT
 	name, team_slug, category, suffix, external_id

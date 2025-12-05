@@ -147,6 +147,7 @@ func ConfigureGraph(
 	}
 
 	team.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "team_search"))
+	group.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "group_search"))
 
 	// Re-index all to initialize the search index
 	if err := searcher.ReIndex(ctx); err != nil {

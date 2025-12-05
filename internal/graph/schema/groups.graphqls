@@ -104,6 +104,12 @@ type Group implements Node {
 	): GroupMemberConnection!
 }
 
+extend union SearchNode = Group
+
+extend enum SearchType {
+	GROUP
+}
+
 type GroupMember {
 	"Group instance."
 	group: Group!

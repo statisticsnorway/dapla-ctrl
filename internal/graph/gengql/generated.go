@@ -4066,6 +4066,12 @@ type Group implements Node {
 	): GroupMemberConnection!
 }
 
+extend union SearchNode = Group
+
+extend enum SearchType {
+	GROUP
+}
+
 type GroupMember {
 	"Group instance."
 	group: Group!
@@ -24263,6 +24269,13 @@ func (ec *executionContext) _SearchNode(ctx context.Context, sel ast.SelectionSe
 			return graphql.Null
 		}
 		return ec._Team(ctx, sel, obj)
+	case group.Group:
+		return ec._Group(ctx, sel, &obj)
+	case *group.Group:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Group(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -24804,7 +24817,7 @@ func (ec *executionContext) _Features(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var groupImplementors = []string{"Group", "Node"}
+var groupImplementors = []string{"Group", "Node", "SearchNode"}
 
 func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, obj *group.Group) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, groupImplementors)

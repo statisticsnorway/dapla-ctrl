@@ -44,3 +44,11 @@ VALUES
 		'Permission to manage group members'
 	)
 ;
+
+CREATE TRIGGER groups_notify
+AFTER INSERT
+OR
+UPDATE
+OR DELETE ON groups FOR EACH ROW
+EXECUTE PROCEDURE api_notify ("name", "team_slug")
+;

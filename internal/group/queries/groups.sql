@@ -100,3 +100,13 @@ ORDER BY
 	END DESC,
 	team_slug ASC
 ;
+
+-- name: ListAllForSearch :many
+SELECT
+    name,
+    team_slug
+FROM
+    groups
+ORDER BY
+    name ASC
+;
