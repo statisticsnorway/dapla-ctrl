@@ -3,7 +3,6 @@
 package grpcteamsql
 
 import (
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
@@ -14,12 +13,4 @@ type Team struct {
 	LastSuccessfulSync   pgtype.Timestamp
 	DeleteKeyConfirmedAt pgtype.Timestamptz
 	SectionCode          string
-}
-
-type User struct {
-	ID         uuid.UUID
-	Email      string
-	Name       string
-	ExternalID string
-	Admin      bool
 }

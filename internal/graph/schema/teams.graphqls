@@ -67,27 +67,6 @@ extend type Mutation {
 	Note: Service accounts are not allowed to confirm a team deletion.
 	"""
 	confirmTeamDeletion(input: ConfirmTeamDeletionInput!): ConfirmTeamDeletionPayload!
-
-	"""
-	Add a team member
-
-	If the user is already a member or an owner of the team, the mutation will result in an error.
-	"""
-	addTeamMember(input: AddTeamMemberInput!): AddTeamMemberPayload!
-
-	"""
-	Remove a team member
-
-	If the user is not already a member or an owner of the team, the mutation will result in an error.
-	"""
-	removeTeamMember(input: RemoveTeamMemberInput!): RemoveTeamMemberPayload!
-
-	"""
-	Assign a role to a team member
-
-	The user must already be a member of the team for this mutation to succeed.
-	"""
-	setTeamMemberRole(input: SetTeamMemberRoleInput!): SetTeamMemberRolePayload!
 }
 
 """
@@ -109,9 +88,6 @@ type Team implements Node {
 
 	"Section who owns the team"
 	section: Section!
-
-	"Get a specific member of the team."
-	member(email: String!): TeamMember!
 
 	"Team members."
 	members(
@@ -170,9 +146,6 @@ type TeamMember {
 
 	"User instance."
 	user: User!
-
-	"The role that the user has in the team."
-	role: TeamMemberRole!
 }
 
 type CreateTeamPayload {
@@ -193,24 +166,6 @@ type RequestTeamDeletionPayload {
 type ConfirmTeamDeletionPayload {
 	"Whether or not the asynchronous deletion process was started."
 	deletionStarted: Boolean
-}
-
-type AddTeamMemberPayload {
-	"The added team member."
-	member: TeamMember
-}
-
-type RemoveTeamMemberPayload {
-	"The user that was removed from the team."
-	user: User
-
-	"The team that the member was removed from."
-	team: Team
-}
-
-type SetTeamMemberRolePayload {
-	"The updated team member."
-	member: TeamMember
 }
 
 type TeamDeleteKey {
@@ -327,36 +282,6 @@ input ConfirmTeamDeletionInput {
 
 	"Deletion key, acquired using the requestTeamDeletion mutation."
 	key: String!
-}
-
-input AddTeamMemberInput {
-	"Slug of the team that should receive a new member."
-	teamSlug: Slug!
-
-	"The email address of the user to add to the team."
-	userEmail: String!
-
-	"The role that the user will have in the team."
-	role: TeamMemberRole!
-}
-
-input RemoveTeamMemberInput {
-	"Slug of the team that the member should be removed from."
-	teamSlug: Slug!
-
-	"The email address of the user to remove from the team."
-	userEmail: String!
-}
-
-input SetTeamMemberRoleInput {
-	"The slug of the team."
-	teamSlug: Slug!
-
-	"The email address of the user."
-	userEmail: String!
-
-	"The role to assign."
-	role: TeamMemberRole!
 }
 
 "Possible fields to order teams by."
@@ -500,112 +425,4 @@ type TeamConfirmDeleteKeyActivityLogEntry implements ActivityLogEntry & Node {
 
 	"The team slug that the entry belongs to."
 	teamSlug: Slug!
-}
-
-type TeamMemberAddedActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-
-	"Data associated with the action."
-	data: TeamMemberAddedActivityLogEntryData!
-}
-
-type TeamMemberAddedActivityLogEntryData {
-	"The role that the user was added with."
-	role: TeamMemberRole!
-
-	"The ID of the user that was added."
-	userID: ID!
-
-	"The email address of the user that was added."
-	userEmail: String!
-}
-
-type TeamMemberRemovedActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-
-	"Data associated with the action."
-	data: TeamMemberRemovedActivityLogEntryData!
-}
-
-type TeamMemberRemovedActivityLogEntryData {
-	"The ID of the user that was removed."
-	userID: ID!
-
-	"The email address of the user that was removed."
-	userEmail: String!
-}
-
-type TeamMemberSetRoleActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-
-	"Data associated with the action."
-	data: TeamMemberSetRoleActivityLogEntryData!
-}
-
-type TeamMemberSetRoleActivityLogEntryData {
-	"The role that the user was assigned."
-	role: TeamMemberRole!
-
-	"The ID of the user that was added."
-	userID: ID!
-
-	"The email address of the user that was added."
-	userEmail: String!
 }

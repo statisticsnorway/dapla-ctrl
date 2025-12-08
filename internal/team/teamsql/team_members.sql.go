@@ -10,118 +10,20 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
 
-const addMember = `-- name: AddMember :exec
-INSERT INTO
-	user_roles (user_id, role_name, target_team_slug)
-VALUES
-	($1, $2, $3::slug)
-ON CONFLICT DO NOTHING
-`
-
-type AddMemberParams struct {
-	UserID   uuid.UUID
-	RoleName string
-	TeamSlug slug.Slug
-}
-
-func (q *Queries) AddMember(ctx context.Context, arg AddMemberParams) error {
-	_, err := q.db.Exec(ctx, addMember, arg.UserID, arg.RoleName, arg.TeamSlug)
-	return err
-}
-
-const getMember = `-- name: GetMember :one
-SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
-	user_roles.role_name
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
-WHERE
-	user_roles.target_team_slug = $1::slug
-	AND user_roles.user_id = $2
-`
-
-type GetMemberParams struct {
-	TeamSlug slug.Slug
-	UserID   uuid.UUID
-}
-
-type GetMemberRow struct {
-	ID         uuid.UUID
-	Email      string
-	Name       string
-	ExternalID string
-	Admin      bool
-	RoleName   string
-}
-
-func (q *Queries) GetMember(ctx context.Context, arg GetMemberParams) (*GetMemberRow, error) {
-	row := q.db.QueryRow(ctx, getMember, arg.TeamSlug, arg.UserID)
-	var i GetMemberRow
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.Name,
-		&i.ExternalID,
-		&i.Admin,
-		&i.RoleName,
-	)
-	return &i, err
-}
-
-const getMemberByEmail = `-- name: GetMemberByEmail :one
-SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
-	user_roles.role_name
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
-WHERE
-	user_roles.target_team_slug = $1::slug
-	AND users.email = $2
-`
-
-type GetMemberByEmailParams struct {
-	TeamSlug slug.Slug
-	Email    string
-}
-
-type GetMemberByEmailRow struct {
-	ID         uuid.UUID
-	Email      string
-	Name       string
-	ExternalID string
-	Admin      bool
-	RoleName   string
-}
-
-func (q *Queries) GetMemberByEmail(ctx context.Context, arg GetMemberByEmailParams) (*GetMemberByEmailRow, error) {
-	row := q.db.QueryRow(ctx, getMemberByEmail, arg.TeamSlug, arg.Email)
-	var i GetMemberByEmailRow
-	err := row.Scan(
-		&i.ID,
-		&i.Email,
-		&i.Name,
-		&i.ExternalID,
-		&i.Admin,
-		&i.RoleName,
-	)
-	return &i, err
-}
-
 const listForUser = `-- name: ListForUser :many
 SELECT
+	teams.slug, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code,
 	users.id, users.email, users.name, users.external_id, users.admin,
-	user_roles.id, user_roles.role_name, user_roles.user_id, user_roles.target_team_slug,
 	COUNT(*) OVER () AS total_count
 FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
+	teams
+	JOIN groups ON groups.team_slug = teams.slug
+	JOIN group_members ON group_members.group_name = groups.name
+	JOIN users ON users.id = group_members.user_id
 WHERE
-	user_roles.user_id = $1
+	group_members.user_id = $1
+GROUP BY
+    users.id, teams.slug
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'slug:asc' THEN teams.slug
@@ -144,8 +46,8 @@ type ListForUserParams struct {
 }
 
 type ListForUserRow struct {
+	Team       Team
 	User       User
-	UserRole   UserRole
 	TotalCount int64
 }
 
@@ -164,15 +66,16 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 	for rows.Next() {
 		var i ListForUserRow
 		if err := rows.Scan(
+			&i.Team.Slug,
+			&i.Team.Purpose,
+			&i.Team.LastSuccessfulSync,
+			&i.Team.DeleteKeyConfirmedAt,
+			&i.Team.SectionCode,
 			&i.User.ID,
 			&i.User.Email,
 			&i.User.Name,
 			&i.User.ExternalID,
 			&i.User.Admin,
-			&i.UserRole.ID,
-			&i.UserRole.RoleName,
-			&i.UserRole.UserID,
-			&i.UserRole.TargetTeamSlug,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -188,14 +91,16 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 const listMembers = `-- name: ListMembers :many
 SELECT
 	users.id, users.email, users.name, users.external_id, users.admin,
-	user_roles.id, user_roles.role_name, user_roles.user_id, user_roles.target_team_slug,
+	groups.team_slug,
 	COUNT(*) OVER () AS total_count
 FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
 WHERE
-	user_roles.target_team_slug = $1::slug
+	groups.team_slug = $1::slug
+GROUP BY
+    groups.team_slug, users.id
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:asc' THEN LOWER(users.name)
@@ -208,12 +113,6 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
-	END DESC,
-	CASE
-		WHEN $2::TEXT = 'role:asc' THEN user_roles.role_name
-	END ASC,
-	CASE
-		WHEN $2::TEXT = 'role:desc' THEN user_roles.role_name
 	END DESC,
 	users.name,
 	users.email ASC
@@ -232,7 +131,7 @@ type ListMembersParams struct {
 
 type ListMembersRow struct {
 	User       User
-	UserRole   UserRole
+	TeamSlug   slug.Slug
 	TotalCount int64
 }
 
@@ -256,10 +155,7 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 			&i.User.Name,
 			&i.User.ExternalID,
 			&i.User.Admin,
-			&i.UserRole.ID,
-			&i.UserRole.RoleName,
-			&i.UserRole.UserID,
-			&i.UserRole.TargetTeamSlug,
+			&i.TeamSlug,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -272,34 +168,17 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 	return items, nil
 }
 
-const removeMember = `-- name: RemoveMember :exec
-DELETE FROM user_roles
-WHERE
-	user_id = $1
-	AND target_team_slug = $2::slug
-`
-
-type RemoveMemberParams struct {
-	UserID   uuid.UUID
-	TeamSlug slug.Slug
-}
-
-func (q *Queries) RemoveMember(ctx context.Context, arg RemoveMemberParams) error {
-	_, err := q.db.Exec(ctx, removeMember, arg.UserID, arg.TeamSlug)
-	return err
-}
-
 const userIsMember = `-- name: UserIsMember :one
 SELECT
 	EXISTS (
 		SELECT
-			id
+			user_id
 		FROM
-			user_roles
+			group_members
+			JOIN groups ON groups.name = group_members.group_name
 		WHERE
 			user_id = $1
-			AND target_team_slug = $2::slug
-			AND role_name IN ('Team member', 'Team owner')
+			AND groups.team_slug = $2::slug
 	)
 `
 
@@ -319,13 +198,15 @@ const userIsOwner = `-- name: UserIsOwner :one
 SELECT
 	EXISTS (
 		SELECT
-			id
+			user_id
 		FROM
-			user_roles
+			group_members
+			JOIN groups ON groups.name = group_members.group_name
 		WHERE
-			user_id = $1
-			AND target_team_slug = $2::slug
-			AND role_name = 'Team owner'
+			group_members.user_id = $1
+			AND groups.team_slug = $2::slug
+			AND groups.category = 'managers'
+			AND groups.suffix = ''
 	)
 `
 

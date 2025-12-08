@@ -171,18 +171,6 @@ function Team:purpose()
 	return ""
 end
 
---- Add a member to the team
----@param ... User
-function Team:addMember(...)
-	print("addMember")
-end
-
---- Add a owner to the team
----@param ... User
-function Team:addOwner(...)
-	print("addOwner")
-end
-
 ---@class User
 User = {}
 --- Create a new user

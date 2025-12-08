@@ -121,102 +121,6 @@ func (r *mutationResolver) ConfirmTeamDeletion(ctx context.Context, input team.C
 	}, nil
 }
 
-func (r *mutationResolver) AddTeamMember(ctx context.Context, input team.AddTeamMemberInput) (*team.AddTeamMemberPayload, error) {
-	actor := authz.ActorFromContext(ctx)
-
-	if err := authz.CanManageTeamMembers(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	if _, err := team.Get(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	u, err := user.GetByEmail(ctx, input.UserEmail)
-	if err != nil {
-		return nil, err
-	}
-
-	input.UserID = u.UUID
-	if err := team.AddMember(ctx, input, actor); err != nil {
-		return nil, err
-	}
-
-	correlationID := uuid.New()
-	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
-
-	return &team.AddTeamMemberPayload{
-		Member: &team.TeamMember{
-			Role:     input.Role,
-			TeamSlug: input.TeamSlug,
-			UserID:   u.UUID,
-		},
-	}, nil
-}
-
-func (r *mutationResolver) RemoveTeamMember(ctx context.Context, input team.RemoveTeamMemberInput) (*team.RemoveTeamMemberPayload, error) {
-	actor := authz.ActorFromContext(ctx)
-
-	if err := authz.CanManageTeamMembers(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	if _, err := team.Get(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	u, err := user.GetByEmail(ctx, input.UserEmail)
-	if err != nil {
-		return nil, err
-	}
-
-	input.UserID = u.UUID
-	if err := team.RemoveMember(ctx, input, actor); err != nil {
-		return nil, err
-	}
-
-	correlationID := uuid.New()
-	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
-
-	return &team.RemoveTeamMemberPayload{
-		UserID:   u.UUID,
-		TeamSlug: input.TeamSlug,
-	}, nil
-}
-
-func (r *mutationResolver) SetTeamMemberRole(ctx context.Context, input team.SetTeamMemberRoleInput) (*team.SetTeamMemberRolePayload, error) {
-	actor := authz.ActorFromContext(ctx)
-
-	if err := authz.CanManageTeamMembers(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	if _, err := team.Get(ctx, input.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	u, err := user.GetByEmail(ctx, input.UserEmail)
-	if err != nil {
-		return nil, err
-	}
-
-	input.UserID = u.UUID
-	if err := team.SetMemberRole(ctx, input, actor); err != nil {
-		return nil, err
-	}
-
-	correlationID := uuid.New()
-	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
-
-	return &team.SetTeamMemberRolePayload{
-		Member: &team.TeamMember{
-			Role:     input.Role,
-			TeamSlug: input.TeamSlug,
-			UserID:   u.UUID,
-		},
-	}, nil
-}
-
 func (r *queryResolver) Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
@@ -230,20 +134,8 @@ func (r *queryResolver) Team(ctx context.Context, slug slug.Slug) (*team.Team, e
 	return team.Get(ctx, slug)
 }
 
-func (r *removeTeamMemberPayloadResolver) User(ctx context.Context, obj *team.RemoveTeamMemberPayload) (*user.User, error) {
-	return user.Get(ctx, obj.UserID)
-}
-
-func (r *removeTeamMemberPayloadResolver) Team(ctx context.Context, obj *team.RemoveTeamMemberPayload) (*team.Team, error) {
-	return team.Get(ctx, obj.TeamSlug)
-}
-
 func (r *teamResolver) Section(ctx context.Context, obj *team.Team) (*section.Section, error) {
 	return section.Get(ctx, obj.SectionCode)
-}
-
-func (r *teamResolver) Member(ctx context.Context, obj *team.Team, email string) (*team.TeamMember, error) {
-	return team.GetMemberByEmail(ctx, obj.Slug, email)
 }
 
 func (r *teamResolver) Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error) {
@@ -297,10 +189,6 @@ func (r *teamMemberResolver) User(ctx context.Context, obj *team.TeamMember) (*u
 	return user.Get(ctx, obj.UserID)
 }
 
-func (r *Resolver) RemoveTeamMemberPayload() gengql.RemoveTeamMemberPayloadResolver {
-	return &removeTeamMemberPayloadResolver{r}
-}
-
 func (r *Resolver) Team() gengql.TeamResolver { return &teamResolver{r} }
 
 func (r *Resolver) TeamDeleteKey() gengql.TeamDeleteKeyResolver { return &teamDeleteKeyResolver{r} }
@@ -308,8 +196,7 @@ func (r *Resolver) TeamDeleteKey() gengql.TeamDeleteKeyResolver { return &teamDe
 func (r *Resolver) TeamMember() gengql.TeamMemberResolver { return &teamMemberResolver{r} }
 
 type (
-	removeTeamMemberPayloadResolver struct{ *Resolver }
-	teamResolver                    struct{ *Resolver }
-	teamDeleteKeyResolver           struct{ *Resolver }
-	teamMemberResolver              struct{ *Resolver }
+	teamResolver          struct{ *Resolver }
+	teamDeleteKeyResolver struct{ *Resolver }
+	teamMemberResolver    struct{ *Resolver }
 )

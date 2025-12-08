@@ -31,10 +31,3 @@ type User struct {
 	ExternalID string
 	Admin      bool
 }
-
-type UserRole struct {
-	ID             int32
-	RoleName       string
-	UserID         uuid.UUID
-	TargetTeamSlug *slug.Slug
-}

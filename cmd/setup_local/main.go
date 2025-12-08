@@ -351,9 +351,8 @@ func createGroupAndAddUsers(ctx context.Context, actor *authz.Actor, team slug.S
 		Suffix:   suffix,
 	}, actor)
 
-
 	i := 0
-	if len(users) - membersToAdd > 0 {
+	if len(users)-membersToAdd > 0 {
 		i = rand.IntN(len(users) - membersToAdd)
 	}
 	for index := range membersToAdd {

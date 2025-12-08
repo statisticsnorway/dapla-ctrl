@@ -50,24 +50,7 @@ func teamMetatable() *spec.Typemetatable {
 				Func:         teamGetSetPurpose,
 			},
 		},
-		Methods: []spec.Function{
-			{
-				Name: "addMember",
-				Doc:  "Add a member to the team",
-				Args: []spec.Argument{
-					{Name: "...", Type: []spec.ArgumentType{spec.ArgumentTypeMetatable("User")}, Doc: "The user IDs to add to the team"},
-				},
-				Func: teamAddMember,
-			},
-			{
-				Name: "addOwner",
-				Doc:  "Add a owner to the team",
-				Args: []spec.Argument{
-					{Name: "...", Type: []spec.ArgumentType{spec.ArgumentTypeMetatable("User")}, Doc: "The user IDs to add to the team"},
-				},
-				Func: teamAddOwner,
-			},
-		},
+		Methods: []spec.Function{},
 	}
 }
 
@@ -122,38 +105,6 @@ func teamGetSetPurpose(L *lua.LState) int {
 	}
 	L.Push(lua.LString(t.Purpose))
 	return 1
-}
-
-func addTeamRole(L *lua.LState, role string) int {
-	t := checkTeam(L)
-	db := teamsql.New(L.Context().Value(databaseKey).(*pgxpool.Pool))
-
-	users := []*User{}
-	for i := 2; i <= L.GetTop(); i++ {
-		users = append(users, checkUserL(L, i))
-	}
-
-	for _, u := range users {
-		err := db.AddMember(L.Context(), teamsql.AddMemberParams{
-			UserID:   u.ID,
-			TeamSlug: slug.Slug(t.Slug),
-			RoleName: role,
-		})
-		if err != nil {
-			L.RaiseError("failed to add members to team: %s", err)
-			return 0
-		}
-	}
-
-	return 0
-}
-
-func teamAddMember(L *lua.LState) int {
-	return addTeamRole(L, "Team member")
-}
-
-func teamAddOwner(L *lua.LState) int {
-	return addTeamRole(L, "Team owner")
 }
 
 func checkTeam(L *lua.LState) *Team {

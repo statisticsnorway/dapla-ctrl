@@ -123,22 +123,19 @@ func toGraphTeam(m *teamsql.Team) *Team {
 
 func toGraphTeamMember(m *teamsql.ListMembersRow) *TeamMember {
 	return &TeamMember{
-		Role:     teamMemberRoleFromSqlTeamRole(m.UserRole.RoleName),
-		TeamSlug: *m.UserRole.TargetTeamSlug,
+		TeamSlug: m.TeamSlug,
 		UserID:   m.User.ID,
 	}
 }
 
 func toGraphUserTeam(m *teamsql.ListForUserRow) *TeamMember {
 	return &TeamMember{
-		Role:     teamMemberRoleFromSqlTeamRole(m.UserRole.RoleName),
-		TeamSlug: *m.UserRole.TargetTeamSlug,
+		TeamSlug: m.Team.Slug,
 		UserID:   m.User.ID,
 	}
 }
 
 type TeamMember struct {
-	Role     TeamMemberRole
 	TeamSlug slug.Slug `json:"-"`
 	UserID   uuid.UUID `json:"-"`
 }
@@ -156,21 +153,6 @@ func (e TeamMemberRole) IsValid() bool {
 		return true
 	}
 	return false
-}
-
-func teamMemberRoleToSqlRole(role TeamMemberRole) string {
-	if role == TeamMemberRoleMember {
-		return "Team member"
-	}
-
-	return "Team owner"
-}
-
-func teamMemberRoleFromSqlTeamRole(t string) TeamMemberRole {
-	if t == "Team owner" {
-		return TeamMemberRoleOwner
-	}
-	return TeamMemberRoleMember
 }
 
 func (e TeamMemberRole) String() string {

@@ -230,12 +230,3 @@ func checkUser(L *lua.LState) *User {
 	L.ArgError(1, "User expected")
 	return nil
 }
-
-func checkUserL(L *lua.LState, idx int) *User {
-	ud := L.CheckUserData(idx)
-	if v, ok := ud.Value.(*User); ok {
-		return v
-	}
-	L.ArgError(1, "User expected")
-	return nil
-}

@@ -39,23 +39,6 @@ func (q *Queries) CountGroups(ctx context.Context, teamSlug slug.Slug) (int64, e
 	return total, err
 }
 
-const countMembers = `-- name: CountMembers :one
-SELECT
-	COUNT(user_roles.*) AS total
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-WHERE
-	user_roles.target_team_slug = $1::slug
-`
-
-func (q *Queries) CountMembers(ctx context.Context, teamSlug slug.Slug) (int64, error) {
-	row := q.db.QueryRow(ctx, countMembers, teamSlug)
-	var total int64
-	err := row.Scan(&total)
-	return total, err
-}
-
 const delete = `-- name: Delete :exec
 DELETE FROM teams
 WHERE
@@ -173,55 +156,6 @@ func (q *Queries) ListGroups(ctx context.Context, arg ListGroupsParams) ([]*List
 	for rows.Next() {
 		var i ListGroupsRow
 		if err := rows.Scan(&i.Name, &i.TeamSlug, &i.ExternalID); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listMembers = `-- name: ListMembers :many
-SELECT
-	users.id, users.email, users.name, users.external_id, users.admin
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
-WHERE
-	user_roles.target_team_slug = $1::slug
-ORDER BY
-	users.name ASC
-LIMIT
-	$3
-OFFSET
-	$2
-`
-
-type ListMembersParams struct {
-	TeamSlug slug.Slug
-	Offset   int32
-	Limit    int32
-}
-
-func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*User, error) {
-	rows, err := q.db.Query(ctx, listMembers, arg.TeamSlug, arg.Offset, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []*User{}
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Email,
-			&i.Name,
-			&i.ExternalID,
-			&i.Admin,
-		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

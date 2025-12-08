@@ -1,14 +1,17 @@
 -- name: ListMembers :many
 SELECT
 	sqlc.embed(users),
-	sqlc.embed(user_roles),
+	groups.team_slug,
 	COUNT(*) OVER () AS total_count
 FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
 WHERE
-	user_roles.target_team_slug = @team_slug::slug
+	groups.team_slug = @team_slug::slug
+GROUP BY
+	groups.team_slug,
+	users.id
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:asc' THEN LOWER(users.name)
@@ -22,12 +25,6 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
 	END DESC,
-	CASE
-		WHEN @order_by::TEXT = 'role:asc' THEN user_roles.role_name
-	END ASC,
-	CASE
-		WHEN @order_by::TEXT = 'role:desc' THEN user_roles.role_name
-	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -38,15 +35,19 @@ OFFSET
 
 -- name: ListForUser :many
 SELECT
+	sqlc.embed(teams),
 	sqlc.embed(users),
-	sqlc.embed(user_roles),
 	COUNT(*) OVER () AS total_count
 FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
+	teams
+	JOIN groups ON groups.team_slug = teams.slug
+	JOIN group_members ON group_members.group_name = groups.name
+	JOIN users ON users.id = group_members.user_id
 WHERE
-	user_roles.user_id = @user_id
+	group_members.user_id = @user_id
+GROUP BY
+	users.id,
+	teams.slug
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'slug:asc' THEN teams.slug
@@ -61,58 +62,17 @@ OFFSET
 	sqlc.arg('offset')
 ;
 
--- name: GetMember :one
-SELECT
-	users.*,
-	user_roles.role_name
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
-WHERE
-	user_roles.target_team_slug = @team_slug::slug
-	AND user_roles.user_id = @user_id
-;
-
--- name: GetMemberByEmail :one
-SELECT
-	users.*,
-	user_roles.role_name
-FROM
-	user_roles
-	JOIN teams ON teams.slug = user_roles.target_team_slug
-	JOIN users ON users.id = user_roles.user_id
-WHERE
-	user_roles.target_team_slug = @team_slug::slug
-	AND users.email = @email
-;
-
--- name: AddMember :exec
-INSERT INTO
-	user_roles (user_id, role_name, target_team_slug)
-VALUES
-	(@user_id, @role_name, @team_slug::slug)
-ON CONFLICT DO NOTHING
-;
-
--- name: RemoveMember :exec
-DELETE FROM user_roles
-WHERE
-	user_id = @user_id
-	AND target_team_slug = @team_slug::slug
-;
-
 -- name: UserIsMember :one
 SELECT
 	EXISTS (
 		SELECT
-			id
+			user_id
 		FROM
-			user_roles
+			group_members
+			JOIN groups ON groups.name = group_members.group_name
 		WHERE
 			user_id = @user_id
-			AND target_team_slug = @team_slug::slug
-			AND role_name IN ('Team member', 'Team owner')
+			AND groups.team_slug = @team_slug::slug
 	)
 ;
 
@@ -120,12 +80,14 @@ SELECT
 SELECT
 	EXISTS (
 		SELECT
-			id
+			user_id
 		FROM
-			user_roles
+			group_members
+			JOIN groups ON groups.name = group_members.group_name
 		WHERE
-			user_id = @user_id
-			AND target_team_slug = @team_slug::slug
-			AND role_name = 'Team owner'
+			group_members.user_id = @user_id
+			AND groups.team_slug = @team_slug::slug
+			AND groups.category = 'managers'
+			AND groups.suffix = ''
 	)
 ;

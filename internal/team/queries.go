@@ -2,14 +2,11 @@ package team
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
@@ -171,23 +168,6 @@ func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Paginat
 	return pagination.NewConvertConnection(ret, page, total, toGraphUserTeam), nil
 }
 
-func GetMemberByEmail(ctx context.Context, teamSlug slug.Slug, email string) (*TeamMember, error) {
-	q := db(ctx)
-
-	m, err := q.GetMemberByEmail(ctx, teamsql.GetMemberByEmailParams{
-		TeamSlug: teamSlug,
-		Email:    email,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &TeamMember{
-		Role:     teamMemberRoleFromSqlTeamRole(m.RoleName),
-		TeamSlug: teamSlug,
-		UserID:   m.ID,
-	}, nil
-}
-
 func ListMembers(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *TeamMemberOrder) (*TeamMemberConnection, error) {
 	q := db(ctx)
 
@@ -265,123 +245,6 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: teamSlug.String(),
 			TeamSlug:     ptr.To(teamSlug),
-		})
-	})
-}
-
-func AddMember(ctx context.Context, input AddTeamMemberInput, actor *authz.Actor) error {
-	_, err := db(ctx).GetMember(ctx, teamsql.GetMemberParams{
-		TeamSlug: input.TeamSlug,
-		UserID:   input.UserID,
-	})
-	if !errors.Is(err, pgx.ErrNoRows) {
-		return apierror.Errorf("User is already a member of the team.")
-	}
-
-	return database.Transaction(ctx, func(ctx context.Context) error {
-		params := teamsql.AddMemberParams{
-			UserID:   input.UserID,
-			RoleName: teamMemberRoleToSqlRole(input.Role),
-			TeamSlug: input.TeamSlug,
-		}
-		if err := db(ctx).AddMember(ctx, params); err != nil {
-			return err
-		}
-
-		return activitylog.Create(ctx, activitylog.CreateInput{
-			Action:       activitylog.ActivityLogEntryActionAdded,
-			Actor:        actor.User,
-			ResourceType: activityLogEntryResourceTypeTeam,
-			ResourceName: input.TeamSlug.String(),
-			TeamSlug:     ptr.To(input.TeamSlug),
-			Data: &TeamMemberAddedActivityLogEntryData{
-				Role:      input.Role,
-				UserUUID:  input.UserID,
-				UserEmail: input.UserEmail,
-			},
-		})
-	})
-}
-
-func RemoveMember(ctx context.Context, input RemoveTeamMemberInput, actor *authz.Actor) error {
-	_, err := db(ctx).GetMember(ctx, teamsql.GetMemberParams{
-		TeamSlug: input.TeamSlug,
-		UserID:   input.UserID,
-	})
-	if errors.Is(err, pgx.ErrNoRows) {
-		return apierror.Errorf("User is not a member of the team.")
-	} else if err != nil {
-		return err
-	}
-
-	return database.Transaction(ctx, func(ctx context.Context) error {
-		params := teamsql.RemoveMemberParams{
-			UserID:   input.UserID,
-			TeamSlug: input.TeamSlug,
-		}
-		if err := db(ctx).RemoveMember(ctx, params); err != nil {
-			return err
-		}
-
-		return activitylog.Create(ctx, activitylog.CreateInput{
-			Action:       activitylog.ActivityLogEntryActionRemoved,
-			Actor:        actor.User,
-			ResourceType: activityLogEntryResourceTypeTeam,
-			ResourceName: input.TeamSlug.String(),
-			TeamSlug:     ptr.To(input.TeamSlug),
-			Data: &TeamMemberRemovedActivityLogEntryData{
-				UserUUID:  input.UserID,
-				UserEmail: input.UserEmail,
-			},
-		})
-	})
-}
-
-func SetMemberRole(ctx context.Context, input SetTeamMemberRoleInput, actor *authz.Actor) error {
-	m, err := db(ctx).GetMember(ctx, teamsql.GetMemberParams{
-		TeamSlug: input.TeamSlug,
-		UserID:   input.UserID,
-	})
-	if errors.Is(err, pgx.ErrNoRows) {
-		return apierror.Errorf("User is not a member of the team.")
-	} else if err != nil {
-		return err
-	}
-
-	roleName := teamMemberRoleToSqlRole(input.Role)
-	if m.RoleName == roleName {
-		return apierror.Errorf("Member already has the %q role.", input.Role)
-	}
-
-	return database.Transaction(ctx, func(ctx context.Context) error {
-		err := db(ctx).RemoveMember(ctx, teamsql.RemoveMemberParams{
-			UserID:   input.UserID,
-			TeamSlug: input.TeamSlug,
-		})
-		if err != nil {
-			return err
-		}
-
-		err = db(ctx).AddMember(ctx, teamsql.AddMemberParams{
-			UserID:   input.UserID,
-			RoleName: roleName,
-			TeamSlug: input.TeamSlug,
-		})
-		if err != nil {
-			return err
-		}
-
-		return activitylog.Create(ctx, activitylog.CreateInput{
-			Action:       activityLogEntryActionSetMemberRole,
-			Actor:        actor.User,
-			ResourceType: activityLogEntryResourceTypeTeam,
-			ResourceName: input.TeamSlug.String(),
-			TeamSlug:     ptr.To(input.TeamSlug),
-			Data: &TeamMemberSetRoleActivityLogEntryData{
-				Role:      input.Role,
-				UserUUID:  input.UserID,
-				UserEmail: input.UserEmail,
-			},
 		})
 	})
 }

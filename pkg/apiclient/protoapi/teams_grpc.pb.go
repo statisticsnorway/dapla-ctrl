@@ -19,11 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Teams_Get_FullMethodName     = "/dapla.api.protobuf.Teams/Get"
-	Teams_List_FullMethodName    = "/dapla.api.protobuf.Teams/List"
-	Teams_Groups_FullMethodName  = "/dapla.api.protobuf.Teams/Groups"
-	Teams_Members_FullMethodName = "/dapla.api.protobuf.Teams/Members"
-	Teams_Delete_FullMethodName  = "/dapla.api.protobuf.Teams/Delete"
+	Teams_Get_FullMethodName    = "/dapla.api.protobuf.Teams/Get"
+	Teams_List_FullMethodName   = "/dapla.api.protobuf.Teams/List"
+	Teams_Groups_FullMethodName = "/dapla.api.protobuf.Teams/Groups"
+	Teams_Delete_FullMethodName = "/dapla.api.protobuf.Teams/Delete"
 )
 
 // TeamsClient is the client API for Teams service.
@@ -33,7 +32,6 @@ type TeamsClient interface {
 	Get(ctx context.Context, in *GetTeamRequest, opts ...grpc.CallOption) (*GetTeamResponse, error)
 	List(ctx context.Context, in *ListTeamsRequest, opts ...grpc.CallOption) (*ListTeamsResponse, error)
 	Groups(ctx context.Context, in *ListTeamGroupsRequest, opts ...grpc.CallOption) (*ListTeamGroupsResponse, error)
-	Members(ctx context.Context, in *ListTeamMembersRequest, opts ...grpc.CallOption) (*ListTeamMembersResponse, error)
 	Delete(ctx context.Context, in *DeleteTeamRequest, opts ...grpc.CallOption) (*DeleteTeamResponse, error)
 }
 
@@ -75,16 +73,6 @@ func (c *teamsClient) Groups(ctx context.Context, in *ListTeamGroupsRequest, opt
 	return out, nil
 }
 
-func (c *teamsClient) Members(ctx context.Context, in *ListTeamMembersRequest, opts ...grpc.CallOption) (*ListTeamMembersResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListTeamMembersResponse)
-	err := c.cc.Invoke(ctx, Teams_Members_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *teamsClient) Delete(ctx context.Context, in *DeleteTeamRequest, opts ...grpc.CallOption) (*DeleteTeamResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteTeamResponse)
@@ -102,7 +90,6 @@ type TeamsServer interface {
 	Get(context.Context, *GetTeamRequest) (*GetTeamResponse, error)
 	List(context.Context, *ListTeamsRequest) (*ListTeamsResponse, error)
 	Groups(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)
-	Members(context.Context, *ListTeamMembersRequest) (*ListTeamMembersResponse, error)
 	Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error)
 	mustEmbedUnimplementedTeamsServer()
 }
@@ -122,9 +109,6 @@ func (UnimplementedTeamsServer) List(context.Context, *ListTeamsRequest) (*ListT
 }
 func (UnimplementedTeamsServer) Groups(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Groups not implemented")
-}
-func (UnimplementedTeamsServer) Members(context.Context, *ListTeamMembersRequest) (*ListTeamMembersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Members not implemented")
 }
 func (UnimplementedTeamsServer) Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
@@ -204,24 +188,6 @@ func _Teams_Groups_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Teams_Members_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListTeamMembersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TeamsServer).Members(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Teams_Members_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TeamsServer).Members(ctx, req.(*ListTeamMembersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Teams_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteTeamRequest)
 	if err := dec(in); err != nil {
@@ -258,10 +224,6 @@ var Teams_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Groups",
 			Handler:    _Teams_Groups_Handler,
-		},
-		{
-			MethodName: "Members",
-			Handler:    _Teams_Members_Handler,
 		},
 		{
 			MethodName: "Delete",

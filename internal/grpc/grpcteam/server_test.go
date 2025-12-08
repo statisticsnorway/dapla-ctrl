@@ -7,13 +7,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
 	logrustest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcteam"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
@@ -165,101 +163,6 @@ func TestTeamsServer_ToBeReconciled(t *testing.T) {
 
 		if expected := "teamtwo"; resp.Nodes[1].Slug != expected {
 			t.Errorf("expected first team to be %q, got %q", expected, resp.Nodes[1].Slug)
-		}
-	})
-}
-
-func TestTeamsServer_Members(t *testing.T) {
-	ctx := context.Background()
-	log, _ := logrustest.NewNullLogger()
-
-	container, dsn, err := startPostgresql(ctx, t, log)
-	if err != nil {
-		t.Fatalf("failed to start postgres container: %v", err)
-	}
-
-	t.Run("no members", func(t *testing.T) {
-		teamSlug := slug.Slug("my-team")
-		pool := getConnection(ctx, t, container, dsn, log)
-
-		stmt := "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
-		if _, err := pool.Exec(ctx, stmt, teamSlug); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		resp, err := grpcteam.NewServer(pool).Members(ctx, &protoapi.ListTeamMembersRequest{Slug: teamSlug.String()})
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if len(resp.Nodes) != 0 {
-			t.Errorf("expected 0 members, got %v", len(resp.Nodes))
-		}
-	})
-
-	t.Run("with members", func(t *testing.T) {
-		pool := getConnection(ctx, t, container, dsn, log)
-
-		teamSlug1 := slug.Slug("my-team")
-		stmt := "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
-		if _, err := pool.Exec(ctx, stmt, teamSlug1); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		teamSlug2 := slug.Slug("other-team")
-		stmt = "INSERT INTO teams (slug, purpose) VALUES ($1, 'some purpose')"
-		if _, err := pool.Exec(ctx, stmt, teamSlug2); err != nil {
-			t.Fatalf("failed to insert team: %v", err)
-		}
-
-		userID1 := uuid.New()
-		stmt = "INSERT INTO users (id, name, email, external_id) VALUES ($1, 'User 1', 'user1@example.com', '123')"
-		if _, err = pool.Exec(ctx, stmt, userID1); err != nil {
-			t.Fatalf("failed to insert user: %v", err)
-		}
-
-		stmt = "INSERT INTO user_roles (role_name, user_id, target_team_slug) VALUES ('Team member', $1, $2)"
-		if _, err = pool.Exec(ctx, stmt, userID1, teamSlug1); err != nil {
-			t.Fatalf("failed to insert user roles: %v", err)
-		}
-
-		userID2 := uuid.New()
-		stmt = "INSERT INTO users (id, name, email, external_id) VALUES ($1, 'User 2', 'user2@example.com', '456')"
-		if _, err = pool.Exec(ctx, stmt, userID2); err != nil {
-			t.Fatalf("failed to insert user: %v", err)
-		}
-
-		stmt = "INSERT INTO user_roles (role_name, user_id, target_team_slug) VALUES ('Team owner', $1, $2)"
-		if _, err = pool.Exec(ctx, stmt, userID2, teamSlug2); err != nil {
-			t.Fatalf("failed to insert user roles: %v", err)
-		}
-
-		resp, err := grpcteam.NewServer(pool).Members(ctx, &protoapi.ListTeamMembersRequest{Slug: teamSlug1.String()})
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if len(resp.Nodes) != 1 {
-			t.Errorf("expected 1 member, got %v", len(resp.Nodes))
-		}
-
-		member := resp.Nodes[0]
-		if member.User.Name != "User 1" {
-			t.Errorf("expected member name to be %q, got %q", "User 1", member.User.Name)
-		}
-
-		resp, err = grpcteam.NewServer(pool).Members(ctx, &protoapi.ListTeamMembersRequest{Slug: teamSlug2.String()})
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if len(resp.Nodes) != 1 {
-			t.Errorf("expected 1 member, got %v", len(resp.Nodes))
-		}
-
-		member = resp.Nodes[0]
-		if member.User.Name != "User 2" {
-			t.Errorf("expected member name to be %q, got %q", "User 2", member.User.Name)
 		}
 	})
 }
