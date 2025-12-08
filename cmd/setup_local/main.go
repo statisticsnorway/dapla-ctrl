@@ -20,6 +20,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/graph/model"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/logger"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
@@ -153,6 +154,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 	ctx = user.NewLoaderContext(ctx, pool)
 	ctx = team.NewLoaderContext(ctx, pool)
 	ctx = authz.NewLoaderContext(ctx, pool)
+	ctx = group.NewLoaderContext(ctx, pool)
 
 	emails := map[string]struct{}{}
 	slugs := map[slug.Slug]struct{}{}
@@ -278,6 +280,8 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				return fmt.Errorf("create devteam: %w", err)
 			}
 		}
+		// devuser is first in array
+		createGroupAndAddUsers(ctx, actor, devteam.Slug, "developers", nil, users[:1], 1)
 
 		if err := authz.MakeUserTeamOwner(ctx, devUser.UUID, devteam.Slug); err != nil {
 			return fmt.Errorf("make user %q owner of team %q: %w", devUser.Email, devteam.Slug, err)
@@ -314,6 +318,19 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			}
 
 			log.Infof("%d/%d teams created", i, *cfg.NumTeams)
+
+			suffixes := []string{
+				"wizards",
+				"ninjas",
+				"cowboys",
+				"10x",
+			}
+
+			createGroupAndAddUsers(ctx, actor, name, "managers", nil, users, rand.IntN(2)+1)
+			createGroupAndAddUsers(ctx, actor, name, "developers", nil, users, rand.IntN(3)+1)
+			createGroupAndAddUsers(ctx, actor, name, "developers", &suffixes[rand.IntN(len(suffixes))], users, rand.IntN(2)+1)
+
+			log.Infof("\tGroups created and users added")
 			slugs[name] = struct{}{}
 		}
 
@@ -325,6 +342,30 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 	log.Infof("done")
 	return nil
+}
+
+func createGroupAndAddUsers(ctx context.Context, actor *authz.Actor, team slug.Slug, teamCategory string, suffix *string, users []*user.User, membersToAdd int) {
+	createdGroup, _ := group.Create(ctx, &group.CreateGroupInput{
+		TeamSlug: team,
+		Category: teamCategory,
+		Suffix:   suffix,
+	}, actor)
+
+
+	i := 0
+	if len(users) - membersToAdd > 0 {
+		i = rand.IntN(len(users) - membersToAdd)
+	}
+	for index := range membersToAdd {
+		user := users[i+index].UUID
+		err := group.AddMember(ctx, group.AddGroupMemberInput{
+			GroupName: createdGroup.Name,
+			UserID:    user,
+		}, actor)
+		if err != nil {
+			fmt.Printf("error adding user: %s", err)
+		}
+	}
 }
 
 func teamName() slug.Slug {
