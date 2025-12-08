@@ -1,6 +1,6 @@
 module github.com/statisticsnorway/dapla-api/pkg/apiclient
 
-go 1.25.3
+go 1.25.5
 
 require (
 	github.com/stretchr/testify v1.10.0
