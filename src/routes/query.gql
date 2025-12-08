@@ -25,6 +25,7 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 							nodes {
 								name
 								category
+								suffix
 								members {
 									nodes {
 										user {

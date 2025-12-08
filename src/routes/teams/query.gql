@@ -1,0 +1,37 @@
+query AllTeams @cache(policy: CacheAndNetwork) {
+	teams(first: 100) @paginate(mode: SinglePage) {
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageEnd
+			pageStart
+			startCursor
+			endCursor
+			totalCount
+		}
+		nodes {
+			id
+			slug
+			members {
+				pageInfo {
+					totalCount
+				}
+			}
+			groups {
+				nodes {
+					name
+					category
+					suffix
+					members {
+						nodes {
+							user {
+								name
+								email
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

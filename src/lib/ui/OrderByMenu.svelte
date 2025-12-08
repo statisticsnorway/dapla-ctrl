@@ -161,6 +161,7 @@
 		</Button>
 	{/snippet}
 	{#key orderField}
+		<!-- prettier-ignore -->
 		<ActionMenuRadioGroup value={currentOrderField} label="Order by">
 			{#each Object.values(orderField)
 				.filter((field) => !onlyInclude || onlyInclude.includes(field as ValueOf<T>))
