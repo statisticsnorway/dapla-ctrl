@@ -23,7 +23,8 @@ FROM
 WHERE
 	group_members.user_id = $1
 GROUP BY
-    users.id, teams.slug
+	users.id,
+	teams.slug
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'slug:asc' THEN teams.slug
@@ -100,7 +101,8 @@ FROM
 WHERE
 	groups.team_slug = $1::slug
 GROUP BY
-    groups.team_slug, users.id
+	groups.team_slug,
+	users.id
 ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:asc' THEN LOWER(users.name)
