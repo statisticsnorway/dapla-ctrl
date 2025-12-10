@@ -150,8 +150,9 @@ Team = {}
 --- Create a new team
 ---@param slug string
 ---@param purpose string
+---@param sectionCode string
 ---@return Team
-function Team.new(slug, purpose)
+function Team.new(slug, purpose, sectionCode)
 	print("new")
 	return {}
 end

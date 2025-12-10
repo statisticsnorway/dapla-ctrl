@@ -12,8 +12,9 @@ import (
 const luaTeamTypeName = "Team"
 
 type Team struct {
-	Slug    slug.Slug
-	Purpose string
+	Slug        slug.Slug
+	Purpose     string
+	SectionCode string
 }
 
 func teamMetatable() *spec.Typemetatable {
@@ -31,6 +32,11 @@ func teamMetatable() *spec.Typemetatable {
 					Name: "purpose",
 					Type: []spec.ArgumentType{spec.ArgumentTypeString},
 					Doc:  "The purpose of the team to create",
+				},
+				{
+					Name: "sectionCode",
+					Type: []spec.ArgumentType{spec.ArgumentTypeString},
+					Doc:  "The code of the section the team belongs to",
 				},
 			},
 			Func: createTeam,
@@ -59,8 +65,9 @@ func createTeam(L *lua.LState) int {
 	db := teamsql.New(pool)
 
 	team, err := db.Create(L.Context(), teamsql.CreateParams{
-		Slug:    slug.Slug(L.CheckString(1)),
-		Purpose: L.CheckString(2),
+		Slug:        slug.Slug(L.CheckString(1)),
+		Purpose:     L.CheckString(2),
+		SectionCode: L.CheckString(3),
 	})
 	if err != nil {
 		L.RaiseError("failed to create team: %s", err)
@@ -68,8 +75,9 @@ func createTeam(L *lua.LState) int {
 	}
 
 	ret := &Team{
-		Slug:    team.Slug,
-		Purpose: team.Purpose,
+		Slug:        team.Slug,
+		Purpose:     team.Purpose,
+		SectionCode: team.SectionCode,
 	}
 	ud := L.NewUserData()
 	ud.Value = ret

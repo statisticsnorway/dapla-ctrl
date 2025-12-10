@@ -1,6 +1,6 @@
 local user = User.new()
 local unauthorized = User.new()
-local existingTeam = Team.new("slug-one", "purpose")
+local existingTeam = Team.new("slug-one", "purpose", "724")
 
 Helper.SQLExec([[
 	DELETE FROM user_roles WHERE user_id = $1
@@ -15,6 +15,7 @@ Test.gql("Create team with user that is not authorized", function(t)
 				input: {
 					slug: "slug-one"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
@@ -46,6 +47,7 @@ Test.gql("Create team with namespace that already exists", function(t)
 				input: {
 					slug: "slug-one"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
@@ -80,6 +82,7 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "newteam"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
@@ -113,6 +116,7 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							purpose: "some purpose"
+							sectionCode: "724"
 						}
 					) {
 						team {
@@ -146,6 +150,7 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							purpose: "some purpose"
+							sectionCode: "724"
 						}
 					) {
 						team {
@@ -255,6 +260,7 @@ Test.gql("Create team with unavailable slug", function(t)
 				input: {
 					slug: "newteam"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {

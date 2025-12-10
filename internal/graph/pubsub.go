@@ -65,17 +65,6 @@ func (r *Resolver) triggerTeamUpdatedEvent(ctx context.Context, teamSlug slug.Sl
 	)
 }
 
-func (r *Resolver) triggerTeamDeletedEvent(ctx context.Context, teamSlug slug.Slug, correlationID uuid.UUID) {
-	r.triggerEvent(
-		ctx,
-		protoapi.EventTypes_EVENT_TEAM_DELETED,
-		&protoapi.EventTeamDeleted{
-			Slug: teamSlug.String(),
-		},
-		correlationID,
-	)
-}
-
 func (r *Resolver) triggerReconcilerEnabledEvent(ctx context.Context, reconcilerName string, correlationID uuid.UUID) {
 	r.triggerEvent(
 		ctx,

@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
@@ -60,67 +59,6 @@ func (r *mutationResolver) UpdateTeam(ctx context.Context, input team.UpdateTeam
 	}, nil
 }
 
-func (r *mutationResolver) RequestTeamDeletion(ctx context.Context, input team.RequestTeamDeletionInput) (*team.RequestTeamDeletionPayload, error) {
-	actor := authz.ActorFromContext(ctx)
-
-	if err := authz.CanDeleteTeam(ctx, input.Slug); err != nil {
-		return nil, err
-	}
-
-	if _, err := team.Get(ctx, input.Slug); err != nil {
-		return nil, err
-	}
-
-	deleteKey, err := team.CreateDeleteKey(ctx, input.Slug, actor)
-	if err != nil {
-		return nil, err
-	}
-
-	return &team.RequestTeamDeletionPayload{
-		Key: deleteKey,
-	}, nil
-}
-
-func (r *mutationResolver) ConfirmTeamDeletion(ctx context.Context, input team.ConfirmTeamDeletionInput) (*team.ConfirmTeamDeletionPayload, error) {
-	keyUid, err := uuid.Parse(input.Key)
-	if err != nil {
-		return nil, apierror.Errorf("Invalid delete key: %s", input.Key)
-	}
-
-	deleteKey, err := team.GetDeleteKey(ctx, input.Slug, keyUid)
-	if err != nil {
-		return nil, apierror.Errorf("Unknown deletion key: %q", input.Key)
-	}
-
-	actor := authz.ActorFromContext(ctx)
-	if err := authz.CanDeleteTeam(ctx, deleteKey.TeamSlug); err != nil {
-		return nil, err
-	}
-
-	if actor.User.GetID() == deleteKey.CreatedByUserID {
-		return nil, apierror.Errorf("You cannot confirm your own delete key.")
-	}
-
-	if deleteKey.ConfirmedAt != nil {
-		return nil, apierror.Errorf("Key has already been confirmed, team is currently being deleted.")
-	}
-
-	if deleteKey.HasExpired() {
-		return nil, apierror.Errorf("Team delete key has expired, you need to request a new key.")
-	}
-
-	if err := team.ConfirmDeleteKey(ctx, deleteKey.TeamSlug, keyUid, actor); err != nil {
-		return nil, err
-	}
-
-	correlationID := uuid.New()
-	r.triggerTeamDeletedEvent(ctx, deleteKey.TeamSlug, correlationID)
-
-	return &team.ConfirmTeamDeletionPayload{
-		DeletionStarted: true,
-	}, nil
-}
-
 func (r *queryResolver) Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
@@ -164,23 +102,6 @@ func (r *teamResolver) ViewerIsMember(ctx context.Context, obj *team.Team) (bool
 	return team.UserIsMember(ctx, obj.Slug, authz.ActorFromContext(ctx).User.GetID())
 }
 
-func (r *teamResolver) DeleteKey(ctx context.Context, obj *team.Team, key string) (*team.TeamDeleteKey, error) {
-	uid, err := uuid.Parse(key)
-	if err != nil {
-		return nil, apierror.Errorf("Invalid delete key: %s", key)
-	}
-
-	return team.GetDeleteKey(ctx, obj.Slug, uid)
-}
-
-func (r *teamDeleteKeyResolver) CreatedBy(ctx context.Context, obj *team.TeamDeleteKey) (*user.User, error) {
-	return user.Get(ctx, obj.CreatedByUserID)
-}
-
-func (r *teamDeleteKeyResolver) Team(ctx context.Context, obj *team.TeamDeleteKey) (*team.Team, error) {
-	return team.Get(ctx, obj.TeamSlug)
-}
-
 func (r *teamMemberResolver) Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
 }
@@ -191,12 +112,9 @@ func (r *teamMemberResolver) User(ctx context.Context, obj *team.TeamMember) (*u
 
 func (r *Resolver) Team() gengql.TeamResolver { return &teamResolver{r} }
 
-func (r *Resolver) TeamDeleteKey() gengql.TeamDeleteKeyResolver { return &teamDeleteKeyResolver{r} }
-
 func (r *Resolver) TeamMember() gengql.TeamMemberResolver { return &teamMemberResolver{r} }
 
 type (
-	teamResolver          struct{ *Resolver }
-	teamDeleteKeyResolver struct{ *Resolver }
-	teamMemberResolver    struct{ *Resolver }
+	teamResolver       struct{ *Resolver }
+	teamMemberResolver struct{ *Resolver }
 )

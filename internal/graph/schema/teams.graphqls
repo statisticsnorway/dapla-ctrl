@@ -43,30 +43,6 @@ extend type Mutation {
 	team slug.
 	"""
 	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
-
-	"""
-	Request a key that can be used to trigger a team deletion process
-
-	Deleting a team is a two step process. First an owner of the team (or an admin) must request a team deletion key,
-	and then a second owner of the team (or an admin) must confirm the deletion using the confirmTeamDeletion mutation.
-
-	The returned delete key is valid for an hour, and can only be used once.
-
-	Note: Service accounts are not allowed to request team delete keys.
-	"""
-	requestTeamDeletion(input: RequestTeamDeletionInput!): RequestTeamDeletionPayload!
-
-	"""
-	Confirm a team deletion
-
-	This will start the actual team deletion process, which will be done in an asynchronous manner. All external
-	entities controlled by Nais will also be deleted.
-
-	WARNING: There is no going back after starting this process.
-
-	Note: Service accounts are not allowed to confirm a team deletion.
-	"""
-	confirmTeamDeletion(input: ConfirmTeamDeletionInput!): ConfirmTeamDeletionPayload!
 }
 
 """
@@ -135,9 +111,6 @@ type Team implements Node {
 
 	"Whether or not the viewer is a member of the team."
 	viewerIsMember: Boolean!
-
-	"Get a delete key for the team."
-	deleteKey(key: String!): TeamDeleteKey!
 }
 
 type TeamMember {
@@ -156,33 +129,6 @@ type CreateTeamPayload {
 type UpdateTeamPayload {
 	"The updated team."
 	team: Team
-}
-
-type RequestTeamDeletionPayload {
-	"The delete key for the team. This can be used to confirm the deletion of the team."
-	key: TeamDeleteKey
-}
-
-type ConfirmTeamDeletionPayload {
-	"Whether or not the asynchronous deletion process was started."
-	deletionStarted: Boolean
-}
-
-type TeamDeleteKey {
-	"The unique key used to confirm the deletion of a team."
-	key: String!
-
-	"The creation timestamp of the key."
-	createdAt: Time!
-
-	"Expiration timestamp of the key."
-	expires: Time!
-
-	"The user who created the key."
-	createdBy: User!
-
-	"The team the delete key is for."
-	team: Team!
 }
 
 type TeamConnection {
@@ -239,6 +185,11 @@ input CreateTeamInput {
 	to give a newcomer an idea of what the team is about.
 	"""
 	purpose: String!
+
+	"""
+	The code of the section the team belongs to.
+	"""
+	sectionCode: String!
 }
 
 input UpdateTeamInput {
@@ -379,50 +330,4 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 
 	"The new value of the field."
 	newValue: String
-}
-
-type TeamCreateDeleteKeyActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-}
-
-type TeamConfirmDeleteKeyActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
 }

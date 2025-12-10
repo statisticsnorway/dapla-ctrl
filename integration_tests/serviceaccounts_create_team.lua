@@ -85,6 +85,7 @@ Test.gql("Create new team as service account without permission", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
@@ -157,6 +158,7 @@ Test.gql("Create new team as service account", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
@@ -175,40 +177,6 @@ Test.gql("Create new team as service account", function(t)
 					id = NotNull(),
 					slug = teamSlug,
 					purpose = "some purpose",
-				},
-			},
-		},
-	}
-end)
-
-Test.gql("Add team member without permission", function(t)
-	t.addHeader("authorization", sa1HeaderValue)
-
-	Helper.emptyPubSubTopic("topic")
-
-	t.query(string.format([[
-		mutation {
-			addTeamMember(
-				input: {
-					teamSlug: "%s"
-					userEmail: "authenticated@example.com"
-					role: MEMBER
-				}
-			) {
-				member {
-					role
-				}
-			}
-		}
-	]], teamSlug))
-
-	t.check {
-		data = Null,
-		errors = {
-			{
-				message = Contains("Specifically, you need the \"teams:members:admin\" authorization."),
-				path = {
-					"addTeamMember",
 				},
 			},
 		},
@@ -252,74 +220,6 @@ Test.gql("Assign team owner role to service account as admin", function(t)
 								name = "Team owner",
 							},
 						},
-					},
-				},
-			},
-		},
-	}
-end)
-
-Test.gql("Add team member with correct permission", function(t)
-	t.addHeader("authorization", sa1HeaderValue)
-
-	Helper.emptyPubSubTopic("topic")
-
-	t.query(string.format([[
-		mutation {
-			addTeamMember(
-				input: {
-					teamSlug: "%s"
-					userEmail: "%s"
-					role: MEMBER
-				}
-			) {
-				member {
-					role
-				}
-			}
-		}
-	]], teamSlug, user:email()))
-
-	t.check {
-		data = {
-			addTeamMember = {
-				member = {
-					role = "MEMBER",
-				},
-			},
-		},
-	}
-end)
-
-
-Test.gql("Remove team member with correct permission", function(t)
-	t.addHeader("authorization", sa1HeaderValue)
-
-	t.query(string.format([[
-		mutation {
-			removeTeamMember(
-				input: {
-					teamSlug: "%s"
-					userEmail: "%s"
-				}
-			) {
-				team {
-					members {
-						nodes {
-							role
-						}
-					}
-				}
-			}
-		}
-	]], teamSlug, user:email()))
-
-	t.check {
-		data = {
-			removeTeamMember = {
-				team = {
-					members = {
-						nodes = {},
 					},
 				},
 			},

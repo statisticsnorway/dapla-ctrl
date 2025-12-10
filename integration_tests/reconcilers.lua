@@ -1,6 +1,6 @@
 local user = User.new("user", "user@user.com", "ext")
-Team.new("slug-one", "team-1")
-Team.new("slug-two", "team-1")
+Team.new("slug-one", "team-1", "724")
+Team.new("slug-two", "team-1", "724")
 
 local reconcilers = { "reconciler-1", "reconciler-2" }
 
@@ -335,8 +335,8 @@ end)
 Test.gql("list reconciler errors", function(t)
 	t.addHeader("x-user-email", user:email())
 
-	Team.new("slugone", "team one")
-	Team.new("slugtwo", "team two")
+	Team.new("slugone", "team one", "724")
+	Team.new("slugtwo", "team two", "724")
 
 	Helper.SQLExec [[
 		INSERT INTO reconciler_errors (correlation_id, reconciler, created_at, error_message, team_slug)

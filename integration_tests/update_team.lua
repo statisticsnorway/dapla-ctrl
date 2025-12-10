@@ -11,6 +11,7 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "%s"
 					purpose: "some purpose"
+					sectionCode: "724"
 				}
 			) {
 				team {
