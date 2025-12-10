@@ -142,3 +142,29 @@ SET
 WHERE
 	id = @id
 ;
+
+-- name: UpdateSectionManager :exec
+UPDATE sections
+SET
+	manager_id = @manager_id
+WHERE
+	code = @section_code
+;
+
+-- name: GetSectionCodes :many
+SELECT
+	code
+FROM
+	sections
+ORDER BY
+	code
+;
+
+-- name: CreateSection :one
+INSERT INTO
+	sections (code, name, manager_id)
+VALUES
+	(@code, @name, @manager_id)
+RETURNING
+	*
+;

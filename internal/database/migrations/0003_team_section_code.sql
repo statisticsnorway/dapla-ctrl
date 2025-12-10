@@ -2,7 +2,7 @@
 CREATE TABLE sections (
 	code TEXT PRIMARY KEY,
 	name TEXT NOT NULL,
-	manager_id UUID REFERENCES users (id)
+	manager_id UUID REFERENCES users (id) ON DELETE SET NULL
 )
 ;
 

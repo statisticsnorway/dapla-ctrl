@@ -14,7 +14,9 @@ type Querier interface {
 	CountLogEntries(ctx context.Context) (int64, error)
 	Create(ctx context.Context, arg CreateParams) (*User, error)
 	CreateLogEntry(ctx context.Context, arg CreateLogEntryParams) error
+	CreateSection(ctx context.Context, arg CreateSectionParams) (*Section, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetSectionCodes(ctx context.Context) ([]string, error)
 	List(ctx context.Context) ([]*User, error)
 	ListGlobalAdmins(ctx context.Context) ([]*User, error)
 	ListLogEntries(ctx context.Context, arg ListLogEntriesParams) ([]*UsersyncLogEntry, error)
@@ -23,6 +25,7 @@ type Querier interface {
 	RevokeGlobalAdmin(ctx context.Context, id uuid.UUID) error
 	RevokeGlobalRole(ctx context.Context, arg RevokeGlobalRoleParams) error
 	Update(ctx context.Context, arg UpdateParams) error
+	UpdateSectionManager(ctx context.Context, arg UpdateSectionManagerParams) error
 }
 
 var _ Querier = (*Queries)(nil)

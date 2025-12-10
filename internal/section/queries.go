@@ -41,6 +41,6 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *SectionOrde
 		total = int(ret[0].TotalCount)
 	}
 	return pagination.NewConvertConnection(ret, page, total, func(from *sectionsql.ListRow) *Section {
-		return toGraphUser(&from.Section)
+		return toGraphSection(&from.Section)
 	}), nil
 }

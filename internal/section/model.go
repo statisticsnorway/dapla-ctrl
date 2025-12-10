@@ -30,7 +30,7 @@ func (s Section) ID() ident.Ident {
 	return NewIdent(s.Code)
 }
 
-func toGraphUser(s *sectionsql.Section) *Section {
+func toGraphSection(s *sectionsql.Section) *Section {
 	return &Section{
 		Code:      s.Code,
 		Name:      s.Name,

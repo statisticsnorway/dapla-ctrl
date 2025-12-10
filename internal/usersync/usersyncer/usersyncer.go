@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -11,8 +12,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
@@ -37,9 +40,11 @@ type userMap struct {
 }
 
 type entraIdUser struct {
-	ID    string
-	Email string
-	Name  string
+	ID       string
+	Email    string
+	Name     string
+	Section  *string
+	JobTitle *string
 }
 
 func New(pool *pgxpool.Pool, allUsersGroup, adminGroup, tenantDomain string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
@@ -145,6 +150,10 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 		return err
 	}
 
+	if err := s.assignSectionManagers(ctx, querier, entraIdUsers, entraIdUserMap, s.log); err != nil {
+		return err
+	}
+
 	return tx.Commit(ctx)
 }
 
@@ -234,6 +243,67 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 	}
 
 	return nil
+}
+
+// assignSectionManagers sets the section manager for each section in the database, if it finds
+// a matching user in Entra ID (someone in the given section with the job title '^Seksjonssjef.*')
+func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, querier usersyncsql.Querier, entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) error {
+	sectionCodes, err := querier.GetSectionCodes(ctx)
+	if err != nil {
+		return fmt.Errorf("get section codes: %w", err)
+	}
+
+	sectionManagers := make(map[string][]*usersyncsql.User)
+	for _, eu := range entraIdUsers {
+		if code := parseSectionManager(sectionCodes, eu, log); code != nil {
+			sectionManagers[*code] = append(sectionManagers[*code], entraIdUserMap[eu.ID])
+		}
+	}
+
+	for sectionCode, manager := range sanitizeSectionManagers(sectionManagers, log) {
+		if err := querier.UpdateSectionManager(ctx, usersyncsql.UpdateSectionManagerParams{
+			ManagerID:   &manager.ID,
+			SectionCode: sectionCode,
+		}); err != nil {
+			return fmt.Errorf("update section manager for section %s to %s: %w", sectionCode, manager.Email, err)
+		}
+	}
+	return nil
+}
+
+// Saved for fun! lern it
+// func sanitizedManagers(allManagers map[string][]*usersyncsql.User, log logrus.FieldLogger) func(yield func(k string, v *usersyncsql.User) bool) {
+// 	return func(yield func(k string, v *usersyncsql.User) bool) {
+// 		for section, managers := range allManagers {
+// 			if len(managers) > 1 {
+// 				var mgs []string
+// 				for _, m := range managers {
+// 					mgs = append(mgs, m.Email)
+// 				}
+// 				log.Warnf("section %s has multiple managers: %s", section, strings.Join(mgs, ", "))
+// 				continue
+// 			}
+// 			if ok := yield(section, managers[0]); !ok {
+// 				return
+// 			}
+// 		}
+// 	}
+// }
+
+func sanitizeSectionManagers(allSectionManagers map[string][]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
+	sectionManagers := make(map[string]*usersyncsql.User, len(allSectionManagers))
+	for section, managers := range allSectionManagers {
+		if len(managers) > 1 {
+			var mgs []string
+			for _, m := range managers {
+				mgs = append(mgs, m.Email)
+			}
+			log.Warnf("section %s has multiple managers: %s", section, strings.Join(mgs, ", "))
+			continue
+		}
+		sectionManagers[section] = managers[0]
+	}
+	return sectionManagers
 }
 
 // getAdminGroupMembers fetches all users in the admin group from the Entra ID group of the tenant.
@@ -327,7 +397,11 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 	log.Debugf("start fetching users from Entra ID")
 	t := time.Now()
 
-	usersResponse, err := s.service.Groups().ByGroupId(s.allUsersGroup).TransitiveMembers().Get(ctx, nil)
+	usersResponse, err := s.service.Groups().ByGroupId(s.allUsersGroup).TransitiveMembers().Get(ctx, &groups.ItemTransitiveMembersRequestBuilderGetRequestConfiguration{
+		QueryParameters: &groups.ItemTransitiveMembersRequestBuilderGetQueryParameters{
+			Select: []string{"department", "jobTitle", "id", "email", "displayName", "userPrincipalName"},
+		},
+	})
 	if err != nil {
 		return nil, fmt.Errorf("get all users group: %w", err)
 	}
@@ -339,9 +413,11 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 
 	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
 		users = append(users, &entraIdUser{
-			ID:    *user.GetId(),
-			Email: strings.ToLower(*user.GetUserPrincipalName()),
-			Name:  *user.GetDisplayName(),
+			ID:       *user.GetId(),
+			Email:    strings.ToLower(*user.GetUserPrincipalName()),
+			Name:     *user.GetDisplayName(),
+			Section:  user.GetDepartment(),
+			JobTitle: user.GetJobTitle(),
 		})
 		return true
 	}); err != nil {
@@ -373,4 +449,24 @@ func getUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, error
 	}
 
 	return ret, nil
+}
+
+func parseSectionManager(sectionCodes []string, eu *entraIdUser, log logrus.FieldLogger) (code *string) {
+	if eu.Section == nil || eu.JobTitle == nil {
+		return nil
+	}
+	if !strings.HasPrefix(*eu.JobTitle, "Seksjonssjef") {
+		return nil
+	}
+	parts := strings.Split(*eu.Section, " ")
+	// Format should be "O|K xxx Seksjon for ..."
+	if len(parts) < 3 {
+		return nil
+	}
+	sectionCode := parts[1]
+	if !slices.Contains(sectionCodes, sectionCode) {
+		log.Infof("encountered section %q, not present in database", sectionCode)
+		return nil
+	}
+	return &sectionCode
 }

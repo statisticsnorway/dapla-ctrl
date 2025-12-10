@@ -43,7 +43,7 @@ type dataloader struct {
 
 func (l dataloader) list(ctx context.Context, sectionCodes []string) ([]*Section, []error) {
 	makeKey := func(obj *Section) string { return obj.Code }
-	return loader.LoadModels(ctx, sectionCodes, l.db.GetByCodes, toGraphUser, makeKey)
+	return loader.LoadModels(ctx, sectionCodes, l.db.GetByCodes, toGraphSection, makeKey)
 }
 
 func db(ctx context.Context) *sectionsql.Queries {

@@ -4,6 +4,7 @@ package usersyncer_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -16,6 +17,7 @@ import (
 	logrustest "github.com/sirupsen/logrus/hooks/test"
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/test"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncer"
@@ -43,6 +45,7 @@ func TestSync(t *testing.T) {
 		pool := getConnection(ctx, t, container, dsn, log)
 		ctx = database.NewLoaderContext(ctx, pool)
 		ctx = user.NewLoaderContext(ctx, pool)
+		ctx = section.NewLoaderContext(ctx, pool)
 		return ctx, pool
 	}
 	t.Run("No local users, no remote users", func(t *testing.T) {
@@ -195,16 +198,18 @@ func TestSync(t *testing.T) {
 
 		httpClient := test.NewTestHttpClient(
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"value":[`+
-					`{"@odata.type": "#microsoft.graph.user", "id": "1", "userPrincipalName":"user1@example.com","displayName":"Correct Name"},`+ // Will update name of local user
-					`{"@odata.type": "#microsoft.graph.user", "id": "2", "userPrincipalName":"user2@example.com","displayName":"Some Name"},`+ // Will update euserPrincipalName of local user
-					`{"@odata.type": "#microsoft.graph.user", "id": "4", "userPrincipalName":"should-lose-admin@example.com","displayName":"Should Lose Admin"},`+ // Will lose admin role
-					`{"@odata.type": "#microsoft.graph.user", "id": "5", "userPrincipalName":"create-me@example.com","displayName":"Create Me"}]}`) // Will be created
+				return test.Response("200 OK", generateEntraIdResponse(
+					externalUser{Id: "1", Email: "user1@example.com", Name: "Correct Name"},                  // Will update name of local user
+					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},                     // Will update euserPrincipalName of local user
+					externalUser{Id: "4", Email: "should-lose-admin@example.com", Name: "Should Lose Admin"}, // Will lose admin role
+					externalUser{Id: "5", Email: "create-me@example.com", Name: "Create Me"}),                // Will be created
+				)
 			},
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", `{"value":[`+
-					`{"@odata.type": "#microsoft.graph.user", "id": "2", "userPrincipalName":"user2@example.com", "displayName":"Some Name"},`+ // Will be granted admin role
-					`{"@odata.type": "#microsoft.graph.user", "id": "7", "userPrincipalName":"unknown-admin@example.com", "displayName": "Unknown Admin"}]}`) // Unknown user, will be logged
+				return test.Response("200 OK", generateEntraIdResponse(
+					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},              // Will be granted admin role
+					externalUser{Id: "7", Email: "unknown-admin@example.com", Name: "Unknown Admin"}), // Unknown user, will be logged
+				)
 			},
 		)
 
@@ -271,6 +276,86 @@ func TestSync(t *testing.T) {
 			t.Fatalf("expected user to be granted admin role, but doesn't have it")
 		}
 	})
+
+	t.Run("create user and set as section manager", func(t *testing.T) {
+		ctx, pool := setup(t)
+		querier := usersyncsql.New(pool)
+
+		sectionCode := "666"
+		sectionName := "Seksjon for seksjoner"
+		sectionFullName := fmt.Sprintf("O %s %s", sectionCode, sectionName)
+		oldBoss := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: sectionFullName, JobTitle: "Pensjonist"} // Will be removed
+		bossUser := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: sectionFullName, JobTitle: "Seksjonssjef"}  // Will be created
+
+		oldBossDbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:       oldBoss.Name,
+			Email:      oldBoss.Email,
+			ExternalID: oldBoss.Id,
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if s, err := querier.CreateSection(ctx, usersyncsql.CreateSectionParams{
+			Code:      sectionCode,
+			Name:      sectionName,
+			ManagerID: &(oldBossDbUser.ID),
+		}); err != nil {
+			t.Fatal(err)
+		} else if s.ManagerID == nil {
+			t.Fatalf("manager_id is nil, expected %q", oldBossDbUser.ID)
+		} else if *s.ManagerID != oldBossDbUser.ID {
+			t.Fatalf("manager_id is %q, expected %q", *s.ManagerID, oldBossDbUser.ID)
+		}
+
+		httpClient := test.NewTestHttpClient(
+			func(req *http.Request) *http.Response {
+				return test.Response("200 OK", generateEntraIdResponse(bossUser))
+			},
+			func(req *http.Request) *http.Response {
+				return test.Response("200 OK", generateEntraIdResponse())
+			},
+		)
+
+		auth := authentication.NewBaseBearerTokenAuthenticationProvider(&fakeCred{})
+		adapter, err := msgraphsdk.NewGraphRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(
+			auth, nil, nil, httpClient,
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		client := msgraphsdk.NewGraphServiceClient(adapter)
+
+		err = usersyncer.
+			New(pool, allUsersGroup, adminGroup, domain, client, log).
+			Sync(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		p, _ := pagination.ParsePage(nil, nil, nil, nil)
+		if users, err := user.List(ctx, p, nil); err != nil {
+			t.Fatal(err)
+		} else if total := len(users.Nodes()); total != 1 {
+			t.Fatalf("expected 1 user, got %d", total)
+		}
+
+		u, err := user.GetByEmail(ctx, bossUser.Email)
+		if err != nil {
+			t.Fatal(err)
+		} else if u.ExternalID != bossUser.Id || u.Name != bossUser.Name {
+			t.Fatalf("expected external_id=%q,name=%q, got external_id=%q,name=%q", bossUser.Id, bossUser.Name, u.ExternalID, u.Name)
+		}
+
+		if s, err := section.Get(ctx, sectionCode); err != nil {
+			t.Fatal(err)
+		} else if s.ManagerId == nil {
+			t.Fatal("section does not have manager set")
+		} else if *s.ManagerId != u.UUID {
+			t.Fatalf("expected manager_id=%q, got %q", u.UUID, *s.ManagerId)
+		}
+	})
 }
 
 func startPostgresql(ctx context.Context, t *testing.T, log logrus.FieldLogger) (container *postgres.PostgresContainer, dsn string, err error) {
@@ -330,4 +415,31 @@ func (b fakeCred) GetAuthorizationToken(context context.Context, url *url.URL, a
 
 func (b fakeCred) GetAllowedHostsValidator() *authentication.AllowedHostsValidator {
 	return nil
+}
+
+type externalUser struct {
+	Id       string `json:"id"`
+	Email    string `json:"userPrincipalName"`
+	Name     string `json:"displayName"`
+	Section  string `json:"department"`
+	JobTitle string `json:"jobTitle"`
+}
+
+func generateEntraIdResponse(users ...externalUser) string {
+	type eIdResponseNode struct {
+		externalUser
+		DataType string `json:"@odata.type"`
+	}
+
+	type eIdResponse struct {
+		Value []eIdResponseNode `json:"value"`
+	}
+
+	res := eIdResponse{}
+	for _, u := range users {
+		res.Value = append(res.Value, eIdResponseNode{u, "#microsoft.graph.user"})
+	}
+
+	resBytes, _ := json.Marshal(res)
+	return string(resBytes)
 }

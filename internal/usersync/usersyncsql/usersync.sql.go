@@ -128,6 +128,28 @@ func (q *Queries) CreateLogEntry(ctx context.Context, arg CreateLogEntryParams) 
 	return err
 }
 
+const createSection = `-- name: CreateSection :one
+INSERT INTO
+	sections (code, name, manager_id)
+VALUES
+	($1, $2, $3)
+RETURNING
+	code, name, manager_id
+`
+
+type CreateSectionParams struct {
+	Code      string
+	Name      string
+	ManagerID *uuid.UUID
+}
+
+func (q *Queries) CreateSection(ctx context.Context, arg CreateSectionParams) (*Section, error) {
+	row := q.db.QueryRow(ctx, createSection, arg.Code, arg.Name, arg.ManagerID)
+	var i Section
+	err := row.Scan(&i.Code, &i.Name, &i.ManagerID)
+	return &i, err
+}
+
 const delete = `-- name: Delete :exec
 DELETE FROM users
 WHERE
@@ -137,6 +159,35 @@ WHERE
 func (q *Queries) Delete(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, delete, id)
 	return err
+}
+
+const getSectionCodes = `-- name: GetSectionCodes :many
+SELECT
+	code
+FROM
+	sections
+ORDER BY
+	code
+`
+
+func (q *Queries) GetSectionCodes(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, getSectionCodes)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var code string
+		if err := rows.Scan(&code); err != nil {
+			return nil, err
+		}
+		items = append(items, code)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const list = `-- name: List :many
@@ -394,5 +445,23 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
 		arg.ExternalID,
 		arg.ID,
 	)
+	return err
+}
+
+const updateSectionManager = `-- name: UpdateSectionManager :exec
+UPDATE sections
+SET
+	manager_id = $1
+WHERE
+	code = $2
+`
+
+type UpdateSectionManagerParams struct {
+	ManagerID   *uuid.UUID
+	SectionCode string
+}
+
+func (q *Queries) UpdateSectionManager(ctx context.Context, arg UpdateSectionManagerParams) error {
+	_, err := q.db.Exec(ctx, updateSectionManager, arg.ManagerID, arg.SectionCode)
 	return err
 }

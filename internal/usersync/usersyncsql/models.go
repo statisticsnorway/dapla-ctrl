@@ -78,6 +78,12 @@ func AllUsersyncLogEntryActionValues() []UsersyncLogEntryAction {
 	}
 }
 
+type Section struct {
+	Code      string
+	Name      string
+	ManagerID *uuid.UUID
+}
+
 type User struct {
 	ID         uuid.UUID
 	Email      string
