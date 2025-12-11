@@ -57,7 +57,7 @@ extend type Mutation {
 }
 
 """
-The group type represents a group of the Nais platform and the Nais GraphQL API.
+The group type represents a group of the Dapla platform and the Dapla GraphQL API.
 """
 type Group implements Node {
 	"""

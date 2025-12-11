@@ -36,7 +36,7 @@ extend type Query {
 }
 
 """
-The section type represents a section of the Nais platform and the Nais GraphQL API.
+The section type represents a section of the Dapla platform and the Dapla GraphQL API.
 """
 type Section implements Node {
 	"""

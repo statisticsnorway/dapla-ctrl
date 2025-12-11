@@ -1,43 +1,54 @@
 extend type Query {
-	"Get a list of teams."
+	"""
+	Get a list of teams.
+	"""
 	teams(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 
-		"Ordering options for items returned from the connection."
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: TeamOrder
 	): TeamConnection!
 
-	"Get a team by its slug."
+	"""
+	Get a team by its slug.
+	"""
 	team(slug: Slug!): Team!
 }
 
 extend type Mutation {
 	"""
-	Create a new Nais team
+	Create a new Dapla team
 
 	The user creating the team will be granted team ownership, unless the user is a service account, in which case the
 	team will not get an initial owner. To add one or more owners to the team, refer to the `addTeamOwners` mutation.
 
-	Creation of a team will also create external resources for the team, which will be managed by the Nais API
+	Creation of a team will also create external resources for the team, which will be managed by the Dapla API
 	reconcilers. This will be done asynchronously.
-
-	Refer to the [official Nais documentation](https://docs.nais.io/explanations/team/) for more information regarding
-	Nais teams.
 	"""
 	createTeam(input: CreateTeamInput!): CreateTeamPayload!
 
 	"""
-	Update an existing Nais team
+	Update an existing Dapla team
 
 	This mutation can be used to update the team purpose and the main Slack channel. It is not possible to update the
 	team slug.
@@ -46,11 +57,9 @@ extend type Mutation {
 }
 
 """
-The team type represents a team on the [Nais platform](https://nais.io/).
+The team type represents a team on the Dapla platform.
 
-Learn more about what Nais teams are and what they can be used for in the [official Nais documentation](https://docs.nais.io/explanations/team/).
-
-External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by [Nais API reconcilers](https://github.com/nais/api-reconcilers).
+External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by Dapla API reconcilers.
 """
 type Team implements Node {
 	"The globally unique ID of the team."

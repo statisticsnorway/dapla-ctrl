@@ -1,3 +1,8 @@
+"""
+Container for feature flags that control functionality in the API.
+
+Feature flags are used to enable or disable specific features without requiring code changes.
+"""
 type Features implements Node {
 	"""
 	Unique identifier for the feature container.
@@ -7,7 +12,9 @@ type Features implements Node {
 
 extend type Query {
 	"""
-	Feature flags.
+	Get feature flags configuration.
+
+	Feature flags control which features are enabled or disabled in the API.
 	"""
 	features: Features!
 }

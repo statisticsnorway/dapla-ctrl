@@ -3433,7 +3433,12 @@ type ActivityLogEntryEdge {
 	node: ActivityLogEntry!
 }
 `, BuiltIn: false},
-	{Name: "../schema/authz.graphqls", Input: `type Role implements Node {
+	{Name: "../schema/authz.graphqls", Input: `"""
+A role that can be assigned to users or service accounts.
+
+Roles define permissions and access levels within the API.
+"""
+type Role implements Node {
 	"""
 	The globally unique ID of the role.
 	"""
@@ -3451,21 +3456,35 @@ type ActivityLogEntryEdge {
 }
 
 extend type Query {
+	"""
+	Get a list of roles.
+	"""
 	roles(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 	): RoleConnection!
 }
 
+"""
+Connection type for paginated role results.
+"""
 type RoleConnection {
 	"""
 	A list of roles.
@@ -3483,6 +3502,9 @@ type RoleConnection {
 	pageInfo: PageInfo!
 }
 
+"""
+Edge type for role connections.
+"""
 type RoleEdge {
 	"""
 	The role.
@@ -3495,7 +3517,12 @@ type RoleEdge {
 	cursor: Cursor!
 }
 `, BuiltIn: false},
-	{Name: "../schema/feature.graphqls", Input: `type Features implements Node {
+	{Name: "../schema/feature.graphqls", Input: `"""
+Container for feature flags that control functionality in the API.
+
+Feature flags are used to enable or disable specific features without requiring code changes.
+"""
+type Features implements Node {
 	"""
 	Unique identifier for the feature container.
 	"""
@@ -3504,7 +3531,9 @@ type RoleEdge {
 
 extend type Query {
 	"""
-	Feature flags.
+	Get feature flags configuration.
+
+	Feature flags control which features are enabled or disabled in the API.
 	"""
 	features: Features!
 }
@@ -3568,7 +3597,7 @@ extend type Mutation {
 }
 
 """
-The group type represents a group of the Nais platform and the Nais GraphQL API.
+The group type represents a group of the Dapla platform and the Dapla GraphQL API.
 """
 type Group implements Node {
 	"""
@@ -3792,109 +3821,188 @@ input RemoveGroupMemberInput {
 	"""
 	disableReconciler(input: DisableReconcilerInput!): Reconciler!
 
-	"Configure a reconciler."
+	"""
+	Configure a reconciler.
+	"""
 	configureReconciler(input: ConfigureReconcilerInput!): Reconciler!
 }
 
 extend type Query {
-	"Get a collection of reconcilers."
+	"""
+	Get a collection of reconcilers.
+	"""
 	reconcilers(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 	): ReconcilerConnection!
 }
 
 extend enum ActivityLogEntryResourceType {
-	"All activity log entries related to reconcilers will use this resource type."
+	"""
+	All activity log entries related to reconcilers will use this resource type.
+	"""
 	RECONCILER
 }
 
+"""
+Connection type for paginated reconciler results.
+"""
 type ReconcilerConnection {
-	"Pagination information."
+	"""
+	Pagination information.
+	"""
 	pageInfo: PageInfo!
 
-	"List of nodes."
+	"""
+	List of nodes.
+	"""
 	nodes: [Reconciler!]!
 
-	"List of edges."
+	"""
+	List of edges.
+	"""
 	edges: [ReconcilerEdge!]!
 }
 
+"""
+Edge type for reconciler connections.
+"""
 type ReconcilerEdge {
-	"Cursor for this edge that can be used for pagination."
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
 	cursor: Cursor!
 
-	"The reconciler."
+	"""
+	The reconciler.
+	"""
 	node: Reconciler!
 }
 
-"Reconciler type."
+"""
+A reconciler manages external resources for teams.
+
+Reconcilers are responsible for creating, updating, and deleting external resources (such as groups, repositories, etc.) based on team configuration.
+"""
 type Reconciler implements Node {
-	"Unique identifier for the reconciler."
+	"""
+	Unique identifier for the reconciler.
+	"""
 	id: ID!
 
-	"The name of the reconciler."
+	"""
+	The name of the reconciler.
+	"""
 	name: String!
 
-	"The human-friendly name of the reconciler."
+	"""
+	The human-friendly name of the reconciler.
+	"""
 	displayName: String!
 
-	"Description of what the reconciler is responsible for."
+	"""
+	Description of what the reconciler is responsible for.
+	"""
 	description: String!
 
-	"Whether or not the reconciler is enabled."
+	"""
+	Whether or not the reconciler is enabled.
+	"""
 	enabled: Boolean!
 
-	"Reconciler configuration keys and descriptions."
+	"""
+	Reconciler configuration keys and descriptions.
+	"""
 	config: [ReconcilerConfig!]!
 
-	"Whether or not the reconciler is fully configured and ready to be enabled."
+	"""
+	Whether or not the reconciler is fully configured and ready to be enabled.
+	"""
 	configured: Boolean!
 
-	"Potential errors that have occurred during the reconciler's operation."
+	"""
+	Potential errors that have occurred during the reconciler's operation.
+	"""
 	errors(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 	): ReconcilerErrorConnection!
 }
 
+"""
+Connection type for paginated reconciler error results.
+"""
 type ReconcilerErrorConnection {
-	"Pagination information."
+	"""
+	Pagination information.
+	"""
 	pageInfo: PageInfo!
 
-	"List of nodes."
+	"""
+	List of nodes.
+	"""
 	nodes: [ReconcilerError!]!
 
-	"List of edges."
+	"""
+	List of edges.
+	"""
 	edges: [ReconcilerErrorEdge!]!
 }
 
+"""
+Edge type for reconciler error connections.
+"""
 type ReconcilerErrorEdge {
-	"Cursor for this edge that can be used for pagination."
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
 	cursor: Cursor!
 
-	"The reconcilerError."
+	"""
+	The reconciler error.
+	"""
 	node: ReconcilerError!
 }
 
+"""
+An error that occurred during a reconciler's operation.
+
+Reconciler errors are logged when a reconciler fails to perform its operations, such as creating or updating external resources.
+"""
 type ReconcilerError implements Node {
 	"""
 	Unique identifier for the reconciler error.
@@ -3922,128 +4030,225 @@ type ReconcilerError implements Node {
 	team: Team!
 }
 
-"Reconciler configuration type."
+"""
+Configuration for a reconciler.
+
+Reconcilers can be configured with various settings that control their behavior.
+"""
 type ReconcilerConfig {
-	"Configuration key."
+	"""
+	Configuration key.
+	"""
 	key: String!
 
-	"The human-friendly name of the configuration key."
+	"""
+	The human-friendly name of the configuration key.
+	"""
 	displayName: String!
 
-	"Configuration description."
+	"""
+	Configuration description.
+	"""
 	description: String!
 
-	"Whether or not the configuration key has a value."
+	"""
+	Whether or not the configuration key has a value.
+	"""
 	configured: Boolean!
 
-	"Whether or not the configuration value is considered a secret. Secret values will not be exposed through the API."
+	"""
+	Whether or not the configuration value is considered a secret. Secret values will not be exposed through the API.
+	"""
 	secret: Boolean!
 
-	"Configuration value. This will be set to null if the value is considered a secret."
+	"""
+	Configuration value. This will be set to null if the value is considered a secret.
+	"""
 	value: String
 }
 
-"Reconciler configuration input."
+"""
+Input for configuring a reconciler.
+"""
 input ReconcilerConfigInput {
-	"Configuration key."
+	"""
+	Configuration key.
+	"""
 	key: String!
 
-	"Configuration value."
+	"""
+	Configuration value.
+	"""
 	value: String!
 }
 
+"""
+Activity log entry for when a reconciler is enabled.
+"""
 type ReconcilerEnabledActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 }
 
+"""
+Activity log entry for when a reconciler is disabled.
+"""
 type ReconcilerDisabledActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 }
 
+"""
+Activity log entry for when a reconciler is configured.
+"""
 type ReconcilerConfiguredActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 
-	"Data associated with the update."
+	"""
+	Data associated with the update.
+	"""
 	data: ReconcilerConfiguredActivityLogEntryData!
 }
 
+"""
+Data associated with a reconciler configuration activity log entry.
+"""
 type ReconcilerConfiguredActivityLogEntryData {
-	"Keys that were updated."
+	"""
+	Keys that were updated.
+	"""
 	updatedKeys: [String!]!
 }
 
+"""
+Input for enabling a reconciler.
+"""
 input EnableReconcilerInput {
-	"The name of the reconciler to enable."
+	"""
+	The name of the reconciler to enable.
+	"""
 	name: String!
 }
 
+"""
+Input for disabling a reconciler.
+"""
 input DisableReconcilerInput {
-	"The name of the reconciler to disable."
+	"""
+	The name of the reconciler to disable.
+	"""
 	name: String!
 }
 
+"""
+Input for configuring a reconciler.
+"""
 input ConfigureReconcilerInput {
-	"The name of the reconciler to configure."
+	"""
+	The name of the reconciler to configure.
+	"""
 	name: String!
 
-	"List of reconciler config inputs."
+	"""
+	List of reconciler config inputs.
+	"""
 	config: [ReconcilerConfigInput!]!
 }
 `, BuiltIn: false},
@@ -4082,7 +4287,7 @@ Cursors are opaque strings that are returned by the server for paginated results
 scalar Cursor
 `, BuiltIn: false},
 	{Name: "../schema/schema.graphqls", Input: `"""
-The query root for the Nais GraphQL API.
+The query root for the Dapla GraphQL API.
 """
 type Query {
 	"""
@@ -4097,7 +4302,7 @@ type Query {
 }
 
 """
-The mutation root for the Nais GraphQL API.
+The mutation root for the Dapla GraphQL API.
 """
 type Mutation
 
@@ -4303,7 +4508,7 @@ enum SearchType {
 }
 
 """
-The section type represents a section of the Nais platform and the Nais GraphQL API.
+The section type represents a section of the Dapla platform and the Dapla GraphQL API.
 """
 type Section implements Node {
 	"""
@@ -4598,7 +4803,7 @@ input DeleteServiceAccountTokenInput {
 }
 
 """
-The service account type represents machine-users of the Nais API.
+The service account type represents machine-users of the Dapla API.
 
 These types of users can be used to automate certain parts of the API, for instance team creation and managing team members.
 
@@ -5277,45 +5482,56 @@ type ServiceAccountTokenDeletedActivityLogEntryData {
 }
 `, BuiltIn: false},
 	{Name: "../schema/teams.graphqls", Input: `extend type Query {
-	"Get a list of teams."
+	"""
+	Get a list of teams.
+	"""
 	teams(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 
-		"Ordering options for items returned from the connection."
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: TeamOrder
 	): TeamConnection!
 
-	"Get a team by its slug."
+	"""
+	Get a team by its slug.
+	"""
 	team(slug: Slug!): Team!
 }
 
 extend type Mutation {
 	"""
-	Create a new Nais team
+	Create a new Dapla team
 
 	The user creating the team will be granted team ownership, unless the user is a service account, in which case the
 	team will not get an initial owner. To add one or more owners to the team, refer to the ` + "`" + `addTeamOwners` + "`" + ` mutation.
 
-	Creation of a team will also create external resources for the team, which will be managed by the Nais API
+	Creation of a team will also create external resources for the team, which will be managed by the Dapla API
 	reconcilers. This will be done asynchronously.
-
-	Refer to the [official Nais documentation](https://docs.nais.io/explanations/team/) for more information regarding
-	Nais teams.
 	"""
 	createTeam(input: CreateTeamInput!): CreateTeamPayload!
 
 	"""
-	Update an existing Nais team
+	Update an existing Dapla team
 
 	This mutation can be used to update the team purpose and the main Slack channel. It is not possible to update the
 	team slug.
@@ -5324,11 +5540,9 @@ extend type Mutation {
 }
 
 """
-The team type represents a team on the [Nais platform](https://nais.io/).
+The team type represents a team on the Dapla platform.
 
-Learn more about what Nais teams are and what they can be used for in the [official Nais documentation](https://docs.nais.io/explanations/team/).
-
-External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by [Nais API reconcilers](https://github.com/nais/api-reconcilers).
+External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by Dapla API reconcilers.
 """
 type Team implements Node {
 	"The globally unique ID of the team."
@@ -5653,7 +5867,7 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 }
 
 """
-The user type represents a user of the Nais platform and the Nais GraphQL API.
+The user type represents a user of the Dapla platform and the Dapla GraphQL API.
 """
 type User implements Node {
 	"""
@@ -5672,7 +5886,7 @@ type User implements Node {
 	name: String!
 
 	"""
-	The external ID of the user. This value is managed by the Nais API user synchronization.
+	The external ID of the user. This value is managed by the Dapla API user synchronization.
 	"""
 	externalID: String!
 

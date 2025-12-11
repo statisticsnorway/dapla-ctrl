@@ -13,109 +13,188 @@ extend type Mutation {
 	"""
 	disableReconciler(input: DisableReconcilerInput!): Reconciler!
 
-	"Configure a reconciler."
+	"""
+	Configure a reconciler.
+	"""
 	configureReconciler(input: ConfigureReconcilerInput!): Reconciler!
 }
 
 extend type Query {
-	"Get a collection of reconcilers."
+	"""
+	Get a collection of reconcilers.
+	"""
 	reconcilers(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 	): ReconcilerConnection!
 }
 
 extend enum ActivityLogEntryResourceType {
-	"All activity log entries related to reconcilers will use this resource type."
+	"""
+	All activity log entries related to reconcilers will use this resource type.
+	"""
 	RECONCILER
 }
 
+"""
+Connection type for paginated reconciler results.
+"""
 type ReconcilerConnection {
-	"Pagination information."
+	"""
+	Pagination information.
+	"""
 	pageInfo: PageInfo!
 
-	"List of nodes."
+	"""
+	List of nodes.
+	"""
 	nodes: [Reconciler!]!
 
-	"List of edges."
+	"""
+	List of edges.
+	"""
 	edges: [ReconcilerEdge!]!
 }
 
+"""
+Edge type for reconciler connections.
+"""
 type ReconcilerEdge {
-	"Cursor for this edge that can be used for pagination."
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
 	cursor: Cursor!
 
-	"The reconciler."
+	"""
+	The reconciler.
+	"""
 	node: Reconciler!
 }
 
-"Reconciler type."
+"""
+A reconciler manages external resources for teams.
+
+Reconcilers are responsible for creating, updating, and deleting external resources (such as groups, repositories, etc.) based on team configuration.
+"""
 type Reconciler implements Node {
-	"Unique identifier for the reconciler."
+	"""
+	Unique identifier for the reconciler.
+	"""
 	id: ID!
 
-	"The name of the reconciler."
+	"""
+	The name of the reconciler.
+	"""
 	name: String!
 
-	"The human-friendly name of the reconciler."
+	"""
+	The human-friendly name of the reconciler.
+	"""
 	displayName: String!
 
-	"Description of what the reconciler is responsible for."
+	"""
+	Description of what the reconciler is responsible for.
+	"""
 	description: String!
 
-	"Whether or not the reconciler is enabled."
+	"""
+	Whether or not the reconciler is enabled.
+	"""
 	enabled: Boolean!
 
-	"Reconciler configuration keys and descriptions."
+	"""
+	Reconciler configuration keys and descriptions.
+	"""
 	config: [ReconcilerConfig!]!
 
-	"Whether or not the reconciler is fully configured and ready to be enabled."
+	"""
+	Whether or not the reconciler is fully configured and ready to be enabled.
+	"""
 	configured: Boolean!
 
-	"Potential errors that have occurred during the reconciler's operation."
+	"""
+	Potential errors that have occurred during the reconciler's operation.
+	"""
 	errors(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
 		first: Int
 
-		"Get items after this cursor."
+		"""
+		Get items after this cursor.
+		"""
 		after: Cursor
 
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
 		last: Int
 
-		"Get items before this cursor."
+		"""
+		Get items before this cursor.
+		"""
 		before: Cursor
 	): ReconcilerErrorConnection!
 }
 
+"""
+Connection type for paginated reconciler error results.
+"""
 type ReconcilerErrorConnection {
-	"Pagination information."
+	"""
+	Pagination information.
+	"""
 	pageInfo: PageInfo!
 
-	"List of nodes."
+	"""
+	List of nodes.
+	"""
 	nodes: [ReconcilerError!]!
 
-	"List of edges."
+	"""
+	List of edges.
+	"""
 	edges: [ReconcilerErrorEdge!]!
 }
 
+"""
+Edge type for reconciler error connections.
+"""
 type ReconcilerErrorEdge {
-	"Cursor for this edge that can be used for pagination."
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
 	cursor: Cursor!
 
-	"The reconcilerError."
+	"""
+	The reconciler error.
+	"""
 	node: ReconcilerError!
 }
 
+"""
+An error that occurred during a reconciler's operation.
+
+Reconciler errors are logged when a reconciler fails to perform its operations, such as creating or updating external resources.
+"""
 type ReconcilerError implements Node {
 	"""
 	Unique identifier for the reconciler error.
@@ -143,127 +222,224 @@ type ReconcilerError implements Node {
 	team: Team!
 }
 
-"Reconciler configuration type."
+"""
+Configuration for a reconciler.
+
+Reconcilers can be configured with various settings that control their behavior.
+"""
 type ReconcilerConfig {
-	"Configuration key."
+	"""
+	Configuration key.
+	"""
 	key: String!
 
-	"The human-friendly name of the configuration key."
+	"""
+	The human-friendly name of the configuration key.
+	"""
 	displayName: String!
 
-	"Configuration description."
+	"""
+	Configuration description.
+	"""
 	description: String!
 
-	"Whether or not the configuration key has a value."
+	"""
+	Whether or not the configuration key has a value.
+	"""
 	configured: Boolean!
 
-	"Whether or not the configuration value is considered a secret. Secret values will not be exposed through the API."
+	"""
+	Whether or not the configuration value is considered a secret. Secret values will not be exposed through the API.
+	"""
 	secret: Boolean!
 
-	"Configuration value. This will be set to null if the value is considered a secret."
+	"""
+	Configuration value. This will be set to null if the value is considered a secret.
+	"""
 	value: String
 }
 
-"Reconciler configuration input."
+"""
+Input for configuring a reconciler.
+"""
 input ReconcilerConfigInput {
-	"Configuration key."
+	"""
+	Configuration key.
+	"""
 	key: String!
 
-	"Configuration value."
+	"""
+	Configuration value.
+	"""
 	value: String!
 }
 
+"""
+Activity log entry for when a reconciler is enabled.
+"""
 type ReconcilerEnabledActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 }
 
+"""
+Activity log entry for when a reconciler is disabled.
+"""
 type ReconcilerDisabledActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 }
 
+"""
+Activity log entry for when a reconciler is configured.
+"""
 type ReconcilerConfiguredActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
+	"""
+	ID of the entry.
+	"""
 	id: ID!
 
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	"""
+	The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
+	"""
 	actor: String!
 
-	"Creation time of the entry."
+	"""
+	Creation time of the entry.
+	"""
 	createdAt: Time!
 
-	"Message that summarizes the entry."
+	"""
+	Message that summarizes the entry.
+	"""
 	message: String!
 
-	"Type of the resource that was affected by the action."
+	"""
+	Type of the resource that was affected by the action.
+	"""
 	resourceType: ActivityLogEntryResourceType!
 
-	"Name of the resource that was affected by the action."
+	"""
+	Name of the resource that was affected by the action.
+	"""
 	resourceName: String!
 
-	"The team slug that the entry belongs to."
+	"""
+	The team slug that the entry belongs to.
+	"""
 	teamSlug: Slug!
 
-	"Data associated with the update."
+	"""
+	Data associated with the update.
+	"""
 	data: ReconcilerConfiguredActivityLogEntryData!
 }
 
+"""
+Data associated with a reconciler configuration activity log entry.
+"""
 type ReconcilerConfiguredActivityLogEntryData {
-	"Keys that were updated."
+	"""
+	Keys that were updated.
+	"""
 	updatedKeys: [String!]!
 }
 
+"""
+Input for enabling a reconciler.
+"""
 input EnableReconcilerInput {
-	"The name of the reconciler to enable."
+	"""
+	The name of the reconciler to enable.
+	"""
 	name: String!
 }
 
+"""
+Input for disabling a reconciler.
+"""
 input DisableReconcilerInput {
-	"The name of the reconciler to disable."
+	"""
+	The name of the reconciler to disable.
+	"""
 	name: String!
 }
 
+"""
+Input for configuring a reconciler.
+"""
 input ConfigureReconcilerInput {
-	"The name of the reconciler to configure."
+	"""
+	The name of the reconciler to configure.
+	"""
 	name: String!
 
-	"List of reconciler config inputs."
+	"""
+	List of reconciler config inputs.
+	"""
 	config: [ReconcilerConfigInput!]!
 }
