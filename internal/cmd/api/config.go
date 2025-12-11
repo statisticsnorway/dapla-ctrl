@@ -47,6 +47,17 @@ type oAuthConfig struct {
 	AdditionalScopes []string `env:"OAUTH_ADDITIONAL_SCOPES"`
 }
 
+type JWTConfig struct {
+	// The issuer to trust for JWT Bearer tokens
+	Issuer string `env:"JWT_ISSUER,default=https://auth-play.test.ssb.no/realms/ssb"`
+	// Required token audience
+	Audience string `env:"JWT_AUDIENCE,default=dapla-api"`
+	// Which claim in the token to extract the user's email from
+	EmailClaim string `env:"JWT_EMAIL_CLAIM,default=preferred_username"`
+	// Set to true to disable the JWT middleware
+	SkipMiddleware bool `env:"JWT_SKIP_MIDDLEWARE,default=false"`
+}
+
 type Config struct {
 	// Tenant is the active tenant
 	Tenant string `env:"TENANT,default=dev-nais"`
@@ -82,6 +93,7 @@ type Config struct {
 
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
+	JWT      JWTConfig
 
 	Fakes Fakes
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,6 +18,7 @@ import (
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authn"
+	"github.com/statisticsnorway/dapla-api/internal/auth/middleware"
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/database/notify"
 	"github.com/statisticsnorway/dapla-api/internal/graph"
@@ -143,6 +145,14 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	notifier := notify.New(pool, log)
 	go notifier.Run(ctx)
 
+	var jwtMiddleware func(next http.Handler) http.Handler
+	if !cfg.JWT.SkipMiddleware {
+		jwtMiddleware, err = middleware.JWTAuthentication(ctx, cfg.JWT.Issuer, cfg.JWT.Audience, cfg.JWT.EmailClaim, log.WithField("subsystem", "jwt"))
+		if err != nil {
+			return fmt.Errorf("failed to create JWT authentication middleware: %w", err)
+		}
+	}
+
 	// HTTP server
 	wg.Go(func() error {
 		return runHttpServer(
@@ -152,6 +162,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 			cfg.Tenant,
 			pool,
 			authHandler,
+			jwtMiddleware,
 			graphHandler,
 			notifier,
 			log,
