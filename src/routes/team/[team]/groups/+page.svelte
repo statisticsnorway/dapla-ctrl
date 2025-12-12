@@ -20,6 +20,7 @@
 	let groupNames = $derived.by(() => {
 		return team?.groups.edges.map((group) => group.node.name) ?? [];
 	});
+	let hasGroups = $derived(groupNames.length > 0);
 
 	const removeGroupMember = graphql(`
 		mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
@@ -37,7 +38,7 @@
 		});
 	};
 
-	let addMemberProps: { open: boolean } = $state({ open: false });
+	let addMemberOpen: boolean = $state(false);
 	let createGroupOpen: boolean = $state(false);
 	let deleteUser: { email: string; name: string; group: string } | null = $state(null);
 	let deleteUserOpen = $state(false);
@@ -124,17 +125,17 @@
 			{/each}
 
 			{#if canEdit}
-				<div class="button">
-					<Button
-						size="small"
-						onclick={() => {
-							addMemberProps = {
-								open: !addMemberProps.open
-							};
-						}}
-						icon={PlusIcon}>Legg til medlem</Button
-					>
-				</div>
+				{#if hasGroups}
+					<div class="button">
+						<Button
+							size="small"
+							onclick={() => {
+								addMemberOpen = !addMemberOpen;
+							}}
+							icon={PlusIcon}>Legg til medlem</Button
+						>
+					</div>
+				{/if}
 				<div class="button">
 					<Button
 						size="small"
@@ -166,7 +167,9 @@
 		<!--div>Here be documentation of teams, members and roles</div-->
 	</div>
 	{#if team}
-		<AddMember bind:open={addMemberProps.open} groups={groupNames} on:created={refetch} />
+		{#if hasGroups}
+			<AddMember bind:open={addMemberOpen} groups={groupNames} on:created={refetch} />
+		{/if}
 
 		<CreateGroup bind:open={createGroupOpen} team={team.slug} on:created={refetch} />
 
