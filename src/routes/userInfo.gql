@@ -4,6 +4,7 @@ query UserInfo {
 			id
 			name
 			isAdmin
+			isSectionManager
 		}
 	}
 }

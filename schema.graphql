@@ -197,8 +197,13 @@ input CreateTeamInput {
   """
   purpose: String!
 
-  """The code of the section the team belongs to."""
-  sectionCode: String!
+  """
+  The code of the section the team belongs to.
+  
+  If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
+  Dapla Admins. Non-admins cannot set this to a custom value.
+  """
+  sectionCode: String
 
   """
   Unique team slug.
@@ -1980,6 +1985,9 @@ type User implements Node {
 
   """True if the user is global admin."""
   isAdmin: Boolean!
+
+  """True if the user is a section mnager."""
+  isSectionManager: Boolean!
 
   """The full name of the user."""
   name: String!

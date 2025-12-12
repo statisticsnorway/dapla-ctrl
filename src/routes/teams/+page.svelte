@@ -7,7 +7,13 @@
 
 	let { data }: PageProps = $props();
 
-	let { AllTeams } = $derived(data);
+	let { AllTeams, UserInfo } = $derived(data);
+
+	const canCreateTeam = $derived.by(() => {
+		let me = $UserInfo.data?.me;
+		if (me?.__typename !== 'User') return false;
+		return me?.isAdmin || me?.isSectionManager;
+	});
 
 	type TeamNode = AllTeams$result['teams']['nodes'][0];
 	type GroupNode = TeamNode['groups']['nodes'][0];
@@ -40,7 +46,9 @@
 	<div class="content-wrapper">
 		<div class="header">
 			<Heading level="1" size="large">Alle team</Heading>
-			<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
+			{#if canCreateTeam}
+				<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
+			{/if}
 		</div>
 		{#if $AllTeams.data}
 			<div class="container">

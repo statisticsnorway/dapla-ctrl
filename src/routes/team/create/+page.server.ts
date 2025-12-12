@@ -16,7 +16,8 @@ export const actions = {
 		const data = await event.request.formData();
 		const input = {
 			slug: (data.get('name') as string) || '',
-			purpose: (data.get('description') as string) || ''
+			purpose: (data.get('description') as string) || '',
+			sectionCode: (data.get('section') as string) || ''
 		};
 
 		const resp = await query.mutate(
