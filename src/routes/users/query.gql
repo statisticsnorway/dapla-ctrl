@@ -18,7 +18,6 @@ query People($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy:
 				externalID
 				teams {
 					nodes {
-						role
 						team {
 							id
 							slug

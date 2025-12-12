@@ -55,11 +55,10 @@
 							</BodyShort>
 						</div>
 						<div>
-							{#each edge.node.teams.nodes as team (team.team.id + team.role)}
+							{#each edge.node.teams.nodes as team (team.team.id)}
 								<IconLabel
 									label={team.team.slug}
 									icon={PersonGroupIcon}
-									description={team.role}
 									size="small"
 									href="/team/{team.team.slug}"
 								/>
