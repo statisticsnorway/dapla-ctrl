@@ -9,12 +9,14 @@ metadata:
     nais.io/read-only-file-system: "true"
     nais.io/run-as-user: "1001"
 spec:
-  image: "europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api-reconcilers:2025.12.10-07.50-1750a2e"
+  image: "europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api-reconcilers:2025.12.12-13.34-3420f6d"
 
   port: 3000
 
   accessPolicy:
     outbound:
+      rules:
+        - application: dapla-api
       external:
         - host: graph.microsoft.com
         - host: login.microsoftonline.com
@@ -45,3 +47,32 @@ spec:
   env:
     - name: PUBSUB_PROJECT_ID
       value: dapla-platform-t-29
+    - name: PUBSUB_SUBSCRIPTION_ID
+      value: dapla-api-reconcilers-api-events
+    - name: GRPC_TARGET
+      value: dapla-api-grpc:3001
+    - name: INSECURE_GRPC
+      value: "true"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dapla-api
+    team: dapla-platform
+  name: dapla-api-grpc
+  namespace: dapla-platform
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: grpc
+      port: 3001
+      protocol: TCP
+      targetPort: 3001
+  selector:
+    app: dapla-api
+  sessionAffinity: None
+  type: ClusterIP

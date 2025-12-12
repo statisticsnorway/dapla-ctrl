@@ -6,14 +6,7 @@ import (
 	"github.com/sethvargo/go-envconfig"
 )
 
-type FeatureFlags struct {
-	// AttachSharedVpc enables the shared vpc feature
-	AttachSharedVpc bool `env:"FEATURE_ATTACH_SHARED_VPC"`
-}
-
 type Config struct {
-	FeatureFlags FeatureFlags
-
 	GRPC struct {
 		// Target The target address for the gRPC server.
 		Target string `env:"GRPC_TARGET,default=127.0.0.1:3001"`
@@ -30,9 +23,6 @@ type Config struct {
 		ProjectID string `env:"PUBSUB_PROJECT_ID,default=$GOOGLE_MANAGEMENT_PROJECT_ID"`
 	}
 
-	// GoogleManagementProjectID The ID of the NAIS management project in the tenant organization in GCP.
-	GoogleManagementProjectID string `env:"GOOGLE_MANAGEMENT_PROJECT_ID"`
-
 	// ListenAddress The host:port combination used by the http server.
 	ListenAddress string `env:"LISTEN_ADDRESS,default=127.0.0.1:3105"`
 
@@ -41,15 +31,6 @@ type Config struct {
 
 	// LogLevel The log level used in api-reconcilers
 	LogLevel string `env:"LOG_LEVEL,default=info"`
-
-	// TenantDomain The domain for the tenant.
-	TenantDomain string `env:"TENANT_DOMAIN,default=example.com"`
-
-	// TenantName The name of the tenant.
-	TenantName string `env:"TENANT_NAME,default=example"`
-
-	// ClusterAlias The cluster alias for legacy migration
-	ClusterAlias map[string]string `env:"CLUSTER_ALIAS"`
 
 	// Reconcilers to enable the first time it is registered (one time only) in the NAIS API.
 	// If you later would like to enable/disable a reconciler, you can do so through the Console frontend.
