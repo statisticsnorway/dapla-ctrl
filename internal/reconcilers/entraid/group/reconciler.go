@@ -38,7 +38,7 @@ type entraIdGroupReconciler struct {
 	mainCtx       context.Context
 	service       *msgraphsdk.GraphServiceClient
 	entraIdConfig entraIdClientConfig
-	gcpSyncer     *gcpSyncer
+	gcpSyncer     gcpSyncer
 	gcpCancelFunc func()
 }
 
@@ -54,7 +54,8 @@ func (c entraIdClientConfig) Equal(o entraIdClientConfig) bool {
 
 func New(ctx context.Context) reconcilers.Reconciler {
 	r := &entraIdGroupReconciler{
-		mainCtx: ctx,
+		mainCtx:   ctx,
+		gcpSyncer: NewGcpSyncer(),
 	}
 
 	return r
@@ -131,10 +132,16 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get reconciler config: %w", err)
 	}
 
+	// If the GCP Sync settings have changed, we can hotswap the config,
+	// since the syncer just reads these as its syncing. In a worst case
+	// race condition, the sync will just fail this once.
 	gcpSyncConfig, err := r.getGcpSyncConfig(config)
 	if err != nil {
 		log.Error(err)
 		return fmt.Errorf("get gcp sync config")
+	}
+	if !r.gcpSyncer.Config.Equal(*gcpSyncConfig) {
+		r.gcpSyncer.Config = *gcpSyncConfig
 	}
 
 	entraId, changed, err := r.getEntraIdClient(config)
@@ -142,17 +149,14 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get entra id client: %w", err)
 	}
 
+	// If the Entra ID credentials have changed, we need to cancel the currently
+	// running GCP sync loop and restart it with the new client.
 	if changed {
-		log.Info("configuring gcpsyncer")
-		if r.gcpCancelFunc != nil {
-			r.gcpCancelFunc()
-		}
-		r.gcpSyncer = NewGcpSyncer(*gcpSyncConfig, entraId)
-		gcpSyncerCtx, cancel := context.WithCancel(context.Background())
-		r.gcpCancelFunc = cancel
-		go r.gcpSyncer.Run(gcpSyncerCtx)
+		log.Info("updating gcpsyncer entra id client")
+		r.restartGcpSyncer(entraId)
 	}
 
+	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
 		return client.Teams().Groups(ctx, &protoapi.ListTeamGroupsRequest{
 			Slug: naisTeam.Slug,
@@ -168,42 +172,18 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	return nil
 }
 
-func (r *entraIdGroupReconciler) getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, log logrus.FieldLogger) (_ models.Groupable, created bool, err error) {
-	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
-		Name: groupName,
-	})
-	if err != nil {
-		return nil, false, fmt.Errorf("get group from database: %w", err)
+func (r *entraIdGroupReconciler) restartGcpSyncer(entraId *msgraphsdk.GraphServiceClient) {
+	if r.gcpCancelFunc != nil {
+		r.gcpCancelFunc()
 	}
-	if dbGroup.Group.ExternalId != nil {
-		entraIdGroup, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
-		if err != nil {
-			return nil, false, fmt.Errorf("get group from entra id: %w", err)
-		}
-		return entraIdGroup, false, nil
-	}
-
-	// TODO: Remove before prod!
-	entraIdGroupName := fmt.Sprintf("%s%s", entraIdGroupPrefix, groupName)
-
-	requestBody := graphmodels.NewGroup()
-	requestBody.SetDisplayName(&entraIdGroupName)
-	requestBody.SetSecurityEnabled(ptr.To(true))
-	requestBody.SetMailEnabled(ptr.To(false))
-	requestBody.SetMailNickname(&entraIdGroupName)
-	requestBody.SetDescription(ptr.To("source:dapla-api"))
-
-	// To initialize your graphClient, see https://learn.microsoft.com/en-us/graph/sdks/create-client?from=snippets&tabs=go
-	group, err := entraId.Groups().Post(ctx, requestBody, nil)
-	if err != nil {
-		return nil, false, fmt.Errorf("create group: %w", err)
-	}
-
-	return group, true, nil
+	gcpSyncerCtx, cancel := context.WithCancel(context.Background())
+	r.gcpCancelFunc = cancel
+	r.gcpSyncer.EntraId = entraId
+	go r.gcpSyncer.Run(gcpSyncerCtx)
 }
 
 func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, gcpSyncConfig *gcpSyncConfig, groupName string, log logrus.FieldLogger) error {
-	group, created, err := r.getOrCreateGroup(ctx, entraId, client, groupName, log)
+	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName)
 	if err != nil {
 		return fmt.Errorf("get or create group: %w", err)
 	}
@@ -218,42 +198,20 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 
 		if gcpSyncConfig != nil {
 			log.Info("assigning app roles")
-			if err := r.assignAppRole(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncProvisioningResourceId, &gcpSyncConfig.GoogleSyncAppRoleId); err != nil {
-				return fmt.Errorf("assign provisioning app role: %w", err)
-			}
-			if err := r.assignAppRole(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncSSOResourceId, &gcpSyncConfig.GoogleSyncAppRoleId); err != nil {
+			if err := assignAppRoles(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncProvisioningResourceId, &gcpSyncConfig.GoogleSyncAppRoleId, &gcpSyncConfig.GoogleSyncAppRoleId); err != nil {
 				return fmt.Errorf("assign provisioning app role: %w", err)
 			}
 		}
 	}
 
-	dbMembersIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
-		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
-			Name: groupName,
-		})
-	})
-
-	var dbMembers []*protoapi.GroupMember
-	for dbMembersIt.Next() {
-		dbMembers = append(dbMembers, dbMembersIt.Value())
-	}
-
-	var entraIdUsers []models.Userable
-	entraIdUsersReq, err := entraId.Groups().ByGroupId(*group.GetId()).Members().Get(ctx, nil)
+	dbMembers, err := getDatabaseMembers(ctx, client, groupName)
 	if err != nil {
-		return fmt.Errorf("get entra id group members: %w", err)
+		return fmt.Errorf("get database members: %w", err)
 	}
 
-	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](entraIdUsersReq, r.service.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+	entraIdUsers, err := getEntraIdMembers(ctx, entraId, *group.GetId())
 	if err != nil {
-		return fmt.Errorf("create entra id users pageiterator: %w", err)
-	}
-
-	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
-		entraIdUsers = append(entraIdUsers, user)
-		return true
-	}); err != nil {
-		return fmt.Errorf("list all users group members: %w", err)
+		return fmt.Errorf("get entra id members: %w", err)
 	}
 
 	usersToAdd := getDatabaseOnlyUsers(dbMembers, entraIdUsers)
@@ -285,6 +243,82 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	return nil
 }
 
+func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group string) ([]*protoapi.GroupMember, error) {
+	dbMembersIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
+		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
+			Name: group,
+		})
+	})
+
+	var dbMembers []*protoapi.GroupMember
+	for dbMembersIt.Next() {
+		if err := dbMembersIt.Err(); err != nil {
+			return nil, err
+		}
+		dbMembers = append(dbMembers, dbMembersIt.Value())
+	}
+	return dbMembers, nil
+}
+
+func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string) ([]models.Userable, error) {
+	var entraIdUsers []models.Userable
+	entraIdUsersReq, err := entraId.Groups().ByGroupId(groupId).Members().Get(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("get entra id group members: %w", err)
+	}
+
+	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](entraIdUsersReq, entraId.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
+	if err != nil {
+		return nil, fmt.Errorf("create entra id users pageiterator: %w", err)
+	}
+
+	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
+		entraIdUsers = append(entraIdUsers, user)
+		return true
+	}); err != nil {
+		return nil, fmt.Errorf("list all users group members: %w", err)
+	}
+	return entraIdUsers, nil
+}
+
+func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string) (_ models.Groupable, created bool, err error) {
+	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
+		Name: groupName,
+	})
+	if err != nil {
+		return nil, false, fmt.Errorf("get group from database: %w", err)
+	}
+	if dbGroup.Group.ExternalId != nil {
+		entraIdGroup, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
+		// TODO: Do we want to handle a 404 (external broup deletion) differently,
+		// or do we want to keep it as an error to notify us of something shady going on?
+		if err != nil {
+			return nil, false, fmt.Errorf("get group from entra id: %w", err)
+		}
+		return entraIdGroup, false, nil
+	}
+
+	// TODO: Remove before prod!
+	entraIdGroupName := fmt.Sprintf("%s%s", entraIdGroupPrefix, groupName)
+
+	requestBody := graphmodels.NewGroup()
+	requestBody.SetDisplayName(&entraIdGroupName)
+	requestBody.SetSecurityEnabled(ptr.To(true))
+	requestBody.SetMailEnabled(ptr.To(false))
+	requestBody.SetMailNickname(&entraIdGroupName)
+	requestBody.SetDescription(ptr.To("source:dapla-api"))
+
+	group, err := entraId.Groups().Post(ctx, requestBody, nil)
+	if err != nil {
+		return nil, false, fmt.Errorf("create group: %w", err)
+	}
+
+	return group, true, nil
+}
+
+// toUniformIdList takes two lists of protoapi.GroupMember (database users)
+// and models.Userable (Entra ID users) and returns a list of their Entra ID IDs.
+// The lists are assumed to be disjunct, so no deduplication of entries is performed.
 func toUniformIdList(toAdd []*protoapi.GroupMember, toRemove []models.Userable) []string {
 	userIds := make([]string, len(toAdd)+len(toRemove))
 	for _, u := range toAdd {
@@ -296,7 +330,20 @@ func toUniformIdList(toAdd []*protoapi.GroupMember, toRemove []models.Userable) 
 	return userIds
 }
 
-func (r *entraIdGroupReconciler) assignAppRole(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, resourceId *uuid.UUID, appRoleId *uuid.UUID) error {
+// assignAppRoles is a convenience function to assign multiple app roles,
+// see assignAppRole
+func assignAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, resourceId *uuid.UUID, appRoleIds ...*uuid.UUID) error {
+	for _, roleId := range appRoleIds {
+		if err := assignAppRole(ctx, entraId, groupId, resourceId, roleId); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// assignAppRole sets the necessary App Role on the given Entra ID group,
+// so that it can be synced by the GCP provisioning app.
+func assignAppRole(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, resourceId *uuid.UUID, appRoleId *uuid.UUID) error {
 	gcpSyncAssignment := models.NewAppRoleAssignment()
 	gcpSyncAssignment.SetAppRoleId(appRoleId)
 	gcpSyncAssignment.SetResourceId(resourceId)
@@ -312,6 +359,9 @@ func (r *entraIdGroupReconciler) assignAppRole(ctx context.Context, entraId *msg
 	return nil
 }
 
+// getDatabaseOnlyUsers takes a list of database users and remote/Entra ID users and returns
+// those users which are only present in the database. These are the users that need to be added
+// to the Entra ID group.
 func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []*protoapi.GroupMember {
 	dbUserMap := make(map[string]*protoapi.GroupMember)
 	for _, u := range dbUsers {
@@ -327,6 +377,9 @@ func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.
 	return dbOnly
 }
 
+// getRemoteOnlyUsers takes a list of database users and remote/Entra ID users and returns
+// those users which are only present in Entra ID. These are the users that need to be removed
+// from the Entra ID group.
 func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []models.Userable {
 	remoteUserMap := make(map[string]models.Userable)
 	for _, u := range remoteUsers {
@@ -374,8 +427,12 @@ func (r *entraIdGroupReconciler) getGcpSyncConfig(config *protoapi.ConfigReconci
 		}
 	}
 
-	if gc.GoogleSyncAppRoleId == uuid.Nil || gc.GoogleSyncProvisioningResourceId == uuid.Nil || gc.GoogleSyncSSOResourceId == uuid.Nil {
-		if gc.GoogleSyncAppRoleId == uuid.Nil && gc.GoogleSyncProvisioningResourceId == uuid.Nil && gc.GoogleSyncSSOResourceId == uuid.Nil {
+	if gc.GoogleSyncAppRoleId == uuid.Nil ||
+		gc.GoogleSyncProvisioningResourceId == uuid.Nil ||
+		gc.GoogleSyncSSOResourceId == uuid.Nil {
+		if gc.GoogleSyncAppRoleId == uuid.Nil &&
+			gc.GoogleSyncProvisioningResourceId == uuid.Nil &&
+			gc.GoogleSyncSSOResourceId == uuid.Nil {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("missing one of %s, %s, %s", configGcpAppRoleId, configGcpProvisioningResourceId, configGcpSSOResourceId)

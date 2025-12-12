@@ -19,32 +19,36 @@ const (
 	gcpSyncQueueSize = 1024
 )
 
-type gcpSyncer struct {
-	config gcpSyncConfig
-	queue  chan gcpSyncRequest
-	ticker *time.Ticker
-	client *msgraphsdkgo.GraphServiceClient
-	log    logrus.FieldLogger
-}
-
-func NewGcpSyncer(config gcpSyncConfig, client *msgraphsdkgo.GraphServiceClient) *gcpSyncer {
-	return &gcpSyncer{
-		config: config,
-		queue:  make(chan gcpSyncRequest, gcpSyncQueueSize),
-		ticker: time.NewTicker(gcpSyncInterval),
-		client: client,
-		log: logrus.New().
-			WithField("reconciler", reconcilerName).
-			WithField("subsystem", "gcpSyncer"),
-	}
-}
-
 type gcpSyncConfig struct {
 	GoogleSyncAppRoleId              uuid.UUID
 	GoogleSyncProvisioningResourceId uuid.UUID
 	GoogleSyncSSOResourceId          uuid.UUID
 	GoogleSyncJobId                  string
 	GoogleSyncRuleId                 string
+}
+
+func (c gcpSyncConfig) Equal(other gcpSyncConfig) bool {
+	return c.GoogleSyncAppRoleId == other.GoogleSyncAppRoleId &&
+		c.GoogleSyncProvisioningResourceId == other.GoogleSyncProvisioningResourceId &&
+		c.GoogleSyncSSOResourceId == other.GoogleSyncSSOResourceId &&
+		c.GoogleSyncJobId == other.GoogleSyncJobId &&
+		c.GoogleSyncRuleId == other.GoogleSyncRuleId
+}
+
+type gcpSyncer struct {
+	Config  gcpSyncConfig
+	queue   chan gcpSyncRequest
+	EntraId *msgraphsdkgo.GraphServiceClient
+	log     logrus.FieldLogger
+}
+
+func NewGcpSyncer() gcpSyncer {
+	return gcpSyncer{
+		queue: make(chan gcpSyncRequest, gcpSyncQueueSize),
+		log: logrus.New().
+			WithField("reconciler", reconcilerName).
+			WithField("subsystem", "gcpSyncer"),
+	}
 }
 
 type gcpSyncRequest struct {
@@ -72,7 +76,6 @@ func (s *gcpSyncer) Run(ctx context.Context) {
 }
 
 func (s *gcpSyncer) run(ctx context.Context) error {
-	s.log.Info("running gcpsyncer")
 	syncTimer := &time.Timer{}
 
 	groupsToSync := make(map[string][]string)
@@ -82,7 +85,7 @@ outerLoop:
 		select {
 		case r := <-s.queue:
 			if syncTimer.C == nil {
-				s.log.Info("running gcp sync")
+				s.log.Info("received first sync request, starting collection interval", "interval", gcpSyncInterval)
 				syncTimer = time.NewTimer(gcpSyncInterval)
 			}
 			if !slices.Contains(groupsToSync[r.Group], r.User) {
@@ -111,7 +114,7 @@ outerLoop:
 	var parameters []models.SynchronizationJobApplicationParametersable
 
 	for group, users := range groupsToSync {
-		syncParamSet := syncJobParameterSet(s.config.GoogleSyncRuleId, group, users)
+		syncParamSet := syncJobParameterSet(s.Config.GoogleSyncRuleId, group, users)
 		parameters = append(parameters, syncParamSet)
 	}
 
@@ -119,12 +122,13 @@ outerLoop:
 
 	requestBody.SetParameters(parameters)
 
-	_, err := s.client.ServicePrincipals().ByServicePrincipalId(s.config.GoogleSyncProvisioningResourceId.String()).
-		Synchronization().Jobs().BySynchronizationJobId(s.config.GoogleSyncJobId).ProvisionOnDemand().
+	_, err := s.EntraId.ServicePrincipals().ByServicePrincipalId(s.Config.GoogleSyncProvisioningResourceId.String()).
+		Synchronization().Jobs().BySynchronizationJobId(s.Config.GoogleSyncJobId).ProvisionOnDemand().
 		Post(ctx, requestBody, nil)
 
 	return err
 }
+
 func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *graphmodels.SynchronizationJobApplicationParameters {
 	mutatedMembers := make([]models.SynchronizationJobSubjectable, 0, len(userIds))
 	for _, u := range userIds {

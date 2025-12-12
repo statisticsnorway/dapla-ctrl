@@ -9,10 +9,10 @@ import (
 
 	"cloud.google.com/go/pubsub"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
-	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -514,17 +514,4 @@ func getReconcilers(ctx context.Context, client protoapi.ReconcilersClient) ([]*
 		reconcilers = append(reconcilers, it.Value())
 	}
 	return reconcilers, it.Err()
-}
-
-// GetTeamMembers retrieves all members of a team from the NAIS API
-func GetTeamMembers(ctx context.Context, client protoapi.TeamsClient, teamSlug string) ([]*protoapi.TeamMember, error) {
-	it := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamMembersResponse, error) {
-		return client.Members(ctx, &protoapi.ListTeamMembersRequest{Slug: teamSlug, Limit: limit, Offset: offset})
-	})
-
-	members := make([]*protoapi.TeamMember, 0)
-	for it.Next() {
-		members = append(members, it.Value())
-	}
-	return members, it.Err()
 }
