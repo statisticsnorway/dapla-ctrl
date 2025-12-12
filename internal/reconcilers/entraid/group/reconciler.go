@@ -31,7 +31,7 @@ const (
 	configGcpSyncJobId              = "gcpSyncJobId"
 	configGcpSyncRuleId             = "gcpSyncRuleId"
 
-	entraIdGroupPrefix = "dapla-api-local-test-"
+	entraIdGroupPrefix = "dapla-api-test-"
 )
 
 type entraIdGroupReconciler struct {
@@ -198,7 +198,7 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 
 		if gcpSyncConfig != nil {
 			log.Info("assigning app roles")
-			if err := assignAppRoles(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncProvisioningResourceId, &gcpSyncConfig.GoogleSyncAppRoleId, &gcpSyncConfig.GoogleSyncAppRoleId); err != nil {
+			if err := assignAppRoles(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncAppRoleId, &gcpSyncConfig.GoogleSyncProvisioningResourceId, &gcpSyncConfig.GoogleSyncSSOResourceId); err != nil {
 				return fmt.Errorf("assign provisioning app role: %w", err)
 			}
 		}
