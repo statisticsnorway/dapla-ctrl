@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/section/sectionsql"
@@ -58,7 +57,7 @@ func GetByManagerId(ctx context.Context, userId uuid.UUID) (*Section, error) {
 
 func IsUserSectionManager(ctx context.Context, userId uuid.UUID) (bool, error) {
 	_, err := GetByManagerId(ctx, userId)
-	if errors.Is(err, pgx.ErrNoRows) {
+	if errors.As(err, &ErrNotFound{}) {
 		return false, nil
 	} else if err != nil {
 		return false, err
