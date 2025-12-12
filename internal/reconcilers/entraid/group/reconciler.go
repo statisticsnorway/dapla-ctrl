@@ -332,9 +332,9 @@ func toUniformIdList(toAdd []*protoapi.GroupMember, toRemove []models.Userable) 
 
 // assignAppRoles is a convenience function to assign multiple app roles,
 // see assignAppRole
-func assignAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, resourceId *uuid.UUID, appRoleIds ...*uuid.UUID) error {
-	for _, roleId := range appRoleIds {
-		if err := assignAppRole(ctx, entraId, groupId, resourceId, roleId); err != nil {
+func assignAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
+	for _, resourceId := range resourceIds {
+		if err := assignAppRole(ctx, entraId, groupId, resourceId, appRoleId); err != nil {
 			return err
 		}
 	}
