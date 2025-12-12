@@ -89,7 +89,7 @@
 		}
 	}
 
-	const sectionPattern = /^()|([0-9]{3})$/;
+	const sectionPattern = /^([0-9]{3})?$/;
 	function handleSectionInput(event: Event) {
 		if (!event) return;
 		const input = event.target as HTMLInputElement | null;
