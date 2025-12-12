@@ -1,0 +1,47 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-api-reconcilers
+  namespace: dapla-platform
+  labels:
+    team: dapla-platform
+  annotations:
+    nais.io/read-only-file-system: "true"
+    nais.io/run-as-user: "1001"
+spec:
+  image: "europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api-reconcilers:2025.12.10-07.50-1750a2e"
+
+  port: 3000
+
+  accessPolicy:
+    outbound:
+      external:
+        - host: graph.microsoft.com
+        - host: login.microsoftonline.com
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+
+  replicas:
+    max: 1
+    min: 1
+
+  readiness:
+    path: /healthz
+    port: 3005
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /healthz
+    port: 3005
+    failureThreshold: 3
+
+  env:
+    - name: PUBSUB_PROJECT_ID
+      value: dapla-platform-t-29
