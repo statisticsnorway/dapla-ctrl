@@ -8,7 +8,7 @@
 		DatabaseIcon,
 		Density3Icon,
 		FileTextIcon,
-		HouseIcon,
+		HexagonGridIcon,
 		ImageIcon,
 		LineGraphStackedIcon,
 		LinkIcon,
@@ -29,7 +29,7 @@
 	const getComponent = (icon: string) => {
 		switch (icon.toLocaleLowerCase()) {
 			case 'team overview':
-				return HouseIcon;
+				return HexagonGridIcon;
 			case 'app overview':
 			case 'applications':
 				return PackageIcon;
@@ -54,6 +54,7 @@
 			case 'vulnerability report':
 				return VirusIcon;
 			case 'members':
+			case 'groups':
 				return PersonGroupIcon;
 			case 'repositories':
 				return BranchingIcon;

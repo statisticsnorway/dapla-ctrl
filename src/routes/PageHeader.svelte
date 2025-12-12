@@ -12,6 +12,7 @@
 	} from '@nais/ds-svelte-community/experimental';
 	import { CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
 	import Logo from '../Logo.svelte';
+	import SearchButton from '$lib/domain/search/SearchButton.svelte';
 
 	interface Props {
 		user:
@@ -35,6 +36,7 @@
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
+	<SearchButton />
 	<InternalHeaderButton as="a" href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
 		>Dokumentasjon</InternalHeaderButton
 	>
