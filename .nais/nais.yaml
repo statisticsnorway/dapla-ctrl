@@ -11,8 +11,6 @@ metadata:
 spec:
   image: "europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api-reconcilers:2025.12.12-13.34-3420f6d"
 
-  port: 3000
-
   accessPolicy:
     outbound:
       rules:
@@ -34,15 +32,15 @@ spec:
 
   readiness:
     path: /healthz
-    port: 3005
-    failureThreshold: 1
+    port: 3105
+    failureThreshold: 3
     initialDelay: 5
     periodSeconds: 5
 
   liveness:
     path: /healthz
-    port: 3005
-    failureThreshold: 3
+    port: 3105
+    failureThreshold: 5
 
   env:
     - name: PUBSUB_PROJECT_ID
@@ -53,6 +51,8 @@ spec:
       value: dapla-api-grpc:3001
     - name: INSECURE_GRPC
       value: "true"
+    - name: LISTEN_ADDRESS
+      value: ":3105"
 ---
 apiVersion: v1
 kind: Service
