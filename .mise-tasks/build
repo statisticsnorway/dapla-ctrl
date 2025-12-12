@@ -3,4 +3,4 @@
 
 set -e
 
-go build -o bin/api-reconcilers ./cmd/api-reconcilers
+go build -o bin/api-reconcilers ./cmd/dapla-api-reconcilers

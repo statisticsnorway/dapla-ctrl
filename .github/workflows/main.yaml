@@ -1,92 +1,68 @@
-name: Build and push image and chart
+name: Build and push image
 on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore: [data/**]
   workflow_dispatch:
-env:
-  NAME: nais-api-reconcilers
-  IMAGE_REPOSITORY: oci://europe-north1-docker.pkg.dev/nais-io/nais
 jobs:
-  build_push:
-    outputs:
-      version: ${{ steps.build-push-sign.outputs.version }}
-      chart_version: ${{ steps.package_chart.outputs.version }}
-    permissions:
-      contents: read
-      id-token: write
-    name: Build and push
+  test:
+    name: Check pull request
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-      - name: Find go cache dir
-        id: go-cache
-        run: |
-          go version
-          # Clear cache dirs to avoid error when restoring
-          go clean -cache -modcache
-          echo "gocache=$(go env GOCACHE)" >> $GITHUB_OUTPUT
-          echo "gomodcache=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
-      - name: Cache go modules
-        uses: actions/cache@v4
         with:
-          path: |
-            ${{ steps.go-cache.outputs.gocache }}
-            ${{ steps.go-cache.outputs.gomodcache }}
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          cache_key_prefix: mise-test
+      - uses: ./.github/actions/go-cache
+        with:
+          key: test
+      - run: mise run build
       - run: mise run test
-      - run: mise run check
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        with:
+          cache_key_prefix: mise-lint
+      - uses: ./.github/actions/go-cache
+        with:
+          key: lint
+          restore-keys: test
+      - run: mise run check:staticcheck
+      - run: mise run check:vulncheck
       - name: Check code format and run code generators
         run: |
-          mise run fmt
-          mise run generate
-          git diff --exit-code --name-only
-      - id: go_version
-        run: echo "go_version=$(mise current go)" >> $GITHUB_OUTPUT
-      - uses: nais/platform-build-push-sign@main
-        id: build-push-sign
-        with:
-          name: ${{ env.NAME }}
-          build_args: |
-            GO_VERSION=${{ steps.go_version.outputs.go_version }}-
-          google_service_account: gh-api-reconcilers
-          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
-          push: true
-      - name: Package chart
-        id: package_chart
-        env:
-          CHART_PATH: ./charts
-        run: |
-          base_version="$(yq '.version' < "${{ env.CHART_PATH }}/Chart.yaml")"
-          chart_version="${base_version}-${{ steps.build-push-sign.outputs.version }}"
+          mise run fmt ::: generate
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run fmt'"
+          git diff --name-only | grep -v '^package-lock.json$' | xargs -r git diff --exit-code --
 
-          yq eval \
-            '.version="'"$chart_version"'"' \
-            "${{ env.CHART_PATH }}/Chart.yaml" --inplace
-          yq eval \
-            '.image.tag="${{ steps.build-push-sign.outputs.version }}"' \
-            "${{ env.CHART_PATH }}/values.yaml" --inplace
-
-          helm package "${{ env.CHART_PATH }}" --destination .
-
-          name=$(yq '.name' < "${{ env.CHART_PATH }}/Chart.yaml")
-          echo "name=$name" >> $GITHUB_OUTPUT
-          echo "version=$chart_version" >> $GITHUB_OUTPUT
-          echo "archive=$name-$chart_version.tgz" >> $GITHUB_OUTPUT
-      - name: Push Chart
-        if: github.ref == 'refs/heads/main'
-        run: |-
-          chart="${{ steps.package_chart.outputs.archive }}"
-          echo "Pushing: $chart"
-          helm push "$chart" ${{ env.IMAGE_REPOSITORY }}
-
-  rollout:
-    runs-on: fasit-deploy
+  build_push:
     permissions:
+      contents: read
       id-token: write
-    needs:
-      - build_push
+    if: github.triggering_actor != 'dependabot[bot]'
+    name: Build and push
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.build-push-sign.outputs.version }}
     steps:
-      - uses: nais/fasit-deploy@v2
-        if: github.ref == 'refs/heads/main'
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
         with:
-          chart: ${{ env.IMAGE_REPOSITORY }}/${{ env.NAME }}
-          version: ${{ needs.build_push.outputs.chart_version }}
+          cache_key_prefix: mise-build-push
+      - uses: ./.github/actions/go-cache
+        with:
+          key: build
+          restore-keys: test
+      - name: Build api-reconcilers
+        run: mise run build
+      - name: Build and push image and SBOM to Nais OCI registry
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: dapla-platform
