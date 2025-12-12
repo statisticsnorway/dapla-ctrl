@@ -149,40 +149,6 @@ Test.gql("Assign team creator role to service account as admin", function(t)
 	}
 end)
 
-Test.gql("Create new team as service account", function(t)
-	t.addHeader("authorization", sa1HeaderValue)
-
-	t.query(string.format([[
-		mutation {
-			createTeam(
-				input: {
-					slug: "%s"
-					purpose: "some purpose"
-					sectionCode: "724"
-				}
-			) {
-				team {
-					id
-					slug
-					purpose
-				}
-			}
-		}
-	]], teamSlug))
-
-	t.check {
-		data = {
-			createTeam = {
-				team = {
-					id = NotNull(),
-					slug = teamSlug,
-					purpose = "some purpose",
-				},
-			},
-		},
-	}
-end)
-
 Test.gql("Assign team owner role to service account as admin", function(t)
 	t.addHeader("x-user-email", user:email())
 

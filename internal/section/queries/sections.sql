@@ -35,3 +35,14 @@ WHERE
 ORDER BY
 	code
 ;
+
+-- name: GetByManagerId :one
+SELECT
+	*
+FROM
+	sections
+WHERE
+	manager_id = @user_id
+ORDER BY
+	code
+;

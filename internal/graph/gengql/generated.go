@@ -620,12 +620,13 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		Email      func(childComplexity int) int
-		ExternalID func(childComplexity int) int
-		ID         func(childComplexity int) int
-		IsAdmin    func(childComplexity int) int
-		Name       func(childComplexity int) int
-		Teams      func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int
+		Email            func(childComplexity int) int
+		ExternalID       func(childComplexity int) int
+		ID               func(childComplexity int) int
+		IsAdmin          func(childComplexity int) int
+		IsSectionManager func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Teams            func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int
 	}
 
 	UserConnection struct {
@@ -761,6 +762,8 @@ type TeamMemberResolver interface {
 }
 type UserResolver interface {
 	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error)
+
+	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
 }
 
 type executableSchema struct {
@@ -2957,6 +2960,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.IsAdmin(childComplexity), true
+	case "User.isSectionManager":
+		if e.complexity.User.IsSectionManager == nil {
+			break
+		}
+
+		return e.complexity.User.IsSectionManager(childComplexity), true
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -5680,8 +5689,11 @@ input CreateTeamInput {
 
 	"""
 	The code of the section the team belongs to.
+
+	If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
+	Dapla Admins. Non-admins cannot set this to a custom value.
 	"""
-	sectionCode: String!
+	sectionCode: String
 }
 
 input UpdateTeamInput {
@@ -5924,6 +5936,11 @@ type User implements Node {
 	True if the user is global admin.
 	"""
 	isAdmin: Boolean!
+
+	"""
+	True if the user is a section mnager.
+	"""
+	isSectionManager: Boolean!
 }
 
 """
@@ -8261,6 +8278,8 @@ func (ec *executionContext) fieldContext_GroupMember_user(_ context.Context, fie
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -10163,6 +10182,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -12130,6 +12151,8 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_user(_ context
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -13725,6 +13748,8 @@ func (ec *executionContext) fieldContext_Section_manager(_ context.Context, fiel
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -17405,6 +17430,8 @@ func (ec *executionContext) fieldContext_TeamMember_user(_ context.Context, fiel
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -18341,6 +18368,35 @@ func (ec *executionContext) fieldContext_User_isAdmin(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _User_isSectionManager(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_isSectionManager,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.User().IsSectionManager(ctx, obj)
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_isSectionManager(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*user.User]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -18422,6 +18478,8 @@ func (ec *executionContext) fieldContext_UserConnection_nodes(_ context.Context,
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -18877,6 +18935,8 @@ func (ec *executionContext) fieldContext_UserEdge_node(_ context.Context, field 
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
 				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -21025,7 +21085,7 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 			it.Purpose = data
 		case "sectionCode":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sectionCode"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -27269,6 +27329,42 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "isSectionManager":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_isSectionManager(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

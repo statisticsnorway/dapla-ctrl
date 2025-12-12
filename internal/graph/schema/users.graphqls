@@ -98,6 +98,11 @@ type User implements Node {
 	True if the user is global admin.
 	"""
 	isAdmin: Boolean!
+
+	"""
+	True if the user is a section mnager.
+	"""
+	isSectionManager: Boolean!
 }
 
 """

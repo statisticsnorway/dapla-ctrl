@@ -2,7 +2,10 @@ package section
 
 import (
 	"context"
+	"errors"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/section/sectionsql"
@@ -43,4 +46,22 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *SectionOrde
 	return pagination.NewConvertConnection(ret, page, total, func(from *sectionsql.ListRow) *Section {
 		return toGraphSection(&from.Section)
 	}), nil
+}
+
+func GetByManagerId(ctx context.Context, userId uuid.UUID) (*Section, error) {
+	ss, err := db(ctx).GetByManagerId(ctx, &userId)
+	if err != nil {
+		return nil, handleError(err)
+	}
+	return toGraphSection(ss), nil
+}
+
+func IsUserSectionManager(ctx context.Context, userId uuid.UUID) (bool, error) {
+	_, err := GetByManagerId(ctx, userId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
 }

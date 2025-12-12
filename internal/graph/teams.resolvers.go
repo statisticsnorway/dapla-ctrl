@@ -2,10 +2,12 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
@@ -19,6 +21,31 @@ func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeam
 	actor := authz.ActorFromContext(ctx)
 
 	if err := authz.CanCreateTeam(ctx); err != nil {
+		return nil, err
+	}
+
+	if !actor.User.IsAdmin() {
+		s, err := section.GetByManagerId(ctx, actor.User.GetID())
+		if errors.As(err, &section.ErrNotFound{}) {
+			return nil, apierror.Errorf("You do not have permission to create teams.")
+		} else if err != nil {
+			return nil, err
+		}
+		// Default to the section the user is a manager for
+		if input.SectionCode == "" {
+			input.SectionCode = s.Code
+		}
+		// Managers can only create teams in their own section
+		if input.SectionCode != s.Code {
+			return nil, apierror.Errorf("You cannot create a team in section %s", input.SectionCode)
+		}
+	} else if input.SectionCode == "" {
+		input.SectionCode = "724"
+	}
+
+	if _, err := section.Get(ctx, input.SectionCode); errors.As(err, &section.ErrNotFound{}) {
+		return nil, apierror.Errorf("Section %s does not exist", input.SectionCode)
+	} else if err != nil {
 		return nil, err
 	}
 

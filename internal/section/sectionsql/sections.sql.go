@@ -5,6 +5,8 @@ package sectionsql
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const getByCodes = `-- name: GetByCodes :many
@@ -36,6 +38,24 @@ func (q *Queries) GetByCodes(ctx context.Context, codes []string) ([]*Section, e
 		return nil, err
 	}
 	return items, nil
+}
+
+const getByManagerId = `-- name: GetByManagerId :one
+SELECT
+	code, name, manager_id
+FROM
+	sections
+WHERE
+	manager_id = $1
+ORDER BY
+	code
+`
+
+func (q *Queries) GetByManagerId(ctx context.Context, userID *uuid.UUID) (*Section, error) {
+	row := q.db.QueryRow(ctx, getByManagerId, userID)
+	var i Section
+	err := row.Scan(&i.Code, &i.Name, &i.ManagerID)
+	return &i, err
 }
 
 const list = `-- name: List :many

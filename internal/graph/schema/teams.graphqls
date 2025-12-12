@@ -197,8 +197,11 @@ input CreateTeamInput {
 
 	"""
 	The code of the section the team belongs to.
+
+	If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
+	Dapla Admins. Non-admins cannot set this to a custom value.
 	"""
-	sectionCode: String!
+	sectionCode: String
 }
 
 input UpdateTeamInput {

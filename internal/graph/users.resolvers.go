@@ -7,6 +7,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 )
@@ -38,6 +39,10 @@ func (r *userResolver) Teams(ctx context.Context, obj *user.User, first *int, af
 	}
 
 	return team.ListForUser(ctx, obj.UUID, page, orderBy)
+}
+
+func (r *userResolver) IsSectionManager(ctx context.Context, obj *user.User) (bool, error) {
+	return section.IsUserSectionManager(ctx, obj.UUID)
 }
 
 func (r *Resolver) User() gengql.UserResolver { return &userResolver{r} }

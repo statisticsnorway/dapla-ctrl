@@ -38,7 +38,10 @@ Test.gql("Create team with user that is not authorized", function(t)
 	}
 end)
 
-Test.gql("Create team with namespace that already exists", function(t)
+-- Make the authenticated user an admin
+user:admin(true)
+
+Test.gql("Create team with slug that is already taken", function(t)
 	t.addHeader("x-user-email", user:email())
 
 	t.query [[

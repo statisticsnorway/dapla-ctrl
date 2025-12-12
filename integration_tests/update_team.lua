@@ -1,6 +1,7 @@
 local teamSlug = "someteamname"
 
 local user = User.new("test", "test@test.com", "exttest")
+user:admin(true)
 
 Test.gql("Create team", function(t)
 	t.addHeader("x-user-email", user:email())
