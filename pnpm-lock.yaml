@@ -21,8 +21,8 @@ importers:
         specifier: ^7.3.6
         version: 7.3.6(@emotion/react@11.14.0(@types/react@18.3.26)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.26)(react@18.3.1))(@types/react@18.3.26)(react@18.3.1))(@types/react@18.3.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@statisticsnorway/ssb-component-library':
-        specifier: ^2.5.4
-        version: 2.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^3.0.1
+        version: 3.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       body-parser:
         specifier: ^2.2.1
         version: 2.2.1
@@ -1093,8 +1093,8 @@ packages:
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
-  '@statisticsnorway/ssb-component-library@2.5.4':
-    resolution: {integrity: sha512-Q9PpcoXOkFzevGitUqy9pefsta7Piu7VdrgQ00IqrYYXoPcTHInaED5mVfde5gsWE5IEuJPKfzWGfJv8pQrZiQ==}
+  '@statisticsnorway/ssb-component-library@3.0.1':
+    resolution: {integrity: sha512-LkgCn1v72cB0sZ0BmvQouCXLNkYBx5eSWfrtW42dEQ1Bi9gc53g+6mqNF2vCvvVi+hTvnVyZPDiif3TZgO+FvQ==}
     peerDependencies:
       react: ^18.3.1
       react-dom: ^18.3.1
@@ -4459,7 +4459,7 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@statisticsnorway/ssb-component-library@2.5.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@statisticsnorway/ssb-component-library@3.0.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       prismjs: 1.30.0
       react: 18.3.1
