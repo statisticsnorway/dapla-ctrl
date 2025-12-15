@@ -133,7 +133,7 @@
 				</Td>
 				<Td>
 					{#if team.manager.email !== ''}
-						<a href="/user/${team.manager.email}">{team.manager.name}</a>
+						<a href="/user/{team.manager.email}">{team.manager.name}</a>
 					{:else}
 						{team.manager.name}
 					{/if}

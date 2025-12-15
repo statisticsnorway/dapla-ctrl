@@ -15,6 +15,7 @@
 		PackageIcon,
 		PadlockLockedIcon,
 		PersonGroupIcon,
+		PersonIcon,
 		QuestionmarkIcon,
 		RocketIcon,
 		ShieldLockIcon,
@@ -78,6 +79,8 @@
 				return BellIcon;
 			case 'issues':
 				return VitalsIcon;
+			case 'brukeroversikt':
+				return PersonIcon;
 			default:
 				return QuestionmarkIcon;
 		}
