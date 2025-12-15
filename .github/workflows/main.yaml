@@ -60,8 +60,8 @@ jobs:
       registry: europe-north1-docker.pkg.dev
       repository: dapla-platform
       image-name: dapla-console
-      image-tag: ${{ needs.build-push.outputs.nais-tag }}
-      cluster: ${{needs.build-push.outputs.nais-cluster}}
-      nais-config-path: ${{needs.build-push.outputs.nais-config-path}}
+      image-tag: ${{ needs.build_push.outputs.nais-tag }}
+      cluster: ${{needs.build_push.outputs.nais-cluster}}
+      nais-config-path: ${{needs.build_push.outputs.nais-config-path}}
     secrets:
       registry-project: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
