@@ -83,7 +83,7 @@
 								<div class="item">
 									<div>
 										<BodyShort size="small">
-											{memberEdge.node.user.name}
+											<a href="/user/{memberEdge.node.user.email}/">{memberEdge.node.user.name}</a>
 										</BodyShort>
 										<BodyShort size="small">
 											<span style="color: var(--ax-text-subtle, --a-text-subtle);"
