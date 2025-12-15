@@ -14,8 +14,9 @@
 
 	export type TeamsData = {
 		slug: string;
+		purpose: string;
 		memberCount: number;
-		managers: User[];
+		manager: User;
 		section: {
 			code: string;
 			name: string;
@@ -89,12 +90,12 @@
 				}
 			} else if (sortedBy === 'MANAGER') {
 				if (sortDirection === 'descending') {
-					if (a.managers > b.managers) return -1;
-					if (a.managers < b.managers) return 1;
+					if (a.manager > b.manager) return -1;
+					if (a.manager < b.manager) return 1;
 					return 0;
 				} else {
-					if (a.managers > b.managers) return 1;
-					if (a.managers < b.managers) return -1;
+					if (a.manager > b.manager) return 1;
+					if (a.manager < b.manager) return -1;
 					return 0;
 				}
 			}
@@ -113,8 +114,8 @@
 	<Thead>
 		<Tr>
 			<Th sortable={true} sortKey="NAME">Navn</Th>
-			<Th sortable={true} sortKey="MEMBER_COUNT">Teammedlemmer</Th>
-			<Th sortable={true} sortKey="MANAGER">Managers</Th>
+			<Th sortable={true} sortKey="MEMBER_COUNT" align="right">Teammedlemmer</Th>
+			<Th sortable={true} sortKey="MANAGER">Ansvarlig</Th>
 		</Tr>
 	</Thead>
 	<Tbody>
@@ -125,26 +126,21 @@
 						{team.slug}
 					</a>
 					<br />
-					{team.section.name} ({team.section.code})
+					{team.purpose}
 				</Td>
-				<Td>
+				<Td align="right">
 					{team.memberCount}
 				</Td>
-				<Td
-					>{#each team.managers as manager, i (manager.email)}
-						<a href="/bruker/${manager.email}"> {manager.name}</a>{#if i < team.managers.length - 1}
-							<span>,</span>
-						{/if}
-					{/each}</Td
-				>
+				<Td>
+					{#if team.manager.email !== ''}
+						<a href="/user/${team.manager.email}">{team.manager.name}</a>
+					{:else}
+						{team.manager.name}
+					{/if}
+					<br />
+					{team.section.name} ({team.section.code})
+				</Td>
 			</Tr>
 		{/each}
 	</Tbody>
 </Table>
-
-<style>
-	span::after {
-		/* Avoid 'svelte/no-useless-mustaches' by adding space after comma with css*/
-		content: ' ';
-	}
-</style>

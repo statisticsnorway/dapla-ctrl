@@ -16,8 +16,6 @@
 	});
 
 	type TeamNode = Extract<UserTeams$result['me'], { __typename: 'User' }>['teams']['nodes'][0];
-	type GroupNode = TeamNode['team']['groups']['nodes'][0];
-	type GroupUserNode = GroupNode['members']['nodes'][0];
 
 	let userTeamsCount = $derived(
 		$UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.nodes.length
@@ -25,20 +23,15 @@
 
 	function transformTeamData(teamNode: TeamNode): TeamsData {
 		const team = teamNode;
-
-		const allManagers = team.team.groups.nodes
-			.filter((group: GroupNode) => group.category === 'managers' && !group.suffix)
-			.flatMap((managerGroup: GroupNode) =>
-				managerGroup.members.nodes.map((member: GroupUserNode) => member.user)
-			);
-		const uniqueManagers = Array.from(
-			new Map(allManagers.map((user: GroupUserNode['user']) => [user.email, user])).values()
-		);
-
+		const manager = team.team.section.manager;
 		return {
 			slug: team.team.slug,
+			purpose: team.team.purpose,
 			memberCount: team.team.members.pageInfo.totalCount,
-			managers: uniqueManagers,
+			manager: {
+				name: manager?.name ?? 'Mangler seksjonsleder',
+				email: manager?.email ?? ''
+			},
 			section: {
 				code: team.team.section.code,
 				name: team.team.section.name

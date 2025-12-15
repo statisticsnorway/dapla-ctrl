@@ -12,9 +12,14 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 		nodes {
 			id
 			slug
+			purpose
 			section {
 				code
 				name
+				manager {
+					name
+					email
+				}
 			}
 			members {
 				pageInfo {

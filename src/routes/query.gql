@@ -16,9 +16,14 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 					team {
 						id
 						slug
+						purpose
 						section {
 							code
 							name
+							manager {
+								name
+								email
+							}
 						}
 						members {
 							pageInfo {

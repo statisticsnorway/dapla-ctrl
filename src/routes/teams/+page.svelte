@@ -16,26 +16,20 @@
 	});
 
 	type TeamNode = AllTeams$result['teams']['nodes'][0];
-	type GroupNode = TeamNode['groups']['nodes'][0];
-	type GroupUserNode = GroupNode['members']['nodes'][0];
 
 	let allTeamsCount = $derived($AllTeams.data?.teams?.nodes.length || 0);
 	function transformTeamData(teamNode: TeamNode): TeamsData {
 		const team = teamNode;
-
-		const allManagers = team.groups.nodes
-			.filter((group: GroupNode) => group.category === 'managers' && !group.suffix)
-			.flatMap((managerGroup: GroupNode) =>
-				managerGroup.members.nodes.map((member: GroupUserNode) => member.user)
-			);
-		const uniqueManagers = Array.from(
-			new Map(allManagers.map((user: GroupUserNode['user']) => [user.email, user])).values()
-		);
+		const manager = team.section.manager;
 
 		return {
 			slug: team.slug,
+			purpose: team.purpose,
 			memberCount: team.members.pageInfo.totalCount,
-			managers: uniqueManagers,
+			manager: {
+				name: manager?.name ?? 'Mangler seksjonsleder',
+				email: manager?.email ?? ''
+			},
 			section: {
 				code: team.section.code,
 				name: team.section.name
