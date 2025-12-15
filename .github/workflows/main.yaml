@@ -46,18 +46,10 @@ jobs:
           echo "nais_tag=${{ steps.docker-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
           echo "cluster=test" >> "$GITHUB_OUTPUT"
           echo "nais_config_path=.nais/dev.yaml" >> "$GITHUB_OUTPUT"
-  # rollout:
-  #   needs:
-  #     - build_push
-  #   # Only do this if on main
-  #   if: endsWith(github.ref, '/main')
-  #   permissions:
-  #     id-token: write
-  #   steps:
-  #     - #todo deploy
+
   deploy:
     name: Deploy to NAIS
-    needs: build-push
+    needs: build_push
     if: ${{github.event_name != 'pull_request'}} && endsWith(github.ref, '/main')
     uses: ./.github/workflows/deploy.yml
     with:
