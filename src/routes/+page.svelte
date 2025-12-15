@@ -38,7 +38,11 @@
 		return {
 			slug: team.team.slug,
 			memberCount: team.team.members.pageInfo.totalCount,
-			managers: uniqueManagers
+			managers: uniqueManagers,
+			section: {
+				code: team.team.section.code,
+				name: team.team.section.name
+			}
 		};
 	}
 </script>

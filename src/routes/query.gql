@@ -16,6 +16,10 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 					team {
 						id
 						slug
+						section {
+							code
+							name
+						}
 						members {
 							pageInfo {
 								totalCount

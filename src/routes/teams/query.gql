@@ -12,6 +12,10 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 		nodes {
 			id
 			slug
+			section {
+				code
+				name
+			}
 			members {
 				pageInfo {
 					totalCount

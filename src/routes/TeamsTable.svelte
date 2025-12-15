@@ -16,6 +16,10 @@
 		slug: string;
 		memberCount: number;
 		managers: User[];
+		section: {
+			code: string;
+			name: string;
+		};
 	};
 
 	type SortBy = 'NAME' | 'MEMBER_COUNT' | 'MANAGER';
@@ -120,6 +124,8 @@
 					<a href={`/team/${team.slug}/`}>
 						{team.slug}
 					</a>
+					<br />
+					{team.section.name} ({team.section.code})
 				</Td>
 				<Td>
 					{team.memberCount}
