@@ -51,7 +51,7 @@ jobs:
     name: Deploy to NAIS
     needs: build_push
     if: ${{github.event_name != 'pull_request'}} && endsWith(github.ref, '/main')
-    uses: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy.yaml
     with:
       registry: europe-north1-docker.pkg.dev
       repository: dapla-platform
