@@ -1,0 +1,44 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-ctrl-alt-del
+  namespace: dapla-platform
+  annotations:
+    nais.io/read-only-file-system: 'true'
+    nais.io/run-as-user: '1001'
+spec:
+  image: '{{image}}'
+
+  port: 3000
+
+  resources:
+    requests:
+      memory: '128Mi'
+      cpu: '100m'
+    limits:
+      memory: '512Mi'
+
+  replicas:
+    disableAutoScaling: true
+    max: 1
+    min: 1
+
+  readiness:
+    path: /isReady
+    port: 3000
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /isAlive
+    port: 3000
+    failureThreshold: 3
+
+  ingresses:
+    - https://dapla-ctrl-alt-del.intern.test.ssb.no
+
+  accessPolicy:
+    outbound:
+      rules:
+        - application: dapla-api
