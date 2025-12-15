@@ -47,7 +47,7 @@ jobs:
       - name: Generate image tags
         id: nais-deploy-vars
         run: |
-          echo "nais_tag=${{ steps.docker-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          echo "nais_tag=${{ steps.docker-build-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
           echo "cluster=test" >> "$GITHUB_OUTPUT"
           echo "nais_config_path=.nais/dev.yaml" >> "$GITHUB_OUTPUT"
 
