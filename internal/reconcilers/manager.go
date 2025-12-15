@@ -10,6 +10,7 @@ import (
 	"cloud.google.com/go/pubsub"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
@@ -36,7 +37,7 @@ type Manager struct {
 	log                 logrus.FieldLogger
 	pubsubSubscription  *pubsub.Subscription
 	syncQueueChan       <-chan ReconcileRequest
-	syncQueue           Queue
+	syncQueue           queue.Queue[ReconcileRequest]
 	inFlight            InFlight
 
 	metricReconcilerTime metric.Int64Histogram
@@ -68,7 +69,7 @@ func NewManager(ctx context.Context, c *apiclient.APIClient, enableDuringRegistr
 		log.WithField("duration", time.Since(start).String()).Debug("subscription created")
 	}
 
-	queue, channel := NewQueue()
+	queue, channel := queue.NewQueue[ReconcileRequest]()
 	return &Manager{
 		apiclient:            c,
 		log:                  log,

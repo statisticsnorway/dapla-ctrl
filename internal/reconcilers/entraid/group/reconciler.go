@@ -28,34 +28,34 @@ const (
 	configGcpAppRoleId              = "gcpSyncAppRoleId"
 	configGcpProvisioningResourceId = "gcpProvisioningResourceId"
 	configGcpSSOResourceId          = "gcpSSOResourceId"
-	configGcpSyncJobId              = "gcpSyncJobId"
-	configGcpSyncRuleId             = "gcpSyncRuleId"
 
 	entraIdGroupPrefix = "dapla-api-test-"
 )
 
+type syncQueuer interface {
+	Add(group string, member *string)
+}
+
 type entraIdGroupReconciler struct {
 	mainCtx       context.Context
 	service       *msgraphsdk.GraphServiceClient
-	entraIdConfig entraIdClientConfig
-	gcpSyncer     gcpSyncer
-	gcpCancelFunc func()
+	entraIdConfig entraIdConfig
+	syncQueuer    syncQueuer
 }
 
-type entraIdClientConfig struct {
-	ClientId     string
-	ClientSecret string
-	TenantId     string
+type entraIdConfig struct {
+	ClientId               string
+	ClientSecret           string
+	TenantId               string
+	SSOResourceId          uuid.UUID
+	ProvisioningResourceId uuid.UUID
+	AppRoleId              uuid.UUID
 }
 
-func (c entraIdClientConfig) Equal(o entraIdClientConfig) bool {
-	return (c.ClientId == o.ClientId) && (c.ClientSecret == o.ClientSecret) && (c.TenantId == o.TenantId)
-}
-
-func New(ctx context.Context) reconcilers.Reconciler {
+func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
 	r := &entraIdGroupReconciler{
-		mainCtx:   ctx,
-		gcpSyncer: NewGcpSyncer(),
+		mainCtx:    ctx,
+		syncQueuer: sq,
 	}
 
 	return r
@@ -86,36 +86,6 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Client secret of the Entra ID client to use for group administration",
 				Secret:      true,
 			},
-			{
-				Key:         configGcpAppRoleId,
-				DisplayName: "GCP Sync App Role ID",
-				Description: "ID of App Role to grant on Google SSO/Provisioning Apps in Entra ID",
-				Secret:      false,
-			},
-			{
-				Key:         configGcpSSOResourceId,
-				DisplayName: "GCP SSO App Resource ID",
-				Description: "Resource ID of the Google SSO App in Entra ID",
-				Secret:      false,
-			},
-			{
-				Key:         configGcpProvisioningResourceId,
-				DisplayName: "GCP Provisioning App Resource ID",
-				Description: "Resource ID of the Google Provisioning App in Entra ID",
-				Secret:      false,
-			},
-			{
-				Key:         configGcpSyncJobId,
-				DisplayName: "GCP Sync Job ID",
-				Description: "ID of the Entra ID-Google sync job",
-				Secret:      false,
-			},
-			{
-				Key:         configGcpSyncRuleId,
-				DisplayName: "GCP Sync Rule Id",
-				Description: "ID of the Entra ID GCP Sync Job Rule ID",
-				Secret:      false,
-			},
 		},
 	}
 }
@@ -132,28 +102,9 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get reconciler config: %w", err)
 	}
 
-	// If the GCP Sync settings have changed, we can hotswap the config,
-	// since the syncer just reads these as its syncing. In a worst case
-	// race condition, the sync will just fail this once.
-	gcpSyncConfig, err := r.getGcpSyncConfig(config)
-	if err != nil {
-		log.Error(err)
-		return fmt.Errorf("get gcp sync config")
-	}
-	if !r.gcpSyncer.Config.Equal(*gcpSyncConfig) {
-		r.gcpSyncer.Config = *gcpSyncConfig
-	}
-
-	entraId, changed, err := r.getEntraIdClient(config)
+	entraId, _, err := r.getEntraIdClient(config)
 	if err != nil {
 		return fmt.Errorf("get entra id client: %w", err)
-	}
-
-	// If the Entra ID credentials have changed, we need to cancel the currently
-	// running GCP sync loop and restart it with the new client.
-	if changed {
-		log.Info("updating gcpsyncer entra id client")
-		r.restartGcpSyncer(entraId)
 	}
 
 	// Iterate through all the groups in the team, and reconcile them one by one
@@ -164,7 +115,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	})
 
 	for groupsIt.Next() {
-		if err := r.reconcileGroup(ctx, entraId, client, gcpSyncConfig, groupsIt.Value().Group.Name, log); err != nil {
+		if err := r.reconcileGroup(ctx, entraId, client, groupsIt.Value().Group.Name, log); err != nil {
 			return fmt.Errorf("reconcile group %q: %w", groupsIt.Value().Group.Name, err)
 		}
 	}
@@ -172,17 +123,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	return nil
 }
 
-func (r *entraIdGroupReconciler) restartGcpSyncer(entraId *msgraphsdk.GraphServiceClient) {
-	if r.gcpCancelFunc != nil {
-		r.gcpCancelFunc()
-	}
-	gcpSyncerCtx, cancel := context.WithCancel(context.Background())
-	r.gcpCancelFunc = cancel
-	r.gcpSyncer.EntraId = entraId
-	go r.gcpSyncer.Run(gcpSyncerCtx)
-}
-
-func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, gcpSyncConfig *gcpSyncConfig, groupName string, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, log logrus.FieldLogger) error {
 	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName)
 	if err != nil {
 		return fmt.Errorf("get or create group: %w", err)
@@ -196,11 +137,13 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 			return fmt.Errorf("update external id: %w", err)
 		}
 
-		if gcpSyncConfig != nil {
-			log.Info("assigning app roles")
-			if err := assignAppRoles(ctx, entraId, *group.GetId(), &gcpSyncConfig.GoogleSyncAppRoleId, &gcpSyncConfig.GoogleSyncProvisioningResourceId, &gcpSyncConfig.GoogleSyncSSOResourceId); err != nil {
-				return fmt.Errorf("assign provisioning app role: %w", err)
-			}
+		log.Info("assigning app roles")
+		if err := assignAppRoles(ctx, entraId, *group.GetId(), &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
+			return fmt.Errorf("assign provisioning app role: %w", err)
+		}
+
+		if r.syncQueuer != nil {
+			r.syncQueuer.Add(*group.GetId(), nil)
 		}
 	}
 
@@ -236,8 +179,10 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		}
 	}
 
-	if gcpSyncConfig != nil && (len(usersToAdd) > 0 || len(usersToRemove) > 0) {
-		r.gcpSyncer.Queue(*group.GetId(), toUniformIdList(usersToAdd, usersToRemove))
+	if r.syncQueuer != nil && (len(usersToAdd) > 0 || len(usersToRemove) > 0) {
+		for _, u := range toUniformIdList(usersToAdd, usersToRemove) {
+			r.syncQueuer.Add(*group.GetId(), &u)
+		}
 	}
 
 	return nil
@@ -395,54 +340,8 @@ func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Us
 	return remoteOnly
 }
 
-func (r *entraIdGroupReconciler) getGcpSyncConfig(config *protoapi.ConfigReconcilerResponse) (*gcpSyncConfig, error) {
-	gc := &gcpSyncConfig{}
-	for _, c := range config.Nodes {
-		switch c.Key {
-		case configGcpAppRoleId:
-			id, err := uuid.Parse(c.Value)
-			if err != nil {
-				return nil, fmt.Errorf("parse app role id: %w", err)
-			}
-			gc.GoogleSyncAppRoleId = id
-		case configGcpSSOResourceId:
-			id, err := uuid.Parse(c.Value)
-			if err != nil {
-				return nil, fmt.Errorf("parse sso resource id: %w", err)
-			}
-			gc.GoogleSyncSSOResourceId = id
-		case configGcpProvisioningResourceId:
-			id, err := uuid.Parse(c.Value)
-			if err != nil {
-				return nil, fmt.Errorf("parse provisioning resource id: %w", err)
-			}
-			gc.GoogleSyncProvisioningResourceId = id
-		case configGcpSyncJobId:
-			gc.GoogleSyncJobId = c.Value
-		case configGcpSyncRuleId:
-			gc.GoogleSyncRuleId = c.Value
-		case configClientIdKey, configClientSecretKey, configTenantIdKey:
-		default:
-			return nil, fmt.Errorf("unknown config key %q", c.Key)
-		}
-	}
-
-	if gc.GoogleSyncAppRoleId == uuid.Nil ||
-		gc.GoogleSyncProvisioningResourceId == uuid.Nil ||
-		gc.GoogleSyncSSOResourceId == uuid.Nil {
-		if gc.GoogleSyncAppRoleId == uuid.Nil &&
-			gc.GoogleSyncProvisioningResourceId == uuid.Nil &&
-			gc.GoogleSyncSSOResourceId == uuid.Nil {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("missing one of %s, %s, %s", configGcpAppRoleId, configGcpProvisioningResourceId, configGcpSSOResourceId)
-	}
-
-	return gc, nil
-}
-
 func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*msgraphsdk.GraphServiceClient, bool, error) {
-	rc := entraIdClientConfig{}
+	rc := entraIdConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
 		case configClientIdKey:
@@ -451,13 +350,30 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ClientSecret = c.Value
 		case configTenantIdKey:
 			rc.TenantId = c.Value
-		case configGcpAppRoleId, configGcpProvisioningResourceId, configGcpSSOResourceId, configGcpSyncJobId, configGcpSyncRuleId:
+		case configGcpAppRoleId:
+			id, err := uuid.Parse(c.Value)
+			if err != nil {
+				return nil, false, fmt.Errorf("parse app role id: %w", err)
+			}
+			rc.AppRoleId = id
+		case configGcpSSOResourceId:
+			id, err := uuid.Parse(c.Value)
+			if err != nil {
+				return nil, false, fmt.Errorf("parse sso resource id: %w", err)
+			}
+			rc.SSOResourceId = id
+		case configGcpProvisioningResourceId:
+			id, err := uuid.Parse(c.Value)
+			if err != nil {
+				return nil, false, fmt.Errorf("parse provisioning resource id: %w", err)
+			}
+			rc.ProvisioningResourceId = id
 		default:
 			return nil, false, fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
-	if rc.Equal(r.entraIdConfig) {
+	if rc == r.entraIdConfig {
 		return r.service, false, nil
 	}
 
@@ -466,14 +382,15 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 		return nil, false, fmt.Errorf("create credentials: %w", err)
 	}
 
-	r.service, err = msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
+	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
 		return nil, false, fmt.Errorf("create graph service client: %w", err)
 	}
 
+	r.service = service
 	r.entraIdConfig = rc
 
-	return r.service, true, nil
+	return service, true, nil
 }
 
 func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {

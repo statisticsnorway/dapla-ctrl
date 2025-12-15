@@ -1,21 +1,17 @@
-package reconcilers_test
+package queue_test
 
 import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
 )
 
 func Test_Queue(t *testing.T) {
-	input := reconcilers.ReconcileRequest{
-		TeamSlug:      "test-team",
-		CorrelationID: uuid.New().String(),
-	}
+	input := struct{}{}
 
 	t.Run("add to queue", func(t *testing.T) {
-		q, ch := reconcilers.NewQueue()
+		q, ch := queue.NewQueue[struct{}]()
 		if q.Add(input) != nil {
 			t.Errorf("expected no error when adding to queue")
 		}
@@ -34,9 +30,9 @@ func Test_Queue(t *testing.T) {
 	})
 
 	t.Run("race test", func(t *testing.T) {
-		q, _ := reconcilers.NewQueue()
-		go func(q reconcilers.Queue) {
-			for i := 0; i < 100; i++ {
+		q, _ := queue.NewQueue[struct{}]()
+		go func(q queue.Queue[struct{}]) {
+			for range 100 {
 				_ = q.Add(input)
 				time.Sleep(time.Millisecond)
 			}
@@ -45,7 +41,7 @@ func Test_Queue(t *testing.T) {
 	})
 
 	t.Run("close channel", func(t *testing.T) {
-		q, _ := reconcilers.NewQueue()
+		q, _ := queue.NewQueue[struct{}]()
 		q.Close()
 
 		if q.Add(input).Error() != "team reconciler channel is closed" {

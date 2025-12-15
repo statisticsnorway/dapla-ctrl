@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group"
 
 	"github.com/joho/godotenv"
@@ -99,11 +100,14 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	log.WithField("duration", time.Since(start).String()).Debug("Created reconciler manager")
 
 	// Init reconcilers
-	entraIdGroupReconciler := entraidreconciler.New(ctx)
+	gcpSyncer := gcpsyncer.New(client)
+
+	entraIdGroupReconciler := entraidreconciler.New(ctx, gcpSyncer)
 	log.WithField("duration", time.Since(start).String()).Debug("Created Entra ID group reconciler")
 
 	// The reconcilers will be run in the order they are added to the manager
 	reconcilerManager.AddReconciler(entraIdGroupReconciler)
+	reconcilerManager.AddReconciler(gcpSyncer)
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 
