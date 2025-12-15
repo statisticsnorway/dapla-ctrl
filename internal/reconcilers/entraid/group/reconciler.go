@@ -107,6 +107,12 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Resource ID of the Google Provisioning App in Entra ID",
 				Secret:      false,
 			},
+			{
+				Key:         configGroupPrefixKey,
+				DisplayName: "Entra ID Group Prefix",
+				Description: "Prefix to be added to any group created in Entra ID. Used for testing.",
+				Secret:      false,
+			},
 		},
 	}
 }
@@ -163,7 +169,6 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		}
 	}
 
-	log.Info("assigning app roles")
 	if err := ensureAppRoles(ctx, entraId, *group.GetId(), &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
 		return fmt.Errorf("assign provisioning app role: %w", err)
 	}

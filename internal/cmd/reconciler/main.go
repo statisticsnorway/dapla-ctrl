@@ -116,6 +116,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	log.WithField("duration", time.Since(start).String()).Debug("Registered reconcilers with API")
 
+	wg.Go(func() error {
+		defer log.Debug("Done running gcpsyncer")
+		gcpSyncer.Run(ctx)
+		return nil
+	})
+
 	for i := range 10 {
 		wg.Go(func() error {
 			defer log.Debugf("Done running reconciler %v", i)
