@@ -22,14 +22,13 @@ import (
 const (
 	reconcilerName = "entraid:group"
 
-	configClientIdKey               = "clientId"
-	configClientSecretKey           = "clientSecret"
-	configTenantIdKey               = "tenantId"
-	configGcpAppRoleId              = "gcpSyncAppRoleId"
-	configGcpProvisioningResourceId = "gcpProvisioningResourceId"
-	configGcpSSOResourceId          = "gcpSSOResourceId"
-
-	entraIdGroupPrefix = "dapla-api-test-"
+	configClientIdKey                  = "clientId"
+	configClientSecretKey              = "clientSecret"
+	configTenantIdKey                  = "tenantId"
+	configGcpAppRoleIdKey              = "gcpSyncAppRoleId"
+	configGcpProvisioningResourceIdKey = "gcpProvisioningResourceId"
+	configGcpSSOResourceIdKey          = "gcpSSOResourceId"
+	configGroupPrefixKey               = "groupPrefix"
 )
 
 type syncQueuer interface {
@@ -50,6 +49,7 @@ type entraIdConfig struct {
 	SSOResourceId          uuid.UUID
 	ProvisioningResourceId uuid.UUID
 	AppRoleId              uuid.UUID
+	GroupPrefix            string
 }
 
 func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
@@ -85,6 +85,24 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Entra ID Client secret",
 				Description: "Client secret of the Entra ID client to use for group administration",
 				Secret:      true,
+			},
+			{
+				Key:         configGcpAppRoleIdKey,
+				DisplayName: "GCP Sync App Role ID",
+				Description: "ID of App Role to grant on Google SSO/Provisioning Apps in Entra ID",
+				Secret:      false,
+			},
+			{
+				Key:         configGcpSSOResourceIdKey,
+				DisplayName: "GCP SSO App Resource ID",
+				Description: "Resource ID of the Google SSO App in Entra ID",
+				Secret:      false,
+			},
+			{
+				Key:         configGcpProvisioningResourceIdKey,
+				DisplayName: "GCP Provisioning App Resource ID",
+				Description: "Resource ID of the Google Provisioning App in Entra ID",
+				Secret:      false,
 			},
 		},
 	}
@@ -124,7 +142,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 }
 
 func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, log logrus.FieldLogger) error {
-	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName)
+	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName, r.entraIdConfig.GroupPrefix)
 	if err != nil {
 		return fmt.Errorf("get or create group: %w", err)
 	}
@@ -226,7 +244,7 @@ func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClie
 	return entraIdUsers, nil
 }
 
-func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string) (_ models.Groupable, created bool, err error) {
+func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ models.Groupable, created bool, err error) {
 	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
 		Name: groupName,
 	})
@@ -244,7 +262,7 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 	}
 
 	// TODO: Remove before prod!
-	entraIdGroupName := fmt.Sprintf("%s%s", entraIdGroupPrefix, groupName)
+	entraIdGroupName := fmt.Sprintf("%s%s", groupPrefix, groupName)
 
 	requestBody := graphmodels.NewGroup()
 	requestBody.SetDisplayName(&entraIdGroupName)
@@ -350,24 +368,26 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ClientSecret = c.Value
 		case configTenantIdKey:
 			rc.TenantId = c.Value
-		case configGcpAppRoleId:
+		case configGcpAppRoleIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
 				return nil, false, fmt.Errorf("parse app role id: %w", err)
 			}
 			rc.AppRoleId = id
-		case configGcpSSOResourceId:
+		case configGcpSSOResourceIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
 				return nil, false, fmt.Errorf("parse sso resource id: %w", err)
 			}
 			rc.SSOResourceId = id
-		case configGcpProvisioningResourceId:
+		case configGcpProvisioningResourceIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
 				return nil, false, fmt.Errorf("parse provisioning resource id: %w", err)
 			}
 			rc.ProvisioningResourceId = id
+		case configGroupPrefixKey:
+			rc.GroupPrefix = c.Value
 		default:
 			return nil, false, fmt.Errorf("unknown config key %q", c.Key)
 		}
