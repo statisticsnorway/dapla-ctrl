@@ -2,7 +2,9 @@ package group
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"slices"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
@@ -17,6 +19,7 @@ import (
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 )
 
 const (
@@ -155,14 +158,14 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 			return fmt.Errorf("update external id: %w", err)
 		}
 
-		log.Info("assigning app roles")
-		if err := assignAppRoles(ctx, entraId, *group.GetId(), &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
-			return fmt.Errorf("assign provisioning app role: %w", err)
-		}
-
 		if r.syncQueuer != nil {
 			r.syncQueuer.Add(*group.GetId(), nil)
 		}
+	}
+
+	log.Info("assigning app roles")
+	if err := ensureAppRoles(ctx, entraId, *group.GetId(), &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
+		return fmt.Errorf("assign provisioning app role: %w", err)
 	}
 
 	dbMembers, err := getDatabaseMembers(ctx, client, groupName)
@@ -253,12 +256,15 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 	}
 	if dbGroup.Group.ExternalId != nil {
 		entraIdGroup, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
-		// TODO: Do we want to handle a 404 (external broup deletion) differently,
-		// or do we want to keep it as an error to notify us of something shady going on?
-		if err != nil {
-			return nil, false, fmt.Errorf("get group from entra id: %w", err)
+		if err == nil {
+			return entraIdGroup, false, nil
 		}
-		return entraIdGroup, false, nil
+		var odError odataerrors.ODataErrorable
+		if !errors.As(err, &odError) {
+			return nil, false, fmt.Errorf("get group from entra id: %w", err)
+		} else if code := odError.GetErrorEscaped().GetCode(); code != nil && *code != "404" {
+			return nil, false, fmt.Errorf("non-404 status code on get group from entra id: %w", err)
+		}
 	}
 
 	// TODO: Remove before prod!
@@ -293,14 +299,33 @@ func toUniformIdList(toAdd []*protoapi.GroupMember, toRemove []models.Userable) 
 	return userIds
 }
 
-// assignAppRoles is a convenience function to assign multiple app roles,
-// see assignAppRole
-func assignAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
+// ensureAppRoles assigns any app roles which may be missing on the given group
+func ensureAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
+	appRolesResponse, err := entraId.Groups().ByGroupId(groupId).AppRoleAssignments().Get(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("get app role assignments for group %q: %w", groupId, err)
+	}
+
+	pageIterator, _ := msgraphcore.NewPageIterator[models.AppRoleAssignmentable](appRolesResponse, entraId.GetAdapter(), models.CreateAppRoleAssignmentCollectionResponseFromDiscriminatorValue)
+
+	var appRoleAssignments []models.AppRoleAssignmentable
+	if err := pageIterator.Iterate(ctx, func(apa graphmodels.AppRoleAssignmentable) bool {
+		appRoleAssignments = append(appRoleAssignments, apa)
+		return true
+	}); err != nil {
+		return fmt.Errorf("iterate through app role assignments for group %q: %w", groupId, err)
+	}
+
 	for _, resourceId := range resourceIds {
-		if err := assignAppRole(ctx, entraId, groupId, resourceId, appRoleId); err != nil {
-			return err
+		if !slices.ContainsFunc(appRoleAssignments, func(apa models.AppRoleAssignmentable) bool {
+			return apa.GetAppRoleId() != nil && *apa.GetAppRoleId() == *appRoleId && apa.GetResourceId() != nil && *apa.GetResourceId() == *resourceId
+		}) {
+			if err := assignAppRole(ctx, entraId, groupId, resourceId, appRoleId); err != nil {
+				return fmt.Errorf("assign app role %q on resourceId %q for group %q: %w", appRoleId.String(), resourceId.String(), groupId, err)
+			}
 		}
 	}
+
 	return nil
 }
 
