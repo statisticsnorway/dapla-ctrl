@@ -10,9 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	k8s "k8s.io/client-go/kubernetes"
-	k8sfake "k8s.io/client-go/kubernetes/fake"
-
 	"cloud.google.com/go/pubsub"
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
@@ -24,10 +21,8 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/grpc"
-	"github.com/statisticsnorway/dapla-api/internal/leaderelection"
 	"github.com/statisticsnorway/dapla-api/internal/logger"
 	"golang.org/x/sync/errgroup"
-	"k8s.io/client-go/rest"
 )
 
 const (
@@ -119,29 +114,6 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	authHandler, err := setupAuthHandler(ctx, cfg.OAuth, log)
 	if err != nil {
 		return err
-	}
-
-	var mgmtK8sClient k8s.Interface
-	if cfg.Fakes.WithFakeKubernetes {
-		mgmtK8sClient = k8sfake.NewSimpleClientset()
-	} else {
-		cfg, err := rest.InClusterConfig()
-		if err != nil {
-			return fmt.Errorf("creating in-cluster config: %w", err)
-		}
-		mgmtK8sClient, err = k8s.NewForConfig(cfg)
-		if err != nil {
-			return fmt.Errorf("creating k8s client: %w", err)
-		}
-	}
-
-	if cfg.LeaderElectionEnabled {
-		if err := leaderelection.Start(ctx, mgmtK8sClient, cfg.LeaseName, cfg.LeaseNamespace, log); err != nil {
-			return fmt.Errorf("starting leader election: %w", err)
-		}
-	} else {
-		leaderelection.LeaderElectionEnabled = false
-		log.Info("Leader elections is disabled")
 	}
 
 	wg, ctx := errgroup.WithContext(ctx)

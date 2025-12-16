@@ -29,7 +29,7 @@ func runUsersync(ctx context.Context, pool *pgxpool.Pool, cfg *Config, log logru
 
 	for {
 		func() {
-			if !leaderelection.IsLeader() {
+			if !cfg.LeaderElectionEnabled && !leaderelection.IsLeader(log) {
 				log.Debug("not leader, skipping usersync")
 				return
 			}

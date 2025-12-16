@@ -71,9 +71,7 @@ type Config struct {
 	// GRPCListenAddress is host:port combination used by the GRPC server
 	GRPCListenAddress string `env:"GRPC_LISTEN_ADDRESS,default=127.0.0.1:3001"`
 
-	LeaderElectionEnabled bool   `env:"LEADER_ELECTION_ENABLED,default=true"`
-	LeaseName             string `env:"LEASE_NAME,default=dapla-api-lease"`
-	LeaseNamespace        string `env:"LEASE_NAMESPACE,default=dapla-system"`
+	LeaderElectionEnabled bool `env:"LEADER_ELECTION_ENABLED,default=true"`
 
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
@@ -84,7 +82,6 @@ type Config struct {
 
 type Fakes struct {
 	WithInsecureUserHeader bool `env:"WITH_INSECURE_USER_HEADER"`
-	WithFakeKubernetes     bool `env:"WITH_FAKE_KUBERNETES"`
 	WithFakeCloudSQL       bool `env:"WITH_FAKE_CLOUD_SQL"`
 	WithFakePrometheus     bool `env:"WITH_FAKE_PROMETHEUS"`
 }

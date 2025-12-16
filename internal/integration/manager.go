@@ -113,7 +113,6 @@ func newGQLRunner(ctx context.Context, pool *pgxpool.Pool, topic graph.PubsubTop
 	graphMiddleware, err := api.ConfigureGraph(
 		ctx,
 		api.Fakes{
-			WithFakeKubernetes:     true,
 			WithInsecureUserHeader: true,
 			WithFakeCloudSQL:       true,
 			WithFakePrometheus:     true,

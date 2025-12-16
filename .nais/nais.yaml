@@ -25,10 +25,12 @@ spec:
 
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: "64Mi"
+      cpu: "50m"
     limits:
       memory: "512Mi"
+
+  leaderElection: true
 
   replicas:
     max: 2
@@ -66,7 +68,7 @@ spec:
     - name: OAUTH_FRONTEND_URL
       value: "https://dapla-ctrl-alt-del.intern.test.ssb.no"
     - name: LEADER_ELECTION_ENABLED
-      value: "false"
+      value: "true"
     - name: DATABASE_URL
       value: $(DAPLA_API_URL)
     - name: USERSYNC_ADMIN_GROUP

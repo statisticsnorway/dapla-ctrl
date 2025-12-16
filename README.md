@@ -35,8 +35,6 @@ We have defined a set of practices for the Graph-API in the [docs/graphql_practi
 ## Fake clients
 
 We have a set of fake clients, and stubs, that can be used for local development.
-One of the clients is a fake Kubernetes client that read data from `data/k8s`.
-You can read more about how the fake clients works in the [data/k8s/README.md](data/k8s/README.md) file.
 
 ## Integration tests
 
@@ -63,7 +61,6 @@ graph TD
   API -.-> PubSub{PubSub}
 
   subgraph ext [External data]
-    API --> K8s([Kubernetes])
     API --> Prom([Prometheus])
     API --> GA([Google Admin])
   end
@@ -75,7 +72,6 @@ graph TD
 | Postgres         | The postgres database storing state from this application                                  |
 | Nais Service     | Services by Nais that requires special communication with API. E.g. Reconcilers and Deploy |
 | External Clients | External clients that communicates with the API. E.g. Browsers and NADA                    |
-| Kubernetes       | The Kubernetes clusters of the tenant                                                      |
 | PubSub           | The PubSub topic used for communication between the API and the Nais Service               |
 | Prometheus       | We collect historic data from the tenants prometheus                                       |
 | Google Admin     | We use the Google Admin API to manage a list of users                                      |
