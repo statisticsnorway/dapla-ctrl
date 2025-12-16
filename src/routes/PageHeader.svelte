@@ -62,7 +62,7 @@
 				}
 			}}
 		>
-			Dark theme
+			Mørkt tema
 		</ActionMenuCheckboxItem>
 		<ActionMenuItem>
 			<a href="/oauth2/logout" class="action-menu-link" style="text-decoration: none;">

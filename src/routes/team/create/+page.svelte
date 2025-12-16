@@ -33,7 +33,7 @@
 		'configconnector-operator-system',
 		'default'
 	];
-	const slugPattern = /^[a-z](-?[a-z0-9]+)+$/;
+	const slugPattern = /^[a-z][a-z0-9-]{0,15}[a-z]$$/;
 
 	function handleTeamSlugInput(event: Event) {
 		if (!event) return;
@@ -43,32 +43,32 @@
 
 			// Check if the slug is reserved
 			if (reservedSlugs.includes(slug)) {
-				teamSlugError = 'Denne slug-en er reservert.';
+				teamSlugError = 'Dette navnet reservert.';
 				return;
 			}
 
 			// Check if the slug starts with "team"
 			if (slug.startsWith('team')) {
 				teamSlugError =
-					"Navneprefikset 'team' er overflødig. Når du oppretter et team, er det per definisjon et team. Prøv igjen med et annet navn, kanskje bare ved å fjerne prefikset?";
+					"Pefikset 'team' er overflødig. Når du oppretter et team, er det per definisjon et team. Prøv igjen med et annet navn, kanskje bare ved å fjerne prefikset?";
 				return;
 			}
 
 			// Check the length of the slug
 			if (slug.length < 3) {
-				teamSlugError = 'En team-slug må være minst 3 tegn lang.';
+				teamSlugError = 'Navnet må være minst 3 tegn langt.';
 				return;
 			}
 
-			if (slug.length > 30) {
-				teamSlugError = 'En team-slug må være maksimalt 30 tegn lang.';
+			if (slug.length > 17) {
+				teamSlugError = 'Navnet kan maksimalt være 17 tegn langt.';
 				return;
 			}
 
 			// Validate the slug against the pattern
 			if (!slugPattern.test(slug)) {
 				teamSlugError =
-					'En team-slug må begynne med en liten bokstav og kan inneholde små bokstaver, tall og bindestreker. Den kan imidlertid ikke starte eller slutte med en bindestrek, og kan ikke inneholde påfølgende bindestreker.';
+					'Navnet kan kun inneholde små bokstaver, tall og bindestreker. Det må starte og slutte med små bokstaver.';
 				return;
 			}
 
@@ -118,13 +118,6 @@
 			{/each}
 		</ErrorSummary>
 	{/if}
-	<p>
-		Å opprette et team i Nais gir tilgang til visse Nais-funksjoner, som Google Cloud-prosjekter,
-		Kubernetes-namespacer eller ditt eget GitHub-team. Etter at teamet er opprettet, blir du
-		administrator for teamet, med rettigheter til å legge til og fjerne teammedlemmer.
-		Identifikatoren er den primære nøkkelen og vil bli brukt på tvers av systemer slik at de enkelt
-		kan gjenkjennes.
-	</p>
 	<form
 		method="POST"
 		use:enhance={() => {
@@ -137,11 +130,11 @@
 	>
 		<TextField name="name" value={form?.input.slug} oninput={handleTeamSlugInput}>
 			{#snippet label()}
-				Identifikator / Navn
+				Teknisk navn
 			{/snippet}
 			{#snippet description()}
 				Eksempel: mitt-team-navn<br />
-				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre identifikatoren etter opprettelse,
+				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre teknisk etter opprettelse,
 				så velg klokt.
 			{/snippet}
 		</TextField>

@@ -37,7 +37,7 @@
 			</Alert>
 		{/if}
 
-		<p>For å få tilgang til denne siden må du logge inn med din Google Workspace-konto.</p>
+		<p>For å få tilgang til denne siden må du logge inn med din Entra ID-konto.</p>
 
 		<Button as="a" href="/oauth2/login?redirect_uri={redirectPath($page.url)}" variant="primary">
 			Logg inn på Dapla Ctrl

@@ -11,21 +11,21 @@ export async function load(event) {
 	});
 
 	if (!roles) {
-		error(501, 'Something went wrong when loading the page');
+		error(501, 'Noe gikk galt under innlasting');
 	}
 
 	const current = get(roles.TeamRoles);
 	if (!current) {
-		error(404, 'Team not found');
+		error(404, 'Fant ikke teamet');
 	}
 
 	if (current.errors) {
 		if (current.errors) {
 			if (current.errors[0].message === 'The specified team was not found.') {
-				error(404, 'Team not found');
+				error(404, 'Fant ikke teamet');
 			}
 		}
-		error(500, 'Something went wrong when loading the page');
+		error(500, 'Noe gikk galt under innlasting');
 	}
 
 	const meta = await addPageMeta(event, {

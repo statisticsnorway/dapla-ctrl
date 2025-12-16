@@ -13,7 +13,7 @@ export async function load(event) {
 	);
 
 	if (!(userInfo.data?.me.__typename === 'User' && userInfo.data?.me.isAdmin)) {
-		error(403, 'You are not allowed to view this page');
+		error(403, 'Du har ikke tilgang til denne siden');
 	}
 
 	return {

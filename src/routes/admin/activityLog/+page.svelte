@@ -20,7 +20,7 @@
 				<Th>Ressursnavn</Th>
 				<Th>Ressurstype</Th>
 				<Th>Team</Th>
-				<Th>Tidsstempel</Th>
+				<Th>Tidspunkt</Th>
 			</Tr>
 		</Thead>
 		<Tbody>
@@ -53,7 +53,7 @@
 				</Tr>
 			{:else}
 				<Tr>
-					<Td colspan={99}>Ingen aktivitetslogger funnet</Td>
+					<Td colspan={99}>Fant ingen aktivitetslogger</Td>
 				</Tr>
 			{/each}
 		</Tbody>

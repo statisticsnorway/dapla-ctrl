@@ -12,13 +12,14 @@ export async function load(event) {
 	});
 
 	const node = get(data.ReconcilerLogs).data?.node;
-	const title = node?.__typename === 'Reconciler' ? `${node.displayName} logs` : 'Reconciler logs';
+	const title =
+		node?.__typename === 'Reconciler' ? `${node.displayName}-logger` : 'Reconciler-logger';
 	return {
 		...(await addPageMeta(event, {
 			title,
 			breadcrumbs: [
 				{
-					label: 'Reconcilers',
+					label: 'Reconcilere',
 					href: '/admin/reconcilers'
 				}
 			]

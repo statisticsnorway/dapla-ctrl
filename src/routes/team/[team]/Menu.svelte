@@ -5,12 +5,10 @@
 
 	const {
 		member,
-		isAdmin,
-		features
+		isAdmin
 	}: {
 		member: boolean;
 		isAdmin: boolean;
-		features?: object;
 	} = $props();
 </script>
 
@@ -18,7 +16,6 @@
 	items={menuItems({
 		path: page.url.pathname,
 		member,
-		features,
 		isAdmin
 	})}
 />

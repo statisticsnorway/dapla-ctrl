@@ -16,7 +16,7 @@
 {#if page.url.searchParams.has('deleted')}
 	{@const msgParts = (page.url.searchParams.get('deleted') || '').split('/')}
 	<Alert variant="success" size="small">
-		Successfully deleted {msgParts[0]}
+		Slettet {msgParts[0]}
 		{msgParts[1]}.
 	</Alert>
 {/if}

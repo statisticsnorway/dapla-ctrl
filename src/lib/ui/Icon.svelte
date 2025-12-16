@@ -30,6 +30,7 @@
 	const getComponent = (icon: string) => {
 		switch (icon.toLocaleLowerCase()) {
 			case 'team overview':
+			case 'teamoversikt':
 				return HexagonGridIcon;
 			case 'app overview':
 			case 'applications':
@@ -56,12 +57,15 @@
 				return VirusIcon;
 			case 'members':
 			case 'groups':
+			case 'grupper':
 				return PersonGroupIcon;
 			case 'repositories':
 				return BranchingIcon;
 			case 'settings':
+			case 'instillinger':
 				return CogIcon;
 			case 'activity log':
+			case 'aktivitetslogg':
 				return ShieldLockIcon;
 			case 'status':
 				return BellIcon;

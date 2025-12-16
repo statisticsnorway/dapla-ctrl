@@ -4,7 +4,6 @@ export const menuItems = ({
 	isAdmin
 }: {
 	path: string;
-	features?: object;
 	member: boolean;
 	isAdmin: boolean;
 }): { label: string; href: string; active?: boolean; count?: number }[][] => {
@@ -27,11 +26,11 @@ export const menuItems = ({
 	const [, , team, page] = split;
 	const menuItem = item(`/team/${team}`, page);
 	return [
-		[menuItem('Team Overview')],
+		[menuItem('Teamoversikt')],
 		[
-			menuItem('Groups', 'groups'),
-			(member || isAdmin) && menuItem('Settings', 'settings'),
-			member && menuItem('Activity Log', 'activity-log')
+			menuItem('Grupper', 'groups'),
+			(member || isAdmin) && menuItem('Instillinger', 'settings'),
+			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log')
 		].filter(Boolean) as { label: string; href: string; active?: boolean }[]
 	];
 };

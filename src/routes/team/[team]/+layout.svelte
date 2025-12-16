@@ -19,18 +19,17 @@
 <div class="page">
 	{#if deletionInProgress}
 		<Alert variant="warning" style="margin-bottom: 1rem;"
-			>The team and all of its resources is currently being deleted.</Alert
+			>Teamet og tilhørende ressurser er under sletting.</Alert
 		>
 	{/if}
 	{#if !lastSuccessfulSync && !deletionInProgress}
 		<Alert variant="info" style="margin-bottom: 1rem;" contentMaxWidth={false}
-			>The team and all of its resources is currently being created. Expected time to completion is
-			about 15 minutes.</Alert
+			>Teamet og tilhørende ressurser blir opprettet. Det tar vanligvis opptil 15 minutter.</Alert
 		>
 	{/if}
 
 	<div class="main">
-		<Menu features={[]} member={viewerIsMember} {isAdmin} />
+		<Menu member={viewerIsMember} {isAdmin} />
 		<div class="container">
 			<PageHeader />
 			<div>{@render children?.()}</div>

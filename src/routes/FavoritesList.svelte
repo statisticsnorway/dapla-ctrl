@@ -8,7 +8,7 @@
 
 <div class="favorites-list">
 	<div class="header">
-		<Heading level="1" size="large">My Favorites</Heading>
+		<Heading level="1" size="large">Favorittsider</Heading>
 	</div>
 
 	<SortableList
@@ -19,7 +19,7 @@
 			<FavoritesListItem path={fav} />
 		{:else}
 			<BodyLong>
-				Click the <StarIcon /> icon on any page to add it to your favorites. You haven’t added any yet.
+				Du har ingen favoritter ennå. Trykk på <StarIcon /> for å legge til en side som favoritt.
 			</BodyLong>
 		{/each}
 	</SortableList>

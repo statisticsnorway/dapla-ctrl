@@ -53,7 +53,7 @@
 
 <Modal bind:open>
 	{#snippet header()}
-		<Heading>Opprett gruppe for team {team}</Heading>
+		<Heading>Opprett gruppe for {team}</Heading>
 	{/snippet}
 
 	{#each errors as error (error)}
@@ -67,7 +67,6 @@
 		}}
 		class="wrapper"
 	>
-		<p>Gruppemedlemmer får tilgang til noen av teamets ressurser.</p>
 		<Select label="Kategori" bind:value={groupCategory}>
 			<option value="data-admins">data-admins</option>
 			<option value="developers">developers</option>

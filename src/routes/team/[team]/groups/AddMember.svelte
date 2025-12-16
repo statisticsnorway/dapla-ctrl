@@ -79,7 +79,7 @@
 		errors = [];
 		const userID = $store.data?.users.nodes.find((u) => u.email === email)?.email;
 		if (!userID) {
-			errors = ['Bruker ikke funnet'];
+			errors = ['Fant ikke brukeren'];
 			return;
 		}
 
@@ -120,7 +120,6 @@
 		}}
 		class="wrapper"
 	>
-		<p>Gruppemedlemmer får tilgang til noen av teamets ressurser.</p>
 		<Select label="Gruppe" bind:value={group}>
 			{#each groups as groupName (groupName)}
 				<option value={groupName}>{groupName}</option>

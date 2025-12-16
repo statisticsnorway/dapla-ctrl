@@ -28,16 +28,13 @@
 			after: params.after ?? after
 		});
 	};
+
+	let totalUserCount = $derived($People.data?.users.pageInfo.totalCount);
 </script>
 
 <div class="container">
-	<Heading level="1" size="large" spacing>Dapla Ctrl brukere</Heading>
-	<List
-		title="{$People.data?.users.pageInfo.totalCount} bruker{$People.data?.users.pageInfo
-			.totalCount !== 1
-			? 'e'
-			: ''}"
-	>
+	<Heading level="1" size="large" spacing>Dapla Ctrl-brukere</Heading>
+	<List title="{totalUserCount} bruker{totalUserCount !== 1 ? 'e' : ''}">
 		{#snippet menu()}
 			<OrderByMenu orderField={UserOrderField} defaultOrderField={UserOrderField.NAME} />
 		{/snippet}

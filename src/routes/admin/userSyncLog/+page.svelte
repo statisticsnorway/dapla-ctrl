@@ -49,7 +49,7 @@
 				</Tr>
 			{:else}
 				<Tr>
-					<Td colspan={99}>ngen brukersynkroniseringslogg-oppføringer funnet</Td>
+					<Td colspan={99}>Fant ingen brukersynkroniseringslogger</Td>
 				</Tr>
 			{/each}
 		</Tbody>

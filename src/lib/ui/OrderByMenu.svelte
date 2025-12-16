@@ -135,6 +135,10 @@
 				return 'Disk Utilization';
 			case 'MEMORY_UTILIZATION':
 				return 'Memory Utilization';
+			case 'NAME':
+				return 'Navn';
+			case 'EMAIL':
+				return 'E-post';
 			default:
 				return fieldName.charAt(0).toUpperCase() + fieldName.slice(1).toLowerCase();
 		}

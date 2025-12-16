@@ -29,7 +29,7 @@
 				</Tr>
 			{:else}
 				<Tr>
-					<Td colspan={99}>Ingen brukere funnet</Td>
+					<Td colspan={99}>Fant ingen brukere</Td>
 				</Tr>
 			{/each}
 		</Tbody>

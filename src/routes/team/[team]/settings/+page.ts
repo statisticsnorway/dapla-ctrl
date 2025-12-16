@@ -13,7 +13,7 @@ export async function _houdini_beforeLoad({ parent }: BeforeLoadEvent) {
 		!pd.viewerIsMember &&
 		!(userInfoData.data?.me.__typename === 'User' && userInfoData.data?.me.isAdmin)
 	) {
-		error(403, 'You are not allowed to view this page');
+		error(403, 'Du har ikke tilgang til denne siden');
 	}
 }
 

@@ -11,12 +11,12 @@
 	let currentRoute = $derived(page.route.id);
 	const nav = [
 		{
-			tab: 'Users',
+			tab: 'Brukere',
 			routeId: '/admin',
 			withSubRoutes: false
 		},
 		{
-			tab: 'User synchronization log',
+			tab: 'Brukersynkroniseringslogg',
 			routeId: '/admin/userSyncLog',
 			withSubRoutes: false
 		},

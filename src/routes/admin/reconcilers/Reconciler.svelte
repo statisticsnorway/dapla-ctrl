@@ -131,8 +131,8 @@
 	<Heading level="2">{$r.displayName}</Heading>
 	{#if $r.errors.pageInfo.totalCount}
 		<span class="reconciler-error">
-			Reconciler has {$r.errors.pageInfo.totalCount} errors. Please consult the
-			<a href="/admin/reconcilerLogs/{$r.id}">logs</a> 🙏
+			Reconcileren har {$r.errors.pageInfo.totalCount} feilmeldinger. Vennligst sjekk
+			<a href="/admin/reconcilerLogs/{$r.id}">loggene</a> 🙏
 		</span>
 	{/if}
 	<p>{$r.description}</p>
@@ -174,8 +174,8 @@
 								{c.description}
 								{#if c.secret && c.configured}
 									<br />
-									<InformationSquareFillIcon /> This value is already configured. It is hidden because
-									it is secret.
+									<InformationSquareFillIcon /> Denne verdien er allerede konfigurert. Den er skjult fordi
+									den er hemmelig.
 								{/if}
 							{/snippet}
 						</TextField>
@@ -189,11 +189,11 @@
 </div>
 <Confirm bind:open={confirm} onconfirm={toggle}>
 	{#snippet header()}
-		Confirmation required
+		Bekreftelse
 	{/snippet}
-	This will <b>{$r.enabled ? 'disable' : 'enable'}</b> synchronization of <i>{$r.displayName}</i><br
+	Dette vil <b>{$r.enabled ? 'slå av' : 'slå på'}</b> synkronisering av <i>{$r.displayName}</i><br
 	/>
-	Are you sure?
+	Er du sikker?
 </Confirm>
 
 <style>

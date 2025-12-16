@@ -13,5 +13,5 @@
 {#each reconcilers || [] as r (r.id)}
 	<Reconciler reconciler={r} />
 {:else}
-	<p>Ingen reconciliere registrert</p>
+	<p>Ingen reconcilere registrert</p>
 {/each}

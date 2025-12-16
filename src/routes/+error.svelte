@@ -6,7 +6,7 @@
 <div>
 	<Heading size="large">{page.status}</Heading>
 	<BodyShort>
-		{page.error?.message || 'Unknown error'}
+		{page.error?.message || 'Ukjent feil'}
 	</BodyShort>
 </div>
 

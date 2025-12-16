@@ -47,21 +47,6 @@
 		viewerIsOwner === true ||
 			($UserInfo.data?.me.__typename == 'User' && $UserInfo.data?.me.isAdmin)
 	);
-
-	// let after: string = $state($Groups.variables?.after ?? '');
-	// let before: string = $state($Groups.variables?.before ?? '');
-
-	// const changeQuery = (
-	// 	params: {
-	// 		after?: string;
-	// 		before?: string;
-	// 	} = {}
-	// ) => {
-	// 	changeParams({
-	// 		before: params.before ?? before,
-	// 		after: params.after ?? after
-	// 	});
-	// };
 </script>
 
 <GraphErrors errors={$Groups.errors} />
@@ -122,6 +107,8 @@
 						{/each}
 					{/if}
 				</List>
+			{:else}
+				Teamet har ingen grupper.
 			{/each}
 
 			{#if canEdit}
@@ -178,7 +165,7 @@
 			{@const userId = deleteUser.email}
 			<Confirm
 				bind:open={deleteUserOpen}
-				confirmText="Slett"
+				confirmText="Fjern"
 				variant="danger"
 				onconfirm={async () => {
 					await removeGroupMember.mutate({ input: { groupName: group, userEmail: userId } });
@@ -188,7 +175,7 @@
 				{#snippet header()}
 					<Heading>Slett medlem</Heading>
 				{/snippet}
-				Er du sikker på at du vil fjerne <b>{deleteUser.name}</b> fra denne gruppen?
+				Er du sikker på at du vil fjerne <b>{deleteUser.name}</b> fra <b>{group}</b>?
 			</Confirm>
 		{/if}
 	{/if}
