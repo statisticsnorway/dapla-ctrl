@@ -44,7 +44,7 @@ func Test_Queue(t *testing.T) {
 		q, _ := queue.NewQueue[struct{}]()
 		q.Close()
 
-		if q.Add(input).Error() != "team reconciler channel is closed" {
+		if q.Add(input).Error() != "queue channel is closed" {
 			t.Errorf("expected error when adding to closed queue")
 		}
 	})
