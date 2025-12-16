@@ -146,6 +146,9 @@ func toGraphActivityLogEntry(row *activitylogsql.ActivityLogEntry) (ActivityLogE
 		UUID:         row.ID,
 		Data:         row.Data,
 	}
+	if row.TeamSlug == nil {
+		entry.TeamSlug = ptr.To(slug.Slug(""))
+	}
 
 	transformer, ok := knownTransformers[ActivityLogEntryResourceType(row.ResourceType)]
 	if !ok {
