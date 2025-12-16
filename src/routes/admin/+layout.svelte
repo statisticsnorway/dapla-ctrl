@@ -24,6 +24,11 @@
 			tab: 'Reconcilers',
 			routeId: '/admin/reconcilers',
 			withSubRoutes: false
+		},
+		{
+			tab: 'Aktivitetslogg',
+			routeId: '/admin/activityLog',
+			withSubRoutes: false
 		}
 	];
 
