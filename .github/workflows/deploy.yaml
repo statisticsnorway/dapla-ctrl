@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 jobs:
-  build_and_push_keycloak:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,6 +21,7 @@ jobs:
       - name: Deploy to Nais
         uses: nais/deploy/actions/deploy@v2
         env:
-          CLUSTER: nais-test
+          TEAM: dapla-platform
+          CLUSTER: test
           RESOURCE: .nais/nais.yaml
           VAR: image=europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api:${{ github.event.inputs.image_version }}
