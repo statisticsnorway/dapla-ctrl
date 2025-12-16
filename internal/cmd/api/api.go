@@ -228,7 +228,7 @@ func loadEnvFile(log logrus.FieldLogger) error {
 }
 
 func setupAuthHandler(ctx context.Context, cfg oAuthConfig, log logrus.FieldLogger) (authn.Handler, error) {
-	cf, err := authn.NewOIDC(ctx, cfg.Issuer, cfg.ClientID, cfg.ClientSecret, cfg.RedirectURL, cfg.AdditionalScopes)
+	cf, err := authn.NewOIDC(ctx, cfg.Issuer, cfg.ClientID, cfg.RedirectURL, cfg.AdditionalScopes)
 	if err != nil {
 		return nil, err
 	}

@@ -34,9 +34,6 @@ type oAuthConfig struct {
 	// ClientID The ID of the OAuth 2.0 client to use for the OAuth login flow.
 	ClientID string `env:"OAUTH_CLIENT_ID"`
 
-	// ClientSecret The client secret to use for the OAuth login flow.
-	ClientSecret string `env:"OAUTH_CLIENT_SECRET"`
-
 	// RedirectURL The URL that Google will redirect back to after performing authentication.
 	RedirectURL string `env:"OAUTH_REDIRECT_URL"`
 
