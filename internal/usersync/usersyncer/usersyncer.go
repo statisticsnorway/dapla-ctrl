@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -27,7 +28,6 @@ type Usersynchronizer struct {
 	querier       *usersyncsql.Queries
 	adminGroup    string
 	allUsersGroup string
-	tenantDomain  string
 	service       *msgraphsdk.GraphServiceClient
 
 	log logrus.FieldLogger
@@ -47,30 +47,39 @@ type entraIdUser struct {
 	JobTitle *string
 }
 
-func New(pool *pgxpool.Pool, allUsersGroup, adminGroup, tenantDomain string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
+func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
 	return &Usersynchronizer{
 		pool:          pool,
 		querier:       usersyncsql.New(pool),
 		allUsersGroup: allUsersGroup,
 		adminGroup:    adminGroup,
-		tenantDomain:  tenantDomain,
 		service:       service,
 		log:           log,
 	}
 }
 
-func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, clientSecret, tenantId, tenantDomain, allUsersGroup, adminGroup string, log logrus.FieldLogger) (*Usersynchronizer, error) {
-	cred, err := azidentity.NewClientSecretCredential(tenantId, clientId, clientSecret, nil)
+func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, allUsersGroup, adminGroup string, log logrus.FieldLogger) (*Usersynchronizer, error) {
+	creds, err := azidentity.NewClientAssertionCredential(tenantId, clientId, func(ctx context.Context) (string, error) {
+		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
+		if err != nil {
+			return "", err
+		}
+		token, err := creds.Token(ctx)
+		if err != nil {
+			return "", err
+		}
+		return token.Value, nil
+	}, nil)
 	if err != nil {
-		return nil, fmt.Errorf("create credentials: %w", err)
+		return nil, fmt.Errorf("exchange for azure credentials: %w", err)
 	}
 
-	srv, err := msgraphsdk.NewGraphServiceClientWithCredentials(cred, []string{"https://graph.microsoft.com/.default"})
+	srv, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
 		return nil, fmt.Errorf("create graph service client: %w", err)
 	}
 
-	return New(pool, allUsersGroup, adminGroup, tenantDomain, srv, log), nil
+	return New(pool, allUsersGroup, adminGroup, srv, log), nil
 }
 
 // Sync fetches all users from Entra ID and adds them as users in Nais API.

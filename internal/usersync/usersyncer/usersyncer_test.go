@@ -27,7 +27,6 @@ import (
 )
 
 const (
-	domain        = "example.com"
 	allUsersGroup = "all-users"
 	adminGroup    = "api-admins"
 )
@@ -71,7 +70,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, domain, client, log).
+			New(pool, allUsersGroup, adminGroup, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatalf("failed to sync: %v", err)
@@ -138,7 +137,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, domain, client, log).
+			New(pool, allUsersGroup, adminGroup, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -224,7 +223,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, domain, client, log).
+			New(pool, allUsersGroup, adminGroup, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -328,7 +327,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, domain, client, log).
+			New(pool, allUsersGroup, adminGroup, client, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)

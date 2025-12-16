@@ -41,7 +41,6 @@ func runHttpServer(
 	ctx context.Context,
 	fakes Fakes,
 	listenAddress string,
-	tenantName string,
 	pool *pgxpool.Pool,
 	authHandler authn.Handler,
 	jwtMiddleware func(http.Handler) http.Handler,
@@ -58,7 +57,6 @@ func runHttpServer(
 		ctx,
 		fakes,
 		pool,
-		tenantName,
 		notifier,
 		log,
 	)
@@ -143,7 +141,6 @@ func ConfigureGraph(
 	ctx context.Context,
 	fakes Fakes,
 	pool *pgxpool.Pool,
-	tenantName string,
 	notifier *notify.Notifier,
 	log logrus.FieldLogger,
 ) (func(http.Handler) http.Handler, error) {

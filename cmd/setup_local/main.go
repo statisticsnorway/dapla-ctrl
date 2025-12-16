@@ -111,7 +111,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 		log.Infof("creating topic")
 
-		if _, err := client.CreateTopic(ctx, "nais-api"); err != nil {
+		if _, err := client.CreateTopic(ctx, "dapla-api"); err != nil {
 			if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
 				return err
 			}
@@ -119,8 +119,8 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 		log.Infof("creating subscription")
 
-		if _, err := client.CreateSubscription(ctx, "nais-api-reconcilers-api-events", pubsub.SubscriptionConfig{
-			Topic:             client.Topic("nais-api"),
+		if _, err := client.CreateSubscription(ctx, "dapla-api-reconcilers-api-events", pubsub.SubscriptionConfig{
+			Topic:             client.Topic("dapla-api"),
 			RetentionDuration: 1 * time.Hour,
 		}); err != nil {
 			if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {

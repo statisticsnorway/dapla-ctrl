@@ -51,6 +51,7 @@ func New(oauth2Config OAuth2, log logrus.FieldLogger) Handler {
 
 type claims struct {
 	Email string
+	Upn   string
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -76,7 +77,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, h.oauth2Config.AuthCodeURL(oauthState, oauth2.SetAuthURLParam("prompt", "select_account")), http.StatusFound)
+	http.Redirect(w, r, h.oauth2Config.AuthCodeURL(oauthState, oauth2.SetAuthURLParam("prompt", "select_account"), oauth2.SetAuthURLParam("response_mode", "query")), http.StatusFound)
 }
 
 func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
@@ -140,9 +141,9 @@ func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := user.GetByEmail(r.Context(), claims.Email)
+	u, err := user.GetByEmail(r.Context(), claims.Upn)
 	if err != nil {
-		h.log.WithError(err).Errorf("get user (%s) from db", claims.Email)
+		h.log.WithError(err).Errorf("get user (%s) from db", claims.Upn)
 		http.Redirect(w, r, "/?error=unknown-user", http.StatusFound)
 		return
 	}

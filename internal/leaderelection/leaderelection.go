@@ -12,7 +12,10 @@ import (
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 )
 
-var elector *leaderelection.LeaderElector
+var (
+	elector               *leaderelection.LeaderElector
+	LeaderElectionEnabled = true
+)
 
 var callbacks = struct {
 	onStartedLeading []func(context.Context)
@@ -81,6 +84,10 @@ func Start(ctx context.Context, client kubernetes.Interface, leaseName, namespac
 }
 
 func IsLeader() bool {
+	if !LeaderElectionEnabled {
+		return true
+	}
+
 	if elector == nil {
 		return false
 	}

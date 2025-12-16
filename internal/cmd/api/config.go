@@ -19,9 +19,6 @@ type usersyncConfig struct {
 	// Entra ID client ID to use for authenticating
 	EntraIdClientId string `env:"ENTRA_ID_CLIENT_ID"`
 
-	// Entra ID client secret
-	EntraIdClientSecret string `env:"ENTRA_ID_CLIENT_SECRET"`
-
 	// Entra ID tenant ID
 	EntraIdTenantId string `env:"ENTRA_ID_TENANT_ID"`
 
@@ -59,12 +56,6 @@ type JWTConfig struct {
 }
 
 type Config struct {
-	// Tenant is the active tenant
-	Tenant string `env:"TENANT,default=dev-nais"`
-
-	// TenantDomain The domain for the tenant.
-	TenantDomain string `env:"TENANT_DOMAIN,default=example.com"`
-
 	// GoogleManagementProjectID The ID of the Nais management project in the tenant organization in GCP.
 	GoogleManagementProjectID string `env:"GOOGLE_MANAGEMENT_PROJECT_ID"`
 
@@ -83,13 +74,9 @@ type Config struct {
 	// GRPCListenAddress is host:port combination used by the GRPC server
 	GRPCListenAddress string `env:"GRPC_LISTEN_ADDRESS,default=127.0.0.1:3001"`
 
-	LeaseName      string `env:"LEASE_NAME,default=nais-api-lease"`
-	LeaseNamespace string `env:"LEASE_NAMESPACE,default=nais-system"`
-
-	// ReplaceEnvironmentNames is a map of cluster names to replace in the UI. Keys are cluster names used in
-	// Kubernetes, for instance "prod", and the values are user-facing environment names, for instance "prod-gcp". This
-	// configuration value is only used by the nav.no tenant.
-	ReplaceEnvironmentNames map[string]string `env:"REPLACE_ENVIRONMENT_NAMES, noinit"`
+	LeaderElectionEnabled bool   `env:"LEADER_ELECTION_ENABLED,default=true"`
+	LeaseName             string `env:"LEASE_NAME,default=dapla-api-lease"`
+	LeaseNamespace        string `env:"LEASE_NAMESPACE,default=dapla-system"`
 
 	Usersync usersyncConfig
 	OAuth    oAuthConfig

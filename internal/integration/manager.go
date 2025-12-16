@@ -59,11 +59,6 @@ func newManager(ctx context.Context, container *postgres.PostgresContainer, conn
 	}
 
 	return func(ctx context.Context, dir string, configInput any) (context.Context, []spec.Runner, func(), error) {
-		config, ok := configInput.(*Config)
-		if !ok {
-			config = &Config{}
-		}
-
 		ctx, done := context.WithCancel(ctx)
 		cleanups := []func(){}
 
@@ -83,7 +78,7 @@ func newManager(ctx context.Context, container *postgres.PostgresContainer, conn
 		}
 
 		topic := newPubsubRunner()
-		gqlRunner, gqlCleanup, err := newGQLRunner(ctx, config, pool, topic)
+		gqlRunner, gqlCleanup, err := newGQLRunner(ctx, pool, topic)
 		if err != nil {
 			done()
 			return ctx, nil, nil, err
@@ -107,7 +102,7 @@ func newManager(ctx context.Context, container *postgres.PostgresContainer, conn
 	}
 }
 
-func newGQLRunner(ctx context.Context, config *Config, pool *pgxpool.Pool, topic graph.PubsubTopic) (spec.Runner, func(), error) {
+func newGQLRunner(ctx context.Context, pool *pgxpool.Pool, topic graph.PubsubTopic) (spec.Runner, func(), error) {
 	log := logrus.New()
 	log.Out = io.Discard
 
@@ -124,7 +119,6 @@ func newGQLRunner(ctx context.Context, config *Config, pool *pgxpool.Pool, topic
 			WithFakePrometheus:     true,
 		},
 		pool,
-		config.TenantName,
 		notifier,
 		log,
 	)

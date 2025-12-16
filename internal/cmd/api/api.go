@@ -103,7 +103,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	if err != nil {
 		return err
 	}
-	pubsubTopic := pubsubClient.Topic("nais-api")
+	pubsubTopic := pubsubClient.Topic("dapla-api")
 
 	graphHandler, err := graph.NewHandler(gengql.Config{
 		Resolvers: graph.NewResolver(
@@ -135,8 +135,13 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 		}
 	}
 
-	if err := leaderelection.Start(ctx, mgmtK8sClient, cfg.LeaseName, cfg.LeaseNamespace, log); err != nil {
-		return fmt.Errorf("starting leader election: %w", err)
+	if cfg.LeaderElectionEnabled {
+		if err := leaderelection.Start(ctx, mgmtK8sClient, cfg.LeaseName, cfg.LeaseNamespace, log); err != nil {
+			return fmt.Errorf("starting leader election: %w", err)
+		}
+	} else {
+		leaderelection.LeaderElectionEnabled = false
+		log.Info("Leader elections is disabled")
 	}
 
 	wg, ctx := errgroup.WithContext(ctx)
@@ -159,7 +164,6 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 			ctx,
 			cfg.Fakes,
 			cfg.ListenAddress,
-			cfg.Tenant,
 			pool,
 			authHandler,
 			jwtMiddleware,
