@@ -2,6 +2,13 @@ module github.com/statisticsnorway/dapla-api-reconcilers
 
 go 1.25.5
 
+tool (
+	golang.org/x/tools/cmd/deadcode
+	golang.org/x/vuln/cmd/govulncheck
+	honnef.co/go/tools/cmd/staticcheck
+	mvdan.cc/gofumpt
+)
+
 require (
 	cloud.google.com/go/auth v0.18.0
 	cloud.google.com/go/pubsub v1.50.1
