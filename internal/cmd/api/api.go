@@ -146,7 +146,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 			jwtMiddleware,
 			graphHandler,
 			notifier,
-			log,
+			log.WithField("subsystem", "http"),
 		)
 	})
 	wg.Go(func() error {
@@ -154,12 +154,12 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 			ctx,
 			cfg.InternalListenAddress,
 			promReg,
-			log,
+			log.WithField("subsystem", "internal_http"),
 		)
 	})
 
 	wg.Go(func() error {
-		if err := grpc.Run(ctx, cfg.GRPCListenAddress, pool, log); err != nil {
+		if err := grpc.Run(ctx, cfg.GRPCListenAddress, pool, log.WithField("subsystem", "grpc")); err != nil {
 			log.WithError(err).Errorf("error in GRPC server")
 			return err
 		}
