@@ -121,7 +121,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get reconciler config: %w", err)
 	}
 
-	entraId, _, err := r.getEntraIdClient(config)
+	entraId, err := r.getEntraIdClient(config)
 	if err != nil {
 		return fmt.Errorf("get entra id client: %w", err)
 	}
@@ -380,7 +380,7 @@ func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Us
 	return remoteOnly
 }
 
-func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*msgraphsdk.GraphServiceClient, bool, error) {
+func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*msgraphsdk.GraphServiceClient, error) {
 	rc := entraIdConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
@@ -391,30 +391,30 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 		case configGcpAppRoleIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
-				return nil, false, fmt.Errorf("parse app role id: %w", err)
+				return nil, fmt.Errorf("parse app role id: %w", err)
 			}
 			rc.AppRoleId = id
 		case configGcpSSOResourceIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
-				return nil, false, fmt.Errorf("parse sso resource id: %w", err)
+				return nil, fmt.Errorf("parse sso resource id: %w", err)
 			}
 			rc.SSOResourceId = id
 		case configGcpProvisioningResourceIdKey:
 			id, err := uuid.Parse(c.Value)
 			if err != nil {
-				return nil, false, fmt.Errorf("parse provisioning resource id: %w", err)
+				return nil, fmt.Errorf("parse provisioning resource id: %w", err)
 			}
 			rc.ProvisioningResourceId = id
 		case configGroupPrefixKey:
 			rc.GroupPrefix = c.Value
 		default:
-			return nil, false, fmt.Errorf("unknown config key %q", c.Key)
+			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
 	if rc == r.entraIdConfig {
-		return r.service, false, nil
+		return r.service, nil
 	}
 
 	creds, err := azidentity.NewClientAssertionCredential(rc.TenantId, rc.ClientId, func(ctx context.Context) (string, error) {
@@ -428,16 +428,19 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 		}
 		return token.Value, nil
 	}, nil)
+	if err != nil {
+		return nil, fmt.Errorf("exchange for azure credentials: %w", err)
+	}
 
 	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
-		return nil, false, fmt.Errorf("create graph service client: %w", err)
+		return nil, fmt.Errorf("create graph service client: %w", err)
 	}
 
 	r.service = service
 	r.entraIdConfig = rc
 
-	return service, true, nil
+	return service, nil
 }
 
 func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {

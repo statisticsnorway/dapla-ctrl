@@ -245,6 +245,9 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 		}
 		return token.Value, nil
 	}, nil)
+	if err != nil {
+		return fmt.Errorf("exchange for azure credentials: %w", err)
+	}
 
 	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
