@@ -161,28 +161,28 @@ func (q *Queries) Delete(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getSectionCodes = `-- name: GetSectionCodes :many
+const getSections = `-- name: GetSections :many
 SELECT
-	code
+	code, name, manager_id
 FROM
 	sections
 ORDER BY
 	code
 `
 
-func (q *Queries) GetSectionCodes(ctx context.Context) ([]string, error) {
-	rows, err := q.db.Query(ctx, getSectionCodes)
+func (q *Queries) GetSections(ctx context.Context) ([]*Section, error) {
+	rows, err := q.db.Query(ctx, getSections)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []string{}
+	items := []*Section{}
 	for rows.Next() {
-		var code string
-		if err := rows.Scan(&code); err != nil {
+		var i Section
+		if err := rows.Scan(&i.Code, &i.Name, &i.ManagerID); err != nil {
 			return nil, err
 		}
-		items = append(items, code)
+		items = append(items, &i)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

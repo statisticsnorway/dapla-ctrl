@@ -16,7 +16,7 @@ type Querier interface {
 	CreateLogEntry(ctx context.Context, arg CreateLogEntryParams) error
 	CreateSection(ctx context.Context, arg CreateSectionParams) (*Section, error)
 	Delete(ctx context.Context, id uuid.UUID) error
-	GetSectionCodes(ctx context.Context) ([]string, error)
+	GetSections(ctx context.Context) ([]*Section, error)
 	List(ctx context.Context) ([]*User, error)
 	ListGlobalAdmins(ctx context.Context) ([]*User, error)
 	ListLogEntries(ctx context.Context, arg ListLogEntriesParams) ([]*UsersyncLogEntry, error)

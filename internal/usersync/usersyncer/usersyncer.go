@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 
@@ -111,7 +110,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 	}()
 	querier := s.querier.WithTx(tx)
 
-	users, err := getUsers(ctx, querier)
+	users, err := getDbUsers(ctx, querier)
 	if err != nil {
 		return fmt.Errorf("get existing users: %w", err)
 	}
@@ -255,24 +254,24 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 // assignSectionManagers sets the section manager for each section in the database, if it finds
 // a matching user in Entra ID (someone in the given section with the job title '^Seksjonssjef.*')
 func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, querier usersyncsql.Querier, entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) error {
-	sectionCodes, err := querier.GetSectionCodes(ctx)
+	sections, err := querier.GetSections(ctx)
 	if err != nil {
-		return fmt.Errorf("get section codes: %w", err)
+		return fmt.Errorf("get current section managers: %w", err)
 	}
 
-	sectionManagers := make(map[string][]*usersyncsql.User)
-	for _, eu := range entraIdUsers {
-		if code := parseSectionManager(sectionCodes, eu, log); code != nil {
-			sectionManagers[*code] = append(sectionManagers[*code], entraIdUserMap[eu.ID])
-		}
-	}
+	// Get the definitive list of section managers from Entra ID
+	entraIdSectionManagers := parseEntraIdSectionManagers(entraIdUsers, entraIdUserMap, log)
 
-	for sectionCode, manager := range sanitizeSectionManagers(sectionManagers, log) {
+	// Compare the managers in the DB to the ones in Entra ID and get a
+	// changeset of sections and their new managers
+	updatedSectionManagers := getSectionManagerChanges(sections, entraIdSectionManagers)
+
+	for sectionCode, manager := range updatedSectionManagers {
 		if err := querier.UpdateSectionManager(ctx, usersyncsql.UpdateSectionManagerParams{
-			ManagerID:   &manager.ID,
+			ManagerID:   manager,
 			SectionCode: sectionCode,
 		}); err != nil {
-			return fmt.Errorf("update section manager for section %s to %s: %w", sectionCode, manager.Email, err)
+			return fmt.Errorf("update section manager for section %s: %w", sectionCode, err)
 		}
 	}
 	return nil
@@ -296,22 +295,6 @@ func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, querier us
 // 		}
 // 	}
 // }
-
-func sanitizeSectionManagers(allSectionManagers map[string][]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
-	sectionManagers := make(map[string]*usersyncsql.User, len(allSectionManagers))
-	for section, managers := range allSectionManagers {
-		if len(managers) > 1 {
-			var mgs []string
-			for _, m := range managers {
-				mgs = append(mgs, m.Email)
-			}
-			log.Warnf("section %s has multiple managers: %s", section, strings.Join(mgs, ", "))
-			continue
-		}
-		sectionManagers[section] = managers[0]
-	}
-	return sectionManagers
-}
 
 // getAdminGroupMembers fetches all users in the admin group from the Entra ID group of the tenant.
 func (s *Usersynchronizer) getAdminGroupMembers(ctx context.Context, entraIdUsers map[string]*usersyncsql.User, log logrus.FieldLogger) (map[uuid.UUID]*usersyncsql.User, error) {
@@ -438,8 +421,8 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 	return users, err
 }
 
-// getUsers return a collection of maps of users by ID, external ID and email.
-func getUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, error) {
+// getDbUsers return a collection of maps of users by ID, external ID and email.
+func getDbUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, error) {
 	users, err := querier.List(ctx)
 	if err != nil {
 		return nil, err
@@ -458,7 +441,22 @@ func getUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, error
 	return ret, nil
 }
 
-func parseSectionManager(sectionCodes []string, eu *entraIdUser, log logrus.FieldLogger) (code *string) {
+// parseEntraIdSectionManagers creates a map of sections to their manager, for all
+// sections with one definite manager
+func parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
+	entraIdSectionManagers := make(map[string][]*usersyncsql.User)
+	for _, eu := range entraIdUsers {
+		if code := parseEntraIdSectionManager(eu); code != nil {
+			entraIdSectionManagers[*code] = append(entraIdSectionManagers[*code], entraIdUserMap[eu.ID])
+		}
+	}
+	return sanitizeSectionManagers(entraIdSectionManagers, log)
+}
+
+// parseEntraIdSectionManager checks whether the user has the Seksjonssjef job title,
+// and whether they have a valid section. If so, we return the section code, otherwise we
+// return nil.
+func parseEntraIdSectionManager(eu *entraIdUser) (code *string) {
 	if eu.Section == nil || eu.JobTitle == nil {
 		return nil
 	}
@@ -470,10 +468,56 @@ func parseSectionManager(sectionCodes []string, eu *entraIdUser, log logrus.Fiel
 	if len(parts) < 3 {
 		return nil
 	}
-	sectionCode := parts[1]
-	if !slices.Contains(sectionCodes, sectionCode) {
-		log.Infof("encountered section %q, not present in database", sectionCode)
-		return nil
+
+	return &parts[1]
+}
+
+// sanitizeSectionManagers goes through the list of the (potentially multiple) managers for each section,
+// and returns a map of only those sections with one definite manager.
+func sanitizeSectionManagers(allSectionManagers map[string][]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
+	sectionManagers := make(map[string]*usersyncsql.User, len(allSectionManagers))
+	for section, managers := range allSectionManagers {
+		// There is a definite manager for this section
+		if len(managers) == 1 {
+			sectionManagers[section] = managers[0]
+			continue
+		}
+		if len(managers) == 0 {
+			continue
+		}
+		// There are multiple managers for the section, which we treat as there being none
+		var mgs []string
+		for _, m := range managers {
+			mgs = append(mgs, m.Email)
+		}
+		log.WithFields(logrus.Fields{"section": section, "managers": strings.Join(mgs, ", ")}).Warnf("section has multiple managers")
 	}
-	return &sectionCode
+	return sectionManagers
+}
+
+// getSectionManagerChanges creates a map of the changes in section managers in Entra ID compared to the database.
+func getSectionManagerChanges(sections []*usersyncsql.Section, entraIdSectionManagers map[string]*usersyncsql.User) map[string]*uuid.UUID {
+	changes := make(map[string]*uuid.UUID)
+	for _, section := range sections {
+		newManager := entraIdSectionManagers[section.Code]
+		var newManagerId *uuid.UUID
+		if newManager != nil {
+			newManagerId = &newManager.ID
+		}
+		if managerHasChanged(section.ManagerID, newManagerId) {
+			changes[section.Code] = newManagerId
+		}
+	}
+	return changes
+}
+
+// managerHasChanged checks whether the manager in the database is outdated compared to Entra ID
+func managerHasChanged(oldManagerId *uuid.UUID, newManagerId *uuid.UUID) bool {
+	if oldManagerId == newManagerId {
+		return false
+	}
+	if oldManagerId == nil || newManagerId == nil {
+		return true
+	}
+	return *oldManagerId != *newManagerId
 }

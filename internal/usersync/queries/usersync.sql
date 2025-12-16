@@ -151,9 +151,9 @@ WHERE
 	code = @section_code
 ;
 
--- name: GetSectionCodes :many
+-- name: GetSections :many
 SELECT
-	code
+	*
 FROM
 	sections
 ORDER BY
