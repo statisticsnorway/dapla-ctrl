@@ -113,9 +113,9 @@ func newGQLRunner(ctx context.Context, pool *pgxpool.Pool, topic graph.PubsubTop
 	graphMiddleware, err := api.ConfigureGraph(
 		ctx,
 		api.Fakes{
-			WithInsecureUserHeader: true,
-			WithFakeCloudSQL:       true,
-			WithFakePrometheus:     true,
+			WithInsecureAuth:   true,
+			WithFakeCloudSQL:   true,
+			WithFakePrometheus: true,
 		},
 		pool,
 		notifier,
@@ -158,7 +158,7 @@ func newGQLRunner(ctx context.Context, pool *pgxpool.Pool, topic graph.PubsubTop
 			r = r.WithContext(authz.ContextWithActor(ctx, usr, roles))
 		}
 
-		middleware.ApiKeyAuthentication()(middleware.RequireAuthenticatedUser()(srv)).ServeHTTP(w, r)
+		(middleware.RequireAuthenticatedUser()(srv)).ServeHTTP(w, r)
 	})
 
 	return runner.NewGQLRunner(graphMiddleware(authProxy)), notifyCancel, nil

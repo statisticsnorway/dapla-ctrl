@@ -111,9 +111,14 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 		return fmt.Errorf("create graph handler: %w", err)
 	}
 
-	authHandler, err := setupAuthHandler(ctx, cfg.OAuth, log)
-	if err != nil {
-		return err
+	var authHandler authn.Handler
+	if !cfg.Fakes.WithInsecureAuth {
+		authHandler, err = setupAuthHandler(ctx, cfg.OAuth, log)
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Warn("Running with insecure auth, only use this for local development, NOT in production!")
 	}
 
 	wg, ctx := errgroup.WithContext(ctx)

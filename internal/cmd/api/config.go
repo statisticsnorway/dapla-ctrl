@@ -81,9 +81,9 @@ type Config struct {
 }
 
 type Fakes struct {
-	WithInsecureUserHeader bool `env:"WITH_INSECURE_USER_HEADER"`
-	WithFakeCloudSQL       bool `env:"WITH_FAKE_CLOUD_SQL"`
-	WithFakePrometheus     bool `env:"WITH_FAKE_PROMETHEUS"`
+	WithInsecureAuth   bool `env:"WITH_INSECURE_AUTH"`
+	WithFakeCloudSQL   bool `env:"WITH_FAKE_CLOUD_SQL"`
+	WithFakePrometheus bool `env:"WITH_FAKE_PROMETHEUS"`
 }
 
 func (f Fakes) Inform(log logrus.FieldLogger) {

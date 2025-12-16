@@ -76,18 +76,18 @@ func runHttpServer(
 			).Handler,
 		}
 
-		if fakes.WithInsecureUserHeader {
+		if fakes.WithInsecureAuth {
 			middlewares = append(middlewares, middleware.InsecureUserHeader())
 		}
-
 		if jwtMiddleware != nil {
 			middlewares = append(middlewares, jwtMiddleware)
+		}
+		if authHandler != nil {
+			middlewares = append(middlewares, middleware.Oauth2Authentication(authHandler))
 		}
 
 		middlewares = append(
 			middlewares,
-			middleware.ApiKeyAuthentication(),
-			middleware.Oauth2Authentication(authHandler),
 			middleware.RequireAuthenticatedUser(),
 			otelhttp.NewMiddleware(
 				"graphql",
@@ -99,12 +99,14 @@ func runHttpServer(
 		r.Method("POST", "/", otelhttp.WithRouteTag("query", graphHandler))
 	})
 
-	router.Route("/oauth2", func(r chi.Router) {
-		r.Use(contextDependencies)
-		r.Get("/login", authHandler.Login)
-		r.Get("/logout", authHandler.Logout)
-		r.Get("/callback", authHandler.Callback)
-	})
+	if authHandler != nil {
+		router.Route("/oauth2", func(r chi.Router) {
+			r.Use(contextDependencies)
+			r.Get("/login", authHandler.Login)
+			r.Get("/logout", authHandler.Logout)
+			r.Get("/callback", authHandler.Callback)
+		})
+	}
 
 	srv := &http.Server{
 		Addr:              listenAddress,
