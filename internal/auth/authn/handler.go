@@ -50,8 +50,7 @@ func New(oauth2Config OAuth2, log logrus.FieldLogger) Handler {
 }
 
 type claims struct {
-	Email string
-	Upn   string
+	Oid string // Object id of the user
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -141,9 +140,9 @@ func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := user.GetByEmail(r.Context(), claims.Upn)
+	u, err := user.GetByExternalId(r.Context(), claims.Oid)
 	if err != nil {
-		h.log.WithError(err).Errorf("get user (%s) from db", claims.Upn)
+		h.log.WithError(err).Errorf("get user by external id (%s) from db", claims.Oid)
 		http.Redirect(w, r, "/?error=unknown-user", http.StatusFound)
 		return
 	}

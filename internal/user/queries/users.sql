@@ -45,3 +45,12 @@ FROM
 WHERE
 	email = LOWER(@email)
 ;
+
+-- name: GetByExternalId :one
+SELECT
+	*
+FROM
+	users
+WHERE
+	external_id = LOWER(@external_id)
+;

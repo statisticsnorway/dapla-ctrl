@@ -53,3 +53,11 @@ func GetByEmail(ctx context.Context, email string) (*User, error) {
 	}
 	return toGraphUser(u), nil
 }
+
+func GetByExternalId(ctx context.Context, id string) (*User, error) {
+	u, err := db(ctx).GetByExternalId(ctx, id)
+	if err != nil {
+		return nil, handleError(err)
+	}
+	return toGraphUser(u), nil
+}
