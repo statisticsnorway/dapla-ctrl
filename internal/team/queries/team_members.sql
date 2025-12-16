@@ -64,30 +64,54 @@ OFFSET
 
 -- name: UserIsMember :one
 SELECT
-	EXISTS (
-		SELECT
-			user_id
-		FROM
-			group_members
-			JOIN groups ON groups.name = group_members.group_name
-		WHERE
-			user_id = @user_id
-			AND groups.team_slug = @team_slug::slug
-	)
+	(
+		EXISTS (
+			SELECT
+				user_id
+			FROM
+				group_members
+				JOIN groups ON groups.name = group_members.group_name
+			WHERE
+				user_id = @user_id
+				AND groups.team_slug = @team_slug::slug
+		)
+		OR EXISTS (
+			SELECT
+				user_id
+			FROM
+				sections
+				JOIN teams ON teams.section_code = sections.code
+			WHERE
+				teams.slug = @team_slug::slug
+				AND sections.manager_id = @user_id
+		)
+	)::BOOLEAN
 ;
 
 -- name: UserIsOwner :one
 SELECT
-	EXISTS (
-		SELECT
-			user_id
-		FROM
-			group_members
-			JOIN groups ON groups.name = group_members.group_name
-		WHERE
-			group_members.user_id = @user_id
-			AND groups.team_slug = @team_slug::slug
-			AND groups.category = 'managers'
-			AND groups.suffix = ''
-	)
+	(
+		EXISTS (
+			SELECT
+				user_id
+			FROM
+				group_members
+				JOIN groups ON groups.name = group_members.group_name
+			WHERE
+				group_members.user_id = @user_id
+				AND groups.team_slug = @team_slug::slug
+				AND groups.category = 'managers'
+				AND groups.suffix = ''
+		)
+		OR EXISTS (
+			SELECT
+				user_id
+			FROM
+				sections
+				JOIN teams ON teams.section_code = sections.code
+			WHERE
+				teams.slug = @team_slug::slug
+				AND sections.manager_id = @user_id
+		)
+	)::BOOLEAN
 ;

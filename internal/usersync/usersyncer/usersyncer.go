@@ -167,9 +167,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 }
 
 func AssignDefaultPermissionsToUser(ctx context.Context, querier usersyncsql.Querier, userID uuid.UUID) error {
-	defaultUserRoles := []string{
-		"Team creator",
-	}
+	defaultUserRoles := []string{}
 	for _, roleName := range defaultUserRoles {
 		if err := querier.AssignGlobalRole(ctx, usersyncsql.AssignGlobalRoleParams{
 			UserID:   userID,

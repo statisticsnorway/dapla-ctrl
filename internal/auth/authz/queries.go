@@ -84,33 +84,37 @@ func ForServiceAccount(ctx context.Context, serviceAccountID uuid.UUID) ([]*Role
 }
 
 func AssignRoleToServiceAccount(ctx context.Context, serviceAccountID uuid.UUID, roleName string) error {
-	return db(ctx).AssignRoleToServiceAccount(ctx, authzsql.AssignRoleToServiceAccountParams{
-		ServiceAccountID: serviceAccountID,
-		RoleName:         roleName,
-	})
+	return ErrNotSupported
+	// return db(ctx).AssignRoleToServiceAccount(ctx, authzsql.AssignRoleToServiceAccountParams{
+	// 	ServiceAccountID: serviceAccountID,
+	// 	RoleName:         roleName,
+	// })
 }
 
 func RevokeRoleFromServiceAccount(ctx context.Context, serviceAccountID uuid.UUID, roleName string) error {
-	return db(ctx).RevokeRoleFromServiceAccount(ctx, authzsql.RevokeRoleFromServiceAccountParams{
-		ServiceAccountID: serviceAccountID,
-		RoleName:         roleName,
-	})
+	return ErrNotSupported
+	// return db(ctx).RevokeRoleFromServiceAccount(ctx, authzsql.RevokeRoleFromServiceAccountParams{
+	// 	ServiceAccountID: serviceAccountID,
+	// 	RoleName:         roleName,
+	// })
 }
 
 func MakeUserTeamMember(ctx context.Context, userID uuid.UUID, teamSlug slug.Slug) error {
-	return db(ctx).AssignTeamRoleToUser(ctx, authzsql.AssignTeamRoleToUserParams{
-		UserID:         userID,
-		RoleName:       "Team member",
-		TargetTeamSlug: teamSlug,
-	})
+	return ErrNotSupported
+	// return db(ctx).AssignTeamRoleToUser(ctx, authzsql.AssignTeamRoleToUserParams{
+	// 	UserID:         userID,
+	// 	RoleName:       "Team member",
+	// 	TargetTeamSlug: teamSlug,
+	// })
 }
 
 func MakeUserTeamOwner(ctx context.Context, userID uuid.UUID, teamSlug slug.Slug) error {
-	return db(ctx).AssignTeamRoleToUser(ctx, authzsql.AssignTeamRoleToUserParams{
-		UserID:         userID,
-		RoleName:       "Team owner",
-		TargetTeamSlug: teamSlug,
-	})
+	return ErrNotSupported
+	// return db(ctx).AssignTeamRoleToUser(ctx, authzsql.AssignTeamRoleToUserParams{
+	// 	UserID:         userID,
+	// 	RoleName:       "Team owner",
+	// 	TargetTeamSlug: teamSlug,
+	// })
 }
 
 func GetRole(ctx context.Context, name string) (*Role, error) {
@@ -130,64 +134,104 @@ func ServiceAccountHasRole(ctx context.Context, serviceAccountID uuid.UUID, role
 }
 
 func CanAssignRole(ctx context.Context, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
-	actor := ActorFromContext(ctx)
-	if actor.User.IsServiceAccount() {
-		return serviceAccountCanAssignRole(ctx, actor.User.GetID(), roleName, targetTeamSlug)
-	}
+	return false, ErrNotSupported
+	// actor := ActorFromContext(ctx)
+	// if actor.User.IsServiceAccount() {
+	// 	return serviceAccountCanAssignRole(ctx, actor.User.GetID(), roleName, targetTeamSlug)
+	// }
 
-	return userCanAssignRole(ctx, actor.User.GetID(), roleName, targetTeamSlug)
+	// return userCanAssignRole(ctx, actor.User.GetID(), roleName, targetTeamSlug)
 }
 
-func userCanAssignRole(ctx context.Context, userID uuid.UUID, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
+/* func userCanAssignRole(ctx context.Context, userID uuid.UUID, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
 	return db(ctx).UserCanAssignRole(ctx, authzsql.UserCanAssignRoleParams{
 		UserID:         userID,
 		RoleName:       roleName,
 		TargetTeamSlug: targetTeamSlug,
 	})
-}
+} */
 
-func serviceAccountCanAssignRole(ctx context.Context, serviceAccountID uuid.UUID, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
+/* func serviceAccountCanAssignRole(ctx context.Context, serviceAccountID uuid.UUID, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
 	return db(ctx).ServiceAccountCanAssignRole(ctx, authzsql.ServiceAccountCanAssignRoleParams{
 		ServiceAccountID: serviceAccountID,
 		RoleName:         roleName,
 		TeamSlug:         targetTeamSlug,
 	})
-}
+} */
 
 func CanCreateServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return requireAuthorization(ctx, "service_accounts:create", teamSlug)
+	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:create", teamSlug)
 }
 
 func CanUpdateServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return requireAuthorization(ctx, "service_accounts:update", teamSlug)
+	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:update", teamSlug)
 }
 
 func CanDeleteServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return requireAuthorization(ctx, "service_accounts:delete", teamSlug)
+	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:delete", teamSlug)
 }
 
 func CanCreateTeam(ctx context.Context) error {
-	return requireGlobalAuthorization(ctx, "teams:create")
+	user := ActorFromContext(ctx).User
+	if user.IsAdmin() {
+		return nil
+	}
+	if user.IsServiceAccount() {
+		return ErrUnauthorized
+	}
+
+	id := user.GetID()
+	authorized, err := db(ctx).IsSectionManager(ctx, &id)
+	if err != nil {
+		return err
+	}
+	if authorized {
+		return nil
+	}
+	return ErrUnauthorized
 }
 
 func CanCreateGroup(ctx context.Context, teamSlug slug.Slug) error {
-	return requireTeamAuthorization(ctx, teamSlug, "teams:groups:create")
+	return CanManageTeam(ctx, teamSlug)
 }
 
 func CanManageTeamMembers(ctx context.Context, teamSlug slug.Slug) error {
-	return requireTeamAuthorization(ctx, teamSlug, "teams:members:admin")
+	return ErrNotSupported
 }
 
 func CanManageGroupMembers(ctx context.Context, teamSlug slug.Slug) error {
-	return requireTeamAuthorization(ctx, teamSlug, "teams:groups:members:admin")
+	return CanManageTeam(ctx, teamSlug)
 }
 
 func CanUpdateTeamMetadata(ctx context.Context, teamSlug slug.Slug) error {
-	return requireTeamAuthorization(ctx, teamSlug, "teams:metadata:update")
+	return CanManageTeam(ctx, teamSlug)
 }
 
 func CanDeleteTeam(ctx context.Context, teamSlug slug.Slug) error {
-	return requireTeamAuthorization(ctx, teamSlug, "teams:delete")
+	return ErrNotSupported // TODO: deletion not yet supported CanManageTeam(ctx, teamSlug)
+}
+
+func CanManageTeam(ctx context.Context, teamSlug slug.Slug) error {
+	user := ActorFromContext(ctx).User
+	if user.IsAdmin() {
+		return nil
+	}
+	if user.IsServiceAccount() {
+		return ErrUnauthorized
+	}
+
+	id := user.GetID()
+	authorized, err := db(ctx).IsManagerForTeamSection(ctx, authzsql.IsManagerForTeamSectionParams{
+		TeamSlug: teamSlug,
+		UserID:   &id,
+	})
+	if err != nil {
+		return err
+	}
+	if authorized {
+		return nil
+	}
+	return ErrUnauthorized
 }
 
 func RequireGlobalAdmin(ctx context.Context) error {
@@ -198,7 +242,7 @@ func RequireGlobalAdmin(ctx context.Context) error {
 	return ErrUnauthorized
 }
 
-func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authorizationName string) error {
+/* func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authorizationName string) error {
 	user := ActorFromContext(ctx).User
 	var (
 		hasAuthorization bool
@@ -226,9 +270,9 @@ func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authoriza
 	}
 
 	return newMissingAuthorizationError(authorizationName)
-}
+} */
 
-func requireGlobalAuthorization(ctx context.Context, authorizationName string) error {
+/* func requireGlobalAuthorization(ctx context.Context, authorizationName string) error {
 	user := ActorFromContext(ctx).User
 	var (
 		authorized bool
@@ -254,12 +298,12 @@ func requireGlobalAuthorization(ctx context.Context, authorizationName string) e
 	}
 
 	return newMissingAuthorizationError(authorizationName)
-}
+} */
 
-func requireAuthorization(ctx context.Context, authorizationName string, teamSlug *slug.Slug) error {
+/* func requireAuthorization(ctx context.Context, authorizationName string, teamSlug *slug.Slug) error {
 	if teamSlug == nil {
 		return requireGlobalAuthorization(ctx, authorizationName)
 	}
 
 	return requireTeamAuthorization(ctx, *teamSlug, authorizationName)
-}
+} */

@@ -20,6 +20,9 @@ type Querier interface {
 	GetRolesForUsers(ctx context.Context, userIds []uuid.UUID) ([]*GetRolesForUsersRow, error)
 	HasGlobalAuthorization(ctx context.Context, arg HasGlobalAuthorizationParams) (bool, error)
 	HasTeamAuthorization(ctx context.Context, arg HasTeamAuthorizationParams) (bool, error)
+	IsGlobalAdmin(ctx context.Context, userID uuid.UUID) (bool, error)
+	IsManagerForTeamSection(ctx context.Context, arg IsManagerForTeamSectionParams) (bool, error)
+	IsSectionManager(ctx context.Context, userID *uuid.UUID) (bool, error)
 	ListRoles(ctx context.Context, arg ListRolesParams) ([]*Role, error)
 	ListRolesForServiceAccount(ctx context.Context, arg ListRolesForServiceAccountParams) ([]*Role, error)
 	RevokeRoleFromServiceAccount(ctx context.Context, arg RevokeRoleFromServiceAccountParams) error

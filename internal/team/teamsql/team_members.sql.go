@@ -172,16 +172,28 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 
 const userIsMember = `-- name: UserIsMember :one
 SELECT
-	EXISTS (
-		SELECT
-			user_id
-		FROM
-			group_members
-			JOIN groups ON groups.name = group_members.group_name
-		WHERE
-			user_id = $1
-			AND groups.team_slug = $2::slug
-	)
+	(
+		EXISTS (
+			SELECT
+				user_id
+			FROM
+				group_members
+				JOIN groups ON groups.name = group_members.group_name
+			WHERE
+				user_id = $1
+				AND groups.team_slug = $2::slug
+		)
+		OR EXISTS (
+			SELECT
+				user_id
+			FROM
+				sections
+				JOIN teams ON teams.section_code = sections.code
+			WHERE
+				teams.slug = $2::slug
+				AND sections.manager_id = $1
+		)
+	)::BOOLEAN
 `
 
 type UserIsMemberParams struct {
@@ -191,25 +203,37 @@ type UserIsMemberParams struct {
 
 func (q *Queries) UserIsMember(ctx context.Context, arg UserIsMemberParams) (bool, error) {
 	row := q.db.QueryRow(ctx, userIsMember, arg.UserID, arg.TeamSlug)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 bool
+	err := row.Scan(&column_1)
+	return column_1, err
 }
 
 const userIsOwner = `-- name: UserIsOwner :one
 SELECT
-	EXISTS (
-		SELECT
-			user_id
-		FROM
-			group_members
-			JOIN groups ON groups.name = group_members.group_name
-		WHERE
-			group_members.user_id = $1
-			AND groups.team_slug = $2::slug
-			AND groups.category = 'managers'
-			AND groups.suffix = ''
-	)
+	(
+		EXISTS (
+			SELECT
+				user_id
+			FROM
+				group_members
+				JOIN groups ON groups.name = group_members.group_name
+			WHERE
+				group_members.user_id = $1
+				AND groups.team_slug = $2::slug
+				AND groups.category = 'managers'
+				AND groups.suffix = ''
+		)
+		OR EXISTS (
+			SELECT
+				user_id
+			FROM
+				sections
+				JOIN teams ON teams.section_code = sections.code
+			WHERE
+				teams.slug = $2::slug
+				AND sections.manager_id = $1
+		)
+	)::BOOLEAN
 `
 
 type UserIsOwnerParams struct {
@@ -219,7 +243,7 @@ type UserIsOwnerParams struct {
 
 func (q *Queries) UserIsOwner(ctx context.Context, arg UserIsOwnerParams) (bool, error) {
 	row := q.db.QueryRow(ctx, userIsOwner, arg.UserID, arg.TeamSlug)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+	var column_1 bool
+	err := row.Scan(&column_1)
+	return column_1, err
 }

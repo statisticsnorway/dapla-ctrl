@@ -29,7 +29,7 @@ Test.gql("Create team with user that is not authorized", function(t)
 		data = Null,
 		errors = {
 			{
-				message = Contains("Specifically, you need the \"teams:create\" authorization."),
+				message = "You are authenticated, but your account is not authorized to perform this action.",
 				path = {
 					"createTeam",
 				},
