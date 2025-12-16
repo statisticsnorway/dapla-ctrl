@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	Create(ctx context.Context, arg CreateParams) error
 	Get(ctx context.Context, id uuid.UUID) (*ActivityLogEntry, error)
+	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListByIDs(ctx context.Context, ids []uuid.UUID) ([]*ActivityLogEntry, error)
 	ListForResource(ctx context.Context, arg ListForResourceParams) ([]*ListForResourceRow, error)
 	ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error)

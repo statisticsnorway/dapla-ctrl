@@ -77,6 +77,60 @@ func (q *Queries) Get(ctx context.Context, id uuid.UUID) (*ActivityLogEntry, err
 	return &i, err
 }
 
+const list = `-- name: List :many
+SELECT
+	activity_log_entries.id, activity_log_entries.created_at, activity_log_entries.actor, activity_log_entries.action, activity_log_entries.resource_type, activity_log_entries.resource_name, activity_log_entries.team_slug, activity_log_entries.data,
+	COUNT(*) OVER () AS total_count
+FROM
+	activity_log_entries
+ORDER BY
+	created_at DESC
+LIMIT
+	$2
+OFFSET
+	$1
+`
+
+type ListParams struct {
+	Offset int32
+	Limit  int32
+}
+
+type ListRow struct {
+	ActivityLogEntry ActivityLogEntry
+	TotalCount       int64
+}
+
+func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) {
+	rows, err := q.db.Query(ctx, list, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListRow{}
+	for rows.Next() {
+		var i ListRow
+		if err := rows.Scan(
+			&i.ActivityLogEntry.ID,
+			&i.ActivityLogEntry.CreatedAt,
+			&i.ActivityLogEntry.Actor,
+			&i.ActivityLogEntry.Action,
+			&i.ActivityLogEntry.ResourceType,
+			&i.ActivityLogEntry.ResourceName,
+			&i.ActivityLogEntry.TeamSlug,
+			&i.ActivityLogEntry.Data,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listByIDs = `-- name: ListByIDs :many
 SELECT
 	id, created_at, actor, action, resource_type, resource_name, team_slug, data

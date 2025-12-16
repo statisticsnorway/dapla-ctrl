@@ -67,7 +67,7 @@ SELECT
 	(
 		EXISTS (
 			SELECT
-				user_id
+				1
 			FROM
 				group_members
 				JOIN groups ON groups.name = group_members.group_name
@@ -77,7 +77,7 @@ SELECT
 		)
 		OR EXISTS (
 			SELECT
-				user_id
+				1
 			FROM
 				sections
 				JOIN teams ON teams.section_code = sections.code
@@ -93,7 +93,7 @@ SELECT
 	(
 		EXISTS (
 			SELECT
-				user_id
+				1
 			FROM
 				group_members
 				JOIN groups ON groups.name = group_members.group_name
@@ -105,7 +105,7 @@ SELECT
 		)
 		OR EXISTS (
 			SELECT
-				user_id
+				1
 			FROM
 				sections
 				JOIN teams ON teams.section_code = sections.code

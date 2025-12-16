@@ -31,6 +31,20 @@ OFFSET
 	sqlc.arg('offset')
 ;
 
+-- name: List :many
+SELECT
+	sqlc.embed(activity_log_entries),
+	COUNT(*) OVER () AS total_count
+FROM
+	activity_log_entries
+ORDER BY
+	created_at DESC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;
+
 -- name: Create :exec
 INSERT INTO
 	activity_log_entries (

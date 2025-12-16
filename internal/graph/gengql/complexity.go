@@ -17,6 +17,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Query.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Query.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}

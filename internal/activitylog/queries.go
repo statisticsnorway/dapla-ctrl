@@ -113,6 +113,26 @@ func ListForResource(ctx context.Context, resourceType ActivityLogEntryResourceT
 	})
 }
 
+func List(ctx context.Context, page *pagination.Pagination) (*ActivityLogEntryConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.List(ctx, activitylogsql.ListParams{
+		Offset: page.Offset(),
+		Limit:  page.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var total int64
+	if len(ret) > 0 {
+		total = ret[0].TotalCount
+	}
+	return pagination.NewConvertConnectionWithError(ret, page, total, func(from *activitylogsql.ListRow) (ActivityLogEntry, error) {
+		return toGraphActivityLogEntry(&from.ActivityLogEntry)
+	})
+}
+
 func toGraphActivityLogEntry(row *activitylogsql.ActivityLogEntry) (ActivityLogEntry, error) {
 	titler := cases.Title(language.English)
 	entry := GenericActivityLogEntry{
