@@ -6,6 +6,7 @@ import (
 	"slices"
 	"time"
 
+	"cloud.google.com/go/auth/credentials/idtoken"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -25,7 +26,6 @@ const (
 	reconcilerName = "entraid:gcpsync"
 
 	configClientIdKey               = "clientId"
-	configClientSecretKey           = "clientSecret"
 	configTenantIdKey               = "tenantId"
 	configGcpProvisioningResourceId = "gcpProvisioningResourceId"
 	configGcpSyncJobId              = "gcpSyncJobId"
@@ -35,7 +35,6 @@ const (
 
 type gcpSyncConfig struct {
 	ClientId                         string
-	ClientSecret                     string
 	TenantId                         string
 	GoogleSyncProvisioningResourceId uuid.UUID
 	GoogleSyncJobId                  string
@@ -86,12 +85,6 @@ func (s *gcpSyncReconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Entra ID tenant ID",
 				Description: "ID of the Entra ID tenant to use",
 				Secret:      false,
-			},
-			{
-				Key:         configClientSecretKey,
-				DisplayName: "Entra ID Client secret",
-				Description: "Client secret of the Entra ID client to use",
-				Secret:      true,
 			},
 			{
 				Key:         configGcpProvisioningResourceId,
@@ -214,8 +207,6 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 		switch c.Key {
 		case configClientIdKey:
 			gc.ClientId = c.Value
-		case configClientSecretKey:
-			gc.ClientSecret = c.Value
 		case configTenantIdKey:
 			gc.TenantId = c.Value
 		case configGcpSyncJobId:
@@ -243,10 +234,17 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 		return nil
 	}
 
-	creds, err := azidentity.NewClientSecretCredential(gc.TenantId, gc.ClientId, gc.ClientSecret, nil)
-	if err != nil {
-		return fmt.Errorf("create credentials: %w", err)
-	}
+	creds, err := azidentity.NewClientAssertionCredential(gc.TenantId, gc.ClientId, func(ctx context.Context) (string, error) {
+		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
+		if err != nil {
+			return "", err
+		}
+		token, err := creds.Token(ctx)
+		if err != nil {
+			return "", err
+		}
+		return token.Value, nil
+	}, nil)
 
 	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {

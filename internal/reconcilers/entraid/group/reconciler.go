@@ -6,27 +6,26 @@ import (
 	"fmt"
 	"slices"
 
+	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
+	"github.com/microsoftgraph/msgraph-sdk-go/models"
+	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
+	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
 	"k8s.io/utils/ptr"
-
-	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
-	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 )
 
 const (
 	reconcilerName = "entraid:group"
 
 	configClientIdKey                  = "clientId"
-	configClientSecretKey              = "clientSecret"
 	configTenantIdKey                  = "tenantId"
 	configGcpAppRoleIdKey              = "gcpSyncAppRoleId"
 	configGcpProvisioningResourceIdKey = "gcpProvisioningResourceId"
@@ -47,7 +46,6 @@ type entraIdGroupReconciler struct {
 
 type entraIdConfig struct {
 	ClientId               string
-	ClientSecret           string
 	TenantId               string
 	SSOResourceId          uuid.UUID
 	ProvisioningResourceId uuid.UUID
@@ -82,12 +80,6 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Entra ID tenant ID",
 				Description: "ID of the Entra ID tenant to use",
 				Secret:      false,
-			},
-			{
-				Key:         configClientSecretKey,
-				DisplayName: "Entra ID Client secret",
-				Description: "Client secret of the Entra ID client to use for group administration",
-				Secret:      true,
 			},
 			{
 				Key:         configGcpAppRoleIdKey,
@@ -394,8 +386,6 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 		switch c.Key {
 		case configClientIdKey:
 			rc.ClientId = c.Value
-		case configClientSecretKey:
-			rc.ClientSecret = c.Value
 		case configTenantIdKey:
 			rc.TenantId = c.Value
 		case configGcpAppRoleIdKey:
@@ -427,10 +417,17 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 		return r.service, false, nil
 	}
 
-	creds, err := azidentity.NewClientSecretCredential(rc.TenantId, rc.ClientId, rc.ClientSecret, nil)
-	if err != nil {
-		return nil, false, fmt.Errorf("create credentials: %w", err)
-	}
+	creds, err := azidentity.NewClientAssertionCredential(rc.TenantId, rc.ClientId, func(ctx context.Context) (string, error) {
+		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
+		if err != nil {
+			return "", err
+		}
+		token, err := creds.Token(ctx)
+		if err != nil {
+			return "", err
+		}
+		return token.Value, nil
+	}, nil)
 
 	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
 	if err != nil {
