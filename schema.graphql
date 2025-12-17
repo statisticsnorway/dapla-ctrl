@@ -9,6 +9,11 @@ directive @defer(
   label: String
 ) on FRAGMENT_SPREAD | INLINE_FRAGMENT
 
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
 """Interface for activity log entries."""
 interface ActivityLogEntry {
   """
@@ -1806,6 +1811,9 @@ type TeamEdge {
 }
 
 type TeamMember {
+  """Groups the user has in the team."""
+  groups: [Group]!
+
   """Team instance."""
   team: Team!
 

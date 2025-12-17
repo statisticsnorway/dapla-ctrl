@@ -3,9 +3,10 @@
 
 	interface Props {
 		teamsData: TeamsData[];
+		rolesHeading?: string;
 	}
 
-	let { teamsData }: Props = $props();
+	let { teamsData, rolesHeading }: Props = $props();
 
 	export type User = {
 		name: string;
@@ -21,7 +22,10 @@
 			code: string;
 			name: string;
 		};
+		userGroups?: string[];
 	};
+
+	const hasUserGroups = teamsData.some((t) => t.userGroups !== undefined);
 
 	type SortBy = 'NAME' | 'MEMBER_COUNT' | 'MANAGER';
 
@@ -114,6 +118,9 @@
 	<Thead>
 		<Tr>
 			<Th sortable={true} sortKey="NAME">Navn</Th>
+			{#if hasUserGroups}
+				<Th>{rolesHeading ?? 'Mine roller'}</Th>
+			{/if}
 			<Th sortable={true} sortKey="MEMBER_COUNT" align="right">Teammedlemmer</Th>
 			<Th sortable={true} sortKey="MANAGER">Ansvarlig</Th>
 		</Tr>
@@ -128,6 +135,14 @@
 					<br />
 					{team.purpose}
 				</Td>
+				{#if team.userGroups}
+					<Td>
+						{team.userGroups
+							.map((g) => g.substring(team.slug.length + 1))
+							.toSorted()
+							.join(', ')}
+					</Td>
+				{/if}
 				<Td align="right">
 					{team.memberCount}
 				</Td>

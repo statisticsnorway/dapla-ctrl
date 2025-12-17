@@ -15,6 +15,9 @@ query UserOverview($user: String) @cache(policy: NetworkOnly) {
 				totalCount
 			}
 			nodes {
+				groups {
+					name
+				}
 				team {
 					id
 					slug

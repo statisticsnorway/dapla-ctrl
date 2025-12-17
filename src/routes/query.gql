@@ -13,6 +13,9 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 					totalCount
 				}
 				nodes {
+					groups {
+						name
+					}
 					team {
 						id
 						slug
@@ -28,21 +31,6 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 						members {
 							pageInfo {
 								totalCount
-							}
-						}
-						groups {
-							nodes {
-								name
-								category
-								suffix
-								members {
-									nodes {
-										user {
-											name
-											email
-										}
-									}
-								}
 							}
 						}
 					}

@@ -11,7 +11,8 @@
 
 	type TeamNode = UserOverview$result['user']['teams']['nodes'][0];
 
-	let allTeamsCount = $derived($UserOverview.data?.user.teams.nodes.length || 0);
+	let userTeamsCount = $derived($UserOverview.data?.user.teams.nodes.length || 0);
+
 	function transformTeamData(teamNode: TeamNode): TeamsData {
 		const team = teamNode.team;
 		const manager = team.section.manager;
@@ -27,7 +28,8 @@
 			section: {
 				code: team.section.code,
 				name: team.section.name
-			}
+			},
+			userGroups: teamNode.groups?.filter((g) => g !== null).map((g) => `${g.name}`) ?? []
 		};
 	}
 </script>
@@ -42,9 +44,12 @@
 	<div class="container">
 		<div>
 			<div class="section-header">
-				<Heading level="2" spacing>Medlem av {allTeamsCount} team</Heading>
+				<Heading level="2" spacing>Medlem av {userTeamsCount} team</Heading>
 			</div>
-			<TeamsTable teamsData={$UserOverview.data.user.teams.nodes.map(transformTeamData)} />
+			<TeamsTable
+				rolesHeading="Roller"
+				teamsData={$UserOverview.data.user.teams.nodes.map(transformTeamData)}
+			/>
 		</div>
 	</div>
 	<Pagination
