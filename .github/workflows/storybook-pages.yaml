@@ -4,12 +4,13 @@ on:
     branches:
       - 'main'
     paths:
-      - "src/**/*.svelte"
-      - "src/**/*.stories.*"
-      - ".storybook/**"
-      - "package.json"
-      - "pnpm-lock.json"
-      
+      - 'src/**/*.svelte'
+      - 'src/**/*.stories.*'
+      - '.storybook/**'
+      - 'package.json'
+      - 'pnpm-lock.json'
+      - '.github/workflows/storybook-pages.yaml'
+
 permissions:
   contents: read
   pages: write
@@ -19,6 +20,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - id: build-publish
         uses: bitovi/github-actions-storybook-to-github-pages@b75ece8f984a32b2adb322065d7a8a2cc8db2d52 # v1.0.3
         with:
