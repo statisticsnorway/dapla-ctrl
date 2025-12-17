@@ -20,9 +20,9 @@ import (
 )
 
 type GrpcConfig struct {
-	ListenAddress string
+	ListenAddress           string
 	ExpectedServiceAccounts []string
-	WithInsecureAuth bool
+	WithInsecureAuth        bool
 }
 
 func Run(ctx context.Context, cfg *GrpcConfig, pool *pgxpool.Pool, log logrus.FieldLogger) error {
