@@ -23,7 +23,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/alts"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -89,12 +88,6 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	if cfg.GRPC.Insecure {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		log.Warn("Running GRPC in insecure mode. Should only be used for local developement")
-	} else {
-		altsClientOpts := alts.DefaultClientOptions()
-		altsClientOpts.TargetServiceAccounts = cfg.GRPC.ExpectedServerSas
-		altsTC := alts.NewClientCreds(altsClientOpts)
-		opts = append(opts, grpc.WithTransportCredentials(altsTC))
 	}
 
 	client, err := apiclient.New(cfg.GRPC.Target, opts...)
