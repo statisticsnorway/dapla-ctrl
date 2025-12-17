@@ -128,6 +128,9 @@ type TeamMember {
 
 	"User instance."
 	user: User!
+
+	"Groups the user has in the team."
+	groups: [Group]!
 }
 
 type CreateTeamPayload {

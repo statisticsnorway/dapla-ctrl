@@ -124,20 +124,23 @@ func toGraphTeam(m *teamsql.Team) *Team {
 func toGraphTeamMember(m *teamsql.ListMembersRow) *TeamMember {
 	return &TeamMember{
 		TeamSlug: m.TeamSlug,
-		UserID:   m.User.ID,
+		UserID:   m.ID,
+		Groups:   m.Groups,
 	}
 }
 
 func toGraphUserTeam(m *teamsql.ListForUserRow) *TeamMember {
 	return &TeamMember{
-		TeamSlug: m.Team.Slug,
-		UserID:   m.User.ID,
+		TeamSlug: m.Slug,
+		UserID:   m.ID,
+		Groups:   m.Groups,
 	}
 }
 
 type TeamMember struct {
 	TeamSlug slug.Slug `json:"-"`
 	UserID   uuid.UUID `json:"-"`
+	Groups   []string  `json:"-"`
 }
 
 type TeamMemberRole string

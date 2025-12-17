@@ -23,11 +23,3 @@ type TeamDeleteKey struct {
 	CreatedBy   uuid.UUID
 	ConfirmedAt pgtype.Timestamptz
 }
-
-type User struct {
-	ID         uuid.UUID
-	Email      string
-	Name       string
-	ExternalID string
-	Admin      bool
-}

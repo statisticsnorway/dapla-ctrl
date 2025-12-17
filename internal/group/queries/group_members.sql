@@ -55,6 +55,27 @@ OFFSET
 	sqlc.arg('offset')
 ;
 
+-- name: ListForTeamMember :many
+SELECT
+	sqlc.embed(groups),
+	COUNT(*) OVER () AS total_count
+FROM
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
+WHERE
+	group_members.user_id = @user_id
+	AND groups.team_slug = @team_slug
+ORDER BY
+	CASE
+		WHEN @order_by::TEXT = 'name:asc' THEN groups.name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'name:desc' THEN groups.name
+	END DESC,
+	groups.name ASC
+;
+
 -- name: GetMember :one
 SELECT
 	users.*

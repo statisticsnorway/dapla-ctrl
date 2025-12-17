@@ -571,8 +571,9 @@ type ComplexityRoot struct {
 	}
 
 	TeamMember struct {
-		Team func(childComplexity int) int
-		User func(childComplexity int) int
+		Groups func(childComplexity int) int
+		Team   func(childComplexity int) int
+		User   func(childComplexity int) int
 	}
 
 	TeamMemberConnection struct {
@@ -761,6 +762,7 @@ type TeamResolver interface {
 type TeamMemberResolver interface {
 	Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error)
 	User(ctx context.Context, obj *team.TeamMember) (*user.User, error)
+	Groups(ctx context.Context, obj *team.TeamMember) ([]*group.Group, error)
 }
 type UserResolver interface {
 	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error)
@@ -2802,6 +2804,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.TeamEdge.Node(childComplexity), true
 
+	case "TeamMember.groups":
+		if e.complexity.TeamMember.Groups == nil {
+			break
+		}
+
+		return e.complexity.TeamMember.Groups(childComplexity), true
 	case "TeamMember.team":
 		if e.complexity.TeamMember.Team == nil {
 			break
@@ -5660,6 +5668,9 @@ type TeamMember {
 
 	"User instance."
 	user: User!
+
+	"Groups the user has in the team."
+	groups: [Group]!
 }
 
 type CreateTeamPayload {
@@ -17554,6 +17565,49 @@ func (ec *executionContext) fieldContext_TeamMember_user(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _TeamMember_groups(ctx context.Context, field graphql.CollectedField, obj *team.TeamMember) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamMember_groups,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.TeamMember().Groups(ctx, obj)
+		},
+		nil,
+		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamMember_groups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamMember",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "teamSlug":
+				return ec.fieldContext_Group_teamSlug(ctx, field)
+			case "category":
+				return ec.fieldContext_Group_category(ctx, field)
+			case "suffix":
+				return ec.fieldContext_Group_suffix(ctx, field)
+			case "members":
+				return ec.fieldContext_Group_members(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TeamMemberConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*team.TeamMember]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17627,6 +17681,8 @@ func (ec *executionContext) fieldContext_TeamMemberConnection_nodes(_ context.Co
 				return ec.fieldContext_TeamMember_team(ctx, field)
 			case "user":
 				return ec.fieldContext_TeamMember_user(ctx, field)
+			case "groups":
+				return ec.fieldContext_TeamMember_groups(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TeamMember", field.Name)
 		},
@@ -17726,6 +17782,8 @@ func (ec *executionContext) fieldContext_TeamMemberEdge_node(_ context.Context, 
 				return ec.fieldContext_TeamMember_team(ctx, field)
 			case "user":
 				return ec.fieldContext_TeamMember_user(ctx, field)
+			case "groups":
+				return ec.fieldContext_TeamMember_groups(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TeamMember", field.Name)
 		},
@@ -27012,6 +27070,42 @@ func (ec *executionContext) _TeamMember(ctx context.Context, sel ast.SelectionSe
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "groups":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamMember_groups(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -28600,6 +28694,44 @@ func (ec *executionContext) marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorway�
 
 func (ec *executionContext) marshalNGroup2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v group.Group) graphql.Marshaler {
 	return ec._Group(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v []*group.Group) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.Group) graphql.Marshaler {

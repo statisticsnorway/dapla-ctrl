@@ -117,6 +117,25 @@ func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Paginat
 	return pagination.NewConvertConnection(ret, page, total, toGraphUserGroup), nil
 }
 
+func ListForTeamMember(ctx context.Context, teamSlug slug.Slug, userID uuid.UUID) ([]*Group, error) {
+	q := db(ctx)
+
+	ret, err := q.ListForTeamMember(ctx, groupsql.ListForTeamMemberParams{
+		UserID:   userID,
+		TeamSlug: teamSlug,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var groups []*Group
+	for _, g := range ret {
+		groups = append(groups, toGraphGroup(&g.Group))
+	}
+
+	return groups, nil
+}
+
 func GetMemberByEmail(ctx context.Context, groupName string, email string) (*GroupMember, error) {
 	q := db(ctx)
 

@@ -137,6 +137,10 @@ func (r *teamMemberResolver) User(ctx context.Context, obj *team.TeamMember) (*u
 	return user.Get(ctx, obj.UserID)
 }
 
+func (r *teamMemberResolver) Groups(ctx context.Context, obj *team.TeamMember) ([]*group.Group, error) {
+	return group.ListForTeamMember(ctx, obj.TeamSlug, obj.UserID)
+}
+
 func (r *Resolver) Team() gengql.TeamResolver { return &teamResolver{r} }
 
 func (r *Resolver) TeamMember() gengql.TeamMemberResolver { return &teamMemberResolver{r} }

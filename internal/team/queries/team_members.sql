@@ -1,7 +1,8 @@
 -- name: ListMembers :many
 SELECT
-	sqlc.embed(users),
+	users.id,
 	groups.team_slug,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	group_members
@@ -35,8 +36,9 @@ OFFSET
 
 -- name: ListForUser :many
 SELECT
-	sqlc.embed(teams),
-	sqlc.embed(users),
+	teams.slug,
+	users.id,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams

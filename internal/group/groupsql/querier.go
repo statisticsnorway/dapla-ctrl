@@ -19,6 +19,7 @@ type Querier interface {
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)
 	ListByTeamSlug(ctx context.Context, arg ListByTeamSlugParams) ([]*Group, error)
+	ListForTeamMember(ctx context.Context, arg ListForTeamMemberParams) ([]*ListForTeamMemberRow, error)
 	ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)
 	RemoveMember(ctx context.Context, arg RemoveMemberParams) error

@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
 
 const addMember = `-- name: AddMember :exec
@@ -83,6 +84,65 @@ func (q *Queries) GetMemberByEmail(ctx context.Context, arg GetMemberByEmailPara
 		&i.Admin,
 	)
 	return &i, err
+}
+
+const listForTeamMember = `-- name: ListForTeamMember :many
+SELECT
+	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
+	COUNT(*) OVER () AS total_count
+FROM
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
+WHERE
+	group_members.user_id = $1
+	AND groups.team_slug = $2
+ORDER BY
+	CASE
+		WHEN $3::TEXT = 'name:asc' THEN groups.name
+	END ASC,
+	CASE
+		WHEN $3::TEXT = 'name:desc' THEN groups.name
+	END DESC,
+	groups.name ASC
+`
+
+type ListForTeamMemberParams struct {
+	UserID   uuid.UUID
+	TeamSlug slug.Slug
+	OrderBy  string
+}
+
+type ListForTeamMemberRow struct {
+	Group      Group
+	TotalCount int64
+}
+
+func (q *Queries) ListForTeamMember(ctx context.Context, arg ListForTeamMemberParams) ([]*ListForTeamMemberRow, error) {
+	rows, err := q.db.Query(ctx, listForTeamMember, arg.UserID, arg.TeamSlug, arg.OrderBy)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListForTeamMemberRow{}
+	for rows.Next() {
+		var i ListForTeamMemberRow
+		if err := rows.Scan(
+			&i.Group.Name,
+			&i.Group.TeamSlug,
+			&i.Group.Category,
+			&i.Group.Suffix,
+			&i.Group.ExternalID,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listForUser = `-- name: ListForUser :many

@@ -12,8 +12,9 @@ import (
 
 const listForUser = `-- name: ListForUser :many
 SELECT
-	teams.slug, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code,
-	users.id, users.email, users.name, users.external_id, users.admin,
+	teams.slug,
+	users.id,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
@@ -47,8 +48,9 @@ type ListForUserParams struct {
 }
 
 type ListForUserRow struct {
-	Team       Team
-	User       User
+	Slug       slug.Slug
+	ID         uuid.UUID
+	Groups     []string
 	TotalCount int64
 }
 
@@ -67,16 +69,9 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 	for rows.Next() {
 		var i ListForUserRow
 		if err := rows.Scan(
-			&i.Team.Slug,
-			&i.Team.Purpose,
-			&i.Team.LastSuccessfulSync,
-			&i.Team.DeleteKeyConfirmedAt,
-			&i.Team.SectionCode,
-			&i.User.ID,
-			&i.User.Email,
-			&i.User.Name,
-			&i.User.ExternalID,
-			&i.User.Admin,
+			&i.Slug,
+			&i.ID,
+			&i.Groups,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -91,8 +86,9 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 
 const listMembers = `-- name: ListMembers :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
+	users.id,
 	groups.team_slug,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	group_members
@@ -132,8 +128,9 @@ type ListMembersParams struct {
 }
 
 type ListMembersRow struct {
-	User       User
+	ID         uuid.UUID
 	TeamSlug   slug.Slug
+	Groups     []string
 	TotalCount int64
 }
 
@@ -152,12 +149,9 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 	for rows.Next() {
 		var i ListMembersRow
 		if err := rows.Scan(
-			&i.User.ID,
-			&i.User.Email,
-			&i.User.Name,
-			&i.User.ExternalID,
-			&i.User.Admin,
+			&i.ID,
 			&i.TeamSlug,
+			&i.Groups,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
