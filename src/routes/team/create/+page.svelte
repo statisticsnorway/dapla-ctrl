@@ -2,14 +2,14 @@
 	import { enhance } from '$app/forms';
 	import { isPossiblyInModal } from '$lib/ui/PageModal.svelte';
 	import WarningIcon from '$lib/icons/WarningIcon.svelte';
-	import { Button, ErrorSummary, Heading, TextField } from '@nais/ds-svelte-community';
+	import { Button, ErrorSummary, Heading, Select, TextField } from '@nais/ds-svelte-community';
 	import { FloppydiskIcon } from '@nais/ds-svelte-community/icons';
 	import type { PageProps } from './$types';
 
 	let { form, data }: PageProps = $props();
 	let saving = $state(false);
 
-	let { UserInfo } = $derived(data);
+	let { UserInfo, SectionsInfo } = $derived(data);
 	const isAdmin = $derived(
 		$UserInfo.data?.me.__typename === 'User' ? $UserInfo.data?.me.isAdmin : false
 	);
@@ -19,6 +19,10 @@
 	let purposeError = $state('');
 
 	let sectionError = $state('no_error');
+
+	let sections = $derived(
+		$SectionsInfo.data?.sections.nodes.toSorted((a, b) => (a.code < b.code ? -1 : 1)) ?? []
+	);
 
 	let disabled = $derived(
 		[teamSlugError, purposeError, sectionError].some((e) => e !== 'no_error')
@@ -88,19 +92,6 @@
 			}
 		}
 	}
-
-	const sectionPattern = /^([0-9]{3})?$/;
-	function handleSectionInput(event: Event) {
-		if (!event) return;
-		const input = event.target as HTMLInputElement | null;
-		if (input) {
-			if (!sectionPattern.test(input.value)) {
-				sectionError = 'Seksjonskoden må være tom eller 3 siffer.';
-			} else {
-				sectionError = 'no_error';
-			}
-		}
-	}
 </script>
 
 <svelte:head>
@@ -155,14 +146,15 @@
 		{/if}
 		{#if isAdmin}
 			<br />
-			<TextField name="section" value={form?.input.sectionCode} oninput={handleSectionInput}>
-				{#snippet label()}
-					Seksjonskode
-				{/snippet}
+			<Select name="section" label="Seksjon" value={form?.input.sectionCode}>
+				<option value=""></option>
+				{#each sections as section (section.code)}
+					<option value={section.code}>{section.code} {section.name}</option>
+				{/each}
 				{#snippet description()}
-					Eksempel: 724
+					Seksjonen teamet blir opprettet i. Tomt felt oppretter teamet i seksjon 724.
 				{/snippet}
-			</TextField>
+			</Select>
 			{#if sectionError !== 'no_error' && sectionError !== ''}
 				<p style:color="var(--ax-text-danger)">{sectionError}</p>
 			{/if}

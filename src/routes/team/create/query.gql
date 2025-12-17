@@ -1,0 +1,11 @@
+query SectionsInfo {
+	sections(first: 100) {
+		nodes {
+			code
+			name
+			manager {
+				name
+			}
+		}
+	}
+}
