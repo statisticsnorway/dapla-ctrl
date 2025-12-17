@@ -13,6 +13,9 @@ type Config struct {
 
 		// InsecureGRPC bypasses authentication, use for development purposes only.
 		Insecure bool `env:"INSECURE_GRPC"`
+
+		// Which SAs of the server we trust when connecting
+		ExpectedServerSas []string `env:"EXPECTED_SERVERS_SA_LIST_GRPC"`
 	}
 
 	PubSub struct {

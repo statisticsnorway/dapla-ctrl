@@ -171,7 +171,6 @@ func (s *gcpSyncReconciler) CollectRequests(ctx context.Context) (map[string][]s
 }
 
 func (s *gcpSyncReconciler) Sync(ctx context.Context, groups map[string][]string) error {
-
 	if len(groups) == 0 {
 		s.log.Info("no groups to sync")
 		return nil
@@ -259,6 +258,7 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 
 	return nil
 }
+
 func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *graphmodels.SynchronizationJobApplicationParameters {
 	mutatedMembers := make([]models.SynchronizationJobSubjectable, 0, len(userIds))
 	for _, u := range userIds {
