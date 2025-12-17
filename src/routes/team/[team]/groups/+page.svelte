@@ -107,6 +107,7 @@
 						{/each}
 					{/if}
 				</List>
+				<br />
 			{:else}
 				Teamet har ingen grupper.
 			{/each}
