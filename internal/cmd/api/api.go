@@ -112,13 +112,13 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	}
 
 	var authHandler authn.Handler
-	if cfg.Fakes.WithInsecureAuth {
-		log.Warn("Running with insecure auth, only use this for local development, NOT in production!")
-	} else {
+	if !cfg.Fakes.WithInsecureAuth {
 		authHandler, err = setupAuthHandler(ctx, cfg.OAuth, log)
 		if err != nil {
 			return err
 		}
+	} else {
+		log.Warn("Running with insecure auth, only use this for local development, NOT in production!")
 	}
 
 	wg, ctx := errgroup.WithContext(ctx)
@@ -159,11 +159,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	})
 
 	wg.Go(func() error {
-		if err := grpc.Run(ctx, &grpc.GrpcConfig{
-			ListenAddress:           cfg.Grpc.ListenAddress,
-			ExpectedServiceAccounts: cfg.Grpc.ExpectedServiceAccounts,
-			WithInsecureAuth:        cfg.Fakes.WithInsecureAuth,
-		}, pool, log.WithField("subsystem", "grpc")); err != nil {
+		if err := grpc.Run(ctx, cfg.GRPCListenAddress, pool, log.WithField("subsystem", "grpc")); err != nil {
 			log.WithError(err).Errorf("error in GRPC server")
 			return err
 		}

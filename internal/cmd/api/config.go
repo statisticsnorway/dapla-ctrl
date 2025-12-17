@@ -41,14 +41,6 @@ type oAuthConfig struct {
 	AdditionalScopes []string `env:"OAUTH_ADDITIONAL_SCOPES"`
 }
 
-type grpcConfig struct {
-	// ListenAddress is host:port combination used by the GRPC server
-	ListenAddress string `env:"GRPC_LISTEN_ADDRESS,default=127.0.0.1:3001"`
-
-	// Which client SAs we trust
-	ExpectedServiceAccounts []string `env:"GRPC_EXPECTED_CLIENT_SA_LIST"`
-}
-
 type JWTConfig struct {
 	// The issuer to trust for JWT Bearer tokens
 	Issuer string `env:"JWT_ISSUER,default=https://auth-play.test.ssb.no/realms/ssb"`
@@ -76,12 +68,14 @@ type Config struct {
 	ListenAddress         string `env:"LISTEN_ADDRESS,default=127.0.0.1:3000"`
 	InternalListenAddress string `env:"INTERNAL_LISTEN_ADDRESS,default=127.0.0.1:3005"`
 
+	// GRPCListenAddress is host:port combination used by the GRPC server
+	GRPCListenAddress string `env:"GRPC_LISTEN_ADDRESS,default=127.0.0.1:3001"`
+
 	LeaderElectionEnabled bool `env:"LEADER_ELECTION_ENABLED,default=true"`
 
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
 	JWT      JWTConfig
-	Grpc     grpcConfig
 
 	Fakes Fakes
 }
