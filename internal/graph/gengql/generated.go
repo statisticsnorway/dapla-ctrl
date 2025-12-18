@@ -540,6 +540,7 @@ type ComplexityRoot struct {
 		DeletionInProgress func(childComplexity int) int
 		Groups             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
 		ID                 func(childComplexity int) int
+		IsManaged          func(childComplexity int) int
 		LastSuccessfulSync func(childComplexity int) int
 		Members            func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int
 		Purpose            func(childComplexity int) int
@@ -752,6 +753,7 @@ type ServiceAccountResolver interface {
 }
 type TeamResolver interface {
 	Section(ctx context.Context, obj *team.Team) (*section.Section, error)
+
 	Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error)
 	Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error)
 
@@ -2681,6 +2683,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Team.ID(childComplexity), true
+	case "Team.isManaged":
+		if e.complexity.Team.IsManaged == nil {
+			break
+		}
+
+		return e.complexity.Team.IsManaged(childComplexity), true
 	case "Team.lastSuccessfulSync":
 		if e.complexity.Team.LastSuccessfulSync == nil {
 			break
@@ -5614,6 +5622,9 @@ type Team implements Node {
 	"Section who owns the team"
 	section: Section!
 
+	"The autonomy level of the team"
+	isManaged: Boolean!
+
 	"Team members."
 	members(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
@@ -7730,6 +7741,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -10190,6 +10203,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -12029,6 +12044,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -14276,6 +14293,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -16786,6 +16805,35 @@ func (ec *executionContext) fieldContext_Team_section(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_isManaged(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_isManaged,
+		func(ctx context.Context) (any, error) {
+			return obj.IsManaged, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_isManaged(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_members(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17126,6 +17174,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -17446,6 +17496,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -17499,6 +17551,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -18326,6 +18380,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
 			case "members":
 				return ec.fieldContext_Team_members(ctx, field)
 			case "groups":
@@ -26615,6 +26671,11 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "isManaged":
+			out.Values[i] = ec._Team_isManaged(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "members":
 			field := field
 

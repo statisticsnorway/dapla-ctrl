@@ -13,4 +13,5 @@ type Team struct {
 	LastSuccessfulSync   pgtype.Timestamp
 	DeleteKeyConfirmedAt pgtype.Timestamptz
 	SectionCode          string
+	IsManaged            bool
 }

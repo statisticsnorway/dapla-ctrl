@@ -32,6 +32,7 @@ type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
 	Purpose              string     `json:"purpose"`
 	SectionCode          string     `json:"sectionCode"`
+	IsManaged            bool       `json:"isManaged"`
 	LastSuccessfulSync   *time.Time `json:"lastSuccessfulSync"`
 	DeleteKeyConfirmedAt *time.Time `json:"-"`
 }
@@ -108,6 +109,7 @@ func toGraphTeam(m *teamsql.Team) *Team {
 		Slug:        m.Slug,
 		Purpose:     m.Purpose,
 		SectionCode: m.SectionCode,
+		IsManaged:   m.IsManaged,
 	}
 
 	if m.LastSuccessfulSync.Valid {

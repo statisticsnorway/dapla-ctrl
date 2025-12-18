@@ -91,6 +91,7 @@ Test.gql("Create team", function(t)
 				team {
 					id
 					slug
+					isManaged
 				}
 			}
 		}
@@ -102,6 +103,7 @@ Test.gql("Create team", function(t)
 				team = {
 					id = Save("teamID"),
 					slug = "newteam",
+					isManaged = true,
 				},
 			},
 		},

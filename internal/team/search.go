@@ -97,6 +97,7 @@ type notificationData struct {
 	Slug        slug.Slug `json:"slug"`
 	Purpose     string    `json:"purpose"`
 	SectionCode string    `json:"sectionCode"`
+	IsManaged   bool      `json:"isManaged"`
 }
 
 func dataFromNotification(payload notify.Payload) notificationData {

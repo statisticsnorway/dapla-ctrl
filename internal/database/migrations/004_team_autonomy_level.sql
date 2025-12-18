@@ -1,0 +1,9 @@
+-- +goose Up
+ALTER TABLE teams
+ADD COLUMN is_managed BOOLEAN NOT NULL DEFAULT TRUE
+;
+
+ALTER TABLE teams
+ALTER COLUMN is_managed
+DROP DEFAULT
+;

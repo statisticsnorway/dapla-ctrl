@@ -26,6 +26,7 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 			Slug:        input.Slug,
 			Purpose:     input.Purpose,
 			SectionCode: input.SectionCode,
+			IsManaged:   true,
 		})
 		if err != nil {
 			return err

@@ -1,8 +1,8 @@
 -- name: Create :one
 INSERT INTO
-	teams (slug, purpose, section_code)
+	teams (slug, purpose, section_code, is_managed)
 VALUES
-	(@slug, @purpose, @section_code)
+	(@slug, @purpose, @section_code, @is_managed)
 RETURNING
 	*
 ;

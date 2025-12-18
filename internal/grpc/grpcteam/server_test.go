@@ -48,8 +48,8 @@ func TestTeamsServer_Get(t *testing.T) {
 		sectionCode := "724"
 
 		stmt := `
-			INSERT INTO teams (slug, purpose, section_code) VALUES
-			($1, $2, $3)`
+			INSERT INTO teams (slug, purpose, section_code, is_managed) VALUES
+			($1, $2, $3, TRUE)`
 		if _, err = pool.Exec(ctx, stmt, teamSlug, purpose, sectionCode); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -101,7 +101,7 @@ func TestTeamsServer_Delete(t *testing.T) {
 		teamSlug := "team-slug"
 		sectionCode := "724"
 
-		stmt := "INSERT INTO teams (slug, purpose, delete_key_confirmed_at, section_code) VALUES ($1, 'some purpose', NOW(), $2)"
+		stmt := "INSERT INTO teams (slug, purpose, delete_key_confirmed_at, section_code, is_managed) VALUES ($1, 'some purpose', NOW(), $2, TRUE)"
 		if _, err := pool.Exec(ctx, stmt, teamSlug, sectionCode); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -137,12 +137,12 @@ func TestTeamsServer_ToBeReconciled(t *testing.T) {
 	t.Run("fetch teams", func(t *testing.T) {
 		pool := getConnection(ctx, t, container, dsn, log)
 
-		stmt := "INSERT INTO teams (slug, purpose, section_code) VALUES ('teamone', 'some purpose', '724')"
+		stmt := "INSERT INTO teams (slug, purpose, section_code, is_managed) VALUES ('teamone', 'some purpose', '724', TRUE)"
 		if _, err := pool.Exec(ctx, stmt); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
 
-		stmt = "INSERT INTO teams (slug, purpose, section_code) VALUES ('teamtwo', 'some purpose', '724')"
+		stmt = "INSERT INTO teams (slug, purpose, section_code, is_managed) VALUES ('teamtwo', 'some purpose', '724', TRUE)"
 		if _, err := pool.Exec(ctx, stmt); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
