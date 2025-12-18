@@ -283,9 +283,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		// devuser is first in array
 		createGroupAndAddUsers(ctx, actor, devteam.Slug, "developers", nil, users[:1], 1)
 
-		if err := authz.MakeUserTeamOwner(ctx, devUser.UUID, devteam.Slug); err != nil {
-			return fmt.Errorf("make user %q owner of team %q: %w", devUser.Email, devteam.Slug, err)
-		}
+		createGroupAndAddUsers(ctx, actor, devteam.Slug, "managers", nil, users[:1], 1)
 
 		for i := 1; i <= *cfg.NumTeams; i++ {
 			name := teamName()
@@ -298,23 +296,9 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				Purpose:     "some purpose",
 				SectionCode: "724",
 			}
-			t, err := team.Create(ctx, input, actor)
+			_, err := team.Create(ctx, input, actor)
 			if err != nil {
 				return fmt.Errorf("create team %q: %w", name, err)
-			}
-
-			for o := 0; o < *cfg.NumOwnersPerTeam; o++ {
-				u := users[rand.IntN(len(users))]
-				if err = authz.MakeUserTeamOwner(ctx, u.UUID, t.Slug); err != nil {
-					return fmt.Errorf("make user %q owner of team %q: %w", u.Email, t.Slug, err)
-				}
-			}
-
-			for o := 0; o < *cfg.NumMembersPerTeam; o++ {
-				u := users[rand.IntN(len(users))]
-				if err = authz.MakeUserTeamMember(ctx, u.UUID, t.Slug); err != nil {
-					return fmt.Errorf("make user %q member of team %q: %w", u.Email, t.Slug, err)
-				}
 			}
 
 			log.Infof("%d/%d teams created", i, *cfg.NumTeams)
