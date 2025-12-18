@@ -36,7 +36,7 @@
 				code: team.team.section.code,
 				name: team.team.section.name
 			},
-			userGroups: team.groups?.filter((g) => g !== null).map((g) => `${g.name}`) ?? []
+			userGroups: team.groups?.filter((g) => g !== null).map((g) => g.name) ?? []
 		};
 	}
 </script>

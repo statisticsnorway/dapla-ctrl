@@ -56,7 +56,10 @@
 						<Button as="a" size="small" href="/" variant="secondary">Se mine team</Button>
 					</div>
 
-					<TeamsTable teamsData={$AllTeams.data.teams.nodes.map(transformTeamData)} />
+					<TeamsTable
+						defaultSelected={['name', 'memberCount', 'manager']}
+						teamsData={$AllTeams.data.teams.nodes.map(transformTeamData)}
+					/>
 				</div>
 			</div>
 			<Pagination
