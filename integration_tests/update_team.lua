@@ -11,6 +11,7 @@ Test.gql("Create team", function(t)
 			createTeam(
 				input: {
 					slug: "%s"
+					displayName: "%s"
 					purpose: "some purpose"
 					sectionCode: "724"
 				}
@@ -20,7 +21,7 @@ Test.gql("Create team", function(t)
 				}
 			}
 		}
-	]], teamSlug))
+	]], teamSlug, teamSlug))
 
 	t.check {
 		data = {
@@ -33,7 +34,7 @@ Test.gql("Create team", function(t)
 	}
 end)
 
-Test.gql("Update team", function(t)
+Test.gql("Update purpose team", function(t)
 	t.addHeader("x-user-email", user:email())
 
 	t.query(string.format([[
@@ -46,6 +47,7 @@ Test.gql("Update team", function(t)
 			) {
 				team {
 					purpose
+					displayName
 				}
 			}
 		}
@@ -56,6 +58,38 @@ Test.gql("Update team", function(t)
 			updateTeam = {
 				team = {
 					purpose = "new-purpose",
+					displayName = "someteamname",
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("Update display name team", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		mutation {
+			updateTeam(
+				input: {
+					slug: "%s"
+					displayName: "My Awesome Team"
+				}
+			) {
+				team {
+					purpose
+					displayName
+				}
+			}
+		}
+	]], teamSlug))
+
+	t.check {
+		data = {
+			updateTeam = {
+				team = {
+					purpose = "new-purpose",
+					displayName = "My Awesome Team",
 				},
 			},
 		},
@@ -74,6 +108,7 @@ Test.gql("Nothing to update", function(t)
 			) {
 				team {
 					purpose
+					displayName
 				}
 			}
 		}
@@ -84,6 +119,7 @@ Test.gql("Nothing to update", function(t)
 			updateTeam = {
 				team = {
 					purpose = "new-purpose",
+					displayName = "My Awesome Team",
 				},
 			},
 		},

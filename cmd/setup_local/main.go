@@ -272,6 +272,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		if err != nil {
 			input := &team.CreateTeamInput{
 				Slug:        "devteam",
+				DisplayName: "Dev Team",
 				Purpose:     "dev-purpose",
 				SectionCode: "724",
 			}
@@ -293,6 +294,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 			input := &team.CreateTeamInput{
 				Slug:        name,
+				DisplayName: strings.ToTitle(name.String()),
 				Purpose:     "some purpose",
 				SectionCode: "724",
 			}

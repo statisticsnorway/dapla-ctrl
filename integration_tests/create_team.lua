@@ -14,6 +14,7 @@ Test.gql("Create team with user that is not authorized", function(t)
 			createTeam(
 				input: {
 					slug: "slug-one"
+					displayName: "Slug One"
 					purpose: "some purpose"
 					sectionCode: "724"
 				}
@@ -49,6 +50,7 @@ Test.gql("Create team with slug that is already taken", function(t)
 			createTeam(
 				input: {
 					slug: "slug-one"
+					displayName: "Slug One"
 					purpose: "some purpose"
 					sectionCode: "724"
 				}
@@ -84,6 +86,7 @@ Test.gql("Create team", function(t)
 			createTeam(
 				input: {
 					slug: "newteam"
+					displayName: "Slug One"
 					purpose: "some purpose"
 					sectionCode: "724"
 				}
@@ -120,6 +123,7 @@ Test.gql("Create team with invalid slug", function(t)
 					createTeam(
 						input: {
 							slug: "%s"
+							displayName: "%s"
 							purpose: "some purpose"
 							sectionCode: "724"
 						}
@@ -130,7 +134,7 @@ Test.gql("Create team with invalid slug", function(t)
 						}
 					}
 				}
-			]], s))
+			]], s, s))
 			t.check {
 				data = Null,
 				errors = {
@@ -154,6 +158,7 @@ Test.gql("Create team with invalid slug", function(t)
 					createTeam(
 						input: {
 							slug: "%s"
+							displayName: "Slug One"
 							purpose: "some purpose"
 							sectionCode: "724"
 						}
@@ -211,7 +216,90 @@ Test.gql("Create team with invalid slug", function(t)
 	testSlug(invalidSlugs, Contains("A team slug must match the following pattern:"))
 end)
 
+Test.gql("Create team with category in slug", function(t)
+	t.addHeader("x-user-email", user:email())
 
+	local testSlug = function(slugs, errorMessageMatch)
+		for _, s in ipairs(slugs) do
+			t.query(string.format([[
+				mutation {
+					createTeam(
+						input: {
+							slug: "%s"
+							displayName: "%s"
+							purpose: "some purpose"
+							sectionCode: "724"
+						}
+					) {
+						team {
+							id
+							slug
+						}
+					}
+				}
+			]], s, s))
+			t.check {
+				data = Null,
+				errors = {
+					{
+						message = errorMessageMatch,
+						extensions = {
+							field = "slug",
+						},
+						path = {
+							"createTeam",
+						},
+					},
+				},
+			}
+		end
+	end
+
+	local invalidSlugs = {
+		"managers",
+		"consumers",
+		"data-admins",
+		"developers",
+	}
+	testSlug(invalidSlugs, Contains("Team slug cannot contain a group category."))
+end)
+
+Test.gql("Create team with empty display name", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query [[
+		mutation {
+			createTeam(
+				input: {
+					slug: "no-display-name"
+					displayName: ""
+					purpose: "some purpose"
+					sectionCode: "724"
+				}
+			) {
+				team {
+					id
+					displayName
+				}
+			}
+		}
+	]]
+
+	t.check {
+		data = Null,
+		errors = {
+			{
+				extensions = {
+					field = "displayName",
+				},
+				message = "This is not a valid display name.",
+				path = {
+					"createTeam",
+				},
+			},
+		},
+	}
+end)
 
 Test.pubsub("Check if pubsub message was sent", function(t)
 	t.check("topic", {
@@ -264,6 +352,7 @@ Test.gql("Create team with unavailable slug", function(t)
 			createTeam(
 				input: {
 					slug: "newteam"
+					displayName: "New Team"
 					purpose: "some purpose"
 					sectionCode: "724"
 				}

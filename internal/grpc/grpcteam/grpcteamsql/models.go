@@ -14,4 +14,5 @@ type Team struct {
 	DeleteKeyConfirmedAt pgtype.Timestamptz
 	SectionCode          string
 	IsManaged            bool
+	DisplayName          string
 }

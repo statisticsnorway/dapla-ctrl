@@ -538,6 +538,7 @@ type ComplexityRoot struct {
 	Team struct {
 		ActivityLog        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
 		DeletionInProgress func(childComplexity int) int
+		DisplayName        func(childComplexity int) int
 		Groups             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
 		ID                 func(childComplexity int) int
 		IsManaged          func(childComplexity int) int
@@ -2666,6 +2667,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Team.DeletionInProgress(childComplexity), true
+	case "Team.displayName":
+		if e.complexity.Team.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.Team.DisplayName(childComplexity), true
 	case "Team.groups":
 		if e.complexity.Team.Groups == nil {
 			break
@@ -5616,6 +5623,9 @@ type Team implements Node {
 	"Unique slug of the team."
 	slug: Slug!
 
+	"The human friendly name of the team"
+	displayName: String!
+
 	"Purpose of the team."
 	purpose: String!
 
@@ -5742,6 +5752,11 @@ input CreateTeamInput {
 	slug: Slug!
 
 	"""
+	Human friendly name of the team.
+	"""
+	displayName: String!
+
+	"""
 	The purpose / description of the team.
 
 	What is the team for? What is the team working on? This value is meant for human consumption, and should be enough
@@ -5761,6 +5776,13 @@ input CreateTeamInput {
 input UpdateTeamInput {
 	"Slug of the team to update."
 	slug: Slug!
+
+	"""
+	An optional new display name of the team.
+
+	When omitted the existing value will not be updated.
+	"""
+	displayName: String
 
 	"""
 	An optional new purpose / description of the team.
@@ -7737,6 +7759,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -10199,6 +10223,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -12040,6 +12066,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -14289,6 +14317,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -16737,6 +16767,35 @@ func (ec *executionContext) fieldContext_Team_slug(_ context.Context, field grap
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_displayName(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_displayName,
+		func(ctx context.Context) (any, error) {
+			return obj.DisplayName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_displayName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_purpose(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17170,6 +17229,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -17492,6 +17553,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -17547,6 +17610,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -18376,6 +18441,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_id(ctx, field)
 			case "slug":
 				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
 			case "purpose":
 				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
@@ -21291,7 +21358,7 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "purpose", "sectionCode"}
+	fieldsInOrder := [...]string{"slug", "displayName", "purpose", "sectionCode"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -21305,6 +21372,13 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.Slug = data
+		case "displayName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("displayName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisplayName = data
 		case "purpose":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purpose"))
 			data, err := ec.unmarshalNString2string(ctx, v)
@@ -21848,7 +21922,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "purpose"}
+	fieldsInOrder := [...]string{"slug", "displayName", "purpose"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -21862,6 +21936,13 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.Slug = data
+		case "displayName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("displayName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DisplayName = data
 		case "purpose":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purpose"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
@@ -26627,6 +26708,11 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "slug":
 			out.Values[i] = ec._Team_slug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "displayName":
+			out.Values[i] = ec._Team_displayName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

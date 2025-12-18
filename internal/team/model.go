@@ -30,6 +30,7 @@ type (
 
 type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
+	DisplayName          string     `json:"displayName"`
 	Purpose              string     `json:"purpose"`
 	SectionCode          string     `json:"sectionCode"`
 	IsManaged            bool       `json:"isManaged"`
@@ -107,6 +108,7 @@ func (e TeamOrderField) MarshalGQL(w io.Writer) {
 func toGraphTeam(m *teamsql.Team) *Team {
 	ret := &Team{
 		Slug:        m.Slug,
+		DisplayName: m.DisplayName,
 		Purpose:     m.Purpose,
 		SectionCode: m.SectionCode,
 		IsManaged:   m.IsManaged,
@@ -295,6 +297,7 @@ func (e UserTeamOrderField) MarshalGQL(w io.Writer) {
 
 type CreateTeamInput struct {
 	Slug        slug.Slug `json:"slug"`
+	DisplayName string    `json:"displayName"`
 	Purpose     string    `json:"purpose"`
 	SectionCode string    `json:"sectionCode"`
 }
@@ -319,16 +322,29 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 		verr.Add("purpose", "This is not a valid purpose.")
 	}
 
+	if i.DisplayName == "" {
+		verr.Add("displayName", "This is not a valid display name.")
+	}
+
 	return verr.NilIfEmpty()
 }
 
 type UpdateTeamInput struct {
-	Slug    slug.Slug `json:"slug"`
-	Purpose *string   `json:"purpose" `
+	Slug        slug.Slug `json:"slug"`
+	DisplayName *string   `json:"displayName"`
+	Purpose     *string   `json:"purpose"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
 	verr := validate.New()
+
+	if i.DisplayName != nil {
+		i.DisplayName = ptr.To(strings.TrimSpace(*i.DisplayName))
+	}
+
+	if i.DisplayName != nil && *i.DisplayName == "" {
+		verr.Add("displayName", "This is not a valid display name.")
+	}
 
 	if i.Purpose != nil {
 		i.Purpose = ptr.To(strings.TrimSpace(*i.Purpose))

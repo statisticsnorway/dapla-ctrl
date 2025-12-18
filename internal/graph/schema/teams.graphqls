@@ -68,6 +68,9 @@ type Team implements Node {
 	"Unique slug of the team."
 	slug: Slug!
 
+	"The human friendly name of the team"
+	displayName: String!
+
 	"Purpose of the team."
 	purpose: String!
 
@@ -194,6 +197,11 @@ input CreateTeamInput {
 	slug: Slug!
 
 	"""
+	Human friendly name of the team.
+	"""
+	displayName: String!
+
+	"""
 	The purpose / description of the team.
 
 	What is the team for? What is the team working on? This value is meant for human consumption, and should be enough
@@ -213,6 +221,13 @@ input CreateTeamInput {
 input UpdateTeamInput {
 	"Slug of the team to update."
 	slug: Slug!
+
+	"""
+	An optional new display name of the team.
+
+	When omitted the existing value will not be updated.
+	"""
+	displayName: String
 
 	"""
 	An optional new purpose / description of the team.

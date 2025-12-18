@@ -25,15 +25,28 @@ func (q *Queries) ConfirmDeleteKey(ctx context.Context, key uuid.UUID) error {
 
 const create = `-- name: Create :one
 INSERT INTO
-	teams (slug, purpose, section_code, is_managed)
+	teams (
+		slug,
+		display_name,
+		purpose,
+		section_code,
+		is_managed
+	)
 VALUES
-	($1, $2, $3, $4)
+	(
+		$1,
+		$2,
+		$3,
+		$4,
+		$5
+	)
 RETURNING
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
 `
 
 type CreateParams struct {
 	Slug        slug.Slug
+	DisplayName string
 	Purpose     string
 	SectionCode string
 	IsManaged   bool
@@ -42,6 +55,7 @@ type CreateParams struct {
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 	row := q.db.QueryRow(ctx, create,
 		arg.Slug,
+		arg.DisplayName,
 		arg.Purpose,
 		arg.SectionCode,
 		arg.IsManaged,
@@ -54,6 +68,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
+		&i.DisplayName,
 	)
 	return &i, err
 }
@@ -106,7 +121,7 @@ func (q *Queries) Exists(ctx context.Context, argSlug slug.Slug) (bool, error) {
 
 const get = `-- name: Get :one
 SELECT
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
 FROM
 	teams
 WHERE
@@ -123,6 +138,7 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
+		&i.DisplayName,
 	)
 	return &i, err
 }
@@ -157,7 +173,7 @@ func (q *Queries) GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*Te
 
 const list = `-- name: List :many
 SELECT
-	teams.slug, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
+	teams.slug, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.display_name,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
@@ -202,6 +218,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 			&i.Team.DeleteKeyConfirmedAt,
 			&i.Team.SectionCode,
 			&i.Team.IsManaged,
+			&i.Team.DisplayName,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -267,7 +284,7 @@ func (q *Queries) ListAllSlugs(ctx context.Context) ([]slug.Slug, error) {
 
 const listBySlugs = `-- name: ListBySlugs :many
 SELECT
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
 FROM
 	teams
 WHERE
@@ -292,6 +309,7 @@ func (q *Queries) ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, 
 			&i.DeleteKeyConfirmedAt,
 			&i.SectionCode,
 			&i.IsManaged,
+			&i.DisplayName,
 		); err != nil {
 			return nil, err
 		}
@@ -338,20 +356,22 @@ func (q *Queries) SlugAvailable(ctx context.Context, argSlug slug.Slug) (bool, e
 const update = `-- name: Update :one
 UPDATE teams
 SET
-	purpose = COALESCE($1, purpose)
+	purpose = COALESCE($1, purpose),
+	display_name = COALESCE($2, display_name)
 WHERE
-	teams.slug = $2
+	teams.slug = $3
 RETURNING
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
 `
 
 type UpdateParams struct {
-	Purpose *string
-	Slug    slug.Slug
+	Purpose     *string
+	DisplayName *string
+	Slug        slug.Slug
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
-	row := q.db.QueryRow(ctx, update, arg.Purpose, arg.Slug)
+	row := q.db.QueryRow(ctx, update, arg.Purpose, arg.DisplayName, arg.Slug)
 	var i Team
 	err := row.Scan(
 		&i.Slug,
@@ -360,6 +380,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
+		&i.DisplayName,
 	)
 	return &i, err
 }
