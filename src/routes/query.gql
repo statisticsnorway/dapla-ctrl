@@ -38,4 +38,9 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 			}
 		}
 	}
+	teams {
+		pageInfo {
+			totalCount
+		}
+	}
 }

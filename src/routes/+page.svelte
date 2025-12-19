@@ -4,6 +4,8 @@
 	import type { PageProps } from './$types';
 	import TeamsTable, { type TeamsData } from './TeamsTable.svelte';
 	import type { UserTeams$result } from '$houdini';
+	import Tab from '$lib/ui/Tab.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -20,6 +22,8 @@
 	let userTeamsCount = $derived(
 		$UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.nodes.length
 	);
+
+	let allTeamsCount = $derived($UserTeams.data?.teams?.pageInfo.totalCount || 0);
 
 	function transformTeamData(teamNode: TeamNode): TeamsData {
 		const team = teamNode;
@@ -55,10 +59,10 @@
 			{#if $UserTeams.data.me.__typename == 'User'}
 				<div class="container">
 					<div>
-						<div class="section-header">
-							<Heading level="2" spacing>Mine team ({userTeamsCount})</Heading>
-							<Button as="a" size="small" href="/teams" variant="secondary">Se alle team</Button>
-						</div>
+						<Tabs>
+							<Tab href="/" active={true} title="Mine team ({userTeamsCount})" />
+							<Tab href="/teams" active={false} title="Alle teams ({allTeamsCount})" />
+						</Tabs>
 
 						<TeamsTable teamsData={$UserTeams.data.me.teams.nodes.map(transformTeamData)} />
 					</div>
@@ -101,12 +105,5 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-layout);
-	}
-
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: var(--ax-space-16);
 	}
 </style>

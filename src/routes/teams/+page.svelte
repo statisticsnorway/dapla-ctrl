@@ -4,6 +4,8 @@
 	import type { PageProps } from './$types';
 	import TeamsTable, { type TeamsData } from '../TeamsTable.svelte';
 	import type { AllTeams$result } from '$houdini';
+	import Tab from '$lib/ui/Tab.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -14,6 +16,10 @@
 		if (me?.__typename !== 'User') return false;
 		return me?.isAdmin || me?.isSectionManager;
 	});
+
+	let userTeamsCount = $derived(
+		($AllTeams.data?.me.__typename == 'User' && $AllTeams.data.me.teams?.pageInfo.totalCount) || 0
+	);
 
 	type TeamNode = AllTeams$result['teams']['nodes'][0];
 
@@ -51,10 +57,10 @@
 		{#if $AllTeams.data}
 			<div class="container">
 				<div>
-					<div class="section-header">
-						<Heading level="2" spacing>Alle team ({allTeamsCount})</Heading>
-						<Button as="a" size="small" href="/" variant="secondary">Se mine team</Button>
-					</div>
+					<Tabs>
+						<Tab href="/" active={false} title="Mine team ({userTeamsCount})" />
+						<Tab href="/teams" active={true} title="Alle teams ({allTeamsCount})" />
+					</Tabs>
 
 					<TeamsTable
 						defaultSelected={['name', 'memberCount', 'manager']}
@@ -99,12 +105,5 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-layout);
-	}
-
-	.section-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: var(--ax-space-16);
 	}
 </style>

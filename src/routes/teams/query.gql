@@ -1,4 +1,14 @@
 query AllTeams @cache(policy: CacheAndNetwork) {
+	me {
+		__typename
+		... on User {
+			teams {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+	}
 	teams(first: 100) @paginate(mode: SinglePage) {
 		pageInfo {
 			hasNextPage
