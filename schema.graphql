@@ -189,6 +189,9 @@ type CreateServiceAccountTokenPayload {
 }
 
 input CreateTeamInput {
+  """Human friendly name of the team."""
+  displayName: String!
+
   """
   The purpose / description of the team.
   
@@ -1696,6 +1699,9 @@ type Team implements Node {
 
   """Whether or not the team is currently being deleted."""
   deletionInProgress: Boolean!
+
+  """The human friendly name of the team"""
+  displayName: String!
   groups(
     """Get items after this cursor."""
     after: Cursor
@@ -1719,6 +1725,9 @@ type Team implements Node {
 
   """The globally unique ID of the team."""
   id: ID!
+
+  """The autonomy level of the team"""
+  isManaged: Boolean!
 
   """Timestamp of the last successful synchronization of the team."""
   lastSuccessfulSync: Time
@@ -1974,6 +1983,13 @@ type UpdateServiceAccountTokenPayload {
 }
 
 input UpdateTeamInput {
+  """
+  An optional new display name of the team.
+  
+  When omitted the existing value will not be updated.
+  """
+  displayName: String
+
   """
   An optional new purpose / description of the team.
   

@@ -22,6 +22,7 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 		nodes {
 			id
 			slug
+			displayName
 			purpose
 			section {
 				code

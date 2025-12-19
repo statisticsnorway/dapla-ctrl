@@ -14,6 +14,8 @@
 		$UserInfo.data?.me.__typename === 'User' ? $UserInfo.data?.me.isAdmin : false
 	);
 
+	let displayNameError = $state('');
+
 	let teamSlugError = $state('');
 
 	let purposeError = $state('');
@@ -25,8 +27,17 @@
 	);
 
 	let disabled = $derived(
-		[teamSlugError, purposeError, sectionError].some((e) => e !== 'no_error')
+		[displayNameError, teamSlugError, purposeError, sectionError].some((e) => e !== 'no_error')
 	);
+
+	function handleDisplayNameInput(event: Event) {
+		if (!event) return;
+		const input = event.target as HTMLInputElement | null;
+		if (input) {
+			// TODO: Add validation rules
+			displayNameError = 'no_error';
+		}
+	}
 
 	const reservedSlugs = [
 		'kube-system',
@@ -47,7 +58,7 @@
 
 			// Check if the slug is reserved
 			if (reservedSlugs.includes(slug)) {
-				teamSlugError = 'Dette navnet reservert.';
+				teamSlugError = 'Dette navnet er opptatt.';
 				return;
 			}
 
@@ -60,19 +71,26 @@
 
 			// Check the length of the slug
 			if (slug.length < 3) {
-				teamSlugError = 'Navnet må være minst 3 tegn langt.';
+				teamSlugError = 'Teknisk navn må være minst 3 tegn langt.';
 				return;
 			}
 
 			if (slug.length > 17) {
-				teamSlugError = 'Navnet kan maksimalt være 17 tegn langt.';
+				teamSlugError = 'Teknisk navn kan maksimalt være 17 tegn langt.';
 				return;
 			}
 
 			// Validate the slug against the pattern
 			if (!slugPattern.test(slug)) {
 				teamSlugError =
-					'Navnet kan kun inneholde små bokstaver, tall og bindestreker. Det må starte og slutte med små bokstaver.';
+					'Teknisk navn kan kun inneholde små bokstaver, tall og bindestreker. Det må starte og slutte med små bokstaver.';
+				return;
+			}
+
+			//validate team name doesn't contain anything related to groups
+			if (['managers', 'consumers', 'data-admins', 'developers'].some((el) => slug.includes(el))) {
+				teamSlugError =
+					'Teknisk navn kan ikke inneholde gruppenavn. Grupper defineres etter teamet er opprettet.';
 				return;
 			}
 
@@ -109,6 +127,13 @@
 			{/each}
 		</ErrorSummary>
 	{/if}
+
+	<p>
+		Se "<a
+			href="https://manual.dapla.ssb.no/statistikkere/hva-er-dapla-team.html#navnestruktur"
+			target="_blank">Navnestruktur</a
+		>" på Dapla-manualen for hvordan finne et godt teamnavn.
+	</p>
 	<form
 		method="POST"
 		use:enhance={() => {
@@ -119,14 +144,25 @@
 			};
 		}}
 	>
+		<TextField name="displayname" value={form?.input.displayName} oninput={handleDisplayNameInput}>
+			{#snippet label()}
+				Visningsnavn
+			{/snippet}
+			{#snippet description()}
+				Eksempel: Mitt teamnavn<br />
+			{/snippet}
+		</TextField>
+		{#if displayNameError !== 'no_error' && displayNameError !== ''}
+			<p style:color="var(--ax-text-danger)">{displayNameError}</p>
+		{/if}
+		<br />
 		<TextField name="name" value={form?.input.slug} oninput={handleTeamSlugInput}>
 			{#snippet label()}
 				Teknisk navn
 			{/snippet}
 			{#snippet description()}
 				Eksempel: mitt-team-navn<br />
-				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre teknisk etter opprettelse,
-				så velg klokt.
+				<WarningIcon class="text-aligned-icon" /> Det er ikke mulig å endre teknisk navn etter opprettelse.
 			{/snippet}
 		</TextField>
 		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
@@ -146,7 +182,7 @@
 		{/if}
 		{#if isAdmin}
 			<br />
-			<Select name="section" label="Seksjon" value={form?.input.sectionCode}>
+			<Select name="section" label="Eierseksjon" value={form?.input.sectionCode}>
 				<option value=""></option>
 				{#each sections as section (section.code)}
 					<option value={section.code}>{section.code} {section.name}</option>

@@ -3,5 +3,6 @@ query TeamSettings($team: Slug!) {
 		slug
 		lastSuccessfulSync
 		purpose
+		displayName
 	}
 }

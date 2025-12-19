@@ -34,6 +34,7 @@
 
 	export type TeamsData = {
 		slug: string;
+		displayName: string;
 		purpose: string;
 		memberCount: number;
 		manager: User;
@@ -176,10 +177,10 @@
 			<Tr>
 				<Td>
 					<a href={`/team/${team.slug}/`}>
-						{team.slug}
+						{team.displayName}
 					</a>
 					<br />
-					{team.purpose}
+					{team.slug}
 				</Td>
 				{#if team.userGroups && selectedFields.includes('groups')}
 					<Td>

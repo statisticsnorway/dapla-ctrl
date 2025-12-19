@@ -30,6 +30,7 @@
 		const manager = team.team.section.manager;
 		return {
 			slug: team.team.slug,
+			displayName: team.team.displayName,
 			purpose: team.team.purpose,
 			memberCount: team.team.members.pageInfo.totalCount,
 			manager: {

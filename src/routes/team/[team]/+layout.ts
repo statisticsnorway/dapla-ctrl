@@ -34,7 +34,7 @@ export async function load(event) {
 				? undefined
 				: [
 						{
-							label: event.params.team,
+							label: current.data?.team.displayName ?? event.params.team,
 							href: '/team/[team]'
 						}
 					]
@@ -50,6 +50,7 @@ export async function load(event) {
 					lastSuccessfulSync: null,
 					viewerIsMember: false,
 					externalResources: { gitHubTeam: null },
+					displayName: '',
 					purpose: '',
 					slackChannel: '',
 					members: { pageInfo: { totalCount: 0 } }

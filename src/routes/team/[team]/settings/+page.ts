@@ -19,7 +19,7 @@ export async function _houdini_beforeLoad({ parent }: BeforeLoadEvent) {
 
 export async function load(event) {
 	return {
-		...(await addPageMeta(event, { title: 'Settings' })),
+		...(await addPageMeta(event, { title: 'Innstillinger' })),
 		...(await load_TeamSettings({
 			event,
 			variables: {

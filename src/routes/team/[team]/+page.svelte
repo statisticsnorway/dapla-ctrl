@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Alert, BodyShort, Heading } from '@nais/ds-svelte-community';
+	import { Alert, CopyButton, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	let { TeamOverview, purpose } = $derived(data);
+	let { activityLog, teamSlug, purpose } = $derived(data);
 </script>
 
 <div class="team-info">
 	<div>
-		<BodyShort>{purpose}</BodyShort>
+		{teamSlug}
+		<CopyButton copyText={teamSlug} title={teamSlug} iconPosition="right" size="xsmall" />
+	</div>
+	<div>
+		{purpose}
 	</div>
 </div>
 
@@ -25,9 +29,9 @@
 	<div class="grid">
 		<div class="card activity">
 			<Heading size="small" level="2">Activity</Heading>
-			{#if $TeamOverview.data}
+			{#if activityLog}
 				<div class="raised">
-					{#each $TeamOverview.data.team.activityLog.nodes as item (item.id)}
+					{#each activityLog.nodes as item (item.id)}
 						<div>{item.__typename}</div>
 					{/each}
 				</div>
@@ -45,8 +49,7 @@
 
 	.team-info {
 		display: grid;
-		grid-template-columns: 1fr 300px;
-		gap: var(--spacing-layout);
+		grid-template-columns: 1fr;
 		margin-top: calc(-1 * var(--spacing-layout));
 		margin-bottom: var(--spacing-layout);
 	}

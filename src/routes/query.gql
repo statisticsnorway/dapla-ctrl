@@ -20,6 +20,7 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 						id
 						slug
 						purpose
+						displayName
 						section {
 							code
 							name

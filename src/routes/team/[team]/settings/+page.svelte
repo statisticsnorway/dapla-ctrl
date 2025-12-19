@@ -13,6 +13,7 @@
 			updateTeam(input: $input) {
 				team {
 					purpose
+					displayName
 				}
 			}
 		}
@@ -29,6 +30,25 @@
 	<div class="wrapper">
 		<div style="display: flex; flex-direction: column; gap: var(--spacing-layout)">
 			<div>
+				<Heading level="2">Visningsnavn</Heading>
+				<EditText
+					text={teamSettings.displayName}
+					on:save={async (e) => {
+						descriptionErrors = undefined;
+						const data = await updateTeam.mutate({
+							input: {
+								slug: teamSlug,
+								displayName: e.detail
+							}
+						});
+
+						if (data.errors) {
+							descriptionErrors = data.errors;
+						}
+					}}
+					isMember={viewerIsMember}
+				/>
+
 				<Heading level="2">Beskrivelse</Heading>
 				<EditText
 					text={teamSettings.purpose}
