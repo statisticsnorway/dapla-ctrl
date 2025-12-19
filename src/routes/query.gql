@@ -38,7 +38,7 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 			}
 		}
 	}
-	teams {
+	teams(first: 1) {
 		pageInfo {
 			totalCount
 		}

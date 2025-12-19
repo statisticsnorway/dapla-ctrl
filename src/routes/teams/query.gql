@@ -2,7 +2,7 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 	me {
 		__typename
 		... on User {
-			teams {
+			teams(first: 1) {
 				pageInfo {
 					totalCount
 				}
