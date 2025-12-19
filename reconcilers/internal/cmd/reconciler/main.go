@@ -11,6 +11,7 @@ import (
 
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/google/groupserviceaccounts"
 
 	"github.com/joho/godotenv"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/cmd/reconciler/config"
@@ -105,9 +106,15 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	entraIdGroupReconciler := entraidreconciler.New(ctx, gcpSyncer)
 	log.WithField("duration", time.Since(start).String()).Debug("Created Entra ID group reconciler")
 
+	daplaGroupSaReconciler, err := groupserviceaccounts.New(ctx)
+	if err != nil {
+		return fmt.Errorf("error creating dapla group sa reconciler: %w", err)
+	}
+
 	// The reconcilers will be run in the order they are added to the manager
 	reconcilerManager.AddReconciler(entraIdGroupReconciler)
 	reconcilerManager.AddReconciler(gcpSyncer)
+	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 
