@@ -380,3 +380,52 @@ Test.gql("Create team with unavailable slug", function(t)
 		},
 	}
 end)
+
+Test.gql("Create team appear in activity log", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query([[
+		query {
+			team(slug: "newteam") {
+				activityLog(
+					first: 20
+					filter: {
+						activityTypes: [
+							TEAM_CREATED
+						]
+					}
+				) {
+					nodes {
+						__typename
+						message
+						actor
+						createdAt
+						resourceType
+						resourceName
+						teamSlug
+					}
+				}
+			}
+		}
+	]])
+
+	t.check {
+		data = {
+			team = {
+				activityLog = {
+					nodes = {
+						{
+							__typename = "TeamCreatedActivityLogEntry",
+							message = "Created team",
+							actor = user:email(),
+							createdAt = NotNull(),
+							resourceType = "TEAM",
+							resourceName = "newteam",
+							teamSlug = "newteam",
+						},
+					},
+				},
+			},
+		},
+	}
+end)

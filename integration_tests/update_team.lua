@@ -2,6 +2,7 @@ local teamSlug = "someteamname"
 
 local user = User.new("test", "test@test.com", "exttest")
 user:admin(true)
+local nonAdmin = User.new("non admin", "non@test.com", "extid")
 
 Test.gql("Create team", function(t)
 	t.addHeader("x-user-email", user:email())
@@ -126,4 +127,119 @@ Test.gql("Nothing to update", function(t)
 	}
 end)
 
--- TODO(chredvar): Add tests for invalid input for create and update team
+
+-- TODO(): Add tests for team owner/section owner
+
+
+Test.gql("Non-admin user should not be able to update team", function(t)
+	t.addHeader("x-user-email", nonAdmin:email())
+
+	t.query(string.format([[
+		mutation {
+			updateTeam(
+				input: {
+					slug: "%s"
+					displayName: "My Awesome Team"
+				}
+			) {
+				team {
+					displayName
+				}
+			}
+		}
+	]], teamSlug))
+
+
+	t.check {
+		data = Null,
+		errors = {
+			{
+				message = "You are authenticated, but your account is not authorized to perform this action.",
+				path = {
+					"updateTeam",
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("Update team appear in activity log", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		query {
+			team(slug: "%s") {
+				activityLog(
+					first: 20
+					filter: {
+						activityTypes: [
+							TEAM_UPDATED
+						]
+					}
+				) {
+					nodes {
+						__typename
+						message
+						actor
+						createdAt
+						resourceType
+						resourceName
+						teamSlug
+						... on TeamUpdatedActivityLogEntry {
+						  data {
+				            updatedFields {
+				              field
+				              oldValue
+				              newValue
+				            }
+						  }
+						}
+					}
+				}
+			}
+		}
+	]], teamSlug))
+
+	t.check {
+		data = {
+			team = {
+				activityLog = {
+					nodes = {
+						{
+							__typename = "TeamUpdatedActivityLogEntry",
+							message = "Updated team",
+							actor = user:email(),
+							createdAt = NotNull(),
+							resourceType = "TEAM",
+							resourceName = teamSlug,
+							teamSlug = teamSlug,
+							data = {
+								updatedFields = { {
+									field = "displayName",
+									oldValue = "someteamname",
+									newValue = "My Awesome Team",
+								} },
+							},
+						},
+						{
+							__typename = "TeamUpdatedActivityLogEntry",
+							message = "Updated team",
+							actor = user:email(),
+							createdAt = NotNull(),
+							resourceType = "TEAM",
+							resourceName = teamSlug,
+							teamSlug = teamSlug,
+							data = {
+								updatedFields = { {
+									field = "purpose",
+									oldValue = "some purpose",
+									newValue = "new-purpose",
+								} },
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+end)
