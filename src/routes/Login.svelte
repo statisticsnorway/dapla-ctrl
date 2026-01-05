@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { Alert, Button, Heading } from '@nais/ds-svelte-community';
-	import Logo from '../Logo.svelte';
 	import { redirect } from '@sveltejs/kit';
 
 	const redirectPath = (url: URL) => {
@@ -27,10 +26,7 @@
 
 <div class="wrapper">
 	<div class="login">
-		<Heading level="1" size="large" spacing>
-			<Logo height=".8em" />
-			Dapla Ctrl
-		</Heading>
+		<Heading level="1" size="large" spacing>Dapla Ctrl</Heading>
 		{#if errorParam}
 			{@const error = page.url.searchParams.get('error')}
 			<Alert variant="error">

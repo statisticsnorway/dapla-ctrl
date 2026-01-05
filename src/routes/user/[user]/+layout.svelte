@@ -18,11 +18,6 @@
 </div>
 
 <style>
-	.page {
-		margin-top: var(--spacing-layout);
-		width: 100%;
-	}
-
 	.main {
 		gap: var(--spacing-layout);
 		display: grid;

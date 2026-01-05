@@ -6,6 +6,7 @@
 
 :root {
 	--spacing-layout: var(--ax-space-40);
+	--margin-default: 12rem;
 }
 
 html,

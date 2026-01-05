@@ -1,11 +1,8 @@
 <script lang="ts">
-	import Pagination from '$lib/ui/Pagination.svelte';
-	import { Button, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
-	import TeamsTable, { type TeamsData } from '../TeamsTable.svelte';
+	import { type TeamsData } from '../TeamsTable.svelte';
 	import type { AllTeams$result } from '$houdini';
-	import Tab from '$lib/ui/Tab.svelte';
-	import Tabs from '$lib/ui/Tabs.svelte';
+	import TeamOverview from '$lib/domain/TeamOverview.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -48,62 +45,22 @@
 <svelte:head><title>Alle team - Dapla Ctrl</title></svelte:head>
 
 <div class="page">
-	<div class="content-wrapper">
-		<div class="header">
-			<Heading level="1" size="large">Teamoversikt</Heading>
-			{#if canCreateTeam}
-				<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
-			{/if}
-		</div>
-		{#if $AllTeams.data}
-			<div class="container">
-				<div>
-					<Tabs>
-						<Tab href="/" active={false} title="Mine team ({userTeamsCount})" />
-						<Tab href="/teams" active={true} title="Alle teams ({allTeamsCount})" />
-					</Tabs>
-
-					<TeamsTable
-						defaultSelected={data.teamTableFields}
-						teamsData={$AllTeams.data.teams.nodes.map(transformTeamData)}
-					/>
-				</div>
-			</div>
-			<Pagination
-				page={$AllTeams.data.teams.pageInfo}
-				loaders={{
-					loadPreviousPage: () => AllTeams.loadPreviousPage(),
-					loadNextPage: () => AllTeams.loadNextPage()
-				}}
-			/>
-		{/if}
-	</div>
+	<TeamOverview
+		{canCreateTeam}
+		{userTeamsCount}
+		{allTeamsCount}
+		teamsData={$AllTeams.data?.teams.nodes.map(transformTeamData) ?? []}
+		teamTableDefaultFields={data.teamTableFields}
+		pageInfo={$AllTeams.data?.teams.pageInfo ?? undefined}
+		loaders={{
+			loadPreviousPage: () => AllTeams.loadPreviousPage(),
+			loadNextPage: () => AllTeams.loadNextPage()
+		}}
+	/>
 </div>
 
 <style>
 	.page {
-		padding-top: 4rem;
-	}
-	.content-wrapper {
-		background: var(--ax-bg-default);
-		position: relative;
-		top: -40px;
-		padding: var(--ax-space-24);
-		border-radius: 12px;
-		margin-inline: auto;
-	}
-
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: var(--ax-space-16);
-	}
-
-	.container {
-		margin-top: var(--spacing-layout);
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-layout);
+		margin-inline: var(--margin-default);
 	}
 </style>

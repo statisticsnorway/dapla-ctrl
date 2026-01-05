@@ -26,7 +26,7 @@
 </script>
 
 <header class="aksel-internalheader header">
-	<InternalHeaderTitle as="a" href="/" style="border: none;">
+	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem;">
 		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
 
@@ -70,7 +70,7 @@
 <style>
 	.header {
 		height: 80px;
-		padding-left: 3rem;
+		padding-left: 4rem;
 	}
 	.title {
 		color: var(--ax-text-neutral);

@@ -63,8 +63,7 @@
 
 <style>
 	.page {
-		margin-top: var(--spacing-layout);
-		width: 100%;
+		margin-inline: var(--margin-default);
 	}
 	.container {
 		margin: auto;

@@ -102,9 +102,10 @@
 
 <style>
 	:global(.page) {
-		margin: 0 auto 0 auto;
+		margin-inline: 3rem;
 		min-width: 1000px;
-		max-width: 1432px;
+
+		margin-top: var(--spacing-layout);
 	}
 
 	@media (max-width: 1464px) {

@@ -40,7 +40,6 @@
 <style>
 	.page {
 		margin-top: var(--spacing-layout);
-		width: 100%;
 	}
 
 	.main {
