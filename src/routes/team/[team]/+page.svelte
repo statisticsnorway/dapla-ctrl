@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Alert, CopyButton, Heading } from '@nais/ds-svelte-community';
+	import { Alert, CopyButton } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
+	import TeamOverviewActivityLog from '$lib/domain/activity/team-overview/TeamOverviewActivityLog.svelte';
 
 	let { data }: PageProps = $props();
-	let { activityLog, teamSlug, purpose } = $derived(data);
+	let { teamSlug, purpose } = $derived(data);
 </script>
 
 <div class="team-info">
@@ -27,16 +28,7 @@
 
 <div class="wrapper">
 	<div class="grid">
-		<div class="card activity">
-			<Heading size="small" level="2">Activity</Heading>
-			{#if activityLog}
-				<div class="raised">
-					{#each activityLog.nodes as item (item.id)}
-						<div>{item.__typename}</div>
-					{/each}
-				</div>
-			{/if}
-		</div>
+		<TeamOverviewActivityLog {teamSlug} />
 	</div>
 </div>
 

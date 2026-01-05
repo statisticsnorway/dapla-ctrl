@@ -2,11 +2,5 @@ query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
 	team(slug: $team) {
 		displayName
 		purpose
-		activityLog(first: 5) {
-			nodes {
-				__typename
-				id
-			}
-		}
 	}
 }

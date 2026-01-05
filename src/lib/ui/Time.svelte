@@ -9,7 +9,7 @@
 		format,
 		formatDistanceStrict
 	} from 'date-fns';
-	import { enGB } from 'date-fns/locale';
+	import { nb } from 'date-fns/locale';
 	import { onDestroy, untrack } from 'svelte';
 
 	const {
@@ -22,7 +22,7 @@
 		dateFormat?: string;
 	} & ({ distance?: false; short?: never } | { distance: true; short?: boolean }) = $props();
 
-	let title = format(time, 'dd. MMMM yyyy HH:mm:ss', { locale: enGB });
+	let title = format(time, 'dd. MMMM yyyy HH:mm:ss', { locale: nb });
 
 	function distanceText(): string {
 		return formatDistanceStrict(time, Date.now(), { addSuffix: true });
@@ -54,7 +54,7 @@
 		if (distance) {
 			return short ? distanceShortText() : distanceText();
 		}
-		return format(time, dateFormat, { locale: enGB });
+		return format(time, dateFormat, { locale: nb });
 	}
 
 	let text: string = $state(getDisplayText());
