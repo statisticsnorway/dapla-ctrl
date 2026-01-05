@@ -62,79 +62,19 @@
 
 	export const orderFieldWeights: Record<string, number> = {
 		NAME: 0,
-		DEPLOYMENT_TIME: 10,
-		VULNERABILITY_RISK_SCORE: 20,
-		VULNERABILITY_LAST_SCANNED: 30,
-		HAS_SBOM: 40,
-		VULNERABILITY_SEVERITY_CRITICAL: 50,
-		VULNERABILITY_SEVERITY_HIGH: 60,
-		VULNERABILITY_SEVERITY_MEDIUM: 70,
-		VULNERABILITY_SEVERITY_LOW: 80,
-		VULNERABILITY_SEVERITY_UNASSIGNED: 90,
-		RISK_SCORE: 100,
-		CRITICAL_VULNERABILITIES: 110,
-		HIGH_VULNERABILITIES: 120,
-		MEDIUM_VULNERABILITIES: 130,
-		LOW_VULNERABILITIES: 140,
-		UNASSIGNED_VULNERABILITIES: 150,
-		SBOM_COVERAGE: 160,
-		SLUG: 170
+		SLUG: 10
 	};
 
 	const fieldLabel = (fieldName: string) => {
 		switch (fieldName) {
-			case 'DEPLOYMENT_TIME':
-				return 'Deploy';
-			case 'VULNERABILITY_RISK_SCORE':
-				return 'Risk score';
-			case 'VULNERABILITY_LAST_SCANNED':
-				return 'Last scanned';
-			case 'HAS_SBOM':
-				return 'Has SBOM';
-			case 'VULNERABILITY_SEVERITY_CRITICAL':
-				return 'Critical vulnerabilities';
-			case 'VULNERABILITY_SEVERITY_HIGH':
-				return 'High vulnerabilities';
-			case 'VULNERABILITY_SEVERITY_MEDIUM':
-				return 'Medium vulnerabilities';
-			case 'VULNERABILITY_SEVERITY_LOW':
-				return 'Low vulnerabilities';
-			case 'VULNERABILITY_SEVERITY_UNASSIGNED':
-				return 'Unassigned vulnerabilities';
-			case 'RISK_SCORE':
-				return 'Risk score';
-			case 'HIGH_VULNERABILITIES':
-				return 'High vulnerabilities';
-			case 'CRITICAL_VULNERABILITIES':
-				return 'Critical vulnerabilities';
-			case 'MEDIUM_VULNERABILITIES':
-				return 'Medium vulnerabilities';
-			case 'LOW_VULNERABILITIES':
-				return 'Low vulnerabilities';
-			case 'UNASSIGNED_VULNERABILITIES':
-				return 'Unassigned vulnerabilities';
-			case 'SBOM_COVERAGE':
-				return 'SBOM coverage';
 			case 'SLUG':
 				return 'Team';
-			case 'ACCUMULATED_COST':
-				return 'Accumulated cost';
 			case 'LAST_MODIFIED_AT':
-				return 'Last modified';
-			case 'ISSUE_TYPE':
-				return 'Issue type';
-			case 'SEVERITY':
-				return 'Severity';
+				return 'Sist endret';
 			case 'RESOURCE_NAME':
-				return 'Resource name';
+				return 'Ressursnavn';
 			case 'RESOURCE_TYPE':
-				return 'Resource type';
-			case 'CPU_UTILIZATION':
-				return 'CPU Utilization';
-			case 'DISK_UTILIZATION':
-				return 'Disk Utilization';
-			case 'MEMORY_UTILIZATION':
-				return 'Memory Utilization';
+				return 'Ressurstype';
 			case 'NAME':
 				return 'Navn';
 			case 'EMAIL':
@@ -166,7 +106,7 @@
 	{/snippet}
 	{#key orderField}
 		<!-- prettier-ignore -->
-		<ActionMenuRadioGroup value={currentOrderField} label="Order by">
+		<ActionMenuRadioGroup value={currentOrderField} label="Sorter etter">
 			{#each Object.values(orderField)
 				.filter((field) => !onlyInclude || onlyInclude.includes(field as ValueOf<T>))
 				.sort((a, b) => {
@@ -189,7 +129,7 @@
 	{/key}
 	<ActionMenuDivider />
 	{#key orderDirection}
-		<ActionMenuRadioGroup value={orderDirection} label="Sort direction">
+		<ActionMenuRadioGroup value={orderDirection} label="Sorteringsrekkefølge">
 			{#each Object.values(OrderDirection) as direction (direction)}
 				<ActionMenuRadioItem
 					value={direction}
@@ -200,9 +140,9 @@
 						)}
 				>
 					{#if direction === OrderDirection.ASC}
-						<SortUpIcon /> Ascending
+						<SortUpIcon /> Stigende
 					{:else}
-						<SortDownIcon /> Descending
+						<SortDownIcon /> Synkende
 					{/if}
 				</ActionMenuRadioItem>
 			{/each}

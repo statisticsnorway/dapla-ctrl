@@ -70,8 +70,8 @@
 			}
 
 			// Check the length of the slug
-			if (slug.length < 3) {
-				teamSlugError = 'Teknisk navn må være minst 3 tegn langt.';
+			if (slug.length < 2) {
+				teamSlugError = 'Teknisk navn må være minst 2 tegn langt.';
 				return;
 			}
 
