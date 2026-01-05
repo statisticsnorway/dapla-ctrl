@@ -46,8 +46,8 @@ func (e *ErrInvalidSlug) GraphError() string {
 var slugPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,15}[a-z]$`)
 
 func (s Slug) Validate() error {
-	if len(s) < 3 {
-		return invalid("A team slug must be at least 3 characters long.")
+	if len(s) < 2 {
+		return invalid("A team slug must be at least 2 characters long.")
 	}
 
 	if len(s) > 17 {

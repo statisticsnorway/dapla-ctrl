@@ -193,12 +193,12 @@ Test.gql("Create team with invalid slug", function(t)
 
 	local shortSlugs = {
 		"a",
-		"ab",
 	}
-	testSlug(shortSlugs, Contains("at least 3 characters long"))
+	testSlug(shortSlugs, Contains("at least 2 characters long"))
 
 	local longSlugs = {
 		"some-long-string-more-than-30-chars",
+		"some-str-18-charss",
 	}
 	testSlug(longSlugs, Contains("at most 17 characters long"))
 

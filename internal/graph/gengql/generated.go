@@ -3594,7 +3594,6 @@ var sources = []*ast.Source{
 	): ActivityLogEntryConnection!
 }
 
-
 extend type Query {
 	"""
 	All activity logs across all teams and resources.

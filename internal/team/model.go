@@ -306,6 +306,7 @@ type CreateTeamInput struct {
 func (i *CreateTeamInput) Validate(ctx context.Context) error {
 	verr := validate.New()
 	i.Purpose = strings.TrimSpace(i.Purpose)
+	i.DisplayName = strings.TrimSpace(i.DisplayName)
 
 	if slices.ContainsFunc([]string{"managers", "consumers", "data-admins", "developers"}, func(category string) bool {
 		return strings.Contains(i.Slug.String(), category)
