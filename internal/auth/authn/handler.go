@@ -76,7 +76,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	http.Redirect(w, r, h.oauth2Config.AuthCodeURL(oauthState, oauth2.SetAuthURLParam("prompt", "select_account"), oauth2.SetAuthURLParam("response_mode", "query")), http.StatusFound)
+	http.Redirect(w, r, h.oauth2Config.AuthCodeURL(oauthState, oauth2.SetAuthURLParam("response_mode", "query")), http.StatusFound)
 }
 
 func (h *handler) Callback(w http.ResponseWriter, r *http.Request) {
