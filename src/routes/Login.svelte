@@ -1,11 +1,18 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { Alert, Button, Heading } from '@nais/ds-svelte-community';
 	import Logo from '../Logo.svelte';
+	import { redirect } from '@sveltejs/kit';
 
 	const redirectPath = (url: URL) => {
 		return encodeURIComponent(url.pathname + url.search + url.hash);
 	};
+
+	const oauth2LoginPath = '/oauth2/login?redirect_uri=' + redirectPath(page.url);
+	const errorParam = page.url.searchParams?.get('error');
+	if (!errorParam) {
+		redirect(302, oauth2LoginPath);
+	}
 </script>
 
 <svelte:head>
@@ -24,8 +31,8 @@
 			<Logo height=".8em" />
 			Dapla Ctrl
 		</Heading>
-		{#if $page.url.searchParams?.get('error')}
-			{@const error = $page.url.searchParams.get('error')}
+		{#if errorParam}
+			{@const error = page.url.searchParams.get('error')}
 			<Alert variant="error">
 				{#if error == 'unknown-user'}
 					Feil under innlogging: Ukjent bruker.<br />
@@ -39,9 +46,7 @@
 
 		<p>For å få tilgang til denne siden må du logge inn med din Entra ID-konto.</p>
 
-		<Button as="a" href="/oauth2/login?redirect_uri={redirectPath($page.url)}" variant="primary">
-			Logg inn på Dapla Ctrl
-		</Button>
+		<Button as="a" href={oauth2LoginPath} variant="primary">Logg inn på Dapla Ctrl</Button>
 	</div>
 </div>
 

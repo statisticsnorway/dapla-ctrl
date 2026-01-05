@@ -10,8 +10,8 @@
 		InternalHeaderTitle,
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
-	import { CogIcon, LeaveIcon } from '@nais/ds-svelte-community/icons';
 	import Logo from '../Logo.svelte';
+	import { CogIcon } from '@nais/ds-svelte-community/icons';
 	import SearchButton from '$lib/domain/search/SearchButton.svelte';
 
 	interface Props {
@@ -64,12 +64,6 @@
 		>
 			Mørkt tema
 		</ActionMenuCheckboxItem>
-		<ActionMenuItem>
-			<a href="/oauth2/logout" class="action-menu-link" style="text-decoration: none;">
-				<LeaveIcon />
-				Logout
-			</a>
-		</ActionMenuItem>
 	</ActionMenu>
 </InternalHeader>
 
