@@ -76,7 +76,6 @@
 		"eslint-plugin-unicorn": "^62.0.0",
 		"graphql": "^16.12.0",
 		"graphql-sse": "^2.6.0",
-		"layerchart": "^2.0.0-next.43",
 		"luxon": "^3.7.2",
 		"pretty-bytes": "^7.1.0",
 		"sortablejs": "^1.15.6",

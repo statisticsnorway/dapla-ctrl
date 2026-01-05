@@ -3,7 +3,9 @@
 	import { page } from '$app/state';
 	import { graphql } from '$houdini';
 	import { isAuthenticated, isUnauthenticated } from '$lib/authentication';
-	import '$lib/font.css';
+	import '$lib/font-roboto.css';
+	import '$lib/font-source-sans-pro.css';
+	import '$lib/font-roboto-condensed.css';
 	import ProgressBar from '$lib/ui/ProgressBar.svelte';
 	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import { Page, Theme } from '@nais/ds-svelte-community';
@@ -15,7 +17,7 @@
 	import PageHeader from './PageHeader.svelte';
 
 	let { data, children }: LayoutProps = $props();
-	let { UserInfo } = $derived(data);
+	let { UserInfo, userAgent } = $derived(data);
 
 	themeSwitch.theme = data.theme;
 
@@ -89,7 +91,7 @@
 				<Login />
 			{:else}
 				{#if user?.__typename === 'User'}
-					<PageHeader {user} />
+					<PageHeader {user} {userAgent} />
 				{/if}
 
 				{@render children?.()}

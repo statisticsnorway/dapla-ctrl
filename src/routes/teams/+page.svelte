@@ -90,7 +90,6 @@
 		top: -40px;
 		padding: var(--ax-space-24);
 		border-radius: 12px;
-		max-width: 900px;
 		margin-inline: auto;
 	}
 

@@ -6,9 +6,15 @@
 	import SearchModal from './SearchModal.svelte';
 	import { onMount } from 'svelte';
 
+	let { userAgent }: { userAgent: string } = $props();
+
 	let open = $state(false);
 
-	let isMac = $state(false);
+	// Best effort SSR for mac to avoid blink
+	const isMacUserAgent = userAgent
+		? userAgent.includes('Macintosh') || userAgent.includes('Mac OS')
+		: false;
+	let isMac = $state(isMacUserAgent);
 	onMount(() => {
 		isMac = navigator.platform === 'MacIntel';
 	});
@@ -37,7 +43,7 @@
 
 <style>
 	.hotkey {
-		font-size: var(--ax-font-size-small);
+		font-size: var(--ax-font-size-medium);
 		font-weight: var(--ax-font-weight-regular);
 		color: var(--ax-text-neutral);
 		padding-top: 2px;

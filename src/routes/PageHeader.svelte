@@ -5,12 +5,10 @@
 		ActionMenuCheckboxItem,
 		ActionMenuDivider,
 		ActionMenuItem,
-		InternalHeader,
 		InternalHeaderButton,
 		InternalHeaderTitle,
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
-	import Logo from '../Logo.svelte';
 	import { CogIcon } from '@nais/ds-svelte-community/icons';
 	import SearchButton from '$lib/domain/search/SearchButton.svelte';
 
@@ -21,25 +19,27 @@
 					readonly isAdmin: boolean;
 			  }
 			| undefined;
+		userAgent: string;
 	}
 
-	let { user }: Props = $props();
+	let { user, userAgent }: Props = $props();
 </script>
 
-<InternalHeader allowLightMode={true}>
-	<InternalHeaderTitle as="a" href="/">
-		<div class="logo">
-			<Logo height="2.0rem" />
-			<span>Ctrl</span>
-		</div>
+<header class="aksel-internalheader header">
+	<InternalHeaderTitle as="a" href="/" style="border: none;">
+		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
-	<SearchButton />
-	<InternalHeaderButton as="a" href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
-		>Dokumentasjon</InternalHeaderButton
+	<SearchButton {userAgent} />
+	<InternalHeaderButton
+		as="a"
+		href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
+		style="font-size: var(--ax-font-size-medium);"
 	>
+		Dokumentasjon
+	</InternalHeaderButton>
 	<ActionMenu>
 		{#snippet trigger(props)}
 			<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />
@@ -65,16 +65,21 @@
 			Mørkt tema
 		</ActionMenuCheckboxItem>
 	</ActionMenu>
-</InternalHeader>
+</header>
 
 <style>
-	.logo {
+	.header {
+		height: 80px;
+		padding-left: 3rem;
+	}
+	.title {
 		color: var(--ax-text-neutral);
 		text-decoration: none;
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
-		font-size: 1.5rem;
+		font-family: 'Roboto Condensed';
+		font-size: 2rem;
 		font-weight: 700;
 	}
 	.action-menu-link {
