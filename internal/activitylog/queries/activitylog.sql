@@ -6,6 +6,10 @@ FROM
 	activity_log_entries
 WHERE
 	team_slug = @team_slug
+	AND (
+		sqlc.narg('filter')::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY (sqlc.narg('filter')::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT
@@ -23,6 +27,10 @@ FROM
 WHERE
 	resource_type = @resource_type
 	AND resource_name = @resource_name
+	AND (
+		sqlc.narg('filter')::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY (sqlc.narg('filter')::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT
@@ -37,6 +45,11 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	activity_log_entries
+WHERE
+	(
+		sqlc.narg('filter')::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY (sqlc.narg('filter')::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT

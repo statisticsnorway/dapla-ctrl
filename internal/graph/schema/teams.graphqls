@@ -364,3 +364,10 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	"The new value of the field."
 	newValue: String
 }
+
+extend enum ActivityLogActivityType {
+	"Team was created."
+	TEAM_CREATED
+	"Team was updated."
+	TEAM_UPDATED
+}

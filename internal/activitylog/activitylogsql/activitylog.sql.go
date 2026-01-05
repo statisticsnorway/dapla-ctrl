@@ -83,15 +83,21 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	activity_log_entries
+WHERE
+	(
+		$1::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY ($1::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT
-	$2
+	$3
 OFFSET
-	$1
+	$2
 `
 
 type ListParams struct {
+	Filter []string
 	Offset int32
 	Limit  int32
 }
@@ -102,7 +108,7 @@ type ListRow struct {
 }
 
 func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) {
-	rows, err := q.db.Query(ctx, list, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, list, arg.Filter, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -180,17 +186,22 @@ FROM
 WHERE
 	resource_type = $1
 	AND resource_name = $2
+	AND (
+		$3::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY ($3::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT
-	$4
+	$5
 OFFSET
-	$3
+	$4
 `
 
 type ListForResourceParams struct {
 	ResourceType string
 	ResourceName string
+	Filter       []string
 	Offset       int32
 	Limit        int32
 }
@@ -204,6 +215,7 @@ func (q *Queries) ListForResource(ctx context.Context, arg ListForResourceParams
 	rows, err := q.db.Query(ctx, listForResource,
 		arg.ResourceType,
 		arg.ResourceName,
+		arg.Filter,
 		arg.Offset,
 		arg.Limit,
 	)
@@ -243,16 +255,21 @@ FROM
 	activity_log_entries
 WHERE
 	team_slug = $1
+	AND (
+		$2::TEXT[] IS NULL
+		OR (resource_type || ':' || action) = ANY ($2::TEXT[])
+	)
 ORDER BY
 	created_at DESC
 LIMIT
-	$3
+	$4
 OFFSET
-	$2
+	$3
 `
 
 type ListForTeamParams struct {
 	TeamSlug *slug.Slug
+	Filter   []string
 	Offset   int32
 	Limit    int32
 }
@@ -263,7 +280,12 @@ type ListForTeamRow struct {
 }
 
 func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error) {
-	rows, err := q.db.Query(ctx, listForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, listForTeam,
+		arg.TeamSlug,
+		arg.Filter,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -123,18 +123,29 @@ type ComplexityRoot struct {
 	}
 
 	Group struct {
-		Category func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Members  func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int
-		Name     func(childComplexity int) int
-		Suffix   func(childComplexity int) int
-		TeamSlug func(childComplexity int) int
+		ActivityLog func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
+		Category    func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Members     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int
+		Name        func(childComplexity int) int
+		Suffix      func(childComplexity int) int
+		TeamSlug    func(childComplexity int) int
 	}
 
 	GroupConnection struct {
 		Edges    func(childComplexity int) int
 		Nodes    func(childComplexity int) int
 		PageInfo func(childComplexity int) int
+	}
+
+	GroupCreatedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
 	}
 
 	GroupEdge struct {
@@ -147,6 +158,22 @@ type ComplexityRoot struct {
 		User  func(childComplexity int) int
 	}
 
+	GroupMemberAddedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		Data         func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	GroupMemberAddedActivityLogEntryData struct {
+		UserEmail func(childComplexity int) int
+		UserID    func(childComplexity int) int
+	}
+
 	GroupMemberConnection struct {
 		Edges    func(childComplexity int) int
 		Nodes    func(childComplexity int) int
@@ -156,6 +183,22 @@ type ComplexityRoot struct {
 	GroupMemberEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	GroupMemberRemovedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		Data         func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	GroupMemberRemovedActivityLogEntryData struct {
+		UserEmail func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -188,7 +231,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ActivityLog     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		ActivityLog     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		Features        func(childComplexity int) int
 		Group           func(childComplexity int, name string) int
 		Groups          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
@@ -209,7 +252,7 @@ type ComplexityRoot struct {
 	}
 
 	Reconciler struct {
-		ActivityLog func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		ActivityLog func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		Config      func(childComplexity int) int
 		Configured  func(childComplexity int) int
 		Description func(childComplexity int) int
@@ -536,7 +579,7 @@ type ComplexityRoot struct {
 	}
 
 	Team struct {
-		ActivityLog        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		ActivityLog        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		DeletionInProgress func(childComplexity int) int
 		DisplayName        func(childComplexity int) int
 		Groups             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
@@ -687,6 +730,7 @@ type ComplexityRoot struct {
 
 type GroupResolver interface {
 	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) (*pagination.Connection[*group.GroupMember], error)
+	ActivityLog(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 }
 type GroupMemberResolver interface {
 	Group(ctx context.Context, obj *group.GroupMember) (*group.Group, error)
@@ -712,7 +756,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id ident.Ident) (model.Node, error)
-	ActivityLog(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[activitylog.ActivityLogEntry], error)
+	ActivityLog(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 	Roles(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*authz.Role], error)
 	Features(ctx context.Context) (*feature.Features, error)
 	Groups(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error)
@@ -734,7 +778,7 @@ type ReconcilerResolver interface {
 	Config(ctx context.Context, obj *reconciler.Reconciler) ([]*reconciler.ReconcilerConfig, error)
 	Configured(ctx context.Context, obj *reconciler.Reconciler) (bool, error)
 	Errors(ctx context.Context, obj *reconciler.Reconciler, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*reconciler.ReconcilerError], error)
-	ActivityLog(ctx context.Context, obj *reconciler.Reconciler, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[activitylog.ActivityLogEntry], error)
+	ActivityLog(ctx context.Context, obj *reconciler.Reconciler, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 }
 type ReconcilerErrorResolver interface {
 	Team(ctx context.Context, obj *reconciler.ReconcilerError) (*team.Team, error)
@@ -760,7 +804,7 @@ type TeamResolver interface {
 
 	ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error)
 	ViewerIsMember(ctx context.Context, obj *team.Team) (bool, error)
-	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[activitylog.ActivityLogEntry], error)
+	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 }
 type TeamMemberResolver interface {
 	Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error)
@@ -905,6 +949,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Features.ID(childComplexity), true
 
+	case "Group.activityLog":
+		if e.complexity.Group.ActivityLog == nil {
+			break
+		}
+
+		args, err := ec.field_Group_activityLog_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Group.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Group.category":
 		if e.complexity.Group.Category == nil {
 			break
@@ -966,6 +1021,49 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.GroupConnection.PageInfo(childComplexity), true
 
+	case "GroupCreatedActivityLogEntry.actor":
+		if e.complexity.GroupCreatedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.Actor(childComplexity), true
+	case "GroupCreatedActivityLogEntry.createdAt":
+		if e.complexity.GroupCreatedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.CreatedAt(childComplexity), true
+	case "GroupCreatedActivityLogEntry.id":
+		if e.complexity.GroupCreatedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.ID(childComplexity), true
+	case "GroupCreatedActivityLogEntry.message":
+		if e.complexity.GroupCreatedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.Message(childComplexity), true
+	case "GroupCreatedActivityLogEntry.resourceName":
+		if e.complexity.GroupCreatedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.ResourceName(childComplexity), true
+	case "GroupCreatedActivityLogEntry.resourceType":
+		if e.complexity.GroupCreatedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.ResourceType(childComplexity), true
+	case "GroupCreatedActivityLogEntry.teamSlug":
+		if e.complexity.GroupCreatedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.complexity.GroupCreatedActivityLogEntry.TeamSlug(childComplexity), true
+
 	case "GroupEdge.cursor":
 		if e.complexity.GroupEdge.Cursor == nil {
 			break
@@ -991,6 +1089,68 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.GroupMember.User(childComplexity), true
+
+	case "GroupMemberAddedActivityLogEntry.actor":
+		if e.complexity.GroupMemberAddedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.Actor(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.createdAt":
+		if e.complexity.GroupMemberAddedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.CreatedAt(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.data":
+		if e.complexity.GroupMemberAddedActivityLogEntry.Data == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.Data(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.id":
+		if e.complexity.GroupMemberAddedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.ID(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.message":
+		if e.complexity.GroupMemberAddedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.Message(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.resourceName":
+		if e.complexity.GroupMemberAddedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.ResourceName(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.resourceType":
+		if e.complexity.GroupMemberAddedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.ResourceType(childComplexity), true
+	case "GroupMemberAddedActivityLogEntry.teamSlug":
+		if e.complexity.GroupMemberAddedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "GroupMemberAddedActivityLogEntryData.userEmail":
+		if e.complexity.GroupMemberAddedActivityLogEntryData.UserEmail == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntryData.UserEmail(childComplexity), true
+	case "GroupMemberAddedActivityLogEntryData.userID":
+		if e.complexity.GroupMemberAddedActivityLogEntryData.UserID == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberAddedActivityLogEntryData.UserID(childComplexity), true
 
 	case "GroupMemberConnection.edges":
 		if e.complexity.GroupMemberConnection.Edges == nil {
@@ -1023,6 +1183,68 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.GroupMemberEdge.Node(childComplexity), true
+
+	case "GroupMemberRemovedActivityLogEntry.actor":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.Actor(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.createdAt":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.CreatedAt(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.data":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.Data == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.Data(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.id":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.ID(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.message":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.Message(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.resourceName":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.ResourceName(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.resourceType":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.ResourceType(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntry.teamSlug":
+		if e.complexity.GroupMemberRemovedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "GroupMemberRemovedActivityLogEntryData.userEmail":
+		if e.complexity.GroupMemberRemovedActivityLogEntryData.UserEmail == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntryData.UserEmail(childComplexity), true
+	case "GroupMemberRemovedActivityLogEntryData.userID":
+		if e.complexity.GroupMemberRemovedActivityLogEntryData.UserID == nil {
+			break
+		}
+
+		return e.complexity.GroupMemberRemovedActivityLogEntryData.UserID(childComplexity), true
 
 	case "Mutation.addGroupMember":
 		if e.complexity.Mutation.AddGroupMember == nil {
@@ -1254,7 +1476,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.complexity.Query.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Query.features":
 		if e.complexity.Query.Features == nil {
 			break
@@ -1443,7 +1665,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Reconciler.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.complexity.Reconciler.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Reconciler.config":
 		if e.complexity.Reconciler.Config == nil {
 			break
@@ -2660,7 +2882,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.complexity.Team.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Team.deletionInProgress":
 		if e.complexity.Team.DeletionInProgress == nil {
 			break
@@ -3215,6 +3437,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputActivityLogFilter,
 		ec.unmarshalInputAddGroupMemberInput,
 		ec.unmarshalInputAssignRoleToServiceAccountInput,
 		ec.unmarshalInputConfigureReconcilerInput,
@@ -3339,7 +3562,40 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema/activitylog.graphqls", Input: `extend type Query {
+	{Name: "../schema/activitylog.graphqls", Input: `interface ActivityLogger {
+	"""
+	Activity log associated with the type.
+	"""
+	activityLog(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
+	): ActivityLogEntryConnection!
+}
+
+
+extend type Query {
 	"""
 	All activity logs across all teams and resources.
 	"""
@@ -3363,10 +3619,15 @@ var sources = []*ast.Source{
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
 
-extend type Team {
+extend type Team implements ActivityLogger {
 	"""
 	Activity log associated with the team.
 	"""
@@ -3390,10 +3651,47 @@ extend type Team {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
 
-extend type Reconciler {
+extend type Group implements ActivityLogger {
+	"""
+	Activity log associated with the team.
+	"""
+	activityLog(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
+	): ActivityLogEntryConnection!
+}
+
+extend type Reconciler implements ActivityLogger {
 	"""
 	Activity log associated with the reconciler.
 	"""
@@ -3417,8 +3715,19 @@ extend type Reconciler {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
+
+input ActivityLogFilter {
+	activityTypes: [ActivityLogActivityType!]
+}
+
+enum ActivityLogActivityType
 
 """
 Interface for activity log entries.
@@ -3877,6 +4186,111 @@ input RemoveGroupMemberInput {
 	"Email of the user to remove from the group."
 	userEmail: String!
 }
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to groups will use this resource type."
+	GROUP
+}
+
+type GroupCreatedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+}
+
+type GroupMemberAddedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberAddedActivityLogEntryData!
+}
+
+type GroupMemberAddedActivityLogEntryData {
+	"The ID of the user that was added."
+	userID: ID!
+
+	"The email address of the user that was added."
+	userEmail: String!
+}
+
+type GroupMemberRemovedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberRemovedActivityLogEntryData!
+}
+
+type GroupMemberRemovedActivityLogEntryData {
+	"The ID of the user that was removed."
+	userID: ID!
+
+	"The email address of the user that was removed."
+	userEmail: String!
+}
+
+extend enum ActivityLogActivityType {
+	"Group was created."
+	GROUP_CREATED
+	"Group member was added."
+	GROUP_MEMBER_ADDED
+	"Group member was removed."
+	GROUP_MEMBER_REMOVED
+}
 `, BuiltIn: false},
 	{Name: "../schema/reconcilers.graphqls", Input: `extend type Mutation {
 	"""
@@ -4322,6 +4736,17 @@ input ConfigureReconcilerInput {
 	List of reconciler config inputs.
 	"""
 	config: [ReconcilerConfigInput!]!
+}
+
+extend enum ActivityLogActivityType {
+	"Reconciler enabled activity log entry."
+	RECONCILER_ENABLED
+
+	"Reconciler disabled activity log entry."
+	RECONCILER_DISABLED
+
+	"Reconciler configured activity log entry."
+	RECONCILER_CONFIGURED
 }
 `, BuiltIn: false},
 	{Name: "../schema/scalars.graphqls", Input: `"""
@@ -5919,6 +6344,13 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	"The new value of the field."
 	newValue: String
 }
+
+extend enum ActivityLogActivityType {
+	"Team was created."
+	TEAM_CREATED
+	"Team was updated."
+	TEAM_UPDATED
+}
 `, BuiltIn: false},
 	{Name: "../schema/users.graphqls", Input: `extend type Query {
 	"""
@@ -6421,6 +6853,37 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Group_activityLog_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg4
+	return args, nil
+}
+
 func (ec *executionContext) field_Group_members_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -6662,6 +7125,11 @@ func (ec *executionContext) field_Query_activityLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg4
 	return args, nil
 }
 
@@ -7013,6 +7481,11 @@ func (ec *executionContext) field_Reconciler_activityLog_args(ctx context.Contex
 		return nil, err
 	}
 	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg4
 	return args, nil
 }
 
@@ -7117,6 +7590,11 @@ func (ec *executionContext) field_Team_activityLog_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg4
 	return args, nil
 }
 
@@ -7552,6 +8030,8 @@ func (ec *executionContext) fieldContext_CreateGroupPayload_group(_ context.Cont
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -8118,6 +8598,55 @@ func (ec *executionContext) fieldContext_Group_members(ctx context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Group_activityLog(ctx context.Context, field graphql.CollectedField, obj *group.Group) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Group_activityLog,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Group().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
+		},
+		nil,
+		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Group_activityLog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Group",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_ActivityLogEntryConnection_pageInfo(ctx, field)
+			case "nodes":
+				return ec.fieldContext_ActivityLogEntryConnection_nodes(ctx, field)
+			case "edges":
+				return ec.fieldContext_ActivityLogEntryConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ActivityLogEntryConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Group_activityLog_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _GroupConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*group.Group]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -8199,6 +8728,8 @@ func (ec *executionContext) fieldContext_GroupConnection_nodes(_ context.Context
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -8236,6 +8767,209 @@ func (ec *executionContext) fieldContext_GroupConnection_edges(_ context.Context
 				return ec.fieldContext_GroupEdge_node(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GroupEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *group.GroupCreatedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupCreatedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupCreatedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupCreatedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8306,6 +9040,8 @@ func (ec *executionContext) fieldContext_GroupEdge_node(_ context.Context, field
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -8349,6 +9085,8 @@ func (ec *executionContext) fieldContext_GroupMember_group(_ context.Context, fi
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -8396,6 +9134,302 @@ func (ec *executionContext) fieldContext_GroupMember_user(_ context.Context, fie
 				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry_data(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntry_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntry_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userID":
+				return ec.fieldContext_GroupMemberAddedActivityLogEntryData_userID(ctx, field)
+			case "userEmail":
+				return ec.fieldContext_GroupMemberAddedActivityLogEntryData_userEmail(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GroupMemberAddedActivityLogEntryData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntryData_userID(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntryData_userID,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntryData_userID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntryData_userEmail(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberAddedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberAddedActivityLogEntryData_userEmail,
+		func(ctx context.Context) (any, error) {
+			return obj.UserEmail, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberAddedActivityLogEntryData_userEmail(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberAddedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -8575,6 +9609,302 @@ func (ec *executionContext) fieldContext_GroupMemberEdge_node(_ context.Context,
 				return ec.fieldContext_GroupMember_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GroupMember", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_data(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntry_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntry_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userID":
+				return ec.fieldContext_GroupMemberRemovedActivityLogEntryData_userID(ctx, field)
+			case "userEmail":
+				return ec.fieldContext_GroupMemberRemovedActivityLogEntryData_userEmail(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GroupMemberRemovedActivityLogEntryData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntryData_userID(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntryData_userID,
+		func(ctx context.Context) (any, error) {
+			return obj.UserID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntryData_userID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntryData_userEmail(ctx context.Context, field graphql.CollectedField, obj *group.GroupMemberRemovedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_GroupMemberRemovedActivityLogEntryData_userEmail,
+		func(ctx context.Context) (any, error) {
+			return obj.UserEmail, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_GroupMemberRemovedActivityLogEntryData_userEmail(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "GroupMemberRemovedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -9610,7 +10940,7 @@ func (ec *executionContext) _Query_activityLog(ctx context.Context, field graphq
 		ec.fieldContext_Query_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ActivityLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.resolvers.Query().ActivityLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -9819,6 +11149,8 @@ func (ec *executionContext) fieldContext_Query_group(ctx context.Context, field 
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -10829,7 +12161,7 @@ func (ec *executionContext) _Reconciler_activityLog(ctx context.Context, field g
 		ec.fieldContext_Reconciler_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Reconciler().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.resolvers.Reconciler().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12367,6 +13699,8 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_group(_ contex
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -17115,7 +18449,7 @@ func (ec *executionContext) _Team_activityLog(ctx context.Context, field graphql
 		ec.fieldContext_Team_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.resolvers.Team().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -17720,6 +19054,8 @@ func (ec *executionContext) fieldContext_TeamMember_groups(_ context.Context, fi
 				return ec.fieldContext_Group_suffix(ctx, field)
 			case "members":
 				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
 		},
@@ -21085,6 +22421,33 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputActivityLogFilter(ctx context.Context, obj any) (activitylog.ActivityLogFilter, error) {
+	var it activitylog.ActivityLogFilter
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"activityTypes"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "activityTypes":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activityTypes"))
+			data, err := ec.unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ActivityTypes = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Context, obj any) (group.AddGroupMemberInput, error) {
 	var it group.AddGroupMemberInput
 	asMap := map[string]any{}
@@ -22123,6 +23486,57 @@ func (ec *executionContext) _ActivityLogEntry(ctx context.Context, sel ast.Selec
 			return graphql.Null
 		}
 		return ec._ReconcilerConfiguredActivityLogEntry(ctx, sel, obj)
+	case group.GroupMemberRemovedActivityLogEntry:
+		return ec._GroupMemberRemovedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupMemberRemovedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupMemberRemovedActivityLogEntry(ctx, sel, obj)
+	case group.GroupMemberAddedActivityLogEntry:
+		return ec._GroupMemberAddedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupMemberAddedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupMemberAddedActivityLogEntry(ctx, sel, obj)
+	case group.GroupCreatedActivityLogEntry:
+		return ec._GroupCreatedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupCreatedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupCreatedActivityLogEntry(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _ActivityLogger(ctx context.Context, sel ast.SelectionSet, obj activitylog.ActivityLogger) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case team.Team:
+		return ec._Team(ctx, sel, &obj)
+	case *team.Team:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Team(ctx, sel, obj)
+	case reconciler.Reconciler:
+		return ec._Reconciler(ctx, sel, &obj)
+	case *reconciler.Reconciler:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Reconciler(ctx, sel, obj)
+	case group.Group:
+		return ec._Group(ctx, sel, &obj)
+	case *group.Group:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Group(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -22186,6 +23600,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._TeamCreatedActivityLogEntry(ctx, sel, obj)
+	case team.Team:
+		return ec._Team(ctx, sel, &obj)
+	case *team.Team:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Team(ctx, sel, obj)
 	case serviceaccount.ServiceAccountUpdatedActivityLogEntry:
 		return ec._ServiceAccountUpdatedActivityLogEntry(ctx, sel, &obj)
 	case *serviceaccount.ServiceAccountUpdatedActivityLogEntry:
@@ -22277,6 +23698,41 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._ReconcilerConfiguredActivityLogEntry(ctx, sel, obj)
+	case reconciler.Reconciler:
+		return ec._Reconciler(ctx, sel, &obj)
+	case *reconciler.Reconciler:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Reconciler(ctx, sel, obj)
+	case group.GroupMemberRemovedActivityLogEntry:
+		return ec._GroupMemberRemovedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupMemberRemovedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupMemberRemovedActivityLogEntry(ctx, sel, obj)
+	case group.GroupMemberAddedActivityLogEntry:
+		return ec._GroupMemberAddedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupMemberAddedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupMemberAddedActivityLogEntry(ctx, sel, obj)
+	case group.GroupCreatedActivityLogEntry:
+		return ec._GroupCreatedActivityLogEntry(ctx, sel, &obj)
+	case *group.GroupCreatedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._GroupCreatedActivityLogEntry(ctx, sel, obj)
+	case group.Group:
+		return ec._Group(ctx, sel, &obj)
+	case *group.Group:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Group(ctx, sel, obj)
 	case usersync.UserSyncLogEntry:
 		if obj == nil {
 			return graphql.Null
@@ -22289,13 +23745,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._User(ctx, sel, obj)
-	case team.Team:
-		return ec._Team(ctx, sel, &obj)
-	case *team.Team:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Team(ctx, sel, obj)
 	case serviceaccount.ServiceAccountToken:
 		return ec._ServiceAccountToken(ctx, sel, &obj)
 	case *serviceaccount.ServiceAccountToken:
@@ -22329,20 +23778,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._ReconcilerError(ctx, sel, obj)
-	case reconciler.Reconciler:
-		return ec._Reconciler(ctx, sel, &obj)
-	case *reconciler.Reconciler:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Reconciler(ctx, sel, obj)
-	case group.Group:
-		return ec._Group(ctx, sel, &obj)
-	case *group.Group:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Group(ctx, sel, obj)
 	case feature.Features:
 		return ec._Features(ctx, sel, &obj)
 	case *feature.Features:
@@ -22847,7 +24282,7 @@ func (ec *executionContext) _Features(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var groupImplementors = []string{"Group", "Node", "SearchNode"}
+var groupImplementors = []string{"Group", "Node", "ActivityLogger", "SearchNode"}
 
 func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, obj *group.Group) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, groupImplementors)
@@ -22890,6 +24325,42 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 					}
 				}()
 				res = ec._Group_members(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "activityLog":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Group_activityLog(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -22962,6 +24433,75 @@ func (ec *executionContext) _GroupConnection(ctx context.Context, sel ast.Select
 			}
 		case "edges":
 			out.Values[i] = ec._GroupConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var groupCreatedActivityLogEntryImplementors = []string{"GroupCreatedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _GroupCreatedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *group.GroupCreatedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupCreatedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GroupCreatedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._GroupCreatedActivityLogEntry_teamSlug(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23138,6 +24678,124 @@ func (ec *executionContext) _GroupMember(ctx context.Context, sel ast.SelectionS
 	return out
 }
 
+var groupMemberAddedActivityLogEntryImplementors = []string{"GroupMemberAddedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *group.GroupMemberAddedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupMemberAddedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GroupMemberAddedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "data":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntry_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var groupMemberAddedActivityLogEntryDataImplementors = []string{"GroupMemberAddedActivityLogEntryData"}
+
+func (ec *executionContext) _GroupMemberAddedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, obj *group.GroupMemberAddedActivityLogEntryData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupMemberAddedActivityLogEntryDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GroupMemberAddedActivityLogEntryData")
+		case "userID":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntryData_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userEmail":
+			out.Values[i] = ec._GroupMemberAddedActivityLogEntryData_userEmail(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var groupMemberConnectionImplementors = []string{"GroupMemberConnection"}
 
 func (ec *executionContext) _GroupMemberConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*group.GroupMember]) graphql.Marshaler {
@@ -23205,6 +24863,124 @@ func (ec *executionContext) _GroupMemberEdge(ctx context.Context, sel ast.Select
 			}
 		case "node":
 			out.Values[i] = ec._GroupMemberEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var groupMemberRemovedActivityLogEntryImplementors = []string{"GroupMemberRemovedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *group.GroupMemberRemovedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupMemberRemovedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GroupMemberRemovedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "data":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntry_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var groupMemberRemovedActivityLogEntryDataImplementors = []string{"GroupMemberRemovedActivityLogEntryData"}
+
+func (ec *executionContext) _GroupMemberRemovedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, obj *group.GroupMemberRemovedActivityLogEntryData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, groupMemberRemovedActivityLogEntryDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GroupMemberRemovedActivityLogEntryData")
+		case "userID":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntryData_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userEmail":
+			out.Values[i] = ec._GroupMemberRemovedActivityLogEntryData_userEmail(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -23891,7 +25667,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var reconcilerImplementors = []string{"Reconciler", "Node"}
+var reconcilerImplementors = []string{"Reconciler", "Node", "ActivityLogger"}
 
 func (ec *executionContext) _Reconciler(ctx context.Context, sel ast.SelectionSet, obj *reconciler.Reconciler) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, reconcilerImplementors)
@@ -26690,7 +28466,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntryDataUpdatedFie
 	return out
 }
 
-var teamImplementors = []string{"Team", "SearchNode", "Node"}
+var teamImplementors = []string{"Team", "SearchNode", "Node", "ActivityLogger"}
 
 func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj *team.Team) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, teamImplementors)
@@ -28489,6 +30265,16 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, v any) (activitylog.ActivityLogActivityType, error) {
+	var res activitylog.ActivityLogActivityType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogActivityType) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogEntry) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -29051,6 +30837,16 @@ func (ec *executionContext) marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorw
 	return ec._GroupMember(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberAddedActivityLogEntryData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GroupMemberAddedActivityLogEntryData(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNGroupMemberConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*group.GroupMember]) graphql.Marshaler {
 	return ec._GroupMemberConnection(ctx, sel, &v)
 }
@@ -29121,6 +30917,16 @@ func (ec *executionContext) unmarshalNGroupMemberOrderField2githubᚗcomᚋstati
 
 func (ec *executionContext) marshalNGroupMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrderField(ctx context.Context, sel ast.SelectionSet, v group.GroupMemberOrderField) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberRemovedActivityLogEntryData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._GroupMemberRemovedActivityLogEntryData(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrderField(ctx context.Context, v any) (group.GroupOrderField, error) {
@@ -31274,6 +33080,79 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, v any) ([]activitylog.ActivityLogActivityType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]activitylog.ActivityLogActivityType, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogActivityType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter(ctx context.Context, v any) (*activitylog.ActivityLogFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputActivityLogFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {

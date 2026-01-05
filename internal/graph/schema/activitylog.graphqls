@@ -1,3 +1,35 @@
+interface ActivityLogger {
+	"""
+	Activity log associated with the type.
+	"""
+	activityLog(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
+	): ActivityLogEntryConnection!
+}
+
 extend type Query {
 	"""
 	All activity logs across all teams and resources.
@@ -22,10 +54,15 @@ extend type Query {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
 
-extend type Team {
+extend type Team implements ActivityLogger {
 	"""
 	Activity log associated with the team.
 	"""
@@ -49,10 +86,47 @@ extend type Team {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
 
-extend type Reconciler {
+extend type Group implements ActivityLogger {
+	"""
+	Activity log associated with the team.
+	"""
+	activityLog(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
+	): ActivityLogEntryConnection!
+}
+
+extend type Reconciler implements ActivityLogger {
 	"""
 	Activity log associated with the reconciler.
 	"""
@@ -76,8 +150,19 @@ extend type Reconciler {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter items.
+		"""
+		filter: ActivityLogFilter
 	): ActivityLogEntryConnection!
 }
+
+input ActivityLogFilter {
+	activityTypes: [ActivityLogActivityType!]
+}
+
+enum ActivityLogActivityType
 
 """
 Interface for activity log entries.

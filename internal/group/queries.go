@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/statisticsnorway/dapla-api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
@@ -15,6 +16,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"k8s.io/utils/ptr"
 )
 
 func GenerateName(input *CreateGroupInput) string {
@@ -43,14 +45,13 @@ func Create(ctx context.Context, input *CreateGroupInput, actor *authz.Actor) (*
 			return err
 		}
 
-		return nil
-		// return activitylog.Create(ctx, activitylog.CreateInput{
-		// 	Action:       activitylog.ActivityLogEntryActionCreated,
-		// 	Actor:        actor.User,
-		// 	ResourceType: activityLogEntryResourceTypeTeam,
-		// 	ResourceName: input.Slug.String(),
-		// 	TeamSlug:     ptr.To(input.Slug),
-		// })
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionCreated,
+			Actor:        actor.User,
+			ResourceType: ActivityLogEntryResourceTypeGroup,
+			ResourceName: group.Name,
+			TeamSlug:     ptr.To(input.TeamSlug),
+		})
 	})
 	if err != nil {
 		return nil, err
@@ -189,20 +190,19 @@ func AddMember(ctx context.Context, input AddGroupMemberInput, actor *authz.Acto
 		if err := db(ctx).AddMember(ctx, params); err != nil {
 			return err
 		}
+		teamSlug := strings.Split(input.GroupName, "-")[0]
 
-		return nil
-		// return activitylog.Create(ctx, activitylog.CreateInput{
-		// 	Action:       activitylog.ActivityLogEntryActionAdded,
-		// 	Actor:        actor.User,
-		// 	ResourceType: activityLogEntryResourceTypeTeam,
-		// 	ResourceName: input.TeamSlug.String(),
-		// 	TeamSlug:     ptr.To(input.TeamSlug),
-		// 	Data: &TeamMemberAddedActivityLogEntryData{
-		// 		Role:      input.Role,
-		// 		UserUUID:  input.UserID,
-		// 		UserEmail: input.UserEmail,
-		// 	},
-		// })
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionAdded,
+			Actor:        actor.User,
+			ResourceType: ActivityLogEntryResourceTypeGroup,
+			ResourceName: input.GroupName,
+			TeamSlug:     (*slug.Slug)(&teamSlug),
+			Data: &GroupMemberAddedActivityLogEntryData{
+				UserUUID:  input.UserID,
+				UserEmail: input.UserEmail,
+			},
+		})
 	})
 }
 
@@ -225,19 +225,19 @@ func RemoveMember(ctx context.Context, input RemoveGroupMemberInput, actor *auth
 		if err := db(ctx).RemoveMember(ctx, params); err != nil {
 			return err
 		}
+		teamSlug := strings.Split(input.GroupName, "-")[0]
 
-		return nil
-		// return activitylog.Create(ctx, activitylog.CreateInput{
-		// 	Action:       activitylog.ActivityLogEntryActionRemoved,
-		// 	Actor:        actor.User,
-		// 	ResourceType: activityLogEntryResourceTypeTeam,
-		// 	ResourceName: input.TeamSlug.String(),
-		// 	TeamSlug:     ptr.To(input.TeamSlug),
-		// 	Data: &TeamMemberRemovedActivityLogEntryData{
-		// 		UserUUID:  input.UserID,
-		// 		UserEmail: input.UserEmail,
-		// 	},
-		// })
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionRemoved,
+			Actor:        actor.User,
+			ResourceType: ActivityLogEntryResourceTypeGroup,
+			ResourceName: input.GroupName,
+			TeamSlug:     (*slug.Slug)(&teamSlug),
+			Data: &GroupMemberRemovedActivityLogEntryData{
+				UserUUID:  input.UserID,
+				UserEmail: input.UserEmail,
+			},
+		})
 	})
 }
 

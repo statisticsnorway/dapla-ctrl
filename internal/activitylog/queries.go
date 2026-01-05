@@ -22,9 +22,8 @@ type CreateInput struct {
 	ResourceType ActivityLogEntryResourceType
 	ResourceName string
 
-	Data            any        // optional
-	EnvironmentName *string    // optional
-	TeamSlug        *slug.Slug // optional
+	Data     any        // optional
+	TeamSlug *slug.Slug // optional
 }
 
 func MarshalData(input CreateInput) ([]byte, error) {
@@ -70,13 +69,14 @@ func GetByIdent(ctx context.Context, id ident.Ident) (ActivityLogEntry, error) {
 	return Get(ctx, uid)
 }
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ActivityLogEntryConnection, error) {
+func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, filter *ActivityLogFilter) (*ActivityLogEntryConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForTeam(ctx, activitylogsql.ListForTeamParams{
 		TeamSlug: ptr.To(teamSlug),
 		Offset:   page.Offset(),
 		Limit:    page.Limit(),
+		Filter:   withFilters(filter),
 	})
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	})
 }
 
-func ListForResource(ctx context.Context, resourceType ActivityLogEntryResourceType, resourceName string, page *pagination.Pagination) (*ActivityLogEntryConnection, error) {
+func ListForResource(ctx context.Context, resourceType ActivityLogEntryResourceType, resourceName string, page *pagination.Pagination, filter *ActivityLogFilter) (*ActivityLogEntryConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForResource(ctx, activitylogsql.ListForResourceParams{
@@ -99,6 +99,7 @@ func ListForResource(ctx context.Context, resourceType ActivityLogEntryResourceT
 		ResourceName: resourceName,
 		Offset:       page.Offset(),
 		Limit:        page.Limit(),
+		Filter:       withFilters(filter),
 	})
 	if err != nil {
 		return nil, err
@@ -113,12 +114,13 @@ func ListForResource(ctx context.Context, resourceType ActivityLogEntryResourceT
 	})
 }
 
-func List(ctx context.Context, page *pagination.Pagination) (*ActivityLogEntryConnection, error) {
+func List(ctx context.Context, page *pagination.Pagination, filter *ActivityLogFilter) (*ActivityLogEntryConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.List(ctx, activitylogsql.ListParams{
 		Offset: page.Offset(),
 		Limit:  page.Limit(),
+		Filter: withFilters(filter),
 	})
 	if err != nil {
 		return nil, err

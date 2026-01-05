@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeTeam        activitylog.ActivityLogEntryResourceType = "TEAM"
-	activityLogEntryActionCreateDeleteKey   activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
-	activityLogEntryActionConfirmDeleteKey  activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
-	activityLogEntryActionSetMemberRole     activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
-	activityLogEntryActionUpdateEnvironment activitylog.ActivityLogEntryAction       = "UPDATE_ENVIRONMENT"
+	activityLogEntryResourceTypeTeam       activitylog.ActivityLogEntryResourceType = "TEAM"
+	activityLogEntryActionCreateDeleteKey  activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
+	activityLogEntryActionConfirmDeleteKey activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
+	activityLogEntryActionSetMemberRole    activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
 )
 
 func init() {
@@ -80,22 +79,18 @@ func init() {
 				GenericActivityLogEntry: entry.WithMessage("Set member role"),
 				Data:                    data,
 			}, nil
-		case activityLogEntryActionUpdateEnvironment:
-			data, err := activitylog.TransformData(entry, func(data *TeamEnvironmentUpdatedActivityLogEntryData) *TeamEnvironmentUpdatedActivityLogEntryData {
-				return data
-			})
-			if err != nil {
-				return nil, err
-			}
-
-			return TeamEnvironmentUpdatedActivityLogEntry{
-				GenericActivityLogEntry: entry.WithMessage("Update environment"),
-				Data:                    data,
-			}, nil
 		default:
 			return nil, fmt.Errorf("unsupported team activity log entry action: %q", entry.Action)
 		}
 	})
+
+	activitylog.RegisterFilter("TEAM_CREATED", activitylog.ActivityLogEntryActionCreated, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_UPDATED", activitylog.ActivityLogEntryActionUpdated, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_CREATE_DELETE_KEY", activityLogEntryActionCreateDeleteKey, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_CONFIRM_DELETE_KEY", activityLogEntryActionConfirmDeleteKey, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_MEMBER_ADDED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_MEMBER_REMOVED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_MEMBER_SET_ROLE", activityLogEntryActionSetMemberRole, activityLogEntryResourceTypeTeam)
 }
 
 type TeamCreatedActivityLogEntry struct {
@@ -167,19 +162,4 @@ type TeamMemberSetRoleActivityLogEntryData struct {
 
 func (t TeamMemberSetRoleActivityLogEntryData) UserID() ident.Ident {
 	return user.NewIdent(t.UserUUID)
-}
-
-type TeamEnvironmentUpdatedActivityLogEntry struct {
-	activitylog.GenericActivityLogEntry
-	Data *TeamEnvironmentUpdatedActivityLogEntryData `json:"data"`
-}
-
-type TeamEnvironmentUpdatedActivityLogEntryData struct {
-	UpdatedFields []*TeamEnvironmentUpdatedActivityLogEntryDataUpdatedField `json:"updatedFields"`
-}
-
-type TeamEnvironmentUpdatedActivityLogEntryDataUpdatedField struct {
-	Field    string  `json:"field"`
-	OldValue *string `json:"oldValue"`
-	NewValue *string `json:"newValue"`
 }

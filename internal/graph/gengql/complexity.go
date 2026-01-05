@@ -3,6 +3,7 @@
 package gengql
 
 import (
+	activitylog "github.com/statisticsnorway/dapla-api/internal/activitylog"
 	pagination "github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	group "github.com/statisticsnorway/dapla-api/internal/group"
 	search "github.com/statisticsnorway/dapla-api/internal/search"
@@ -14,10 +15,13 @@ import (
 func NewComplexityRoot() ComplexityRoot {
 	c := ComplexityRoot{}
 
+	c.Group.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Query.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+	c.Query.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int {
@@ -47,7 +51,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Query.Users = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Reconciler.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+	c.Reconciler.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Reconciler.Errors = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
@@ -59,7 +63,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.ServiceAccount.Tokens = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Team.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+	c.Team.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int {

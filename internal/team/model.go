@@ -40,8 +40,9 @@ type Team struct {
 
 type ExternalReferences struct{}
 
-func (Team) IsNode()       {}
-func (Team) IsSearchNode() {}
+func (Team) IsNode()           {}
+func (Team) IsSearchNode()     {}
+func (Team) IsActivityLogger() {}
 
 func (t Team) DeletionInProgress() bool {
 	return t.DeleteKeyConfirmedAt != nil

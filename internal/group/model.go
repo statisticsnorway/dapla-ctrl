@@ -34,8 +34,9 @@ type Group struct {
 
 type ExternalReferences struct{}
 
-func (Group) IsNode()       {}
-func (Group) IsSearchNode() {}
+func (Group) IsNode()           {}
+func (Group) IsSearchNode()     {}
+func (Group) IsActivityLogger() {}
 
 func (g Group) ID() ident.Ident {
 	return NewIdent(g.Name)

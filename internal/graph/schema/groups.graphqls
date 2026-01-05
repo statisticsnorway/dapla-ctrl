@@ -265,3 +265,108 @@ input RemoveGroupMemberInput {
 	"Email of the user to remove from the group."
 	userEmail: String!
 }
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to groups will use this resource type."
+	GROUP
+}
+
+type GroupCreatedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+}
+
+type GroupMemberAddedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberAddedActivityLogEntryData!
+}
+
+type GroupMemberAddedActivityLogEntryData {
+	"The ID of the user that was added."
+	userID: ID!
+
+	"The email address of the user that was added."
+	userEmail: String!
+}
+
+type GroupMemberRemovedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberRemovedActivityLogEntryData!
+}
+
+type GroupMemberRemovedActivityLogEntryData {
+	"The ID of the user that was removed."
+	userID: ID!
+
+	"The email address of the user that was removed."
+	userEmail: String!
+}
+
+extend enum ActivityLogActivityType {
+	"Group was created."
+	GROUP_CREATED
+	"Group member was added."
+	GROUP_MEMBER_ADDED
+	"Group member was removed."
+	GROUP_MEMBER_REMOVED
+}
