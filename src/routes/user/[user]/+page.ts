@@ -11,6 +11,7 @@ export async function load(event) {
 	const { data } = get(meta.UserOverview);
 	return {
 		...meta,
+		...event.data,
 		...(await addPageMeta(event, { title: data?.user.name ?? 'Ukjent bruker' }))
 	};
 }

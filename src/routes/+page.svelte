@@ -65,7 +65,10 @@
 							<Tab href="/teams" active={false} title="Alle teams ({allTeamsCount})" />
 						</Tabs>
 
-						<TeamsTable teamsData={$UserTeams.data.me.teams.nodes.map(transformTeamData)} />
+						<TeamsTable
+							teamsData={$UserTeams.data.me.teams.nodes.map(transformTeamData)}
+							defaultSelected={data.teamTableFields}
+						/>
 					</div>
 				</div>
 				<Pagination

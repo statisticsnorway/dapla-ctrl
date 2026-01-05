@@ -50,7 +50,7 @@
 			<TeamsTable
 				rolesHeading="Roller"
 				teamsData={$UserOverview.data.user.teams.nodes.map(transformTeamData)}
-				localStorageKey="console-teamstable-fields-/user"
+				defaultSelected={data.teamTableFields}
 			/>
 		</div>
 	</div>

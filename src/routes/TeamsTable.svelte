@@ -19,13 +19,13 @@
 	interface Props {
 		teamsData: TeamsData[];
 		rolesHeading?: string;
-		defaultSelected?: string[];
-		localStorageKey?: string;
+		defaultSelected: string[];
 	}
 
-	let { teamsData, rolesHeading, defaultSelected, localStorageKey }: Props = $props();
-	localStorageKey = localStorageKey ?? `console-teamstable-fields-${page.url.pathname}`;
-	defaultSelected = defaultSelected ?? ['groups', 'memberCount', 'manager'];
+	let { teamsData, rolesHeading, defaultSelected }: Props = $props();
+	if (defaultSelected.length == 0) {
+		defaultSelected = ['groups', 'memberCount', 'manager'];
+	}
 
 	export type User = {
 		name: string;
@@ -45,18 +45,14 @@
 		userGroups?: string[];
 	};
 
-	let storedSelections = defaultSelected;
-	if (browser) {
-		let inStorage = localStorage.getItem(localStorageKey);
-		if (inStorage !== null) {
-			storedSelections = JSON.parse(inStorage);
-		}
-	}
-	let selectedFields: string[] = $state(storedSelections);
+	let selectedFields: string[] = $state(defaultSelected);
 
 	$effect(() => {
 		if (!browser) return;
-		localStorage.setItem(localStorageKey, JSON.stringify(selectedFields));
+		// group togheter e.g. /users/. Every path start with /
+		const path = page.url.pathname.split('/')[1];
+		// expiry is 1 year as default in most browsers
+		document.cookie = `teamTableFields${path}=${JSON.stringify(selectedFields)}; expires=Thu, 31 Dec 2099 23:59:59 GMT; SameSite=Lax; Secure; path=/${path}`;
 	});
 
 	const hasUserGroups = teamsData.some((t) => t.userGroups !== undefined);
@@ -88,8 +84,8 @@
 	};
 
 	let sortState: TableSortState = $state({
-		orderBy: 'NAME',
-		direction: 'descending'
+		orderBy: 'NONE',
+		direction: 'ascending'
 	});
 
 	let teamsTable: TeamsData[] = $derived(
@@ -152,7 +148,6 @@
 	</ActionMenu>
 </div>
 <Table
-	size="small"
 	sort={sortState}
 	onsortchange={(key) => {
 		sortState = sortTable(key as SortBy, sortState);

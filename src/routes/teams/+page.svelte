@@ -64,7 +64,7 @@
 					</Tabs>
 
 					<TeamsTable
-						defaultSelected={['name', 'memberCount', 'manager']}
+						defaultSelected={data.teamTableFields}
 						teamsData={$AllTeams.data.teams.nodes.map(transformTeamData)}
 					/>
 				</div>

@@ -3,6 +3,7 @@ import type { PageLoadEvent } from './$types';
 
 export async function load(event: PageLoadEvent) {
 	return {
+		...event.data,
 		...(await load_UserTeams({
 			event
 		}))
