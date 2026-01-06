@@ -152,6 +152,7 @@
 	onsortchange={(key) => {
 		sortState = sortTable(key as SortBy, sortState);
 	}}
+	zebraStripes
 >
 	<Thead>
 		<Tr>
@@ -169,10 +170,10 @@
 	</Thead>
 	<Tbody>
 		{#each teamsTable as team (team.slug)}
-			<Tr>
+			<Tr shadeOnHover={false}>
 				<Td>
 					<a href={`/team/${team.slug}/`}>
-						{team.displayName}
+						<b>{team.displayName}</b>
 					</a>
 					<br />
 					{team.slug}

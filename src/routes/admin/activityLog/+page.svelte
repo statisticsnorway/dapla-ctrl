@@ -9,7 +9,7 @@
 	let { ActivityLogs } = $derived(data);
 </script>
 
-<Heading level="2" size="medium" spacing>Aktivitetslogg</Heading>
+<Heading level="2" as="h2" size="medium" spacing>Aktivitetslogg</Heading>
 <GraphErrors errors={$ActivityLogs.errors} />
 {#if $ActivityLogs.data}
 	<Table size="small">

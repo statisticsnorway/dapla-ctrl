@@ -33,7 +33,7 @@
 </script>
 
 <div class="container">
-	<Heading level="1" size="large" spacing>Dapla Ctrl-brukere</Heading>
+	<Heading level="2" as="h2" size="large" spacing>Dapla Ctrl-brukere</Heading>
 	<List title="{totalUserCount} bruker{totalUserCount !== 1 ? 'e' : ''}">
 		{#snippet menu()}
 			<OrderByMenu orderField={UserOrderField} defaultOrderField={UserOrderField.NAME} />

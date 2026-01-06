@@ -4,7 +4,7 @@
 	import { graphql } from '$houdini';
 	import { isAuthenticated, isUnauthenticated } from '$lib/authentication';
 	import '$lib/font-roboto.css';
-	import '$lib/font-source-sans-pro.css';
+	import '$lib/font-open-sans.css';
 	import '$lib/font-roboto-condensed.css';
 	import ProgressBar from '$lib/ui/ProgressBar.svelte';
 	import { themeSwitch } from '$lib/stores/theme.svelte';
@@ -12,6 +12,8 @@
 	import { onMount } from 'svelte';
 	import '../styles/app.css';
 	import '../styles/colors.css';
+	import '../styles/ssb-colors.css';
+	import '../styles/aksel-token-overrides.css';
 	import type { LayoutProps } from './$houdini';
 	import Login from './Login.svelte';
 	import PageHeader from './PageHeader.svelte';
@@ -103,7 +105,6 @@
 <style>
 	:global(.page) {
 		margin-inline: 3rem;
-		min-width: 1000px;
 
 		margin-top: var(--spacing-layout);
 	}

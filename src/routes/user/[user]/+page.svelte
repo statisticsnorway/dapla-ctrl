@@ -45,7 +45,7 @@
 	<div class="container">
 		<div>
 			<div class="section-header">
-				<Heading level="2" spacing>Medlem av {userTeamsCount} team</Heading>
+				<Heading level="2" as="h2" spacing>Medlem av {userTeamsCount} team</Heading>
 			</div>
 			<TeamsTable
 				rolesHeading="Roller"

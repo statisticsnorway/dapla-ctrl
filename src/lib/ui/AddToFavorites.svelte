@@ -20,7 +20,7 @@
 	const isFavorite = $derived(favorites.isFavorite(path));
 </script>
 
-<Tooltip placement="bottom" content={isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
+<Tooltip placement="bottom" content={isFavorite ? 'Fjern fra favoritter' : 'Legg til favoritter'}>
 	<Button
 		variant="tertiary-neutral"
 		onclick={toggleFavorite}

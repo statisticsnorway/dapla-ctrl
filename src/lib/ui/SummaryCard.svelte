@@ -41,7 +41,7 @@
 	</div>
 	<div class="summary">
 		<div class="heading">
-			<Heading level="2" size="xsmall">
+			<Heading level="2" as="h2" size="xsmall">
 				{title}
 			</Heading>
 			{#if helpText}

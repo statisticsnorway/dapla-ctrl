@@ -39,9 +39,9 @@
 
 <div class="content-wrapper">
 	<div class="header">
-		<Heading level="1" size="large">Teamoversikt</Heading>
+		<Heading level="1" size="xlarge">Teamoversikt</Heading>
 		{#if canCreateTeam}
-			<Button as="a" size="medium" href="/team/create" variant="primary">Opprett team</Button>
+			<Button as="a" size="medium" href="/team/create" variant="secondary">+ Opprett team</Button>
 		{/if}
 	</div>
 	<div class="container">

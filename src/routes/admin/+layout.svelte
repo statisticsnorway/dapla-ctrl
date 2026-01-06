@@ -67,7 +67,6 @@
 	}
 	.container {
 		margin: auto;
-		min-width: 1000px;
 		max-width: 1432px;
 	}
 </style>

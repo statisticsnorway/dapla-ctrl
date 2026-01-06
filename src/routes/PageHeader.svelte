@@ -73,7 +73,7 @@
 		padding-left: 4rem;
 	}
 	.title {
-		color: var(--ax-text-neutral);
+		color: var(--dapla-ctrl-logo);
 		text-decoration: none;
 		display: flex;
 		align-items: center;

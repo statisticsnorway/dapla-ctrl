@@ -8,7 +8,7 @@
 	let { AdminUsers } = $derived(data);
 </script>
 
-<Heading level="2" size="medium" spacing>Brukere</Heading>
+<Heading level="2" as="h2" size="medium" spacing>Brukere</Heading>
 {#if $AdminUsers.data}
 	<Table size="small">
 		<Thead>

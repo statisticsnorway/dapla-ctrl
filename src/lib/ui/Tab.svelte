@@ -14,6 +14,8 @@
 
 <style>
 	.tab {
+		font-family: 'Roboto', sans-serif;
+		font-weight: 700;
 		text-decoration: none;
 		color: var(--ax-text-subtle);
 		padding: 0.75rem 1rem;
