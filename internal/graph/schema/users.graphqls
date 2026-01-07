@@ -65,6 +65,11 @@ type User implements Node {
 	externalID: String!
 
 	"""
+	The section the user belongs to, nullable in case the user has an invalid section, i.e. not synced to the database.
+	"""
+	section: Section
+
+	"""
 	List of teams the user is connected to.
 	"""
 	teams(

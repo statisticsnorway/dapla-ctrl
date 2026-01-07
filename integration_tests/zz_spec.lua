@@ -178,8 +178,9 @@ User = {}
 ---@param name? string
 ---@param email? string
 ---@param externalID? string
+---@param sectionCode? string
 ---@return User
-function User.new(name, email, externalID)
+function User.new(name, email, externalID, sectionCode)
 	print("new")
 	return {}
 end
@@ -221,6 +222,14 @@ end
 function User:admin()
 	print("admin")
 	return false
+end
+
+--- The section code of the user
+---@return string
+---@overload fun(self: User, sectionCode?: string)
+function User:sectionCode()
+	print("sectionCode")
+	return ""
 end
 
 --- Configuration

@@ -39,11 +39,11 @@ type userMap struct {
 }
 
 type entraIdUser struct {
-	ID       string
-	Email    string
-	Name     string
-	Section  *string
-	JobTitle *string
+	ID          string
+	Email       string
+	Name        string
+	SectionCode *string
+	JobTitle    *string
 }
 
 func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
@@ -342,6 +342,10 @@ func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
 		return true
 	}
 
+	if user.SectionCode != eu.SectionCode {
+		return true
+	}
+
 	return false
 }
 
@@ -403,11 +407,11 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 
 	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
 		users = append(users, &entraIdUser{
-			ID:       *user.GetId(),
-			Email:    strings.ToLower(*user.GetUserPrincipalName()),
-			Name:     *user.GetDisplayName(),
-			Section:  user.GetDepartment(),
-			JobTitle: user.GetJobTitle(),
+			ID:          *user.GetId(),
+			Email:       strings.ToLower(*user.GetUserPrincipalName()),
+			Name:        *user.GetDisplayName(),
+			SectionCode: parseSectionCode(user.GetDepartment()),
+			JobTitle:    user.GetJobTitle(),
 		})
 		return true
 	}); err != nil {
@@ -446,8 +450,8 @@ func getDbUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, err
 func parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
 	entraIdSectionManagers := make(map[string][]*usersyncsql.User)
 	for _, eu := range entraIdUsers {
-		if code := parseEntraIdSectionManager(eu); code != nil {
-			entraIdSectionManagers[*code] = append(entraIdSectionManagers[*code], entraIdUserMap[eu.ID])
+		if isSectionManager(eu) {
+			entraIdSectionManagers[*eu.SectionCode] = append(entraIdSectionManagers[*eu.SectionCode], entraIdUserMap[eu.ID])
 		}
 	}
 	return sanitizeSectionManagers(entraIdSectionManagers, log)
@@ -456,14 +460,20 @@ func parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map
 // parseEntraIdSectionManager checks whether the user has the Seksjonssjef job title,
 // and whether they have a valid section. If so, we return the section code, otherwise we
 // return nil.
-func parseEntraIdSectionManager(eu *entraIdUser) (code *string) {
-	if eu.Section == nil || eu.JobTitle == nil {
+func isSectionManager(eu *entraIdUser) bool {
+	if eu.SectionCode == nil || eu.JobTitle == nil {
+		return false
+	}
+	return strings.HasPrefix(*eu.JobTitle, "Seksjonssjef")
+}
+
+// parseSectionCode tries to extract the section code from the given section name,
+// using the format "O|K xxx Seksjon for ...". Returns nil if it does not work.
+func parseSectionCode(section *string) *string {
+	if section == nil {
 		return nil
 	}
-	if !strings.HasPrefix(*eu.JobTitle, "Seksjonssjef") {
-		return nil
-	}
-	parts := strings.Split(*eu.Section, " ")
+	parts := strings.Split(*section, " ")
 	// Format should be "O|K xxx Seksjon for ..."
 	if len(parts) < 3 {
 		return nil

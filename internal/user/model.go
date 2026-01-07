@@ -19,11 +19,12 @@ type (
 )
 
 type User struct {
-	UUID       uuid.UUID `json:"-"`
-	Email      string    `json:"email"`
-	Name       string    `json:"name"`
-	ExternalID string    `json:"externalId"`
-	Admin      bool      `json:"admin"`
+	UUID        uuid.UUID `json:"-"`
+	Email       string    `json:"email"`
+	Name        string    `json:"name"`
+	ExternalID  string    `json:"externalId"`
+	Admin       bool      `json:"admin"`
+	SectionCode *string   `json:"sectionCode"`
 }
 
 func (User) IsNode() {}
@@ -39,11 +40,12 @@ func (u User) ID() ident.Ident {
 
 func toGraphUser(u *usersql.User) *User {
 	return &User{
-		UUID:       u.ID,
-		Email:      u.Email,
-		Name:       u.Name,
-		ExternalID: u.ExternalID,
-		Admin:      u.Admin,
+		UUID:        u.ID,
+		Email:       u.Email,
+		Name:        u.Name,
+		ExternalID:  u.ExternalID,
+		Admin:       u.Admin,
+		SectionCode: u.SectionCode,
 	}
 }
 

@@ -22,6 +22,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/logger"
+	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
@@ -155,6 +156,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 	ctx = team.NewLoaderContext(ctx, pool)
 	ctx = authz.NewLoaderContext(ctx, pool)
 	ctx = group.NewLoaderContext(ctx, pool)
+	ctx = section.NewLoaderContext(ctx, pool)
 
 	emails := map[string]struct{}{}
 	slugs := map[slug.Slug]struct{}{}
@@ -200,11 +202,12 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 		usersyncq := usersyncsql.New(database.TransactionFromContext(ctx))
 
-		createUser := func(ctx context.Context, name, email string) (*user.User, error) {
+		createUser := func(ctx context.Context, name, email, sectionCode string) (*user.User, error) {
 			usu, err := usersyncq.Create(ctx, usersyncsql.CreateParams{
-				Name:       name,
-				Email:      email,
-				ExternalID: uuid.New().String(),
+				Name:        name,
+				Email:       email,
+				ExternalID:  uuid.New().String(),
+				SectionCode: &sectionCode,
 			})
 			if err != nil {
 				return nil, fmt.Errorf("create user: %w", err)
@@ -218,9 +221,15 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			return usr, nil
 		}
 
+		sections, err := getAllSectionCodes(ctx)
+		if err != nil {
+			return fmt.Errorf("get section codes: %w", err)
+		}
+		numSections := len(sections)
+
 		adminUser, err = user.GetByEmail(ctx, nameToEmail(adminName, cfg.Domain))
 		if err != nil {
-			adminUser, err = createUser(ctx, adminName, nameToEmail(adminName, cfg.Domain))
+			adminUser, err = createUser(ctx, adminName, nameToEmail(adminName, cfg.Domain), sections[rand.IntN(numSections)])
 			if err != nil {
 				return fmt.Errorf("create admin user: %w", err)
 			}
@@ -233,7 +242,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 		devUser, err = user.GetByEmail(ctx, nameToEmail(devName, cfg.Domain))
 		if err != nil {
-			devUser, err = createUser(ctx, devName, nameToEmail(devName, cfg.Domain))
+			devUser, err = createUser(ctx, devName, nameToEmail(devName, cfg.Domain), sections[rand.IntN(numSections)])
 			if err != nil {
 				return fmt.Errorf("create dev user: %w", err)
 			}
@@ -247,13 +256,14 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		for i := 1; i <= *cfg.NumUsers; i++ {
 			firstName := firstNames[rand.IntN(numFirstNames)]
 			lastName := lastNames[rand.IntN(numLastNames)]
+			section := sections[rand.IntN(numSections)]
 			name := firstName + " " + lastName
 			email := nameToEmail(name, cfg.Domain)
 			if _, exists := emails[email]; exists {
 				continue
 			}
 
-			u, err := createUser(ctx, name, email)
+			u, err := createUser(ctx, name, email, section)
 			if err != nil {
 				return fmt.Errorf("create user %q: %w", email, err)
 			}
@@ -437,4 +447,33 @@ func getAllTeams(ctx context.Context) ([]*team.Team, error) {
 	}
 
 	return allTeams, nil
+}
+
+func getAllSectionCodes(ctx context.Context) ([]string, error) {
+	first := 100
+	allCodes := make([]string, 0)
+	orderBy := &section.SectionOrder{
+		Field:     section.SectionOrderFieldCode,
+		Direction: model.OrderDirectionAsc,
+	}
+	var after *pagination.Cursor
+	for {
+		p, err := pagination.ParsePage(&first, after, nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		conn, err := section.List(ctx, p, orderBy)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range conn.Nodes() {
+			allCodes = append(allCodes, node.Code)
+		}
+		if !conn.PageInfo.HasNextPage {
+			break
+		}
+		after = conn.PageInfo.EndCursor
+	}
+
+	return allCodes, nil
 }

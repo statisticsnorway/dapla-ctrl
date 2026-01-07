@@ -56,21 +56,33 @@ func (q *Queries) CountLogEntries(ctx context.Context) (int64, error) {
 
 const create = `-- name: Create :one
 INSERT INTO
-	users (name, email, external_id, admin)
+	users (name, email, external_id, admin, section_code)
 VALUES
-	($1, LOWER($2), $3, FALSE)
+	(
+		$1,
+		LOWER($2),
+		$3,
+		FALSE,
+		$4
+	)
 RETURNING
-	id, email, name, external_id, admin
+	id, email, name, external_id, admin, section_code
 `
 
 type CreateParams struct {
-	Name       string
-	Email      string
-	ExternalID string
+	Name        string
+	Email       string
+	ExternalID  string
+	SectionCode *string
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*User, error) {
-	row := q.db.QueryRow(ctx, create, arg.Name, arg.Email, arg.ExternalID)
+	row := q.db.QueryRow(ctx, create,
+		arg.Name,
+		arg.Email,
+		arg.ExternalID,
+		arg.SectionCode,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -78,6 +90,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*User, error) {
 		&i.Name,
 		&i.ExternalID,
 		&i.Admin,
+		&i.SectionCode,
 	)
 	return &i, err
 }
@@ -192,7 +205,7 @@ func (q *Queries) GetSections(ctx context.Context) ([]*Section, error) {
 
 const list = `-- name: List :many
 SELECT
-	id, email, name, external_id, admin
+	id, email, name, external_id, admin, section_code
 FROM
 	users
 ORDER BY
@@ -215,6 +228,7 @@ func (q *Queries) List(ctx context.Context) ([]*User, error) {
 			&i.Name,
 			&i.ExternalID,
 			&i.Admin,
+			&i.SectionCode,
 		); err != nil {
 			return nil, err
 		}
@@ -228,7 +242,7 @@ func (q *Queries) List(ctx context.Context) ([]*User, error) {
 
 const listGlobalAdmins = `-- name: ListGlobalAdmins :many
 SELECT
-	u.id, u.email, u.name, u.external_id, u.admin
+	u.id, u.email, u.name, u.external_id, u.admin, u.section_code
 FROM
 	users u
 WHERE
@@ -253,6 +267,7 @@ func (q *Queries) ListGlobalAdmins(ctx context.Context) ([]*User, error) {
 			&i.Name,
 			&i.ExternalID,
 			&i.Admin,
+			&i.SectionCode,
 		); err != nil {
 			return nil, err
 		}
@@ -426,16 +441,18 @@ UPDATE users
 SET
 	name = $1,
 	email = LOWER($2),
-	external_id = $3
+	external_id = $3,
+	section_code = $4
 WHERE
-	id = $4
+	id = $5
 `
 
 type UpdateParams struct {
-	Name       string
-	Email      string
-	ExternalID string
-	ID         uuid.UUID
+	Name        string
+	Email       string
+	ExternalID  string
+	SectionCode *string
+	ID          uuid.UUID
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
@@ -443,6 +460,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
 		arg.Name,
 		arg.Email,
 		arg.ExternalID,
+		arg.SectionCode,
 		arg.ID,
 	)
 	return err

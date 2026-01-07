@@ -30,7 +30,7 @@ func (q *Queries) AddMember(ctx context.Context, arg AddMemberParams) error {
 
 const getMember = `-- name: GetMember :one
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code
 FROM
 	group_members
 	JOIN users ON users.id = group_members.user_id
@@ -53,13 +53,14 @@ func (q *Queries) GetMember(ctx context.Context, arg GetMemberParams) (*User, er
 		&i.Name,
 		&i.ExternalID,
 		&i.Admin,
+		&i.SectionCode,
 	)
 	return &i, err
 }
 
 const getMemberByEmail = `-- name: GetMemberByEmail :one
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code
 FROM
 	group_members
 	JOIN users ON users.id = group_members.user_id
@@ -82,6 +83,7 @@ func (q *Queries) GetMemberByEmail(ctx context.Context, arg GetMemberByEmailPara
 		&i.Name,
 		&i.ExternalID,
 		&i.Admin,
+		&i.SectionCode,
 	)
 	return &i, err
 }
@@ -147,7 +149,7 @@ func (q *Queries) ListForTeamMember(ctx context.Context, arg ListForTeamMemberPa
 
 const listForUser = `-- name: ListForUser :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
@@ -203,6 +205,7 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 			&i.User.Name,
 			&i.User.ExternalID,
 			&i.User.Admin,
+			&i.User.SectionCode,
 			&i.Group.Name,
 			&i.Group.TeamSlug,
 			&i.Group.Category,
@@ -222,7 +225,7 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 
 const listMembers = `-- name: ListMembers :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
@@ -285,6 +288,7 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 			&i.User.Name,
 			&i.User.ExternalID,
 			&i.User.Admin,
+			&i.User.SectionCode,
 			&i.Group.Name,
 			&i.Group.TeamSlug,
 			&i.Group.Category,

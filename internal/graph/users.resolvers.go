@@ -32,6 +32,13 @@ func (r *queryResolver) Me(ctx context.Context) (authz.AuthenticatedUser, error)
 	return authz.ActorFromContext(ctx).User, nil
 }
 
+func (r *userResolver) Section(ctx context.Context, obj *user.User) (*section.Section, error) {
+	if obj.SectionCode == nil {
+		return nil, nil
+	}
+	return section.Get(ctx, *obj.SectionCode)
+}
+
 func (r *userResolver) Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {

@@ -51,7 +51,7 @@ func (q *Queries) Get(ctx context.Context, name string) (*GetRow, error) {
 
 const listMembers = `-- name: ListMembers :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
@@ -114,6 +114,7 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 			&i.User.Name,
 			&i.User.ExternalID,
 			&i.User.Admin,
+			&i.User.SectionCode,
 			&i.Group.Name,
 			&i.Group.TeamSlug,
 			&i.Group.Category,

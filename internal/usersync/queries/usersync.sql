@@ -22,9 +22,15 @@ ORDER BY
 
 -- name: Create :one
 INSERT INTO
-	users (name, email, external_id, admin)
+	users (name, email, external_id, admin, section_code)
 VALUES
-	(@name, LOWER(@email), @external_id, FALSE)
+	(
+		@name,
+		LOWER(@email),
+		@external_id,
+		FALSE,
+		@section_code
+	)
 RETURNING
 	*
 ;
@@ -34,7 +40,8 @@ UPDATE users
 SET
 	name = @name,
 	email = LOWER(@email),
-	external_id = @external_id
+	external_id = @external_id,
+	section_code = @section_code
 WHERE
 	id = @id
 ;

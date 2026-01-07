@@ -15,11 +15,12 @@ import (
 const luaUserTypeName = "User"
 
 type User struct {
-	ID         uuid.UUID
-	Name       string
-	Email      string
-	ExternalID string
-	Admin      bool
+	ID          uuid.UUID
+	Name        string
+	Email       string
+	ExternalID  string
+	Admin       bool
+	SectionCode *string
 }
 
 func userMetatable() *spec.Typemetatable {
@@ -42,6 +43,11 @@ func userMetatable() *spec.Typemetatable {
 					Name: "externalID?",
 					Type: []spec.ArgumentType{spec.ArgumentTypeString},
 					Doc:  "The externalID of the user to create",
+				},
+				{
+					Name: "sectionCode?",
+					Type: []spec.ArgumentType{spec.ArgumentTypeString},
+					Doc:  "The section code of the user to create",
 				},
 			},
 			Func: createUser,
@@ -81,6 +87,13 @@ func userMetatable() *spec.Typemetatable {
 				SetArguments: []spec.Argument{{Name: "admin", Type: []spec.ArgumentType{spec.ArgumentTypeBoolean}}},
 				Func:         userGetSetAdmin,
 			},
+			{
+				Name:         "sectionCode",
+				Doc:          "The section code of the user",
+				GetReturns:   []spec.ArgumentType{spec.ArgumentTypeString},
+				SetArguments: []spec.Argument{{Name: "sectionCode?", Type: []spec.ArgumentType{spec.ArgumentTypeString}}},
+				Func:         userGetSetExternalID,
+			},
 		},
 	}
 }
@@ -106,6 +119,7 @@ func createUser(L *lua.LState) int {
 	name := L.OptString(1, "")
 	email := L.OptString(2, "")
 	externalID := L.OptString(3, "")
+	var section *string
 
 	if name == "" {
 		name = fmt.Sprintf("name-%v", userIndex.Next())
@@ -116,11 +130,15 @@ func createUser(L *lua.LState) int {
 	if externalID == "" {
 		externalID = uuid.NewString()
 	}
+	if optSection := L.OptString(4, ""); optSection != "" {
+		section = &optSection
+	}
 
 	user, err := db.Create(L.Context(), usersyncsql.CreateParams{
-		Name:       name,
-		Email:      email,
-		ExternalID: externalID,
+		Name:        name,
+		Email:       email,
+		ExternalID:  externalID,
+		SectionCode: section,
 	})
 	if err != nil {
 		L.RaiseError("failed to create user: %s", err)
@@ -131,11 +149,12 @@ func createUser(L *lua.LState) int {
 	}
 
 	ret := &User{
-		ID:         user.ID,
-		Name:       user.Name,
-		Email:      user.Email,
-		ExternalID: user.ExternalID,
-		Admin:      user.Admin,
+		ID:          user.ID,
+		Name:        user.Name,
+		Email:       user.Email,
+		ExternalID:  user.ExternalID,
+		Admin:       user.Admin,
+		SectionCode: user.SectionCode,
 	}
 	ud := L.NewUserData()
 	ud.Value = ret

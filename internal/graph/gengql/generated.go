@@ -673,6 +673,7 @@ type ComplexityRoot struct {
 		IsAdmin          func(childComplexity int) int
 		IsSectionManager func(childComplexity int) int
 		Name             func(childComplexity int) int
+		Section          func(childComplexity int) int
 		Teams            func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int
 	}
 
@@ -812,6 +813,7 @@ type TeamMemberResolver interface {
 	Groups(ctx context.Context, obj *team.TeamMember) ([]*group.Group, error)
 }
 type UserResolver interface {
+	Section(ctx context.Context, obj *user.User) (*section.Section, error)
 	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error)
 
 	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
@@ -3230,6 +3232,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.Name(childComplexity), true
+	case "User.section":
+		if e.complexity.User.Section == nil {
+			break
+		}
+
+		return e.complexity.User.Section(childComplexity), true
 	case "User.teams":
 		if e.complexity.User.Teams == nil {
 			break
@@ -6418,6 +6426,11 @@ type User implements Node {
 	externalID: String!
 
 	"""
+	The section the user belongs to, nullable in case the user has an invalid section, i.e. not synced to the database.
+	"""
+	section: Section
+
+	"""
 	List of teams the user is connected to.
 	"""
 	teams(
@@ -9125,6 +9138,8 @@ func (ec *executionContext) fieldContext_GroupMember_user(_ context.Context, fie
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -11676,6 +11691,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -13649,6 +13666,8 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_user(_ context
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -15248,6 +15267,8 @@ func (ec *executionContext) fieldContext_Section_manager(_ context.Context, fiel
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -19004,6 +19025,8 @@ func (ec *executionContext) fieldContext_TeamMember_user(_ context.Context, fiel
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -19921,6 +19944,45 @@ func (ec *executionContext) fieldContext_User_externalID(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _User_section(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_section,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.User().Section(ctx, obj)
+		},
+		nil,
+		ec.marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_section(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Section_id(ctx, field)
+			case "code":
+				return ec.fieldContext_Section_code(ctx, field)
+			case "name":
+				return ec.fieldContext_Section_name(ctx, field)
+			case "manager":
+				return ec.fieldContext_Section_manager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_teams(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -20105,6 +20167,8 @@ func (ec *executionContext) fieldContext_UserConnection_nodes(_ context.Context,
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -20562,6 +20626,8 @@ func (ec *executionContext) fieldContext_UserEdge_node(_ context.Context, field 
 				return ec.fieldContext_User_name(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
 			case "teams":
 				return ec.fieldContext_User_teams(ctx, field)
 			case "isAdmin":
@@ -29441,6 +29507,39 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "section":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_section(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "teams":
 			field := field
 
@@ -33285,6 +33384,13 @@ func (ec *executionContext) marshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwa
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v *section.Section) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Section(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrder(ctx context.Context, v any) (*section.SectionOrder, error) {

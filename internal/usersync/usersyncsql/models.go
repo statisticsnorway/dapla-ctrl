@@ -85,11 +85,12 @@ type Section struct {
 }
 
 type User struct {
-	ID         uuid.UUID
-	Email      string
-	Name       string
-	ExternalID string
-	Admin      bool
+	ID          uuid.UUID
+	Email       string
+	Name        string
+	ExternalID  string
+	Admin       bool
+	SectionCode *string
 }
 
 type UserRole struct {
