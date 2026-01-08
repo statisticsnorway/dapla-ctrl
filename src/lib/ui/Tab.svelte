@@ -3,12 +3,13 @@
 		href?: string;
 		active?: boolean;
 		title?: string;
+		[key: string]: unknown;
 	}
 
-	let { href = '', active = false, title = '' }: Props = $props();
+	let { href = '', active = false, title = '', ...rest }: Props = $props();
 </script>
 
-<a {href} class="tab" class:active>
+<a {...rest} {href} class="tab" class:active>
 	{title}
 </a>
 

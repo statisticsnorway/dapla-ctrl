@@ -44,11 +44,17 @@
 			<Button as="a" size="medium" href="/team/create" variant="secondary">+ Opprett team</Button>
 		{/if}
 	</div>
-	<div class="container">
+	<div class="container" data-sveltekit-preload-data="hover">
 		<div>
 			<Tabs>
-				<Tab href="/" active={page.url.pathname === '/'} title="Mine team ({userTeamsCount})" />
 				<Tab
+					data-sveltekit-noscroll
+					href="/"
+					active={page.url.pathname === '/'}
+					title="Mine team ({userTeamsCount})"
+				/>
+				<Tab
+					data-sveltekit-noscroll
 					href="/teams"
 					active={page.url.pathname === '/teams'}
 					title="Alle teams ({allTeamsCount})"
