@@ -2217,6 +2217,11 @@ type User implements Node {
   """The full name of the user."""
   name: String!
 
+  """
+  The section the user belongs to, nullable in case the user has an invalid section, i.e. not synced to the database.
+  """
+  section: Section
+
   """List of teams the user is connected to."""
   teams(
     """Get items after this cursor."""
