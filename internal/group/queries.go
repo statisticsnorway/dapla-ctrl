@@ -190,14 +190,17 @@ func AddMember(ctx context.Context, input AddGroupMemberInput, actor *authz.Acto
 		if err := db(ctx).AddMember(ctx, params); err != nil {
 			return err
 		}
-		teamSlug := strings.Split(input.GroupName, "-")[0]
+		group, err := db(ctx).Get(ctx, input.GroupName)
+		if err != nil {
+			return err
+		}
 
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionAdded,
 			Actor:        actor.User,
 			ResourceType: ActivityLogEntryResourceTypeGroup,
 			ResourceName: input.GroupName,
-			TeamSlug:     (*slug.Slug)(&teamSlug),
+			TeamSlug:     &group.TeamSlug,
 			Data: &GroupMemberAddedActivityLogEntryData{
 				UserUUID:  input.UserID,
 				UserEmail: input.UserEmail,
@@ -225,14 +228,17 @@ func RemoveMember(ctx context.Context, input RemoveGroupMemberInput, actor *auth
 		if err := db(ctx).RemoveMember(ctx, params); err != nil {
 			return err
 		}
-		teamSlug := strings.Split(input.GroupName, "-")[0]
+		group, err := db(ctx).Get(ctx, input.GroupName)
+		if err != nil {
+			return err
+		}
 
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionRemoved,
 			Actor:        actor.User,
 			ResourceType: ActivityLogEntryResourceTypeGroup,
 			ResourceName: input.GroupName,
-			TeamSlug:     (*slug.Slug)(&teamSlug),
+			TeamSlug:     &group.TeamSlug,
 			Data: &GroupMemberRemovedActivityLogEntryData{
 				UserUUID:  input.UserID,
 				UserEmail: input.UserEmail,

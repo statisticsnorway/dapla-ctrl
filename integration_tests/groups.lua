@@ -4,7 +4,7 @@ admin:admin(true)
 local member = User.new("Group Member", "member@example.com", "group-member")
 local other = User.new("Other Member", "other-member@example.com", "other-member")
 
-local team = Team.new("slug", "purpose", "724")
+local team = Team.new("slug-one", "purpose", "724")
 
 Test.gql("Non-admin member cannot create group", function(t)
 	t.addHeader("x-user-email", member:email())

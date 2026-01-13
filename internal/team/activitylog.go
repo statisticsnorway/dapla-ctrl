@@ -86,11 +86,6 @@ func init() {
 
 	activitylog.RegisterFilter("TEAM_CREATED", activitylog.ActivityLogEntryActionCreated, activityLogEntryResourceTypeTeam)
 	activitylog.RegisterFilter("TEAM_UPDATED", activitylog.ActivityLogEntryActionUpdated, activityLogEntryResourceTypeTeam)
-	activitylog.RegisterFilter("TEAM_CREATE_DELETE_KEY", activityLogEntryActionCreateDeleteKey, activityLogEntryResourceTypeTeam)
-	activitylog.RegisterFilter("TEAM_CONFIRM_DELETE_KEY", activityLogEntryActionConfirmDeleteKey, activityLogEntryResourceTypeTeam)
-	activitylog.RegisterFilter("TEAM_MEMBER_ADDED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeTeam)
-	activitylog.RegisterFilter("TEAM_MEMBER_REMOVED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeTeam)
-	activitylog.RegisterFilter("TEAM_MEMBER_SET_ROLE", activityLogEntryActionSetMemberRole, activityLogEntryResourceTypeTeam)
 }
 
 type TeamCreatedActivityLogEntry struct {
