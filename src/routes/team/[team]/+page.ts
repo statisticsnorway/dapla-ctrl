@@ -37,6 +37,13 @@ export async function load(event) {
 			: {
 					displayName: '',
 					purpose: '',
+					slug: '',
+					isManaged: false,
+					section: {
+						code: '',
+						name: '',
+						manager: null
+					},
 					activityLog: { nodes: [] }
 				})
 	};

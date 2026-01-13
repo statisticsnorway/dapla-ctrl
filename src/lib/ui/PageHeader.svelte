@@ -5,6 +5,12 @@
 	import { Heading, Tag } from '@nais/ds-svelte-community';
 	import AddToFavorites from '$lib/ui/AddToFavorites.svelte';
 
+	interface Props {
+		actions?: import('svelte').Snippet;
+	}
+
+	let { actions }: Props = $props();
+
 	const breadcrumbs = $derived(page.data?.meta?.breadcrumbs ?? []);
 	const heading = $derived(page.data?.meta?.title ?? '');
 	const tag = $derived(page.data?.meta?.tag ?? null);
@@ -37,6 +43,9 @@
 			<Heading level="1" size="xlarge">{heading}</Heading>
 			{#if tag}
 				<Tag variant={tag.variant}>{tag.label}</Tag>
+			{/if}
+			{#if actions}
+				{@render actions()}
 			{/if}
 		</div>
 		{#if breadcrumbs.length === 0}
