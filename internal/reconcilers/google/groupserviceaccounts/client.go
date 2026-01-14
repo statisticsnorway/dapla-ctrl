@@ -33,6 +33,10 @@ func NewGoogleServiceAccounts(ctx context.Context) (*GoogleServiceAccounts, erro
 func (g *GoogleServiceAccounts) GetOrCreate(group, projectId string) (*iam.ServiceAccount, error) {
 	saName := fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", group, projectId)
 	sa, err := g.client.Projects.ServiceAccounts.Get(saName).Do()
+
+	// TODO: replace with
+	// 	if gErr, ok := errors.AsType[*googleapi.Error](err); ok && gErr.Code == http.StatusNotFound
+	// when go 1.26 is out. Also, do this anywhere this nightmare fuel is used
 	var apiError *googleapi.Error
 	if errors.As(err, &apiError) && apiError.Code == http.StatusNotFound {
 		return g.createServiceAccount(group, projectId)
