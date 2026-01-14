@@ -2,17 +2,13 @@ package groupserviceaccounts
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
-	"google.golang.org/api/googleapi"
-	"google.golang.org/api/iam/v1"
 )
 
 const (
@@ -24,24 +20,35 @@ const (
 )
 
 type reconciler struct {
-	mainCtx context.Context
-	client  *iam.Service
-	config  groupSaConfig
+	client GroupServiceAccounts
+	config groupSaConfig
 }
 
 type groupSaConfig struct {
 	DaplaGroupSaProjectId string
 }
 
-func New(ctx context.Context) (reconcilers.Reconciler, error) {
-	client, err := iam.NewService(ctx)
-	if err != nil {
-		return nil, err
+type optFunc func(*reconciler)
+
+func WithGroupServiceAccounts(gsa GroupServiceAccounts) optFunc {
+	return func(r *reconciler) {
+		r.client = gsa
+	}
+}
+
+func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
+	r := new(reconciler)
+
+	for _, opt := range opts {
+		opt(r)
 	}
 
-	r := &reconciler{
-		mainCtx: ctx,
-		client:  client,
+	if r.client == nil {
+		client, err := NewGoogleServiceAccounts(ctx)
+		if err != nil {
+			return nil, err
+		}
+		r.client = client
 	}
 
 	return r, nil
@@ -69,6 +76,9 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+	if err := r.updateConfig(ctx, client); err != nil {
+		return fmt.Errorf("error getting reconciler config: %w", err)
+	}
 
 	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
@@ -87,58 +97,28 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 }
 
 func (r *reconciler) reconcileGroup(groupName string) error {
-	saName := fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", groupName, r.config.DaplaGroupSaProjectId)
-
-	sa, err := r.client.Projects.ServiceAccounts.Get(saName).Do()
-	var apiError *googleapi.Error
-	if errors.As(err, &apiError) {
-		if apiError.Code == http.StatusNotFound {
-			return r.createServiceAccount(groupName, r.config.DaplaGroupSaProjectId)
-		}
-		return fmt.Errorf("unexpected status code getting service account: %w", err)
-	} else if err != nil {
-		return fmt.Errorf("unexpected error getting service account: %w", err)
+	sa, err := r.client.GetOrCreate(groupName, r.config.DaplaGroupSaProjectId)
+	if err != nil {
+		return err
 	}
 
 	if sa.Description == saDescription {
 		return nil
 	}
 
-	req := iam.PatchServiceAccountRequest{
-		ServiceAccount: &iam.ServiceAccount{
-			Description: saDescription,
-		},
-		UpdateMask: "description",
-	}
-
-	if _, err := r.client.Projects.ServiceAccounts.Patch(saName, &req).Do(); err != nil {
-		return fmt.Errorf("unexpected error patching sa description: %w", err)
+	if err := r.client.UpdateDescription(groupName, saDescription, r.config.DaplaGroupSaProjectId); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (r *reconciler) createServiceAccount(groupName string, projectId string) error {
-	req := iam.CreateServiceAccountRequest{
-		AccountId: groupName,
-		ServiceAccount: &iam.ServiceAccount{
-			Description: saDescription,
-		},
-	}
-
-	if _, err := r.client.Projects.ServiceAccounts.Create(fmt.Sprintf("projects/%s", projectId), &req).Do(); err != nil {
-		return fmt.Errorf("unexpected error creating service account: %w", err)
-	}
-
-	return nil
-}
-
-func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) (*groupSaConfig, error) {
+func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
 	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
 		ReconcilerName: r.Name(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get reconciler config: %w", err)
+		return fmt.Errorf("get reconciler config: %w", err)
 	}
 
 	gac := groupSaConfig{}
@@ -148,11 +128,12 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		case configDaplaGroupSaProjectIdKey:
 			gac.DaplaGroupSaProjectId = c.Value
 		default:
-			return nil, fmt.Errorf("unknown config key %q", c.Key)
+			return fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
-	return &gac, nil
+	r.config = gac
+	return nil
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
