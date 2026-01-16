@@ -10,6 +10,7 @@ query TeamRoles($team: Slug!) {
 		deletionInProgress
 		lastSuccessfulSync
 		purpose
+		isManaged
 		displayName
 	}
 }

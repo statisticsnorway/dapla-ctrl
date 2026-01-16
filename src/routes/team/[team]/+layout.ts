@@ -52,6 +52,7 @@ export async function load(event) {
 					externalResources: { gitHubTeam: null },
 					displayName: '',
 					purpose: '',
+					isManaged: true,
 					slackChannel: '',
 					members: { pageInfo: { totalCount: 0 } }
 				}),

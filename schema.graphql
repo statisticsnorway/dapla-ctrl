@@ -252,6 +252,13 @@ input CreateTeamInput {
   displayName: String!
 
   """
+  The autonomy level of the team.
+  
+  If this is not provided, it will be set to true.
+  """
+  isManaged: Boolean
+
+  """
   The purpose / description of the team.
   
   What is the team for? What is the team working on? This value is meant for human consumption, and should be enough

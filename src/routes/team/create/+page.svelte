@@ -14,6 +14,12 @@
 		$UserInfo.data?.me.__typename === 'User' ? $UserInfo.data?.me.isAdmin : false
 	);
 
+	const isSection7xxManager = $derived(
+		$UserInfo.data?.me.__typename === 'User'
+			? $UserInfo.data?.me.isSectionManager && $UserInfo.data?.me.section?.code?.startsWith('7')
+			: false
+	);
+
 	let displayNameError = $state('');
 
 	let teamSlugError = $state('');
@@ -179,6 +185,13 @@
 		</TextField>
 		{#if purposeError !== 'no_error' && purposeError !== ''}
 			<p style:color="var(--ax-text-danger)">{purposeError}</p>
+		{/if}
+		{#if isAdmin || isSection7xxManager}
+			<br />
+			<Select name="isManaged" label="Autonomitetsnivå" value={form?.input.isManaged}>
+				<option value="">Managed</option>
+				<option value="false">Self-managed</option>
+			</Select>
 		{/if}
 		{#if isAdmin}
 			<br />

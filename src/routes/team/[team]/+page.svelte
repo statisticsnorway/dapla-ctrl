@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Alert, CopyButton } from '@nais/ds-svelte-community';
+	import { Alert, CopyButton, HelpText } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import TeamOverviewActivityLog from '$lib/domain/activity/team-overview/TeamOverviewActivityLog.svelte';
 
@@ -9,7 +9,7 @@
 
 	function getAutonomyLevelText(managed: boolean | undefined): string {
 		if (managed === undefined) return 'Ikke spesifisert';
-		return managed ? 'Managed' : 'Self-Managed';
+		return managed ? 'MANAGED' : 'SELF_MANAGED';
 	}
 </script>
 
@@ -55,7 +55,14 @@
 			</div>
 		</div>
 		<div class="info-item">
-			<div class="value">{getAutonomyLevelText(isManaged)}</div>
+			<div class="value">
+				{getAutonomyLevelText(isManaged)}
+				<HelpText title="About Managed Teams"
+					>Et managed Dapla-team er et team som kun kan bruke tjenester som tilbys på Dapla. Et
+					self-managed Dapla-team er et team som står helt fritt til å definere sin egen
+					infrastruktur og er ansvarlig for at den er satt opp i henhold til SSBs krav.
+				</HelpText>
+			</div>
 		</div>
 	</div>
 	<div class="right-section">

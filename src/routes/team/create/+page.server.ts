@@ -18,12 +18,19 @@ export const actions = {
 			slug: (data.get('name') as string) || '',
 			displayName: (data.get('displayname') as string) || '',
 			purpose: (data.get('description') as string) || '',
-			sectionCode: (data.get('section') as string) || ''
+			sectionCode: (data.get('section') as string) || '',
+			isManaged: (data.get('isManaged') as string) || 'true'
 		};
 
 		const resp = await query.mutate(
 			{
-				input
+				input: {
+					slug: input.slug,
+					displayName: input.displayName,
+					purpose: input.purpose,
+					sectionCode: input.sectionCode,
+					isManaged: input.isManaged !== 'false'
+				}
 			},
 			{ event }
 		);

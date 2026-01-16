@@ -5,6 +5,9 @@ query UserInfo {
 			name
 			isAdmin
 			isSectionManager
+			section {
+				code
+			}
 		}
 	}
 }
