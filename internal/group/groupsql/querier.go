@@ -22,6 +22,7 @@ type Querier interface {
 	ListForTeamMember(ctx context.Context, arg ListForTeamMemberParams) ([]*ListForTeamMemberRow, error)
 	ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)
+	RefreshTeamMembers(ctx context.Context) error
 	RemoveMember(ctx context.Context, arg RemoveMemberParams) error
 	TeamExists(ctx context.Context, argSlug slug.Slug) (bool, error)
 }

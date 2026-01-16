@@ -13,6 +13,7 @@ type Querier interface {
 	GetByExternalId(ctx context.Context, externalID string) (*User, error)
 	GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*User, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
+	ListTeamMembersForUser(ctx context.Context, arg ListTeamMembersForUserParams) ([]*ListTeamMembersForUserRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

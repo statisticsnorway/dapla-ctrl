@@ -72,6 +72,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.User.TeamMembers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.User.Teams = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}

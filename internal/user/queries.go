@@ -61,3 +61,25 @@ func GetByExternalId(ctx context.Context, id string) (*User, error) {
 	}
 	return toGraphUser(u), nil
 }
+
+func ListTeamMembersForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *UserOrder) (*UserConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListTeamMembersForUser(ctx, usersql.ListTeamMembersForUserParams{
+		UserID:  userID,
+		Offset:  page.Offset(),
+		Limit:   page.Limit(),
+		OrderBy: orderBy.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	total := 0
+	if len(ret) > 0 {
+		total = int(ret[0].TotalCount)
+	}
+	return pagination.NewConvertConnection(ret, page, total, func(from *usersql.ListTeamMembersForUserRow) *User {
+		return toGraphUser(&from.User)
+	}), nil
+}

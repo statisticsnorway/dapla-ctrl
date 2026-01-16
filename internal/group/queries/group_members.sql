@@ -112,3 +112,7 @@ WHERE
 	user_id = @user_id
 	AND group_name = @group_name
 ;
+
+-- name: RefreshTeamMembers :exec
+REFRESH MATERIALIZED VIEW team_members
+;

@@ -195,6 +195,9 @@ func AddMember(ctx context.Context, input AddGroupMemberInput, actor *authz.Acto
 			return err
 		}
 
+		// Not the end of the world if it fails
+		_ = db(ctx).RefreshTeamMembers(ctx)
+
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionAdded,
 			Actor:        actor.User,
@@ -232,6 +235,8 @@ func RemoveMember(ctx context.Context, input RemoveGroupMemberInput, actor *auth
 		if err != nil {
 			return err
 		}
+		// Not the end of the world if it fails
+		_ = db(ctx).RefreshTeamMembers(ctx)
 
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionRemoved,

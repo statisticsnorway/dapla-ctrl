@@ -48,6 +48,15 @@ func (r *userResolver) Teams(ctx context.Context, obj *user.User, first *int, af
 	return team.ListForUser(ctx, obj.UUID, page, orderBy)
 }
 
+func (r *userResolver) TeamMembers(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.ListTeamMembersForUser(ctx, obj.UUID, page, orderBy)
+}
+
 func (r *userResolver) IsSectionManager(ctx context.Context, obj *user.User) (bool, error) {
 	return section.IsUserSectionManager(ctx, obj.UUID)
 }

@@ -159,3 +159,95 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 	}
 	return items, nil
 }
+
+const listTeamMembersForUser = `-- name: ListTeamMembersForUser :many
+SELECT
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
+	COUNT(*) OVER () AS total_count
+FROM
+	(
+		SELECT
+			user_id
+		FROM
+			(
+				SELECT
+					team_slug AS slug
+				FROM
+					team_members
+				WHERE
+					team_members.user_id = $1
+			) t
+			JOIN team_members ON team_members.team_slug = t.slug
+		WHERE
+			team_members.user_id != $1
+		GROUP BY
+			team_members.user_id
+	) t
+	JOIN users ON users.id = t.user_id
+GROUP BY
+	users.id
+ORDER BY
+	CASE
+		WHEN $2::TEXT = 'name:asc' THEN users.name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'name:desc' THEN users.name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'email:asc' THEN users.email
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	users.name,
+	users.email ASC
+LIMIT
+	$4
+OFFSET
+	$3
+`
+
+type ListTeamMembersForUserParams struct {
+	UserID  uuid.UUID
+	OrderBy string
+	Offset  int32
+	Limit   int32
+}
+
+type ListTeamMembersForUserRow struct {
+	User       User
+	TotalCount int64
+}
+
+func (q *Queries) ListTeamMembersForUser(ctx context.Context, arg ListTeamMembersForUserParams) ([]*ListTeamMembersForUserRow, error) {
+	rows, err := q.db.Query(ctx, listTeamMembersForUser,
+		arg.UserID,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListTeamMembersForUserRow{}
+	for rows.Next() {
+		var i ListTeamMembersForUserRow
+		if err := rows.Scan(
+			&i.User.ID,
+			&i.User.Email,
+			&i.User.Name,
+			&i.User.ExternalID,
+			&i.User.Admin,
+			&i.User.SectionCode,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
