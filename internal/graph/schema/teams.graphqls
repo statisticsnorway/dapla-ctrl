@@ -216,6 +216,13 @@ input CreateTeamInput {
 	Dapla Admins. Non-admins cannot set this to a custom value.
 	"""
 	sectionCode: String
+
+	"""
+	The autonomy level of the team.
+
+	If this is not provided, it will be set to true.
+	"""
+	isManaged: Boolean
 }
 
 input UpdateTeamInput {

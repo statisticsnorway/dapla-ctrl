@@ -33,6 +33,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -285,6 +286,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				DisplayName: "Dev Team",
 				Purpose:     "dev-purpose",
 				SectionCode: "724",
+				IsManaged:   ptr.To(true),
 			}
 			devteam, err = team.Create(ctx, input, actor)
 			if err != nil {
@@ -307,6 +309,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				DisplayName: strings.ToTitle(name.String()),
 				Purpose:     "some purpose",
 				SectionCode: "724",
+				IsManaged:   ptr.To(true),
 			}
 			_, err := team.Create(ctx, input, actor)
 			if err != nil {

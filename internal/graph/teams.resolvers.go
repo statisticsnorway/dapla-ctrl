@@ -15,6 +15,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
+	"k8s.io/utils/ptr"
 )
 
 func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeamInput) (*team.CreateTeamPayload, error) {
@@ -24,7 +25,9 @@ func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeam
 		return nil, err
 	}
 
-	if !actor.User.IsAdmin() {
+	isRegularUser := !actor.User.IsAdmin()
+
+	if isRegularUser {
 		s, err := section.GetByManagerId(ctx, actor.User.GetID())
 		if errors.As(err, &section.ErrNotFound{}) {
 			return nil, apierror.Errorf("You do not have permission to create teams.")
@@ -51,6 +54,23 @@ func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeam
 
 	if strings.HasPrefix(input.Slug.String(), "team") {
 		return nil, &slug.ErrInvalidSlug{Message: "The name prefix 'team' is redundant. When you create a team, it is by definition a team. Try again with a different name, perhaps just removing the prefix?"}
+	}
+
+	if input.IsManaged == nil {
+		input.IsManaged = ptr.To(true)
+	}
+
+	if isRegularUser && !*input.IsManaged {
+		// Require that the actor is a section manager of a 7xx section
+		s, err := section.GetByManagerId(ctx, actor.User.GetID())
+		if errors.As(err, &section.ErrNotFound{}) {
+			return nil, apierror.Errorf("You do not have permission to create self_managed teams.")
+		} else if err != nil {
+			return nil, err
+		}
+		if s.Code[0] != '7' {
+			return nil, apierror.Errorf("Only Section managers in IT department may create self-managed teams.")
+		}
 	}
 
 	t, err := team.Create(ctx, &input, actor)

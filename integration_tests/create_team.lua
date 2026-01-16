@@ -1,10 +1,20 @@
 local user = User.new()
 local unauthorized = User.new()
+local ITmanagers = User.new()
+local notITmanagers = User.new()
 local existingTeam = Team.new("slug-one", "purpose", "724")
 
 Helper.SQLExec([[
 	DELETE FROM user_roles WHERE user_id = $1
 ]], unauthorized:id())
+
+Helper.SQLExec([[
+    UPDATE sections SET  manager_id = $1 WHERE code = '722'
+]], ITmanagers:id())
+
+Helper.SQLExec([[
+    UPDATE sections SET  manager_id = $1 WHERE code = '811'
+]], notITmanagers:id())
 
 Test.gql("Create team with user that is not authorized", function(t)
 	t.addHeader("x-user-email", unauthorized:email())
@@ -112,6 +122,110 @@ Test.gql("Create team", function(t)
 		},
 	}
 end)
+
+Test.gql("Admin can create self-managed team", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query [[
+		mutation {
+			createTeam(
+				input: {
+					slug: "newadminteam"
+					displayName: "Slug One"
+					purpose: "some purpose"
+					sectionCode: "724"
+					isManaged: false
+				}
+			) {
+				team {
+					slug
+					isManaged
+				}
+			}
+		}
+	]]
+
+	t.check {
+		data = {
+			createTeam = {
+				team = {
+					slug = "newadminteam",
+					isManaged = false,
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("non-7xx-manager can NOT create self-managed team", function(t)
+	t.addHeader("x-user-email", notITmanagers:email())
+
+	t.query [[
+		mutation {
+			createTeam(
+				input: {
+					slug: "newnon7xxteam"
+					displayName: "Slug One"
+					purpose: "some purpose"
+					sectionCode: "811"
+					isManaged: false
+				}
+			) {
+				team {
+					slug
+					isManaged
+				}
+			}
+		}
+	]]
+
+	t.check {
+		data = Null,
+		errors = {
+			{
+				message = "Only Section managers in IT department may create self-managed teams.",
+				path = {
+					"createTeam",
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("7xx-manager can create self-managed team", function(t)
+	t.addHeader("x-user-email", ITmanagers:email())
+
+	t.query [[
+		mutation {
+			createTeam(
+				input: {
+					slug: "new7xxteam"
+					displayName: "Slug One"
+					purpose: "some purpose"
+					sectionCode: "722"
+					isManaged: false
+				}
+			) {
+				team {
+					slug
+					isManaged
+				}
+			}
+		}
+	]]
+
+	t.check {
+		data = {
+			createTeam = {
+				team = {
+					slug = "new7xxteam",
+					isManaged = false,
+				},
+			},
+		},
+	}
+end)
+
 
 Test.gql("Create team with invalid slug", function(t)
 	t.addHeader("x-user-email", user:email())

@@ -301,6 +301,7 @@ type CreateTeamInput struct {
 	DisplayName string    `json:"displayName"`
 	Purpose     string    `json:"purpose"`
 	SectionCode string    `json:"sectionCode"`
+	IsManaged   *bool     `json:"isManaged"`
 }
 
 func (i *CreateTeamInput) Validate(ctx context.Context) error {
@@ -326,6 +327,10 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 
 	if i.DisplayName == "" {
 		verr.Add("displayName", "This is not a valid display name.")
+	}
+
+	if i.IsManaged == nil {
+		verr.Add("isManaged", "Whether the team should be managed must be specified.")
 	}
 
 	return verr.NilIfEmpty()

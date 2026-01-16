@@ -6216,6 +6216,13 @@ input CreateTeamInput {
 	Dapla Admins. Non-admins cannot set this to a custom value.
 	"""
 	sectionCode: String
+
+	"""
+	The autonomy level of the team.
+
+	If this is not provided, it will be set to true.
+	"""
+	isManaged: Boolean
 }
 
 input UpdateTeamInput {
@@ -22923,7 +22930,7 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "purpose", "sectionCode"}
+	fieldsInOrder := [...]string{"slug", "displayName", "purpose", "sectionCode", "isManaged"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -22958,6 +22965,13 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.SectionCode = data
+		case "isManaged":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isManaged"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.IsManaged = data
 		}
 	}
 
