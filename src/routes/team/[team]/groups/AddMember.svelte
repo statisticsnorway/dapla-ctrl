@@ -21,6 +21,7 @@
 				nodes {
 					id
 					email
+					name
 				}
 			}
 			group(name: $group) {
@@ -64,12 +65,12 @@
 		}
 	`);
 
-	let emails = $derived.by(() => {
-		const allEmails = $store.data?.users.nodes.map((user) => user.email) ?? [];
+	let users = $derived.by(() => {
+		const allUsers = $store.data?.users.nodes ?? [];
 		const groupMemberEmails = new Set(
 			$store.data?.group.members.nodes.map((member) => member.user.email) ?? []
 		);
-		return allEmails.filter((email) => !groupMemberEmails.has(email));
+		return allUsers.filter((user) => !groupMemberEmails.has(user.email));
 	});
 
 	let email: string = $state('');
@@ -131,8 +132,8 @@
 			{/snippet}
 		</TextField>
 		<datalist id="add-member-email">
-			{#each emails as email (email)}
-				<option value={email}>{email}</option>
+			{#each users as user (user.email)}
+				<option value={user.email}>{user.name}</option>
 			{/each}
 		</datalist>
 	</form>
