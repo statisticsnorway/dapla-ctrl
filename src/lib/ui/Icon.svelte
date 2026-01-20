@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		CogIcon,
 		HexagonGridIcon,
 		PersonGroupIcon,
 		PersonIcon,
@@ -20,8 +19,6 @@
 			case 'grupper':
 				return PersonGroupIcon;
 			case 'settings':
-			case 'instillinger':
-				return CogIcon;
 			case 'activity log':
 			case 'aktivitetslogg':
 				return ShieldLockIcon;

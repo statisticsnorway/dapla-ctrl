@@ -29,7 +29,6 @@ export const menuItems = ({
 		[menuItem('Teamoversikt')],
 		[
 			menuItem('Grupper', 'groups'),
-			(member || isAdmin) && menuItem('Instillinger', 'settings'),
 			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log')
 		].filter(Boolean) as { label: string; href: string; active?: boolean }[]
 	];
