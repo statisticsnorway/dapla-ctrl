@@ -1,16 +1,16 @@
 <script lang="ts">
+	import SearchButton from '$lib/domain/search/SearchButton.svelte';
 	import { themeSwitch } from '$lib/stores/theme.svelte';
+	import { Button } from '@nais/ds-svelte-community';
 	import {
 		ActionMenu,
-		ActionMenuCheckboxItem,
 		ActionMenuDivider,
 		ActionMenuItem,
 		InternalHeaderButton,
 		InternalHeaderTitle,
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
-	import { CogIcon } from '@nais/ds-svelte-community/icons';
-	import SearchButton from '$lib/domain/search/SearchButton.svelte';
+	import { CogIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
 
 	interface Props {
 		user:
@@ -32,6 +32,25 @@
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
+	<Button
+		style="background-color: inherit; color: inherit;"
+		onclick={() => {
+			if (themeSwitch.theme == 'dark') {
+				themeSwitch.setTheme('light');
+			} else {
+				themeSwitch.setTheme('dark');
+			}
+		}}
+	>
+		<span class="switch-theme-icon">
+			{#if themeSwitch.theme == 'dark'}
+				<SunIcon />
+			{:else}
+				<MoonIcon />
+			{/if}
+		</span>
+	</Button>
+
 	<SearchButton {userAgent} />
 	<InternalHeaderButton
 		as="a"
@@ -52,18 +71,6 @@
 			>
 			<ActionMenuDivider />
 		{/if}
-		<ActionMenuCheckboxItem
-			checked={themeSwitch.theme == 'dark'}
-			onchange={(checked) => {
-				if (!checked) {
-					themeSwitch.setTheme('light');
-				} else {
-					themeSwitch.setTheme('dark');
-				}
-			}}
-		>
-			Mørkt tema
-		</ActionMenuCheckboxItem>
 	</ActionMenu>
 </header>
 
@@ -85,5 +92,10 @@
 	.action-menu-link {
 		color: var(--ax-text-neutral);
 		text-decoration: none;
+	}
+	.switch-theme-icon {
+		display: flex;
+		align-items: center;
+		padding-top: 3px;
 	}
 </style>
