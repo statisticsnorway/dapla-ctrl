@@ -10,7 +10,7 @@ describe('menuItems', () => {
 					isAdmin: false
 				})
 			).toEqual([
-				[{ label: 'Teamoversikt', href: '/team/devteam', active: true }],
+				[{ label: 'Oversikt', href: '/team/devteam', active: true }],
 				[
 					{ label: 'Grupper', href: '/team/devteam/groups' },
 					{ label: 'Aktivitetslogg', href: '/team/devteam/activity-log' }

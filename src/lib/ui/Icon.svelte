@@ -12,7 +12,7 @@
 	const getComponent = (icon: string) => {
 		switch (icon.toLocaleLowerCase()) {
 			case 'team overview':
-			case 'teamoversikt':
+			case 'oversikt':
 				return HexagonGridIcon;
 			case 'members':
 			case 'groups':

@@ -26,7 +26,7 @@ export const menuItems = ({
 	const [, , team, page] = split;
 	const menuItem = item(`/team/${team}`, page);
 	return [
-		[menuItem('Teamoversikt')],
+		[menuItem('Oversikt')],
 		[
 			menuItem('Grupper', 'groups'),
 			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log')
