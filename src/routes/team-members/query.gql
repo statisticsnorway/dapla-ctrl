@@ -1,0 +1,44 @@
+query MyTeamMembers @cache(policy: CacheAndNetwork) {
+	me {
+		__typename
+		... on User {
+			id
+			teamMembers(first: 100) {
+				pageInfo {
+					totalCount
+				}
+				nodes {
+					id
+					name
+					email
+					section {
+						manager {
+							name
+							email
+						}
+					}
+					teams(first: 50) {
+						pageInfo {
+							totalCount
+						}
+						nodes {
+							groups {
+								name
+							}
+							team {
+								id
+								slug
+								section {
+									manager {
+										name
+										email
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

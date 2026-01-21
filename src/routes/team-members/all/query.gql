@@ -1,0 +1,55 @@
+query AllTeamMembers(
+	$after: Cursor
+	$before: Cursor
+	$first: Int
+	$last: Int
+	$orderBy: UserOrder
+) {
+	users(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+		pageInfo {
+			endCursor
+			hasNextPage
+			hasPreviousPage
+			pageEnd
+			pageStart
+			startCursor
+			totalCount
+		}
+		edges {
+			node {
+				id
+				name
+				email
+				section {
+					manager {
+						name
+						email
+					}
+				}
+				teams(first: 50) {
+					pageInfo {
+						totalCount
+					}
+					nodes {
+						groups {
+							name
+						}
+						team {
+							id
+							slug
+							section {
+								code
+								name
+								manager {
+									id
+									name
+									email
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -29,6 +29,13 @@
 	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem;">
 		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
+	<InternalHeaderButton
+		as="a"
+		href="/team-members"
+		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-16);"
+	>
+		Teammedlemmer
+	</InternalHeaderButton>
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
