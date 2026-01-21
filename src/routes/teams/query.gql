@@ -9,7 +9,7 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 			}
 		}
 	}
-	teams(first: 100) @paginate(mode: SinglePage) {
+	teams(first: 25) @paginate(mode: SinglePage) {
 		pageInfo {
 			hasNextPage
 			hasPreviousPage

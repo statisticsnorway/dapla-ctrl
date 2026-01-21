@@ -26,7 +26,7 @@
 </script>
 
 <header class="aksel-internalheader header">
-	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem;">
+	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem; margin-right: 3rem;">
 		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
 	<InternalHeaderButton
@@ -36,6 +36,8 @@
 	>
 		Teammedlemmer
 	</InternalHeaderButton>
+
+	<InternalHeaderButton as="a" href="/shared-data">Datadeling</InternalHeaderButton>
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 

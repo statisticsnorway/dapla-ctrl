@@ -9,6 +9,11 @@ directive @defer(
   label: String
 ) on FRAGMENT_SPREAD | INLINE_FRAGMENT
 
+"""
+Indicates exactly one field must be supplied and this field must not be `null`.
+"""
+directive @oneOf on INPUT_OBJECT
+
 enum ActivityLogActivityType {
   """Group was created."""
   GROUP_CREATED
@@ -900,6 +905,33 @@ type Query {
     last: Int
   ): ServiceAccountConnection!
 
+  """
+  Get a Shared Bucket by its name, e.g. 'ssb-my-team-data-delt-abc-prod'.
+  """
+  sharedBucket(name: String!): SharedBucket!
+
+  """Get a list of Shared Buckets."""
+  sharedBuckets(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+
+    """Ordering options for items returned from the connection."""
+    orderBy: SharedBucketOrder
+  ): SharedBucketConnection!
+
   """Get a team by its slug."""
   team(slug: Slug!): Team!
 
@@ -1427,7 +1459,7 @@ input SearchFilter {
 }
 
 """Types that can be searched for."""
-union SearchNode = Group | Team
+union SearchNode = Group | SharedBucket | Team
 
 """Search node connection."""
 type SearchNodeConnection {
@@ -1453,6 +1485,7 @@ type SearchNodeEdge {
 """A list of possible search types."""
 enum SearchType {
   GROUP
+  SHAREDBUCKET
 
   """Search for teams."""
   TEAM
@@ -1847,6 +1880,153 @@ type ServiceAccountUpdatedActivityLogEntryDataUpdatedField {
 }
 
 """
+The SharedBucket type represents a Shared Bucket of the Dapla platform and the Dapla GraphQL API.
+"""
+type SharedBucket implements Node {
+  """Which env the bucket is in (test/prod)"""
+  env: String!
+
+  """List the groups who have access to the bucket."""
+  groups(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+  ): GroupConnection!
+
+  """The globally unique ID of the SharedBucket."""
+  id: ID!
+
+  """The kind of the (standard/delomat)."""
+  kind: String!
+
+  """
+  Name of the Shared Bucket.
+  
+  This is equal to "ssb-<teamSlug>-data-delt-<shortName>-<env>"
+  """
+  name: String!
+
+  """Shortname of the bucket"""
+  shortName: String!
+
+  """The team that owns the bucket"""
+  team: Team!
+
+  """List the teams that have access to the bucket."""
+  teams(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+    orderBy: TeamOrder
+  ): TeamConnection!
+
+  """List the unique users who have access to the bucket."""
+  uniqueUsers(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+    orderBy: UserOrder
+  ): UserConnection!
+
+  """
+  List the users who have access to the bucket.
+  
+  The entries are not unique, i.e. one user might show up multiple times if they have access
+  via multiple groups. Use uniqueUsers to get a list of unique users with access.
+  """
+  users(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+    orderBy: TeamMemberOrder
+  ): TeamMemberConnection!
+}
+
+"""SharedBucketStopgap connection."""
+type SharedBucketConnection {
+  """List of edges."""
+  edges: [SharedBucketEdge!]!
+
+  """List of nodes."""
+  nodes: [SharedBucket!]!
+
+  """Pagination information."""
+  pageInfo: PageInfo!
+}
+
+"""SharedBucket edge."""
+type SharedBucketEdge {
+  """Cursor for this edge that can be used for pagination."""
+  cursor: Cursor!
+
+  """The SharedBucketStopgap."""
+  node: SharedBucket!
+}
+
+"""Ordering options when fetching SharedBucket."""
+input SharedBucketOrder {
+  """The direction to order items by."""
+  direction: OrderDirection!
+
+  """The field to order items by."""
+  field: SharedBucketOrderField!
+}
+
+"""Possible fields to order SharedBucket by."""
+enum SharedBucketOrderField {
+  """The name of the shared bucket."""
+  NAME
+}
+
+"""
 The slug must:
 
 - contain only lowercase alphanumeric characters or hyphens
@@ -1953,6 +2133,26 @@ type Team implements ActivityLogger & Node {
 
   """Section who owns the team"""
   section: Section!
+  sharedBuckets(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+
+    """Ordering options for items returned from the connection."""
+    orderBy: SharedBucketOrder
+  ): SharedBucketConnection!
 
   """Unique slug of the team."""
   slug: Slug!
@@ -2010,7 +2210,7 @@ type TeamEdge {
 
 type TeamMember {
   """Groups the user has in the team."""
-  groups: [Group]!
+  groups: [Group!]!
 
   """Team instance."""
   team: Team!
@@ -2228,6 +2428,28 @@ type User implements Node {
   The section the user belongs to, nullable in case the user has an invalid section, i.e. not synced to the database.
   """
   section: Section
+
+  """Get the shared buckets the user has access to."""
+  sharedBucketsAccess(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+
+    """Ordering options for items returned from the connection."""
+    orderBy: SharedBucketOrder
+  ): SharedBucketConnection!
 
   """List of users the user is in a team with."""
   teamMembers(

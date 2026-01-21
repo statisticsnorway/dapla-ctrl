@@ -31,7 +31,7 @@
 						{/snippet}
 					</IconLabel>
 					{#if count}
-						<Detail>{count}</Detail>
+						<Detail>({count})</Detail>
 					{/if}
 				</a>
 			{/each}

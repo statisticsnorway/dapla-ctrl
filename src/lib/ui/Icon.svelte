@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		FloppydiskIcon,
 		HexagonGridIcon,
 		PersonGroupIcon,
 		PersonIcon,
@@ -14,7 +15,7 @@
 			case 'team overview':
 			case 'oversikt':
 				return HexagonGridIcon;
-			case 'members':
+			case 'medlemmer':
 			case 'groups':
 			case 'grupper':
 				return PersonGroupIcon;
@@ -24,6 +25,8 @@
 				return ShieldLockIcon;
 			case 'brukeroversikt':
 				return PersonIcon;
+			case 'datadeling':
+				return FloppydiskIcon;
 			default:
 				return QuestionmarkIcon;
 		}

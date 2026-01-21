@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
 	import { Modal } from '@nais/ds-svelte-community';
-	import { PersonGroupIcon, HexagonGridIcon } from '@nais/ds-svelte-community/icons';
+	import {
+		PersonGroupIcon,
+		HexagonGridIcon,
+		FloppydiskIcon
+	} from '@nais/ds-svelte-community/icons';
 	import Search from './Search.svelte';
 
 	let { open = $bindable() }: { open: boolean } = $props();
@@ -25,6 +29,13 @@
 							}
 						}
 					}
+					... on SharedBucket {
+						name
+						shortName
+						team {
+							slug
+						}
+					}
 				}
 			}
 		}
@@ -40,8 +51,14 @@
 		Group: {
 			icon: PersonGroupIcon,
 			urlName: 'group',
-			prefix: 'group',
+			prefix: 'gruppe',
 			type: 'GROUP'
+		},
+		SharedBucket: {
+			icon: FloppydiskIcon,
+			urlName: 'sharedbucket',
+			prefix: 'delt',
+			type: 'SHAREDBUCKET'
 		}
 	} as const;
 
@@ -87,13 +104,22 @@
 							href: `/team/${result.slug}`,
 							type: 'link'
 						};
+					} else if (result.__typename === 'Group') {
+						const memberCount = result.members.pageInfo.totalCount;
+						return {
+							icon,
+							label: result.name,
+							description: `${memberCount} medlem${memberCount != 1 ? 'mer' : ''}`,
+							href: `/team/${result.teamSlug}/groups`,
+							type: 'link'
+						};
 					}
-					const memberCount = result.members.pageInfo.totalCount;
+					// SharedBucket
 					return {
 						icon,
-						label: result.name,
-						description: `${memberCount} medlem${memberCount != 1 ? 'mer' : ''}`,
-						href: `/team/${result.teamSlug}/groups`,
+						label: result.shortName,
+						description: result.name,
+						href: `team/${result.team.slug}/shared-data/${result.name}`,
 						type: 'link'
 					};
 				})

@@ -3,7 +3,7 @@ import { getContext, setContext } from 'svelte';
 const ctxKey = Symbol('team');
 
 class TeamContext {
-	refetchInventory() {
+	refetchCounts() {
 		this.inventoryFetcher?.();
 	}
 

@@ -25,7 +25,7 @@
 			};
 		const [, , user, page] = split;
 		const menuItem = item(`/user/${user}`, page);
-		return [[menuItem('Brukeroversikt')]];
+		return [[menuItem('Brukeroversikt'), menuItem('Datadeling', 'shared-data')]];
 	};
 </script>
 

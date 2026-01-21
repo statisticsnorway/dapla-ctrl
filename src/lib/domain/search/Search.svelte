@@ -19,7 +19,7 @@
 		results,
 		close,
 		suggestions = true,
-		placeholder = 'Search for teams, workloads, or services'
+		placeholder = 'Søk etter team, grupper eller delte data'
 	}: {
 		placeholder?: string;
 		suggestions?: boolean;
@@ -136,7 +136,7 @@
 				{/if}
 			{:else}
 				<div class="no-results">
-					<div>No results matching "{query}"</div>
+					<div>Fant ingen resultater for "{query}"</div>
 					{#if query.includes(':') && suggestions}
 						<Suggestions />
 					{/if}
@@ -150,15 +150,15 @@
 		<div>
 			<kbd><ArrowDownIcon /></kbd>
 			<kbd><ArrowUpIcon /></kbd>
-			<span>Move</span>
+			<span>Flytt</span>
 		</div>
 		<div>
 			<kbd class="enter"><ArrowDownRightIcon /></kbd>
-			<span>Select</span>
+			<span>Velg</span>
 		</div>
 		<div>
 			<kbd class="escape"><span>esc</span></kbd>
-			<span>Close</span>
+			<span>Lukk</span>
 		</div>
 	</div>
 </div>

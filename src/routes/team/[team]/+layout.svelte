@@ -45,7 +45,7 @@
 	{/if}
 
 	<div class="main">
-		<Menu member={viewerIsMember} {isAdmin} />
+		<Menu {teamSlug} member={viewerIsMember} {isAdmin} />
 		<div class="container">
 			<EditTeamDisplayName {displayName} {teamSlug} {canEdit} {isTeamOverviewPage} />
 			<div>{@render children?.()}</div>

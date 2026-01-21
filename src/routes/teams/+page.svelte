@@ -20,7 +20,7 @@
 
 	type TeamNode = AllTeams$result['teams']['nodes'][0];
 
-	let allTeamsCount = $derived($AllTeams.data?.teams?.nodes.length || 0);
+	let allTeamsCount = $derived($AllTeams.data?.teams?.pageInfo.totalCount || 0);
 	function transformTeamData(teamNode: TeamNode): TeamsData {
 		const team = teamNode;
 		const manager = team.section.manager;

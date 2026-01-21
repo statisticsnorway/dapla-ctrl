@@ -12,7 +12,8 @@ describe('menuItems', () => {
 			).toEqual([
 				[{ label: 'Oversikt', href: '/team/devteam', active: true }],
 				[
-					{ label: 'Grupper', href: '/team/devteam/groups' },
+					{ label: 'Medlemmer', href: '/team/devteam/members' },
+					{ label: 'Datadeling', href: '/team/devteam/shared-data' },
 					{ label: 'Aktivitetslogg', href: '/team/devteam/activity-log' }
 				]
 			]);

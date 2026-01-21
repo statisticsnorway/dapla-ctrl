@@ -1,0 +1,36 @@
+query AllSharedData {
+	sharedBuckets(first: 25) @paginate(mode: SinglePage) {
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageEnd
+			pageStart
+			startCursor
+			endCursor
+			totalCount
+		}
+		nodes {
+			name
+			team {
+				slug
+				displayName
+				section {
+					code
+				}
+			}
+			shortName
+			kind
+			env
+			uniqueUsers {
+				pageInfo {
+					totalCount
+				}
+			}
+			teams {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+	}
+}

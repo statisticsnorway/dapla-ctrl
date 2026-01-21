@@ -1,0 +1,32 @@
+query SharedData($team: Slug!) {
+	team(slug: $team) {
+		slug
+		sharedBuckets(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageEnd
+				pageStart
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				name
+				shortName
+				kind
+				env
+				uniqueUsers {
+					pageInfo {
+						totalCount
+					}
+				}
+				teams {
+					pageInfo {
+						totalCount
+					}
+				}
+			}
+		}
+	}
+}
