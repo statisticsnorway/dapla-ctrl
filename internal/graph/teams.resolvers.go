@@ -12,6 +12,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/section"
+	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
@@ -139,6 +140,14 @@ func (r *teamResolver) Groups(ctx context.Context, obj *team.Team, first *int, a
 	}
 
 	return group.ListByTeamSlug(ctx, obj.Slug, page, orderBy)
+}
+
+func (r *teamResolver) SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+	return sharedbucketsstopgap.ListForTeam(ctx, obj.Slug, page, orderBy)
 }
 
 func (r *teamResolver) ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error) {

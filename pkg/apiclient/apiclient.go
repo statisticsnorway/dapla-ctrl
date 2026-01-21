@@ -36,6 +36,10 @@ func (a *APIClient) Groups() protoapi.GroupsClient {
 	return protoapi.NewGroupsClient(a.conn)
 }
 
+func (a *APIClient) SharedBucketsStopgap() protoapi.SharedBucketsStopgapClient {
+	return protoapi.NewSharedBucketsStopgapClient(a.conn)
+}
+
 func (a *APIClient) Close() error {
 	return a.conn.Close()
 }

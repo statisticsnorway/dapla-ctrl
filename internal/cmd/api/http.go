@@ -27,6 +27,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
 	"github.com/statisticsnorway/dapla-api/internal/session"
+	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/statisticsnorway/dapla-api/internal/usersync"
@@ -153,6 +154,7 @@ func ConfigureGraph(
 
 	team.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "team_search"))
 	group.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "group_search"))
+	sharedbucketsstopgap.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "sharedbucket_search"))
 
 	// Re-index all to initialize the search index
 	if err := searcher.ReIndex(ctx); err != nil {
@@ -173,6 +175,7 @@ func ConfigureGraph(
 		ctx = search.NewLoaderContext(ctx, pool, searcher)
 		ctx = feature.NewLoaderContext(ctx)
 		ctx = group.NewLoaderContext(ctx, pool)
+		ctx = sharedbucketsstopgap.NewLoaderContext(ctx, pool)
 		return ctx
 	}
 

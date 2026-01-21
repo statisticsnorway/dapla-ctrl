@@ -35,6 +35,7 @@ autobind:
   - "github.com/statisticsnorway/dapla-api/internal/search"
   - "github.com/statisticsnorway/dapla-api/internal/section"
   - "github.com/statisticsnorway/dapla-api/internal/serviceaccount"
+  - "github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
   - "github.com/statisticsnorway/dapla-api/internal/team"
   - "github.com/statisticsnorway/dapla-api/internal/user"
   - "github.com/statisticsnorway/dapla-api/internal/usersync"

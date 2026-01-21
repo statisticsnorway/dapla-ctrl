@@ -8,6 +8,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/section"
+	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 )
@@ -55,6 +56,15 @@ func (r *userResolver) TeamMembers(ctx context.Context, obj *user.User, first *i
 	}
 
 	return user.ListTeamMembersForUser(ctx, obj.UUID, page, orderBy)
+}
+
+func (r *userResolver) SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
+	return sharedbucketsstopgap.ListForUser(ctx, obj.UUID, page, orderBy)
 }
 
 func (r *userResolver) IsSectionManager(ctx context.Context, obj *user.User) (bool, error) {

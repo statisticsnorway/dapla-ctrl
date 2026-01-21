@@ -165,3 +165,21 @@ sql:
         <<: *default_go
         package: "searchsql"
         out: "../internal/search/searchsql"
+
+  - <<: *default_domain
+    name: "Shared Bucket Stopgap SQL"
+    queries: "../internal/sharedbucketsstopgap/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "sharedbucketsstopgapsql"
+        out: "../internal/sharedbucketsstopgap/sharedbucketsstopgapsql"
+
+  - <<: *default_domain
+    name: "Shared Bucket Stopgap GRPC SQL"
+    queries: "../internal/grpc/grpcsharedbucketsstopgap/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "grpcsharedbucketsstopgapsql"
+        out: "../internal/grpc/grpcsharedbucketsstopgap/grpcsharedbucketsstopgapsql"

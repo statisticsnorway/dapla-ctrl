@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcgroup"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcreconciler"
+	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcsharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcteam"
 	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcuser"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
@@ -34,6 +35,7 @@ func Run(ctx context.Context, listenAddress string, pool *pgxpool.Pool, log logr
 	protoapi.RegisterTeamsServer(s, grpcteam.NewServer(pool))
 	protoapi.RegisterUsersServer(s, grpcuser.NewServer(pool))
 	protoapi.RegisterReconcilersServer(s, grpcreconciler.NewServer(pool))
+	protoapi.RegisterSharedBucketsStopgapServer(s, grpcsharedbucketsstopgap.NewServer(pool))
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return s.Serve(lis) })
