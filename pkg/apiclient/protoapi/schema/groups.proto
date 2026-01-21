@@ -17,6 +17,8 @@ service Groups {
     rpc Members(ListGroupMembersRequest) returns (ListGroupMembersResponse) {}
     rpc Get(GetGroupRequest) returns (GetGroupResponse) {}
     rpc SetExternalId(SetExternalIdRequest) returns (SetExternalIdResponse) {}
+    rpc AddMember(AddMemberRequest) returns (AddMemberResponse) {}
+    rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {}
 }
 
 message ListGroupMembersRequest {
@@ -48,3 +50,17 @@ message SetExternalIdResponse {}
 message GroupMember {
     User user = 1;
 }
+
+message AddMemberRequest {
+    string user_external_id = 1;
+    string groupname = 2;
+}
+
+message AddMemberResponse {}
+
+message RemoveMemberRequest {
+    string user_external_id = 1;
+    string groupname = 2;
+}
+
+message RemoveMemberResponse {}

@@ -7,9 +7,12 @@ import (
 )
 
 type Querier interface {
+	AddMember(ctx context.Context, arg AddMemberParams) error
 	CountMembers(ctx context.Context, groupName string) (int64, error)
 	Get(ctx context.Context, name string) (*GetRow, error)
+	GetUserByExternalId(ctx context.Context, externalID string) (*User, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)
+	RemoveMember(ctx context.Context, arg RemoveMemberParams) error
 	UpdateExternalId(ctx context.Context, arg UpdateExternalIdParams) error
 }
 

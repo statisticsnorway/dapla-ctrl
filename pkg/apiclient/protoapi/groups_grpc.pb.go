@@ -22,6 +22,8 @@ const (
 	Groups_Members_FullMethodName       = "/dapla.api.protobuf.Groups/Members"
 	Groups_Get_FullMethodName           = "/dapla.api.protobuf.Groups/Get"
 	Groups_SetExternalId_FullMethodName = "/dapla.api.protobuf.Groups/SetExternalId"
+	Groups_AddMember_FullMethodName     = "/dapla.api.protobuf.Groups/AddMember"
+	Groups_RemoveMember_FullMethodName  = "/dapla.api.protobuf.Groups/RemoveMember"
 )
 
 // GroupsClient is the client API for Groups service.
@@ -31,6 +33,8 @@ type GroupsClient interface {
 	Members(ctx context.Context, in *ListGroupMembersRequest, opts ...grpc.CallOption) (*ListGroupMembersResponse, error)
 	Get(ctx context.Context, in *GetGroupRequest, opts ...grpc.CallOption) (*GetGroupResponse, error)
 	SetExternalId(ctx context.Context, in *SetExternalIdRequest, opts ...grpc.CallOption) (*SetExternalIdResponse, error)
+	AddMember(ctx context.Context, in *AddMemberRequest, opts ...grpc.CallOption) (*AddMemberResponse, error)
+	RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error)
 }
 
 type groupsClient struct {
@@ -71,6 +75,26 @@ func (c *groupsClient) SetExternalId(ctx context.Context, in *SetExternalIdReque
 	return out, nil
 }
 
+func (c *groupsClient) AddMember(ctx context.Context, in *AddMemberRequest, opts ...grpc.CallOption) (*AddMemberResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddMemberResponse)
+	err := c.cc.Invoke(ctx, Groups_AddMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *groupsClient) RemoveMember(ctx context.Context, in *RemoveMemberRequest, opts ...grpc.CallOption) (*RemoveMemberResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RemoveMemberResponse)
+	err := c.cc.Invoke(ctx, Groups_RemoveMember_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GroupsServer is the server API for Groups service.
 // All implementations must embed UnimplementedGroupsServer
 // for forward compatibility.
@@ -78,6 +102,8 @@ type GroupsServer interface {
 	Members(context.Context, *ListGroupMembersRequest) (*ListGroupMembersResponse, error)
 	Get(context.Context, *GetGroupRequest) (*GetGroupResponse, error)
 	SetExternalId(context.Context, *SetExternalIdRequest) (*SetExternalIdResponse, error)
+	AddMember(context.Context, *AddMemberRequest) (*AddMemberResponse, error)
+	RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)
 	mustEmbedUnimplementedGroupsServer()
 }
 
@@ -96,6 +122,12 @@ func (UnimplementedGroupsServer) Get(context.Context, *GetGroupRequest) (*GetGro
 }
 func (UnimplementedGroupsServer) SetExternalId(context.Context, *SetExternalIdRequest) (*SetExternalIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetExternalId not implemented")
+}
+func (UnimplementedGroupsServer) AddMember(context.Context, *AddMemberRequest) (*AddMemberResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddMember not implemented")
+}
+func (UnimplementedGroupsServer) RemoveMember(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveMember not implemented")
 }
 func (UnimplementedGroupsServer) mustEmbedUnimplementedGroupsServer() {}
 func (UnimplementedGroupsServer) testEmbeddedByValue()                {}
@@ -172,6 +204,42 @@ func _Groups_SetExternalId_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Groups_AddMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupsServer).AddMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Groups_AddMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupsServer).AddMember(ctx, req.(*AddMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Groups_RemoveMember_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveMemberRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GroupsServer).RemoveMember(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Groups_RemoveMember_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GroupsServer).RemoveMember(ctx, req.(*RemoveMemberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Groups_ServiceDesc is the grpc.ServiceDesc for Groups service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +258,14 @@ var Groups_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetExternalId",
 			Handler:    _Groups_SetExternalId_Handler,
+		},
+		{
+			MethodName: "AddMember",
+			Handler:    _Groups_AddMember_Handler,
+		},
+		{
+			MethodName: "RemoveMember",
+			Handler:    _Groups_RemoveMember_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -38,6 +38,74 @@ func (_m *MockGroupsServer) EXPECT() *MockGroupsServer_Expecter {
 	return &MockGroupsServer_Expecter{mock: &_m.Mock}
 }
 
+// AddMember provides a mock function for the type MockGroupsServer
+func (_mock *MockGroupsServer) AddMember(context1 context.Context, addMemberRequest *AddMemberRequest) (*AddMemberResponse, error) {
+	ret := _mock.Called(context1, addMemberRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddMember")
+	}
+
+	var r0 *AddMemberResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *AddMemberRequest) (*AddMemberResponse, error)); ok {
+		return returnFunc(context1, addMemberRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *AddMemberRequest) *AddMemberResponse); ok {
+		r0 = returnFunc(context1, addMemberRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*AddMemberResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *AddMemberRequest) error); ok {
+		r1 = returnFunc(context1, addMemberRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGroupsServer_AddMember_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddMember'
+type MockGroupsServer_AddMember_Call struct {
+	*mock.Call
+}
+
+// AddMember is a helper method to define mock.On call
+//   - context1 context.Context
+//   - addMemberRequest *AddMemberRequest
+func (_e *MockGroupsServer_Expecter) AddMember(context1 interface{}, addMemberRequest interface{}) *MockGroupsServer_AddMember_Call {
+	return &MockGroupsServer_AddMember_Call{Call: _e.mock.On("AddMember", context1, addMemberRequest)}
+}
+
+func (_c *MockGroupsServer_AddMember_Call) Run(run func(context1 context.Context, addMemberRequest *AddMemberRequest)) *MockGroupsServer_AddMember_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *AddMemberRequest
+		if args[1] != nil {
+			arg1 = args[1].(*AddMemberRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGroupsServer_AddMember_Call) Return(addMemberResponse *AddMemberResponse, err error) *MockGroupsServer_AddMember_Call {
+	_c.Call.Return(addMemberResponse, err)
+	return _c
+}
+
+func (_c *MockGroupsServer_AddMember_Call) RunAndReturn(run func(context1 context.Context, addMemberRequest *AddMemberRequest) (*AddMemberResponse, error)) *MockGroupsServer_AddMember_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function for the type MockGroupsServer
 func (_mock *MockGroupsServer) Get(context1 context.Context, getGroupRequest *GetGroupRequest) (*GetGroupResponse, error) {
 	ret := _mock.Called(context1, getGroupRequest)
@@ -170,6 +238,74 @@ func (_c *MockGroupsServer_Members_Call) Return(listGroupMembersResponse *ListGr
 }
 
 func (_c *MockGroupsServer_Members_Call) RunAndReturn(run func(context1 context.Context, listGroupMembersRequest *ListGroupMembersRequest) (*ListGroupMembersResponse, error)) *MockGroupsServer_Members_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// RemoveMember provides a mock function for the type MockGroupsServer
+func (_mock *MockGroupsServer) RemoveMember(context1 context.Context, removeMemberRequest *RemoveMemberRequest) (*RemoveMemberResponse, error) {
+	ret := _mock.Called(context1, removeMemberRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RemoveMember")
+	}
+
+	var r0 *RemoveMemberResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *RemoveMemberRequest) (*RemoveMemberResponse, error)); ok {
+		return returnFunc(context1, removeMemberRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *RemoveMemberRequest) *RemoveMemberResponse); ok {
+		r0 = returnFunc(context1, removeMemberRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*RemoveMemberResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *RemoveMemberRequest) error); ok {
+		r1 = returnFunc(context1, removeMemberRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGroupsServer_RemoveMember_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'RemoveMember'
+type MockGroupsServer_RemoveMember_Call struct {
+	*mock.Call
+}
+
+// RemoveMember is a helper method to define mock.On call
+//   - context1 context.Context
+//   - removeMemberRequest *RemoveMemberRequest
+func (_e *MockGroupsServer_Expecter) RemoveMember(context1 interface{}, removeMemberRequest interface{}) *MockGroupsServer_RemoveMember_Call {
+	return &MockGroupsServer_RemoveMember_Call{Call: _e.mock.On("RemoveMember", context1, removeMemberRequest)}
+}
+
+func (_c *MockGroupsServer_RemoveMember_Call) Run(run func(context1 context.Context, removeMemberRequest *RemoveMemberRequest)) *MockGroupsServer_RemoveMember_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *RemoveMemberRequest
+		if args[1] != nil {
+			arg1 = args[1].(*RemoveMemberRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGroupsServer_RemoveMember_Call) Return(removeMemberResponse *RemoveMemberResponse, err error) *MockGroupsServer_RemoveMember_Call {
+	_c.Call.Return(removeMemberResponse, err)
+	return _c
+}
+
+func (_c *MockGroupsServer_RemoveMember_Call) RunAndReturn(run func(context1 context.Context, removeMemberRequest *RemoveMemberRequest) (*RemoveMemberResponse, error)) *MockGroupsServer_RemoveMember_Call {
 	_c.Call.Return(run)
 	return _c
 }

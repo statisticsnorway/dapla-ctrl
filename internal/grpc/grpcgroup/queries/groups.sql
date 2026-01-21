@@ -57,3 +57,27 @@ SET
 WHERE
 	name = @name
 ;
+
+-- name: AddMember :exec
+INSERT INTO
+	group_members (group_name, user_id)
+VALUES
+	(@group_name, @user_id)
+ON CONFLICT DO NOTHING
+;
+
+-- name: RemoveMember :exec
+DELETE FROM group_members
+WHERE
+	user_id = @user_id
+	AND group_name = @group_name
+;
+
+-- name: GetUserByExternalId :one
+SELECT
+	*
+FROM
+	users
+WHERE
+	external_id = LOWER(@external_id)
+;

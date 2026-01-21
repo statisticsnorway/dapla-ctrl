@@ -6,8 +6,27 @@ package grpcgroupsql
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
+
+const addMember = `-- name: AddMember :exec
+INSERT INTO
+	group_members (group_name, user_id)
+VALUES
+	($1, $2)
+ON CONFLICT DO NOTHING
+`
+
+type AddMemberParams struct {
+	GroupName string
+	UserID    uuid.UUID
+}
+
+func (q *Queries) AddMember(ctx context.Context, arg AddMemberParams) error {
+	_, err := q.db.Exec(ctx, addMember, arg.GroupName, arg.UserID)
+	return err
+}
 
 const countMembers = `-- name: CountMembers :one
 SELECT
@@ -46,6 +65,29 @@ func (q *Queries) Get(ctx context.Context, name string) (*GetRow, error) {
 	row := q.db.QueryRow(ctx, get, name)
 	var i GetRow
 	err := row.Scan(&i.Name, &i.ExternalID, &i.TeamSlug)
+	return &i, err
+}
+
+const getUserByExternalId = `-- name: GetUserByExternalId :one
+SELECT
+	id, email, name, external_id, admin, section_code
+FROM
+	users
+WHERE
+	external_id = LOWER($1)
+`
+
+func (q *Queries) GetUserByExternalId(ctx context.Context, externalID string) (*User, error) {
+	row := q.db.QueryRow(ctx, getUserByExternalId, externalID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.ExternalID,
+		&i.Admin,
+		&i.SectionCode,
+	)
 	return &i, err
 }
 
@@ -130,6 +172,23 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeMember = `-- name: RemoveMember :exec
+DELETE FROM group_members
+WHERE
+	user_id = $1
+	AND group_name = $2
+`
+
+type RemoveMemberParams struct {
+	UserID    uuid.UUID
+	GroupName string
+}
+
+func (q *Queries) RemoveMember(ctx context.Context, arg RemoveMemberParams) error {
+	_, err := q.db.Exec(ctx, removeMember, arg.UserID, arg.GroupName)
+	return err
 }
 
 const updateExternalId = `-- name: UpdateExternalId :exec

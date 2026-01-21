@@ -82,6 +82,56 @@ func (t *Server) SetExternalId(ctx context.Context, req *protoapi.SetExternalIdR
 	return &protoapi.SetExternalIdResponse{}, nil
 }
 
+func (t *Server) AddMember(ctx context.Context, req *protoapi.AddMemberRequest) (*protoapi.AddMemberResponse, error) {
+	_, err := t.querier.Get(ctx, req.Groupname)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "group not found")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get group: %s", err)
+	}
+
+	user, err := t.querier.GetUserByExternalId(ctx, req.UserExternalId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "user not found")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get user: %s", err)
+	}
+
+	if err = t.querier.AddMember(ctx, grpcgroupsql.AddMemberParams{
+		GroupName: req.Groupname,
+		UserID:    user.ID,
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to add member to group")
+	}
+
+	return &protoapi.AddMemberResponse{}, nil
+}
+
+func (t *Server) RemoveMember(ctx context.Context, req *protoapi.RemoveMemberRequest) (*protoapi.RemoveMemberResponse, error) {
+	_, err := t.querier.Get(ctx, req.Groupname)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "group not found")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get group: %s", err)
+	}
+
+	user, err := t.querier.GetUserByExternalId(ctx, req.UserExternalId)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "user not found")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get user: %s", err)
+	}
+
+	if err = t.querier.RemoveMember(ctx, grpcgroupsql.RemoveMemberParams{
+		GroupName: req.Groupname,
+		UserID:    user.ID,
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to remove member from group")
+	}
+
+	return &protoapi.RemoveMemberResponse{}, nil
+}
+
 func toProtoGroupMember(u *grpcgroupsql.User) *protoapi.GroupMember {
 	return &protoapi.GroupMember{
 		User: &protoapi.User{
