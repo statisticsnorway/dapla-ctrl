@@ -124,10 +124,11 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 
 		if userIsOutdated(user, eu) {
 			if err := querier.Update(ctx, usersyncsql.UpdateParams{
-				ID:         user.ID,
-				Name:       eu.Name,
-				Email:      eu.Email,
-				ExternalID: eu.ID,
+				ID:          user.ID,
+				Name:        eu.Name,
+				Email:       eu.Email,
+				ExternalID:  eu.ID,
+				SectionCode: eu.SectionCode,
 			}); err != nil {
 				return fmt.Errorf("update user %q: %w", eu.Email, err)
 			}
@@ -360,9 +361,10 @@ func getOrCreateUserFromEntraIdUser(ctx context.Context, querier usersyncsql.Que
 	}
 
 	createdUser, err := querier.Create(ctx, usersyncsql.CreateParams{
-		Name:       entraIdUser.Name,
-		Email:      entraIdUser.Email,
-		ExternalID: entraIdUser.ID,
+		Name:        entraIdUser.Name,
+		Email:       entraIdUser.Email,
+		ExternalID:  entraIdUser.ID,
+		SectionCode: entraIdUser.SectionCode,
 	})
 	if err != nil {
 		return nil, err
@@ -432,9 +434,9 @@ func getDbUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, err
 		return nil, err
 	}
 	ret := &userMap{
-		byID:         make(map[uuid.UUID]*usersyncsql.User),
-		byExternalID: make(map[string]*usersyncsql.User),
-		byEmail:      make(map[string]*usersyncsql.User),
+		byID:         make(map[uuid.UUID]*usersyncsql.User, len(users)),
+		byExternalID: make(map[string]*usersyncsql.User, len(users)),
+		byEmail:      make(map[string]*usersyncsql.User, len(users)),
 	}
 	for _, user := range users {
 		ret.byID[user.ID] = user

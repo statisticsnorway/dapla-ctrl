@@ -196,6 +196,15 @@ func TestSync(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		userWithOutdatedSection, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:       "I Am No Longer In Section 723",
+			Email:      "fix-my-section@example.com",
+			ExternalID: "5",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		if err := querier.AssignGlobalAdmin(ctx, userThatShouldLoseAdminRole.ID); err != nil {
 			t.Fatal(err)
 		}
@@ -204,10 +213,11 @@ func TestSync(t *testing.T) {
 			func(req *http.Request) *http.Response {
 				// All users response
 				return test.Response("200 OK", generateEntraIdResponse(
-					externalUser{Id: "1", Email: "user1@example.com", Name: "Correct Name"},                  // Will update name of local user
-					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},                     // Will update euserPrincipalName of local user
-					externalUser{Id: "4", Email: "should-lose-admin@example.com", Name: "Should Lose Admin"}, // Will lose admin role
-					externalUser{Id: "5", Email: "create-me@example.com", Name: "Create Me"}),                // Will be created
+					externalUser{Id: "1", Email: "user1@example.com", Name: "Correct Name"},                                                                 // Will update name of local user
+					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},                                                                    // Will update euserPrincipalName of local user
+					externalUser{Id: "4", Email: "should-lose-admin@example.com", Name: "Should Lose Admin"},                                                // Will lose admin role
+					externalUser{Id: "5", Email: "fix-my-section@example.com", Name: "I Am No Longer In Section 723", Section: "O 724 Seksjon for Testing"}, // Will be created
+					externalUser{Id: "6", Email: "create-me@example.com", Name: "Create Me", Section: "O 724 Seksjon for Testing"}),                         // Will be created
 				)
 			},
 			func(req *http.Request) *http.Response {
@@ -239,47 +249,57 @@ func TestSync(t *testing.T) {
 		p, _ := pagination.ParsePage(nil, nil, nil, nil)
 		if users, err := user.List(ctx, p, nil); err != nil {
 			t.Fatal(err)
-		} else if total := len(users.Nodes()); total != 4 {
-			t.Fatalf("expected 3 users, got %d", total)
+		} else if total := users.PageInfo.TotalCount; total != 5 {
+			t.Errorf("expected 5 users, got %d", total)
 		}
 
 		if u, err := user.Get(ctx, userWithIncorrectName.ID); err != nil {
 			t.Fatal(err)
 		} else if correctName := "Correct Name"; u.Name != correctName {
-			t.Fatalf("expected name to be %q, got %q", correctName, u.Name)
+			t.Errorf("expected name to be %q, got %q", correctName, u.Name)
 		}
 
 		if u, err := user.Get(ctx, userWithIncorrectEmail.ID); err != nil {
 			t.Fatal(err)
 		} else if correctEmail := "user2@example.com"; u.Email != correctEmail {
-			t.Fatalf("expected email to be %q, got %q", correctEmail, u.Email)
+			t.Errorf("expected email to be %q, got %q", correctEmail, u.Email)
 		}
 
 		if u, err := user.Get(ctx, userThatWillBeDeleted.ID); err == nil {
-			t.Fatalf("expected user to be deleted, got %v", u)
+			t.Errorf("expected user to be deleted, got %v", u)
 		}
 
-		if u, err := user.GetByEmail(ctx, "create-me@example.com"); err != nil {
-			t.Fatal(err)
-		} else if correctName := "Create Me"; u.Name != correctName {
-			t.Fatalf("expected name to be %q, got %q", correctName, u.Name)
-		}
-
-		updatedUserThatShouldLoseAdmin, err := user.Get(ctx, userThatShouldLoseAdminRole.ID)
+		u, err := user.GetByEmail(ctx, "create-me@example.com")
 		if err != nil {
 			t.Fatal(err)
 		}
-		if updatedUserThatShouldLoseAdmin.Admin {
-			t.Fatalf("expected user to lose admin role, but still has it")
+		if correctName := "Create Me"; u.Name != correctName {
+			t.Errorf("expected name to be %q, got %q", correctName, u.Name)
+		}
+		if section := u.SectionCode; section == nil {
+			t.Errorf("expected user %q to have section 724, got nil", u.Email)
+		} else if *section != "724" {
+			t.Errorf("expected user %q to have section 724, got %q", u.Email, *section)
 		}
 
-		updatedUserWithIncorrectEmail, err := user.Get(ctx, userWithIncorrectEmail.ID)
-		if err != nil {
+		if updatedUserThatShouldLoseAdmin, err := user.Get(ctx, userThatShouldLoseAdminRole.ID); err != nil {
 			t.Fatal(err)
+		} else if updatedUserThatShouldLoseAdmin.Admin {
+			t.Errorf("expected user to lose admin role, but still has it")
 		}
 
-		if !updatedUserWithIncorrectEmail.Admin {
-			t.Fatalf("expected user to be granted admin role, but doesn't have it")
+		if updatedUserWithIncorrectEmail, err := user.Get(ctx, userWithIncorrectEmail.ID); err != nil {
+			t.Fatal(err)
+		} else if !updatedUserWithIncorrectEmail.Admin {
+			t.Errorf("expected user to be granted admin role, but doesn't have it")
+		}
+
+		if updatedUserWithOutdatedSection, err := user.Get(ctx, userWithOutdatedSection.ID); err != nil {
+			t.Fatal(err)
+		} else if updatedUserWithOutdatedSection.SectionCode == nil {
+			t.Errorf("expected user %q to have section 724, got nil", userWithOutdatedSection.Email)
+		} else if *updatedUserWithOutdatedSection.SectionCode != "724" {
+			t.Errorf("expected user %q to have section 724, got %q", userWithOutdatedSection.Email, *userWithOutdatedSection.SectionCode)
 		}
 	})
 
