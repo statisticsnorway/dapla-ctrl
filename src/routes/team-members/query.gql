@@ -1,14 +1,19 @@
-query MyTeamMembers @cache(policy: CacheAndNetwork) {
+query MyTeamMembers($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy: UserOrder)
+@cache(policy: CacheAndNetwork) {
 	me {
 		__typename
 		... on User {
-			id
-			teamMembers(first: 100) {
+			teamMembers(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
 				pageInfo {
+					hasNextPage
+					hasPreviousPage
+					pageEnd
+					pageStart
+					startCursor
+					endCursor
 					totalCount
 				}
 				nodes {
-					id
 					name
 					email
 					section {
@@ -17,24 +22,14 @@ query MyTeamMembers @cache(policy: CacheAndNetwork) {
 							email
 						}
 					}
-					teams(first: 50) {
+					teams(first: 1) {
 						pageInfo {
 							totalCount
 						}
-						nodes {
-							groups {
-								name
-							}
-							team {
-								id
-								slug
-								section {
-									manager {
-										name
-										email
-									}
-								}
-							}
+					}
+					dataAdmins: groups(first: 1, filter: { categories: ["data-admins"] }) {
+						pageInfo {
+							totalCount
 						}
 					}
 				}

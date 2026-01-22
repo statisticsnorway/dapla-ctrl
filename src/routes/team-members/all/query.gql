@@ -7,47 +7,31 @@ query AllTeamMembers(
 ) {
 	users(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
 		pageInfo {
-			endCursor
 			hasNextPage
 			hasPreviousPage
 			pageEnd
 			pageStart
 			startCursor
+			endCursor
 			totalCount
 		}
-		edges {
-			node {
-				id
-				name
-				email
-				section {
-					manager {
-						name
-						email
-					}
+		nodes {
+			name
+			email
+			section {
+				manager {
+					name
+					email
 				}
-				teams(first: 50) {
-					pageInfo {
-						totalCount
-					}
-					nodes {
-						groups {
-							name
-						}
-						team {
-							id
-							slug
-							section {
-								code
-								name
-								manager {
-									id
-									name
-									email
-								}
-							}
-						}
-					}
+			}
+			teams(first: 1) {
+				pageInfo {
+					totalCount
+				}
+			}
+			dataAdmins: groups(first: 1, filter: { categories: ["data-admins"] }) {
+				pageInfo {
+					totalCount
 				}
 			}
 		}

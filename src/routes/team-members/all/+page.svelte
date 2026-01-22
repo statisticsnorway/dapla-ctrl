@@ -2,7 +2,7 @@
 	import { changeParams } from '$lib/utils/searchparams';
 	import type { PageProps } from './$types';
 	import TeamMembersTable from '../TeamMembersTable.svelte';
-	import { calculateDataAdminCount, type TeamMemberData } from '../teamMembersUtils';
+	import type { TeamMemberData } from '../teamMembersUtils';
 
 	let { data }: PageProps = $props();
 	let { AllTeamMembers } = $derived(data);
@@ -11,43 +11,23 @@
 		changeParams(params);
 	};
 
-	let teamMembers = $derived.by(() => {
-		if (!$AllTeamMembers.data) {
-			return [];
-		}
-
-		const members: TeamMemberData[] = [];
-
-		for (const edge of $AllTeamMembers.data.users.edges) {
-			const user = edge.node;
-
-			if (user.teams.pageInfo.totalCount === 0) {
-				continue;
-			}
-
-			const dataAdminCount = calculateDataAdminCount(user.teams.nodes);
-
-			const sectionManager = user.section?.manager
-				? {
-						name: user.section.manager.name,
-						email: user.section.manager.email
-					}
-				: null;
-
-			members.push({
+	let teamMembers: TeamMemberData[] =
+		$AllTeamMembers.data?.users.nodes.map((u) => {
+			return {
 				user: {
-					id: user.id,
-					name: user.name,
-					email: user.email
+					name: u.name,
+					email: u.email
 				},
-				teamCount: user.teams.pageInfo.totalCount,
-				dataAdminCount,
-				sectionManager
-			});
-		}
-
-		return members;
-	});
+				teamCount: u.teams.pageInfo.totalCount,
+				dataAdminCount: u.dataAdmins.pageInfo.totalCount,
+				sectionManager: u.section?.manager
+					? {
+							name: u.section.manager.name,
+							email: u.section.manager.email
+						}
+					: undefined
+			};
+		}) ?? [];
 </script>
 
 {#if $AllTeamMembers.data}

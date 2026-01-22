@@ -51,7 +51,7 @@
 		</Tr>
 	</Thead>
 	<Tbody>
-		{#each sortedTeamMembers as member (member.user.id)}
+		{#each sortedTeamMembers as member (member.user.email)}
 			<Tr shadeOnHover={false}>
 				<Td>
 					<a href="/user/{member.user.email}">{member.user.name}</a>

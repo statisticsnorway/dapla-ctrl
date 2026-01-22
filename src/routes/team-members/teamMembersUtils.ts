@@ -2,16 +2,15 @@ import type { TableSortState } from '@nais/ds-svelte-community';
 
 export interface TeamMemberData {
 	user: {
-		id: string;
 		name: string;
 		email: string;
 	};
 	teamCount: number;
 	dataAdminCount: number;
-	sectionManager: {
+	sectionManager?: {
 		name: string;
-		email: string | null;
-	} | null;
+		email: string;
+	};
 }
 
 export type SortBy = 'NAME' | 'TEAM_COUNT' | 'DATA_ADMIN_COUNT' | 'SECTION_MANAGER';
@@ -62,13 +61,4 @@ export function getTeamMembersSorted(
 
 		return sortDirection === 'descending' ? -result : result;
 	});
-}
-
-export function calculateDataAdminCount(
-	teams: Array<{ groups: Array<{ name: string } | null> | null } | null>
-): number {
-	return teams.filter((ut) => {
-		if (!ut?.groups || ut.groups.length === 0) return false;
-		return ut.groups.some((g) => g?.name.endsWith('-data-admins'));
-	}).length;
 }
