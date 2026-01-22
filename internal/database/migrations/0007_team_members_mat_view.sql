@@ -7,4 +7,6 @@ FROM
 	teams
 	JOIN groups ON groups.team_slug = teams.slug
 	JOIN group_members ON groups.name = group_members.group_name
+WHERE
+	teams.slug != 'dapla-felles'
 ;
