@@ -130,6 +130,41 @@ type User implements Node {
 	): UserConnection!
 
 	"""
+	Get a list of the groups the user is a member of.
+	"""
+	groups(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserGroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupMemberConnection!
+
+	"""
 	Get the shared buckets the user has access to.
 	"""
 	sharedBucketsAccess(
@@ -236,6 +271,21 @@ input UserTeamOrder {
 }
 
 """
+Ordering options when fetching the teams a user is connected to.
+"""
+input UserGroupOrder {
+	"""
+	The field to order items by.
+	"""
+	field: UserGroupOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
 Possible fields to order users by.
 """
 enum UserOrderField {
@@ -254,6 +304,16 @@ enum UserOrderField {
 Possible fields to order user teams by.
 """
 enum UserTeamOrderField {
+	"""
+	The unique slug of the team.
+	"""
+	TEAM_SLUG
+}
+
+"""
+Possible fields to order user teams by.
+"""
+enum UserGroupOrderField {
 	"""
 	The unique slug of the team.
 	"""

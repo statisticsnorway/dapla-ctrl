@@ -27,6 +27,11 @@ extend type Query {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	"""
@@ -102,6 +107,13 @@ type Group implements Node {
 		"Ordering options for items returned from the connection."
 		orderBy: GroupMemberOrder
 	): GroupMemberConnection!
+}
+
+input GroupFilter {
+	"""
+	Filter by group categories, e.g. developers and data-admins
+	"""
+	categories: [String!]
 }
 
 extend union SearchNode = Group

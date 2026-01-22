@@ -76,13 +76,14 @@ func GetByIdent(ctx context.Context, id ident.Ident) (*Group, error) {
 	return Get(ctx, groupName)
 }
 
-func List(ctx context.Context, page *pagination.Pagination, orderBy *GroupOrder) (*GroupConnection, error) {
+func List(ctx context.Context, page *pagination.Pagination, orderBy *GroupOrder, filter *GroupFilter) (*GroupConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.List(ctx, groupsql.ListParams{
 		Offset:  page.Offset(),
 		Limit:   page.Limit(),
 		OrderBy: orderBy.String(),
+		Filter:  filter.CategoryFilter(),
 	})
 	if err != nil {
 		return nil, err
@@ -98,7 +99,7 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *GroupOrder)
 	}), nil
 }
 
-func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *UserGroupOrder) (*GroupMemberConnection, error) {
+func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *UserGroupOrder, filter *GroupFilter) (*GroupMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForUser(ctx, groupsql.ListForUserParams{
@@ -106,6 +107,7 @@ func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Paginat
 		Offset:  page.Offset(),
 		Limit:   page.Limit(),
 		OrderBy: orderBy.String(),
+		Filter:  filter.CategoryFilter(),
 	})
 	if err != nil {
 		return nil, err
@@ -261,10 +263,11 @@ func GroupExists(ctx context.Context, teamSlug slug.Slug, category, suffix strin
 	})
 }
 
-func ListByTeamSlug(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, order *GroupOrder) (*GroupConnection, error) {
+func ListByTeamSlug(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, order *GroupOrder, filter *GroupFilter) (*GroupConnection, error) {
 	ret, err := db(ctx).ListByTeamSlug(ctx, groupsql.ListByTeamSlugParams{
 		TeamSlug: teamSlug,
 		OrderBy:  order.String(),
+		Filter:   filter.CategoryFilter(),
 	})
 	if err != nil {
 		return nil, err

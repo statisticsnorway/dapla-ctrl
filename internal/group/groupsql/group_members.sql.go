@@ -149,45 +149,50 @@ func (q *Queries) ListForTeamMember(ctx context.Context, arg ListForTeamMemberPa
 
 const listForUser = `-- name: ListForUser :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
-	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
+	group_name,
+	user_id,
 	COUNT(*) OVER () AS total_count
 FROM
 	group_members
-	JOIN groups ON groups.name = group_members.group_name
-	JOIN users ON users.id = group_members.user_id
+	JOIN groups ON group_members.group_name = groups.name
 WHERE
 	group_members.user_id = $1
+	AND (
+		$2::TEXT[] IS NULL
+		OR (category) = ANY ($2::TEXT[])
+	)
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'slug:asc' THEN groups.team_slug
+		WHEN $3::TEXT = 'slug:asc' THEN groups.team_slug
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'slug:desc' THEN groups.team_slug
+		WHEN $3::TEXT = 'slug:desc' THEN groups.team_slug
 	END DESC,
 	groups.team_slug ASC
 LIMIT
-	$4
+	$5
 OFFSET
-	$3
+	$4
 `
 
 type ListForUserParams struct {
 	UserID  uuid.UUID
+	Filter  []string
 	OrderBy string
 	Offset  int32
 	Limit   int32
 }
 
 type ListForUserRow struct {
-	User       User
-	Group      Group
+	GroupName  string
+	UserID     uuid.UUID
 	TotalCount int64
 }
 
 func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error) {
 	rows, err := q.db.Query(ctx, listForUser,
 		arg.UserID,
+		arg.Filter,
 		arg.OrderBy,
 		arg.Offset,
 		arg.Limit,
@@ -199,20 +204,7 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 	items := []*ListForUserRow{}
 	for rows.Next() {
 		var i ListForUserRow
-		if err := rows.Scan(
-			&i.User.ID,
-			&i.User.Email,
-			&i.User.Name,
-			&i.User.ExternalID,
-			&i.User.Admin,
-			&i.User.SectionCode,
-			&i.Group.Name,
-			&i.Group.TeamSlug,
-			&i.Group.Category,
-			&i.Group.Suffix,
-			&i.Group.ExternalID,
-			&i.TotalCount,
-		); err != nil {
+		if err := rows.Scan(&i.GroupName, &i.UserID, &i.TotalCount); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)

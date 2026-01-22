@@ -147,21 +147,25 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	groups
+WHERE
+	$1::TEXT[] IS NULL
+	OR (category) = ANY ($1::TEXT[])
 ORDER BY
 	CASE
-		WHEN $1::TEXT = 'slug:asc' THEN team_slug
+		WHEN $2::TEXT = 'slug:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'slug:desc' THEN team_slug
+		WHEN $2::TEXT = 'slug:desc' THEN team_slug
 	END DESC,
 	team_slug ASC
 LIMIT
-	$3
+	$4
 OFFSET
-	$2
+	$3
 `
 
 type ListParams struct {
+	Filter  []string
 	OrderBy string
 	Offset  int32
 	Limit   int32
@@ -173,7 +177,12 @@ type ListRow struct {
 }
 
 func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) {
-	rows, err := q.db.Query(ctx, list, arg.OrderBy, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, list,
+		arg.Filter,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -241,23 +250,28 @@ FROM
 	groups
 WHERE
 	team_slug = $1::slug
+	AND (
+		$2::TEXT[] IS NULL
+		OR (category) = ANY ($2::TEXT[])
+	)
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'slug:asc' THEN team_slug
+		WHEN $3::TEXT = 'slug:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'slug:desc' THEN team_slug
+		WHEN $3::TEXT = 'slug:desc' THEN team_slug
 	END DESC,
 	team_slug ASC
 `
 
 type ListByTeamSlugParams struct {
 	TeamSlug slug.Slug
+	Filter   []string
 	OrderBy  string
 }
 
 func (q *Queries) ListByTeamSlug(ctx context.Context, arg ListByTeamSlugParams) ([]*Group, error) {
-	rows, err := q.db.Query(ctx, listByTeamSlug, arg.TeamSlug, arg.OrderBy)
+	rows, err := q.db.Query(ctx, listByTeamSlug, arg.TeamSlug, arg.Filter, arg.OrderBy)
 	if err != nil {
 		return nil, err
 	}

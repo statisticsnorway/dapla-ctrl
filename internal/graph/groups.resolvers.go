@@ -112,13 +112,13 @@ func (r *mutationResolver) RemoveGroupMember(ctx context.Context, input group.Re
 	}, nil
 }
 
-func (r *queryResolver) Groups(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error) {
+func (r *queryResolver) Groups(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return group.List(ctx, page, orderBy)
+	return group.List(ctx, page, orderBy, filter)
 }
 
 func (r *queryResolver) Group(ctx context.Context, name string) (*group.Group, error) {

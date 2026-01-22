@@ -7,6 +7,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
 	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-api/internal/team"
@@ -56,6 +57,15 @@ func (r *userResolver) TeamMembers(ctx context.Context, obj *user.User, first *i
 	}
 
 	return user.ListTeamMembersForUser(ctx, obj.UUID, page, orderBy)
+}
+
+func (r *userResolver) Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
+	return group.ListForUser(ctx, obj.UUID, page, orderBy, filter)
 }
 
 func (r *userResolver) SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {

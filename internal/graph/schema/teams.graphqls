@@ -113,6 +113,11 @@ type Team implements Node {
 
 		"Ordering options for items returned from the connection."
 		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	sharedBuckets(

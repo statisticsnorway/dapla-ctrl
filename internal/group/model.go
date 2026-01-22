@@ -109,8 +109,8 @@ func toGraphGroupMember(m *groupsql.ListMembersRow) *GroupMember {
 
 func toGraphUserGroup(m *groupsql.ListForUserRow) *GroupMember {
 	return &GroupMember{
-		GroupName: m.Group.Name,
-		UserID:    m.User.ID,
+		GroupName: m.GroupName,
+		UserID:    m.UserID,
 	}
 }
 
@@ -167,6 +167,20 @@ func (e *GroupMemberOrderField) UnmarshalGQL(v interface{}) error {
 
 func (e GroupMemberOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type GroupFilter struct {
+	Categories []string `json:"categories,omitempty"`
+}
+
+func (f *GroupFilter) CategoryFilter() []string {
+	var categoryFilter []string
+	if f != nil {
+		for _, c := range f.Categories {
+			categoryFilter = append(categoryFilter, strings.ToLower(c))
+		}
+	}
+	return categoryFilter
 }
 
 type UserGroupOrder struct {

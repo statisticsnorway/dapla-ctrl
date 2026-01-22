@@ -32,15 +32,18 @@ OFFSET
 
 -- name: ListForUser :many
 SELECT
-	sqlc.embed(users),
-	sqlc.embed(groups),
+	group_name,
+	user_id,
 	COUNT(*) OVER () AS total_count
 FROM
 	group_members
-	JOIN groups ON groups.name = group_members.group_name
-	JOIN users ON users.id = group_members.user_id
+	JOIN groups ON group_members.group_name = groups.name
 WHERE
 	group_members.user_id = @user_id
+	AND (
+		sqlc.narg('filter')::TEXT[] IS NULL
+		OR (category) = ANY (sqlc.narg('filter')::TEXT[])
+	)
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'slug:asc' THEN groups.team_slug

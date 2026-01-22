@@ -48,6 +48,9 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	groups
+WHERE
+	sqlc.narg('filter')::TEXT[] IS NULL
+	OR (category) = ANY (sqlc.narg('filter')::TEXT[])
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'slug:asc' THEN team_slug
@@ -91,6 +94,10 @@ FROM
 	groups
 WHERE
 	team_slug = @team_slug::slug
+	AND (
+		sqlc.narg('filter')::TEXT[] IS NULL
+		OR (category) = ANY (sqlc.narg('filter')::TEXT[])
+	)
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'slug:asc' THEN team_slug

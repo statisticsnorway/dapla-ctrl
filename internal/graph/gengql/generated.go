@@ -236,7 +236,7 @@ type ComplexityRoot struct {
 		ActivityLog     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		Features        func(childComplexity int) int
 		Group           func(childComplexity int, name string) int
-		Groups          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
+		Groups          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		Me              func(childComplexity int) int
 		Node            func(childComplexity int, id ident.Ident) int
 		Reconcilers     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
@@ -610,7 +610,7 @@ type ComplexityRoot struct {
 		ActivityLog        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		DeletionInProgress func(childComplexity int) int
 		DisplayName        func(childComplexity int) int
-		Groups             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) int
+		Groups             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		ID                 func(childComplexity int) int
 		IsManaged          func(childComplexity int) int
 		LastSuccessfulSync func(childComplexity int) int
@@ -698,6 +698,7 @@ type ComplexityRoot struct {
 	User struct {
 		Email               func(childComplexity int) int
 		ExternalID          func(childComplexity int) int
+		Groups              func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) int
 		ID                  func(childComplexity int) int
 		IsAdmin             func(childComplexity int) int
 		IsSectionManager    func(childComplexity int) int
@@ -791,7 +792,7 @@ type QueryResolver interface {
 	ActivityLog(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 	Roles(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*authz.Role], error)
 	Features(ctx context.Context) (*feature.Features, error)
-	Groups(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error)
+	Groups(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error)
 	Group(ctx context.Context, name string) (*group.Group, error)
 	Reconcilers(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*reconciler.Reconciler], error)
 	Search(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter search.SearchFilter) (*pagination.Connection[search.SearchNode], error)
@@ -841,7 +842,7 @@ type TeamResolver interface {
 	Section(ctx context.Context, obj *team.Team) (*section.Section, error)
 
 	Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error)
-	Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error)
+	Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error)
 	SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 
 	ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error)
@@ -857,6 +858,7 @@ type UserResolver interface {
 	Section(ctx context.Context, obj *user.User) (*section.Section, error)
 	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error)
 	TeamMembers(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
+	Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error)
 	SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 
 	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
@@ -1549,7 +1551,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder)), true
+		return e.complexity.Query.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
 			break
@@ -3085,7 +3087,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder)), true
+		return e.complexity.Team.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "Team.id":
 		if e.complexity.Team.ID == nil {
 			break
@@ -3397,6 +3399,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.ExternalID(childComplexity), true
+	case "User.groups":
+		if e.complexity.User.Groups == nil {
+			break
+		}
+
+		args, err := ec.field_User_groups_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.UserGroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -3669,6 +3682,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteServiceAccountTokenInput,
 		ec.unmarshalInputDisableReconcilerInput,
 		ec.unmarshalInputEnableReconcilerInput,
+		ec.unmarshalInputGroupFilter,
 		ec.unmarshalInputGroupMemberOrder,
 		ec.unmarshalInputGroupOrder,
 		ec.unmarshalInputReconcilerConfigInput,
@@ -3683,6 +3697,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputUpdateServiceAccountInput,
 		ec.unmarshalInputUpdateServiceAccountTokenInput,
 		ec.unmarshalInputUpdateTeamInput,
+		ec.unmarshalInputUserGroupOrder,
 		ec.unmarshalInputUserOrder,
 		ec.unmarshalInputUserTeamOrder,
 	)
@@ -4167,6 +4182,11 @@ extend type Query {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	"""
@@ -4242,6 +4262,13 @@ type Group implements Node {
 		"Ordering options for items returned from the connection."
 		orderBy: GroupMemberOrder
 	): GroupMemberConnection!
+}
+
+input GroupFilter {
+	"""
+	Filter by group categories, e.g. developers and data-admins
+	"""
+	categories: [String!]
 }
 
 extend union SearchNode = Group
@@ -6561,6 +6588,11 @@ type Team implements Node {
 
 		"Ordering options for items returned from the connection."
 		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	sharedBuckets(
@@ -6976,6 +7008,41 @@ type User implements Node {
 	): UserConnection!
 
 	"""
+	Get a list of the groups the user is a member of.
+	"""
+	groups(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserGroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupMemberConnection!
+
+	"""
 	Get the shared buckets the user has access to.
 	"""
 	sharedBucketsAccess(
@@ -7082,6 +7149,21 @@ input UserTeamOrder {
 }
 
 """
+Ordering options when fetching the teams a user is connected to.
+"""
+input UserGroupOrder {
+	"""
+	The field to order items by.
+	"""
+	field: UserGroupOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
 Possible fields to order users by.
 """
 enum UserOrderField {
@@ -7100,6 +7182,16 @@ enum UserOrderField {
 Possible fields to order user teams by.
 """
 enum UserTeamOrderField {
+	"""
+	The unique slug of the team.
+	"""
+	TEAM_SLUG
+}
+
+"""
+Possible fields to order user teams by.
+"""
+enum UserGroupOrderField {
 	"""
 	The unique slug of the team.
 	"""
@@ -7729,6 +7821,11 @@ func (ec *executionContext) field_Query_groups_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -8344,6 +8441,11 @@ func (ec *executionContext) field_Team_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -8406,6 +8508,42 @@ func (ec *executionContext) field_Team_sharedBuckets_args(ctx context.Context, r
 		return nil, err
 	}
 	args["orderBy"] = arg4
+	return args, nil
+}
+
+func (ec *executionContext) field_User_groups_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -9945,6 +10083,8 @@ func (ec *executionContext) fieldContext_GroupMember_user(_ context.Context, fie
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -11890,7 +12030,7 @@ func (ec *executionContext) _Query_groups(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Groups(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder))
+			return ec.resolvers.Query().Groups(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12616,6 +12756,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -14597,6 +14739,8 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_user(_ context
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -16202,6 +16346,8 @@ func (ec *executionContext) fieldContext_Section_manager(_ context.Context, fiel
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -19850,7 +19996,7 @@ func (ec *executionContext) _Team_groups(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Team_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder))
+			return ec.resolvers.Team().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20632,6 +20778,8 @@ func (ec *executionContext) fieldContext_TeamMember_user(_ context.Context, fiel
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -21688,6 +21836,55 @@ func (ec *executionContext) fieldContext_User_teamMembers(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _User_groups(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_groups,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.UserGroupOrder), fc.Args["filter"].(*group.GroupFilter))
+		},
+		nil,
+		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_groups(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_GroupMemberConnection_pageInfo(ctx, field)
+			case "nodes":
+				return ec.fieldContext_GroupMemberConnection_nodes(ctx, field)
+			case "edges":
+				return ec.fieldContext_GroupMemberConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type GroupMemberConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_groups_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_sharedBucketsAccess(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -21878,6 +22075,8 @@ func (ec *executionContext) fieldContext_UserConnection_nodes(_ context.Context,
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -22341,6 +22540,8 @@ func (ec *executionContext) fieldContext_UserEdge_node(_ context.Context, field 
 				return ec.fieldContext_User_teams(ctx, field)
 			case "teamMembers":
 				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
 			case "sharedBucketsAccess":
 				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
 			case "isAdmin":
@@ -24655,6 +24856,33 @@ func (ec *executionContext) unmarshalInputEnableReconcilerInput(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputGroupFilter(ctx context.Context, obj any) (group.GroupFilter, error) {
+	var it group.GroupFilter
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"categories"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "categories":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categories"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Categories = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGroupMemberOrder(ctx context.Context, obj any) (group.GroupMemberOrder, error) {
 	var it group.GroupMemberOrder
 	asMap := map[string]any{}
@@ -25132,6 +25360,40 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.Purpose = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputUserGroupOrder(ctx context.Context, obj any) (group.UserGroupOrder, error) {
+	var it group.UserGroupOrder
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"field", "direction"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "field":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			data, err := ec.unmarshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Field = data
+		case "direction":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Direction = data
 		}
 	}
 
@@ -31792,6 +32054,42 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "groups":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_groups(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "sharedBucketsAccess":
 			field := field
 
@@ -35135,6 +35433,16 @@ func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
+func (ec *executionContext) unmarshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx context.Context, v any) (group.UserGroupOrderField, error) {
+	var res group.UserGroupOrderField
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx context.Context, sel ast.SelectionSet, v group.UserGroupOrderField) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, v any) (user.UserOrderField, error) {
 	var res user.UserOrderField
 	err := res.UnmarshalGQL(v)
@@ -35666,6 +35974,14 @@ func (ec *executionContext) marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋd
 	return ec._Group(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter(ctx context.Context, v any) (*group.GroupFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputGroupFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx context.Context, sel ast.SelectionSet, v *group.GroupMember) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -35795,6 +36111,42 @@ func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
 	if v == nil {
 		return nil, nil
@@ -35859,6 +36211,14 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOUserGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrder(ctx context.Context, v any) (*group.UserGroupOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUserGroupOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder(ctx context.Context, v any) (*user.UserOrder, error) {

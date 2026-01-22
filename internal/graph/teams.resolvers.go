@@ -133,13 +133,13 @@ func (r *teamResolver) Members(ctx context.Context, obj *team.Team, first *int, 
 	return team.ListMembers(ctx, obj.Slug, page, orderBy)
 }
 
-func (r *teamResolver) Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder) (*pagination.Connection[*group.Group], error) {
+func (r *teamResolver) Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return group.ListByTeamSlug(ctx, obj.Slug, page, orderBy)
+	return group.ListByTeamSlug(ctx, obj.Slug, page, orderBy, filter)
 }
 
 func (r *teamResolver) SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {

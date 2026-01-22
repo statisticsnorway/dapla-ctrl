@@ -34,12 +34,12 @@ Test.gql("Non-admin member cannot create group", function(t)
 	}
 end)
 
-Test.gql("Admin can create group", function(t)
+Test.gql("Admin can create groups", function(t)
 	t.addHeader("x-user-email", admin:email())
 
 	t.query(string.format([[
 		mutation {
-			createGroup(
+			developers: createGroup(
 				input: {teamSlug: "%s", category: "developers", suffix: "cowboys"}
 			) {
 				group {
@@ -50,18 +50,98 @@ Test.gql("Admin can create group", function(t)
 					suffix
 				}
 			}
+			dataAdmins: createGroup(
+				input: {teamSlug: "%s", category: "data-admins", suffix: "outlaws"}
+			) {
+				group {
+					id
+					name
+					teamSlug
+					category
+					suffix
+				}
+			}
 		}
-	]], team:slug()))
+	]], team:slug(), team:slug()))
 
 	t.check {
 		data = {
-			createGroup = {
+			developers = {
 				group = {
 					id = NotNull(),
 					name = team:slug() .. "-developers-cowboys",
 					teamSlug = team:slug(),
 					category = "developers",
 					suffix = "cowboys",
+				},
+			},
+			dataAdmins = {
+				group = {
+					id = NotNull(),
+					name = team:slug() .. "-data-admins-outlaws",
+					teamSlug = team:slug(),
+					category = "data-admins",
+					suffix = "outlaws",
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("Group category filter returns only the requested groups", function(t)
+	t.addHeader("x-user-email", admin:email())
+
+	t.query([[
+		query {
+			developers: groups(filter: { categories: ["developers"] }) {
+				pageInfo {
+					totalCount
+				}
+				nodes {
+					name
+				}
+			}
+			dataAdmins: groups(filter: { categories: ["data-admins"] }) {
+				pageInfo {
+					totalCount
+				}
+				nodes {
+					name
+				}
+			}
+			allGroups: groups {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+		]])
+
+	t.check {
+		data = {
+			developers = {
+				pageInfo = {
+					totalCount = 1,
+				},
+				nodes = {
+					{
+						name = team:slug() .. "-developers-cowboys",
+					},
+				},
+			},
+			dataAdmins = {
+				pageInfo = {
+					totalCount = 1,
+				},
+				nodes = {
+					{
+						name = team:slug() .. "-data-admins-outlaws",
+					},
+				},
+			},
+			allGroups = {
+				pageInfo = {
+					totalCount = 2,
 				},
 			},
 		},
