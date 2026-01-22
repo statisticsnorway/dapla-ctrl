@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -97,6 +98,13 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 		return fmt.Errorf("get users from entra id: %w", err)
 	}
 
+	sections, err := s.querier.GetSections(ctx)
+	if err != nil {
+		return fmt.Errorf("get sections: %w", err)
+	}
+
+	entraIdUsers = sanitizeUserSections(sections, entraIdUsers)
+
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
@@ -159,7 +167,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 		return err
 	}
 
-	if err := s.assignSectionManagers(ctx, querier, entraIdUsers, entraIdUserMap, s.log); err != nil {
+	if err := s.assignSectionManagers(ctx, sections, querier, entraIdUsers, entraIdUserMap, s.log); err != nil {
 		return err
 	}
 
@@ -254,12 +262,7 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 
 // assignSectionManagers sets the section manager for each section in the database, if it finds
 // a matching user in Entra ID (someone in the given section with the job title '^Seksjonssjef.*')
-func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, querier usersyncsql.Querier, entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) error {
-	sections, err := querier.GetSections(ctx)
-	if err != nil {
-		return fmt.Errorf("get current section managers: %w", err)
-	}
-
+func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, sections []*usersyncsql.Section, querier usersyncsql.Querier, entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) error {
 	// Get the definitive list of section managers from Entra ID
 	entraIdSectionManagers := parseEntraIdSectionManagers(entraIdUsers, entraIdUserMap, log)
 
@@ -532,4 +535,15 @@ func managerHasChanged(oldManagerId *uuid.UUID, newManagerId *uuid.UUID) bool {
 		return true
 	}
 	return *oldManagerId != *newManagerId
+}
+
+func sanitizeUserSections(validSections []*usersyncsql.Section, users []*entraIdUser) []*entraIdUser {
+	for _, u := range users {
+		if u.SectionCode != nil && !slices.ContainsFunc(validSections, func(s *usersyncsql.Section) bool {
+			return *u.SectionCode == s.Code
+		}) {
+			u.SectionCode = nil
+		}
+	}
+	return users
 }

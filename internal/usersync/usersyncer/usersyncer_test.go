@@ -216,15 +216,16 @@ func TestSync(t *testing.T) {
 					externalUser{Id: "1", Email: "user1@example.com", Name: "Correct Name"},                                                                 // Will update name of local user
 					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},                                                                    // Will update euserPrincipalName of local user
 					externalUser{Id: "4", Email: "should-lose-admin@example.com", Name: "Should Lose Admin"},                                                // Will lose admin role
-					externalUser{Id: "5", Email: "fix-my-section@example.com", Name: "I Am No Longer In Section 723", Section: "O 724 Seksjon for Testing"}, // Will be created
-					externalUser{Id: "6", Email: "create-me@example.com", Name: "Create Me", Section: "O 724 Seksjon for Testing"}),                         // Will be created
+					externalUser{Id: "5", Email: "fix-my-section@example.com", Name: "I Am No Longer In Section 723", Section: "O 724 Seksjon for Testing"}, // Will get their section updated
+					externalUser{Id: "6", Email: "create-me@example.com", Name: "Create Me", Section: "O 724 Seksjon for Testing"},                          // Will be created
+					externalUser{Id: "7", Email: "invalid-section@example.com", Name: "My Section Doesn't Exist", Section: "O 1337 Seksjon for fantasi"}),   // Will be created, with section NULL
 				)
 			},
 			func(req *http.Request) *http.Response {
 				// Admin users response
 				return test.Response("200 OK", generateEntraIdResponse(
 					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},              // Will be granted admin role
-					externalUser{Id: "7", Email: "unknown-admin@example.com", Name: "Unknown Admin"}), // Unknown user, will be logged
+					externalUser{Id: "8", Email: "unknown-admin@example.com", Name: "Unknown Admin"}), // Unknown user, will be logged
 				)
 			},
 		)
@@ -249,8 +250,8 @@ func TestSync(t *testing.T) {
 		p, _ := pagination.ParsePage(nil, nil, nil, nil)
 		if users, err := user.List(ctx, p, nil); err != nil {
 			t.Fatal(err)
-		} else if total := users.PageInfo.TotalCount; total != 5 {
-			t.Errorf("expected 5 users, got %d", total)
+		} else if total := users.PageInfo.TotalCount; total != 6 {
+			t.Errorf("expected 6 users, got %d", total)
 		}
 
 		if u, err := user.Get(ctx, userWithIncorrectName.ID); err != nil {
@@ -300,6 +301,12 @@ func TestSync(t *testing.T) {
 			t.Errorf("expected user %q to have section 724, got nil", userWithOutdatedSection.Email)
 		} else if *updatedUserWithOutdatedSection.SectionCode != "724" {
 			t.Errorf("expected user %q to have section 724, got %q", userWithOutdatedSection.Email, *userWithOutdatedSection.SectionCode)
+		}
+
+		if updatedUserWithInvalidSection, err := user.GetByEmail(ctx, "invalid-section@example.com"); err != nil {
+			t.Fatal(err)
+		} else if updatedUserWithInvalidSection.SectionCode != nil {
+			t.Errorf("expected user %q to have no section, got %q", updatedUserWithInvalidSection.Email, *updatedUserWithInvalidSection.SectionCode)
 		}
 	})
 
