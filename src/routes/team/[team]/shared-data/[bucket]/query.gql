@@ -1,5 +1,6 @@
 query TeamSharedBucketAccess($bucket: String!) {
 	sharedBucket(name: $bucket) {
+		shortName
 		users(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
 				hasNextPage

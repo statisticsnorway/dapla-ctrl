@@ -3,8 +3,9 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { TeamSharedBucketAccess$result } from '$houdini';
 	import UsersTable, { type TeamMemberData } from './UsersTable.svelte';
+	import { BodyShort } from '@nais/ds-svelte-community';
 
-	let { data }: PageProps = $props();
+	let { params, data }: PageProps = $props();
 
 	let { TeamSharedBucketAccess } = $derived(data);
 
@@ -30,6 +31,12 @@
 	}
 </script>
 
+<div class="bucket-info">
+	<div>
+		<BodyShort>{params.bucket}</BodyShort>
+	</div>
+</div>
+
 <div class="container">
 	<UsersTable
 		teamMembersData={$TeamSharedBucketAccess.data?.sharedBucket.users.nodes.map(
@@ -46,3 +53,13 @@
 		loadNextPage: () => TeamSharedBucketAccess.loadNextPage()
 	}}
 />
+
+<style>
+	.bucket-info {
+		display: grid;
+		grid-template-columns: 1fr 300px;
+		gap: var(--spacing-layout);
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--spacing-layout);
+	}
+</style>
