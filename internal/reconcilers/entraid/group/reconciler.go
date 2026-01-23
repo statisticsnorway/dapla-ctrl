@@ -64,8 +64,8 @@ func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
 func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 	return &protoapi.NewReconciler{
 		Name:        r.Name(),
-		DisplayName: "ABC reconciler",
-		Description: "Do stupid things",
+		DisplayName: "Entra ID reconciler",
+		Description: "Synchronize team and groups to Entra ID",
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
