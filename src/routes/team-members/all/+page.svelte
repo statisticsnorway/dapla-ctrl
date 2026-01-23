@@ -2,7 +2,6 @@
 	import { changeParams } from '$lib/utils/searchparams';
 	import type { PageProps } from './$types';
 	import TeamMembersTable from '../TeamMembersTable.svelte';
-	import type { TeamMemberData } from '../teamMembersUtils';
 
 	let { data }: PageProps = $props();
 	let { AllTeamMembers } = $derived(data);
@@ -11,8 +10,12 @@
 		changeParams(params);
 	};
 
-	let teamMembers: TeamMemberData[] =
-		$AllTeamMembers.data?.users.nodes.map((u) => {
+	let teamMembers = $derived.by(() => {
+		if (!$AllTeamMembers.data) {
+			return [];
+		}
+
+		return $AllTeamMembers.data.users.nodes.map((u) => {
 			return {
 				user: {
 					name: u.name,
@@ -27,7 +30,8 @@
 						}
 					: undefined
 			};
-		}) ?? [];
+		});
+	});
 </script>
 
 {#if $AllTeamMembers.data}

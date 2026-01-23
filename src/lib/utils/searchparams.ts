@@ -10,5 +10,5 @@ export const changeParams = (params: Record<string, string>, options = {}) => {
 		}
 		query.set(key, value);
 	}
-	goto(`?${query.toString()}`, options);
+	goto(`?${query.toString()}`, { ...options, invalidateAll: true });
 };

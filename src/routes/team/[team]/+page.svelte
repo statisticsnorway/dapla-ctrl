@@ -36,14 +36,20 @@
 		<div class="info-item">
 			<div class="value">
 				{#if section?.manager}
-					{section.manager.name}
 					{#if section.manager.email}
-						<a href="mailto:{section.manager.email}">{section.manager.email}</a>
+						<a href="/user/{section.manager.email}">{section.manager.name}</a>
+					{:else}
+						{section.manager.name}
 					{/if}
 				{:else}
 					<span class="missing">Mangler seksjonsleder</span>
 				{/if}
 			</div>
+			{#if section?.manager?.email}
+				<div class="value">
+					<a href="mailto:{section.manager.email}">{section.manager.email}</a>
+				</div>
+			{/if}
 		</div>
 		<div class="info-item">
 			<div class="value">
