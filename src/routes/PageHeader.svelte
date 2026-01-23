@@ -34,7 +34,7 @@
 		href="/team-members"
 		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-16);"
 	>
-		Teammedlemmer
+		Medlemmer
 	</InternalHeaderButton>
 
 	<InternalHeaderButton as="a" href="/shared-data">Datadeling</InternalHeaderButton>
