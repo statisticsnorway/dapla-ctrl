@@ -11,7 +11,8 @@ import (
 	"time"
 	"unicode"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2"
+	"cloud.google.com/go/pubsub/v2/apiv1/pubsubpb"
 	"github.com/google/uuid"
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
@@ -33,6 +34,7 @@ import (
 	"golang.org/x/text/unicode/norm"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"k8s.io/utils/ptr"
 )
 
@@ -106,14 +108,18 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			return err
 		}
 
-		client, err := pubsub.NewClient(ctx, cfg.GoogleManagementProjectID)
+		projectID := cfg.GoogleManagementProjectID
+		client, err := pubsub.NewClient(ctx, projectID)
 		if err != nil {
 			return err
 		}
 
 		log.Infof("creating topic")
 
-		if _, err := client.CreateTopic(ctx, "dapla-api"); err != nil {
+		topic := &pubsubpb.Topic{
+			Name: fmt.Sprintf("projects/%s/topics/%s", projectID, "dapla-api"),
+		}
+		if _, err := client.TopicAdminClient.CreateTopic(ctx, topic); err != nil {
 			if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
 				return err
 			}
@@ -121,10 +127,12 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 		log.Infof("creating subscription")
 
-		if _, err := client.CreateSubscription(ctx, "dapla-api-reconcilers-api-events", pubsub.SubscriptionConfig{
-			Topic:             client.Topic("dapla-api"),
-			RetentionDuration: 1 * time.Hour,
-		}); err != nil {
+		subscription := &pubsubpb.Subscription{
+			Name:                     fmt.Sprintf("projects/%s/subscriptions/%s", projectID, "dapla-api-reconcilers-api-events"),
+			Topic:                    topic.Name,
+			MessageRetentionDuration: durationpb.New(1 * time.Hour),
+		}
+		if _, err := client.SubscriptionAdminClient.CreateSubscription(ctx, subscription); err != nil {
 			if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
 				return err
 			}

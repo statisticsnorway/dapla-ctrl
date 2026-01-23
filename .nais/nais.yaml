@@ -16,12 +16,13 @@ spec:
   accessPolicy:
     inbound:
       rules:
-        - application: dapla-ctrl-alt-del
-        - application: dapla-api-reconcilers
+        - application: "*"
+          namespace: dapla-platform
     outbound:
       external:
-        - host: auth.test.ssb.no
+        - host: auth.ssb.no
         - host: login.microsoftonline.com
+        - ipv4: 100.71.16.226
 
   resources:
     requests:
@@ -49,8 +50,12 @@ spec:
     failureThreshold: 3
 
   ingresses:
-    - https://dapla-ctrl-alt-del.intern.test.ssb.no/graphql
-    - https://dapla-ctrl-alt-del.intern.test.ssb.no/oauth2
+    - https://dapla-ctrl.intern.ssb.no/graphql
+    - https://dapla-ctrl.intern.ssb.no/beta/oauth2
+    - https://dapla-ctrl.intern.ssb.no/api-docs
+    - https://dapla-ctrl-alt-del.intern.ssb.no/graphql
+    - https://dapla-ctrl-alt-del.intern.ssb.no/oauth2
+    - https://dapla-ctrl-alt-del.intern.ssb.no/api-docs
 
   env:
     - name: LISTEN_ADDRESS
@@ -61,16 +66,16 @@ spec:
       value: ":3001"
     - name: GOOGLE_MANAGEMENT_PROJECT_ID
       value: dapla-platform-t-29
+    - name: JWT_ISSUER
+      value: https://auth.ssb.no/realms/ssb
     - name: OAUTH_ISSUER
       value: "https://login.microsoftonline.com/c7217092-b240-4e1d-bd61-fa97ba975cbc/v2.0"
     - name: OAUTH_REDIRECT_URL
-      value: "https://dapla-ctrl-alt-del.intern.test.ssb.no/oauth2/callback"
+      value: "https://dapla-ctrl-alt-del.intern.ssb.no/oauth2/callback"
     - name: OAUTH_FRONTEND_URL
-      value: "https://dapla-ctrl-alt-del.intern.test.ssb.no"
+      value: "https://dapla-ctrl-alt-del.intern.ssb.no/"
     - name: LEADER_ELECTION_ENABLED
       value: "true"
-    - name: DATABASE_URL
-      value: $(DAPLA_API_URL)
     - name: USERSYNC_ADMIN_GROUP
       value: 57448440-d89e-45b7-ab0a-c915d7d8593d
     - name: ENTRA_ID_ALL_USERS_GROUP
@@ -81,10 +86,28 @@ spec:
   envFrom:
     - secret: dapla-api
 
-  gcp:
-    sqlInstances:
-      - type: POSTGRES_17
-        tier: db-f1-micro
-        databases:
-          - name: dapla-api
-            envVarPrefix: DAPLA_API
+  # Sql DB set up outside of nais manifest
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dapla-api
+    team: dapla-platform
+  name: dapla-api-grpc
+  namespace: dapla-platform
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: grpc
+      port: 3001
+      protocol: TCP
+      targetPort: 3001
+  selector:
+    app: dapla-api
+  sessionAffinity: None
+  type: ClusterIP

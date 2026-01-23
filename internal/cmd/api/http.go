@@ -32,7 +32,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/statisticsnorway/dapla-api/internal/usersync"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
@@ -50,9 +50,8 @@ func runHttpServer(
 	log logrus.FieldLogger,
 ) error {
 	router := chi.NewRouter()
-	router.Method("GET", "/",
-		otelhttp.WithRouteTag("playground", otelhttp.NewHandler(playground.Handler("GraphQL playground", "/graphql"), "playground")),
-	)
+	router.Handle("/", http.RedirectHandler("/api-docs", http.StatusPermanentRedirect))
+	router.Method("GET", "/api-docs", otelhttp.NewHandler(playground.Handler("GraphQL playground", "/graphql"), "playground"))
 
 	contextDependencies, err := ConfigureGraph(
 		ctx,
@@ -92,12 +91,12 @@ func runHttpServer(
 			middleware.RequireAuthenticatedUser(),
 			otelhttp.NewMiddleware(
 				"graphql",
-				otelhttp.WithPublicEndpoint(),
+				otelhttp.WithPublicEndpointFn(func(*http.Request) bool { return true }),
 				otelhttp.WithSpanOptions(trace.WithAttributes(semconv.ServiceName("http"))),
 			),
 		)
 		r.Use(middlewares...)
-		r.Method("POST", "/", otelhttp.WithRouteTag("query", graphHandler))
+		r.Method("POST", "/", graphHandler)
 	})
 
 	if authHandler != nil {

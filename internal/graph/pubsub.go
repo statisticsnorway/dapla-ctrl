@@ -3,7 +3,7 @@ package graph
 import (
 	"context"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -23,7 +23,7 @@ type PubsubTopic interface {
 }
 
 type TopicWrapper struct {
-	Topic *pubsub.Topic
+	Topic *pubsub.Publisher
 }
 
 func (t *TopicWrapper) Publish(ctx context.Context, msg protoreflect.ProtoMessage, attrs map[string]string) (string, error) {
@@ -93,11 +93,10 @@ func (r *Resolver) triggerReconcilerConfiguredEvent(ctx context.Context, reconci
 }
 
 func (r *Resolver) triggerEvent(ctx context.Context, event protoapi.EventTypes, msg proto.Message, correlationID uuid.UUID) {
-	ctx, span := otel.Tracer("").
+	ctx, span := otel.Tracer(event.String()).
 		Start(ctx, "trigger Pub/Sub event", trace.WithSpanKind(trace.SpanKindProducer), trace.WithAttributes(
-			semconv.EventName(event.String()),
 			semconv.MessagingDestinationNameKey.String(r.pubsubTopic.String()),
-			semconv.MessagingSystemGCPPubsub,
+			semconv.MessagingSystemGCPPubSub,
 		))
 	defer span.End()
 

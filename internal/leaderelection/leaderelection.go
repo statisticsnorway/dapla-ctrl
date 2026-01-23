@@ -27,6 +27,7 @@ func IsLeader(log logrus.FieldLogger) bool {
 		return false
 	}
 
+	// #nosec G107
 	resp, err := http.Get(electorEndpoint)
 	if err != nil {
 		log.WithError(err).Errorf("unable to get leader")

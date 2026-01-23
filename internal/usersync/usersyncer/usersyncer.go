@@ -426,7 +426,7 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 	log.WithFields(logrus.Fields{
 		"duration":  time.Since(t),
 		"num_users": len(users),
-	}).Debugf("finished fetching users from Entra ID")
+	}).Infof("finished fetching users from Entra ID")
 	return users, err
 }
 

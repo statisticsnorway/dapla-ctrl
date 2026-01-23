@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2"
 	"github.com/joho/godotenv"
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
@@ -98,7 +98,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	if err != nil {
 		return err
 	}
-	pubsubTopic := pubsubClient.Topic("dapla-api")
+	pubsubTopic := pubsubClient.Publisher("dapla-api")
 
 	graphHandler, err := graph.NewHandler(gengql.Config{
 		Resolvers: graph.NewResolver(
