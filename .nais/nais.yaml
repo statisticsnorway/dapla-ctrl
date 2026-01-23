@@ -79,7 +79,7 @@ spec:
     - name: USERSYNC_ADMIN_GROUP
       value: 57448440-d89e-45b7-ab0a-c915d7d8593d
     - name: ENTRA_ID_ALL_USERS_GROUP
-      value: 4b59c229-2fe7-465d-a2bf-f9d36071459c
+      value: 8bfaa3cb-f959-4eef-bb7a-4b9e09b55fc9
     - name: USERSYNC_ENABLED
       value: "true"
 
