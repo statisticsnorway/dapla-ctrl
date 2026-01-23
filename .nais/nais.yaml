@@ -9,7 +9,7 @@ metadata:
     nais.io/read-only-file-system: "true"
     nais.io/run-as-user: "1001"
 spec:
-  image: "europe-north1-docker.pkg.dev/nais-management-b3a7/dapla-platform/dapla-api-reconcilers:2025.12.12-13.34-3420f6d"
+  image: "{{image}}"
 
   accessPolicy:
     outbound:
