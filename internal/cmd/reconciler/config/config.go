@@ -17,7 +17,7 @@ type Config struct {
 
 	PubSub struct {
 		// SubscriptionID The ID of the Pub/Sub subscription used to listen for events from the NAIS API.
-		SubscriptionID string `env:"PUBSUB_SUBSCRIPTION_ID,default=nais-api-reconcilers-api-events"`
+		SubscriptionID string `env:"PUBSUB_SUBSCRIPTION_ID,default=dapla-api-reconcilers-api-events"`
 
 		// ProjectID The ID of the Pub/Sub project used to listen for events from the NAIS API. Defaults to GoogleManagementProjectID.
 		ProjectID string `env:"PUBSUB_PROJECT_ID,default=$GOOGLE_MANAGEMENT_PROJECT_ID"`

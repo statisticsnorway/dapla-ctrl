@@ -30,6 +30,7 @@ const (
 	configGcpProvisioningResourceIdKey = "gcpProvisioningResourceId"
 	configGcpSSOResourceIdKey          = "gcpSSOResourceId"
 	configGroupPrefixKey               = "groupPrefix"
+	configMaster                       = "master"
 )
 
 type syncQueuer interface {
@@ -41,6 +42,7 @@ type entraIdGroupReconciler struct {
 	service       *msgraphsdk.GraphServiceClient
 	entraIdConfig entraIdConfig
 	syncQueuer    syncQueuer
+	master        MemberMaster
 }
 
 type entraIdConfig struct {
@@ -104,6 +106,12 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Prefix to be added to any group created in Entra ID. Used for testing.",
 				Secret:      false,
 			},
+			{
+				Key:         configMaster,
+				DisplayName: "Master",
+				Description: "Which system is source of truth for group membership. Value can be 'entraid' or 'database'.",
+				Secret:      false,
+			},
 		},
 	}
 }
@@ -125,6 +133,10 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get entra id client: %w", err)
 	}
 
+	r.master, err = r.GetMemberMaster(ctx, client, entraId, config)
+	if err != nil {
+		return fmt.Errorf("get master config: %w", err)
+	}
 	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
 		return client.Teams().Groups(ctx, &protoapi.ListTeamGroupsRequest{
@@ -150,19 +162,19 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	if created {
 		if _, err := client.Groups().SetExternalId(ctx, &protoapi.SetExternalIdRequest{
 			Name:       groupName,
-			ExternalId: *group.GetId(),
+			ExternalId: group.ExternalId,
 		}); err != nil {
 			return fmt.Errorf("update external id: %w", err)
 		}
 
 		if r.syncQueuer != nil {
-			if err := r.syncQueuer.Add(*group.GetId(), nil); err != nil {
+			if err := r.syncQueuer.Add(group.ExternalId, nil); err != nil {
 				return fmt.Errorf("add to sync queue: %w", err)
 			}
 		}
 	}
 
-	if err := ensureAppRoles(ctx, entraId, *group.GetId(), &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
+	if err := ensureAppRoles(ctx, entraId, group.ExternalId, &r.entraIdConfig.AppRoleId, &r.entraIdConfig.ProvisioningResourceId, &r.entraIdConfig.SSOResourceId); err != nil {
 		return fmt.Errorf("assign provisioning app role: %w", err)
 	}
 
@@ -171,46 +183,110 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		return fmt.Errorf("get database members: %w", err)
 	}
 
-	entraIdUsers, err := getEntraIdMembers(ctx, entraId, *group.GetId())
+	entraIdUsers, err := getEntraIdMembers(ctx, entraId, group.ExternalId)
 	if err != nil {
 		return fmt.Errorf("get entra id members: %w", err)
 	}
 
-	usersToAdd := getDatabaseOnlyUsers(dbMembers, entraIdUsers)
-	usersToRemove := getRemoteOnlyUsers(dbMembers, entraIdUsers)
+	localOnlyUsers := getDatabaseOnlyUsers(dbMembers, entraIdUsers)
+	remoteOnlyUsers := getRemoteOnlyUsers(dbMembers, entraIdUsers)
 
-	if len(usersToAdd) == 0 && len(usersToRemove) == 0 {
+	if len(localOnlyUsers) == 0 && len(remoteOnlyUsers) == 0 {
 		return nil
 	}
 
-	for _, u := range usersToRemove {
-		if err := entraId.Groups().ByGroupId(*group.GetId()).Members().ByDirectoryObjectId(*u.GetId()).Ref().Delete(ctx, nil); err != nil {
-			return fmt.Errorf("remove user %q from group %q: %w", *u.GetUserPrincipalName(), groupName, err)
-		}
+	if err := r.master.RemoveUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers); err != nil {
+		return err
 	}
 
-	for _, u := range usersToAdd {
-		requestBody := models.NewReferenceCreate()
-		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", u.User.ExternalId)
-		requestBody.SetOdataId(&odataId)
-		if err := entraId.Groups().ByGroupId(*group.GetId()).Members().Ref().Post(context.Background(), requestBody, nil); err != nil {
-			return fmt.Errorf("add user %q to group %q: %w", u.User.Email, groupName, err)
-		}
+	if err := r.master.AddUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers); err != nil {
+		return err
 	}
 
-	if r.syncQueuer != nil && (len(usersToAdd) > 0 || len(usersToRemove) > 0) {
+	if r.syncQueuer != nil && (len(localOnlyUsers) > 0 || len(remoteOnlyUsers) > 0) {
 		var joinedError error
-		for _, u := range toUniformIdList(usersToAdd, usersToRemove) {
-			err := r.syncQueuer.Add(*group.GetId(), &u)
+		for _, u := range slices.Concat(localOnlyUsers, remoteOnlyUsers) {
+			err := r.syncQueuer.Add(group.ExternalId, &u.ExternalId)
 			if err != nil {
 				joinedError = errors.Join(joinedError, err)
 			}
 		}
+
 		if joinedError != nil {
 			return joinedError
 		}
 	}
 
+	return nil
+}
+
+type User struct {
+	ExternalId string
+	Email      string
+}
+
+type Group struct {
+	ExternalId string
+	Name       string
+}
+
+type MemberMaster interface {
+	AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error
+	RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error
+}
+
+type DatabaseMaster struct {
+	client *msgraphsdk.GraphServiceClient
+}
+
+func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	for _, user := range remoteOnlyUsers {
+		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().ByDirectoryObjectId(user.ExternalId).Ref().Delete(ctx, nil); err != nil {
+			return fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err)
+		}
+	}
+	return nil
+}
+
+func (m *DatabaseMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	for _, user := range localOnlyUsers {
+		requestBody := models.NewReferenceCreate()
+		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", user.ExternalId)
+		requestBody.SetOdataId(&odataId)
+		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().Ref().Post(ctx, requestBody, nil); err != nil {
+			return fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err)
+		}
+	}
+	return nil
+}
+
+type EntraIdMaster struct {
+	client *apiclient.APIClient
+}
+
+func (m *EntraIdMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	for _, user := range localOnlyUsers {
+		_, err := m.client.Groups().RemoveMember(ctx, &protoapi.RemoveMemberRequest{
+			Groupname:      group.Name,
+			UserExternalId: user.ExternalId,
+		})
+		if err != nil {
+			return fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err)
+		}
+	}
+	return nil
+}
+
+func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	for _, user := range remoteOnlyUsers {
+		_, err := m.client.Groups().AddMember(ctx, &protoapi.AddMemberRequest{
+			Groupname:      group.Name,
+			UserExternalId: user.ExternalId,
+		})
+		if err != nil {
+			return fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err)
+		}
+	}
 	return nil
 }
 
@@ -252,17 +328,21 @@ func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClie
 	return entraIdUsers, nil
 }
 
-func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ models.Groupable, created bool, err error) {
+func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *Group, created bool, err error) {
 	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
 		Name: groupName,
 	})
 	if err != nil {
 		return nil, false, fmt.Errorf("get group from database: %w", err)
 	}
+	entraIdGroupName := fmt.Sprintf("%s%s", groupPrefix, groupName)
 	if dbGroup.Group.ExternalId != nil {
-		entraIdGroup, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
+		_, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
 		if err == nil {
-			return entraIdGroup, false, nil
+			return &Group{
+				ExternalId: *dbGroup.Group.ExternalId,
+				Name:       entraIdGroupName,
+			}, false, nil
 		}
 		var odError odataerrors.ODataErrorable
 		if !errors.As(err, &odError) {
@@ -271,9 +351,6 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 			return nil, false, fmt.Errorf("non-404 status code on get group from entra id: %w", err)
 		}
 	}
-
-	// TODO: Remove before prod!
-	entraIdGroupName := fmt.Sprintf("%s%s", groupPrefix, groupName)
 
 	requestBody := models.NewGroup()
 	requestBody.SetDisplayName(&entraIdGroupName)
@@ -287,21 +364,10 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 		return nil, false, fmt.Errorf("create group: %w", err)
 	}
 
-	return group, true, nil
-}
-
-// toUniformIdList takes two lists of protoapi.GroupMember (database users)
-// and models.Userable (Entra ID users) and returns a list of their Entra ID IDs.
-// The lists are assumed to be disjunct, so no deduplication of entries is performed.
-func toUniformIdList(toAdd []*protoapi.GroupMember, toRemove []models.Userable) []string {
-	userIds := make([]string, len(toAdd)+len(toRemove))
-	for _, u := range toAdd {
-		userIds = append(userIds, u.User.ExternalId)
-	}
-	for _, u := range toRemove {
-		userIds = append(userIds, *u.GetId())
-	}
-	return userIds
+	return &Group{
+		ExternalId: *group.GetId(),
+		Name:       entraIdGroupName,
+	}, true, nil
 }
 
 // ensureAppRoles assigns any app roles which may be missing on the given group
@@ -355,15 +421,18 @@ func assignAppRole(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, 
 // getDatabaseOnlyUsers takes a list of database users and remote/Entra ID users and returns
 // those users which are only present in the database. These are the users that need to be added
 // to the Entra ID group.
-func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []*protoapi.GroupMember {
-	dbUserMap := make(map[string]*protoapi.GroupMember)
+func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []User {
+	dbUserMap := make(map[string]User)
 	for _, u := range dbUsers {
-		dbUserMap[u.User.ExternalId] = u
+		dbUserMap[u.User.ExternalId] = User{
+			ExternalId: u.User.ExternalId,
+			Email:      u.User.Email,
+		}
 	}
 	for _, u := range remoteUsers {
 		delete(dbUserMap, *u.GetId())
 	}
-	var dbOnly []*protoapi.GroupMember
+	var dbOnly []User
 	for _, u := range dbUserMap {
 		dbOnly = append(dbOnly, u)
 	}
@@ -373,15 +442,18 @@ func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.
 // getRemoteOnlyUsers takes a list of database users and remote/Entra ID users and returns
 // those users which are only present in Entra ID. These are the users that need to be removed
 // from the Entra ID group.
-func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []models.Userable {
-	remoteUserMap := make(map[string]models.Userable)
+func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []User {
+	remoteUserMap := make(map[string]User)
 	for _, u := range remoteUsers {
-		remoteUserMap[*u.GetId()] = u
+		remoteUserMap[*u.GetId()] = User{
+			ExternalId: *u.GetId(),
+			Email:      *u.GetUserPrincipalName(),
+		}
 	}
 	for _, u := range dbUsers {
 		delete(remoteUserMap, u.User.ExternalId)
 	}
-	var remoteOnly []models.Userable
+	var remoteOnly []User
 	for _, u := range remoteUserMap {
 		remoteOnly = append(remoteOnly, u)
 	}
@@ -416,6 +488,7 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ProvisioningResourceId = id
 		case configGroupPrefixKey:
 			rc.GroupPrefix = c.Value
+		case configMaster:
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -449,6 +522,27 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 	r.entraIdConfig = rc
 
 	return service, nil
+}
+
+func (r *entraIdGroupReconciler) GetMemberMaster(ctx context.Context, apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) (MemberMaster, error) {
+	for _, c := range config.Nodes {
+		switch c.Key {
+		case configMaster:
+			switch c.Value {
+			case "entraid":
+				return &EntraIdMaster{
+					client: apiClient,
+				}, nil
+			case "database":
+				return &DatabaseMaster{
+					client: entraidClient,
+				}, nil
+			default:
+				return nil, fmt.Errorf("unknown master type %q, master must be 'entraid' or 'database'", c.Value)
+			}
+		}
+	}
+	return nil, errors.New("no master config defined")
 }
 
 func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
