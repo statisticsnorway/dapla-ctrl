@@ -11,9 +11,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
-	msgraphsdkgo "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
 	graphserviceprincipals "github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
@@ -47,7 +45,7 @@ type gcpSyncReconciler struct {
 	config       gcpSyncConfig
 	queue        queue.Queue[SyncRequest]
 	queueChannel <-chan SyncRequest
-	entraId      *msgraphsdkgo.GraphServiceClient
+	entraId      *msgraphsdk.GraphServiceClient
 	log          logrus.FieldLogger
 }
 
@@ -171,7 +169,6 @@ func (s *gcpSyncReconciler) CollectRequests(ctx context.Context) (map[string][]s
 }
 
 func (s *gcpSyncReconciler) Sync(ctx context.Context, groups map[string][]string) error {
-
 	if len(groups) == 0 {
 		s.log.Info("no groups to sync")
 		return nil
@@ -259,7 +256,8 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 
 	return nil
 }
-func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *graphmodels.SynchronizationJobApplicationParameters {
+
+func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *models.SynchronizationJobApplicationParameters {
 	mutatedMembers := make([]models.SynchronizationJobSubjectable, 0, len(userIds))
 	for _, u := range userIds {
 		member := models.NewSynchronizationJobSubject()
@@ -282,8 +280,8 @@ func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *g
 	return parameters
 }
 
-func (s *gcpSyncReconciler) Add(group string, member *string) {
-	s.queue.Add(SyncRequest{Group: group, User: member})
+func (s *gcpSyncReconciler) Add(group string, member *string) error {
+	return s.queue.Add(SyncRequest{Group: group, User: member})
 }
 
 // These methods are no-ops, just there to satisfy the Reconciler interface.

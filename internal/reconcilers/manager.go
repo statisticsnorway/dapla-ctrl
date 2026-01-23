@@ -7,7 +7,7 @@ import (
 	"slices"
 	"time"
 
-	"cloud.google.com/go/pubsub"
+	pubsub "cloud.google.com/go/pubsub/v2"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
@@ -35,7 +35,7 @@ type Manager struct {
 	// Reconcilers to enable during registration
 	reconcilersToEnable []string
 	log                 logrus.FieldLogger
-	pubsubSubscription  *pubsub.Subscription
+	pubsubSubscription  *pubsub.Subscriber
 	syncQueueChan       <-chan ReconcileRequest
 	syncQueue           queue.Queue[ReconcileRequest]
 	inFlight            InFlight
@@ -59,13 +59,13 @@ func NewManager(ctx context.Context, c *apiclient.APIClient, enableDuringRegistr
 
 	log.WithField("duration", time.Since(start).String()).Debug("metrics created")
 
-	var pubsubSubscription *pubsub.Subscription
+	var pubsubSubscription *pubsub.Subscriber
 	pubsubClient, err := pubsub.NewClient(ctx, pubsubProjectID)
 	log.WithField("duration", time.Since(start).String()).Debug("pubsub client created")
 	if err != nil {
 		log.WithError(err).Errorf("error when creating pubsub client")
 	} else {
-		pubsubSubscription = pubsubClient.Subscription(pubsubSubscriptionID)
+		pubsubSubscription = pubsubClient.Subscriber(pubsubSubscriptionID)
 		log.WithField("duration", time.Since(start).String()).Debug("subscription created")
 	}
 

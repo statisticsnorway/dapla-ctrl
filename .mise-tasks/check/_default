@@ -3,4 +3,4 @@
 
 set -e
 
-mise run check:deadcode ::: check:gosec ::: check:helm-lint ::: check:staticcheck ::: check:vulncheck
+mise run check:deadcode ::: check:gosec ::: check:staticcheck ::: check:vulncheck

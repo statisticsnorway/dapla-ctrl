@@ -12,7 +12,6 @@ import (
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
-	graphmodels "github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
@@ -34,7 +33,7 @@ const (
 )
 
 type syncQueuer interface {
-	Add(group string, member *string)
+	Add(group string, member *string) error
 }
 
 type entraIdGroupReconciler struct {
@@ -157,7 +156,9 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		}
 
 		if r.syncQueuer != nil {
-			r.syncQueuer.Add(*group.GetId(), nil)
+			if err := r.syncQueuer.Add(*group.GetId(), nil); err != nil {
+				return fmt.Errorf("add to sync queue: %w", err)
+			}
 		}
 	}
 
@@ -189,7 +190,7 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	}
 
 	for _, u := range usersToAdd {
-		requestBody := graphmodels.NewReferenceCreate()
+		requestBody := models.NewReferenceCreate()
 		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", u.User.ExternalId)
 		requestBody.SetOdataId(&odataId)
 		if err := entraId.Groups().ByGroupId(*group.GetId()).Members().Ref().Post(context.Background(), requestBody, nil); err != nil {
@@ -198,8 +199,15 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	}
 
 	if r.syncQueuer != nil && (len(usersToAdd) > 0 || len(usersToRemove) > 0) {
+		var joinedError error
 		for _, u := range toUniformIdList(usersToAdd, usersToRemove) {
-			r.syncQueuer.Add(*group.GetId(), &u)
+			err := r.syncQueuer.Add(*group.GetId(), &u)
+			if err != nil {
+				joinedError = errors.Join(joinedError, err)
+			}
+		}
+		if joinedError != nil {
+			return joinedError
 		}
 	}
 
@@ -267,7 +275,7 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 	// TODO: Remove before prod!
 	entraIdGroupName := fmt.Sprintf("%s%s", groupPrefix, groupName)
 
-	requestBody := graphmodels.NewGroup()
+	requestBody := models.NewGroup()
 	requestBody.SetDisplayName(&entraIdGroupName)
 	requestBody.SetSecurityEnabled(ptr.To(true))
 	requestBody.SetMailEnabled(ptr.To(false))
@@ -306,7 +314,7 @@ func ensureAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient,
 	pageIterator, _ := msgraphcore.NewPageIterator[models.AppRoleAssignmentable](appRolesResponse, entraId.GetAdapter(), models.CreateAppRoleAssignmentCollectionResponseFromDiscriminatorValue)
 
 	var appRoleAssignments []models.AppRoleAssignmentable
-	if err := pageIterator.Iterate(ctx, func(apa graphmodels.AppRoleAssignmentable) bool {
+	if err := pageIterator.Iterate(ctx, func(apa models.AppRoleAssignmentable) bool {
 		appRoleAssignments = append(appRoleAssignments, apa)
 		return true
 	}); err != nil {

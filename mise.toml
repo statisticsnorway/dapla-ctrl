@@ -4,4 +4,3 @@ task_output = "prefix"
 
 [tools]
 go = "1.25.5"
-helm = "3.17.1"
