@@ -309,7 +309,7 @@ func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group 
 
 func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string) ([]models.Userable, error) {
 	var entraIdUsers []models.Userable
-	entraIdUsersReq, err := entraId.Groups().ByGroupId(groupId).TransitiveMembers().Get(ctx, nil)
+	entraIdUsersReq, err := entraId.Groups().ByGroupId(groupId).TransitiveMembers().GraphUser().Get(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("get entra id group members: %w", err)
 	}
