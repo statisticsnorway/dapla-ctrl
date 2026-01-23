@@ -23,4 +23,4 @@ jobs:
           TEAM: dapla-platform
           CLUSTER: prod
           RESOURCE: .nais/nais.yaml
-          VAR: image=europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/dapla-platform/dapla-api:${{ github.event.inputs.image_version }}
+          VAR: image=europe-north1-docker.pkg.dev/${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}/dapla-platform/dapla-api:${{ github.event.inputs.image_version }}
