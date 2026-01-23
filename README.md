@@ -62,3 +62,13 @@ logger.error({ error, context: 'some-context' }, 'An error occurred');
 ```
 
 HTTP requests are automatically logged in `hooks.server.ts` (errors and slow requests only).
+
+## Deploy
+
+Deploys are performed when creating a release or manually triggered. This will also create a new image if needed.
+
+Triggering deploy manually can be done in GUI or from the command line:
+
+```sh
+gh workflow run deploy.yaml --ref main
+```

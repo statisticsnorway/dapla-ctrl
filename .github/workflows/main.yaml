@@ -44,24 +44,5 @@ jobs:
         id: docker-build-push
         with:
           team: dapla-platform
-      - name: Generate image tags
-        id: nais-deploy-vars
-        run: |
-          echo "nais_tag=${{ steps.docker-build-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
-          echo "cluster=test" >> "$GITHUB_OUTPUT"
-          echo "nais_config_path=.nais/dev.yaml" >> "$GITHUB_OUTPUT"
 
-  deploy:
-    name: Deploy to NAIS
-    needs: build_push
-    if: github.event_name != 'pull_request' && endsWith(github.ref, '/main')
-    uses: ./.github/workflows/deploy.yaml
-    with:
-      registry: europe-north1-docker.pkg.dev
-      repository: dapla-platform
-      image-name: dapla-console
-      image-tag: ${{ needs.build_push.outputs.nais-tag }}
-      cluster: ${{needs.build_push.outputs.nais-cluster}}
-      nais-config-path: ${{needs.build_push.outputs.nais-config-path}}
-    secrets:
-      registry-project: ${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}
+    # TODO: deploy to preview

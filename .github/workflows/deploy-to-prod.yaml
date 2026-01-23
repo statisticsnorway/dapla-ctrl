@@ -1,0 +1,89 @@
+name: Deploy to NAIS prod
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    name: Docker Build
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+      telemetry: ${{ steps.docker-build-push.outputs.telemetry }}
+      only-config-changed: ${{ steps.changed-files.outputs.changed == 'only-inputs'}}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.json') }}-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check what changed
+        id: changed-files
+        uses: 'nais/what-changed@main'
+        with:
+          files: .nais/nais.yaml
+          main-branch-name: 'main'
+
+      - name: Lint
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        run: pnpm run lint
+
+      - name: Type check
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        run: pnpm run check
+
+      - name: Run tests
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        run: pnpm test --run
+
+      - name: Build and push
+        if: steps.changed-files.outputs.changed != 'only-inputs'
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: dapla-platform
+
+  deploy:
+    name: Deploy
+    needs: docker-build
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: prod
+          RESOURCE: .nais/nais.yaml
+          WORKLOAD_IMAGE: ${{ needs.docker-build.outputs.image }}
+          DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443
+          WAIT: true
+          TELEMETRY: ${{ needs.docker-build.outputs.telemetry }}
