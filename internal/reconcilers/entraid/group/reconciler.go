@@ -240,24 +240,26 @@ type DatabaseMaster struct {
 }
 
 func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	var errs []error
 	for _, user := range remoteOnlyUsers {
 		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().ByDirectoryObjectId(user.ExternalId).Ref().Delete(ctx, nil); err != nil {
-			return fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err)
+			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (m *DatabaseMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	var errs []error
 	for _, user := range localOnlyUsers {
 		requestBody := models.NewReferenceCreate()
 		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", user.ExternalId)
 		requestBody.SetOdataId(&odataId)
 		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().Ref().Post(ctx, requestBody, nil); err != nil {
-			return fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err)
+			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 type EntraIdMaster struct {
@@ -265,29 +267,31 @@ type EntraIdMaster struct {
 }
 
 func (m *EntraIdMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	var errs []error
 	for _, user := range localOnlyUsers {
 		_, err := m.client.Groups().RemoveMember(ctx, &protoapi.RemoveMemberRequest{
 			Groupname:      group.Name,
 			UserExternalId: user.ExternalId,
 		})
 		if err != nil {
-			return fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err)
+			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+	var errs []error
 	for _, user := range remoteOnlyUsers {
 		_, err := m.client.Groups().AddMember(ctx, &protoapi.AddMemberRequest{
 			Groupname:      group.Name,
 			UserExternalId: user.ExternalId,
 		})
 		if err != nil {
-			return fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err)
+			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
 		}
 	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group string) ([]*protoapi.GroupMember, error) {
