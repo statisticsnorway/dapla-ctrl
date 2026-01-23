@@ -41,7 +41,7 @@ VALUES
 		$5
 	)
 RETURNING
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
+	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 `
 
 type CreateParams struct {
@@ -63,12 +63,12 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 	var i Team
 	err := row.Scan(
 		&i.Slug,
+		&i.DisplayName,
 		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
-		&i.DisplayName,
 	)
 	return &i, err
 }
@@ -121,7 +121,7 @@ func (q *Queries) Exists(ctx context.Context, argSlug slug.Slug) (bool, error) {
 
 const get = `-- name: Get :one
 SELECT
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
+	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 WHERE
@@ -133,12 +133,12 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	var i Team
 	err := row.Scan(
 		&i.Slug,
+		&i.DisplayName,
 		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
-		&i.DisplayName,
 	)
 	return &i, err
 }
@@ -173,7 +173,7 @@ func (q *Queries) GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*Te
 
 const list = `-- name: List :many
 SELECT
-	teams.slug, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.display_name,
+	teams.slug, teams.display_name, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
@@ -213,12 +213,12 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 		var i ListRow
 		if err := rows.Scan(
 			&i.Team.Slug,
+			&i.Team.DisplayName,
 			&i.Team.Purpose,
 			&i.Team.LastSuccessfulSync,
 			&i.Team.DeleteKeyConfirmedAt,
 			&i.Team.SectionCode,
 			&i.Team.IsManaged,
-			&i.Team.DisplayName,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -284,7 +284,7 @@ func (q *Queries) ListAllSlugs(ctx context.Context) ([]slug.Slug, error) {
 
 const listBySlugs = `-- name: ListBySlugs :many
 SELECT
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
+	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 WHERE
@@ -304,12 +304,12 @@ func (q *Queries) ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, 
 		var i Team
 		if err := rows.Scan(
 			&i.Slug,
+			&i.DisplayName,
 			&i.Purpose,
 			&i.LastSuccessfulSync,
 			&i.DeleteKeyConfirmedAt,
 			&i.SectionCode,
 			&i.IsManaged,
-			&i.DisplayName,
 		); err != nil {
 			return nil, err
 		}
@@ -361,7 +361,7 @@ SET
 WHERE
 	teams.slug = $3
 RETURNING
-	slug, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, display_name
+	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 `
 
 type UpdateParams struct {
@@ -375,12 +375,12 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
 	var i Team
 	err := row.Scan(
 		&i.Slug,
+		&i.DisplayName,
 		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
 		&i.IsManaged,
-		&i.DisplayName,
 	)
 	return &i, err
 }

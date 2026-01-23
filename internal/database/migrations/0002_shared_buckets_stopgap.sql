@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE shared_buckets_stopgap (
 	name TEXT NOT NULL PRIMARY KEY,
-	team_slug slug NOT NULL,
+	team_slug slug NOT NULL REFERENCES teams (slug) ON DELETE CASCADE,
 	short_name TEXT NOT NULL,
 	kind TEXT NOT NULL,
 	env TEXT NOT NULL

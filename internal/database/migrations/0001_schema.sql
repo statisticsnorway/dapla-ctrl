@@ -113,6 +113,23 @@ CREATE TABLE activity_log_entries (
 )
 ;
 
+CREATE TABLE groups (
+	name TEXT PRIMARY KEY,
+	team_slug slug NOT NULL,
+	category TEXT NOT NULL,
+	suffix TEXT NOT NULL,
+	external_id TEXT,
+	UNIQUE (team_slug, category, suffix)
+)
+;
+
+CREATE TABLE group_members (
+	group_name TEXT NOT NULL REFERENCES groups (name) ON DELETE CASCADE,
+	user_id UUID NOT NULL,
+	PRIMARY KEY (group_name, user_id)
+)
+;
+
 CREATE TABLE reconciler_errors (
 	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
 	correlation_id UUID NOT NULL,
@@ -172,6 +189,13 @@ CREATE TABLE role_authorizations (
 )
 ;
 
+CREATE TABLE sections (
+	code TEXT PRIMARY KEY,
+	name TEXT NOT NULL,
+	manager_id UUID
+)
+;
+
 CREATE TABLE sessions (
 	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
 	user_id UUID NOT NULL,
@@ -194,9 +218,12 @@ CREATE TABLE team_slugs (slug slug PRIMARY KEY)
 
 CREATE TABLE teams (
 	slug slug PRIMARY KEY,
+	display_name TEXT NOT NULL,
 	purpose TEXT NOT NULL,
 	last_successful_sync TIMESTAMP WITHOUT TIME ZONE,
 	delete_key_confirmed_at TIMESTAMPTZ,
+	section_code TEXT NOT NULL,
+	is_managed BOOLEAN NOT NULL,
 	CHECK (
 		(
 			TRIM(
@@ -253,7 +280,8 @@ CREATE TABLE users (
 	email TEXT NOT NULL UNIQUE,
 	name TEXT NOT NULL,
 	external_id TEXT NOT NULL UNIQUE,
-	admin BOOLEAN NOT NULL DEFAULT FALSE
+	admin BOOLEAN NOT NULL DEFAULT FALSE,
+	section_code TEXT
 )
 ;
 
@@ -271,6 +299,18 @@ CREATE TABLE usersync_log_entries (
 ;
 
 -- views
+CREATE MATERIALIZED VIEW team_members AS
+SELECT DISTINCT
+	ON (teams.slug, group_members.user_id) teams.slug AS team_slug,
+	group_members.user_id
+FROM
+	teams
+	JOIN groups ON groups.team_slug = teams.slug
+	JOIN group_members ON groups.name = group_members.group_name
+WHERE
+	teams.slug != 'dapla-felles'
+;
+
 -- additional indexes
 CREATE INDEX activity_log_entries_team_slug_idx ON activity_log_entries (team_slug)
 ;
@@ -279,6 +319,12 @@ CREATE INDEX activity_log_entries_resource_type_idx ON activity_log_entries (res
 ;
 
 CREATE INDEX activity_log_entries_created_at_idx ON activity_log_entries (created_at)
+;
+
+CREATE INDEX group_members_for_user ON group_members (user_id)
+;
+
+CREATE INDEX group_members_for_group ON group_members (group_name)
 ;
 
 CREATE INDEX ON reconciler_errors USING btree (created_at DESC)
@@ -307,6 +353,14 @@ WHERE
 ;
 
 -- foreign keys
+ALTER TABLE groups
+ADD FOREIGN KEY (team_slug) REFERENCES teams (slug) ON DELETE CASCADE
+;
+
+ALTER TABLE group_members
+ADD FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+;
+
 ALTER TABLE reconciler_config
 ADD FOREIGN KEY (reconciler) REFERENCES reconcilers (name) ON DELETE CASCADE
 ;
@@ -321,13 +375,25 @@ ADD FOREIGN KEY (reconciler_name) REFERENCES reconcilers (name) ON DELETE CASCAD
 ADD FOREIGN KEY (team_slug) REFERENCES teams (slug) ON DELETE CASCADE
 ;
 
+ALTER TABLE sections
+ADD FOREIGN KEY (manager_id) REFERENCES users (id) ON DELETE SET NULL
+;
+
 ALTER TABLE sessions
 ADD FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+;
+
+ALTER TABLE teams
+ADD FOREIGN KEY (section_code) REFERENCES sections (code)
 ;
 
 ALTER TABLE team_delete_keys
 ADD FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
 ADD FOREIGN KEY (team_slug) REFERENCES teams (slug) ON DELETE CASCADE
+;
+
+ALTER TABLE users
+ADD FOREIGN KEY (section_code) REFERENCES sections (code) ON DELETE SET NULL
 ;
 
 ALTER TABLE user_roles
@@ -337,6 +403,14 @@ ADD FOREIGN KEY (role_name) REFERENCES roles (name) ON DELETE CASCADE ON UPDATE 
 ;
 
 -- triggers
+CREATE TRIGGER groups_notify
+AFTER INSERT
+OR
+UPDATE
+OR DELETE ON groups FOR EACH ROW
+EXECUTE PROCEDURE api_notify ("name", "team_slug")
+;
+
 CREATE TRIGGER reconciler_states_set_updated BEFORE
 UPDATE ON reconciler_states FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at ()
@@ -459,4 +533,95 @@ VALUES
 	('Team owner', 'service_accounts:delete'),
 	('Team owner', 'service_accounts:read'),
 	('Team owner', 'service_accounts:update')
+;
+
+INSERT INTO
+	sections (code, name)
+VALUES
+	('101', 'Administrerende direktør'),
+	('102', 'Stab Administrasjonsavdeling'),
+	(
+		'111',
+		'Seksjon for økonomi og virksomhetsstyring'
+	),
+	('120', 'Internasjonalt sekretæriat'),
+	('150', 'Seksjon HR'),
+	(
+		'160',
+		'Seksjon for eiendom, arkiv og administrative systemer'
+	),
+	('201', 'Stab økonomisk statistikk'),
+	('210', 'Seksjon for nasjonalregnskap'),
+	('211', 'Seksjon for finansregnskap'),
+	('212', 'Seksjon for offentlige finanser'),
+	('213', 'Seksjon for finansmarkedsstatistikk'),
+	('214', 'Seksjon for utenrikshandelsstatistikk'),
+	(
+		'216',
+		'Seksjon for internasjonalt utviklingsarbeid'
+	),
+	('240', 'Seksjon for prisstatistikk'),
+	('301', 'Stab person- og sosialstatistikk'),
+	(
+		'312',
+		'Seksjon for arbeidsmarkeds- og lønnsstatistikk'
+	),
+	('320', 'Seksjon for befolkningsstatistikk'),
+	('330', 'Seksjon for helsestatistikk'),
+	(
+		'350',
+		'Seksjon for inntekts- og levekårsstatistikk'
+	),
+	('360', 'Seksjon for utdanningsstatistikk'),
+	('380', 'Seksjon for mikrodata'),
+	('401', 'Stab - nærings- og miljøstatistikk'),
+	(
+		'421',
+		'Seksjon for FoU, teknologi og næringslivets utvikling.'
+	),
+	('422', 'Seksjon for næringslivets konjunkturer'),
+	('423', 'Seksjon for næringslivets strukturer'),
+	('424', 'Seksjon for regnskapsstatistikk og BoF'),
+	(
+		'425',
+		'Seksjon for energi-, miljø- og transportstatistikk'
+	),
+	(
+		'426',
+		'Seksjon for eiendoms-, areal- og primærnæringsstatistikk'
+	),
+	('501', 'Stab Forskningsavdelingen'),
+	(
+		'510',
+		'Gruppe for befolkning og offentlig økonomi '
+	),
+	(
+		'520',
+		'Gruppe for miljø-, ressurs- og innovasjonsøkonomi'
+	),
+	('530', 'Gruppe for makroøkonomi'),
+	('550', 'Gruppe for arbeidsmarked og skatt'),
+	('601', 'Stab Kommunikasjon og brukerkontakt'),
+	('610', 'Seksjon for redaksjon og publisering'),
+	('611', 'Seksjon for brukerkontakt'),
+	('630', 'Seksjon for virksomhetskommunikasjon'),
+	(
+		'660',
+		'Seksjon for brukerinnsikt og webutvikling'
+	),
+	('701', 'Stab IT'),
+	('702', 'Seksjon for IT-arkitektur'),
+	('703', 'Seksjon for IT-partner'),
+	('722', 'Seksjon for datafangstplattform'),
+	('723', 'Seksjon for formidlingsplattform'),
+	('724', 'Seksjon for dataplattform'),
+	('782', 'Seksjon for drift og infrastruktur'),
+	('801', 'Stab metodeutvikling og datainnsamling'),
+	('811', 'Seksjon for metode'),
+	('821', 'Seksjon for næringslivsundersøkelser'),
+	(
+		'831',
+		'Seksjon for operasjonell forretningsstøtte'
+	),
+	('851', 'Seksjon for personundersøkelser')
 ;
