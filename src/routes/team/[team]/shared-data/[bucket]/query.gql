@@ -6,6 +6,8 @@ query TeamSharedBucketAccess($bucket: String!) {
 				hasPreviousPage
 				pageStart
 				pageEnd
+				startCursor
+				endCursor
 				totalCount
 			}
 			nodes {

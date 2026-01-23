@@ -6,6 +6,8 @@ query UserSharedBucketAccess($user: String!) {
 				hasPreviousPage
 				pageStart
 				pageEnd
+				startCursor
+				endCursor
 				totalCount
 			}
 			nodes {
