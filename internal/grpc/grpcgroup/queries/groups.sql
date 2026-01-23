@@ -81,3 +81,7 @@ FROM
 WHERE
 	external_id = LOWER(@external_id)
 ;
+
+-- name: RefreshTeamMembers :exec
+REFRESH MATERIALIZED VIEW team_members
+;

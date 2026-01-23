@@ -174,6 +174,15 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 	return items, nil
 }
 
+const refreshTeamMembers = `-- name: RefreshTeamMembers :exec
+REFRESH MATERIALIZED VIEW team_members
+`
+
+func (q *Queries) RefreshTeamMembers(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, refreshTeamMembers)
+	return err
+}
+
 const removeMember = `-- name: RemoveMember :exec
 DELETE FROM group_members
 WHERE

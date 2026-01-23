@@ -104,6 +104,9 @@ func (t *Server) AddMember(ctx context.Context, req *protoapi.AddMemberRequest) 
 		return nil, status.Errorf(codes.Internal, "failed to add member to group")
 	}
 
+	// Not the end of the world if it fails
+	_ = t.querier.RefreshTeamMembers(ctx)
+
 	return &protoapi.AddMemberResponse{}, nil
 }
 
@@ -128,6 +131,9 @@ func (t *Server) RemoveMember(ctx context.Context, req *protoapi.RemoveMemberReq
 	}); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to remove member from group")
 	}
+
+	// Not the end of the world if it fails
+	_ = t.querier.RefreshTeamMembers(ctx)
 
 	return &protoapi.RemoveMemberResponse{}, nil
 }

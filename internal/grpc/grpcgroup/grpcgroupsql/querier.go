@@ -12,6 +12,7 @@ type Querier interface {
 	Get(ctx context.Context, name string) (*GetRow, error)
 	GetUserByExternalId(ctx context.Context, externalID string) (*User, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)
+	RefreshTeamMembers(ctx context.Context) error
 	RemoveMember(ctx context.Context, arg RemoveMemberParams) error
 	UpdateExternalId(ctx context.Context, arg UpdateExternalIdParams) error
 }
