@@ -293,18 +293,17 @@ func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUser
 func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group string) ([]*protoapi.GroupMember, error) {
 	dbMembersIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
 		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
-			Name: group,
+			Name:   group,
+			Limit:  limit,
+			Offset: offset,
 		})
 	})
 
 	var dbMembers []*protoapi.GroupMember
 	for dbMembersIt.Next() {
-		if err := dbMembersIt.Err(); err != nil {
-			return nil, err
-		}
 		dbMembers = append(dbMembers, dbMembersIt.Value())
 	}
-	return dbMembers, nil
+	return dbMembers, dbMembersIt.Err()
 }
 
 func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string) ([]models.Userable, error) {
