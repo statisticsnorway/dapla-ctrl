@@ -3,7 +3,7 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { TeamSharedBucketAccess$result } from '$houdini';
 	import UsersTable, { type TeamMemberData } from './UsersTable.svelte';
-	import { BodyShort } from '@nais/ds-svelte-community';
+	import { BodyShort, CopyButton } from '@nais/ds-svelte-community';
 
 	let { params, data }: PageProps = $props();
 
@@ -33,7 +33,15 @@
 
 <div class="bucket-info">
 	<div>
-		<BodyShort>{params.bucket}</BodyShort>
+		<BodyShort
+			>{params.bucket}
+			<CopyButton
+				copyText={params.bucket}
+				title={params.bucket}
+				iconPosition="right"
+				size="xsmall"
+			/>
+		</BodyShort>
 	</div>
 </div>
 

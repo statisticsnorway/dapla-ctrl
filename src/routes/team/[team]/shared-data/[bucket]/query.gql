@@ -17,8 +17,7 @@ query TeamSharedBucketAccess($bucket: String!) {
 					displayName
 				}
 				groups {
-					category
-					suffix
+					name
 				}
 				user {
 					name

@@ -32,8 +32,7 @@
 			displayName: string;
 		};
 		groups: {
-			category: string;
-			suffix: string | null;
+			name: string;
 		}[];
 		user: {
 			name: string;
@@ -138,8 +137,7 @@
 		<ActionMenuGroup label="Felter">
 			<CheckboxGroup legend="" bind:value={selectedFields}>
 				<Checkbox value="section">Ansvarlig</Checkbox>
-				<Checkbox value="team">Team</Checkbox>
-				<Checkbox value="groups">Roller</Checkbox>
+				<Checkbox value="team">Tilgang via</Checkbox>
 			</CheckboxGroup>
 		</ActionMenuGroup>
 	</ActionMenu>
@@ -158,10 +156,7 @@
 				<Th>Ansvarlig</Th>
 			{/if}
 			{#if selectedFields.includes('team')}
-				<Th sortable={true} sortKey="TEAM">Team</Th>
-			{/if}
-			{#if selectedFields.includes('groups')}
-				<Th sortable={true} sortKey="GROUPS">Roller</Th>
+				<Th colspan={2} sortable={true} sortKey="TEAM">Tilgang via</Th>
 			{/if}
 		</Tr>
 	</Thead>
@@ -196,10 +191,8 @@
 						<br />
 						{teamMember.team.slug}
 					</Td>
-				{/if}
-				{#if selectedFields.includes('groups')}
 					<Td>
-						{teamMember.groups.map((g) => g.category + (g.suffix ? `-${g.suffix}` : '')).join(', ')}
+						{teamMember.groups.map((g) => g.name.slice(teamMember.team.slug.length + 1)).join(', ')}
 					</Td>
 				{/if}
 			</Tr>
