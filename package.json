@@ -23,7 +23,7 @@
     "@statisticsnorway/ssb-component-library": "^2.5.4",
     "body-parser": "^2.2.2",
     "dotenv": "^17.2.3",
-    "effect": "^3.18.4",
+    "effect": "^3.19.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "express": "5.1.0",
