@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"reflect"
+	"regexp"
 
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,9 @@ type usersyncConfig struct {
 	// Entra ID group containing all valid users
 	// Required when usersyncer is enabled
 	AllUsersGroup string `env:"ENTRA_ID_ALL_USERS_GROUP"`
+
+	// Regex to match against Job Titles in Entra ID to determine who is a section manager
+	SectionManagerRegex *regexp.Regexp `env:"SECTION_MANAGER_REGEX,default=^(Seksjonssjef|Forskningsleder)"`
 }
 
 type oAuthConfig struct {

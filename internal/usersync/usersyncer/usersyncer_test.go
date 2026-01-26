@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"regexp"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -47,6 +48,9 @@ func TestSync(t *testing.T) {
 		ctx = section.NewLoaderContext(ctx, pool)
 		return ctx, pool
 	}
+
+	sectionManagerRegex := regexp.MustCompile("^(Seksjonssjef|Forskningsleder)")
+
 	t.Run("No local users, no remote users", func(t *testing.T) {
 		ctx, pool := setup(t)
 
@@ -72,7 +76,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, log).
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatalf("failed to sync: %v", err)
@@ -141,7 +145,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, log).
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -241,7 +245,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, log).
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -310,24 +314,39 @@ func TestSync(t *testing.T) {
 		}
 	})
 
-	t.Run("create user and set as section manager", func(t *testing.T) {
+	t.Run("create users and set as section managers", func(t *testing.T) {
 		ctx, pool := setup(t)
 		querier := usersyncsql.New(pool)
 
-		sectionCode := "666"
-		sectionName := "Seksjon for seksjoner"
-		sectionFullName := fmt.Sprintf("O %s %s", sectionCode, sectionName)
+		type testSection struct {
+			Code string
+			Name string
+		}
+		fullName := func(s testSection) string {
+			return fmt.Sprintf("O %s %s", s.Code, s.Name)
+		}
+		sectionA := testSection{
+			Code: "666",
+			Name: "Seksjon for seksjoner",
+		}
+		sectionB := testSection{
+			Code: "667",
+			Name: "Seksjon for flere seksjoner",
+		}
 
 		// Create two users, one who is currently manager in the API's database,
 		// and a new manager to replace them.
-		oldBoss := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: sectionFullName, JobTitle: "Pensjonist"} // Will be removed
-		bossUser := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: sectionFullName, JobTitle: "Seksjonssjef"}  // Will be created
+		oldBossA := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: fullName(sectionA), JobTitle: "Pensjonist"} // Will be removed
+		bossUserA := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: fullName(sectionA), JobTitle: "Seksjonssjef"}  // Will be created
+
+		// Create forskningsleder for 667
+		bossUserB := externalUser{Id: "3", Email: "einstein@example.com", Name: "Ein Stein", Section: fullName(sectionB), JobTitle: "Forskningsleder"} // Will be created
 
 		// Create the old boss in the database so we can use him as manager
 		oldBossDbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
-			Name:       oldBoss.Name,
-			Email:      oldBoss.Email,
-			ExternalID: oldBoss.Id,
+			Name:       oldBossA.Name,
+			Email:      oldBossA.Email,
+			ExternalID: oldBossA.Id,
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -335,8 +354,8 @@ func TestSync(t *testing.T) {
 
 		// Create a section with our old boss as manager
 		if s, err := querier.CreateSection(ctx, usersyncsql.CreateSectionParams{
-			Code:      sectionCode,
-			Name:      sectionName,
+			Code:      sectionA.Code,
+			Name:      sectionA.Name,
 			ManagerID: &(oldBossDbUser.ID),
 		}); err != nil {
 			t.Fatal(err)
@@ -346,10 +365,21 @@ func TestSync(t *testing.T) {
 			t.Fatalf("manager_id is %q, expected %q", *s.ManagerID, oldBossDbUser.ID)
 		}
 
+		// Create a section with no manager
+		if s, err := querier.CreateSection(ctx, usersyncsql.CreateSectionParams{
+			Code:      sectionB.Code,
+			Name:      sectionB.Name,
+			ManagerID: nil,
+		}); err != nil {
+			t.Fatal(err)
+		} else if s.ManagerID != nil {
+			t.Fatalf("manager_id is not nil: %q", *s.ManagerID)
+		}
+
 		httpClient := test.NewTestHttpClient(
 			// All users response
 			func(req *http.Request) *http.Response {
-				return test.Response("200 OK", generateEntraIdResponse(oldBoss, bossUser))
+				return test.Response("200 OK", generateEntraIdResponse(oldBossA, bossUserA, bossUserB))
 			},
 			// Admin users response
 			func(req *http.Request) *http.Response {
@@ -369,25 +399,40 @@ func TestSync(t *testing.T) {
 
 		// Run usersync, this should replace our old boss with the new one as manager of the section
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, log).
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		newBossDbUser, err := user.GetByEmail(ctx, bossUser.Email)
+		newBossADbUser, err := user.GetByEmail(ctx, bossUserA.Email)
 		if err != nil {
 			t.Fatal(err)
-		} else if newBossDbUser.ExternalID != bossUser.Id || newBossDbUser.Name != bossUser.Name {
-			t.Fatalf("expected external_id=%q,name=%q, got external_id=%q,name=%q", bossUser.Id, bossUser.Name, newBossDbUser.ExternalID, newBossDbUser.Name)
+		} else if newBossADbUser.ExternalID != bossUserA.Id || newBossADbUser.Name != bossUserA.Name {
+			t.Fatalf("expected external_id=%q,name=%q, got external_id=%q,name=%q", bossUserA.Id, bossUserA.Name, newBossADbUser.ExternalID, newBossADbUser.Name)
 		}
 
-		if s, err := section.Get(ctx, sectionCode); err != nil {
+		newBossBDbUser, err := user.GetByEmail(ctx, bossUserB.Email)
+		if err != nil {
+			t.Fatal(err)
+		} else if newBossBDbUser.ExternalID != bossUserB.Id || newBossBDbUser.Name != bossUserB.Name {
+			t.Fatalf("expected external_id=%q,name=%q, got external_id=%q,name=%q", bossUserB.Id, bossUserB.Name, newBossBDbUser.ExternalID, newBossBDbUser.Name)
+		}
+
+		if s, err := section.Get(ctx, sectionA.Code); err != nil {
 			t.Fatal(err)
 		} else if s.ManagerId == nil {
 			t.Fatal("section does not have manager set")
-		} else if *s.ManagerId != newBossDbUser.UUID {
-			t.Fatalf("expected manager_id=%q, got %q", newBossDbUser.UUID, *s.ManagerId)
+		} else if *s.ManagerId != newBossADbUser.UUID {
+			t.Fatalf("expected manager_id=%q, got %q", newBossADbUser.UUID, *s.ManagerId)
+		}
+
+		if s, err := section.Get(ctx, sectionB.Code); err != nil {
+			t.Fatal(err)
+		} else if s.ManagerId == nil {
+			t.Fatal("section does not have manager set")
+		} else if *s.ManagerId != newBossBDbUser.UUID {
+			t.Fatalf("expected manager_id=%q, got %q", newBossADbUser.UUID, *s.ManagerId)
 		}
 	})
 
@@ -447,7 +492,7 @@ func TestSync(t *testing.T) {
 
 		// Run usersync, this should demote the ex-manager
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, log).
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)

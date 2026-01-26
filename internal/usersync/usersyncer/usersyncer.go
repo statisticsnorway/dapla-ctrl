@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -24,11 +25,12 @@ import (
 )
 
 type Usersynchronizer struct {
-	pool          *pgxpool.Pool
-	querier       *usersyncsql.Queries
-	adminGroup    string
-	allUsersGroup string
-	service       *msgraphsdk.GraphServiceClient
+	pool                *pgxpool.Pool
+	querier             *usersyncsql.Queries
+	adminGroup          string
+	allUsersGroup       string
+	sectionManagerRegex *regexp.Regexp
+	service             *msgraphsdk.GraphServiceClient
 
 	log logrus.FieldLogger
 }
@@ -47,18 +49,19 @@ type entraIdUser struct {
 	JobTitle    *string
 }
 
-func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, log logrus.FieldLogger) *Usersynchronizer {
+func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) *Usersynchronizer {
 	return &Usersynchronizer{
-		pool:          pool,
-		querier:       usersyncsql.New(pool),
-		allUsersGroup: allUsersGroup,
-		adminGroup:    adminGroup,
-		service:       service,
-		log:           log,
+		pool:                pool,
+		querier:             usersyncsql.New(pool),
+		allUsersGroup:       allUsersGroup,
+		adminGroup:          adminGroup,
+		sectionManagerRegex: sectionManagerRegex,
+		service:             service,
+		log:                 log,
 	}
 }
 
-func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, allUsersGroup, adminGroup string, log logrus.FieldLogger) (*Usersynchronizer, error) {
+func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, allUsersGroup, adminGroup string, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) (*Usersynchronizer, error) {
 	creds, err := azidentity.NewClientAssertionCredential(tenantId, clientId, func(ctx context.Context) (string, error) {
 		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
 		if err != nil {
@@ -79,7 +82,11 @@ func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, 
 		return nil, fmt.Errorf("create graph service client: %w", err)
 	}
 
-	return New(pool, allUsersGroup, adminGroup, srv, log), nil
+	if sectionManagerRegex == nil {
+		return nil, errors.New("section managers regex must be provided")
+	}
+
+	return New(pool, allUsersGroup, adminGroup, srv, sectionManagerRegex, log), nil
 }
 
 // Sync fetches all users from Entra ID and adds them as users in Nais API.
@@ -264,7 +271,7 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 // a matching user in Entra ID (someone in the given section with the job title '^Seksjonssjef.*')
 func (s *Usersynchronizer) assignSectionManagers(ctx context.Context, sections []*usersyncsql.Section, querier usersyncsql.Querier, entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) error {
 	// Get the definitive list of section managers from Entra ID
-	entraIdSectionManagers := parseEntraIdSectionManagers(entraIdUsers, entraIdUserMap, log)
+	entraIdSectionManagers := s.parseEntraIdSectionManagers(entraIdUsers, entraIdUserMap, log)
 
 	// Compare the managers in the DB to the ones in Entra ID and get a
 	// changeset of sections and their new managers
@@ -452,10 +459,10 @@ func getDbUsers(ctx context.Context, querier usersyncsql.Querier) (*userMap, err
 
 // parseEntraIdSectionManagers creates a map of sections to their manager, for all
 // sections with one definite manager
-func parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
+func (s *Usersynchronizer) parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map[string]*usersyncsql.User, log logrus.FieldLogger) map[string]*usersyncsql.User {
 	entraIdSectionManagers := make(map[string][]*usersyncsql.User)
 	for _, eu := range entraIdUsers {
-		if isSectionManager(eu) {
+		if s.isSectionManager(eu) {
 			entraIdSectionManagers[*eu.SectionCode] = append(entraIdSectionManagers[*eu.SectionCode], entraIdUserMap[eu.ID])
 		}
 	}
@@ -465,11 +472,11 @@ func parseEntraIdSectionManagers(entraIdUsers []*entraIdUser, entraIdUserMap map
 // parseEntraIdSectionManager checks whether the user has the Seksjonssjef job title,
 // and whether they have a valid section. If so, we return the section code, otherwise we
 // return nil.
-func isSectionManager(eu *entraIdUser) bool {
+func (s *Usersynchronizer) isSectionManager(eu *entraIdUser) bool {
 	if eu.SectionCode == nil || eu.JobTitle == nil {
 		return false
 	}
-	return strings.HasPrefix(*eu.JobTitle, "Seksjonssjef")
+	return s.sectionManagerRegex.MatchString(*eu.JobTitle)
 }
 
 // parseSectionCode tries to extract the section code from the given section name,
