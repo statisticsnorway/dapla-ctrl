@@ -1,5 +1,6 @@
 query UserOverview($user: String) @cache(policy: NetworkOnly) {
 	user(email: $user) {
+		id
 		name
 		email
 		isAdmin
@@ -16,6 +17,7 @@ query UserOverview($user: String) @cache(policy: NetworkOnly) {
 			}
 			nodes {
 				groups {
+					id
 					name
 				}
 				team {
@@ -24,14 +26,16 @@ query UserOverview($user: String) @cache(policy: NetworkOnly) {
 					displayName
 					purpose
 					section {
+						id
 						code
 						name
 						manager {
+							id
 							name
 							email
 						}
 					}
-					members {
+					members(first: 1) {
 						pageInfo {
 							totalCount
 						}

@@ -16,10 +16,13 @@ query AllTeamMembers(
 			totalCount
 		}
 		nodes {
+			id
 			name
 			email
 			section {
+				id
 				manager {
+					id
 					name
 					email
 				}

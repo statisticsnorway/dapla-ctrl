@@ -10,17 +10,20 @@ query AllSharedData {
 			totalCount
 		}
 		nodes {
+			id
 			name
-			team {
-				slug
-				displayName
-				section {
-					code
-				}
-			}
 			shortName
 			kind
 			env
+			team {
+				id
+				slug
+				displayName
+				section {
+					id
+					code
+				}
+			}
 			uniqueUsers {
 				pageInfo {
 					totalCount

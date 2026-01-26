@@ -25,31 +25,18 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 			displayName
 			purpose
 			section {
+				id
 				code
 				name
 				manager {
+					id
 					name
 					email
 				}
 			}
-			members {
+			members(first: 1) {
 				pageInfo {
 					totalCount
-				}
-			}
-			groups {
-				nodes {
-					name
-					category
-					suffix
-					members {
-						nodes {
-							user {
-								name
-								email
-							}
-						}
-					}
 				}
 			}
 		}

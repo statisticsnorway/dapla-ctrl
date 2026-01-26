@@ -1,27 +1,26 @@
 query Groups($team: Slug!) {
 	team(slug: $team) {
+		id
 		slug
 		groups(first: 20) {
-			edges {
-				node {
-					name
-					members(first: 20) {
-						pageInfo {
-							totalCount
-							hasNextPage
-							hasPreviousPage
-							pageStart
-							pageEnd
-							startCursor
-							endCursor
-						}
-						edges {
-							node {
-								user {
-									name
-									email
-								}
-							}
+			nodes {
+				id
+				name
+				members(first: 20) {
+					pageInfo {
+						totalCount
+						hasNextPage
+						hasPreviousPage
+						pageStart
+						pageEnd
+						startCursor
+						endCursor
+					}
+					nodes {
+						user {
+							id
+							name
+							email
 						}
 					}
 				}

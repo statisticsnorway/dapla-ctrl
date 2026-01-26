@@ -1,5 +1,6 @@
 query SharedData($team: Slug!) {
 	team(slug: $team) {
+		id
 		slug
 		sharedBuckets(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
@@ -12,6 +13,7 @@ query SharedData($team: Slug!) {
 				totalCount
 			}
 			nodes {
+				id
 				name
 				shortName
 				kind

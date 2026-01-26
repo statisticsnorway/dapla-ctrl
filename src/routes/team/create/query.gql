@@ -1,9 +1,11 @@
 query SectionsInfo {
 	sections(first: 100) {
 		nodes {
+			id
 			code
 			name
 			manager {
+				id
 				name
 			}
 		}

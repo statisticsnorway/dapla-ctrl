@@ -1,10 +1,12 @@
 query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
 	team(slug: $team) {
+		id
 		displayName
 		slug
 		purpose
 		isManaged
 		section {
+			id
 			code
 			name
 			manager {

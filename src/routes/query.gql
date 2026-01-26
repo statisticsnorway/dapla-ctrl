@@ -14,6 +14,7 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 				}
 				nodes {
 					groups {
+						id
 						name
 					}
 					team {

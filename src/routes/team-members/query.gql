@@ -14,10 +14,13 @@ query MyTeamMembers($after: Cursor, $before: Cursor, $first: Int, $last: Int, $o
 					totalCount
 				}
 				nodes {
+					id
 					name
 					email
 					section {
+						id
 						manager {
+							id
 							name
 							email
 						}

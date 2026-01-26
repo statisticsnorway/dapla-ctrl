@@ -1,5 +1,6 @@
 query TeamSharedBucketAccess($bucket: String!) {
 	sharedBucket(name: $bucket) {
+		id
 		shortName
 		users(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
@@ -13,22 +14,27 @@ query TeamSharedBucketAccess($bucket: String!) {
 			}
 			nodes {
 				team {
+					id
 					slug
 					displayName
 				}
 				groups {
+					id
 					name
 				}
 				user {
+					id
 					name
 					email
 					section {
+						id
+						code
+						name
 						manager {
+							id
 							name
 							email
 						}
-						code
-						name
 					}
 				}
 			}

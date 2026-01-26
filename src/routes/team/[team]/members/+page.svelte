@@ -18,7 +18,7 @@
 	let team = $derived($Groups.data?.team);
 
 	let groupNames = $derived.by(() => {
-		return team?.groups.edges.map((group) => group.node.name) ?? [];
+		return team?.groups.nodes.map((node) => node.name) ?? [];
 	});
 	let hasGroups = $derived(groupNames.length > 0);
 
@@ -53,26 +53,26 @@
 {#if team}
 	<div class="content-wrapper">
 		<div>
-			{#each team.groups.edges as edge (edge.node.name)}
-				{@const memberCount = edge.node.members.pageInfo.totalCount}
-				<List title="{edge.node.name}: {memberCount} bruker{memberCount !== 1 ? 'e' : ''}">
+			{#each team.groups.nodes as group (group.name)}
+				{@const memberCount = group.members.pageInfo.totalCount}
+				<List title="{group.name}: {memberCount} bruker{memberCount !== 1 ? 'e' : ''}">
 					{#snippet menu()}
 						<OrderByMenu
 							orderField={GroupMemberOrderField}
 							defaultOrderField={GroupMemberOrderField.NAME}
 						/>
 					{/snippet}
-					{#if edge.node.members.edges}
-						{#each edge.node.members.edges as memberEdge (memberEdge.node.user.email)}
+					{#if group.members.nodes}
+						{#each group.members.nodes as member (member.user.email)}
 							<ListItem>
 								<div class="item">
 									<div>
 										<BodyShort size="small">
-											<a href="/user/{memberEdge.node.user.email}/">{memberEdge.node.user.name}</a>
+											<a href="/user/{member.user.email}/">{member.user.name}</a>
 										</BodyShort>
 										<BodyShort size="small">
 											<span style="color: var(--ax-text-subtle, --a-text-subtle);"
-												>{memberEdge.node.user.email}</span
+												>{member.user.email}</span
 											>
 										</BodyShort>
 									</div>
@@ -86,9 +86,9 @@
 													variant="tertiary-neutral"
 													onclick={() => {
 														deleteUser = {
-															email: memberEdge.node.user.email,
-															name: memberEdge.node.user.name,
-															group: edge.node.name
+															email: member.user.email,
+															name: member.user.name,
+															group: group.name
 														};
 														deleteUserOpen = true;
 													}}
