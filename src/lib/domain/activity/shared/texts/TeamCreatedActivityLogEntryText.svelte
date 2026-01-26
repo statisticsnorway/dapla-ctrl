@@ -11,9 +11,9 @@
 </script>
 
 <div>
-	Opprettet team
+	Team opprettet
 	<BodyShort textColor="subtle" size="small">
-		av {data.actor}
+		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>

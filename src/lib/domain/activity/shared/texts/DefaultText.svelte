@@ -13,7 +13,7 @@
 <div>
 	{data.message}<br />
 	<BodyShort textColor="subtle" size="small">
-		Av {data.actor}
+		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>

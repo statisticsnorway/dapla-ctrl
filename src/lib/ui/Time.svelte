@@ -25,7 +25,7 @@
 	let title = format(time, 'dd. MMMM yyyy HH:mm:ss', { locale: nb });
 
 	function distanceText(): string {
-		return formatDistanceStrict(time, Date.now(), { addSuffix: true });
+		return formatDistanceStrict(time, Date.now(), { addSuffix: true, locale: nb });
 	}
 
 	function distanceShortText(): string {
@@ -38,16 +38,16 @@
 		if (minutes < 60) return `${Math.ceil(minutes)}m`;
 
 		const hours = differenceInHours(now, time);
-		if (hours < 24) return `${Math.ceil(hours)}h`;
+		if (hours < 24) return `${Math.ceil(hours)}t`;
 
 		const days = differenceInDays(now, time);
 		if (days < 30) return `${Math.ceil(days)}d`;
 
 		const months = differenceInMonths(now, time);
-		if (months < 12) return `${Math.ceil(months)}mo`;
+		if (months < 12) return `${Math.ceil(months)}mnd`;
 
 		const years = differenceInYears(now, time);
-		return `${Math.ceil(years)}y`;
+		return `${Math.ceil(years)} år`;
 	}
 
 	function getDisplayText(): string {

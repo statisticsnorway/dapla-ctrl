@@ -11,10 +11,10 @@
 </script>
 
 <div>
-	Opprettet gruppe
-	<i>{data.resourceName}</i>
+	Gruppen
+	<i>{data.resourceName}</i> ble opprettet
 	<BodyShort textColor="subtle" size="small">
-		av {data.actor}
+		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>

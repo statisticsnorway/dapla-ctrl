@@ -11,9 +11,9 @@
 </script>
 
 <div class="container">
-	{data.groupMemberAdded.userEmail} ble lagt til i gruppe <i>{data.resourceName}</i>
+	{data.groupMemberAdded.userEmail} ble lagt til i gruppen <i>{data.resourceName}</i>
 	<BodyShort textColor="subtle" size="small">
-		av {data.actor}
+		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>
