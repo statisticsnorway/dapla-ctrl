@@ -18,6 +18,8 @@ import (
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"k8s.io/utils/ptr"
 )
 
@@ -154,6 +156,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 }
 
 func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, log logrus.FieldLogger) error {
+	log = log.WithField("groupName", groupName)
 	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName, r.entraIdConfig.GroupPrefix)
 	if err != nil {
 		return fmt.Errorf("get or create group: %w", err)
@@ -195,11 +198,11 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		return nil
 	}
 
-	if err := r.master.RemoveUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers); err != nil {
+	if err := r.master.RemoveUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
 		return err
 	}
 
-	if err := r.master.AddUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers); err != nil {
+	if err := r.master.AddUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
 		return err
 	}
 
@@ -231,15 +234,15 @@ type Group struct {
 }
 
 type MemberMaster interface {
-	AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error
-	RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error
+	AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error
+	RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error
 }
 
 type DatabaseMaster struct {
 	client *msgraphsdk.GraphServiceClient
 }
 
-func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range remoteOnlyUsers {
 		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().ByDirectoryObjectId(user.ExternalId).Ref().Delete(ctx, nil); err != nil {
@@ -249,7 +252,7 @@ func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnly
 	return errors.Join(errs...)
 }
 
-func (m *DatabaseMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+func (m *DatabaseMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range localOnlyUsers {
 		requestBody := models.NewReferenceCreate()
@@ -266,28 +269,32 @@ type EntraIdMaster struct {
 	client *apiclient.APIClient
 }
 
-func (m *EntraIdMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+func (m *EntraIdMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range localOnlyUsers {
 		_, err := m.client.Groups().RemoveMember(ctx, &protoapi.RemoveMemberRequest{
 			Groupname:      group.Name,
 			UserExternalId: user.ExternalId,
 		})
-		if err != nil {
+		if status.Code(err) == codes.NotFound {
+			log.Warn("user not found in database", "user", user.Email)
+		} else if err != nil {
 			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
 		}
 	}
 	return errors.Join(errs...)
 }
 
-func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User) error {
+func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range remoteOnlyUsers {
 		_, err := m.client.Groups().AddMember(ctx, &protoapi.AddMemberRequest{
 			Groupname:      group.Name,
 			UserExternalId: user.ExternalId,
 		})
-		if err != nil {
+		if status.Code(err) == codes.NotFound {
+			log.Warn("user not found in database", "user", user.Email)
+		} else if err != nil {
 			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
 		}
 	}
