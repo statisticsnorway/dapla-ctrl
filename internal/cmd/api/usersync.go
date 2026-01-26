@@ -21,7 +21,7 @@ func runUsersync(ctx context.Context, pool *pgxpool.Pool, cfg *Config, log logru
 		return nil
 	}
 
-	us, err := usersyncer.NewFromConfig(ctx, pool, cfg.Usersync.EntraIdClientId, cfg.Usersync.EntraIdTenantId, cfg.Usersync.AllUsersGroup, cfg.Usersync.AdminGroup, nil, log)
+	us, err := usersyncer.NewFromConfig(ctx, pool, cfg.Usersync.EntraIdClientId, cfg.Usersync.EntraIdTenantId, cfg.Usersync.AllUsersGroup, cfg.Usersync.AdminGroup, cfg.Usersync.SectionManagerRegex, log)
 	if err != nil {
 		log.WithError(err).Errorf("unable to set up usersyncer")
 		return err
