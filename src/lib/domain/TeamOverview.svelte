@@ -71,6 +71,8 @@
 	.content-wrapper {
 		background: var(--ax-bg-default);
 		position: relative;
+		margin: auto;
+		max-width: 1432px;
 	}
 
 	.header {

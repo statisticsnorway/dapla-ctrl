@@ -94,7 +94,9 @@
 		});
 
 		if (resp.errors) {
-			errors = resp.errors.filter((e) => e.message != 'unable to resolve').map((e) => e.message);
+			errors = resp.errors
+				.filter((e: { message: string }) => e.message != 'unable to resolve')
+				.map((e: { message: string }) => e.message);
 			return;
 		}
 
