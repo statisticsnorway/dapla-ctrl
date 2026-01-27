@@ -1,12 +1,7 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import { Table, type TableSortState, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
-	import {
-		getTeamMembersSorted,
-		sortTable,
-		type SortBy,
-		type TeamMemberData
-	} from './teamMembersUtils';
+	import { type TeamMemberData } from './teamMembersUtils';
+	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	interface Props {
 		teamMembers: TeamMemberData[];
@@ -21,64 +16,65 @@
 			loadPreviousPage: () => void;
 			loadNextPage: () => void;
 		};
+		selected: string[];
 	}
 
-	let { teamMembers, pageInfo, loaders }: Props = $props();
-
-	let sortState: TableSortState = $state({
-		orderBy: 'NONE',
-		direction: 'ascending'
-	});
-
-	let sortedTeamMembers = $derived(
-		getTeamMembersSorted(teamMembers, sortState.orderBy, sortState.direction)
-	);
+	let { teamMembers, pageInfo, loaders, selected }: Props = $props();
 </script>
 
-<Table
-	zebraStripes
-	sort={sortState}
-	onsortchange={(key) => {
-		sortState = sortTable(key as SortBy, sortState);
-	}}
->
-	<Thead>
-		<Tr>
-			<Th sortable={true} sortKey="NAME">Navn</Th>
-			<Th sortable={true} sortKey="TEAM_COUNT" align="right">Team</Th>
-			<Th sortable={true} sortKey="DATA_ADMIN_COUNT" align="right">Data-admin roller</Th>
-			<Th sortable={true} sortKey="SECTION_MANAGER">Seksjonsleder</Th>
-		</Tr>
-	</Thead>
-	<Tbody>
-		{#each sortedTeamMembers as member (member.user.email)}
-			<Tr shadeOnHover={false}>
-				<Td>
-					<a href="/user/{member.user.email}">{member.user.name}</a>
-				</Td>
-				<Td align="right">{member.teamCount}</Td>
-				<Td align="right">{member.dataAdminCount}</Td>
-				<Td>
-					{#if member.sectionManager}
-						{#if member.sectionManager.email}
-							<a href="/user/{member.sectionManager.email}">{member.sectionManager.name}</a>
-						{:else}
-							{member.sectionManager.name}
-						{/if}
-					{:else}
-						<span style="color: var(--ax-text-subtle); font-style: italic;"
-							>Mangler seksjonsleder</span
-						>
-					{/if}
-				</Td>
-			</Tr>
+{#snippet nameCell(member: TeamMemberData)}
+	<a href="/user/{member.user.email}">{member.user.name}</a>
+{/snippet}
+{#snippet teamCell(member: TeamMemberData)}
+	{member.teamCount}
+{/snippet}
+{#snippet dataAdminCell(member: TeamMemberData)}
+	{member.dataAdminCount}
+{/snippet}
+{#snippet managerCell(member: TeamMemberData)}
+	{#if member.sectionManager}
+		{#if member.sectionManager.email}
+			<a href="/user/{member.sectionManager.email}">{member.sectionManager.name}</a>
 		{:else}
-			<Tr>
-				<Td colspan={4}>Fant ingen teammedlemmer</Td>
-			</Tr>
-		{/each}
-	</Tbody>
-</Table>
+			{member.sectionManager.name}
+		{/if}
+	{:else}
+		<span style="color: var(--ax-text-subtle); font-style: italic;">Mangler seksjonsleder</span>
+	{/if}
+{/snippet}
+
+<DaplaTable
+	data={teamMembers}
+	{selected}
+	columns={[
+		{
+			id: 'NAME',
+			name: 'Navn',
+			show: 'ALWAYS',
+			cell: nameCell
+		},
+		{
+			id: 'TEAM_COUNT',
+			name: 'Team',
+			align: 'right',
+			show: 'DEFAULT_YES',
+			cell: teamCell
+		},
+		{
+			id: 'DATA_ADMIN_COUNT',
+			name: 'Data-admins-roller',
+			align: 'right',
+			show: 'DEFAULT_YES',
+			cell: dataAdminCell
+		},
+		{
+			id: 'MANAGER',
+			name: 'Seksjonsleder',
+			show: 'DEFAULT_YES',
+			cell: managerCell
+		}
+	]}
+/>
 
 {#if pageInfo && loaders}
 	<Pagination page={pageInfo} {loaders} />

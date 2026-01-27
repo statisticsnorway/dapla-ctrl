@@ -3,9 +3,26 @@
 	import { Button, Heading } from '@nais/ds-svelte-community';
 	import Tab from '$lib/ui/Tab.svelte';
 	import Tabs from '$lib/ui/Tabs.svelte';
-	import TeamsTable, { type TeamsData } from '../../routes/TeamsTable.svelte';
 	import { page } from '$app/state';
+	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
+	type User = {
+		name: string;
+		email: string;
+	};
+	export type TeamsData = {
+		id: string;
+		slug: string;
+		displayName: string;
+		purpose: string;
+		memberCount: number;
+		manager: User;
+		section: {
+			code: string;
+			name: string;
+		};
+		userGroups?: string[];
+	};
 	interface Props {
 		canCreateTeam: boolean;
 		userTeamsCount: number;
@@ -35,7 +52,65 @@
 		pageInfo,
 		loaders
 	}: Props = $props();
+
+	const hasUserGroups = teamsData.some((t) => t.userGroups !== undefined);
+
+	const columns = [
+		{
+			id: 'NAME',
+			name: 'Navn',
+			show: 'ALWAYS',
+			cell: nameCell
+		} as const,
+		hasUserGroups
+			? ({
+					id: 'GROUPS',
+					name: 'Mine roller',
+					show: 'DEFAULT_YES',
+					cell: groupsCell
+				} as const)
+			: undefined,
+		{
+			id: 'MEMBER_COUNT',
+			name: 'Teammedlemmer',
+			align: 'right',
+			show: 'DEFAULT_YES',
+			cell: membersCell
+		} as const,
+		{
+			id: 'MANAGER',
+			name: 'Ansvarlig',
+			show: 'DEFAULT_YES',
+			cell: managerCell
+		} as const
+	].filter((c) => c !== undefined);
 </script>
+
+{#snippet nameCell(team: TeamsData)}
+	<a href={`/team/${team.slug}/`}>
+		<b>{team.displayName}</b>
+	</a>
+	<br />
+	{team.slug}
+{/snippet}
+{#snippet groupsCell(team: TeamsData)}
+	{team.userGroups
+		?.map((g) => g.substring(team.slug.length + 1))
+		.toSorted()
+		.join(', ') ?? []}
+{/snippet}
+{#snippet membersCell(team: TeamsData)}
+	{team.memberCount}
+{/snippet}
+{#snippet managerCell(team: TeamsData)}
+	{#if team.manager.email !== ''}
+		<a href="/user/{team.manager.email}">{team.manager.name}</a>
+	{:else}
+		{team.manager.name}
+	{/if}
+	<br />
+	{team.section.name} ({team.section.code})
+{/snippet}
 
 <div class="content-wrapper">
 	<div class="header">
@@ -61,7 +136,7 @@
 				/>
 			</Tabs>
 
-			<TeamsTable defaultSelected={teamTableDefaultFields} {teamsData} />
+			<DaplaTable data={teamsData} selected={teamTableDefaultFields} {columns} />
 		</div>
 	</div>
 	<Pagination page={pageInfo} {loaders} fetching={!teamsData} />

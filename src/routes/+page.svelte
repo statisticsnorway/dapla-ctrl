@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { type TeamsData } from './TeamsTable.svelte';
+	import { type TeamsData } from '$lib/domain/TeamOverview.svelte';
 	import type { UserTeams$result } from '$houdini';
 	import TeamOverview from '$lib/domain/TeamOverview.svelte';
 
@@ -26,6 +26,7 @@
 		const team = teamNode;
 		const manager = team.team.section.manager;
 		return {
+			id: team.team.id,
 			slug: team.team.slug,
 			displayName: team.team.displayName,
 			purpose: team.team.purpose,

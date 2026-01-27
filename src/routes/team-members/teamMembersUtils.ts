@@ -1,6 +1,7 @@
 import type { TableSortState } from '@nais/ds-svelte-community';
 
 export interface TeamMemberData {
+	id: string;
 	user: {
 		name: string;
 		email: string;

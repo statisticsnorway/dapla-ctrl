@@ -8,6 +8,7 @@ export async function load(event: PageLoadEvent) {
 	const after = event.url.searchParams.get('after') || '';
 	const before = event.url.searchParams.get('before') || '';
 	return {
+		...event.data,
 		...(await load_AllTeamMembers({
 			event,
 			variables: {

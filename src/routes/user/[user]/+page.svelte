@@ -2,8 +2,8 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import { BodyShort, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
-	import TeamsTable, { type TeamsData } from '../../TeamsTable.svelte';
 	import type { UserOverview$result } from '$houdini';
+	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -11,29 +11,36 @@
 
 	type TeamNode = UserOverview$result['user']['teams']['nodes'][0];
 
+	type TeamItem = TeamNode & { id: string };
+
 	let userTeamsCount = $derived($UserOverview.data?.user.teams.nodes.length || 0);
-
-	function transformTeamData(teamNode: TeamNode): TeamsData {
-		const team = teamNode.team;
-		const manager = team.section.manager;
-
-		return {
-			slug: team.slug,
-			displayName: team.displayName,
-			purpose: team.purpose,
-			memberCount: team.members.pageInfo.totalCount,
-			manager: {
-				name: manager?.name ?? 'Mangler seksjonsleder',
-				email: manager?.email ?? ''
-			},
-			section: {
-				code: team.section.code,
-				name: team.section.name
-			},
-			userGroups: teamNode.groups?.filter((g) => g !== null).map((g) => `${g.name}`) ?? []
-		};
-	}
 </script>
+
+{#snippet nameCell(item: TeamItem)}
+	<a href={`/team/${item.team.slug}/`}>
+		<b>{item.team.displayName}</b>
+	</a>
+	<br />
+	{item.team.slug}
+{/snippet}
+{#snippet rolesCell(item: TeamItem)}
+	{item.groups
+		?.map((g) => g.name.substring(item.team.slug.length + 1))
+		.toSorted()
+		.join(', ') ?? ''}
+{/snippet}
+{#snippet membersCell(item: TeamItem)}
+	{item.team.members.pageInfo.totalCount}
+{/snippet}
+{#snippet managerCell(item: TeamItem)}
+	{#if item.team.section.manager}
+		<a href="/user/{item.team.section.manager.email}">{item.team.section.manager.name}</a>
+	{:else}
+		Mangler seksjonsleder
+	{/if}
+	<br />
+	{item.team.section.name} ({item.team.section.code})
+{/snippet}
 
 {#if $UserOverview.data}
 	<div class="user-info">
@@ -47,10 +54,38 @@
 			<div class="section-header">
 				<Heading level="2" as="h2" spacing>Medlem av {userTeamsCount} team</Heading>
 			</div>
-			<TeamsTable
-				rolesHeading="Roller"
-				teamsData={$UserOverview.data.user.teams.nodes.map(transformTeamData)}
-				defaultSelected={data.teamTableFields}
+			<DaplaTable
+				data={$UserOverview.data.user.teams.nodes.map((n) => {
+					return { id: n.team.id, ...n };
+				})}
+				fieldsCookie={{ path: '/user' }}
+				selected={data.teamTableFields}
+				columns={[
+					{
+						id: 'NAME',
+						show: 'ALWAYS',
+						name: 'Navn',
+						cell: nameCell
+					},
+					{
+						id: 'ROLES',
+						show: 'DEFAULT_YES',
+						name: 'Roller',
+						cell: rolesCell
+					},
+					{
+						id: 'MEMBER_COUNT',
+						show: 'DEFAULT_YES',
+						name: 'Teammedlemmer',
+						cell: membersCell
+					},
+					{
+						id: 'MANAGER',
+						show: 'DEFAULT_YES',
+						name: 'Ansvarlig',
+						cell: managerCell
+					}
+				]}
 			/>
 		</div>
 	</div>

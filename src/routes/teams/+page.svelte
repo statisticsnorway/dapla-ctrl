@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { type TeamsData } from '../TeamsTable.svelte';
 	import type { AllTeams$result } from '$houdini';
-	import TeamOverview from '$lib/domain/TeamOverview.svelte';
+	import TeamOverview, { type TeamsData } from '$lib/domain/TeamOverview.svelte';
 
 	let { data }: PageProps = $props();
 
@@ -26,6 +25,7 @@
 		const manager = team.section.manager;
 
 		return {
+			id: team.id,
 			slug: team.slug,
 			displayName: team.displayName,
 			purpose: team.purpose,

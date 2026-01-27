@@ -16,6 +16,7 @@
 
 	function transformTeamMembersData(u: TeamMember): TeamMemberData {
 		return {
+			id: u.id,
 			user: {
 				name: u.name,
 				email: u.email
@@ -36,6 +37,7 @@
 	<TeamMembersTable
 		teamMembers={$AllTeamMembers.data?.users.nodes.map(transformTeamMembersData)}
 		pageInfo={$AllTeamMembers.data.users.pageInfo}
+		selected={data.teamMembersTableField}
 		loaders={{
 			loadPreviousPage: () => {
 				changeQuery({ after: '', before: $AllTeamMembers.data?.users.pageInfo.startCursor ?? '' });
