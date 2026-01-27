@@ -88,6 +88,7 @@ func runHttpServer(
 
 		middlewares = append(
 			middlewares,
+			middleware.ApiKeyAuthentication(),
 			middleware.RequireAuthenticatedUser(),
 			otelhttp.NewMiddleware(
 				"graphql",

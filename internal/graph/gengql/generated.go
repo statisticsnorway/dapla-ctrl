@@ -5443,9 +5443,9 @@ input CreateServiceAccountInput {
 	description: String!
 
 	"""
-	The team slug that the service account belongs to.
+	The team slug of whom owns the service account.
 	"""
-	teamSlug: Slug
+	teamSlug: Slug!
 }
 
 input UpdateServiceAccountInput {
@@ -24634,7 +24634,7 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountInput(ctx context.
 			it.Description = data
 		case "teamSlug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}

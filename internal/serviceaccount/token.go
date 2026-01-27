@@ -7,7 +7,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 )
 
-const tokenPrefix = "nais_console_"
+const TokenPrefix = "dapla_api_"
 
 func HashToken(token string) (string, error) {
 	sha256Hash := sha256.New()
@@ -24,5 +24,5 @@ func generateToken() (string, error) {
 		return "", err
 	}
 
-	return tokenPrefix + base58.Encode(b), nil
+	return TokenPrefix + base58.Encode(b), nil
 }

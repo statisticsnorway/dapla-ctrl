@@ -66,7 +66,7 @@ func GetTokenByIdent(ctx context.Context, ident ident.Ident) (*ServiceAccountTok
 }
 
 func Create(ctx context.Context, input CreateServiceAccountInput) (*ServiceAccount, error) {
-	if err := authz.CanCreateServiceAccounts(ctx, input.TeamSlug); err != nil {
+	if err := authz.RequireGlobalAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -103,7 +103,7 @@ func Update(ctx context.Context, input UpdateServiceAccountInput) (*ServiceAccou
 		return nil, err
 	}
 
-	if err := authz.CanUpdateServiceAccounts(ctx, existingSA.TeamSlug); err != nil {
+	if err := authz.RequireGlobalAdmin(ctx); err != nil {
 		return nil, err
 	}
 
@@ -157,7 +157,7 @@ func Delete(ctx context.Context, input DeleteServiceAccountInput) error {
 		return err
 	}
 
-	if err := authz.CanDeleteServiceAccounts(ctx, existingSA.TeamSlug); err != nil {
+	if err := authz.RequireGlobalAdmin(ctx); err != nil {
 		return err
 	}
 
@@ -182,7 +182,7 @@ func CreateToken(ctx context.Context, input CreateServiceAccountTokenInput) (*Se
 		return nil, nil, nil, err
 	}
 
-	if err := authz.CanUpdateServiceAccounts(ctx, sa.TeamSlug); err != nil {
+	if err := authz.RequireGlobalAdmin(ctx); err != nil {
 		return nil, nil, nil, err
 	}
 
@@ -245,7 +245,7 @@ func UpdateToken(ctx context.Context, input UpdateServiceAccountTokenInput) (*Se
 		return nil, nil, err
 	}
 
-	if err := authz.CanUpdateServiceAccounts(ctx, sa.TeamSlug); err != nil {
+	if err := authz.RequireGlobalAdmin(ctx); err != nil {
 		return nil, nil, err
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/lestrrat-go/httprc/v3"
@@ -13,6 +14,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/zitadel/oidc/v3/pkg/client"
 )
@@ -72,6 +74,11 @@ func (j *jwtAuth) handler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		token, ok := BearerAuth(r)
 		if !ok {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if strings.HasPrefix(token, serviceaccount.TokenPrefix) {
 			next.ServeHTTP(w, r)
 			return
 		}
