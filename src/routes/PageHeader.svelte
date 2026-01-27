@@ -31,8 +31,15 @@
 	</InternalHeaderTitle>
 	<InternalHeaderButton
 		as="a"
-		href="/team-members"
+		href="/"
 		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-16);"
+	>
+		Team
+	</InternalHeaderButton>
+	<InternalHeaderButton
+		as="a"
+		href="/team-members"
+		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-8);"
 	>
 		Medlemmer
 	</InternalHeaderButton>
