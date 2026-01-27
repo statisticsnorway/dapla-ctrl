@@ -6,19 +6,9 @@ dir: "{{.InterfaceDir}}"
 filename: "mock_{{.InterfaceNameSnake}}.go"
 issue-845-fix: True
 packages:
-  github.com/nais/api-reconcilers/internal/azureclient:
-    interfaces:
-      Client:
-  github.com/nais/api-reconcilers/internal/reconcilers:
+  github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers:
     interfaces:
       Reconciler:
-  github.com/nais/api-reconcilers/internal/reconcilers/dependencytrack:
-    interfaces:
-      Client:
-  github.com/nais/api-reconcilers/internal/reconcilers/github/team:
-    interfaces:
-      TeamsService:
-      GraphClient:
   github.com/grafana/grafana-openapi-client-go/client/users:
     interfaces:
       ClientService:

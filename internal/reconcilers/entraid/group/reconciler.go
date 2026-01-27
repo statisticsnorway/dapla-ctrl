@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -32,7 +33,8 @@ const (
 	configGcpProvisioningResourceIdKey = "gcpProvisioningResourceId"
 	configGcpSSOResourceIdKey          = "gcpSSOResourceId"
 	configGroupPrefixKey               = "groupPrefix"
-	configMaster                       = "master"
+	configMasterKey                    = "master"
+	configForceDbMasterTeamsKey        = "forceDbMasterTeams"
 )
 
 type syncQueuer interface {
@@ -109,9 +111,15 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				Secret:      false,
 			},
 			{
-				Key:         configMaster,
+				Key:         configMasterKey,
 				DisplayName: "Master",
 				Description: "Which system is source of truth for group membership. Value can be 'entraid' or 'database'.",
+				Secret:      false,
+			},
+			{
+				Key:         configForceDbMasterTeamsKey,
+				DisplayName: "Forced DB Master teams",
+				Description: "Comma-separated list of team slugs for which to force database as master",
 				Secret:      false,
 			},
 		},
@@ -122,7 +130,7 @@ func (r *entraIdGroupReconciler) Name() string {
 	return reconcilerName
 }
 
-func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
 		ReconcilerName: r.Name(),
 	})
@@ -135,14 +143,14 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get entra id client: %w", err)
 	}
 
-	r.master, err = r.GetMemberMaster(ctx, client, entraId, config)
+	r.master, err = r.GetMemberMaster(ctx, daplaTeam.Slug, client, entraId, config)
 	if err != nil {
 		return fmt.Errorf("get master config: %w", err)
 	}
 	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
 		return client.Teams().Groups(ctx, &protoapi.ListTeamGroupsRequest{
-			Slug: naisTeam.Slug,
+			Slug: daplaTeam.Slug,
 		})
 	})
 
@@ -498,7 +506,7 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ProvisioningResourceId = id
 		case configGroupPrefixKey:
 			rc.GroupPrefix = c.Value
-		case configMaster:
+		case configMasterKey, configForceDbMasterTeamsKey:
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -534,28 +542,44 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 	return service, nil
 }
 
-func (r *entraIdGroupReconciler) GetMemberMaster(ctx context.Context, apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) (MemberMaster, error) {
+func (r *entraIdGroupReconciler) GetMemberMaster(ctx context.Context, team string, apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) (MemberMaster, error) {
+	var master MemberMaster
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configMaster:
-			switch c.Value {
-			case "entraid":
-				return &EntraIdMaster{
-					client: apiClient,
-				}, nil
-			case "database":
+		case configForceDbMasterTeamsKey:
+			if slices.ContainsFunc(strings.Split(c.Value, ","), func(t string) bool {
+				return strings.EqualFold(
+					strings.TrimSpace(t),
+					team,
+				)
+			}) {
 				return &DatabaseMaster{
 					client: entraidClient,
 				}, nil
+			}
+		case configMasterKey:
+			switch c.Value {
+			case "entraid":
+				master = &EntraIdMaster{
+					client: apiClient,
+				}
+			case "database":
+				master = &DatabaseMaster{
+					client: entraidClient,
+				}
 			default:
 				return nil, fmt.Errorf("unknown master type %q, master must be 'entraid' or 'database'", c.Value)
 			}
 		}
 	}
+
+	if master != nil {
+		return master, nil
+	}
 	return nil, errors.New("no master config defined")
 }
 
-func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	log.Debug("Executing some action to delete the resource owned by this reconciler")
 
 	return nil

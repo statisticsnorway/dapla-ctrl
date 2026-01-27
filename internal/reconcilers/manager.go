@@ -89,7 +89,7 @@ func (m *Manager) AddReconciler(r Reconciler) {
 	m.reconcilers = append(m.reconcilers, r)
 }
 
-// RegisterReconcilersWithAPI will register all reconcilers with the NAIS API.
+// RegisterReconcilersWithAPI will register all reconcilers with the Dapla API.
 func (m *Manager) RegisterReconcilersWithAPI(ctx context.Context) error {
 	r := &protoapi.RegisterReconcilerRequest{}
 	for _, rec := range m.reconcilers {
@@ -273,7 +273,7 @@ func (m *Manager) syncTeam(ctx context.Context, req ReconcileRequest) {
 	}
 }
 
-// enabledReconcilers will fetch all reconcilers from the NAIS API, and return the ones we have registered locally in a
+// enabledReconcilers will fetch all reconcilers from the Dapla API, and return the ones we have registered locally in a
 // specific order.
 func (m *Manager) enabledReconcilers(ctx context.Context) ([]Reconciler, error) {
 	reconcilers, err := getReconcilers(ctx, m.apiclient.Reconcilers())
@@ -294,7 +294,7 @@ func (m *Manager) enabledReconcilers(ctx context.Context) ([]Reconciler, error) 
 
 // deleteTeam will pass the team through to all enabled reconcilers, effectively deleting the team from all configured
 // external systems.
-func (m *Manager) deleteTeam(ctx context.Context, reconcilers []Reconciler, naisTeam *protoapi.Team, req ReconcileRequest) {
+func (m *Manager) deleteTeam(ctx context.Context, reconcilers []Reconciler, daplaTeam *protoapi.Team, req ReconcileRequest) {
 	teamStart := time.Now()
 	log := m.log.WithField("team", req.TeamSlug)
 
@@ -319,7 +319,7 @@ func (m *Manager) deleteTeam(ctx context.Context, reconcilers []Reconciler, nais
 		hasError := false
 
 		log.WithField("time", start).Debugf("start delete")
-		if err := r.Delete(ctx, m.apiclient, naisTeam, log); err != nil {
+		if err := r.Delete(ctx, m.apiclient, daplaTeam, log); err != nil {
 			successfulDelete = false
 			hasError = true
 
@@ -385,7 +385,7 @@ func (m *Manager) deleteTeam(ctx context.Context, reconcilers []Reconciler, nais
 
 // reconcileTeam will pass the team through to all enabled reconcilers, effectively synchronizing the team to all
 // configured external systems.
-func (m *Manager) reconcileTeam(ctx context.Context, reconcilers []Reconciler, naisTeam *protoapi.Team, input ReconcileRequest) {
+func (m *Manager) reconcileTeam(ctx context.Context, reconcilers []Reconciler, daplaTeam *protoapi.Team, input ReconcileRequest) {
 	teamStart := time.Now()
 	log := m.log.WithField("team", input.TeamSlug)
 
@@ -406,7 +406,7 @@ func (m *Manager) reconcileTeam(ctx context.Context, reconcilers []Reconciler, n
 		hasError := false
 
 		log.WithField("time", start).Debugf("start reconcile")
-		if err := r.Reconcile(ctx, m.apiclient, naisTeam, log); err != nil {
+		if err := r.Reconcile(ctx, m.apiclient, daplaTeam, log); err != nil {
 			successfulSync = false
 			hasError = true
 
@@ -463,7 +463,7 @@ func (m *Manager) reconcileTeam(ctx context.Context, reconcilers []Reconciler, n
 	m.metricReconcileTeam.Record(ctx, time.Since(teamStart).Milliseconds())
 }
 
-// scheduleAllTeams will fetch all teams from the NAIS API and put them on the reconciler queue
+// scheduleAllTeams will fetch all teams from the Dapla API and put them on the reconciler queue
 func (m *Manager) scheduleAllTeams(ctx context.Context, correlationID uuid.UUID) error {
 	reconcilers, err := m.enabledReconcilers(ctx)
 	if err != nil {
@@ -504,7 +504,7 @@ func (m *Manager) scheduleTeams(ctx context.Context, correlationID uuid.UUID) er
 	return nil
 }
 
-// getReconcilers retrieves all reconcilers from the NAIS API
+// getReconcilers retrieves all reconcilers from the Dapla API
 func getReconcilers(ctx context.Context, client protoapi.ReconcilersClient) ([]*protoapi.Reconciler, error) {
 	it := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListReconcilersResponse, error) {
 		return client.List(ctx, &protoapi.ListReconcilersRequest{Limit: limit, Offset: offset})

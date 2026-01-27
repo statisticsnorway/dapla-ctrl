@@ -1,9 +1,6 @@
 name: Check pull request
-on: 
+on:
   workflow_dispatch:
-env:
-  NAME: nais-api-reconcilers
-  IMAGE_REPOSITORY: oci://europe-north1-docker.pkg.dev/nais-io/nais
 jobs:
   test:
     name: Check pull request
@@ -33,35 +30,3 @@ jobs:
           mise run fmt
           mise run generate
           git diff --exit-code --name-only
-
-  build_push:
-    outputs:
-      version: ${{ steps.build-push-sign.outputs.version }}
-    permissions:
-      contents: read
-      id-token: write
-    name: Build and push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-        with:
-          cache_key_prefix: "pr_bp_"
-      - id: go_version
-        run: echo "go_version=$(mise current go)" >> $GITHUB_OUTPUT
-      - uses: nais/platform-build-push-sign@main
-        id: build-push-sign
-        with:
-          name: ${{ env.NAME }}
-          build_args: GO_VERSION=${{ steps.go_version.outputs.go_version }}-
-          google_service_account: gh-api-reconcilers
-          workload_identity_provider: ${{ secrets.NAIS_IO_WORKLOAD_IDENTITY_PROVIDER }}
-          push: true
-      - name: Build Chart
-        run: |-
-          sed -i "s/^version: .*/version: ${{ steps.build-push-sign.outputs.version }}/g" charts/Chart.yaml
-          cat charts/Chart.yaml
-          helm package charts
-      - name: Push Chart
-        run: |-
-          helm push ${{ env.NAME }}*.tgz ${{ env.IMAGE_REPOSITORY }}

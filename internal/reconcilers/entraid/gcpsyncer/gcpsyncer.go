@@ -286,10 +286,10 @@ func (s *gcpSyncReconciler) Add(group string, member *string) error {
 
 // These methods are no-ops, just there to satisfy the Reconciler interface.
 // The GCP Syncer runs "independently"
-func (s *gcpSyncReconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (s *gcpSyncReconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	return nil
 }
 
-func (s *gcpSyncReconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (s *gcpSyncReconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	return nil
 }
