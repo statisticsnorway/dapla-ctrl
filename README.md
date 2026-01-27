@@ -6,6 +6,8 @@ It is a fork of and therefore also heavily inspired by [Nais API](https://github
 
 ## Local development
 
+As a pre-requisite, you need a container runtime available, such as [Rancher](https://ranchermanager.docs.rancher.com/getting-started/installation-and-upgrade) or [Colima](https://github.com/abiosoft/colima?tab=readme-ov-file#installation). You might also need to install [mise](https://mise.jdx.dev/installing-mise.html) and [Docker Engine](https://docs.docker.com/engine/install/) if you haven't already.
+
 ```bash
 mise install # Install required dependencies
 cp .env.example .env # Copy example configuration file, and adjust to your needs
