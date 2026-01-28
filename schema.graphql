@@ -199,8 +199,8 @@ input CreateServiceAccountInput {
   """The name of the service account."""
   name: String!
 
-  """The team slug that the service account belongs to."""
-  teamSlug: Slug
+  """The team slug of whom owns the service account."""
+  teamSlug: Slug!
 }
 
 type CreateServiceAccountPayload {

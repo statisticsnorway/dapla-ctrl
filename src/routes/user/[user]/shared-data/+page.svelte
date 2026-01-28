@@ -4,6 +4,7 @@
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import type { UserSharedBucketAccess$result } from '$houdini';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
+	import { BodyShort } from '@nais/ds-svelte-community';
 
 	let { data }: PageProps = $props();
 
@@ -11,6 +12,12 @@
 
 	type BucketItem = UserSharedBucketAccess$result['user']['sharedBucketsAccess']['nodes'][0];
 </script>
+
+<div class="description">
+	<BodyShort textColor="subtle" size="medium">
+		Oversikt over hvilke delt-bøtter medlemmet har tilgang til.
+	</BodyShort>
+</div>
 
 {#snippet nameCell(bucket: BucketItem)}
 	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
@@ -78,3 +85,10 @@
 		}}
 	/>
 {/if}
+
+<style>
+	.description {
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--ax-space-16);
+	}
+</style>
