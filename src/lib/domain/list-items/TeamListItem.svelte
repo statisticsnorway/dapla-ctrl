@@ -7,7 +7,7 @@
 		team
 		// badge
 	}: {
-		team: { slug: string; purpose: string };
+		team: { slug: string };
 		// badge?: BadgeProps;
 	} = $props();
 </script>
@@ -16,7 +16,6 @@
 	<IconLabel
 		label={team.slug}
 		icon={PersonGroupIcon}
-		description={team.purpose}
 		size="large"
 		level="3"
 		href="/team/{team.slug}"

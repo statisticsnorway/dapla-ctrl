@@ -14,7 +14,6 @@
 		id: string;
 		slug: string;
 		displayName: string;
-		purpose: string;
 		memberCount: number;
 		manager: User;
 		isManaged: boolean;

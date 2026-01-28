@@ -17,7 +17,6 @@
 					__typename
 					... on Team {
 						slug
-						purpose
 					}
 					... on Group {
 						name
@@ -100,7 +99,7 @@
 						return {
 							icon,
 							label: result.slug,
-							description: result.purpose,
+							description: '',
 							href: `/team/${result.slug}`,
 							type: 'link'
 						};

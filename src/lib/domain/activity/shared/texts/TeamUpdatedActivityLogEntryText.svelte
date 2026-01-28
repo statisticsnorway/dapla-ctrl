@@ -11,8 +11,6 @@
 
 	const fieldNameToDisplayName = (fieldName: string) => {
 		switch (fieldName) {
-			case 'purpose':
-				return 'Beskrivelse';
 			case 'displayName':
 				return 'Visningsnavn';
 			default:

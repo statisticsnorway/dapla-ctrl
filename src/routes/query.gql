@@ -20,7 +20,6 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 					team {
 						id
 						slug
-						purpose
 						displayName
 						isManaged
 						section {

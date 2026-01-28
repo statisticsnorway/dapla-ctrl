@@ -51,7 +51,6 @@ export async function load(event) {
 					viewerIsMember: false,
 					externalResources: { gitHubTeam: null },
 					displayName: '',
-					purpose: '',
 					isManaged: true,
 					slackChannel: '',
 					members: { pageInfo: { totalCount: 0 } }

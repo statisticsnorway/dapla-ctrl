@@ -14,10 +14,11 @@ export const actions = {
 			}
 		`);
 		const data = await event.request.formData();
+		const displayName = (data.get('displayname') as string) || '';
 		const input = {
 			slug: (data.get('name') as string) || '',
-			displayName: (data.get('displayname') as string) || '',
-			purpose: (data.get('description') as string) || '',
+			displayName,
+			purpose: displayName,
 			sectionCode: (data.get('section') as string) || '',
 			isManaged: (data.get('isManaged') as string) || 'true'
 		};

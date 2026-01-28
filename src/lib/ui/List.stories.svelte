@@ -13,25 +13,19 @@
 
 	const teams = [
 		{
-			slug: 'aura',
-			purpose: 'Not the Nais platform team any more, check out Nais instead.'
+			slug: 'aura'
 		},
 		{
-			slug: 'detsombetyrnoe',
-			purpose:
-				'Rekruttering og profileringssiden for NAV IT - blir liggende på detsombetyrnoe.no. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.'
+			slug: 'detsombetyrnoe'
 		},
 		{
-			slug: 'frontend-golden-path',
-			purpose: 'Teste greier for den gyldne sti'
+			slug: 'frontend-golden-path'
 		},
 		{
-			slug: 'frontendplattform',
-			purpose: 'Frontendplattform'
+			slug: 'frontendplattform'
 		},
 		{
-			slug: 'nais',
-			purpose: 'The Nais platform team'
+			slug: 'nais'
 		}
 	];
 </script>

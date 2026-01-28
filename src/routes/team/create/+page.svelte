@@ -24,8 +24,6 @@
 
 	let teamSlugError = $state('');
 
-	let purposeError = $state('');
-
 	let sectionError = $state('no_error');
 
 	let sections = $derived(
@@ -33,7 +31,7 @@
 	);
 
 	let disabled = $derived(
-		[displayNameError, teamSlugError, purposeError, sectionError].some((e) => e !== 'no_error')
+		[displayNameError, teamSlugError, sectionError].some((e) => e !== 'no_error')
 	);
 
 	function handleDisplayNameInput(event: Event) {
@@ -104,18 +102,6 @@
 			teamSlugError = 'no_error';
 		}
 	}
-
-	function handlePurposeInput(event: Event) {
-		if (!event) return;
-		const input = event.target as HTMLInputElement | null;
-		if (input) {
-			if (input.value.length < 3) {
-				purposeError = 'Formålet må være minst 3 tegn langt.';
-			} else {
-				purposeError = 'no_error';
-			}
-		}
-	}
 </script>
 
 <svelte:head>
@@ -173,18 +159,6 @@
 		</TextField>
 		{#if teamSlugError !== 'no_error' && teamSlugError !== ''}
 			<p style:color="var(--ax-text-danger)">{teamSlugError}</p>
-		{/if}
-		<br />
-		<TextField name="description" value={form?.input.purpose} oninput={handlePurposeInput}>
-			{#snippet label()}
-				Teamets formål
-			{/snippet}
-			{#snippet description()}
-				Eksempel: Sørger for at brukere får en god opplevelse
-			{/snippet}
-		</TextField>
-		{#if purposeError !== 'no_error' && purposeError !== ''}
-			<p style:color="var(--ax-text-danger)">{purposeError}</p>
 		{/if}
 		{#if isAdmin || isSection7xxManager}
 			<br />

@@ -36,7 +36,6 @@ export async function load(event) {
 			? current.data.team
 			: {
 					displayName: '',
-					purpose: '',
 					slug: '',
 					isManaged: false,
 					section: {

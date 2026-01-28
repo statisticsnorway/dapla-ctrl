@@ -12,7 +12,6 @@
 		mutation UpdateTeam($input: UpdateTeamInput!) {
 			updateTeam(input: $input) {
 				team {
-					purpose
 					displayName
 				}
 			}
@@ -39,25 +38,6 @@
 							input: {
 								slug: teamSlug,
 								displayName: e.detail
-							}
-						});
-
-						if (data.errors) {
-							descriptionErrors = data.errors;
-						}
-					}}
-					isMember={viewerIsMember}
-				/>
-
-				<Heading level="2">Beskrivelse</Heading>
-				<EditText
-					text={teamSettings.purpose}
-					on:save={async (e) => {
-						descriptionErrors = undefined;
-						const data = await updateTeam.mutate({
-							input: {
-								slug: teamSlug,
-								purpose: e.detail
 							}
 						});
 

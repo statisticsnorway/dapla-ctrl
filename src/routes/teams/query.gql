@@ -23,7 +23,6 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 			id
 			slug
 			displayName
-			purpose
 			isManaged
 			section {
 				id

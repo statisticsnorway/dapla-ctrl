@@ -28,7 +28,6 @@
 			id: team.id,
 			slug: team.slug,
 			displayName: team.displayName,
-			purpose: team.purpose,
 			memberCount: team.members.pageInfo.totalCount,
 			isManaged: team.isManaged,
 			manager: {
