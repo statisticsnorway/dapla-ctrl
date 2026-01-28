@@ -24,6 +24,7 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 			slug
 			displayName
 			purpose
+			isManaged
 			section {
 				id
 				code

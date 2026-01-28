@@ -22,6 +22,7 @@ query UserTeams @cache(policy: CacheAndNetwork) {
 						slug
 						purpose
 						displayName
+						isManaged
 						section {
 							code
 							name

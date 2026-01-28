@@ -31,6 +31,7 @@
 			displayName: team.team.displayName,
 			purpose: team.team.purpose,
 			memberCount: team.team.members.pageInfo.totalCount,
+			isManaged: team.team.isManaged,
 			manager: {
 				name: manager?.name ?? 'Mangler seksjonsleder',
 				email: manager?.email ?? ''

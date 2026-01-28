@@ -25,6 +25,7 @@ query UserOverview($user: String) @cache(policy: NetworkOnly) {
 					slug
 					displayName
 					purpose
+					isManaged
 					section {
 						id
 						code

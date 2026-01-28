@@ -17,6 +17,7 @@
 		purpose: string;
 		memberCount: number;
 		manager: User;
+		isManaged: boolean;
 		section: {
 			code: string;
 			name: string;
@@ -62,6 +63,12 @@
 			show: 'ALWAYS',
 			cell: nameCell
 		} as const,
+		{
+			id: 'AUTONOMY',
+			name: 'Autonomitetsnivå',
+			show: 'DEFAULT_NO',
+			cell: autonomyCell
+		} as const,
 		hasUserGroups
 			? ({
 					id: 'GROUPS',
@@ -92,6 +99,13 @@
 	</a>
 	<br />
 	{team.slug}
+{/snippet}
+{#snippet autonomyCell(team: TeamsData)}
+	{#if team.isManaged}
+		Managed
+	{:else}
+		Self-managed
+	{/if}
 {/snippet}
 {#snippet groupsCell(team: TeamsData)}
 	{team.userGroups

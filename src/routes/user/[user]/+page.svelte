@@ -23,6 +23,13 @@
 	<br />
 	{item.team.slug}
 {/snippet}
+{#snippet autonomyCell(item: TeamItem)}
+	{#if item.team.isManaged}
+		Managed
+	{:else}
+		Self-managed
+	{/if}
+{/snippet}
 {#snippet rolesCell(item: TeamItem)}
 	{item.groups
 		?.map((g) => g.name.substring(item.team.slug.length + 1))
@@ -66,6 +73,12 @@
 						show: 'ALWAYS',
 						name: 'Navn',
 						cell: nameCell
+					},
+					{
+						id: 'AUTONOMY',
+						show: 'DEFAULT_NO',
+						name: 'Autonomitetsnivå',
+						cell: autonomyCell
 					},
 					{
 						id: 'ROLES',
