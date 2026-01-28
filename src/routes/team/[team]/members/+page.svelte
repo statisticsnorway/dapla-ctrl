@@ -1,208 +1,42 @@
 <script lang="ts">
-	import { graphql, GroupMemberOrderField } from '$houdini';
-	import Confirm from '$lib/ui/Confirm.svelte';
-	import List from '$lib/ui/List.svelte';
-	import ListItem from '$lib/ui/ListItem.svelte';
-	import OrderByMenu from '$lib/ui/OrderByMenu.svelte';
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
-	// import Pagination from '$lib/Pagination.svelte';
-	// import { changeParams } from '$lib/utils/searchparams';
-	import { BodyShort, Button, Heading } from '@nais/ds-svelte-community';
-	import { PlusIcon, TrashIcon } from '@nais/ds-svelte-community/icons';
+	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { PageProps } from './$houdini';
-	import AddMember from './AddMember.svelte';
-	import CreateGroup from './CreateGroup.svelte';
+	import GroupMembersTable, { type GroupMembersData } from './GroupMembersTable.svelte';
+	import type { Groups$result } from '$houdini';
 
 	let { data }: PageProps = $props();
-	let { Groups, UserInfo, viewerIsOwner } = $derived(data);
-	let team = $derived($Groups.data?.team);
+	let { Groups } = $derived(data);
 
-	let groupNames = $derived.by(() => {
-		return team?.groups.nodes.map((node) => node.name) ?? [];
-	});
-	let hasGroups = $derived(groupNames.length > 0);
-
-	const removeGroupMember = graphql(`
-		mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
-			removeGroupMember(input: $input) {
-				group {
-					name
-				}
-			}
-		}
-	`);
-
-	const refetch = () => {
-		Groups.fetch({
-			policy: 'CacheAndNetwork'
-		});
-	};
-
-	let addMemberOpen: boolean = $state(false);
-	let createGroupOpen: boolean = $state(false);
-	let deleteUser: { email: string; name: string; group: string } | null = $state(null);
-	let deleteUserOpen = $state(false);
-
-	let canEdit = $derived(
-		viewerIsOwner === true ||
-			($UserInfo.data?.me.__typename == 'User' && $UserInfo.data?.me.isAdmin)
-	);
+	type GroupMemberNode = Groups$result['team']['members']['nodes'][0];
+	function transformGroupMembersData(groupMember: GroupMemberNode): GroupMembersData {
+		return {
+			name: groupMember.user.name,
+			email: groupMember.user.email,
+			section: {
+				code: groupMember.user.section?.code ?? '',
+				name: groupMember.user.section?.name ?? ''
+			},
+			groups: groupMember.groups.map((group) => ({
+				category: group.category,
+				suffix: group.suffix ?? null
+			}))
+		};
+	}
 </script>
 
 <GraphErrors errors={$Groups.errors} />
-{#if team}
-	<div class="content-wrapper">
-		<div>
-			{#each team.groups.nodes as group (group.name)}
-				{@const memberCount = group.members.pageInfo.totalCount}
-				<List title="{group.name}: {memberCount} bruker{memberCount !== 1 ? 'e' : ''}">
-					{#snippet menu()}
-						<OrderByMenu
-							orderField={GroupMemberOrderField}
-							defaultOrderField={GroupMemberOrderField.NAME}
-						/>
-					{/snippet}
-					{#if group.members.nodes}
-						{#each group.members.nodes as member (member.user.email)}
-							<ListItem>
-								<div class="item">
-									<div>
-										<BodyShort size="small">
-											<a href="/user/{member.user.email}/">{member.user.name}</a>
-										</BodyShort>
-										<BodyShort size="small">
-											<span style="color: var(--ax-text-subtle, --a-text-subtle);"
-												>{member.user.email}</span
-											>
-										</BodyShort>
-									</div>
 
-									<div class="role-and-buttons">
-										{#if canEdit}
-											<div>
-												<Button
-													title="Slett medlem"
-													size="small"
-													variant="tertiary-neutral"
-													onclick={() => {
-														deleteUser = {
-															email: member.user.email,
-															name: member.user.name,
-															group: group.name
-														};
-														deleteUserOpen = true;
-													}}
-												>
-													{#snippet icon()}
-														<TrashIcon
-															style="color:var(--ax-text-danger-icon, --a-icon-danger)!important"
-														/>
-													{/snippet}
-												</Button>
-											</div>
-										{/if}
-									</div>
-								</div>
-							</ListItem>
-						{/each}
-					{/if}
-				</List>
-				<br />
-			{:else}
-				Teamet har ingen grupper.
-			{/each}
+<div class="container">
+	<GroupMembersTable
+		groupMembersData={$Groups.data?.team?.members.nodes.map(transformGroupMembersData) ?? []}
+	/>
+</div>
 
-			{#if canEdit}
-				{#if hasGroups}
-					<div class="button">
-						<Button
-							size="small"
-							onclick={() => {
-								addMemberOpen = !addMemberOpen;
-							}}
-							icon={PlusIcon}>Legg til medlem</Button
-						>
-					</div>
-				{/if}
-				<div class="button">
-					<Button
-						size="small"
-						onclick={() => {
-							createGroupOpen = !createGroupOpen;
-						}}
-						icon={PlusIcon}>Opprett gruppe</Button
-					>
-				</div>
-			{/if}
-			<!-- <Pagination
-				page={$Members.data?.team.members.pageInfo}
-				loaders={{
-					loadPreviousPage: () => {
-						changeQuery({
-							before: $Members.data?.team.members.pageInfo.startCursor ?? '',
-							after: ''
-						});
-					},
-					loadNextPage: () => {
-						changeQuery({
-							after: $Members.data?.team.members.pageInfo.endCursor ?? '',
-							before: ''
-						});
-					}
-				}}
-			/> -->
-		</div>
-		<!--div>Here be documentation of teams, members and roles</div-->
-	</div>
-	{#if team}
-		{#if hasGroups}
-			<AddMember bind:open={addMemberOpen} groups={groupNames} on:created={refetch} />
-		{/if}
-
-		<CreateGroup bind:open={createGroupOpen} team={team.slug} on:created={refetch} />
-
-		{#if deleteUser && deleteUserOpen}
-			{@const group = deleteUser.group}
-			{@const userId = deleteUser.email}
-			<Confirm
-				bind:open={deleteUserOpen}
-				confirmText="Fjern"
-				variant="danger"
-				onconfirm={async () => {
-					await removeGroupMember.mutate({ input: { groupName: group, userEmail: userId } });
-					refetch();
-				}}
-			>
-				{#snippet header()}
-					<Heading>Slett medlem</Heading>
-				{/snippet}
-				Er du sikker på at du vil fjerne <b>{deleteUser.name}</b> fra <b>{group}</b>?
-			</Confirm>
-		{/if}
-	{/if}
-{/if}
-
-<style>
-	.button {
-		display: flex;
-		justify-content: flex-end;
-		margin-bottom: var(--ax-space-24, --a-spacing-6);
-	}
-	.content-wrapper {
-		display: grid;
-		gap: var(--ax-space-24, --a-spacing-6);
-		grid-template-columns: 1fr 300px;
-	}
-
-	.item {
-		display: grid;
-		grid-template-columns: 600px 1fr;
-	}
-	.role-and-buttons {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		width: 200px;
-	}
-</style>
+<Pagination
+	page={$Groups.data?.team?.members.pageInfo}
+	loaders={{
+		loadPreviousPage: () => Groups.loadPreviousPage(),
+		loadNextPage: () => Groups.loadNextPage()
+	}}
+/>

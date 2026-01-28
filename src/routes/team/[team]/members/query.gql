@@ -2,26 +2,31 @@ query Groups($team: Slug!) {
 	team(slug: $team) {
 		id
 		slug
-		groups(first: 20) {
+		members(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				totalCount
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+			}
 			nodes {
-				id
-				name
-				members(first: 20) {
-					pageInfo {
-						totalCount
-						hasNextPage
-						hasPreviousPage
-						pageStart
-						pageEnd
-						startCursor
-						endCursor
-					}
-					nodes {
-						user {
-							id
-							name
-							email
-						}
+				groups {
+					id
+					name
+					category
+					suffix
+				}
+				user {
+					id
+					name
+					email
+					section {
+						id
+						name
+						code
 					}
 				}
 			}
