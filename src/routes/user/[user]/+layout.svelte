@@ -3,13 +3,16 @@
 	import PageHeader from '$lib/ui/PageHeader.svelte';
 	import type { LayoutProps } from './$types';
 	import Menu from './Menu.svelte';
+	import { createUserContext } from './userContext.svelte';
 
-	let { children }: LayoutProps = $props();
+	let { params, children }: LayoutProps = $props();
+
+	createUserContext();
 </script>
 
 <div class="page">
 	<div class="main">
-		<Menu />
+		<Menu user={params.user} />
 		<div class="container">
 			<PageHeader />
 			<div>{@render children?.()}</div>
