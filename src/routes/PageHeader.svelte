@@ -29,18 +29,10 @@
 	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem; margin-right: 3rem;">
 		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
-	<InternalHeaderButton
-		as="a"
-		href="/"
-		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-16);"
-	>
+	<InternalHeaderButton as="a" href="/" style="font-size: var(--ax-font-size-medium);">
 		Team
 	</InternalHeaderButton>
-	<InternalHeaderButton
-		as="a"
-		href="/team-members"
-		style="font-size: var(--ax-font-size-medium); margin-left: var(--ax-space-8);"
-	>
+	<InternalHeaderButton as="a" href="/team-members" style="font-size: var(--ax-font-size-medium);">
 		Medlemmer
 	</InternalHeaderButton>
 
