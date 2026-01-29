@@ -1,3 +1,28 @@
+<script module lang="ts">
+	type ValueOf<T> = T[keyof T];
+
+	export type OrderField = {
+		[s: string]: string;
+	};
+
+	export const urlToOrderField = <T extends OrderField>(
+		orderField: T,
+		defaultValue: ValueOf<T>,
+		url: URL
+	): ValueOf<T> =>
+		(Object.values(orderField).find((field) =>
+			url.searchParams.get('sort')?.toUpperCase().startsWith(field.toUpperCase())
+		) as ValueOf<T> | undefined) ?? defaultValue;
+
+	export const urlToOrderDirection = (
+		url: URL,
+		defaultDirection: OrderDirection$options = OrderDirection.ASC
+	) =>
+		Object.values(OrderDirection).find((dir) =>
+			url.searchParams.get('sort')?.toUpperCase().endsWith(dir.toUpperCase())
+		) ?? defaultDirection;
+</script>
+
 <script lang="ts" generics="Item extends { id: string }">
 	import { browser } from '$app/environment';
 	import {
@@ -9,13 +34,16 @@
 		Td,
 		Th,
 		Thead,
-		Tr
+		Tr,
+		type TableSortState
 	} from '@nais/ds-svelte-community';
 	import { ActionMenu, ActionMenuGroup } from '@nais/ds-svelte-community/experimental';
 	import { CloudDownIcon, SidebarBothIcon } from '@nais/ds-svelte-community/icons';
 	import { page } from '$app/state';
 	import type { Snippet } from 'svelte';
 	import Papa from 'papaparse';
+	import { OrderDirection, type OrderDirection$options } from '$houdini';
+	import { changeParams } from '$lib/utils/searchparams';
 
 	type Show = 'ALWAYS' | 'DEFAULT_NO' | 'DEFAULT_YES';
 
@@ -27,6 +55,7 @@
 		colspan?: number;
 		cell: Snippet<[Item]> | { id: string; align?: 'left' | 'right'; snippet: Snippet<[Item]> }[];
 		align?: 'right' | 'left';
+		sortKey?: string;
 	};
 
 	interface Props {
@@ -52,6 +81,24 @@
 		return columns.filter((c) => selectedFields.includes(c.id));
 	});
 
+	const orderByFields = columns.map((c) => c.sortKey).filter((f) => f !== undefined);
+
+	const orderField = $derived(
+		orderByFields.find(
+			(f) => page.url.searchParams.get('sort')?.split('-')[0].toUpperCase() === f.toUpperCase()
+		) ?? undefined
+	);
+	const orderDirection = $derived(urlToOrderDirection(page.url));
+
+	let sortState: TableSortState | undefined = $derived(
+		orderField !== undefined
+			? {
+					orderBy: orderField,
+					direction: orderDirection === OrderDirection.ASC ? 'ascending' : 'descending'
+				}
+			: undefined
+	);
+
 	$effect(() => {
 		if (!browser) return;
 
@@ -61,6 +108,11 @@
 
 		document.cookie = `${cookieKey}=${JSON.stringify(selectedFields)}; expires=Thu, 31 Dec 2099 23:59:59 GMT; SameSite=Lax; Secure; path=${cookiePath}`;
 	});
+
+	function toQueryValue(sortState?: TableSortState): string {
+		if (!sortState) return '';
+		return `${sortState.orderBy}-${sortState.direction === 'ascending' ? 'ASC' : 'DESC'}`;
+	}
 
 	async function generateDownload() {
 		if (!exportTable) return;
@@ -116,11 +168,39 @@
 	</div>
 {/if}
 
-<Table zebraStripes>
+<Table
+	zebraStripes
+	sort={sortState}
+	onsortchange={(key) => {
+		if (!sortState) {
+			sortState = {
+				orderBy: key,
+				direction: 'ascending'
+			};
+		} else if (sortState.orderBy === key) {
+			if (sortState.direction === 'descending') {
+				sortState = undefined;
+			} else if (sortState.direction === 'ascending') {
+				sortState.direction = 'descending';
+			} else {
+				sortState.direction = 'ascending';
+			}
+		} else {
+			sortState.orderBy = key;
+			sortState.direction = 'ascending';
+		}
+
+		changeParams({
+			sort: toQueryValue(sortState)
+		});
+	}}
+>
 	<Thead>
 		<Tr>
 			{#each selectedColumns as column (column.id)}
 				<Th
+					sortable={column.sortKey !== undefined}
+					sortKey={column.sortKey}
 					colspan={(column.colspan ?? typeof column.cell !== 'function') ? column.cell.length : 1}
 					align={column.align ?? 'left'}>{column.heading ?? column.name}</Th
 				>
