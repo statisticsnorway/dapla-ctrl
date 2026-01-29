@@ -180,14 +180,15 @@ func CanCreateTeam(ctx context.Context) error {
 		return ErrUnauthorized
 	}
 
-	id := user.GetID()
-	authorized, err := db(ctx).IsSectionManager(ctx, &id)
-	if err != nil {
-		return err
-	}
-	if authorized {
-		return nil
-	}
+	// TODO: UNCOMMENT WHEN WE WANT TO OPEN FOR TEAM CREATION
+	// id := user.GetID()
+	// authorized, err := db(ctx).IsSectionManager(ctx, &id)
+	// if err != nil {
+	// 	return err
+	// }
+	// if authorized {
+	// 	return nil
+	// }
 	return ErrUnauthorized
 }
 

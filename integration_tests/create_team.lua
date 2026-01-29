@@ -183,7 +183,8 @@ Test.gql("non-7xx-manager can NOT create self-managed team", function(t)
 		data = Null,
 		errors = {
 			{
-				message = "Only Section managers in IT department may create self-managed teams.",
+				-- message = "Only Section managers in IT department may create self-managed teams.",
+				message = "You are authenticated, but your account is not authorized to perform this action.",
 				path = {
 					"createTeam",
 				},
@@ -215,14 +216,23 @@ Test.gql("7xx-manager can create self-managed team", function(t)
 	]]
 
 	t.check {
-		data = {
-			createTeam = {
-				team = {
-					slug = "new7xxteam",
-					isManaged = false,
+		data = Null,
+		errors = {
+			{
+				message = "You are authenticated, but your account is not authorized to perform this action.",
+				path = {
+					"createTeam",
 				},
 			},
 		},
+		-- data = {
+		-- 	createTeam = {
+		-- 		team = {
+		-- 			slug = "new7xxteam",
+		-- 			isManaged = false,
+		-- 		},
+		-- 	},
+		-- },
 	}
 end)
 
