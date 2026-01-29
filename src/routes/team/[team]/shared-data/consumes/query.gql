@@ -23,6 +23,9 @@ query ConsumesSharedData($team: Slug!) {
 				shortName
 				kind
 				env
+				team {
+					slug
+				}
 				uniqueUsers {
 					pageInfo {
 						totalCount

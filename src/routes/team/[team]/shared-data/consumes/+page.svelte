@@ -10,13 +10,13 @@
 
 	let { data, params }: PageProps = $props();
 
-	let { ConsumesSharedData, teamSlug } = $derived(data);
+	let { ConsumesSharedData } = $derived(data);
 
 	type BucketItem = ConsumesSharedData$result['team']['sharedBucketsAccess']['nodes'][0];
 </script>
 
 {#snippet nameCell(bucket: BucketItem)}
-	<a href={`/team/${teamSlug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
+	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
 	<br />
 	{bucket.name}
 {/snippet}
