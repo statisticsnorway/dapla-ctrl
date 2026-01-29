@@ -196,3 +196,30 @@ LIMIT
 OFFSET
 	sqlc.arg('offset')
 ;
+
+-- name: ListAccessToForTeam :many
+SELECT
+	sqlc.embed(shared_buckets_stopgap),
+	COUNT(*) OVER () AS total_count
+FROM
+	shared_buckets_stopgap
+	JOIN shared_buckets_access_stopgap ON shared_buckets_access_stopgap.bucket_name = shared_buckets_stopgap.name
+	JOIN groups ON shared_buckets_access_stopgap.group_name = groups.name
+WHERE
+	groups.team_slug = @team_slug
+GROUP BY
+	shared_buckets_stopgap.name,
+	groups.team_slug
+ORDER BY
+	CASE
+		WHEN @order_by::TEXT = 'name:asc' THEN shared_buckets_stopgap.name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
+	END DESC,
+	shared_buckets_stopgap.name ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;

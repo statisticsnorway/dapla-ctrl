@@ -150,6 +150,14 @@ func (r *teamResolver) SharedBuckets(ctx context.Context, obj *team.Team, first 
 	return sharedbucketsstopgap.ListForTeam(ctx, obj.Slug, page, orderBy)
 }
 
+func (r *teamResolver) SharedBucketsAccess(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+	return sharedbucketsstopgap.ListAccessToForTeam(ctx, obj.Slug, page, orderBy)
+}
+
 func (r *teamResolver) ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error) {
 	return team.UserIsOwner(ctx, obj.Slug, authz.ActorFromContext(ctx).User.GetID())
 }

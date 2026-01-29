@@ -105,6 +105,77 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 	return items, nil
 }
 
+const listAccessToForTeam = `-- name: ListAccessToForTeam :many
+SELECT
+	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env,
+	COUNT(*) OVER () AS total_count
+FROM
+	shared_buckets_stopgap
+	JOIN shared_buckets_access_stopgap ON shared_buckets_access_stopgap.bucket_name = shared_buckets_stopgap.name
+	JOIN groups ON shared_buckets_access_stopgap.group_name = groups.name
+WHERE
+	groups.team_slug = $1
+GROUP BY
+	shared_buckets_stopgap.name,
+	groups.team_slug
+ORDER BY
+	CASE
+		WHEN $2::TEXT = 'name:asc' THEN shared_buckets_stopgap.name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
+	END DESC,
+	shared_buckets_stopgap.name ASC
+LIMIT
+	$4
+OFFSET
+	$3
+`
+
+type ListAccessToForTeamParams struct {
+	TeamSlug slug.Slug
+	OrderBy  string
+	Offset   int32
+	Limit    int32
+}
+
+type ListAccessToForTeamRow struct {
+	SharedBucketsStopgap SharedBucketsStopgap
+	TotalCount           int64
+}
+
+func (q *Queries) ListAccessToForTeam(ctx context.Context, arg ListAccessToForTeamParams) ([]*ListAccessToForTeamRow, error) {
+	rows, err := q.db.Query(ctx, listAccessToForTeam,
+		arg.TeamSlug,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListAccessToForTeamRow{}
+	for rows.Next() {
+		var i ListAccessToForTeamRow
+		if err := rows.Scan(
+			&i.SharedBucketsStopgap.Name,
+			&i.SharedBucketsStopgap.TeamSlug,
+			&i.SharedBucketsStopgap.ShortName,
+			&i.SharedBucketsStopgap.Kind,
+			&i.SharedBucketsStopgap.Env,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listAllForSearch = `-- name: ListAllForSearch :many
 SELECT
 	name,

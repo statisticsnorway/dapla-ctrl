@@ -9,6 +9,7 @@ import (
 type Querier interface {
 	GetByNames(ctx context.Context, names []string) ([]*SharedBucketsStopgap, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
+	ListAccessToForTeam(ctx context.Context, arg ListAccessToForTeamParams) ([]*ListAccessToForTeamRow, error)
 	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)
 	ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error)
 	ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error)

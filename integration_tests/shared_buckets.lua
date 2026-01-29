@@ -8,14 +8,16 @@ local sharedUser2 = User.new()
 
 
 local bucketName = "ssb-sharing-data-delt-testing-test"
+local bucketName2 = "ssb-sharing-data-delt-testing2-test"
 
--- Create a shared bucket in team "sharing"
+-- Create two shared buckets in team "sharing"
 Helper.SQLExec([[
 	INSERT INTO
 		shared_buckets_stopgap (name, short_name, kind, env, team_slug)
 	VALUES
-		($1, 'testing', 'standard', 'test', 'sharing')
-	]], bucketName)
+		($1, 'testing', 'standard', 'test', 'sharing'),
+		($2, 'testing2', 'standard', 'test', 'sharing')
+	]], bucketName, bucketName2)
 
 -- Create some groups in shared-with-a and shared-with-b which we can grant access to the bucket
 Helper.SQLExec([[
@@ -71,7 +73,7 @@ Test.gql("Get shared bucket of team", function(t)
 			team = {
 				sharedBuckets = {
 					pageInfo = {
-						totalCount = 1,
+						totalCount = 2,
 					},
 					nodes = {
 						{
@@ -143,6 +145,42 @@ Test.gql("4 groups, 2 unique users, 3 user-team edges", function(t)
 					},
 				},
 				uniqueUsers = {
+					pageInfo = {
+						totalCount = 2,
+					},
+				},
+			},
+		},
+	}
+end)
+
+-- Grant shared-with-a access to second bucket
+Helper.SQLExec([[
+	INSERT INTO
+		shared_buckets_access_stopgap (bucket_name, group_name)
+	VALUES
+		($1, 'shared-with-a-developers')
+	]], bucketName2)
+
+Test.gql("shared-with-a has access to 2 buckets", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		query {
+			team(slug: "shared-with-a") {
+				sharedBucketsAccess {
+					pageInfo {
+						totalCount
+					}
+				}
+			}
+		}
+		]], bucketName))
+
+	t.check {
+		data = {
+			team = {
+				sharedBucketsAccess = {
 					pageInfo = {
 						totalCount = 2,
 					},

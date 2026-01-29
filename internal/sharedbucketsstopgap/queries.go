@@ -195,3 +195,26 @@ func ListForUser(ctx context.Context, userId uuid.UUID, page *pagination.Paginat
 		return toGraphBucket(&from.SharedBucketsStopgap)
 	}), nil
 }
+
+func ListAccessToForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListAccessToForTeam(ctx, sharedbucketsstopgapsql.ListAccessToForTeamParams{
+		TeamSlug: teamSlug,
+		Offset:   page.Offset(),
+		Limit:    page.Limit(),
+		OrderBy:  orderBy.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	total := 0
+	if len(ret) > 0 {
+		total = int(ret[0].TotalCount)
+	}
+
+	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListAccessToForTeamRow) *SharedBucket {
+		return toGraphBucket(&from.SharedBucketsStopgap)
+	}), nil
+}
