@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { SharedData$result } from '$houdini';
+	import type { ConsumesSharedData$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
 	import Tab from '$lib/ui/Tab.svelte';
@@ -10,9 +10,9 @@
 
 	let { data, params }: PageProps = $props();
 
-	let { SharedData, teamSlug } = $derived(data);
+	let { ConsumesSharedData, teamSlug } = $derived(data);
 
-	type BucketItem = SharedData$result['team']['sharedBuckets']['nodes'][0];
+	type BucketItem = ConsumesSharedData$result['team']['sharedBucketsAccess']['nodes'][0];
 </script>
 
 {#snippet nameCell(bucket: BucketItem)}
@@ -33,25 +33,25 @@
 	{bucket.uniqueUsers.pageInfo.totalCount}
 {/snippet}
 
-{#if $SharedData.data}
+{#if $ConsumesSharedData.data}
 	<div class="container">
 		<Tabs>
 			<Tab
 				data-sveltekit-noscroll
-				href="/team/${params.team}/shared-data"
+				href={`/team/${params.team}/shared-data`}
 				active={page.url.pathname === `/team/${params.team}/shared-data`}
-				title={`Deler (${$SharedData.data.team.sharedBuckets.pageInfo.totalCount})`}
+				title="Deler ({$ConsumesSharedData.data.team.sharedBuckets.pageInfo.totalCount})"
 			/>
 			<Tab
 				data-sveltekit-noscroll
 				href={`/team/${params.team}/shared-data/consumes`}
 				active={page.url.pathname === `/team/${params.team}/shared-data/consumes`}
-				title={`Konsumerer (${$SharedData.data.team.sharedBucketsAccess.pageInfo.totalCount})`}
+				title={`Konsumerer (${$ConsumesSharedData.data.team.sharedBucketsAccess.pageInfo.totalCount})`}
 			/>
 		</Tabs>
 		<DaplaTable
-			data={$SharedData.data.team.sharedBuckets.nodes}
-			fieldsCookie={{ path: '/team', key: 'sharedBucketsFields/team' }}
+			data={$ConsumesSharedData.data.team.sharedBucketsAccess.nodes}
+			fieldsCookie={{ path: '/team', key: 'consumesSharedBucketsFields/team' }}
 			selected={data.bucketTableFields}
 			columns={[
 				{
@@ -89,10 +89,10 @@
 	</div>
 
 	<Pagination
-		page={$SharedData.data?.team.sharedBuckets.pageInfo}
+		page={$ConsumesSharedData.data?.team.sharedBucketsAccess.pageInfo}
 		loaders={{
-			loadPreviousPage: () => SharedData.loadPreviousPage(),
-			loadNextPage: () => SharedData.loadNextPage()
+			loadPreviousPage: () => ConsumesSharedData.loadPreviousPage(),
+			loadNextPage: () => ConsumesSharedData.loadNextPage()
 		}}
 	/>
 {/if}

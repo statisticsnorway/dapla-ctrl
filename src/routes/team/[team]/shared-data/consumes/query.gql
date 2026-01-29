@@ -1,13 +1,13 @@
-query SharedData($team: Slug!) {
+query ConsumesSharedData($team: Slug!) {
 	team(slug: $team) {
 		id
 		slug
-		sharedBucketsAccess(first: 1) {
+		sharedBuckets(first: 1) {
 			pageInfo {
 				totalCount
 			}
 		}
-		sharedBuckets(first: 25) @paginate(mode: SinglePage) {
+		sharedBucketsAccess(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
 				hasNextPage
 				hasPreviousPage
