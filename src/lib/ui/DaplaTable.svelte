@@ -12,9 +12,10 @@
 		Tr
 	} from '@nais/ds-svelte-community';
 	import { ActionMenu, ActionMenuGroup } from '@nais/ds-svelte-community/experimental';
-	import { SidebarBothIcon } from '@nais/ds-svelte-community/icons';
+	import { CloudDownIcon, SidebarBothIcon } from '@nais/ds-svelte-community/icons';
 	import { page } from '$app/state';
 	import type { Snippet } from 'svelte';
+	import Papa from 'papaparse';
 
 	type Show = 'ALWAYS' | 'DEFAULT_NO' | 'DEFAULT_YES';
 
@@ -36,9 +37,10 @@
 			path?: string;
 			key?: string;
 		};
+		exportTable?: () => Promise<object[]>;
 	}
 
-	let { data, columns, selected, fieldsCookie }: Props = $props();
+	let { data, columns, selected, fieldsCookie, exportTable }: Props = $props();
 
 	if (selected.length === 0) {
 		selected = columns.filter((c) => c.show !== 'DEFAULT_NO').map((c) => c.id);
@@ -59,10 +61,40 @@
 
 		document.cookie = `${cookieKey}=${JSON.stringify(selectedFields)}; expires=Thu, 31 Dec 2099 23:59:59 GMT; SameSite=Lax; Secure; path=${cookiePath}`;
 	});
+
+	async function generateDownload() {
+		if (!exportTable) return;
+		const csv = Papa.unparse(await exportTable(), { delimiter: ';' });
+		const blob = new Blob([csv], { type: `text/csv;charset=utf-8` });
+		const link = document.createElement('a');
+		const crumbs = page.data.meta.breadcrumbs?.map((b) => b.label).join('_');
+		const title = page.data.meta.title;
+		const date = new Date().toJSON();
+		const filename = `${[crumbs, title, date].filter((e) => e !== undefined).join('_')}.csv`;
+		if (link.download !== undefined) {
+			const url = URL.createObjectURL(blob);
+			link.setAttribute('href', url);
+			link.setAttribute('download', filename);
+			link.style.visibility = 'hidden';
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+		}
+	}
 </script>
 
 {#if selectable.length > 0}
 	<div class="field-selector">
+		{#if exportTable}
+			<Button
+				variant="tertiary-neutral"
+				size="small"
+				iconPosition="right"
+				icon={CloudDownIcon}
+				onclick={generateDownload}
+				title="Last ned som CSV"
+			></Button>
+		{/if}
 		<ActionMenu align="end">
 			{#snippet trigger(props)}
 				<Button
@@ -117,5 +149,6 @@
 <style>
 	.field-selector {
 		float: right;
+		display: flex;
 	}
 </style>

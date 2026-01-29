@@ -2,7 +2,7 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import { BodyShort, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
-	import type { UserOverview$result } from '$houdini';
+	import { graphql, type GetUserTeamsForExport$result, type UserOverview$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	let { data }: PageProps = $props();
@@ -14,6 +14,56 @@
 	type TeamItem = TeamNode & { id: string };
 
 	let userTeamsCount = $derived($UserOverview.data?.user.teams.nodes.length || 0);
+
+	const getAllForExport = graphql(`
+		query GetUserTeamsForExport($user: String, $total: Int) {
+			user(email: $user) {
+				id
+				teams(first: $total) {
+					nodes {
+						groups {
+							name
+						}
+						team {
+							slug
+							displayName
+							isManaged
+							section {
+								id
+								code
+								name
+								manager {
+									name
+									email
+								}
+							}
+							members(first: 1) {
+								pageInfo {
+									totalCount
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	`);
+
+	function transformToExportable(
+		data: GetUserTeamsForExport$result['user']['teams']['nodes']
+	): object[] {
+		return data.map((n) => {
+			return {
+				slug: n.team.slug,
+				autonomy: n.team.isManaged ? 'MANAGED' : 'SELF_MANAGED',
+				sectionCode: n.team.section.code,
+				sectionName: n.team.section.name,
+				manager: n.team.section.manager?.email,
+				memberCount: n.team.members.pageInfo.totalCount,
+				groups: n.groups.map((g) => g.name.substring(n.team.slug.length + 1))
+			};
+		});
+	}
 </script>
 
 {#snippet nameCell(item: TeamItem)}
@@ -62,6 +112,15 @@
 				<Heading level="2" as="h2" spacing>Medlem av {userTeamsCount} team</Heading>
 			</div>
 			<DaplaTable
+				exportTable={() =>
+					getAllForExport
+						.fetch({
+							variables: {
+								user: $UserOverview.data?.user.email,
+								total: $UserOverview.data?.user.teams.pageInfo.totalCount
+							}
+						})
+						.then((result) => transformToExportable(result.data?.user.teams.nodes ?? []))}
 				data={$UserOverview.data.user.teams.nodes.map((n) => {
 					return { id: n.team.id, ...n };
 				})}
