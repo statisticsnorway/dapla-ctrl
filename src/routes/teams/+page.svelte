@@ -10,7 +10,8 @@
 	const canCreateTeam = $derived.by(() => {
 		let me = $UserInfo.data?.me;
 		if (me?.__typename !== 'User') return false;
-		return me?.isAdmin || me?.isSectionManager;
+		// TODO: uncomment when we support creating teams
+		return me?.isAdmin; // || me?.isSectionManager;
 	});
 
 	let userTeamsCount = $derived(

@@ -11,7 +11,8 @@
 	const canCreateTeam = $derived.by(() => {
 		let me = $UserInfo.data?.me;
 		if (me?.__typename !== 'User') return false;
-		return me?.isAdmin || me?.isSectionManager;
+		// TODO: uncomment when we support creating teams
+		return me?.isAdmin; //|| me?.isSectionManager;
 	});
 
 	type TeamNode = Extract<UserTeams$result['me'], { __typename: 'User' }>['teams']['nodes'][0];
