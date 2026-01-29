@@ -15,6 +15,7 @@ export async function load(event) {
 	}
 
 	const current = get(roles.TeamRoles);
+	const team = get(roles.TeamRoles).data?.team.displayName ?? event.params.team;
 	if (!current) {
 		error(404, 'Fant ikke teamet');
 	}
@@ -34,8 +35,8 @@ export async function load(event) {
 				? undefined
 				: [
 						{
-							label: current.data?.team.displayName ?? event.params.team,
-							href: '/team/[team]'
+							label: team,
+							href: `/team/[team]`
 						}
 					]
 	});
