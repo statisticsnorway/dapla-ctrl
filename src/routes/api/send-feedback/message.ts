@@ -1,14 +1,12 @@
 import type { FeedbackType } from '$lib/feedback/types';
-import type { Block, DividerBlock, HeaderBlock, SectionBlock } from '@slack/types';
 
 export function createFeedbackMessage(
 	anonymous: boolean,
 	email: string,
 	feedback: string,
 	path: string,
-	tenant: string,
 	type: FeedbackType
-): Block[] {
+): string {
 	let headerText: string;
 
 	if (anonymous) {
@@ -17,53 +15,25 @@ export function createFeedbackMessage(
 
 	switch (type) {
 		case 'BUG':
-			headerText = ':bug: Bug report';
+			headerText = ':bug:\nBug report';
 			break;
 		case 'CHANGE_REQUEST':
-			headerText = ':bulb: Change request';
+			headerText = ':bulb:\nChange request';
 			break;
 		case 'OTHER':
-			headerText = ':speech_balloon: Other feedback';
+			headerText = ':speech_balloon:\nOther feedback';
 			break;
 		case 'QUESTION':
-			headerText = ':question: Question';
+			headerText = ':question:\nQuestion';
 			break;
 		default:
 			throw new Error('Invalid feedback type');
 	}
 
-	const details = [
-		`*From:* ${email}`,
-		`*URL:* https://console.${tenant}.cloud.nais.io${path}`,
-		`*Tenant:* ${tenant}`
-	];
+	const details = [`From: ${email}`, `Path: ${path}`];
 
-	return [
-		{
-			type: 'header',
-			text: {
-				type: 'plain_text',
-				text: headerText,
-				emoji: true
-			}
-		} as HeaderBlock,
-		{
-			type: 'section',
-			text: {
-				type: 'mrkdwn',
-				text: details.join('\n')
-			}
-		} as SectionBlock,
-		{
-			type: 'divider'
-		} as DividerBlock,
-		{
-			type: 'section',
-			text: {
-				type: 'plain_text',
-				text: feedback,
-				emoji: false
-			}
-		} as SectionBlock
-	];
+	return `${headerText}
+${details.join('\n')}
+Feedback:
+${feedback}`;
 }

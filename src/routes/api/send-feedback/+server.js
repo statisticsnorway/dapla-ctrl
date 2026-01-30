@@ -1,12 +1,9 @@
 import { env } from '$env/dynamic/private';
 import { ServerGetUserStore } from '$houdini';
 import { createFeedbackMessage } from './message';
-import { WebClient } from '@slack/web-api';
 import { json } from '@sveltejs/kit';
 
-const client = new WebClient(env.SLACK_API_TOKEN);
-const channel = env.SLACK_FEEDBACK_CHANNEL_ID || '';
-const tenant = env.TENANT_NAME || '';
+const webhookUrl = env.SLACK_WEBHOOK_URL || '';
 
 export async function POST(event) {
 	const { request } = event;
@@ -25,19 +22,23 @@ export async function POST(event) {
 	const body = await request.json();
 	const { anonymous, feedback, path, type } = body;
 
-	let blocks = [];
+	let message = '';
 
 	try {
-		blocks = createFeedbackMessage(anonymous, email, feedback, path, tenant, type);
+		message = createFeedbackMessage(anonymous, email, feedback, path, type);
 	} catch (error) {
 		return json({ error: 'Failed to create feedback message - ' + error }, { status: 500 });
 	}
 
 	try {
-		const result = await client.chat.postMessage({
-			channel: channel,
-			blocks: blocks,
-			text: `${type} feedback`
+		const result = await fetch(webhookUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				feedback: message
+			})
 		});
 
 		if (result.ok) {

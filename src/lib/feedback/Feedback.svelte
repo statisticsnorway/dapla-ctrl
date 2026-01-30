@@ -30,11 +30,11 @@
 	}
 
 	const FEEDBACK_TYPE: { value: FeedbackType | ''; text: string }[] = [
-		{ value: '', text: 'Choose type of feedback' },
+		{ value: '', text: 'Velg tilbakemeldingstype' },
 		{ value: 'BUG', text: 'Bug' },
-		{ value: 'CHANGE_REQUEST', text: 'Change request' },
-		{ value: 'QUESTION', text: 'Question' },
-		{ value: 'OTHER', text: 'Other' }
+		{ value: 'CHANGE_REQUEST', text: 'Funksjonalitets- eller endringsønske' },
+		{ value: 'QUESTION', text: 'Spørsmål' },
+		{ value: 'OTHER', text: 'Annet' }
 	];
 
 	const submitFeedback = async () => {
@@ -77,11 +77,11 @@
 				return;
 			}
 
-			response = data.ok ? 'Message sent!' : 'Failed to send message.';
+			response = data.ok ? 'Melding sendt!' : 'Klarte ikke sende melding.';
 			feedbackSent = true;
 		} catch (error) {
 			console.error('Error:', error);
-			response = 'Error sending message: ' + error;
+			response = 'Det oppsto en feil under sending av melding: ' + error;
 		}
 		return response;
 	};
@@ -90,15 +90,17 @@
 <Theme theme={themeSwitch.theme}>
 	<Modal open width="medium" onclose={close}>
 		{#snippet header()}
-			<Heading level="1">Dapla Ctrl Feedback</Heading>
+			<Heading level="1">Dapla Ctrl tilbakemelding</Heading>
 		{/snippet}
 
 		{#if feedbackSent}
-			<p>Thank you for your feedback!</p>
+			<p>Takk for tilbakemeldingen!</p>
 		{:else}
 			<p>
-				Help us improve Console! We value your input. Feedback will be associated with your
-				logged-in email address. To provide feedback anonymously, check the box below.
+				Tilbakemeldingen vil bli knyttet til din e-postadresse. Huk av boksen under hvis du ønsker å
+				gi tilbakemeldingen anonymt.
+				<br />
+				Vi ser frem til å høre fra deg!
 			</p>
 			<div class="wrapper">
 				<Select size="small" label="Type" bind:value={type}>
@@ -107,11 +109,13 @@
 					{/each}
 				</Select>
 				{#if errorType}
-					<p class="aksel-error-message aksel-label aksel-label--small">Feedback type required</p>
+					<p class="aksel-error-message aksel-label aksel-label--small">
+						Tilbakemeldingstype må være valgt
+					</p>
 				{/if}
 
 				<label class="aksel-form-field__label aksel-label aksel-label--small" for="details">
-					Details
+					Beskrivelse
 				</label>
 				<div class="details">
 					<textarea
@@ -122,12 +126,10 @@
 						cols="40"
 						{maxlength}
 						style="resize: vertical; min-height: 16rem; "
-						placeholder="Enter your feedback here..."
+						placeholder="Skriv tilbakemeldingen din her..."
 						disabled={feedbackSent}
 					></textarea>
-					<span id="charCount"
-						>{maxlength - details.length} character{maxlength - details.length == 1 ? '' : 's'} remaining</span
-					>
+					<span id="charCount">{maxlength - details.length} tegn gjenstår</span>
 				</div>
 				<div
 					class="aksel-form-field__error"
@@ -137,22 +139,22 @@
 				>
 					{#if errorDetails}
 						<p class="aksel-error-message aksel-label aksel-label--small">
-							Feedback details required
+							Beskrivelse må fylles ut
 						</p>
 					{/if}
 				</div>
 				{#if errorMessage !== ''}
 					<p class="aksel-error-message aksel-label aksel-label--small">{errorMessage}</p>
 				{/if}
-				<Checkbox bind:checked={anonymous}>Anonymous feedback</Checkbox>
+				<Checkbox bind:checked={anonymous}>Anonym tilbakemelding</Checkbox>
 			</div>
 		{/if}
 		{#snippet footer()}
 			{#if feedbackSent}
-				<Button variant="primary" size="small" onclick={close}>Close</Button>
+				<Button variant="primary" size="small" onclick={close}>Lukk</Button>
 			{:else}
-				<Button variant="primary" size="small" {loading} onclick={submitFeedback}>Submit</Button>
-				<Button variant="secondary" size="small" onclick={close}>Cancel</Button>
+				<Button variant="primary" size="small" {loading} onclick={submitFeedback}>Send</Button>
+				<Button variant="secondary" size="small" onclick={close}>Lukk</Button>
 			{/if}
 		{/snippet}
 	</Modal>

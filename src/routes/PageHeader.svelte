@@ -11,6 +11,7 @@
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
 	import { CogIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
+	import BetaBanner from './BetaBanner.svelte';
 
 	interface Props {
 		user:
@@ -24,6 +25,8 @@
 
 	let { user, userAgent }: Props = $props();
 </script>
+
+<BetaBanner />
 
 <header class="aksel-internalheader header">
 	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem; margin-right: 3rem;">

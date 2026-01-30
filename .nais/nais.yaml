@@ -38,3 +38,6 @@ spec:
     outbound:
       rules:
         - application: dapla-api
+
+  envFrom:
+    - secret: dapla-ctrl
