@@ -1,4 +1,4 @@
-query TeamSharedBucketAccess($bucket: String!) {
+query TeamSharedBucketAccessTeams($bucket: String!) {
 	sharedBucket(name: $bucket) {
 		id
 		shortName
@@ -9,12 +9,7 @@ query TeamSharedBucketAccess($bucket: String!) {
 				totalCount
 			}
 		}
-		teams {
-			pageInfo {
-				totalCount
-			}
-		}
-		users(first: 25) @paginate(mode: SinglePage) {
+		teams(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
 				hasNextPage
 				hasPreviousPage
@@ -25,25 +20,30 @@ query TeamSharedBucketAccess($bucket: String!) {
 				totalCount
 			}
 			nodes {
-				team {
-					id
-					slug
-					displayName
-				}
-				groups {
-					id
-					name
-				}
-				user {
-					id
-					name
-					email
-					section {
-						id
-						code
-						name
+				id
+				slug
+				displayName
+				isManaged
+				members {
+					pageInfo {
+						totalCount
 					}
 				}
+				section {
+					id
+					name
+					code
+					manager {
+						id
+						name
+						email
+					}
+				}
+			}
+		}
+		users {
+			pageInfo {
+				totalCount
 			}
 		}
 	}

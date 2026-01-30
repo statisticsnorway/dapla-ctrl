@@ -5,6 +5,9 @@
 	import { BodyShort, CopyButton } from '@nais/ds-svelte-community';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
+	import Tab from '$lib/ui/Tab.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
+	import { page } from '$app/state';
 
 	let { params, data }: PageProps = $props();
 
@@ -21,18 +24,11 @@
 	</a>
 	<br />
 	{teamMember.user.email}
-{/snippet}
-{#snippet sectionCell(teamMember: TeamMemberItem)}
+	<br />
 	{#if teamMember.user.section}
-		{#if teamMember.user.section.manager}
-			<a href="/user/{teamMember.user.section.manager.email}"
-				>{teamMember.user.section.manager.name}</a
-			>
-		{:else}
-			Mangler seksjonsleder
-		{/if}
-		<br />
 		{teamMember.user.section.name} ({teamMember.user.section.code})
+	{:else}
+		<span style="color: var(--ax-text-subtle); font-style: italic;">Mangler seksjon</span>
 	{/if}
 {/snippet}
 {#snippet teamCell(teamMember: TeamMemberItem)}
@@ -64,6 +60,22 @@
 
 {#if $TeamSharedBucketAccess.data}
 	<div class="container">
+		<Tabs>
+			<Tab
+				data-sveltekit-noscroll
+				href={`/team/${params.team}/shared-data/${params.bucket}`}
+				active={page.url.pathname === `/team/${params.team}/shared-data/${params.bucket}`}
+				title="{$TeamSharedBucketAccess.data.sharedBucket.users.pageInfo
+					.totalCount} brukere ({$TeamSharedBucketAccess.data.sharedBucket.uniqueUsers.pageInfo
+					.totalCount} unike)"
+			/>
+			<Tab
+				data-sveltekit-noscroll
+				href={`/team/${params.team}/shared-data/${params.bucket}/teams`}
+				active={page.url.pathname === `/team/${params.team}/shared-data/${params.bucket}/teams`}
+				title={`${$TeamSharedBucketAccess.data.sharedBucket.teams.pageInfo.totalCount} team`}
+			/>
+		</Tabs>
 		<DaplaTable
 			data={$TeamSharedBucketAccess.data.sharedBucket.users.nodes.map((tm) => {
 				return { id: `${tm.team.id}:${tm.user.id}`, ...tm };
@@ -79,12 +91,6 @@
 					name: 'Navn',
 					show: 'ALWAYS',
 					cell: nameCell
-				},
-				{
-					id: 'SECTION',
-					name: 'Ansvarlig',
-					show: 'DEFAULT_YES',
-					cell: sectionCell
 				},
 				{
 					id: 'TEAM',
