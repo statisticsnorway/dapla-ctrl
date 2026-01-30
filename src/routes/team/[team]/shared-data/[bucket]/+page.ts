@@ -16,7 +16,11 @@ export async function load(event: PageLoadEvent) {
 		...meta,
 		...event.data,
 		...(await addPageMeta(event, {
-			title: data?.sharedBucket.shortName ?? event.params.bucket
+			title: data?.sharedBucket.shortName ?? event.params.bucket,
+			tag: {
+				label: data?.sharedBucket.env ?? '',
+				variant: 'info'
+			}
 		}))
 	};
 }

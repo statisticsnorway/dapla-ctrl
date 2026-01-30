@@ -4,6 +4,7 @@
 	import type { TeamSharedBucketAccess$result } from '$houdini';
 	import { BodyShort, CopyButton } from '@nais/ds-svelte-community';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
+	import { capitalizeFirstLetter } from '$lib/utils/formatters';
 
 	let { params, data }: PageProps = $props();
 
@@ -55,6 +56,8 @@
 				iconPosition="right"
 				size="xsmall"
 			/>
+			<br />
+			{capitalizeFirstLetter($TeamSharedBucketAccess.data?.sharedBucket.kind ?? '')}
 		</BodyShort>
 	</div>
 </div>
