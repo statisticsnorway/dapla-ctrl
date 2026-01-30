@@ -25,29 +25,16 @@ func (q *Queries) ConfirmDeleteKey(ctx context.Context, key uuid.UUID) error {
 
 const create = `-- name: Create :one
 INSERT INTO
-	teams (
-		slug,
-		display_name,
-		purpose,
-		section_code,
-		is_managed
-	)
+	teams (slug, display_name, section_code, is_managed)
 VALUES
-	(
-		$1,
-		$2,
-		$3,
-		$4,
-		$5
-	)
+	($1, $2, $3, $4)
 RETURNING
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 `
 
 type CreateParams struct {
 	Slug        slug.Slug
 	DisplayName string
-	Purpose     string
 	SectionCode string
 	IsManaged   bool
 }
@@ -56,7 +43,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 	row := q.db.QueryRow(ctx, create,
 		arg.Slug,
 		arg.DisplayName,
-		arg.Purpose,
 		arg.SectionCode,
 		arg.IsManaged,
 	)
@@ -64,7 +50,6 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 	err := row.Scan(
 		&i.Slug,
 		&i.DisplayName,
-		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
@@ -121,7 +106,7 @@ func (q *Queries) Exists(ctx context.Context, argSlug slug.Slug) (bool, error) {
 
 const get = `-- name: Get :one
 SELECT
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 WHERE
@@ -134,7 +119,6 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	err := row.Scan(
 		&i.Slug,
 		&i.DisplayName,
-		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
@@ -173,7 +157,7 @@ func (q *Queries) GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*Te
 
 const list = `-- name: List :many
 SELECT
-	teams.slug, teams.display_name, teams.purpose, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
+	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
@@ -214,7 +198,6 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 		if err := rows.Scan(
 			&i.Team.Slug,
 			&i.Team.DisplayName,
-			&i.Team.Purpose,
 			&i.Team.LastSuccessfulSync,
 			&i.Team.DeleteKeyConfirmedAt,
 			&i.Team.SectionCode,
@@ -234,7 +217,6 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 const listAllForSearch = `-- name: ListAllForSearch :many
 SELECT
 	slug,
-	purpose,
 	section_code
 FROM
 	teams
@@ -244,7 +226,6 @@ ORDER BY
 
 type ListAllForSearchRow struct {
 	Slug        slug.Slug
-	Purpose     string
 	SectionCode string
 }
 
@@ -257,7 +238,7 @@ func (q *Queries) ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow,
 	items := []*ListAllForSearchRow{}
 	for rows.Next() {
 		var i ListAllForSearchRow
-		if err := rows.Scan(&i.Slug, &i.Purpose, &i.SectionCode); err != nil {
+		if err := rows.Scan(&i.Slug, &i.SectionCode); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -284,7 +265,7 @@ func (q *Queries) ListAllSlugs(ctx context.Context) ([]slug.Slug, error) {
 
 const listBySlugs = `-- name: ListBySlugs :many
 SELECT
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 WHERE
@@ -305,7 +286,6 @@ func (q *Queries) ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, 
 		if err := rows.Scan(
 			&i.Slug,
 			&i.DisplayName,
-			&i.Purpose,
 			&i.LastSuccessfulSync,
 			&i.DeleteKeyConfirmedAt,
 			&i.SectionCode,
@@ -356,27 +336,24 @@ func (q *Queries) SlugAvailable(ctx context.Context, argSlug slug.Slug) (bool, e
 const update = `-- name: Update :one
 UPDATE teams
 SET
-	purpose = COALESCE($1, purpose),
-	display_name = COALESCE($2, display_name)
+	display_name = COALESCE($1, display_name)
 WHERE
-	teams.slug = $3
+	teams.slug = $2
 RETURNING
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 `
 
 type UpdateParams struct {
-	Purpose     *string
 	DisplayName *string
 	Slug        slug.Slug
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
-	row := q.db.QueryRow(ctx, update, arg.Purpose, arg.DisplayName, arg.Slug)
+	row := q.db.QueryRow(ctx, update, arg.DisplayName, arg.Slug)
 	var i Team
 	err := row.Scan(
 		&i.Slug,
 		&i.DisplayName,
-		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,

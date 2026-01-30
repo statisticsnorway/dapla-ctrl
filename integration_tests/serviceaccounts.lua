@@ -2,7 +2,7 @@ local user = User.new("authenticated", "authenticated@example.com", "someid")
 user:admin(true)
 
 local teamslug = "slug-team"
-local team = Team.new(teamslug, "purpose", "724")
+local team = Team.new(teamslug, "724")
 
 Test.gql("Create service account as authenticated user", function(t)
 	t.addHeader("x-user-email", user:email())
@@ -87,14 +87,14 @@ Test.gql("Create new team as service account without permission", function(t)
 			createTeam(
 				input: {
 					slug: "%s"
-					purpose: "some purpose"
+					displayName: "Test Team"
+					sectionCode: "724"
 					slackChannel: "#some-channel"
 				}
 			) {
 				team {
 					id
 					slug
-					purpose
 					slackChannel
 				}
 			}

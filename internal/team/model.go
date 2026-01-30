@@ -31,7 +31,6 @@ type (
 type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
 	DisplayName          string     `json:"displayName"`
-	Purpose              string     `json:"purpose"`
 	SectionCode          string     `json:"sectionCode"`
 	IsManaged            bool       `json:"isManaged"`
 	LastSuccessfulSync   *time.Time `json:"lastSuccessfulSync"`
@@ -110,7 +109,6 @@ func toGraphTeam(m *teamsql.Team) *Team {
 	ret := &Team{
 		Slug:        m.Slug,
 		DisplayName: m.DisplayName,
-		Purpose:     m.Purpose,
 		SectionCode: m.SectionCode,
 		IsManaged:   m.IsManaged,
 	}
@@ -299,14 +297,12 @@ func (e UserTeamOrderField) MarshalGQL(w io.Writer) {
 type CreateTeamInput struct {
 	Slug        slug.Slug `json:"slug"`
 	DisplayName string    `json:"displayName"`
-	Purpose     string    `json:"purpose"`
 	SectionCode string    `json:"sectionCode"`
 	IsManaged   *bool     `json:"isManaged"`
 }
 
 func (i *CreateTeamInput) Validate(ctx context.Context) error {
 	verr := validate.New()
-	i.Purpose = strings.TrimSpace(i.Purpose)
 	i.DisplayName = strings.TrimSpace(i.DisplayName)
 
 	if slices.ContainsFunc([]string{"managers", "consumers", "data-admins", "developers"}, func(category string) bool {
@@ -319,10 +315,6 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 		return err
 	} else if !available {
 		verr.Add("slug", "Team slug is not available.")
-	}
-
-	if i.Purpose == "" {
-		verr.Add("purpose", "This is not a valid purpose.")
 	}
 
 	if i.DisplayName == "" {
@@ -339,7 +331,6 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 type UpdateTeamInput struct {
 	Slug        slug.Slug `json:"slug"`
 	DisplayName *string   `json:"displayName"`
-	Purpose     *string   `json:"purpose"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
@@ -351,14 +342,6 @@ func (i *UpdateTeamInput) Validate() error {
 
 	if i.DisplayName != nil && *i.DisplayName == "" {
 		verr.Add("displayName", "This is not a valid display name.")
-	}
-
-	if i.Purpose != nil {
-		i.Purpose = ptr.To(strings.TrimSpace(*i.Purpose))
-	}
-
-	if i.Purpose != nil && *i.Purpose == "" {
-		verr.Add("purpose", "This is not a valid purpose.")
 	}
 
 	return verr.NilIfEmpty()

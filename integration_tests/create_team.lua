@@ -2,7 +2,7 @@ local user = User.new()
 local unauthorized = User.new()
 local ITmanagers = User.new()
 local notITmanagers = User.new()
-local existingTeam = Team.new("slug-one", "purpose", "724")
+local existingTeam = Team.new("slug-one", "724")
 
 Helper.SQLExec([[
 	DELETE FROM user_roles WHERE user_id = $1
@@ -25,7 +25,6 @@ Test.gql("Create team with user that is not authorized", function(t)
 				input: {
 					slug: "slug-one"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {
@@ -61,7 +60,6 @@ Test.gql("Create team with slug that is already taken", function(t)
 				input: {
 					slug: "slug-one"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {
@@ -97,7 +95,6 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "newteam"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {
@@ -132,7 +129,6 @@ Test.gql("Admin can create self-managed team", function(t)
 				input: {
 					slug: "newadminteam"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "724"
 					isManaged: false
 				}
@@ -166,7 +162,6 @@ Test.gql("non-7xx-manager can NOT create self-managed team", function(t)
 				input: {
 					slug: "newnon7xxteam"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "811"
 					isManaged: false
 				}
@@ -202,7 +197,6 @@ Test.gql("7xx-manager can create self-managed team", function(t)
 				input: {
 					slug: "new7xxteam"
 					displayName: "Slug One"
-					purpose: "some purpose"
 					sectionCode: "722"
 					isManaged: false
 				}
@@ -248,7 +242,6 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							displayName: "%s"
-							purpose: "some purpose"
 							sectionCode: "724"
 						}
 					) {
@@ -283,7 +276,6 @@ Test.gql("Create team with invalid slug", function(t)
 						input: {
 							slug: "%s"
 							displayName: "Slug One"
-							purpose: "some purpose"
 							sectionCode: "724"
 						}
 					) {
@@ -351,7 +343,6 @@ Test.gql("Create team with category in slug", function(t)
 						input: {
 							slug: "%s"
 							displayName: "%s"
-							purpose: "some purpose"
 							sectionCode: "724"
 						}
 					) {
@@ -397,7 +388,6 @@ Test.gql("Create team with empty display name", function(t)
 				input: {
 					slug: "no-display-name"
 					displayName: ""
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {
@@ -438,10 +428,9 @@ Test.pubsub("Check if pubsub message was sent", function(t)
 end)
 
 Test.sql("Check database", function(t)
-	t.queryRow("SELECT slug, purpose FROM teams WHERE slug = $1", "newteam")
+	t.queryRow("SELECT slug FROM teams WHERE slug = $1", "newteam")
 
 	t.check {
-		purpose = "some purpose",
 		slug = "newteam",
 	}
 end)
@@ -477,7 +466,6 @@ Test.gql("Create team with unavailable slug", function(t)
 				input: {
 					slug: "newteam"
 					displayName: "New Team"
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {

@@ -2,7 +2,7 @@ local user = User.new("user", "user@usersen.com", "123")
 local admin = User.new("admin", "admin@adminsen.com", "4332")
 admin:admin(true)
 
-Team.new("someteamname", "purpose", "724")
+Team.new("someteamname", "724")
 
 Test.gql("Create global service account as non-admin", function(t)
 	t.addHeader("x-user-email", user:email())

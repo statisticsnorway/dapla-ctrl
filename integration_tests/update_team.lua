@@ -13,7 +13,6 @@ Test.gql("Create team", function(t)
 				input: {
 					slug: "%s"
 					displayName: "%s"
-					purpose: "some purpose"
 					sectionCode: "724"
 				}
 			) {
@@ -35,37 +34,6 @@ Test.gql("Create team", function(t)
 	}
 end)
 
-Test.gql("Update purpose team", function(t)
-	t.addHeader("x-user-email", user:email())
-
-	t.query(string.format([[
-		mutation {
-			updateTeam(
-				input: {
-					slug: "%s"
-					purpose: "new-purpose"
-				}
-			) {
-				team {
-					purpose
-					displayName
-				}
-			}
-		}
-	]], teamSlug))
-
-	t.check {
-		data = {
-			updateTeam = {
-				team = {
-					purpose = "new-purpose",
-					displayName = "someteamname",
-				},
-			},
-		},
-	}
-end)
-
 Test.gql("Update display name team", function(t)
 	t.addHeader("x-user-email", user:email())
 
@@ -78,7 +46,6 @@ Test.gql("Update display name team", function(t)
 				}
 			) {
 				team {
-					purpose
 					displayName
 				}
 			}
@@ -89,7 +56,6 @@ Test.gql("Update display name team", function(t)
 		data = {
 			updateTeam = {
 				team = {
-					purpose = "new-purpose",
 					displayName = "My Awesome Team",
 				},
 			},
@@ -108,7 +74,6 @@ Test.gql("Nothing to update", function(t)
 				}
 			) {
 				team {
-					purpose
 					displayName
 				}
 			}
@@ -119,7 +84,6 @@ Test.gql("Nothing to update", function(t)
 		data = {
 			updateTeam = {
 				team = {
-					purpose = "new-purpose",
 					displayName = "My Awesome Team",
 				},
 			},
@@ -218,22 +182,6 @@ Test.gql("Update team appear in activity log", function(t)
 									field = "displayName",
 									oldValue = "someteamname",
 									newValue = "My Awesome Team",
-								} },
-							},
-						},
-						{
-							__typename = "TeamUpdatedActivityLogEntry",
-							message = "Updated team",
-							actor = user:email(),
-							createdAt = NotNull(),
-							resourceType = "TEAM",
-							resourceName = teamSlug,
-							teamSlug = teamSlug,
-							data = {
-								updatedFields = { {
-									field = "purpose",
-									oldValue = "some purpose",
-									newValue = "new-purpose",
 								} },
 							},
 						},

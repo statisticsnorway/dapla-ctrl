@@ -10,7 +10,6 @@ import "pagination.proto";
 
 message Team {
   string slug = 1;
-  string purpose = 2;
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
 }
 

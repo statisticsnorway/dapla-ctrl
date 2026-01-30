@@ -53,7 +53,7 @@ func (q *Queries) Delete(ctx context.Context, argSlug slug.Slug) error {
 
 const get = `-- name: Get :one
 SELECT
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 WHERE
@@ -66,7 +66,6 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	err := row.Scan(
 		&i.Slug,
 		&i.DisplayName,
-		&i.Purpose,
 		&i.LastSuccessfulSync,
 		&i.DeleteKeyConfirmedAt,
 		&i.SectionCode,
@@ -77,7 +76,7 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 
 const list = `-- name: List :many
 SELECT
-	slug, display_name, purpose, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 FROM
 	teams
 ORDER BY
@@ -105,7 +104,6 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*Team, error) {
 		if err := rows.Scan(
 			&i.Slug,
 			&i.DisplayName,
-			&i.Purpose,
 			&i.LastSuccessfulSync,
 			&i.DeleteKeyConfirmedAt,
 			&i.SectionCode,

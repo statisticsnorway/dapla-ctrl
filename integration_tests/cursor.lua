@@ -6,7 +6,7 @@ end
 -- Create 20 teams
 for i = 1, 20 do
 	local slug = slugFor(i)
-	Team.new(slug, "purpose", "724")
+	Team.new(slug, "724")
 end
 
 Test.gql("pagination using cursors", function(t)

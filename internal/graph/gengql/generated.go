@@ -615,7 +615,6 @@ type ComplexityRoot struct {
 		IsManaged           func(childComplexity int) int
 		LastSuccessfulSync  func(childComplexity int) int
 		Members             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int
-		Purpose             func(childComplexity int) int
 		Section             func(childComplexity int) int
 		SharedBuckets       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		SharedBucketsAccess func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
@@ -3119,12 +3118,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamMemberOrder)), true
-	case "Team.purpose":
-		if e.complexity.Team.Purpose == nil {
-			break
-		}
-
-		return e.complexity.Team.Purpose(childComplexity), true
 	case "Team.section":
 		if e.complexity.Team.Section == nil {
 			break
@@ -6538,8 +6531,7 @@ extend type Mutation {
 	"""
 	Update an existing Dapla team
 
-	This mutation can be used to update the team purpose and the main Slack channel. It is not possible to update the
-	team slug.
+	This mutation can be used to update team metadata. It is not possible to update the team slug.
 	"""
 	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
 }
@@ -6558,9 +6550,6 @@ type Team implements Node {
 
 	"The human friendly name of the team"
 	displayName: String!
-
-	"Purpose of the team."
-	purpose: String!
 
 	"Section who owns the team"
 	section: Section!
@@ -6742,14 +6731,6 @@ input CreateTeamInput {
 	displayName: String!
 
 	"""
-	The purpose / description of the team.
-
-	What is the team for? What is the team working on? This value is meant for human consumption, and should be enough
-	to give a newcomer an idea of what the team is about.
-	"""
-	purpose: String!
-
-	"""
 	The code of the section the team belongs to.
 
 	If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
@@ -6775,13 +6756,6 @@ input UpdateTeamInput {
 	When omitted the existing value will not be updated.
 	"""
 	displayName: String
-
-	"""
-	An optional new purpose / description of the team.
-
-	When omitted the existing value will not be updated.
-	"""
-	purpose: String
 }
 
 "Ordering options when fetching teams."
@@ -9264,8 +9238,6 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -12704,8 +12676,6 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -14559,8 +14529,6 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -16832,8 +16800,6 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -19401,8 +19367,6 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -19926,35 +19890,6 @@ func (ec *executionContext) fieldContext_Team_displayName(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Team_purpose(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Team_purpose,
-		func(ctx context.Context) (any, error) {
-			return obj.Purpose, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Team_purpose(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Team",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Team_section(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -20459,8 +20394,6 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -20787,8 +20720,6 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -20848,8 +20779,6 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -21693,8 +21622,6 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_slug(ctx, field)
 			case "displayName":
 				return ec.fieldContext_Team_displayName(ctx, field)
-			case "purpose":
-				return ec.fieldContext_Team_purpose(ctx, field)
 			case "section":
 				return ec.fieldContext_Team_section(ctx, field)
 			case "isManaged":
@@ -24841,7 +24768,7 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "purpose", "sectionCode", "isManaged"}
+	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "isManaged"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -24862,13 +24789,6 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.DisplayName = data
-		case "purpose":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purpose"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Purpose = data
 		case "sectionCode":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sectionCode"))
 			data, err := ec.unmarshalOString2string(ctx, v)
@@ -25473,7 +25393,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "purpose"}
+	fieldsInOrder := [...]string{"slug", "displayName"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -25494,13 +25414,6 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.DisplayName = data
-		case "purpose":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("purpose"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Purpose = data
 		}
 	}
 
@@ -31125,11 +31038,6 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "displayName":
 			out.Values[i] = ec._Team_displayName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "purpose":
-			out.Values[i] = ec._Team_purpose(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

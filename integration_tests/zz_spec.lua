@@ -149,10 +149,9 @@ end
 Team = {}
 --- Create a new team
 ---@param slug string
----@param purpose string
 ---@param sectionCode string
 ---@return Team
-function Team.new(slug, purpose, sectionCode)
+function Team.new(slug, sectionCode)
 	print("new")
 	return {}
 end
@@ -161,14 +160,6 @@ end
 ---@return string
 function Team:slug()
 	print("slug")
-	return ""
-end
-
---- The purpose of the team
----@return string
----@overload fun(self: Team, purpose: string)
-function Team:purpose()
-	print("purpose")
 	return ""
 end
 

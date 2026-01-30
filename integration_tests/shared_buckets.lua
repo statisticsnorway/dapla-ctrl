@@ -1,8 +1,8 @@
 local user = User.new()
-local sharingTeam = Team.new("sharing", "no purpose", "724")
+local sharingTeam = Team.new("sharing", "724")
 
-local sharedWithTeam1 = Team.new("shared-with-a", "no purpose", "723")
-local sharedWithTeam2 = Team.new("shared-with-b", "no purpose", "723")
+local sharedWithTeam1 = Team.new("shared-with-a", "723")
+local sharedWithTeam2 = Team.new("shared-with-b", "723")
 local sharedUser1 = User.new()
 local sharedUser2 = User.new()
 

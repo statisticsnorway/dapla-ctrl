@@ -1,20 +1,8 @@
 -- name: Create :one
 INSERT INTO
-	teams (
-		slug,
-		display_name,
-		purpose,
-		section_code,
-		is_managed
-	)
+	teams (slug, display_name, section_code, is_managed)
 VALUES
-	(
-		@slug,
-		@display_name,
-		@purpose,
-		@section_code,
-		@is_managed
-	)
+	(@slug, @display_name, @section_code, @is_managed)
 RETURNING
 	*
 ;
@@ -22,7 +10,6 @@ RETURNING
 -- name: Update :one
 UPDATE teams
 SET
-	purpose = COALESCE(sqlc.narg(purpose), purpose),
 	display_name = COALESCE(sqlc.narg(display_name), display_name)
 WHERE
 	teams.slug = @slug
@@ -139,7 +126,6 @@ FROM
 -- name: ListAllForSearch :many
 SELECT
 	slug,
-	purpose,
 	section_code
 FROM
 	teams

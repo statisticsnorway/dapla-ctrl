@@ -6,14 +6,12 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
 	lua "github.com/yuin/gopher-lua"
-	"k8s.io/utils/ptr"
 )
 
 const luaTeamTypeName = "Team"
 
 type Team struct {
 	Slug        slug.Slug
-	Purpose     string
 	SectionCode string
 }
 
@@ -27,11 +25,6 @@ func teamMetatable() *spec.Typemetatable {
 					Name: "slug",
 					Type: []spec.ArgumentType{spec.ArgumentTypeString},
 					Doc:  "The slug of the team to create",
-				},
-				{
-					Name: "purpose",
-					Type: []spec.ArgumentType{spec.ArgumentTypeString},
-					Doc:  "The purpose of the team to create",
 				},
 				{
 					Name: "sectionCode",
@@ -48,13 +41,6 @@ func teamMetatable() *spec.Typemetatable {
 				GetReturns: []spec.ArgumentType{spec.ArgumentTypeString},
 				Func:       teamGetSlug,
 			},
-			{
-				Name:         "purpose",
-				Doc:          "The purpose of the team",
-				GetReturns:   []spec.ArgumentType{spec.ArgumentTypeString},
-				SetArguments: []spec.Argument{{Name: "purpose", Type: []spec.ArgumentType{spec.ArgumentTypeString}}},
-				Func:         teamGetSetPurpose,
-			},
 		},
 		Methods: []spec.Function{},
 	}
@@ -66,8 +52,7 @@ func createTeam(L *lua.LState) int {
 
 	team, err := db.Create(L.Context(), teamsql.CreateParams{
 		Slug:        slug.Slug(L.CheckString(1)),
-		Purpose:     L.CheckString(2),
-		SectionCode: L.CheckString(3),
+		SectionCode: L.CheckString(2),
 	})
 	if err != nil {
 		L.RaiseError("failed to create team: %s", err)
@@ -76,7 +61,6 @@ func createTeam(L *lua.LState) int {
 
 	ret := &Team{
 		Slug:        team.Slug,
-		Purpose:     team.Purpose,
 		SectionCode: team.SectionCode,
 	}
 	ud := L.NewUserData()
@@ -92,26 +76,6 @@ func teamGetSlug(L *lua.LState) int {
 		L.ArgError(2, "cannot set slug")
 	}
 	L.Push(lua.LString(t.Slug))
-	return 1
-}
-
-func teamGetSetPurpose(L *lua.LState) int {
-	t := checkTeam(L)
-	if L.GetTop() == 2 {
-		db := teamsql.New(L.Context().Value(databaseKey).(*pgxpool.Pool))
-		team, err := db.Update(L.Context(), teamsql.UpdateParams{
-			Slug:    t.Slug,
-			Purpose: ptr.To(L.CheckString(2)),
-		})
-		if err != nil {
-			L.RaiseError("failed to set team purpose: %s", err)
-			return 0
-		}
-
-		t.Purpose = team.Purpose
-		return 0
-	}
-	L.Push(lua.LString(t.Purpose))
 	return 1
 }
 

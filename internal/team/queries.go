@@ -25,7 +25,6 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 		team, err = db(ctx).Create(ctx, teamsql.CreateParams{
 			Slug:        input.Slug,
 			DisplayName: input.DisplayName,
-			Purpose:     input.Purpose,
 			SectionCode: input.SectionCode,
 			IsManaged:   *input.IsManaged,
 		})
@@ -58,12 +57,8 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		return nil, err
 	}
 
-	if input.Purpose == nil && input.DisplayName == nil {
+	if input.DisplayName == nil {
 		return existingTeam, nil
-	}
-
-	if input.Purpose == nil {
-		input.Purpose = &existingTeam.Purpose
 	}
 
 	if input.DisplayName == nil {
@@ -73,7 +68,6 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 	var team *teamsql.Team
 	err = database.Transaction(ctx, func(ctx context.Context) error {
 		team, err = db(ctx).Update(ctx, teamsql.UpdateParams{
-			Purpose:     input.Purpose,
 			DisplayName: input.DisplayName,
 			Slug:        input.Slug,
 		})
@@ -82,13 +76,6 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		}
 
 		updatedFields := make([]*TeamUpdatedActivityLogEntryDataUpdatedField, 0)
-		if input.Purpose != nil && *input.Purpose != existingTeam.Purpose {
-			updatedFields = append(updatedFields, &TeamUpdatedActivityLogEntryDataUpdatedField{
-				Field:    "purpose",
-				OldValue: &existingTeam.Purpose,
-				NewValue: input.Purpose,
-			})
-		}
 		if input.DisplayName != nil && *input.DisplayName != existingTeam.DisplayName {
 			updatedFields = append(updatedFields, &TeamUpdatedActivityLogEntryDataUpdatedField{
 				Field:    "displayName",

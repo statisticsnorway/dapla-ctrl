@@ -50,8 +50,7 @@ extend type Mutation {
 	"""
 	Update an existing Dapla team
 
-	This mutation can be used to update the team purpose and the main Slack channel. It is not possible to update the
-	team slug.
+	This mutation can be used to update team metadata. It is not possible to update the team slug.
 	"""
 	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
 }
@@ -70,9 +69,6 @@ type Team implements Node {
 
 	"The human friendly name of the team"
 	displayName: String!
-
-	"Purpose of the team."
-	purpose: String!
 
 	"Section who owns the team"
 	section: Section!
@@ -254,14 +250,6 @@ input CreateTeamInput {
 	displayName: String!
 
 	"""
-	The purpose / description of the team.
-
-	What is the team for? What is the team working on? This value is meant for human consumption, and should be enough
-	to give a newcomer an idea of what the team is about.
-	"""
-	purpose: String!
-
-	"""
 	The code of the section the team belongs to.
 
 	If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
@@ -287,13 +275,6 @@ input UpdateTeamInput {
 	When omitted the existing value will not be updated.
 	"""
 	displayName: String
-
-	"""
-	An optional new purpose / description of the team.
-
-	When omitted the existing value will not be updated.
-	"""
-	purpose: String
 }
 
 "Ordering options when fetching teams."

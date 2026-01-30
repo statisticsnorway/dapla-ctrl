@@ -10,7 +10,6 @@ import (
 type Team struct {
 	Slug                 slug.Slug
 	DisplayName          string
-	Purpose              string
 	LastSuccessfulSync   pgtype.Timestamp
 	DeleteKeyConfirmedAt pgtype.Timestamptz
 	SectionCode          string

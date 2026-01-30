@@ -1,6 +1,6 @@
 local manager = User.new()
 local member = User.new("Group Member", "member@example.com", "group-member")
-local team = Team.new("slug-one", "purpose", "724")
+local team = Team.new("slug-one", "724")
 
 Helper.SQLExec([[
 	UPDATE sections SET  manager_id = $1 WHERE code = '724'
