@@ -16,8 +16,7 @@ export async function load(event: PageLoadEvent) {
 		...meta,
 		...event.data,
 		...(await addPageMeta(event, {
-			title: data?.sharedBucket.shortName ?? event.params.bucket,
-			breadcrumbs: [{ label: 'Datadeling', href: '/team/[team]/shared-data' }]
+			title: data?.sharedBucket.shortName ?? event.params.bucket
 		}))
 	};
 }
