@@ -2,22 +2,38 @@
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { PageProps } from './$houdini';
-	import GroupMembersTable, { type GroupMembersData } from './GroupMembersTable.svelte';
 	import type { Groups$result } from '$houdini';
+	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	let { data }: PageProps = $props();
 	let { Groups } = $derived(data);
 
 	type GroupMemberNode = Groups$result['team']['members']['nodes'][0];
-	function transformGroupMembersData(groupMember: GroupMemberNode): GroupMembersData {
+
+	type GroupMembersData = {
+		id: string;
+		name: string;
+		email: string;
+		section: {
+			code: string;
+			name: string;
+		};
+		groups: {
+			category: string;
+			suffix: string | null;
+		}[];
+	};
+
+	function transformGroupMembersData(groupMemberNode: GroupMemberNode): GroupMembersData {
 		return {
-			name: groupMember.user.name,
-			email: groupMember.user.email,
+			id: groupMemberNode.user.id,
+			name: groupMemberNode.user.name,
+			email: groupMemberNode.user.email,
 			section: {
-				code: groupMember.user.section?.code ?? '',
-				name: groupMember.user.section?.name ?? ''
+				code: groupMemberNode.user.section?.code ?? '',
+				name: groupMemberNode.user.section?.name ?? ''
 			},
-			groups: groupMember.groups.map((group) => ({
+			groups: groupMemberNode.groups.map((group) => ({
 				category: group.category,
 				suffix: group.suffix ?? null
 			}))
@@ -25,18 +41,44 @@
 	}
 </script>
 
+{#snippet nameCell(groupMember: GroupMembersData)}
+	<a href={`/user/${groupMember.email}`}>
+		<b>{groupMember.name}</b>
+	</a>
+	<br />
+	{groupMember.email}
+	<br />
+	{groupMember.section.name} ({groupMember.section.code})
+{/snippet}
+{#snippet groupsCell(groupMember: GroupMembersData)}
+	{groupMember.groups
+		.map((g) => (g.suffix && g.suffix !== '' ? `${g.category}-${g.suffix}` : g.category))
+		.toSorted()
+		.join(', ')}
+{/snippet}
+
 <GraphErrors errors={$Groups.errors} />
 
-<div class="container">
-	<GroupMembersTable
-		groupMembersData={$Groups.data?.team?.members.nodes.map(transformGroupMembersData) ?? []}
+{#if $Groups.data}
+	<div class="container">
+		<DaplaTable
+			data={$Groups.data?.team?.members.nodes.map(transformGroupMembersData) ?? []}
+			fieldsCookie={{
+				path: '/team',
+				key: 'teamMembersTableFields'
+			}}
+			selected={data.groupMemberTableFields}
+			columns={[
+				{ id: 'NAME', name: 'Navn', show: 'ALWAYS', cell: nameCell },
+				{ id: 'TYPE', name: 'Grupper', show: 'DEFAULT_YES', cell: groupsCell }
+			]}
+		/>
+	</div>
+	<Pagination
+		page={$Groups.data?.team?.members.pageInfo}
+		loaders={{
+			loadPreviousPage: () => Groups.loadPreviousPage(),
+			loadNextPage: () => Groups.loadNextPage()
+		}}
 	/>
-</div>
-
-<Pagination
-	page={$Groups.data?.team?.members.pageInfo}
-	loaders={{
-		loadPreviousPage: () => Groups.loadPreviousPage(),
-		loadNextPage: () => Groups.loadNextPage()
-	}}
-/>
+{/if}
