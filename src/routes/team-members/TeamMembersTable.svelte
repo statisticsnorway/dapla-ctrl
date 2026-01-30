@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import { type TeamMemberData } from './teamMembersUtils';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	interface Props {
@@ -19,28 +18,41 @@
 		selected: string[];
 	}
 
+	export interface TeamMemberData {
+		id: string;
+		user: {
+			name: string;
+			email: string;
+		};
+		teamCount: number;
+		dataAdminCount: number;
+		section?: {
+			name: string;
+			code: string;
+		};
+	}
+
 	let { teamMembers, pageInfo, loaders, selected }: Props = $props();
 </script>
 
 {#snippet nameCell(member: TeamMemberData)}
-	<a href="/user/{member.user.email}">{member.user.name}</a>
+	<a href="/user/{member.user.email}">
+		<b>{member.user.name}</b>
+	</a>
+	<br />
+	{member.user.email}
+	<br />
+	{#if member.section}
+		{member.section.name} ({member.section.code})
+	{:else}
+		<span style="color: var(--ax-text-subtle); font-style: italic;">Mangler seksjon</span>
+	{/if}
 {/snippet}
 {#snippet teamCell(member: TeamMemberData)}
 	{member.teamCount}
 {/snippet}
 {#snippet dataAdminCell(member: TeamMemberData)}
 	{member.dataAdminCount}
-{/snippet}
-{#snippet managerCell(member: TeamMemberData)}
-	{#if member.sectionManager}
-		{#if member.sectionManager.email}
-			<a href="/user/{member.sectionManager.email}">{member.sectionManager.name}</a>
-		{:else}
-			{member.sectionManager.name}
-		{/if}
-	{:else}
-		<span style="color: var(--ax-text-subtle); font-style: italic;">Mangler seksjonsleder</span>
-	{/if}
 {/snippet}
 
 <DaplaTable
@@ -66,12 +78,6 @@
 			align: 'right',
 			show: 'DEFAULT_YES',
 			cell: dataAdminCell
-		},
-		{
-			id: 'MANAGER',
-			name: 'Seksjonsleder',
-			show: 'DEFAULT_YES',
-			cell: managerCell
 		}
 	]}
 />

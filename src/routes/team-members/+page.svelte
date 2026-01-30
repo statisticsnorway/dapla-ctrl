@@ -1,9 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import TeamMembersTable from './TeamMembersTable.svelte';
+	import TeamMembersTable, { type TeamMemberData } from './TeamMembersTable.svelte';
 	import { changeParams } from '$lib/utils/searchparams';
 	import type { MyTeamMembers$result } from '$houdini';
-	import type { TeamMemberData } from './teamMembersUtils';
 
 	let { data }: PageProps = $props();
 	let { MyTeamMembers } = $derived(data);
@@ -26,12 +25,7 @@
 			},
 			teamCount: u.teams.pageInfo.totalCount,
 			dataAdminCount: u.dataAdmins.pageInfo.totalCount,
-			sectionManager: u.section?.manager
-				? {
-						name: u.section.manager.name,
-						email: u.section.manager.email
-					}
-				: undefined
+			section: u.section ?? undefined
 		};
 	}
 </script>

@@ -20,8 +20,8 @@
 
 	const description = $derived(
 		isAllTeamMembersPage
-			? 'Oversikt over alle brukere i SSB som medlem av minst ett team.'
-			: 'Oversikt over alle brukere som medlem av samme team som deg.'
+			? 'Oversikt over alle brukere i SSB som er medlem av minst ett team.'
+			: 'Oversikt over alle brukere som er medlem av samme team som deg.'
 	);
 </script>
 

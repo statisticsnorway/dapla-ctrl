@@ -21,11 +21,8 @@ query AllTeamMembers(
 			email
 			section {
 				id
-				manager {
-					id
-					name
-					email
-				}
+				name
+				code
 			}
 			teams(first: 1) {
 				pageInfo {

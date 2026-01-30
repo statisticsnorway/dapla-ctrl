@@ -19,11 +19,8 @@ query MyTeamMembers($after: Cursor, $before: Cursor, $first: Int, $last: Int, $o
 					email
 					section {
 						id
-						manager {
-							id
-							name
-							email
-						}
+						name
+						code
 					}
 					teams(first: 1) {
 						pageInfo {
