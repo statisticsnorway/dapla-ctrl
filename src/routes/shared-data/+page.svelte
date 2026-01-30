@@ -2,7 +2,7 @@
 	import type { PageProps } from './$types';
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { AllSharedData$result } from '$houdini';
-	import { Heading } from '@nais/ds-svelte-community';
+	import { Heading, BodyShort } from '@nais/ds-svelte-community';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
 
@@ -67,6 +67,11 @@
 	<div class="content-wrapper">
 		<div class="header">
 			<Heading level="1" size="xlarge">Datadeling</Heading>
+			<div class="description">
+				<BodyShort textColor="subtle" size="medium">
+					Oversikt over alle delt-bøtter på Dapla.
+				</BodyShort>
+			</div>
 		</div>
 		<div class="container">
 			<DaplaTable
@@ -115,5 +120,10 @@
 <style>
 	.page {
 		margin-inline: var(--margin-default);
+	}
+
+	.description {
+		margin-top: var(--ax-space-8);
+		margin-bottom: var(--ax-space-16);
 	}
 </style>
