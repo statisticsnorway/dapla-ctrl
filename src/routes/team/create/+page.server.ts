@@ -18,7 +18,6 @@ export const actions = {
 		const input = {
 			slug: (data.get('name') as string) || '',
 			displayName,
-			purpose: displayName,
 			sectionCode: (data.get('section') as string) || '',
 			isManaged: (data.get('isManaged') as string) || 'true'
 		};
@@ -28,7 +27,6 @@ export const actions = {
 				input: {
 					slug: input.slug,
 					displayName: input.displayName,
-					purpose: input.purpose,
 					sectionCode: input.sectionCode,
 					isManaged: input.isManaged !== 'false'
 				}
