@@ -31,7 +31,7 @@
 	.beta-message-container {
 		padding: 1rem 0;
 
-		background-color: var(--ssb-green-1);
+		background-color: var(--ax-bg-neutral-softA);
 	}
 	.beta-message {
 		margin: 0;
