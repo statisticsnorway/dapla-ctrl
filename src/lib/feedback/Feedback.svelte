@@ -31,7 +31,8 @@
 
 	const FEEDBACK_TYPE: { value: FeedbackType | ''; text: string }[] = [
 		{ value: '', text: 'Velg tilbakemeldingstype' },
-		{ value: 'BUG', text: 'Bug' },
+		{ value: 'KUDOS', text: 'Skryt' },
+		{ value: 'BUG', text: 'Feil' },
 		{ value: 'CHANGE_REQUEST', text: 'Funksjonalitets- eller endringsønske' },
 		{ value: 'QUESTION', text: 'Spørsmål' },
 		{ value: 'OTHER', text: 'Annet' }

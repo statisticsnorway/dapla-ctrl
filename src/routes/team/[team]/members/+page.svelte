@@ -4,9 +4,10 @@
 	import type { PageProps } from './$houdini';
 	import { UserOrderField, type Groups$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
+	import { BodyShort } from '@nais/ds-svelte-community';
 
 	let { data }: PageProps = $props();
-	let { Groups } = $derived(data);
+	let { Groups, displayName } = $derived(data);
 
 	type GroupMemberNode = Groups$result['team']['members']['nodes'][0];
 
@@ -59,6 +60,12 @@
 
 <GraphErrors errors={$Groups.errors} />
 
+<div class="description">
+	<BodyShort textColor="subtle" size="medium">
+		Oversikt over {displayName} sine medlemmer.
+	</BodyShort>
+</div>
+
 {#if $Groups.data}
 	<div class="container">
 		<DaplaTable
@@ -82,3 +89,10 @@
 		}}
 	/>
 {/if}
+
+<style>
+	.description {
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--ax-space-16);
+	}
+</style>

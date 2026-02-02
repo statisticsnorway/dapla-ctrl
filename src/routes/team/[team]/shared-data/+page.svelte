@@ -7,10 +7,11 @@
 	import Tab from '$lib/ui/Tab.svelte';
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import { page } from '$app/state';
+	import { BodyShort } from '@nais/ds-svelte-community';
 
 	let { data, params }: PageProps = $props();
 
-	let { SharedData, teamSlug } = $derived(data);
+	let { SharedData, teamSlug, displayName } = $derived(data);
 
 	type BucketItem = SharedData$result['team']['sharedBuckets']['nodes'][0];
 </script>
@@ -32,6 +33,12 @@
 {#snippet usersCell(bucket: BucketItem)}
 	{bucket.uniqueUsers.pageInfo.totalCount}
 {/snippet}
+
+<div class="description">
+	<BodyShort textColor="subtle" size="medium">
+		Oversikt over hvilke deltbøtter {displayName} deler, og hvilke de har tilgang til hos andre team.
+	</BodyShort>
+</div>
 
 {#if $SharedData.data}
 	<div class="container">
@@ -99,3 +106,10 @@
 		}}
 	/>
 {/if}
+
+<style>
+	.description {
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--ax-space-16);
+	}
+</style>

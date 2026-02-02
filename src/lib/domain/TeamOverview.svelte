@@ -148,7 +148,7 @@
 					data-sveltekit-noscroll
 					href="/teams"
 					active={page.url.pathname === '/teams'}
-					title="Alle teams ({allTeamsCount})"
+					title="Alle team ({allTeamsCount})"
 				/>
 			</Tabs>
 

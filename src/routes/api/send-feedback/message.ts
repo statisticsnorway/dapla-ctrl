@@ -14,6 +14,9 @@ export function createFeedbackMessage(
 	}
 
 	switch (type) {
+		case 'KUDOS':
+			headerText = ':sparkles:\nKudos';
+			break;
 		case 'BUG':
 			headerText = ':bug:\nBug report';
 			break;
@@ -27,7 +30,7 @@ export function createFeedbackMessage(
 			headerText = ':question:\nQuestion';
 			break;
 		default:
-			throw new Error('Invalid feedback type');
+			headerText = type;
 	}
 
 	const details = [`From: ${email}`, `Path: ${path}`];

@@ -15,7 +15,7 @@
 
 <div class="description">
 	<BodyShort textColor="subtle" size="medium">
-		Oversikt over hvilke delt-bøtter medlemmet har tilgang til.
+		Oversikt over hvilke deltbøtter medlemmet har tilgang til.
 	</BodyShort>
 </div>
 
