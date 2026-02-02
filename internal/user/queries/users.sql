@@ -17,6 +17,12 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN email
 	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN section_code
+	END DESC,
 	name,
 	email ASC
 LIMIT
@@ -93,6 +99,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN users.section_code
 	END DESC,
 	users.name,
 	users.email ASC

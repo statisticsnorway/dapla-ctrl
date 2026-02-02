@@ -26,6 +26,12 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
 	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN users.section_code
+	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -56,6 +62,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN @order_by::TEXT = 'slug:desc' THEN teams.slug
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN teams.section_code
 	END DESC,
 	teams.slug ASC
 LIMIT

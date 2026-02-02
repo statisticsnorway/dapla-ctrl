@@ -113,6 +113,12 @@ ORDER BY
 	CASE
 		WHEN $1::TEXT = 'email:desc' THEN email
 	END DESC,
+	CASE
+		WHEN $1::TEXT = 'section_code:asc' THEN section_code
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'section_code:desc' THEN section_code
+	END DESC,
 	name,
 	email ASC
 LIMIT
@@ -198,6 +204,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN users.section_code
 	END DESC,
 	users.name,
 	users.email ASC

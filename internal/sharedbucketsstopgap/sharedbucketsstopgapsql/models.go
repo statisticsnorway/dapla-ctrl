@@ -6,6 +6,14 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
 
+type Group struct {
+	Name       string
+	TeamSlug   slug.Slug
+	Category   string
+	Suffix     string
+	ExternalID *string
+}
+
 type SharedBucketsStopgap struct {
 	Name      string
 	TeamSlug  slug.Slug

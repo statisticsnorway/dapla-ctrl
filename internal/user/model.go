@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -65,16 +66,19 @@ func (o *UserOrder) String() string {
 type UserOrderField string
 
 const (
-	UserOrderFieldName  UserOrderField = "NAME"
-	UserOrderFieldEmail UserOrderField = "EMAIL"
+	UserOrderFieldName        UserOrderField = "NAME"
+	UserOrderFieldEmail       UserOrderField = "EMAIL"
+	UserOrderFieldSectionCode UserOrderField = "SECTION_CODE"
 )
 
+var AllUserOrderFields = []UserOrderField{
+	UserOrderFieldName,
+	UserOrderFieldEmail,
+	UserOrderFieldSectionCode,
+}
+
 func (e UserOrderField) IsValid() bool {
-	switch e {
-	case UserOrderFieldName, UserOrderFieldEmail:
-		return true
-	}
-	return false
+	return slices.Contains(AllUserOrderFields, e)
 }
 
 func (e UserOrderField) String() string {

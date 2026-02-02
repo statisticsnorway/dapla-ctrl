@@ -11,7 +11,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/user"
 )
 
-func (r *groupResolver) Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) (*pagination.Connection[*group.GroupMember], error) {
+func (r *groupResolver) Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err

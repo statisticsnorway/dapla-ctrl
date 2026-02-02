@@ -11,6 +11,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
+	"github.com/statisticsnorway/dapla-api/internal/user"
 	"k8s.io/utils/ptr"
 )
 
@@ -146,7 +147,7 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *TeamOrder) 
 	}), nil
 }
 
-func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *UserTeamOrder) (*TeamMemberConnection, error) {
+func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *TeamOrder) (*TeamMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForUser(ctx, teamsql.ListForUserParams{
@@ -166,7 +167,7 @@ func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Paginat
 	return pagination.NewConvertConnection(ret, page, total, toGraphUserTeam), nil
 }
 
-func ListMembers(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *TeamMemberOrder) (*TeamMemberConnection, error) {
+func ListMembers(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *user.UserOrder) (*TeamMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListMembers(ctx, teamsql.ListMembersParams{

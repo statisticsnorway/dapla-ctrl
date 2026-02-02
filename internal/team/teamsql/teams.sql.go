@@ -163,12 +163,18 @@ FROM
 	teams
 ORDER BY
 	CASE
-		WHEN $1::TEXT = 'slug:asc' THEN slug
+		WHEN $1::TEXT = 'slug:asc' THEN teams.slug
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'slug:desc' THEN slug
+		WHEN $1::TEXT = 'slug:desc' THEN teams.slug
 	END DESC,
-	slug ASC
+	CASE
+		WHEN $1::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
 LIMIT
 	$3
 OFFSET

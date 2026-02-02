@@ -96,7 +96,7 @@ type User implements Node {
 		"""
 		Ordering options for items returned from the connection.
 		"""
-		orderBy: UserTeamOrder
+		orderBy: TeamOrder
 	): TeamMemberConnection!
 
 	"""
@@ -156,7 +156,7 @@ type User implements Node {
 		"""
 		Ordering options for items returned from the connection.
 		"""
-		orderBy: UserGroupOrder
+		orderBy: GroupOrder
 
 		"""
 		Filter the results
@@ -256,36 +256,6 @@ input UserOrder {
 }
 
 """
-Ordering options when fetching the teams a user is connected to.
-"""
-input UserTeamOrder {
-	"""
-	The field to order items by.
-	"""
-	field: UserTeamOrderField!
-
-	"""
-	The direction to order items by.
-	"""
-	direction: OrderDirection!
-}
-
-"""
-Ordering options when fetching the teams a user is connected to.
-"""
-input UserGroupOrder {
-	"""
-	The field to order items by.
-	"""
-	field: UserGroupOrderField!
-
-	"""
-	The direction to order items by.
-	"""
-	direction: OrderDirection!
-}
-
-"""
 Possible fields to order users by.
 """
 enum UserOrderField {
@@ -298,26 +268,11 @@ enum UserOrderField {
 	The email address of the user.
 	"""
 	EMAIL
-}
 
-"""
-Possible fields to order user teams by.
-"""
-enum UserTeamOrderField {
 	"""
-	The unique slug of the team.
+	The section code of the user.
 	"""
-	TEAM_SLUG
-}
-
-"""
-Possible fields to order user teams by.
-"""
-enum UserGroupOrderField {
-	"""
-	The unique slug of the team.
-	"""
-	TEAM_SLUG
+	SECTION_CODE
 }
 
 """

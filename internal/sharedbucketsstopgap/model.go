@@ -3,6 +3,7 @@ package sharedbucketsstopgap
 import (
 	"fmt"
 	"io"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -59,15 +60,23 @@ func (o *SharedBucketOrder) String() string {
 type SharedBucketOrderField string
 
 const (
-	SectionOrderFieldName SharedBucketOrderField = "NAME"
+	SharedBucketOrderFieldName      SharedBucketOrderField = "NAME"
+	SharedBucketOrderFieldKind      SharedBucketOrderField = "KIND"
+	SharedBucketOrderFieldShortName SharedBucketOrderField = "SHORT_NAME"
+	SharedBucketOrderFieldEnv       SharedBucketOrderField = "ENV"
+	SharedBucketOrderFieldTeam      SharedBucketOrderField = "TEAM"
 )
 
+var AllSharedBucketOrderFields = []SharedBucketOrderField{
+	SharedBucketOrderFieldName,
+	SharedBucketOrderFieldKind,
+	SharedBucketOrderFieldShortName,
+	SharedBucketOrderFieldEnv,
+	SharedBucketOrderFieldTeam,
+}
+
 func (e SharedBucketOrderField) IsValid() bool {
-	switch e {
-	case SectionOrderFieldName:
-		return true
-	}
-	return false
+	return slices.Contains(AllSharedBucketOrderFields, e)
 }
 
 func (e SharedBucketOrderField) String() string {

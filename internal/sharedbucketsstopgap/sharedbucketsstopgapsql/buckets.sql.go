@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
 
@@ -60,7 +61,31 @@ ORDER BY
 	CASE
 		WHEN $1::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN $1::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN $1::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN $1::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN $1::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $1::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	$3
 OFFSET
@@ -125,7 +150,31 @@ ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
 	END DESC,
-	shared_buckets_stopgap.name ASC
+	CASE
+		WHEN $2::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN shared_buckets_stopgap.team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN shared_buckets_stopgap.team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	$4
 OFFSET
@@ -226,7 +275,31 @@ ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN $2::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	$4
 OFFSET
@@ -296,7 +369,31 @@ ORDER BY
 	CASE
 		WHEN $2::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN $2::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	$4
 OFFSET
@@ -349,33 +446,58 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 
 const listGroupsForBucket = `-- name: ListGroupsForBucket :many
 SELECT
-	group_name,
+	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
-	shared_buckets_access_stopgap
+	groups
+	JOIN shared_buckets_access_stopgap ON groups.name = shared_buckets_access_stopgap.group_name
 WHERE
 	shared_buckets_access_stopgap.bucket_name = $1
 ORDER BY
-	group_name ASC
+	CASE
+		WHEN $2::TEXT = 'name:asc' THEN groups.name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'name:desc' THEN groups.name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
-	$3
+	$4
 OFFSET
-	$2
+	$3
 `
 
 type ListGroupsForBucketParams struct {
-	Name   string
-	Offset int32
-	Limit  int32
+	Name    string
+	OrderBy string
+	Offset  int32
+	Limit   int32
 }
 
 type ListGroupsForBucketRow struct {
-	GroupName  string
+	Group      Group
 	TotalCount int64
 }
 
 func (q *Queries) ListGroupsForBucket(ctx context.Context, arg ListGroupsForBucketParams) ([]*ListGroupsForBucketRow, error) {
-	rows, err := q.db.Query(ctx, listGroupsForBucket, arg.Name, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, listGroupsForBucket,
+		arg.Name,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -383,7 +505,14 @@ func (q *Queries) ListGroupsForBucket(ctx context.Context, arg ListGroupsForBuck
 	items := []*ListGroupsForBucketRow{}
 	for rows.Next() {
 		var i ListGroupsForBucketRow
-		if err := rows.Scan(&i.GroupName, &i.TotalCount); err != nil {
+		if err := rows.Scan(
+			&i.Group.Name,
+			&i.Group.TeamSlug,
+			&i.Group.Category,
+			&i.Group.Suffix,
+			&i.Group.ExternalID,
+			&i.TotalCount,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -396,23 +525,30 @@ func (q *Queries) ListGroupsForBucket(ctx context.Context, arg ListGroupsForBuck
 
 const listTeamsForBucket = `-- name: ListTeamsForBucket :many
 SELECT
-	team_slug,
+	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap
 	JOIN groups ON groups.name = shared_buckets_access_stopgap.group_name
+	JOIN teams ON groups.team_slug = teams.slug
 WHERE
 	shared_buckets_access_stopgap.bucket_name = $1
 GROUP BY
-	team_slug
+	teams.slug
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'slug:asc' THEN team_slug
+		WHEN $2::TEXT = 'slug:asc' THEN teams.slug
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'slug:desc' THEN team_slug
+		WHEN $2::TEXT = 'slug:desc' THEN teams.slug
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
 LIMIT
 	$4
 OFFSET
@@ -427,8 +563,13 @@ type ListTeamsForBucketParams struct {
 }
 
 type ListTeamsForBucketRow struct {
-	TeamSlug   slug.Slug
-	TotalCount int64
+	Slug                 slug.Slug
+	DisplayName          string
+	LastSuccessfulSync   pgtype.Timestamp
+	DeleteKeyConfirmedAt pgtype.Timestamptz
+	SectionCode          string
+	IsManaged            bool
+	TotalCount           int64
 }
 
 func (q *Queries) ListTeamsForBucket(ctx context.Context, arg ListTeamsForBucketParams) ([]*ListTeamsForBucketRow, error) {
@@ -445,7 +586,15 @@ func (q *Queries) ListTeamsForBucket(ctx context.Context, arg ListTeamsForBucket
 	items := []*ListTeamsForBucketRow{}
 	for rows.Next() {
 		var i ListTeamsForBucketRow
-		if err := rows.Scan(&i.TeamSlug, &i.TotalCount); err != nil {
+		if err := rows.Scan(
+			&i.Slug,
+			&i.DisplayName,
+			&i.LastSuccessfulSync,
+			&i.DeleteKeyConfirmedAt,
+			&i.SectionCode,
+			&i.IsManaged,
+			&i.TotalCount,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -458,7 +607,7 @@ func (q *Queries) ListTeamsForBucket(ctx context.Context, arg ListTeamsForBucket
 
 const listUniqueUsersForBucket = `-- name: ListUniqueUsersForBucket :many
 SELECT
-	users.id,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap
@@ -481,6 +630,12 @@ ORDER BY
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
 	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN users.section_code
+	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -497,8 +652,13 @@ type ListUniqueUsersForBucketParams struct {
 }
 
 type ListUniqueUsersForBucketRow struct {
-	ID         uuid.UUID
-	TotalCount int64
+	ID          uuid.UUID
+	Email       string
+	Name        string
+	ExternalID  string
+	Admin       bool
+	SectionCode *string
+	TotalCount  int64
 }
 
 func (q *Queries) ListUniqueUsersForBucket(ctx context.Context, arg ListUniqueUsersForBucketParams) ([]*ListUniqueUsersForBucketRow, error) {
@@ -515,7 +675,15 @@ func (q *Queries) ListUniqueUsersForBucket(ctx context.Context, arg ListUniqueUs
 	items := []*ListUniqueUsersForBucketRow{}
 	for rows.Next() {
 		var i ListUniqueUsersForBucketRow
-		if err := rows.Scan(&i.ID, &i.TotalCount); err != nil {
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.ExternalID,
+			&i.Admin,
+			&i.SectionCode,
+			&i.TotalCount,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -553,6 +721,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN users.section_code
 	END DESC,
 	users.name,
 	users.email ASC

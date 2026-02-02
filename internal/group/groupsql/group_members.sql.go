@@ -100,19 +100,12 @@ WHERE
 	group_members.user_id = $1
 	AND groups.team_slug = $2
 ORDER BY
-	CASE
-		WHEN $3::TEXT = 'name:asc' THEN groups.name
-	END ASC,
-	CASE
-		WHEN $3::TEXT = 'name:desc' THEN groups.name
-	END DESC,
 	groups.name ASC
 `
 
 type ListForTeamMemberParams struct {
 	UserID   uuid.UUID
 	TeamSlug slug.Slug
-	OrderBy  string
 }
 
 type ListForTeamMemberRow struct {
@@ -121,7 +114,7 @@ type ListForTeamMemberRow struct {
 }
 
 func (q *Queries) ListForTeamMember(ctx context.Context, arg ListForTeamMemberParams) ([]*ListForTeamMemberRow, error) {
-	rows, err := q.db.Query(ctx, listForTeamMember, arg.UserID, arg.TeamSlug, arg.OrderBy)
+	rows, err := q.db.Query(ctx, listForTeamMember, arg.UserID, arg.TeamSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -163,12 +156,24 @@ WHERE
 	)
 ORDER BY
 	CASE
-		WHEN $3::TEXT = 'slug:asc' THEN groups.team_slug
+		WHEN $3::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN $3::TEXT = 'slug:desc' THEN groups.team_slug
+		WHEN $3::TEXT = 'name:desc' THEN name
 	END DESC,
-	groups.team_slug ASC
+	CASE
+		WHEN $3::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $3::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN $3::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN $3::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
 	$5
 OFFSET
@@ -238,6 +243,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN users.section_code
 	END DESC,
 	users.name,
 	users.email ASC

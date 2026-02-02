@@ -11,7 +11,31 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN @order_by::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -41,14 +65,33 @@ ORDER BY
 
 -- name: ListGroupsForBucket :many
 SELECT
-	group_name,
+	sqlc.embed(groups),
 	COUNT(*) OVER () AS total_count
 FROM
-	shared_buckets_access_stopgap
+	groups
+	JOIN shared_buckets_access_stopgap ON groups.name = shared_buckets_access_stopgap.group_name
 WHERE
 	shared_buckets_access_stopgap.bucket_name = @name
 ORDER BY
-	group_name ASC
+	CASE
+		WHEN @order_by::TEXT = 'name:asc' THEN groups.name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'name:desc' THEN groups.name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -83,6 +126,12 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
 	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN users.section_code
+	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -93,7 +142,7 @@ OFFSET
 
 -- name: ListUniqueUsersForBucket :many
 SELECT
-	users.id,
+	users.*,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap
@@ -116,6 +165,12 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
 	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN users.section_code
+	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -126,23 +181,30 @@ OFFSET
 
 -- name: ListTeamsForBucket :many
 SELECT
-	team_slug,
+	teams.*,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap
 	JOIN groups ON groups.name = shared_buckets_access_stopgap.group_name
+	JOIN teams ON groups.team_slug = teams.slug
 WHERE
 	shared_buckets_access_stopgap.bucket_name = @name
 GROUP BY
-	team_slug
+	teams.slug
 ORDER BY
 	CASE
-		WHEN @order_by::TEXT = 'slug:asc' THEN team_slug
+		WHEN @order_by::TEXT = 'slug:asc' THEN teams.slug
 	END ASC,
 	CASE
-		WHEN @order_by::TEXT = 'slug:desc' THEN team_slug
+		WHEN @order_by::TEXT = 'slug:desc' THEN teams.slug
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -164,7 +226,31 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN @order_by::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -190,7 +276,31 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:desc' THEN name
 	END DESC,
-	name ASC
+	CASE
+		WHEN @order_by::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -217,7 +327,31 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
 	END DESC,
-	shared_buckets_stopgap.name ASC
+	CASE
+		WHEN @order_by::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN shared_buckets_stopgap.team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN shared_buckets_stopgap.team_slug
+	END DESC,
+	short_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET

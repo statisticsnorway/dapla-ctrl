@@ -50,13 +50,14 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *SharedBucke
 	}), nil
 }
 
-func ListGroups(ctx context.Context, name string, page *pagination.Pagination) (*group.GroupConnection, error) {
+func ListGroups(ctx context.Context, name string, page *pagination.Pagination, orderBy *group.GroupOrder) (*group.GroupConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListGroupsForBucket(ctx, sharedbucketsstopgapsql.ListGroupsForBucketParams{
-		Name:   name,
-		Offset: page.Offset(),
-		Limit:  page.Limit(),
+		Name:    name,
+		Offset:  page.Offset(),
+		Limit:   page.Limit(),
+		OrderBy: orderBy.String(),
 	})
 	if err != nil {
 		return nil, err
@@ -69,12 +70,15 @@ func ListGroups(ctx context.Context, name string, page *pagination.Pagination) (
 
 	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListGroupsForBucketRow) *group.Group {
 		return &group.Group{
-			Name: from.GroupName,
+			Name:     from.Group.Name,
+			Suffix:   from.Group.Suffix,
+			Category: from.Group.Category,
+			TeamSlug: from.Group.TeamSlug,
 		}
 	}), nil
 }
 
-func ListUsers(ctx context.Context, name string, page *pagination.Pagination, orderBy *team.TeamMemberOrder) (*team.TeamMemberConnection, error) {
+func ListUsers(ctx context.Context, name string, page *pagination.Pagination, orderBy *user.UserOrder) (*team.TeamMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListUsersForBucket(ctx, sharedbucketsstopgapsql.ListUsersForBucketParams{
@@ -142,10 +146,12 @@ func ListTeams(ctx context.Context, name string, page *pagination.Pagination, or
 	if len(ret) > 0 {
 		total = int(ret[0].TotalCount)
 	}
-
 	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListTeamsForBucketRow) *team.Team {
 		return &team.Team{
-			Slug: from.TeamSlug,
+			Slug:        from.Slug,
+			SectionCode: from.SectionCode,
+			IsManaged:   from.IsManaged,
+			DisplayName: from.DisplayName,
 		}
 	}), nil
 }

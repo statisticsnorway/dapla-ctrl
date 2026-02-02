@@ -53,12 +53,24 @@ WHERE
 	OR (category) = ANY (sqlc.narg('filter')::TEXT[])
 ORDER BY
 	CASE
-		WHEN @order_by::TEXT = 'slug:asc' THEN team_slug
+		WHEN @order_by::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN @order_by::TEXT = 'slug:desc' THEN team_slug
+		WHEN @order_by::TEXT = 'name:desc' THEN name
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -100,12 +112,19 @@ WHERE
 	)
 ORDER BY
 	CASE
-		WHEN @order_by::TEXT = 'slug:asc' THEN team_slug
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN @order_by::TEXT = 'slug:desc' THEN team_slug
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN @order_by::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'category:desc' THEN category
+	END DESC,
+	team_slug,
+	category ASC
 ;
 
 -- name: ListAllForSearch :many

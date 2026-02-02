@@ -16,6 +16,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-api/internal/user"
 	"k8s.io/utils/ptr"
 )
 
@@ -99,7 +100,7 @@ func List(ctx context.Context, page *pagination.Pagination, orderBy *GroupOrder,
 	}), nil
 }
 
-func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *UserGroupOrder, filter *GroupFilter) (*GroupMemberConnection, error) {
+func ListForUser(ctx context.Context, userID uuid.UUID, page *pagination.Pagination, orderBy *GroupOrder, filter *GroupFilter) (*GroupMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForUser(ctx, groupsql.ListForUserParams{
@@ -155,7 +156,7 @@ func GetMemberByEmail(ctx context.Context, groupName string, email string) (*Gro
 	}, nil
 }
 
-func ListMembers(ctx context.Context, groupName string, page *pagination.Pagination, orderBy *GroupMemberOrder) (*GroupMemberConnection, error) {
+func ListMembers(ctx context.Context, groupName string, page *pagination.Pagination, orderBy *user.UserOrder) (*GroupMemberConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListMembers(ctx, groupsql.ListMembersParams{

@@ -105,7 +105,7 @@ type Group implements Node {
 		before: Cursor
 
 		"Ordering options for items returned from the connection."
-		orderBy: GroupMemberOrder
+		orderBy: UserOrder
 	): GroupMemberConnection!
 }
 
@@ -199,38 +199,24 @@ input GroupOrder {
 	direction: OrderDirection!
 }
 
-"Ordering options for group members."
-input GroupMemberOrder {
-	"The field to order items by."
-	field: GroupMemberOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
 """
 Possible fields to order groups by.
 """
 enum GroupOrderField {
 	"""
-	The team of the group.
-	"""
-	TEAM
-}
-
-"""
-Possible fields to order group members by.
-"""
-enum GroupMemberOrderField {
-	"""
-	The name of the user.
+	The full name of the group.
 	"""
 	NAME
 
 	"""
-	The email address of the user.
+	The team of the group.
 	"""
-	EMAIL
+	TEAM
+
+	"""
+	The category of the group.
+	"""
+	CATEGORY
 }
 
 type CreateGroupPayload {

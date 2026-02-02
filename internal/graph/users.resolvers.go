@@ -41,7 +41,7 @@ func (r *userResolver) Section(ctx context.Context, obj *user.User) (*section.Se
 	return section.Get(ctx, *obj.SectionCode)
 }
 
-func (r *userResolver) Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error) {
+func (r *userResolver) Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.TeamMember], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (r *userResolver) TeamMembers(ctx context.Context, obj *user.User, first *i
 	return user.ListTeamMembersForUser(ctx, obj.UUID, page, orderBy)
 }
 
-func (r *userResolver) Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error) {
+func (r *userResolver) Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err

@@ -28,16 +28,16 @@ func (r *sharedBucketResolver) Team(ctx context.Context, obj *sharedbucketsstopg
 	return team.Get(ctx, obj.TeamSlug)
 }
 
-func (r *sharedBucketResolver) Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*group.Group], error) {
+func (r *sharedBucketResolver) Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return sharedbucketsstopgap.ListGroups(ctx, obj.Name, page)
+	return sharedbucketsstopgap.ListGroups(ctx, obj.Name, page, orderBy)
 }
 
-func (r *sharedBucketResolver) Users(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error) {
+func (r *sharedBucketResolver) Users(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*team.TeamMember], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err

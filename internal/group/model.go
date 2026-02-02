@@ -58,11 +58,15 @@ func (o *GroupOrder) String() string {
 type GroupOrderField string
 
 const (
-	GroupOrderFieldSlug GroupOrderField = "SLUG"
+	GroupOrderFieldName     GroupOrderField = "NAME"
+	GroupOrderFieldSlug     GroupOrderField = "TEAM"
+	GroupOrderFieldCategory GroupOrderField = "CATEGORY"
 )
 
 var AllGroupOrderField = []GroupOrderField{
+	GroupOrderFieldName,
 	GroupOrderFieldSlug,
+	GroupOrderFieldCategory,
 }
 
 func (e GroupOrderField) IsValid() bool {
@@ -119,56 +123,6 @@ type GroupMember struct {
 	UserID    uuid.UUID `json:"-"`
 }
 
-type GroupMemberOrder struct {
-	Field     GroupMemberOrderField `json:"field"`
-	Direction model.OrderDirection  `json:"direction"`
-}
-
-func (o *GroupMemberOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type GroupMemberOrderField string
-
-const (
-	GroupMemberOrderFieldName  GroupMemberOrderField = "NAME"
-	GroupMemberOrderFieldEmail GroupMemberOrderField = "EMAIL"
-	GroupMemberOrderFieldRole  GroupMemberOrderField = "ROLE"
-)
-
-func (e GroupMemberOrderField) IsValid() bool {
-	switch e {
-	case GroupMemberOrderFieldName, GroupMemberOrderFieldEmail, GroupMemberOrderFieldRole:
-		return true
-	}
-	return false
-}
-
-func (e GroupMemberOrderField) String() string {
-	return string(e)
-}
-
-func (e *GroupMemberOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = GroupMemberOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid GroupMemberOrderField", str)
-	}
-	return nil
-}
-
-func (e GroupMemberOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
 type GroupFilter struct {
 	Categories []string `json:"categories,omitempty"`
 }
@@ -181,54 +135,6 @@ func (f *GroupFilter) CategoryFilter() []string {
 		}
 	}
 	return categoryFilter
-}
-
-type UserGroupOrder struct {
-	Field     UserGroupOrderField  `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
-}
-
-func (o *UserGroupOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type UserGroupOrderField string
-
-const (
-	UserGroupOrderFieldTeamSlug UserGroupOrderField = "TEAM_SLUG"
-)
-
-func (e UserGroupOrderField) IsValid() bool {
-	switch e {
-	case UserGroupOrderFieldTeamSlug:
-		return true
-	}
-	return false
-}
-
-func (e UserGroupOrderField) String() string {
-	return string(e)
-}
-
-func (e *UserGroupOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserGroupOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserGroupOrderField", str)
-	}
-	return nil
-}
-
-func (e UserGroupOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type CreateGroupInput struct {

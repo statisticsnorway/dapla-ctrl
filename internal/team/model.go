@@ -73,11 +73,13 @@ func (o *TeamOrder) String() string {
 type TeamOrderField string
 
 const (
-	TeamOrderFieldSlug TeamOrderField = "SLUG"
+	TeamOrderFieldSlug        TeamOrderField = "SLUG"
+	TeamOrderFieldSectionCode TeamOrderField = "SECTION_CODE"
 )
 
 var AllTeamOrderField = []TeamOrderField{
 	TeamOrderFieldSlug,
+	TeamOrderFieldSectionCode,
 }
 
 func (e TeamOrderField) IsValid() bool {
@@ -200,12 +202,11 @@ type TeamMemberOrderField string
 const (
 	TeamMemberOrderFieldName  TeamMemberOrderField = "NAME"
 	TeamMemberOrderFieldEmail TeamMemberOrderField = "EMAIL"
-	TeamMemberOrderFieldRole  TeamMemberOrderField = "ROLE"
 )
 
 func (e TeamMemberOrderField) IsValid() bool {
 	switch e {
-	case TeamMemberOrderFieldName, TeamMemberOrderFieldEmail, TeamMemberOrderFieldRole:
+	case TeamMemberOrderFieldName, TeamMemberOrderFieldEmail:
 		return true
 	}
 	return false

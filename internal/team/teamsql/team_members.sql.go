@@ -33,6 +33,12 @@ ORDER BY
 	CASE
 		WHEN $2::TEXT = 'slug:desc' THEN teams.slug
 	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
 	teams.slug ASC
 LIMIT
 	$4
@@ -111,6 +117,12 @@ ORDER BY
 	END ASC,
 	CASE
 		WHEN $2::TEXT = 'email:desc' THEN users.email
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN users.section_code
 	END DESC,
 	users.name,
 	users.email ASC

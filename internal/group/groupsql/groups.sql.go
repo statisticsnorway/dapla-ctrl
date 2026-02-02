@@ -152,12 +152,24 @@ WHERE
 	OR (category) = ANY ($1::TEXT[])
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'slug:asc' THEN team_slug
+		WHEN $2::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'slug:desc' THEN team_slug
+		WHEN $2::TEXT = 'name:desc' THEN name
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
 	$4
 OFFSET
@@ -256,12 +268,19 @@ WHERE
 	)
 ORDER BY
 	CASE
-		WHEN $3::TEXT = 'slug:asc' THEN team_slug
+		WHEN $3::TEXT = 'team:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN $3::TEXT = 'slug:desc' THEN team_slug
+		WHEN $3::TEXT = 'team:desc' THEN team_slug
 	END DESC,
-	team_slug ASC
+	CASE
+		WHEN $3::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN $3::TEXT = 'category:desc' THEN category
+	END DESC,
+	team_slug,
+	category ASC
 `
 
 type ListByTeamSlugParams struct {

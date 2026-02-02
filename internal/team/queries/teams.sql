@@ -49,12 +49,18 @@ FROM
 	teams
 ORDER BY
 	CASE
-		WHEN @order_by::TEXT = 'slug:asc' THEN slug
+		WHEN @order_by::TEXT = 'slug:asc' THEN teams.slug
 	END ASC,
 	CASE
-		WHEN @order_by::TEXT = 'slug:desc' THEN slug
+		WHEN @order_by::TEXT = 'slug:desc' THEN teams.slug
 	END DESC,
-	slug ASC
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET

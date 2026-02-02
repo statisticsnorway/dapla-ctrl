@@ -22,6 +22,12 @@ ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'email:desc' THEN users.email
 	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN users.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN users.section_code
+	END DESC,
 	users.name,
 	users.email ASC
 LIMIT
@@ -46,12 +52,24 @@ WHERE
 	)
 ORDER BY
 	CASE
-		WHEN @order_by::TEXT = 'slug:asc' THEN groups.team_slug
+		WHEN @order_by::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN @order_by::TEXT = 'slug:desc' THEN groups.team_slug
+		WHEN @order_by::TEXT = 'name:desc' THEN name
 	END DESC,
-	groups.team_slug ASC
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN team_slug
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'category:asc' THEN category
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'category:desc' THEN category
+	END DESC,
+	name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -70,12 +88,6 @@ WHERE
 	group_members.user_id = @user_id
 	AND groups.team_slug = @team_slug
 ORDER BY
-	CASE
-		WHEN @order_by::TEXT = 'name:asc' THEN groups.name
-	END ASC,
-	CASE
-		WHEN @order_by::TEXT = 'name:desc' THEN groups.name
-	END DESC,
 	groups.name ASC
 ;
 

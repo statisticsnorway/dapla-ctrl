@@ -19,7 +19,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Group.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int {
+	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
@@ -67,7 +67,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.ServiceAccount.Tokens = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.SharedBucket.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+	c.SharedBucket.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.SharedBucket.Teams = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int {
@@ -76,7 +76,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.SharedBucket.UniqueUsers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.SharedBucket.Users = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int {
+	c.SharedBucket.Users = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
@@ -85,7 +85,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Team.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int {
+	c.Team.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.SharedBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
@@ -94,7 +94,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.SharedBucketsAccess = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.User.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) int {
+	c.User.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.User.SharedBucketsAccess = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
@@ -103,7 +103,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.User.TeamMembers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.User.Teams = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int {
+	c.User.Teams = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 

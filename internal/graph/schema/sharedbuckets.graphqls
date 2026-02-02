@@ -94,6 +94,16 @@ type SharedBucket implements Node {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	"""
@@ -123,7 +133,10 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
-		orderBy: TeamMemberOrder
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
 	): TeamMemberConnection!
 
 	"""
@@ -150,6 +163,9 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: UserOrder
 	): UserConnection!
 
@@ -177,6 +193,9 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: TeamOrder
 	): TeamConnection!
 }
@@ -245,4 +264,24 @@ enum SharedBucketOrderField {
 	The name of the shared bucket.
 	"""
 	NAME
+
+	"""
+	The kind of the shared bucket.
+	"""
+	KIND
+
+	"""
+	The short name of the shared bucket.
+	"""
+	SHORT_NAME
+
+	"""
+	The environment of the shared bucket.
+	"""
+	ENV
+
+	"""
+	The team who owns the shared bucket.
+	"""
+	TEAM
 }

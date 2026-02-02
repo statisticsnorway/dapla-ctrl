@@ -128,7 +128,7 @@ type ComplexityRoot struct {
 		ActivityLog func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		Category    func(childComplexity int) int
 		ID          func(childComplexity int) int
-		Members     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) int
+		Members     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 		Name        func(childComplexity int) int
 		Suffix      func(childComplexity int) int
 		TeamSlug    func(childComplexity int) int
@@ -584,7 +584,7 @@ type ComplexityRoot struct {
 
 	SharedBucket struct {
 		Env         func(childComplexity int) int
-		Groups      func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		Groups      func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		ID          func(childComplexity int) int
 		Kind        func(childComplexity int) int
 		Name        func(childComplexity int) int
@@ -592,7 +592,7 @@ type ComplexityRoot struct {
 		Team        func(childComplexity int) int
 		Teams       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int
 		UniqueUsers func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
-		Users       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int
+		Users       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 	}
 
 	SharedBucketConnection struct {
@@ -614,7 +614,7 @@ type ComplexityRoot struct {
 		ID                  func(childComplexity int) int
 		IsManaged           func(childComplexity int) int
 		LastSuccessfulSync  func(childComplexity int) int
-		Members             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) int
+		Members             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 		Section             func(childComplexity int) int
 		SharedBuckets       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		SharedBucketsAccess func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
@@ -698,7 +698,7 @@ type ComplexityRoot struct {
 	User struct {
 		Email               func(childComplexity int) int
 		ExternalID          func(childComplexity int) int
-		Groups              func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) int
+		Groups              func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		ID                  func(childComplexity int) int
 		IsAdmin             func(childComplexity int) int
 		IsSectionManager    func(childComplexity int) int
@@ -706,7 +706,7 @@ type ComplexityRoot struct {
 		Section             func(childComplexity int) int
 		SharedBucketsAccess func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		TeamMembers         func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
-		Teams               func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) int
+		Teams               func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int
 	}
 
 	UserConnection struct {
@@ -762,7 +762,7 @@ type ComplexityRoot struct {
 }
 
 type GroupResolver interface {
-	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupMemberOrder) (*pagination.Connection[*group.GroupMember], error)
+	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error)
 	ActivityLog(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 }
 type GroupMemberResolver interface {
@@ -833,15 +833,15 @@ type ServiceAccountResolver interface {
 }
 type SharedBucketResolver interface {
 	Team(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket) (*team.Team, error)
-	Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*group.Group], error)
-	Users(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error)
+	Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error)
+	Users(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*team.TeamMember], error)
 	UniqueUsers(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
 	Teams(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error)
 }
 type TeamResolver interface {
 	Section(ctx context.Context, obj *team.Team) (*section.Section, error)
 
-	Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamMemberOrder) (*pagination.Connection[*team.TeamMember], error)
+	Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*team.TeamMember], error)
 	Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error)
 	SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 	SharedBucketsAccess(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
@@ -857,9 +857,9 @@ type TeamMemberResolver interface {
 }
 type UserResolver interface {
 	Section(ctx context.Context, obj *user.User) (*section.Section, error)
-	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.UserTeamOrder) (*pagination.Connection[*team.TeamMember], error)
+	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.TeamMember], error)
 	TeamMembers(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
-	Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.UserGroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error)
+	Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error)
 	SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 
 	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
@@ -1030,7 +1030,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Group.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupMemberOrder)), true
+		return e.complexity.Group.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "Group.name":
 		if e.complexity.Group.Name == nil {
 			break
@@ -2958,7 +2958,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.complexity.SharedBucket.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "SharedBucket.id":
 		if e.complexity.SharedBucket.ID == nil {
 			break
@@ -3021,7 +3021,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamMemberOrder)), true
+		return e.complexity.SharedBucket.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 
 	case "SharedBucketConnection.edges":
 		if e.complexity.SharedBucketConnection.Edges == nil {
@@ -3117,7 +3117,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamMemberOrder)), true
+		return e.complexity.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "Team.section":
 		if e.complexity.Team.Section == nil {
 			break
@@ -3415,7 +3415,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.UserGroupOrder), args["filter"].(*group.GroupFilter)), true
+		return e.complexity.User.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "User.id":
 		if e.complexity.User.ID == nil {
 			break
@@ -3478,7 +3478,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.UserTeamOrder)), true
+		return e.complexity.User.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
 
 	case "UserConnection.edges":
 		if e.complexity.UserConnection.Edges == nil {
@@ -3689,7 +3689,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDisableReconcilerInput,
 		ec.unmarshalInputEnableReconcilerInput,
 		ec.unmarshalInputGroupFilter,
-		ec.unmarshalInputGroupMemberOrder,
 		ec.unmarshalInputGroupOrder,
 		ec.unmarshalInputReconcilerConfigInput,
 		ec.unmarshalInputRemoveGroupMemberInput,
@@ -3698,14 +3697,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSearchFilter,
 		ec.unmarshalInputSectionOrder,
 		ec.unmarshalInputSharedBucketOrder,
-		ec.unmarshalInputTeamMemberOrder,
 		ec.unmarshalInputTeamOrder,
 		ec.unmarshalInputUpdateServiceAccountInput,
 		ec.unmarshalInputUpdateServiceAccountTokenInput,
 		ec.unmarshalInputUpdateTeamInput,
-		ec.unmarshalInputUserGroupOrder,
 		ec.unmarshalInputUserOrder,
-		ec.unmarshalInputUserTeamOrder,
 	)
 	first := true
 
@@ -4266,7 +4262,7 @@ type Group implements Node {
 		before: Cursor
 
 		"Ordering options for items returned from the connection."
-		orderBy: GroupMemberOrder
+		orderBy: UserOrder
 	): GroupMemberConnection!
 }
 
@@ -4360,38 +4356,24 @@ input GroupOrder {
 	direction: OrderDirection!
 }
 
-"Ordering options for group members."
-input GroupMemberOrder {
-	"The field to order items by."
-	field: GroupMemberOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
 """
 Possible fields to order groups by.
 """
 enum GroupOrderField {
 	"""
-	The team of the group.
-	"""
-	TEAM
-}
-
-"""
-Possible fields to order group members by.
-"""
-enum GroupMemberOrderField {
-	"""
-	The name of the user.
+	The full name of the group.
 	"""
 	NAME
 
 	"""
-	The email address of the user.
+	The team of the group.
 	"""
-	EMAIL
+	TEAM
+
+	"""
+	The category of the group.
+	"""
+	CATEGORY
 }
 
 type CreateGroupPayload {
@@ -6326,6 +6308,16 @@ type SharedBucket implements Node {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
 	): GroupConnection!
 
 	"""
@@ -6355,7 +6347,10 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
-		orderBy: TeamMemberOrder
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
 	): TeamMemberConnection!
 
 	"""
@@ -6382,6 +6377,9 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: UserOrder
 	): UserConnection!
 
@@ -6409,6 +6407,9 @@ type SharedBucket implements Node {
 		"""
 		before: Cursor
 
+		"""
+		Ordering options for items returned from the connection.
+		"""
 		orderBy: TeamOrder
 	): TeamConnection!
 }
@@ -6477,6 +6478,26 @@ enum SharedBucketOrderField {
 	The name of the shared bucket.
 	"""
 	NAME
+
+	"""
+	The kind of the shared bucket.
+	"""
+	KIND
+
+	"""
+	The short name of the shared bucket.
+	"""
+	SHORT_NAME
+
+	"""
+	The environment of the shared bucket.
+	"""
+	ENV
+
+	"""
+	The team who owns the shared bucket.
+	"""
+	TEAM
 }
 `, BuiltIn: false},
 	{Name: "../schema/teams.graphqls", Input: `extend type Query {
@@ -6572,7 +6593,7 @@ type Team implements Node {
 		before: Cursor
 
 		"Ordering options for items returned from the connection."
-		orderBy: TeamMemberOrder
+		orderBy: UserOrder
 	): TeamMemberConnection!
 
 	groups(
@@ -6767,15 +6788,6 @@ input TeamOrder {
 	direction: OrderDirection!
 }
 
-"Ordering options for team members."
-input TeamMemberOrder {
-	"The field to order items by."
-	field: TeamMemberOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
 input RequestTeamDeletionInput {
 	"Slug of the team to request a team deletion key for."
 	slug: Slug!
@@ -6792,28 +6804,10 @@ input ConfirmTeamDeletionInput {
 "Possible fields to order teams by."
 enum TeamOrderField {
 	"The unique slug of the team."
-	TEAM_SLUG
-}
+	SLUG
 
-"Possible fields to order team members by."
-enum TeamMemberOrderField {
-	"The name of user."
-	NAME
-
-	"The email address of the user."
-	EMAIL
-
-	"The role the user has in the team."
-	ROLE
-}
-
-"Team member roles."
-enum TeamMemberRole {
-	"Regular member, read only access."
-	MEMBER
-
-	"Team owner, full access to the team."
-	OWNER
+	"The section code of the team."
+	SECTION_CODE
 }
 
 extend enum ActivityLogEntryResourceType {
@@ -6991,7 +6985,7 @@ type User implements Node {
 		"""
 		Ordering options for items returned from the connection.
 		"""
-		orderBy: UserTeamOrder
+		orderBy: TeamOrder
 	): TeamMemberConnection!
 
 	"""
@@ -7051,7 +7045,7 @@ type User implements Node {
 		"""
 		Ordering options for items returned from the connection.
 		"""
-		orderBy: UserGroupOrder
+		orderBy: GroupOrder
 
 		"""
 		Filter the results
@@ -7151,36 +7145,6 @@ input UserOrder {
 }
 
 """
-Ordering options when fetching the teams a user is connected to.
-"""
-input UserTeamOrder {
-	"""
-	The field to order items by.
-	"""
-	field: UserTeamOrderField!
-
-	"""
-	The direction to order items by.
-	"""
-	direction: OrderDirection!
-}
-
-"""
-Ordering options when fetching the teams a user is connected to.
-"""
-input UserGroupOrder {
-	"""
-	The field to order items by.
-	"""
-	field: UserGroupOrderField!
-
-	"""
-	The direction to order items by.
-	"""
-	direction: OrderDirection!
-}
-
-"""
 Possible fields to order users by.
 """
 enum UserOrderField {
@@ -7193,26 +7157,11 @@ enum UserOrderField {
 	The email address of the user.
 	"""
 	EMAIL
-}
 
-"""
-Possible fields to order user teams by.
-"""
-enum UserTeamOrderField {
 	"""
-	The unique slug of the team.
+	The section code of the user.
 	"""
-	TEAM_SLUG
-}
-
-"""
-Possible fields to order user teams by.
-"""
-enum UserGroupOrderField {
-	"""
-	The unique slug of the team.
-	"""
-	TEAM_SLUG
+	SECTION_CODE
 }
 
 """
@@ -7573,7 +7522,7 @@ func (ec *executionContext) field_Group_members_args(ctx context.Context, rawArg
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupMemberOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -8303,6 +8252,16 @@ func (ec *executionContext) field_SharedBucket_groups_args(ctx context.Context, 
 		return nil, err
 	}
 	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -8391,7 +8350,7 @@ func (ec *executionContext) field_SharedBucket_users_args(ctx context.Context, r
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamMemberOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -8489,7 +8448,7 @@ func (ec *executionContext) field_Team_members_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamMemberOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -8582,7 +8541,7 @@ func (ec *executionContext) field_User_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -8680,7 +8639,7 @@ func (ec *executionContext) field_User_teams_args(ctx context.Context, rawArgs m
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUserTeamOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9556,7 +9515,7 @@ func (ec *executionContext) _Group_members(ctx context.Context, field graphql.Co
 		ec.fieldContext_Group_members,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Group().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupMemberOrder))
+			return ec.resolvers.Group().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -19404,7 +19363,7 @@ func (ec *executionContext) _SharedBucket_groups(ctx context.Context, field grap
 		ec.fieldContext_SharedBucket_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.resolvers.SharedBucket().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -19453,7 +19412,7 @@ func (ec *executionContext) _SharedBucket_users(ctx context.Context, field graph
 		ec.fieldContext_SharedBucket_users,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().Users(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamMemberOrder))
+			return ec.resolvers.SharedBucket().Users(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -19966,7 +19925,7 @@ func (ec *executionContext) _Team_members(ctx context.Context, field graphql.Col
 		ec.fieldContext_Team_members,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamMemberOrder))
+			return ec.resolvers.Team().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21814,7 +21773,7 @@ func (ec *executionContext) _User_teams(ctx context.Context, field graphql.Colle
 		ec.fieldContext_User_teams,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.UserTeamOrder))
+			return ec.resolvers.User().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21912,7 +21871,7 @@ func (ec *executionContext) _User_groups(ctx context.Context, field graphql.Coll
 		ec.fieldContext_User_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.UserGroupOrder), fc.Args["filter"].(*group.GroupFilter))
+			return ec.resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -24944,40 +24903,6 @@ func (ec *executionContext) unmarshalInputGroupFilter(ctx context.Context, obj a
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputGroupMemberOrder(ctx context.Context, obj any) (group.GroupMemberOrder, error) {
-	var it group.GroupMemberOrder
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"field", "direction"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNGroupMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrderField(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Field = data
-		case "direction":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Direction = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputGroupOrder(ctx context.Context, obj any) (group.GroupOrder, error) {
 	var it group.GroupOrder
 	asMap := map[string]any{}
@@ -25243,40 +25168,6 @@ func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context,
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputTeamMemberOrder(ctx context.Context, obj any) (team.TeamMemberOrder, error) {
-	var it team.TeamMemberOrder
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"field", "direction"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNTeamMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrderField(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Field = data
-		case "direction":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Direction = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any) (team.TeamOrder, error) {
 	var it team.TeamOrder
 	asMap := map[string]any{}
@@ -25420,40 +25311,6 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputUserGroupOrder(ctx context.Context, obj any) (group.UserGroupOrder, error) {
-	var it group.UserGroupOrder
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"field", "direction"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Field = data
-		case "direction":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Direction = data
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj any) (user.UserOrder, error) {
 	var it user.UserOrder
 	asMap := map[string]any{}
@@ -25471,40 +25328,6 @@ func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj any
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
 			data, err := ec.unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Field = data
-		case "direction":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Direction = data
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputUserTeamOrder(ctx context.Context, obj any) (team.UserTeamOrder, error) {
-	var it team.UserTeamOrder
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"field", "direction"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNUserTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUserTeamOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -33628,16 +33451,6 @@ func (ec *executionContext) marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatistics
 	return ret
 }
 
-func (ec *executionContext) unmarshalNGroupMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrderField(ctx context.Context, v any) (group.GroupMemberOrderField, error) {
-	var res group.GroupMemberOrderField
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNGroupMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrderField(ctx context.Context, sel ast.SelectionSet, v group.GroupMemberOrderField) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberRemovedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -35265,16 +35078,6 @@ func (ec *executionContext) marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsn
 	return ret
 }
 
-func (ec *executionContext) unmarshalNTeamMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrderField(ctx context.Context, v any) (team.TeamMemberOrderField, error) {
-	var res team.TeamMemberOrderField
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNTeamMemberOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrderField(ctx context.Context, sel ast.SelectionSet, v team.TeamMemberOrderField) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, v any) (team.TeamOrderField, error) {
 	var res team.TeamOrderField
 	err := res.UnmarshalGQL(v)
@@ -35542,16 +35345,6 @@ func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx context.Context, v any) (group.UserGroupOrderField, error) {
-	var res group.UserGroupOrderField
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUserGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrderField(ctx context.Context, sel ast.SelectionSet, v group.UserGroupOrderField) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, v any) (user.UserOrderField, error) {
 	var res user.UserOrderField
 	err := res.UnmarshalGQL(v)
@@ -35676,16 +35469,6 @@ func (ec *executionContext) marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstati
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalNUserTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUserTeamOrderField(ctx context.Context, v any) (team.UserTeamOrderField, error) {
-	var res team.UserTeamOrderField
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUserTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUserTeamOrderField(ctx context.Context, sel ast.SelectionSet, v team.UserTeamOrderField) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -36098,14 +35881,6 @@ func (ec *executionContext) marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorw
 	return ec._GroupMember(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGroupMemberOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberOrder(ctx context.Context, v any) (*group.GroupMemberOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGroupMemberOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder(ctx context.Context, v any) (*group.GroupOrder, error) {
 	if v == nil {
 		return nil, nil
@@ -36281,14 +36056,6 @@ func (ec *executionContext) marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._Team(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOTeamMemberOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberOrder(ctx context.Context, v any) (*team.TeamMemberOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputTeamMemberOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder(ctx context.Context, v any) (*team.TeamOrder, error) {
 	if v == nil {
 		return nil, nil
@@ -36322,27 +36089,11 @@ func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUserGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐUserGroupOrder(ctx context.Context, v any) (*group.UserGroupOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputUserGroupOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder(ctx context.Context, v any) (*user.UserOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputUserOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOUserTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUserTeamOrder(ctx context.Context, v any) (*team.UserTeamOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputUserTeamOrder(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

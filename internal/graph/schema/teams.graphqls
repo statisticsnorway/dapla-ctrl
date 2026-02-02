@@ -91,7 +91,7 @@ type Team implements Node {
 		before: Cursor
 
 		"Ordering options for items returned from the connection."
-		orderBy: TeamMemberOrder
+		orderBy: UserOrder
 	): TeamMemberConnection!
 
 	groups(
@@ -286,15 +286,6 @@ input TeamOrder {
 	direction: OrderDirection!
 }
 
-"Ordering options for team members."
-input TeamMemberOrder {
-	"The field to order items by."
-	field: TeamMemberOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
 input RequestTeamDeletionInput {
 	"Slug of the team to request a team deletion key for."
 	slug: Slug!
@@ -311,28 +302,10 @@ input ConfirmTeamDeletionInput {
 "Possible fields to order teams by."
 enum TeamOrderField {
 	"The unique slug of the team."
-	TEAM_SLUG
-}
+	SLUG
 
-"Possible fields to order team members by."
-enum TeamMemberOrderField {
-	"The name of user."
-	NAME
-
-	"The email address of the user."
-	EMAIL
-
-	"The role the user has in the team."
-	ROLE
-}
-
-"Team member roles."
-enum TeamMemberRole {
-	"Regular member, read only access."
-	MEMBER
-
-	"Team owner, full access to the team."
-	OWNER
+	"The section code of the team."
+	SECTION_CODE
 }
 
 extend enum ActivityLogEntryResourceType {
