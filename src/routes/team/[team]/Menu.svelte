@@ -29,6 +29,11 @@
 							totalCount
 						}
 					}
+					sharedBucketsAccess(first: 1) {
+						pageInfo {
+							totalCount
+						}
+					}
 				}
 			}
 		`)

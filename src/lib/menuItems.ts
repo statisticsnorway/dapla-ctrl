@@ -16,19 +16,26 @@ export const menuItems = ({
 	inventory?: {
 		members: Paginated;
 		sharedBuckets: Paginated;
+		sharedBucketsAccess: Paginated;
 	};
 }): { label: string; href: string; active?: boolean; count?: number }[][] => {
 	const split = path.split('/');
 
 	const getInventory = (pageName?: string) => {
-		const pageNameToInventory = {
-			'shared-data': 'sharedBuckets',
-			members: 'members'
-		} as const;
+		let count: number | undefined = undefined;
+		switch (pageName) {
+			case 'members':
+				count = inventory?.members.pageInfo.totalCount;
+				break;
+			case 'shared-data':
+				count = inventory
+					? inventory.sharedBuckets.pageInfo.totalCount +
+						inventory.sharedBucketsAccess.pageInfo.totalCount
+					: undefined;
+				break;
+		}
 		return {
-			count:
-				inventory?.[pageNameToInventory[pageName as keyof typeof pageNameToInventory]]?.pageInfo
-					.totalCount
+			count: count
 		};
 	};
 
