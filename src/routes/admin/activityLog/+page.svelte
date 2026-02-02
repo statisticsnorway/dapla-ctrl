@@ -28,7 +28,7 @@
 				<Tr>
 					<Td>
 						{#if entry.actor !== ''}
-							<a href="/user/{entry.actor}/">{entry.actor}</a>
+							<a href="/member/{entry.actor}/">{entry.actor}</a>
 						{:else}
 							-
 						{/if}

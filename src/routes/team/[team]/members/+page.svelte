@@ -42,7 +42,7 @@
 </script>
 
 {#snippet nameCell(groupMember: GroupMembersData)}
-	<a href={`/user/${groupMember.email}`}>
+	<a href={`/member/${groupMember.email}`}>
 		<b>{groupMember.name}</b>
 	</a>
 	<br />

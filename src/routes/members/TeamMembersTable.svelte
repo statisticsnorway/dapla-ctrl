@@ -37,7 +37,7 @@
 </script>
 
 {#snippet nameCell(member: TeamMemberData)}
-	<a href="/user/{member.user.email}">
+	<a href="/member/{member.user.email}">
 		<b>{member.user.name}</b>
 	</a>
 	<br />

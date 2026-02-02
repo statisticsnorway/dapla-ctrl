@@ -6,19 +6,19 @@ export async function load(event) {
 	const { UserLayoutInfo } = await load_UserLayoutInfo({
 		event,
 		blocking: true,
-		variables: { user: event.params.user }
+		variables: { user: event.params.member }
 	});
 
-	const name = get(UserLayoutInfo).data?.user.name ?? event.params.user;
+	const name = get(UserLayoutInfo).data?.user.name ?? event.params.member;
 
 	const meta = await addPageMeta(event, {
 		breadcrumbs:
-			event.route.id === '/user/[user]'
+			event.route.id === '/member/[member]'
 				? undefined
 				: [
 						{
 							label: name,
-							href: '/user/[user]'
+							href: '/member/[member]'
 						}
 					]
 	});

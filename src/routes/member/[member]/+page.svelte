@@ -91,7 +91,7 @@
 {/snippet}
 {#snippet managerCell(item: TeamItem)}
 	{#if item.team.section.manager}
-		<a href="/user/{item.team.section.manager.email}">{item.team.section.manager.name}</a>
+		<a href="/member/{item.team.section.manager.email}">{item.team.section.manager.name}</a>
 	{:else}
 		Mangler seksjonsleder
 	{/if}
@@ -124,7 +124,7 @@
 				data={$UserOverview.data.user.teams.nodes.map((n) => {
 					return { id: n.team.id, ...n };
 				})}
-				fieldsCookie={{ path: '/user' }}
+				fieldsCookie={{ path: '/member' }}
 				selected={data.teamTableFields}
 				columns={[
 					{

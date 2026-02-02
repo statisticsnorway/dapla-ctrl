@@ -5,7 +5,7 @@ import { get } from 'svelte/store';
 export async function load(event) {
 	const meta = await load_UserOverview({
 		event,
-		variables: { user: event.params.user },
+		variables: { user: event.params.member },
 		blocking: true
 	});
 	const { data } = get(meta.UserOverview);

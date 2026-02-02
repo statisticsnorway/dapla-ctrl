@@ -44,8 +44,8 @@
 		<DaplaTable
 			data={$UserSharedBucketAccess.data.user.sharedBucketsAccess.nodes ?? []}
 			fieldsCookie={{
-				path: '/user',
-				key: 'sharedBucketsTableFields/user'
+				path: '/member',
+				key: 'sharedBucketsTableFields/member'
 			}}
 			selected={data.bucketTableFields}
 			columns={[

@@ -19,7 +19,7 @@
 </script>
 
 {#snippet nameCell(teamMember: TeamMemberItem)}
-	<a href={`/user/${teamMember.user.email}/shared-data`}>
+	<a href={`/member/${teamMember.user.email}/shared-data`}>
 		<b>{teamMember.user.name}</b>
 	</a>
 	<br />

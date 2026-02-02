@@ -31,7 +31,7 @@
 			<div class="value">
 				{#if section?.manager}
 					{#if section.manager.email}
-						<a href="/user/{section.manager.email}">{section.manager.name}</a>
+						<a href="/member/{section.manager.email}">{section.manager.name}</a>
 					{:else}
 						{section.manager.name}
 					{/if}

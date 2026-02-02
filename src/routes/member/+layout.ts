@@ -4,12 +4,12 @@ export async function load(event) {
 	const meta = await addPageMeta(event, {
 		title: 'Medlemmer',
 		breadcrumbs:
-			event.route.id === '/user'
+			event.route.id === '/member'
 				? undefined
 				: [
 						{
 							label: 'Medlemmer',
-							href: `/team-members`
+							href: `/members`
 						}
 					]
 	});

@@ -12,7 +12,7 @@
 
 <div class="page">
 	<div class="main">
-		<Menu user={params.user} />
+		<Menu user={params.member} />
 		<div class="container">
 			<PageHeader />
 			<div>{@render children?.()}</div>

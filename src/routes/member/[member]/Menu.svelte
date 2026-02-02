@@ -42,7 +42,7 @@
 				const href = pageName ? `${baseUrl}/${pageName}` : baseUrl;
 				const { count } = getInventory(pageName);
 				const active =
-					(matchSubPath && path.startsWith(`/user/${user}/${page}/${matchSubPath}/`)) ||
+					(matchSubPath && path.startsWith(`/member/${user}/${page}/${matchSubPath}/`)) ||
 					pageName === page;
 
 				return {
@@ -53,7 +53,7 @@
 				};
 			};
 		const [, , user, page] = split;
-		const menuItem = item(`/user/${user}`, page);
+		const menuItem = item(`/member/${user}`, page);
 		return [[menuItem('Brukeroversikt'), menuItem('Datadeling', 'shared-data')]];
 	};
 

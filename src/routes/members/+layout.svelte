@@ -16,7 +16,7 @@
 
 	let allTeamMembersCount = $derived($AllTeamMembers.data?.users?.pageInfo?.totalCount ?? 0);
 
-	const isAllTeamMembersPage = $derived(page.url.pathname === '/team-members/all');
+	const isAllTeamMembersPage = $derived(page.url.pathname === '/members/all');
 
 	const description = $derived(
 		isAllTeamMembersPage
@@ -44,14 +44,14 @@
 				<Tabs>
 					<Tab
 						data-sveltekit-noscroll
-						href="/team-members"
-						active={page.url.pathname === '/team-members' || page.url.pathname === '/team-members/'}
+						href="/members"
+						active={page.url.pathname === '/members' || page.url.pathname === '/members/'}
 						title="Mine teammedlemmer ({myTeamMembersCount})"
 					/>
 					<Tab
 						data-sveltekit-noscroll
-						href="/team-members/all"
-						active={page.url.pathname === '/team-members/all'}
+						href="/members/all"
+						active={page.url.pathname === '/members/all'}
 						title="Alle teammedlemmer ({allTeamMembersCount})"
 					/>
 				</Tabs>

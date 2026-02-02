@@ -10,7 +10,7 @@ export async function load(event: PageLoadEvent) {
 		...event.data,
 		...(await load_UserSharedBucketAccess({
 			event,
-			variables: { user: event.params.user },
+			variables: { user: event.params.member },
 			blocking: true
 		}))
 	};

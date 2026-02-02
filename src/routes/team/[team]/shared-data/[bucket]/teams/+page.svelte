@@ -35,7 +35,7 @@
 {/snippet}
 {#snippet managerCell(item: TeamItem)}
 	{#if item.section.manager}
-		<a href="/user/{item.section.manager.email}">{item.section.manager.name}</a>
+		<a href="/member/{item.section.manager.email}">{item.section.manager.name}</a>
 	{:else}
 		Mangler seksjonsleder
 	{/if}

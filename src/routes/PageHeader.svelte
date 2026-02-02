@@ -36,7 +36,7 @@
 	<InternalHeaderButton as="a" href="/" style="font-size: var(--ax-font-size-medium);">
 		Team
 	</InternalHeaderButton>
-	<InternalHeaderButton as="a" href="/team-members" style="font-size: var(--ax-font-size-medium);">
+	<InternalHeaderButton as="a" href="/members" style="font-size: var(--ax-font-size-medium);">
 		Medlemmer
 	</InternalHeaderButton>
 
@@ -75,7 +75,7 @@
 	{#if !user?.isAdmin}
 		<InternalHeaderButton
 			as="a"
-			href={`/user/${user?.email || ''}`}
+			href={`/member/${user?.email || ''}`}
 			style="font-size: var(--ax-font-size-medium);"
 		>
 			{user ? user.name : 'unauthorized'}
@@ -98,8 +98,10 @@
 		{/if}
 
 		<ActionMenuItem>
-			<a href={`/user/${user?.email || ''}`} class="action-menu-link" style="text-decoration: none;"
-				><PersonIcon />Min side</a
+			<a
+				href={`/member/${user?.email || ''}`}
+				class="action-menu-link"
+				style="text-decoration: none;"><PersonIcon />Min side</a
 			></ActionMenuItem
 		>
 	</ActionMenu>
