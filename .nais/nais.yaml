@@ -36,6 +36,8 @@ spec:
 
   accessPolicy:
     outbound:
+      external:
+        - host: hooks.slack.com
       rules:
         - application: dapla-api
 
