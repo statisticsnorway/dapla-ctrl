@@ -27,6 +27,7 @@
 		$UserInfo.data?.me as
 			| {
 					readonly name: string;
+					readonly email: string;
 					readonly isAdmin: boolean;
 					readonly __typename: 'User';
 			  }

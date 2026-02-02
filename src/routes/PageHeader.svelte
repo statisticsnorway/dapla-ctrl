@@ -10,13 +10,14 @@
 		InternalHeaderTitle,
 		InternalHeaderUserButton
 	} from '@nais/ds-svelte-community/experimental';
-	import { CogIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
+	import { CogIcon, PersonIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
 	import BetaBanner from './BetaBanner.svelte';
 
 	interface Props {
 		user:
 			| {
 					readonly name: string;
+					readonly email: string;
 					readonly isAdmin: boolean;
 			  }
 			| undefined;
@@ -70,9 +71,22 @@
 	>
 		Dokumentasjon
 	</InternalHeaderButton>
+
+	{#if !user?.isAdmin}
+		<InternalHeaderButton
+			as="a"
+			href={`/user/${user?.email || ''}`}
+			style="font-size: var(--ax-font-size-medium);"
+		>
+			{user ? user.name : 'unauthorized'}
+		</InternalHeaderButton>
+	{/if}
+
 	<ActionMenu>
 		{#snippet trigger(props)}
-			<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />
+			{#if user?.isAdmin}
+				<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />
+			{/if}
 		{/snippet}
 
 		{#if user?.isAdmin}
@@ -82,6 +96,12 @@
 			>
 			<ActionMenuDivider />
 		{/if}
+
+		<ActionMenuItem>
+			<a href={`/user/${user?.email || ''}`} class="action-menu-link" style="text-decoration: none;"
+				><PersonIcon />Min side</a
+			></ActionMenuItem
+		>
 	</ActionMenu>
 </header>
 
