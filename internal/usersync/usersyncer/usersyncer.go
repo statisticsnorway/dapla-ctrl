@@ -353,7 +353,7 @@ func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
 		return true
 	}
 
-	if user.SectionCode != eu.SectionCode {
+	if !ptr.Equal(user.SectionCode, eu.SectionCode) {
 		return true
 	}
 
