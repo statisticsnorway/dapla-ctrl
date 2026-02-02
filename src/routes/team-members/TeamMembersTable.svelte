@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
+	import { UserOrderField } from '$houdini';
 
 	interface Props {
 		teamMembers: TeamMemberData[];
@@ -63,7 +64,8 @@
 			id: 'NAME',
 			name: 'Navn',
 			show: 'ALWAYS',
-			cell: nameCell
+			cell: nameCell,
+			sortKey: UserOrderField.NAME
 		},
 		{
 			id: 'TEAM_COUNT',

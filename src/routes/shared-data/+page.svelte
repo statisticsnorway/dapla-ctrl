@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { AllSharedData$result } from '$houdini';
 	import { Heading, BodyShort } from '@nais/ds-svelte-community';
+	import { SharedBucketOrderField, type AllSharedData$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
 
@@ -78,9 +78,27 @@
 				data={$AllSharedData.data?.sharedBuckets.nodes.map(transformBucketdata) ?? []}
 				selected={data.bucketTableFields}
 				columns={[
-					{ id: 'NAME', name: 'Navn', show: 'ALWAYS', cell: nameCell },
-					{ id: 'TYPE', name: 'Type', show: 'DEFAULT_YES', cell: typeCell },
-					{ id: 'TEAM', name: 'Team', show: 'DEFAULT_YES', cell: teamCell },
+					{
+						id: 'NAME',
+						name: 'Navn',
+						show: 'ALWAYS',
+						cell: nameCell,
+						sortKey: SharedBucketOrderField.SHORT_NAME
+					},
+					{
+						id: 'TYPE',
+						name: 'Type',
+						show: 'DEFAULT_YES',
+						cell: typeCell,
+						sortKey: SharedBucketOrderField.KIND
+					},
+					{
+						id: 'TEAM',
+						name: 'Team',
+						show: 'DEFAULT_YES',
+						cell: teamCell,
+						sortKey: SharedBucketOrderField.TEAM
+					},
 					{
 						id: 'SECTION',
 						name: 'Seksjon',
@@ -88,7 +106,13 @@
 						show: 'DEFAULT_YES',
 						cell: sectionCell
 					},
-					{ id: 'ENV', name: 'Miljø', show: 'DEFAULT_YES', cell: envCell },
+					{
+						id: 'ENV',
+						name: 'Miljø',
+						show: 'DEFAULT_YES',
+						cell: envCell,
+						sortKey: SharedBucketOrderField.ENV
+					},
 					{
 						id: 'TEAM_COUNT',
 						name: 'Antall team',

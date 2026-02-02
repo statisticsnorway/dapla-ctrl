@@ -1,5 +1,5 @@
-query AllSharedData {
-	sharedBuckets(first: 25) @paginate(mode: SinglePage) {
+query AllSharedData($orderBy: SharedBucketOrder) {
+	sharedBuckets(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
 		pageInfo {
 			hasNextPage
 			hasPreviousPage

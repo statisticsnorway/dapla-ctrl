@@ -1,5 +1,5 @@
 import { load_AllTeamMembers, OrderDirection, UserOrderField } from '$houdini';
-import { urlToOrderDirection, urlToOrderField } from '$lib/ui/OrderByMenu.svelte';
+import { urlToOrderDirection, urlToOrderField } from '$lib/ui/DaplaTable.svelte';
 import type { PageLoadEvent } from './$types';
 
 const rows = 25;

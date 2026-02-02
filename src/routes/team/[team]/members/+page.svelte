@@ -2,7 +2,7 @@
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import type { PageProps } from './$houdini';
-	import type { Groups$result } from '$houdini';
+	import { UserOrderField, type Groups$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	let { data }: PageProps = $props();
@@ -69,8 +69,8 @@
 			}}
 			selected={data.groupMemberTableFields}
 			columns={[
-				{ id: 'NAME', name: 'Navn', show: 'ALWAYS', cell: nameCell },
-				{ id: 'TYPE', name: 'Grupper', show: 'DEFAULT_YES', cell: groupsCell }
+				{ id: 'NAME', name: 'Navn', show: 'ALWAYS', cell: nameCell, sortKey: UserOrderField.NAME },
+				{ id: 'GROUPS', name: 'Grupper', show: 'DEFAULT_YES', cell: groupsCell }
 			]}
 		/>
 	</div>

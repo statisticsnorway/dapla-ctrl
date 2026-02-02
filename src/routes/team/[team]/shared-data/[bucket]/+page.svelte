@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { TeamSharedBucketAccess$result } from '$houdini';
+	import { UserOrderField, type TeamSharedBucketAccess$result } from '$houdini';
 	import { BodyShort, CopyButton } from '@nais/ds-svelte-community';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
@@ -89,7 +89,8 @@
 					id: 'NAME',
 					name: 'Navn',
 					show: 'ALWAYS',
-					cell: nameCell
+					cell: nameCell,
+					sortKey: UserOrderField.NAME
 				},
 				{
 					id: 'TEAM',

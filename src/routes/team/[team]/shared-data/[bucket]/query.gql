@@ -1,4 +1,4 @@
-query TeamSharedBucketAccess($bucket: String!) {
+query TeamSharedBucketAccess($bucket: String!, $orderBy: UserOrder) {
 	sharedBucket(name: $bucket) {
 		id
 		shortName
@@ -14,7 +14,7 @@ query TeamSharedBucketAccess($bucket: String!) {
 				totalCount
 			}
 		}
-		users(first: 25) @paginate(mode: SinglePage) {
+		users(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
 			pageInfo {
 				hasNextPage
 				hasPreviousPage

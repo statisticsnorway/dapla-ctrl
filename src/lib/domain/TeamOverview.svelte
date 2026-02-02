@@ -5,6 +5,7 @@
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import { page } from '$app/state';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
+	import { TeamOrderField } from '$houdini';
 
 	type User = {
 		name: string;
@@ -60,7 +61,8 @@
 			id: 'NAME',
 			name: 'Navn',
 			show: 'ALWAYS',
-			cell: nameCell
+			cell: nameCell,
+			sortKey: TeamOrderField.SLUG
 		} as const,
 		{
 			id: 'AUTONOMY',
@@ -87,7 +89,8 @@
 			id: 'MANAGER',
 			name: 'Ansvarlig',
 			show: 'DEFAULT_YES',
-			cell: managerCell
+			cell: managerCell,
+			sortKey: TeamOrderField.SECTION_CODE
 		} as const
 	].filter((c) => c !== undefined);
 </script>

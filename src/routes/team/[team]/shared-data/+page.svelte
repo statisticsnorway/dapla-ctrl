@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { SharedData$result } from '$houdini';
+	import { SharedBucketOrderField, type SharedData$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { capitalizeFirstLetter } from '$lib/utils/formatters';
 	import Tab from '$lib/ui/Tab.svelte';
@@ -58,19 +58,22 @@
 					id: 'NAME',
 					name: 'Navn',
 					show: 'ALWAYS',
-					cell: nameCell
+					cell: nameCell,
+					sortKey: SharedBucketOrderField.SHORT_NAME
 				},
 				{
 					id: 'TYPE',
 					name: 'Type',
 					show: 'DEFAULT_YES',
-					cell: typeCell
+					cell: typeCell,
+					sortKey: SharedBucketOrderField.KIND
 				},
 				{
 					id: 'ENV',
 					name: 'Miljø',
 					show: 'DEFAULT_YES',
-					cell: envCell
+					cell: envCell,
+					sortKey: SharedBucketOrderField.ENV
 				},
 				{
 					id: 'TEAM_COUNT',

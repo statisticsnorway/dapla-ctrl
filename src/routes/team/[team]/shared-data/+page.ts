@@ -1,4 +1,5 @@
-import { load_SharedData } from '$houdini';
+import { load_SharedData, OrderDirection, SharedBucketOrderField } from '$houdini';
+import { urlToOrderDirection, urlToOrderField } from '$lib/ui/DaplaTable.svelte';
 import { addPageMeta } from '$lib/utils/pageMeta';
 import type { PageLoadEvent } from './$types';
 
@@ -8,7 +9,13 @@ export async function load(event: PageLoadEvent) {
 		...event.data,
 		...(await load_SharedData({
 			event,
-			variables: { team: event.params.team },
+			variables: {
+				team: event.params.team,
+				orderBy: {
+					field: urlToOrderField(SharedBucketOrderField, SharedBucketOrderField.NAME, event.url),
+					direction: urlToOrderDirection(event.url, OrderDirection.ASC)
+				}
+			},
 			blocking: true
 		}))
 	};

@@ -386,7 +386,7 @@ type Group implements ActivityLogger & Node {
     last: Int
 
     """Ordering options for items returned from the connection."""
-    orderBy: GroupMemberOrder
+    orderBy: UserOrder
   ): GroupMemberConnection!
 
   """Full name of group."""
@@ -513,24 +513,6 @@ type GroupMemberEdge {
   node: GroupMember!
 }
 
-"""Ordering options for group members."""
-input GroupMemberOrder {
-  """The direction to order items by."""
-  direction: OrderDirection!
-
-  """The field to order items by."""
-  field: GroupMemberOrderField!
-}
-
-"""Possible fields to order group members by."""
-enum GroupMemberOrderField {
-  """The email address of the user."""
-  EMAIL
-
-  """The name of the user."""
-  NAME
-}
-
 type GroupMemberRemovedActivityLogEntry implements ActivityLogEntry & Node {
   """
   The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
@@ -578,6 +560,12 @@ input GroupOrder {
 
 """Possible fields to order groups by."""
 enum GroupOrderField {
+  """The category of the group."""
+  CATEGORY
+
+  """The full name of the group."""
+  NAME
+
   """The team of the group."""
   TEAM
 }
@@ -1888,6 +1876,9 @@ type SharedBucket implements Node {
     """Get items before this cursor."""
     before: Cursor
 
+    """Filter the results"""
+    filter: GroupFilter
+
     """
     Get the first n items in the connection. This can be used in combination with the after parameter.
     """
@@ -1897,6 +1888,9 @@ type SharedBucket implements Node {
     Get the last n items in the connection. This can be used in combination with the before parameter.
     """
     last: Int
+
+    """Ordering options for items returned from the connection."""
+    orderBy: GroupOrder
   ): GroupConnection!
 
   """The globally unique ID of the SharedBucket."""
@@ -1935,6 +1929,8 @@ type SharedBucket implements Node {
     Get the last n items in the connection. This can be used in combination with the before parameter.
     """
     last: Int
+
+    """Ordering options for items returned from the connection."""
     orderBy: TeamOrder
   ): TeamConnection!
 
@@ -1955,6 +1951,8 @@ type SharedBucket implements Node {
     Get the last n items in the connection. This can be used in combination with the before parameter.
     """
     last: Int
+
+    """Ordering options for items returned from the connection."""
     orderBy: UserOrder
   ): UserConnection!
 
@@ -1980,7 +1978,9 @@ type SharedBucket implements Node {
     Get the last n items in the connection. This can be used in combination with the before parameter.
     """
     last: Int
-    orderBy: TeamMemberOrder
+
+    """Ordering options for items returned from the connection."""
+    orderBy: UserOrder
   ): TeamMemberConnection!
 }
 
@@ -2016,8 +2016,20 @@ input SharedBucketOrder {
 
 """Possible fields to order SharedBucket by."""
 enum SharedBucketOrderField {
+  """The environment of the shared bucket."""
+  ENV
+
+  """The kind of the shared bucket."""
+  KIND
+
   """The name of the shared bucket."""
   NAME
+
+  """The short name of the shared bucket."""
+  SHORT_NAME
+
+  """The team who owns the shared bucket."""
+  TEAM
 }
 
 """
@@ -2122,7 +2134,7 @@ type Team implements ActivityLogger & Node {
     last: Int
 
     """Ordering options for items returned from the connection."""
-    orderBy: TeamMemberOrder
+    orderBy: UserOrder
   ): TeamMemberConnection!
 
   """Section who owns the team"""
@@ -2254,36 +2266,6 @@ type TeamMemberEdge {
   node: TeamMember!
 }
 
-"""Ordering options for team members."""
-input TeamMemberOrder {
-  """The direction to order items by."""
-  direction: OrderDirection!
-
-  """The field to order items by."""
-  field: TeamMemberOrderField!
-}
-
-"""Possible fields to order team members by."""
-enum TeamMemberOrderField {
-  """The email address of the user."""
-  EMAIL
-
-  """The name of user."""
-  NAME
-
-  """The role the user has in the team."""
-  ROLE
-}
-
-"""Team member roles."""
-enum TeamMemberRole {
-  """Regular member, read only access."""
-  MEMBER
-
-  """Team owner, full access to the team."""
-  OWNER
-}
-
 """Ordering options when fetching teams."""
 input TeamOrder {
   """The direction to order items by."""
@@ -2295,8 +2277,11 @@ input TeamOrder {
 
 """Possible fields to order teams by."""
 enum TeamOrderField {
+  """The section code of the team."""
+  SECTION_CODE
+
   """The unique slug of the team."""
-  TEAM_SLUG
+  SLUG
 }
 
 type TeamUpdatedActivityLogEntry implements ActivityLogEntry & Node {
@@ -2443,7 +2428,7 @@ type User implements Node {
     last: Int
 
     """Ordering options for items returned from the connection."""
-    orderBy: UserGroupOrder
+    orderBy: GroupOrder
   ): GroupMemberConnection!
 
   """The globally unique ID of the user."""
@@ -2526,7 +2511,7 @@ type User implements Node {
     last: Int
 
     """Ordering options for items returned from the connection."""
-    orderBy: UserTeamOrder
+    orderBy: TeamOrder
   ): TeamMemberConnection!
 }
 
@@ -2593,21 +2578,6 @@ type UserEdge {
   node: User!
 }
 
-"""Ordering options when fetching the teams a user is connected to."""
-input UserGroupOrder {
-  """The direction to order items by."""
-  direction: OrderDirection!
-
-  """The field to order items by."""
-  field: UserGroupOrderField!
-}
-
-"""Possible fields to order user teams by."""
-enum UserGroupOrderField {
-  """The unique slug of the team."""
-  TEAM_SLUG
-}
-
 """Ordering options when fetching users."""
 input UserOrder {
   """The direction to order items by."""
@@ -2624,6 +2594,9 @@ enum UserOrderField {
 
   """The name of the user."""
   NAME
+
+  """The section code of the user."""
+  SECTION_CODE
 }
 
 """Interface for user sync log entries."""
@@ -2666,21 +2639,6 @@ type UserSyncLogEntryEdge {
 
   """The log entry."""
   node: UserSyncLogEntry!
-}
-
-"""Ordering options when fetching the teams a user is connected to."""
-input UserTeamOrder {
-  """The direction to order items by."""
-  direction: OrderDirection!
-
-  """The field to order items by."""
-  field: UserTeamOrderField!
-}
-
-"""Possible fields to order user teams by."""
-enum UserTeamOrderField {
-  """The unique slug of the team."""
-  TEAM_SLUG
 }
 
 """User updated log entry."""

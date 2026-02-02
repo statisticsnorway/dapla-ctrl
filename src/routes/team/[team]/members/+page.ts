@@ -1,4 +1,5 @@
-import { load_Groups } from '$houdini';
+import { load_Groups, OrderDirection, UserOrderField } from '$houdini';
+import { urlToOrderDirection, urlToOrderField } from '$lib/ui/DaplaTable.svelte';
 import { addPageMeta } from '$lib/utils/pageMeta';
 
 const rows = 25;
@@ -14,6 +15,10 @@ export async function load(event) {
 			event,
 			variables: {
 				team: event.params.team,
+				orderBy: {
+					field: urlToOrderField(UserOrderField, UserOrderField.NAME, event.url),
+					direction: urlToOrderDirection(event.url, OrderDirection.ASC)
+				},
 				...(before ? { before, last: rows } : { after, first: rows })
 			}
 		}))

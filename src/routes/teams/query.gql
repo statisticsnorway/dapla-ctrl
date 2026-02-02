@@ -1,4 +1,4 @@
-query AllTeams @cache(policy: CacheAndNetwork) {
+query AllTeams($orderBy: TeamOrder) @cache(policy: CacheAndNetwork) {
 	me {
 		__typename
 		... on User {
@@ -9,7 +9,7 @@ query AllTeams @cache(policy: CacheAndNetwork) {
 			}
 		}
 	}
-	teams(first: 25) @paginate(mode: SinglePage) {
+	teams(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
 		pageInfo {
 			hasNextPage
 			hasPreviousPage
