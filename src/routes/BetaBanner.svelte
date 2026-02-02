@@ -10,7 +10,7 @@
 	<p class="beta-message">
 		<InformationSquareIcon
 			style="width: 1.5rem;height: 1.5rem; vertical-align: bottom; padding-right: 5px;"
-/> Velkommen til testing av nye Dapla Ctrl. Det gjøres fortsatt endringer fortløpende. Gi oss gjerne
+		/> Velkommen til testing av nye Dapla Ctrl. Det gjøres fortsatt endringer fortløpende. Gi oss gjerne
 		<Button
 			variant="tertiary-neutral"
 			icon={ChatElipsisIcon}
