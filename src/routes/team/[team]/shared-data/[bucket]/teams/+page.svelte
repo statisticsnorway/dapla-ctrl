@@ -65,15 +65,14 @@
 				data-sveltekit-noscroll
 				href={`/team/${params.team}/shared-data/${params.bucket}`}
 				active={page.url.pathname === `/team/${params.team}/shared-data/${params.bucket}`}
-				title="{$TeamSharedBucketAccessTeams.data.sharedBucket.users.pageInfo
-					.totalCount} brukere ({$TeamSharedBucketAccessTeams.data.sharedBucket.uniqueUsers.pageInfo
-					.totalCount} unike)"
+				title="Medlemmer ({$TeamSharedBucketAccessTeams.data.sharedBucket.uniqueUsers.pageInfo
+					.totalCount})"
 			/>
 			<Tab
 				data-sveltekit-noscroll
 				href={`/team/${params.team}/shared-data/${params.bucket}/teams`}
 				active={page.url.pathname === `/team/${params.team}/shared-data/${params.bucket}/teams`}
-				title={`${$TeamSharedBucketAccessTeams.data.sharedBucket.teams.pageInfo.totalCount} team`}
+				title={`Team (${$TeamSharedBucketAccessTeams.data.sharedBucket.teams.pageInfo.totalCount})`}
 			/>
 		</Tabs>
 		<DaplaTable
