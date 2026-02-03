@@ -71,6 +71,7 @@
 	<InternalHeaderButton
 		as="a"
 		href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
+		target="_blank"
 		style="font-size: var(--ax-font-size-medium);"
 	>
 		Dokumentasjon
