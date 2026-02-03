@@ -30,7 +30,11 @@
 <BetaBanner />
 
 <header class="aksel-internalheader header">
-	<InternalHeaderTitle as="a" href="/" style="border: none; padding: 0rem; margin-right: 3rem;">
+	<InternalHeaderTitle
+		as="a"
+		href="/"
+		style="border: none; padding: 0rem; margin-right: 3rem; background-color: transparent;"
+	>
 		<div class="title">Dapla Ctrl</div>
 	</InternalHeaderTitle>
 	<InternalHeaderButton as="a" href="/" style="font-size: var(--ax-font-size-medium);">
