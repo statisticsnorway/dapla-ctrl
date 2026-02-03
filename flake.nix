@@ -10,6 +10,11 @@
     flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
       perSystem = {pkgs, ...}: {
+        apps.actionlint = {
+          type = "app";
+          program = "${pkgs.actionlint}/bin/actionlint";
+        };
+        packages.actionlint = pkgs.actionlint;
         devShells.default = pkgs.mkShell {
           shellHook = ''
             export DAPLA_TEAM_API_URL=https://dapla-team-api.intern.test.ssb.no
