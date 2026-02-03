@@ -191,7 +191,9 @@
 		}
 
 		changeParams({
-			sort: toQueryValue(sortState)
+			sort: toQueryValue(sortState),
+			after: '',
+			before: ''
 		});
 	}}
 >
