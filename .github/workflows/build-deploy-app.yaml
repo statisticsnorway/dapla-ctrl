@@ -1,4 +1,13 @@
 on:
+  workflow_dispatch:
+    inputs:
+      nais_environment:
+        description: NAIS environment to deploy to
+        type: choice
+        options:
+          - test
+          - prod
+        default: test
   release:
     types: [published]
   push:
@@ -61,13 +70,20 @@ jobs:
       - name: Generate NAIS deploy variables
         id: nais-deploy-vars
         run: |
-          if [[ ${{github.event_name}} == "release" ]]; then
-            echo "cluster=prod" >> "$GITHUB_OUTPUT"
-            echo "nais_config_path=.nais/prod.yaml" >> "$GITHUB_OUTPUT"
-          else
-            echo "cluster=test" >> "$GITHUB_OUTPUT"
-            echo "nais_config_path=.nais/test.yaml" >> "$GITHUB_OUTPUT"
-          fi
+          case "${{ github.event_name }}" in
+            release)
+              nais_env="prod"
+              ;;
+            workflow_dispatch)
+              nais_env="${{ inputs.nais_environment }}"
+              ;;
+            *)
+              nais_env="test"
+              ;;
+          esac
+
+          echo "cluster=${nais_env}" >> "$GITHUB_OUTPUT"
+          echo "nais_config_path=.nais/${nais_env}.yaml" >> "$GITHUB_OUTPUT"
 
   build-push-deploy:
     name: Build image, push to registries and deploy image
