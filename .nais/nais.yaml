@@ -65,7 +65,7 @@ spec:
     - name: GRPC_LISTEN_ADDRESS
       value: ":3001"
     - name: GOOGLE_MANAGEMENT_PROJECT_ID
-      value: dapla-platform-t-29
+      value: dapla-api-pp
     - name: JWT_ISSUER
       value: https://auth.ssb.no/realms/ssb
     - name: OAUTH_ISSUER
