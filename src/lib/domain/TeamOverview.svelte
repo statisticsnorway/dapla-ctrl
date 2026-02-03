@@ -54,45 +54,47 @@
 		loaders
 	}: Props = $props();
 
-	const hasUserGroups = teamsData.some((t) => t.userGroups !== undefined);
+	const hasUserGroups = $derived(teamsData.some((t) => t.userGroups !== undefined));
 
-	const columns = [
-		{
-			id: 'NAME',
-			name: 'Navn',
-			show: 'ALWAYS',
-			cell: nameCell,
-			sortKey: TeamOrderField.SLUG
-		} as const,
-		{
-			id: 'AUTONOMY',
-			name: 'Autonomitetsnivå',
-			show: 'DEFAULT_NO',
-			cell: autonomyCell
-		} as const,
-		hasUserGroups
-			? ({
-					id: 'GROUPS',
-					name: 'Mine roller',
-					show: 'DEFAULT_YES',
-					cell: groupsCell
-				} as const)
-			: undefined,
-		{
-			id: 'MEMBER_COUNT',
-			name: 'Teammedlemmer',
-			align: 'right',
-			show: 'DEFAULT_YES',
-			cell: membersCell
-		} as const,
-		{
-			id: 'MANAGER',
-			name: 'Ansvarlig',
-			show: 'DEFAULT_YES',
-			cell: managerCell,
-			sortKey: TeamOrderField.SECTION_CODE
-		} as const
-	].filter((c) => c !== undefined);
+	const columns = $derived(
+		[
+			{
+				id: 'NAME',
+				name: 'Navn',
+				show: 'ALWAYS',
+				cell: nameCell,
+				sortKey: TeamOrderField.SLUG
+			} as const,
+			{
+				id: 'AUTONOMY',
+				name: 'Autonomitetsnivå',
+				show: 'DEFAULT_NO',
+				cell: autonomyCell
+			} as const,
+			hasUserGroups
+				? ({
+						id: 'GROUPS',
+						name: 'Mine roller',
+						show: 'DEFAULT_YES',
+						cell: groupsCell
+					} as const)
+				: undefined,
+			{
+				id: 'MEMBER_COUNT',
+				name: 'Teammedlemmer',
+				align: 'right',
+				show: 'DEFAULT_YES',
+				cell: membersCell
+			} as const,
+			{
+				id: 'MANAGER',
+				name: 'Ansvarlig',
+				show: 'DEFAULT_YES',
+				cell: managerCell,
+				sortKey: TeamOrderField.SECTION_CODE
+			} as const
+		].filter((c) => c !== undefined)
+	);
 </script>
 
 {#snippet nameCell(team: TeamsData)}
