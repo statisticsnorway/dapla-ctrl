@@ -11,6 +11,7 @@ export async function load(event: PageLoadEvent) {
 		...event.data,
 		...(await load_AllTeamMembers({
 			event,
+			blocking: true,
 			variables: {
 				orderBy: {
 					field: urlToOrderField(UserOrderField, UserOrderField.NAME, event.url),
