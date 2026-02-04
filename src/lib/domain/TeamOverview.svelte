@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import { Button, Heading } from '@nais/ds-svelte-community';
+	import { BodyShort, Button, Heading } from '@nais/ds-svelte-community';
 	import Tab from '$lib/ui/Tab.svelte';
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import { page } from '$app/state';
@@ -54,7 +54,11 @@
 		loaders
 	}: Props = $props();
 
-	const hasUserGroups = $derived(teamsData.some((t) => t.userGroups !== undefined));
+	const isAllTeamsPage = $derived(page.url.pathname === '/teams');
+
+	const description = $derived(
+		isAllTeamsPage ? 'Oversikt over alle team.' : 'Oversikt over alle team du er medlem av.'
+	);
 
 	const columns = $derived(
 		[
@@ -71,14 +75,14 @@
 				show: 'DEFAULT_NO',
 				cell: autonomyCell
 			} as const,
-			hasUserGroups
-				? ({
+			isAllTeamsPage
+				? undefined
+				: ({
 						id: 'GROUPS',
 						name: 'Mine roller',
 						show: 'DEFAULT_YES',
 						cell: groupsCell
-					} as const)
-				: undefined,
+					} as const),
 			{
 				id: 'MEMBER_COUNT',
 				name: 'Teammedlemmer',
@@ -132,7 +136,12 @@
 
 <div class="content-wrapper">
 	<div class="header">
-		<Heading level="1" size="xlarge">Team</Heading>
+		<div>
+			<Heading level="1" size="xlarge">Team</Heading>
+			<div class="description">
+				<BodyShort textColor="subtle" size="medium">{description}</BodyShort>
+			</div>
+		</div>
 		{#if canCreateTeam}
 			<Button as="a" size="medium" href="/team/create" variant="secondary">+ Opprett team</Button>
 		{/if}
@@ -173,6 +182,10 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: var(--ax-space-16);
+	}
+
+	.description {
+		margin-top: var(--ax-space-4);
 	}
 
 	.container {
