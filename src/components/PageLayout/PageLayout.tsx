@@ -3,6 +3,7 @@ import Header from '../Header/Header'
 import styles from './pagelayout.module.scss'
 
 import { Title } from '@statisticsnorway/ssb-component-library'
+import Banner from '../Banner/Banner.tsx'
 
 interface PageLayoutProps {
   title?: string | JSX.Element | undefined
@@ -13,6 +14,7 @@ interface PageLayoutProps {
 const PageLayout = ({ title, button, content }: PageLayoutProps) => {
   return (
     <>
+      <Banner />
       <Header />
       <main className={styles.container}>
         <Breadcrumb />

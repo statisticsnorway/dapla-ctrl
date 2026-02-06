@@ -1,0 +1,10 @@
+@use '@statisticsnorway/ssb-component-library/src/style/variables' as variables;
+
+.header {
+    display: flex;
+    align-items: center;
+    color: variables.$ssb-dark-5;
+    background: variables.$ssb-green-1;
+    padding: 0 4rem;
+    gap: 5px;
+}
