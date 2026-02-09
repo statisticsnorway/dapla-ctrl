@@ -13,18 +13,19 @@ import (
 const listForUser = `-- name: ListForUser :many
 SELECT
 	teams.slug,
-	users.id,
+	$1::UUID AS user_id,
 	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
-	JOIN groups ON groups.team_slug = teams.slug
-	JOIN group_members ON group_members.group_name = groups.name
-	JOIN users ON users.id = group_members.user_id
+	LEFT JOIN groups ON groups.team_slug = teams.slug
+	LEFT JOIN group_members ON group_members.group_name = groups.name
+	LEFT JOIN users ON users.id = group_members.user_id
+	LEFT JOIN sections ON teams.section_code = sections.code
 WHERE
-	group_members.user_id = $1
+	users.id = $1
+	OR sections.manager_id = $1
 GROUP BY
-	users.id,
 	teams.slug
 ORDER BY
 	CASE
@@ -55,7 +56,7 @@ type ListForUserParams struct {
 
 type ListForUserRow struct {
 	Slug       slug.Slug
-	ID         uuid.UUID
+	UserID     uuid.UUID
 	Groups     []string
 	TotalCount int64
 }
@@ -76,7 +77,7 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 		var i ListForUserRow
 		if err := rows.Scan(
 			&i.Slug,
-			&i.ID,
+			&i.UserID,
 			&i.Groups,
 			&i.TotalCount,
 		); err != nil {

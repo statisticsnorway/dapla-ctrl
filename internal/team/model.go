@@ -137,7 +137,7 @@ func toGraphTeamMember(m *teamsql.ListMembersRow) *TeamMember {
 func toGraphUserTeam(m *teamsql.ListForUserRow) *TeamMember {
 	return &TeamMember{
 		TeamSlug: m.Slug,
-		UserID:   m.ID,
+		UserID:   m.UserID,
 		Groups:   m.Groups,
 	}
 }

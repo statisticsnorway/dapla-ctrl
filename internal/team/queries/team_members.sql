@@ -43,18 +43,19 @@ OFFSET
 -- name: ListForUser :many
 SELECT
 	teams.slug,
-	users.id,
+	@user_id::UUID AS user_id,
 	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
-	JOIN groups ON groups.team_slug = teams.slug
-	JOIN group_members ON group_members.group_name = groups.name
-	JOIN users ON users.id = group_members.user_id
+	LEFT JOIN groups ON groups.team_slug = teams.slug
+	LEFT JOIN group_members ON group_members.group_name = groups.name
+	LEFT JOIN users ON users.id = group_members.user_id
+	LEFT JOIN sections ON teams.section_code = sections.code
 WHERE
-	group_members.user_id = @user_id
+	users.id = @user_id
+	OR sections.manager_id = @user_id
 GROUP BY
-	users.id,
 	teams.slug
 ORDER BY
 	CASE

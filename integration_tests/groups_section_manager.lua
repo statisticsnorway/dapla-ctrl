@@ -6,6 +6,7 @@ Helper.SQLExec([[
 	UPDATE sections SET  manager_id = $1 WHERE code = '724'
 ]], manager:id())
 
+
 Test.gql("Manager can create group", function(t)
 	t.addHeader("x-user-email", manager:email())
 
@@ -39,6 +40,49 @@ Test.gql("Manager can create group", function(t)
 		},
 	}
 end)
+
+Test.gql("Team shows up when listing the manager's teams", function(t)
+	t.addHeader("x-user-email", manager:email())
+
+	t.query([[
+		query {
+			me {
+				... on User {
+					teams {
+					pageInfo {
+						totalCount
+					}
+					nodes {
+						team {
+							slug
+						}
+					}
+					}
+				}
+			}
+		}
+		]])
+
+	t.check {
+		data = {
+			me = {
+				teams = {
+					pageInfo = {
+						totalCount = 1,
+					},
+					nodes = {
+						{
+							team = {
+								slug = "slug-one",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+end)
+
 
 local groupName = team:slug() .. "-developers-cowboys"
 
