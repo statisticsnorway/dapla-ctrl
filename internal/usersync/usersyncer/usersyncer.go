@@ -144,6 +144,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 				Email:       eu.Email,
 				ExternalID:  eu.ID,
 				SectionCode: eu.SectionCode,
+				JobTitle:    eu.JobTitle,
 			}); err != nil {
 				return fmt.Errorf("update user %q: %w", eu.Email, err)
 			}
@@ -357,6 +358,10 @@ func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
 		return true
 	}
 
+	if !ptr.Equal(user.JobTitle, eu.JobTitle) {
+		return true
+	}
+
 	return false
 }
 
@@ -375,6 +380,7 @@ func getOrCreateUserFromEntraIdUser(ctx context.Context, querier usersyncsql.Que
 		Email:       entraIdUser.Email,
 		ExternalID:  entraIdUser.ID,
 		SectionCode: entraIdUser.SectionCode,
+		JobTitle:    entraIdUser.JobTitle,
 	})
 	if err != nil {
 		return nil, err
@@ -418,12 +424,16 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 	}
 
 	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
+		jobTitle := user.GetJobTitle()
+		if jobTitle != nil && *jobTitle == "" {
+			jobTitle = nil
+		}
 		users = append(users, &entraIdUser{
 			ID:          *user.GetId(),
 			Email:       strings.ToLower(*user.GetUserPrincipalName()),
 			Name:        *user.GetDisplayName(),
 			SectionCode: parseSectionCode(user.GetDepartment()),
-			JobTitle:    user.GetJobTitle(),
+			JobTitle:    jobTitle,
 		})
 		return true
 	}); err != nil {

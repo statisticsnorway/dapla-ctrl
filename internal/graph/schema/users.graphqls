@@ -60,6 +60,11 @@ type User implements Node {
 	name: String!
 
 	"""
+	The job title of the user.
+	"""
+	jobTitle: String
+
+	"""
 	The external ID of the user. This value is managed by the Dapla API user synchronization.
 	"""
 	externalID: String!

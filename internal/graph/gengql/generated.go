@@ -702,6 +702,7 @@ type ComplexityRoot struct {
 		ID                  func(childComplexity int) int
 		IsAdmin             func(childComplexity int) int
 		IsSectionManager    func(childComplexity int) int
+		JobTitle            func(childComplexity int) int
 		Name                func(childComplexity int) int
 		Section             func(childComplexity int) int
 		SharedBucketsAccess func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
@@ -3434,6 +3435,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.IsSectionManager(childComplexity), true
+	case "User.jobTitle":
+		if e.complexity.User.JobTitle == nil {
+			break
+		}
+
+		return e.complexity.User.JobTitle(childComplexity), true
 	case "User.name":
 		if e.complexity.User.Name == nil {
 			break
@@ -6949,6 +6956,11 @@ type User implements Node {
 	name: String!
 
 	"""
+	The job title of the user.
+	"""
+	jobTitle: String
+
+	"""
 	The external ID of the user. This value is managed by the Dapla API user synchronization.
 	"""
 	externalID: String!
@@ -10082,6 +10094,8 @@ func (ec *executionContext) fieldContext_GroupMember_user(_ context.Context, fie
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -12755,6 +12769,8 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -14738,6 +14754,8 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_user(_ context
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -16345,6 +16363,8 @@ func (ec *executionContext) fieldContext_Section_manager(_ context.Context, fiel
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -20797,6 +20817,8 @@ func (ec *executionContext) fieldContext_TeamMember_user(_ context.Context, fiel
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -21697,6 +21719,35 @@ func (ec *executionContext) fieldContext_User_name(_ context.Context, field grap
 	return fc, nil
 }
 
+func (ec *executionContext) _User_jobTitle(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_jobTitle,
+		func(ctx context.Context) (any, error) {
+			return obj.JobTitle, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_jobTitle(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_externalID(ctx context.Context, field graphql.CollectedField, obj *user.User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -22094,6 +22145,8 @@ func (ec *executionContext) fieldContext_UserConnection_nodes(_ context.Context,
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -22559,6 +22612,8 @@ func (ec *executionContext) fieldContext_UserEdge_node(_ context.Context, field 
 				return ec.fieldContext_User_email(ctx, field)
 			case "name":
 				return ec.fieldContext_User_name(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
 			case "externalID":
 				return ec.fieldContext_User_externalID(ctx, field)
 			case "section":
@@ -31876,6 +31931,8 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "jobTitle":
+			out.Values[i] = ec._User_jobTitle(ctx, field, obj)
 		case "externalID":
 			out.Values[i] = ec._User_externalID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

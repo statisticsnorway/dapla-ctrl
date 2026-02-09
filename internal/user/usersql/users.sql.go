@@ -11,7 +11,7 @@ import (
 
 const getByEmail = `-- name: GetByEmail :one
 SELECT
-	id, email, name, external_id, admin, section_code
+	id, email, name, external_id, admin, section_code, job_title
 FROM
 	users
 WHERE
@@ -28,13 +28,14 @@ func (q *Queries) GetByEmail(ctx context.Context, email string) (*User, error) {
 		&i.ExternalID,
 		&i.Admin,
 		&i.SectionCode,
+		&i.JobTitle,
 	)
 	return &i, err
 }
 
 const getByExternalId = `-- name: GetByExternalId :one
 SELECT
-	id, email, name, external_id, admin, section_code
+	id, email, name, external_id, admin, section_code, job_title
 FROM
 	users
 WHERE
@@ -51,13 +52,14 @@ func (q *Queries) GetByExternalId(ctx context.Context, externalID string) (*User
 		&i.ExternalID,
 		&i.Admin,
 		&i.SectionCode,
+		&i.JobTitle,
 	)
 	return &i, err
 }
 
 const getByIDs = `-- name: GetByIDs :many
 SELECT
-	id, email, name, external_id, admin, section_code
+	id, email, name, external_id, admin, section_code, job_title
 FROM
 	users
 WHERE
@@ -83,6 +85,7 @@ func (q *Queries) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*User, error
 			&i.ExternalID,
 			&i.Admin,
 			&i.SectionCode,
+			&i.JobTitle,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +99,7 @@ func (q *Queries) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*User, error
 
 const list = `-- name: List :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title,
 	COUNT(*) OVER () AS total_count
 FROM
 	users
@@ -154,6 +157,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 			&i.User.ExternalID,
 			&i.User.Admin,
 			&i.User.SectionCode,
+			&i.User.JobTitle,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -168,7 +172,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 
 const listTeamMembersForUser = `-- name: ListTeamMembersForUser :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title,
 	COUNT(*) OVER () AS total_count
 FROM
 	(
@@ -252,6 +256,7 @@ func (q *Queries) ListTeamMembersForUser(ctx context.Context, arg ListTeamMember
 			&i.User.ExternalID,
 			&i.User.Admin,
 			&i.User.SectionCode,
+			&i.User.JobTitle,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

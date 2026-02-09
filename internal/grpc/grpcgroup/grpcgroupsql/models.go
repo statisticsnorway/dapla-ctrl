@@ -22,4 +22,5 @@ type User struct {
 	ExternalID  string
 	Admin       bool
 	SectionCode *string
+	JobTitle    *string
 }

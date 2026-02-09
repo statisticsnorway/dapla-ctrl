@@ -607,7 +607,7 @@ func (q *Queries) ListTeamsForBucket(ctx context.Context, arg ListTeamsForBucket
 
 const listUniqueUsersForBucket = `-- name: ListUniqueUsersForBucket :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap
@@ -658,6 +658,7 @@ type ListUniqueUsersForBucketRow struct {
 	ExternalID  string
 	Admin       bool
 	SectionCode *string
+	JobTitle    *string
 	TotalCount  int64
 }
 
@@ -682,6 +683,7 @@ func (q *Queries) ListUniqueUsersForBucket(ctx context.Context, arg ListUniqueUs
 			&i.ExternalID,
 			&i.Admin,
 			&i.SectionCode,
+			&i.JobTitle,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

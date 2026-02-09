@@ -25,6 +25,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -314,6 +315,110 @@ func TestSync(t *testing.T) {
 		}
 	})
 
+	t.Run("sync job title", func(t *testing.T) {
+		ctx, pool := setup(t)
+		querier := usersyncsql.New(pool)
+
+		// Create a user without job title in DB
+		userWithoutJobTitle, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:       "No Job Title",
+			Email:      "no-title@example.com",
+			ExternalID: "1",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create a user with outdated job title
+		userWithOutdatedJobTitle, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:       "Old Title",
+			Email:      "old-title@example.com",
+			ExternalID: "2",
+			JobTitle:   ptr.To("Old Job Title"),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Create a user with job title that will be removed
+		userWithJobTitleToRemove, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:       "Will Lose Title",
+			Email:      "lose-title@example.com",
+			ExternalID: "3",
+			JobTitle:   ptr.To("Current Title"),
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		httpClient := test.NewTestHttpClient(
+			func(req *http.Request) *http.Response {
+				// All users response
+				return test.Response("200 OK", generateEntraIdResponse(
+					externalUser{Id: "1", Email: "no-title@example.com", Name: "No Job Title", JobTitle: ptr.To("New Job Title")},   // Will get job title added
+					externalUser{Id: "2", Email: "old-title@example.com", Name: "Old Title", JobTitle: ptr.To("Updated Job Title")}, // Will get job title updated
+					externalUser{Id: "3", Email: "lose-title@example.com", Name: "Will Lose Title"},                                 // Will lose job title (nil JobTitle)
+					externalUser{Id: "4", Email: "new-user@example.com", Name: "New User", JobTitle: ptr.To("Senior Developer")},    // Will be created with job title
+				))
+			},
+			func(req *http.Request) *http.Response {
+				// Admin users response
+				return test.Response("200 OK", generateEntraIdResponse())
+			},
+		)
+
+		auth := authentication.NewBaseBearerTokenAuthenticationProvider(&fakeCred{})
+		adapter, err := msgraphsdk.NewGraphRequestAdapterWithParseNodeFactoryAndSerializationWriterFactoryAndHttpClient(
+			auth, nil, nil, httpClient,
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		client := msgraphsdk.NewGraphServiceClient(adapter)
+
+		err = usersyncer.
+			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			Sync(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Test: User without job title gets one on sync
+		if u, err := user.Get(ctx, userWithoutJobTitle.ID); err != nil {
+			t.Fatal(err)
+		} else if u.JobTitle == nil {
+			t.Errorf("expected user %q to have job title 'New Job Title', got nil", u.Email)
+		} else if *u.JobTitle != "New Job Title" {
+			t.Errorf("expected user %q to have job title 'New Job Title', got %q", u.Email, *u.JobTitle)
+		}
+
+		// Test: User with outdated job title gets updated
+		if u, err := user.Get(ctx, userWithOutdatedJobTitle.ID); err != nil {
+			t.Fatal(err)
+		} else if u.JobTitle == nil {
+			t.Errorf("expected user %q to have job title 'Updated Job Title', got nil", u.Email)
+		} else if *u.JobTitle != "Updated Job Title" {
+			t.Errorf("expected user %q to have job title 'Updated Job Title', got %q", u.Email, *u.JobTitle)
+		}
+
+		// Test: User with job title that is removed in remote gets it removed
+		if u, err := user.Get(ctx, userWithJobTitleToRemove.ID); err != nil {
+			t.Fatal(err)
+		} else if u.JobTitle != nil {
+			t.Errorf("expected user %q to have no job title, got %q", u.Email, *u.JobTitle)
+		}
+
+		// Test: New user created with job title
+		if u, err := user.GetByEmail(ctx, "new-user@example.com"); err != nil {
+			t.Fatal(err)
+		} else if u.JobTitle == nil {
+			t.Errorf("expected user %q to have job title 'Senior Developer', got nil", u.Email)
+		} else if *u.JobTitle != "Senior Developer" {
+			t.Errorf("expected user %q to have job title 'Senior Developer', got %q", u.Email, *u.JobTitle)
+		}
+	})
+
 	t.Run("create users and set as section managers", func(t *testing.T) {
 		ctx, pool := setup(t)
 		querier := usersyncsql.New(pool)
@@ -336,11 +441,11 @@ func TestSync(t *testing.T) {
 
 		// Create two users, one who is currently manager in the API's database,
 		// and a new manager to replace them.
-		oldBossA := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: fullName(sectionA), JobTitle: "Pensjonist"} // Will be removed
-		bossUserA := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: fullName(sectionA), JobTitle: "Seksjonssjef"}  // Will be created
+		oldBossA := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: fullName(sectionA), JobTitle: ptr.To("Pensjonist")} // Will be removed
+		bossUserA := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: fullName(sectionA), JobTitle: ptr.To("Seksjonssjef")}  // Will be created
 
 		// Create forskningsleder for 667
-		bossUserB := externalUser{Id: "3", Email: "einstein@example.com", Name: "Ein Stein", Section: fullName(sectionB), JobTitle: "Forskningsleder"} // Will be created
+		bossUserB := externalUser{Id: "3", Email: "einstein@example.com", Name: "Ein Stein", Section: fullName(sectionB), JobTitle: ptr.To("Forskningsleder")} // Will be created
 
 		// Create the old boss in the database so we can use him as manager
 		oldBossDbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
@@ -445,7 +550,7 @@ func TestSync(t *testing.T) {
 		sectionFullName := fmt.Sprintf("O %s %s", sectionCode, sectionName)
 
 		// The user to demote (imagine they previously had the title "Seksjonssjef")
-		demoted := externalUser{Id: "1", Email: "ex-jefe@example.com", Name: "No Longer Boss", Section: sectionFullName, JobTitle: "Ikke-seksjonssjef"} // Will be created
+		demoted := externalUser{Id: "1", Email: "ex-jefe@example.com", Name: "No Longer Boss", Section: sectionFullName, JobTitle: ptr.To("Ikke-seksjonssjef")} // Will be created
 
 		dbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
 			Name:       demoted.Name,
@@ -567,11 +672,11 @@ func (b fakeCred) GetAllowedHostsValidator() *authentication.AllowedHostsValidat
 }
 
 type externalUser struct {
-	Id       string `json:"id"`
-	Email    string `json:"userPrincipalName"`
-	Name     string `json:"displayName"`
-	Section  string `json:"department"`
-	JobTitle string `json:"jobTitle"`
+	Id       string  `json:"id"`
+	Email    string  `json:"userPrincipalName"`
+	Name     string  `json:"displayName"`
+	Section  string  `json:"department"`
+	JobTitle *string `json:"jobTitle"`
 }
 
 func generateEntraIdResponse(users ...externalUser) string {
@@ -586,6 +691,9 @@ func generateEntraIdResponse(users ...externalUser) string {
 
 	res := eIdResponse{}
 	for _, u := range users {
+		if u.JobTitle != nil && *u.JobTitle == "" {
+			u.JobTitle = nil
+		}
 		res.Value = append(res.Value, eIdResponseNode{u, "#microsoft.graph.user"})
 	}
 

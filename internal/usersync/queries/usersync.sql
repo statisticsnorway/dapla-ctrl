@@ -22,14 +22,22 @@ ORDER BY
 
 -- name: Create :one
 INSERT INTO
-	users (name, email, external_id, admin, section_code)
+	users (
+		name,
+		email,
+		external_id,
+		admin,
+		section_code,
+		job_title
+	)
 VALUES
 	(
 		@name,
 		LOWER(@email),
 		@external_id,
 		FALSE,
-		@section_code
+		@section_code,
+		@job_title
 	)
 RETURNING
 	*
@@ -41,7 +49,8 @@ SET
 	name = @name,
 	email = LOWER(@email),
 	external_id = @external_id,
-	section_code = @section_code
+	section_code = @section_code,
+	job_title = @job_title
 WHERE
 	id = @id
 ;
