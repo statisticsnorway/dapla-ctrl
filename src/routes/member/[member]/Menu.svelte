@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { graphql } from '$houdini';
+	import { get } from 'svelte/store';
 	import Menu from '$lib/ui/Menu.svelte';
 	import { setInventoryRefetcher } from './userContext.svelte';
 
@@ -54,11 +56,18 @@
 			};
 		const [, , user, page] = split;
 		const menuItem = item(`/member/${user}`, page);
-		return [[menuItem('Brukeroversikt'), menuItem('Datadeling', 'shared-data')]];
+		return [
+			[
+				menuItem('Oversikt'),
+				menuItem('Medlemskap', 'membership'),
+				menuItem('Datatilgang', 'shared-data')
+			]
+		];
 	};
 
-	const Inventory = $derived(
-		graphql(`
+	const Inventory = $derived.by(() => {
+		if (!browser) return null;
+		return graphql(`
 			query UserInventory($user: String) @cache(policy: CacheAndNetwork) {
 				user(email: $user) {
 					sharedBucketsAccess(first: 1) {
@@ -68,29 +77,40 @@
 					}
 				}
 			}
-		`)
-	);
+		`);
+	});
 
 	$effect(() => {
-		Inventory.fetch({
-			variables: {
-				user: user
-			}
-		});
+		if (Inventory) {
+			Inventory.fetch({
+				variables: {
+					user: user
+				}
+			});
+		}
 	});
 
 	setInventoryRefetcher(() => {
-		Inventory.fetch({
-			variables: {
-				user: user
-			}
-		});
+		if (Inventory) {
+			Inventory.fetch({
+				variables: {
+					user: user
+				}
+			});
+		}
+	});
+
+	const inventoryData = $derived.by(() => {
+		if (!Inventory) return undefined;
+		const store = Inventory as NonNullable<typeof Inventory>;
+		const storeValue = get(store);
+		return !storeValue.fetching ? storeValue.data?.user : undefined;
 	});
 </script>
 
 <Menu
 	items={menuItems({
 		path: page.url.pathname,
-		inventory: $Inventory.fetching ? undefined : $Inventory.data?.user
+		inventory: inventoryData
 	})}
 />

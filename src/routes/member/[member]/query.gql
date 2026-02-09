@@ -3,8 +3,13 @@ query UserOverview($user: String) @cache(policy: NetworkOnly) {
 		id
 		name
 		email
+		jobTitle
 		isAdmin
 		isSectionManager
+		section {
+			code
+			name
+		}
 		teams(first: 25) @paginate(mode: SinglePage) {
 			pageInfo {
 				hasNextPage

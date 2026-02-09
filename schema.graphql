@@ -2440,6 +2440,9 @@ type User implements Node {
   """True if the user is a section mnager."""
   isSectionManager: Boolean!
 
+  """The job title of the user."""
+  jobTitle: String
+
   """The full name of the user."""
   name: String!
 

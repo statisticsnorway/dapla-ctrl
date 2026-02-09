@@ -3,7 +3,6 @@
 		FloppydiskIcon,
 		HexagonGridIcon,
 		PersonGroupIcon,
-		PersonIcon,
 		QuestionmarkIcon,
 		ShieldLockIcon
 	} from '@nais/ds-svelte-community/icons';
@@ -16,6 +15,7 @@
 			case 'oversikt':
 				return HexagonGridIcon;
 			case 'medlemmer':
+			case 'medlemskap':
 			case 'groups':
 			case 'grupper':
 				return PersonGroupIcon;
@@ -23,9 +23,8 @@
 			case 'activity log':
 			case 'aktivitetslogg':
 				return ShieldLockIcon;
-			case 'brukeroversikt':
-				return PersonIcon;
 			case 'datadeling':
+			case 'datatilgang':
 				return FloppydiskIcon;
 			default:
 				return QuestionmarkIcon;
