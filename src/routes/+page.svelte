@@ -8,6 +8,10 @@
 
 	let { UserTeams, UserInfo } = $derived(data);
 
+	let userEmail = $derived(
+		$UserInfo.data?.me.__typename === 'User' ? $UserInfo.data.me.email : undefined
+	);
+
 	const canCreateTeam = $derived.by(() => {
 		let me = $UserInfo.data?.me;
 		if (me?.__typename !== 'User') return false;
@@ -62,6 +66,7 @@
 
 <div class="page">
 	<TeamOverview
+		{userEmail}
 		{canCreateTeam}
 		{userTeamsCount}
 		{allTeamsCount}

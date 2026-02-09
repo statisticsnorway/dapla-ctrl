@@ -25,6 +25,7 @@
 		userGroups?: string[];
 	};
 	interface Props {
+		userEmail?: string;
 		canCreateTeam: boolean;
 		userTeamsCount: number;
 		allTeamsCount: number;
@@ -45,6 +46,7 @@
 			| undefined;
 	}
 	let {
+		userEmail,
 		canCreateTeam,
 		userTeamsCount,
 		allTeamsCount,
@@ -116,6 +118,10 @@
 	{/if}
 {/snippet}
 {#snippet groupsCell(team: TeamsData)}
+	{#if team.manager.email === userEmail}
+		<i>Teamansvarlig</i>{#if team.userGroups?.length ?? 0 > 0},
+		{/if}
+	{/if}
 	{team.userGroups
 		?.map((g) => g.substring(team.slug.length + 1))
 		.toSorted()

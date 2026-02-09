@@ -1,0 +1,43 @@
+query UserMemberships($user: String!) {
+	user(email: $user) {
+		id
+		teams(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageEnd
+				pageStart
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				groups {
+					id
+					name
+				}
+				team {
+					id
+					slug
+					displayName
+					isManaged
+					section {
+						id
+						code
+						name
+						manager {
+							id
+							name
+							email
+						}
+					}
+					members(first: 1) {
+						pageInfo {
+							totalCount
+						}
+					}
+				}
+			}
+		}
+	}
+}

@@ -2,18 +2,22 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import { Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
-	import { graphql, type GetUserTeamsForExport$result, type UserOverview$result } from '$houdini';
+	import {
+		graphql,
+		type GetUserTeamsForExport$result,
+		type UserMemberships$result
+	} from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
-	let { data }: PageProps = $props();
+	let { data, params }: PageProps = $props();
 
-	let { UserOverview } = $derived(data);
+	let { UserMemberships } = $derived(data);
 
-	type TeamNode = UserOverview$result['user']['teams']['nodes'][0];
+	type TeamNode = UserMemberships$result['user']['teams']['nodes'][0];
 
 	type TeamItem = TeamNode & { id: string };
 
-	let userTeamsCount = $derived($UserOverview.data?.user.teams.nodes.length || 0);
+	let userTeamsCount = $derived($UserMemberships.data?.user.teams.nodes.length || 0);
 
 	const getAllForExport = graphql(`
 		query GetUserTeamsForExport($user: String, $total: Int) {
@@ -81,6 +85,10 @@
 	{/if}
 {/snippet}
 {#snippet rolesCell(item: TeamItem)}
+	{#if item.team.section.manager?.email === params.member}
+		<i>Teamansvarlig</i>{#if item.groups.length > 0},
+		{/if}
+	{/if}
 	{item.groups
 		?.map((g) => g.name.substring(item.team.slug.length + 1))
 		.toSorted()
@@ -99,7 +107,7 @@
 	{item.team.section.name} ({item.team.section.code})
 {/snippet}
 
-{#if $UserOverview.data?.user?.teams?.nodes}
+{#if $UserMemberships.data?.user?.teams?.nodes}
 	<div class="container">
 		<div>
 			<div class="section-header">
@@ -110,12 +118,12 @@
 					getAllForExport
 						.fetch({
 							variables: {
-								user: $UserOverview.data?.user.email,
-								total: $UserOverview.data?.user.teams.pageInfo.totalCount
+								user: params.member,
+								total: $UserMemberships.data?.user.teams.pageInfo.totalCount
 							}
 						})
 						.then((result) => transformToExportable(result.data?.user.teams.nodes ?? []))}
-				data={$UserOverview.data.user.teams.nodes.map((n) => {
+				data={$UserMemberships.data.user.teams.nodes.map((n) => {
 					return { id: n.team.id, ...n };
 				})}
 				fieldsCookie={{ path: '/member' }}
@@ -155,12 +163,12 @@
 			/>
 		</div>
 	</div>
-	{#if $UserOverview.data?.user?.teams?.pageInfo}
+	{#if $UserMemberships.data?.user?.teams?.pageInfo}
 		<Pagination
-			page={$UserOverview.data.user.teams.pageInfo}
+			page={$UserMemberships.data.user.teams.pageInfo}
 			loaders={{
-				loadPreviousPage: () => UserOverview.loadPreviousPage(),
-				loadNextPage: () => UserOverview.loadNextPage()
+				loadPreviousPage: () => UserMemberships.loadPreviousPage(),
+				loadNextPage: () => UserMemberships.loadNextPage()
 			}}
 		/>
 	{/if}
