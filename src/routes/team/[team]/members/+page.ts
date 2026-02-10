@@ -13,6 +13,7 @@ export async function load(event) {
 		...event.data,
 		...(await load_Groups({
 			event,
+			blocking: true,
 			variables: {
 				team: event.params.team,
 				orderBy: {
