@@ -60,6 +60,16 @@ type User implements Node {
 	name: String!
 
 	"""
+	The first name of the user.
+	"""
+	firstName: String!
+
+	"""
+	The last name of the user.
+	"""
+	lastName: String!
+
+	"""
 	The job title of the user.
 	"""
 	jobTitle: String

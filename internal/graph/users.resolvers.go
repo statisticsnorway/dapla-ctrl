@@ -2,6 +2,7 @@ package graph
 
 import (
 	"context"
+	"strings"
 
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
@@ -32,6 +33,26 @@ func (r *queryResolver) User(ctx context.Context, email *string) (*user.User, er
 
 func (r *queryResolver) Me(ctx context.Context) (authz.AuthenticatedUser, error) {
 	return authz.ActorFromContext(ctx).User, nil
+}
+
+func (r *userResolver) FirstName(ctx context.Context, obj *user.User) (string, error) {
+	parts := strings.SplitN(obj.Name, ", ", 2)
+	if len(parts) == 1 {
+		// Assuming people use firstName more than lastName,
+		// returning firstName=name for an "invalid" name seems correct.
+		return parts[0], nil
+	}
+	return parts[1], nil
+}
+
+func (r *userResolver) LastName(ctx context.Context, obj *user.User) (string, error) {
+	parts := strings.SplitN(obj.Name, ", ", 2)
+	if len(parts) == 1 {
+		// Assuming people use firstName more than lastName,
+		// returning lastName="" for an "invalid" name seems correct.
+		return "", nil
+	}
+	return parts[0], nil
 }
 
 func (r *userResolver) Section(ctx context.Context, obj *user.User) (*section.Section, error) {
