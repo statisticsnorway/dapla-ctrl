@@ -23,6 +23,9 @@ export async function load(event) {
 					]
 	});
 	return {
-		...meta
+		...meta,
+		...{
+			userDisplayName: name
+		}
 	};
 }

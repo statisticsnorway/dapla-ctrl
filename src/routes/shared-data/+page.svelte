@@ -69,7 +69,7 @@
 			<Heading level="1" size="xlarge">Datadeling</Heading>
 			<div class="description">
 				<BodyShort textColor="subtle" size="medium">
-					Oversikt over alle delt-bøtter på Dapla.
+					Oversikt over alle deltbøtter på Dapla.
 				</BodyShort>
 			</div>
 		</div>

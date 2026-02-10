@@ -8,16 +8,10 @@
 
 	let { data }: PageProps = $props();
 
-	let { UserSharedBucketAccess } = $derived(data);
+	let { UserSharedBucketAccess, userDisplayName } = $derived(data);
 
 	type BucketItem = UserSharedBucketAccess$result['user']['sharedBucketsAccess']['nodes'][0];
 </script>
-
-<div class="description">
-	<BodyShort textColor="subtle" size="medium">
-		Oversikt over hvilke deltbøtter medlemmet har tilgang til.
-	</BodyShort>
-</div>
 
 {#snippet nameCell(bucket: BucketItem)}
 	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
@@ -38,6 +32,12 @@
 	<br />
 	{bucket.team.slug}
 {/snippet}
+
+<div class="description">
+	<BodyShort textColor="subtle" size="medium">
+		Oversikt over hvilke deltbøtter {userDisplayName} har tilgang til.
+	</BodyShort>
+</div>
 
 {#if $UserSharedBucketAccess.data}
 	<div class="container">

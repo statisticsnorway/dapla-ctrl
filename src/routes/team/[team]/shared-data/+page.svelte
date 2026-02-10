@@ -36,7 +36,7 @@
 
 <div class="description">
 	<BodyShort textColor="subtle" size="medium">
-		Oversikt over hvilke deltbøtter {displayName} deler, og hvilke de har tilgang til hos andre team.
+		Oversikt over hvilke deltbøtter {displayName} deler.
 	</BodyShort>
 </div>
 

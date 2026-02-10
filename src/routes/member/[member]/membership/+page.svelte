@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import { Heading } from '@nais/ds-svelte-community';
+	import { BodyShort, Heading } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import {
 		graphql,
@@ -11,13 +11,11 @@
 
 	let { data, params }: PageProps = $props();
 
-	let { UserMemberships } = $derived(data);
+	let { UserMemberships, userDisplayName } = $derived(data);
 
 	type TeamNode = UserMemberships$result['user']['teams']['nodes'][0];
 
 	type TeamItem = TeamNode & { id: string };
-
-	let userTeamsCount = $derived($UserMemberships.data?.user.teams.nodes.length || 0);
 
 	const getAllForExport = graphql(`
 		query GetUserTeamsForExport($user: String, $total: Int) {
@@ -107,11 +105,19 @@
 	{item.team.section.name} ({item.team.section.code})
 {/snippet}
 
+<div class="description">
+	<BodyShort textColor="subtle" size="medium"
+		>Oversikt over hvilke team {userDisplayName} er medlem av.</BodyShort
+	>
+</div>
+
 {#if $UserMemberships.data?.user?.teams?.nodes}
 	<div class="container">
 		<div>
 			<div class="section-header">
-				<Heading level="2" as="h2" spacing>Medlem av {userTeamsCount} team</Heading>
+				<Heading level="2" as="h2" spacing
+					>Medlem av {$UserMemberships.data.user.teams.pageInfo.totalCount} team</Heading
+				>
 			</div>
 			<DaplaTable
 				exportTable={() =>
@@ -173,3 +179,10 @@
 		/>
 	{/if}
 {/if}
+
+<style>
+	.description {
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--ax-space-16);
+	}
+</style>

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { graphql } from '$houdini';
-	import { get } from 'svelte/store';
 	import Menu from '$lib/ui/Menu.svelte';
 	import { setInventoryRefetcher } from './userContext.svelte';
 
@@ -23,13 +21,15 @@
 		path: string;
 		inventory?: {
 			sharedBucketsAccess: Paginated;
+			teams: Paginated;
 		};
 	}): { label: string; href: string; active?: boolean; count?: number }[][] => {
 		const split = path.split('/');
 
 		const getInventory = (pageName?: string) => {
 			const pageNameToINventory = {
-				'shared-data': 'sharedBucketsAccess'
+				'shared-data': 'sharedBucketsAccess',
+				membership: 'teams'
 			} as const;
 			return {
 				count:
@@ -65,11 +65,15 @@
 		];
 	};
 
-	const Inventory = $derived.by(() => {
-		if (!browser) return null;
-		return graphql(`
-			query UserInventory($user: String) @cache(policy: CacheAndNetwork) {
+	const Inventory = $derived(
+		graphql(`
+			query UserInventory($user: String!) @cache(policy: CacheAndNetwork) {
 				user(email: $user) {
+					teams(first: 1) {
+						pageInfo {
+							totalCount
+						}
+					}
 					sharedBucketsAccess(first: 1) {
 						pageInfo {
 							totalCount
@@ -77,8 +81,8 @@
 					}
 				}
 			}
-		`);
-	});
+		`)
+	);
 
 	$effect(() => {
 		if (Inventory) {
@@ -99,18 +103,11 @@
 			});
 		}
 	});
-
-	const inventoryData = $derived.by(() => {
-		if (!Inventory) return undefined;
-		const store = Inventory as NonNullable<typeof Inventory>;
-		const storeValue = get(store);
-		return !storeValue.fetching ? storeValue.data?.user : undefined;
-	});
 </script>
 
 <Menu
 	items={menuItems({
 		path: page.url.pathname,
-		inventory: inventoryData
+		inventory: $Inventory.fetching ? undefined : $Inventory.data?.user
 	})}
 />
