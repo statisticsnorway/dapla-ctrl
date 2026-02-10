@@ -109,7 +109,7 @@
 							icon,
 							label: result.name,
 							description: `${memberCount} medlem${memberCount != 1 ? 'mer' : ''}`,
-							href: `/team/${result.teamSlug}/groups`,
+							href: `/team/${result.teamSlug}/members`,
 							type: 'link'
 						};
 					}
@@ -118,7 +118,7 @@
 						icon,
 						label: result.shortName,
 						description: result.name,
-						href: `team/${result.team.slug}/shared-data/${result.name}`,
+						href: `/team/${result.team.slug}/shared-data/${result.name}`,
 						type: 'link'
 					};
 				})
