@@ -22,16 +22,6 @@ func (e ErrNotFound) GraphError() string {
 	return "The specified user was not found."
 }
 
-func (e *ErrNotFound) As(v any) bool {
-	_, ok := v.(*ErrNotFound)
-	return ok
-}
-
-func (e *ErrNotFound) Is(v error) bool {
-	_, ok := v.(*ErrNotFound)
-	return ok
-}
-
 func handleError(err error) error {
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ErrNotFound{
