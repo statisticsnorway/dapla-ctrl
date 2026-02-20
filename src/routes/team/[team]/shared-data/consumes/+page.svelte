@@ -7,7 +7,7 @@
 	import Tab from '$lib/ui/Tab.svelte';
 	import Tabs from '$lib/ui/Tabs.svelte';
 	import { page } from '$app/state';
-	import { BodyShort } from '@nais/ds-svelte-community';
+	import { BodyShort, CopyButton } from '@nais/ds-svelte-community';
 
 	let { data, params }: PageProps = $props();
 
@@ -18,8 +18,25 @@
 
 {#snippet nameCell(bucket: BucketItem)}
 	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
+	<CopyButton
+		copyText={bucket.shortName}
+		title={bucket.shortName}
+		iconPosition="right"
+		size="xsmall"
+	/>
 	<br />
 	{bucket.name}
+{/snippet}
+{#snippet ownerCell(bucket: BucketItem)}
+	{bucket.team.displayName}
+	<br />
+	{bucket.team.slug}
+	<CopyButton
+		copyText={bucket.team.slug}
+		title={bucket.team.slug}
+		iconPosition="right"
+		size="xsmall"
+	/>
 {/snippet}
 {#snippet typeCell(bucket: BucketItem)}
 	{capitalizeFirstLetter(bucket.kind)}
@@ -67,6 +84,12 @@
 					show: 'ALWAYS',
 					cell: nameCell,
 					sortKey: SharedBucketOrderField.SHORT_NAME
+				},
+				{
+					id: 'OWNER',
+					name: 'Eier team',
+					show: 'DEFAULT_YES',
+					cell: ownerCell
 				},
 				{
 					id: 'TYPE',

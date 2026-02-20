@@ -2406,6 +2406,9 @@ type User implements Node {
   """
   externalID: String!
 
+  """The first name of the user."""
+  firstName: String!
+
   """Get a list of the groups the user is a member of."""
   groups(
     """Get items after this cursor."""
@@ -2442,6 +2445,9 @@ type User implements Node {
 
   """The job title of the user."""
   jobTitle: String
+
+  """The last name of the user."""
+  lastName: String!
 
   """The full name of the user."""
   name: String!

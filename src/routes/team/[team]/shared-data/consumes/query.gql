@@ -25,6 +25,7 @@ query ConsumesSharedData($team: Slug!, $orderBy: SharedBucketOrder) {
 				env
 				team {
 					slug
+					displayName
 				}
 				uniqueUsers {
 					pageInfo {
