@@ -47,7 +47,7 @@
     "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@eslint/compat": "^1.4.1",
     "@eslint/eslintrc": "^3.3.3",
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^9.39.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
     "@types/react": "^18.3.26",
