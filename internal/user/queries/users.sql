@@ -77,6 +77,15 @@ FROM
 					team_members
 				WHERE
 					team_members.user_id = @user_id
+				UNION
+				SELECT
+					teams.slug AS slug
+				FROM
+					teams
+					JOIN sections ON sections.code = teams.section_code
+				WHERE
+					sections.manager_id = @user_id
+					AND teams.slug != 'dapla-felles'
 			) t
 			JOIN team_members ON team_members.team_slug = t.slug
 		WHERE
