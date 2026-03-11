@@ -20,6 +20,7 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
 	"k8s.io/utils/ptr"
 )
@@ -149,6 +150,8 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 				return fmt.Errorf("update user %q: %w", eu.Email, err)
 			}
 
+			userChanges := buildUserChanges(user, eu)
+
 			if err := querier.CreateLogEntry(ctx, usersyncsql.CreateLogEntryParams{
 				Action:       usersyncsql.UsersyncLogEntryActionUpdateUser,
 				UserID:       user.ID,
@@ -156,6 +159,7 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 				UserEmail:    eu.Email,
 				OldUserName:  &user.Name,
 				OldUserEmail: &user.Email,
+				Changes:      userChanges,
 			}); err != nil {
 				s.log.WithError(err).Errorf("create user sync log entry")
 			}
@@ -363,6 +367,41 @@ func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
 	}
 
 	return false
+}
+
+// buildUserChanges builds a Changes object containing all changed fields.
+func buildUserChanges(user *usersyncsql.User, eu *entraIdUser) *changes.UserSyncUserChanges {
+	ch := &changes.UserSyncUserChanges{}
+
+	if user.Name != eu.Name {
+		ch.Name = &changes.UserSyncUserChangeUnit{
+			Old: &user.Name,
+			New: &eu.Name,
+		}
+	}
+
+	if !strings.EqualFold(user.Email, eu.Email) {
+		ch.Email = &changes.UserSyncUserChangeUnit{
+			Old: &user.Email,
+			New: &eu.Email,
+		}
+	}
+
+	if !ptr.Equal(user.SectionCode, eu.SectionCode) {
+		ch.SectionCode = &changes.UserSyncUserChangeUnit{
+			Old: user.SectionCode,
+			New: eu.SectionCode,
+		}
+	}
+
+	if !ptr.Equal(user.JobTitle, eu.JobTitle) {
+		ch.JobTitle = &changes.UserSyncUserChangeUnit{
+			Old: user.JobTitle,
+			New: eu.JobTitle,
+		}
+	}
+
+	return ch
 }
 
 // getOrCreateUserFromEntraIdUser will return a user for an Entra ID user, creating it first if needed.

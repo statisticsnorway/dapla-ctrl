@@ -37,8 +37,9 @@ jobs:
       - run: mise run check:vulncheck
       - name: Check code format and run code generators
         run: |
-          mise run fmt ::: generate
-          echo "checking for diff after running generators and formatters, if this fails, run 'mise run fmt'"
+          mise run generate
+          mise run fmt
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run generate' and 'mise run fmt'"
           git diff --name-only | grep -v '^package-lock.json$' | xargs -r git diff --exit-code --
 
   build_push:

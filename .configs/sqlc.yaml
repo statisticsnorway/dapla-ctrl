@@ -39,6 +39,9 @@ sql:
             nullable: true
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
+          - column: "usersync_log_entries.changes"
+            go_type: "*github.com/statisticsnorway/dapla-api/internal/usersync/changes.UserSyncUserChanges"
+            nullable: true
 
   - <<: *default_domain
     name: "Groups SQL"

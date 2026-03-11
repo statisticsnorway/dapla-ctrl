@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
 )
 
 const assignGlobalAdmin = `-- name: AssignGlobalAdmin :exec
@@ -115,7 +116,8 @@ INSERT INTO
 		user_email,
 		old_user_name,
 		old_user_email,
-		role_name
+		role_name,
+		changes
 	)
 VALUES
 	(
@@ -125,7 +127,8 @@ VALUES
 		$4,
 		$5,
 		$6,
-		$7
+		$7,
+		$8
 	)
 `
 
@@ -137,6 +140,7 @@ type CreateLogEntryParams struct {
 	OldUserName  *string
 	OldUserEmail *string
 	RoleName     *string
+	Changes      *changes.UserSyncUserChanges
 }
 
 func (q *Queries) CreateLogEntry(ctx context.Context, arg CreateLogEntryParams) error {
@@ -148,6 +152,7 @@ func (q *Queries) CreateLogEntry(ctx context.Context, arg CreateLogEntryParams) 
 		arg.OldUserName,
 		arg.OldUserEmail,
 		arg.RoleName,
+		arg.Changes,
 	)
 	return err
 }
@@ -294,7 +299,7 @@ func (q *Queries) ListGlobalAdmins(ctx context.Context) ([]*User, error) {
 
 const listLogEntries = `-- name: ListLogEntries :many
 SELECT
-	id, created_at, action, user_id, user_name, user_email, old_user_name, old_user_email, role_name
+	id, created_at, action, user_id, user_name, user_email, old_user_name, old_user_email, role_name, changes
 FROM
 	usersync_log_entries
 ORDER BY
@@ -329,6 +334,7 @@ func (q *Queries) ListLogEntries(ctx context.Context, arg ListLogEntriesParams) 
 			&i.OldUserName,
 			&i.OldUserEmail,
 			&i.RoleName,
+			&i.Changes,
 		); err != nil {
 			return nil, err
 		}
@@ -342,7 +348,7 @@ func (q *Queries) ListLogEntries(ctx context.Context, arg ListLogEntriesParams) 
 
 const listLogEntriesByIDs = `-- name: ListLogEntriesByIDs :many
 SELECT
-	id, created_at, action, user_id, user_name, user_email, old_user_name, old_user_email, role_name
+	id, created_at, action, user_id, user_name, user_email, old_user_name, old_user_email, role_name, changes
 FROM
 	usersync_log_entries
 WHERE
@@ -370,6 +376,7 @@ func (q *Queries) ListLogEntriesByIDs(ctx context.Context, ids []uuid.UUID) ([]*
 			&i.OldUserName,
 			&i.OldUserEmail,
 			&i.RoleName,
+			&i.Changes,
 		); err != nil {
 			return nil, err
 		}

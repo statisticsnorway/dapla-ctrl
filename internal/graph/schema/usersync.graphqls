@@ -96,6 +96,46 @@ type UserCreatedUserSyncLogEntry implements UserSyncLogEntry & Node {
 }
 
 """
+A unit representing a single field change with old and new values.
+"""
+type UserSyncUserChangeUnit {
+	"""
+	The old value of the field.
+	"""
+	old: String
+
+	"""
+	The new value of the field.
+	"""
+	new: String
+}
+
+"""
+A collection of changes made to a user.
+"""
+type UserSyncUserChanges {
+	"""
+	Change to the user's name.
+	"""
+	name: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's email address.
+	"""
+	email: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's section code.
+	"""
+	sectionCode: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's job title.
+	"""
+	jobTitle: UserSyncUserChangeUnit
+}
+
+"""
 User updated log entry.
 """
 type UserUpdatedUserSyncLogEntry implements UserSyncLogEntry & Node {
@@ -138,6 +178,11 @@ type UserUpdatedUserSyncLogEntry implements UserSyncLogEntry & Node {
 	The old email address of the user.
 	"""
 	oldUserEmail: String!
+
+	"""
+	The changes made to the user.
+	"""
+	changes: UserSyncUserChanges
 }
 
 """

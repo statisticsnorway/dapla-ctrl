@@ -117,7 +117,8 @@ INSERT INTO
 		user_email,
 		old_user_name,
 		old_user_email,
-		role_name
+		role_name,
+		changes
 	)
 VALUES
 	(
@@ -127,7 +128,8 @@ VALUES
 		@user_email,
 		@old_user_name,
 		@old_user_email,
-		@role_name
+		@role_name,
+		@changes
 	)
 ;
 

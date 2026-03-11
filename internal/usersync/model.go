@@ -8,6 +8,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/model"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
 	"k8s.io/utils/ptr"
 )
@@ -57,8 +58,9 @@ type UserDeletedUserSyncLogEntry struct {
 
 type UserUpdatedUserSyncLogEntry struct {
 	userSyncLogEntry
-	OldUserName  string `json:"oldUserName"`
-	OldUserEmail string `json:"oldUserEmail"`
+	OldUserName  string                       `json:"oldUserName"`
+	OldUserEmail string                       `json:"oldUserEmail"`
+	Changes      *changes.UserSyncUserChanges `json:"changes"`
 }
 
 type RoleAssignedUserSyncLogEntry struct {
@@ -90,6 +92,7 @@ func toGraphUserSyncLogEntry(row *usersyncsql.UsersyncLogEntry) (UserSyncLogEntr
 			userSyncLogEntry: entry.WithMessage("Updated user"),
 			OldUserName:      ptr.Deref(row.OldUserName, "unknown"),
 			OldUserEmail:     ptr.Deref(row.OldUserEmail, "unknown"),
+			Changes:          row.Changes,
 		}, nil
 	case usersyncsql.UsersyncLogEntryActionDeleteUser:
 		return &UserDeletedUserSyncLogEntry{

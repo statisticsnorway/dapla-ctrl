@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
 )
 
 type UsersyncLogEntryAction string
@@ -111,4 +112,5 @@ type UsersyncLogEntry struct {
 	OldUserName  *string
 	OldUserEmail *string
 	RoleName     *string
+	Changes      *changes.UserSyncUserChanges
 }

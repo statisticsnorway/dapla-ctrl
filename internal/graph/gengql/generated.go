@@ -31,6 +31,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/statisticsnorway/dapla-api/internal/usersync"
+	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -752,7 +753,20 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	UserSyncUserChangeUnit struct {
+		New func(childComplexity int) int
+		Old func(childComplexity int) int
+	}
+
+	UserSyncUserChanges struct {
+		Email       func(childComplexity int) int
+		JobTitle    func(childComplexity int) int
+		Name        func(childComplexity int) int
+		SectionCode func(childComplexity int) int
+	}
+
 	UserUpdatedUserSyncLogEntry struct {
+		Changes      func(childComplexity int) int
 		CreatedAt    func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Message      func(childComplexity int) int
@@ -3642,6 +3656,50 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.UserSyncLogEntryEdge.Node(childComplexity), true
 
+	case "UserSyncUserChangeUnit.new":
+		if e.complexity.UserSyncUserChangeUnit.New == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChangeUnit.New(childComplexity), true
+	case "UserSyncUserChangeUnit.old":
+		if e.complexity.UserSyncUserChangeUnit.Old == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChangeUnit.Old(childComplexity), true
+
+	case "UserSyncUserChanges.email":
+		if e.complexity.UserSyncUserChanges.Email == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChanges.Email(childComplexity), true
+	case "UserSyncUserChanges.jobTitle":
+		if e.complexity.UserSyncUserChanges.JobTitle == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChanges.JobTitle(childComplexity), true
+	case "UserSyncUserChanges.name":
+		if e.complexity.UserSyncUserChanges.Name == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChanges.Name(childComplexity), true
+	case "UserSyncUserChanges.sectionCode":
+		if e.complexity.UserSyncUserChanges.SectionCode == nil {
+			break
+		}
+
+		return e.complexity.UserSyncUserChanges.SectionCode(childComplexity), true
+
+	case "UserUpdatedUserSyncLogEntry.changes":
+		if e.complexity.UserUpdatedUserSyncLogEntry.Changes == nil {
+			break
+		}
+
+		return e.complexity.UserUpdatedUserSyncLogEntry.Changes(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.createdAt":
 		if e.complexity.UserUpdatedUserSyncLogEntry.CreatedAt == nil {
 			break
@@ -7306,6 +7364,46 @@ type UserCreatedUserSyncLogEntry implements UserSyncLogEntry & Node {
 }
 
 """
+A unit representing a single field change with old and new values.
+"""
+type UserSyncUserChangeUnit {
+	"""
+	The old value of the field.
+	"""
+	old: String
+
+	"""
+	The new value of the field.
+	"""
+	new: String
+}
+
+"""
+A collection of changes made to a user.
+"""
+type UserSyncUserChanges {
+	"""
+	Change to the user's name.
+	"""
+	name: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's email address.
+	"""
+	email: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's section code.
+	"""
+	sectionCode: UserSyncUserChangeUnit
+
+	"""
+	Change to the user's job title.
+	"""
+	jobTitle: UserSyncUserChangeUnit
+}
+
+"""
 User updated log entry.
 """
 type UserUpdatedUserSyncLogEntry implements UserSyncLogEntry & Node {
@@ -7348,6 +7446,11 @@ type UserUpdatedUserSyncLogEntry implements UserSyncLogEntry & Node {
 	The old email address of the user.
 	"""
 	oldUserEmail: String!
+
+	"""
+	The changes made to the user.
+	"""
+	changes: UserSyncUserChanges
 }
 
 """
@@ -22917,6 +23020,204 @@ func (ec *executionContext) fieldContext_UserSyncLogEntryEdge_node(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _UserSyncUserChangeUnit_old(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChangeUnit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChangeUnit_old,
+		func(ctx context.Context) (any, error) {
+			return obj.Old, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChangeUnit_old(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChangeUnit",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserSyncUserChangeUnit_new(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChangeUnit) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChangeUnit_new,
+		func(ctx context.Context) (any, error) {
+			return obj.New, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChangeUnit_new(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChangeUnit",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserSyncUserChanges_name(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChanges) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChanges_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChanges_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChanges",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "old":
+				return ec.fieldContext_UserSyncUserChangeUnit_old(ctx, field)
+			case "new":
+				return ec.fieldContext_UserSyncUserChangeUnit_new(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserSyncUserChangeUnit", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserSyncUserChanges_email(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChanges) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChanges_email,
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
+		nil,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChanges_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChanges",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "old":
+				return ec.fieldContext_UserSyncUserChangeUnit_old(ctx, field)
+			case "new":
+				return ec.fieldContext_UserSyncUserChangeUnit_new(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserSyncUserChangeUnit", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserSyncUserChanges_sectionCode(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChanges) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChanges_sectionCode,
+		func(ctx context.Context) (any, error) {
+			return obj.SectionCode, nil
+		},
+		nil,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChanges_sectionCode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChanges",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "old":
+				return ec.fieldContext_UserSyncUserChangeUnit_old(ctx, field)
+			case "new":
+				return ec.fieldContext_UserSyncUserChangeUnit_new(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserSyncUserChangeUnit", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserSyncUserChanges_jobTitle(ctx context.Context, field graphql.CollectedField, obj *changes.UserSyncUserChanges) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserSyncUserChanges_jobTitle,
+		func(ctx context.Context) (any, error) {
+			return obj.JobTitle, nil
+		},
+		nil,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserSyncUserChanges_jobTitle(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserSyncUserChanges",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "old":
+				return ec.fieldContext_UserSyncUserChangeUnit_old(ctx, field)
+			case "new":
+				return ec.fieldContext_UserSyncUserChangeUnit_new(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserSyncUserChangeUnit", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserUpdatedUserSyncLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *usersync.UserUpdatedUserSyncLogEntry) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -23144,6 +23445,45 @@ func (ec *executionContext) fieldContext_UserUpdatedUserSyncLogEntry_oldUserEmai
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserUpdatedUserSyncLogEntry_changes(ctx context.Context, field graphql.CollectedField, obj *usersync.UserUpdatedUserSyncLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_UserUpdatedUserSyncLogEntry_changes,
+		func(ctx context.Context) (any, error) {
+			return obj.Changes, nil
+		},
+		nil,
+		ec.marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_UserUpdatedUserSyncLogEntry_changes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserUpdatedUserSyncLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_UserSyncUserChanges_name(ctx, field)
+			case "email":
+				return ec.fieldContext_UserSyncUserChanges_email(ctx, field)
+			case "sectionCode":
+				return ec.fieldContext_UserSyncUserChanges_sectionCode(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_UserSyncUserChanges_jobTitle(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserSyncUserChanges", field.Name)
 		},
 	}
 	return fc, nil
@@ -32678,6 +33018,86 @@ func (ec *executionContext) _UserSyncLogEntryEdge(ctx context.Context, sel ast.S
 	return out
 }
 
+var userSyncUserChangeUnitImplementors = []string{"UserSyncUserChangeUnit"}
+
+func (ec *executionContext) _UserSyncUserChangeUnit(ctx context.Context, sel ast.SelectionSet, obj *changes.UserSyncUserChangeUnit) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userSyncUserChangeUnitImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserSyncUserChangeUnit")
+		case "old":
+			out.Values[i] = ec._UserSyncUserChangeUnit_old(ctx, field, obj)
+		case "new":
+			out.Values[i] = ec._UserSyncUserChangeUnit_new(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var userSyncUserChangesImplementors = []string{"UserSyncUserChanges"}
+
+func (ec *executionContext) _UserSyncUserChanges(ctx context.Context, sel ast.SelectionSet, obj *changes.UserSyncUserChanges) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, userSyncUserChangesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UserSyncUserChanges")
+		case "name":
+			out.Values[i] = ec._UserSyncUserChanges_name(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._UserSyncUserChanges_email(ctx, field, obj)
+		case "sectionCode":
+			out.Values[i] = ec._UserSyncUserChanges_sectionCode(ctx, field, obj)
+		case "jobTitle":
+			out.Values[i] = ec._UserSyncUserChanges_jobTitle(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var userUpdatedUserSyncLogEntryImplementors = []string{"UserUpdatedUserSyncLogEntry", "UserSyncLogEntry", "Node"}
 
 func (ec *executionContext) _UserUpdatedUserSyncLogEntry(ctx context.Context, sel ast.SelectionSet, obj *usersync.UserUpdatedUserSyncLogEntry) graphql.Marshaler {
@@ -32729,6 +33149,8 @@ func (ec *executionContext) _UserUpdatedUserSyncLogEntry(ctx context.Context, se
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "changes":
+			out.Values[i] = ec._UserUpdatedUserSyncLogEntry_changes(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -36337,6 +36759,20 @@ func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorw
 	}
 	res, err := ec.unmarshalInputUserOrder(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChangeUnit) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UserSyncUserChangeUnit(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChanges) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._UserSyncUserChanges(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
