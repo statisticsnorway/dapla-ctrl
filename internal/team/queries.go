@@ -58,7 +58,7 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		return nil, err
 	}
 
-	if input.DisplayName == nil {
+	if input.HasNoChanges() {
 		return existingTeam, nil
 	}
 
@@ -66,11 +66,16 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		input.DisplayName = &existingTeam.DisplayName
 	}
 
+	if input.SectionCode == nil {
+		input.SectionCode = &existingTeam.SectionCode
+	}
+
 	var team *teamsql.Team
 	err = database.Transaction(ctx, func(ctx context.Context) error {
 		team, err = db(ctx).Update(ctx, teamsql.UpdateParams{
 			DisplayName: input.DisplayName,
 			Slug:        input.Slug,
+			SectionCode: input.SectionCode,
 		})
 		if err != nil {
 			return err
@@ -82,6 +87,13 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 				Field:    "displayName",
 				OldValue: &existingTeam.DisplayName,
 				NewValue: input.DisplayName,
+			})
+		}
+		if input.SectionCode != nil && *input.SectionCode != existingTeam.SectionCode {
+			updatedFields = append(updatedFields, &TeamUpdatedActivityLogEntryDataUpdatedField{
+				Field:    "sectionCode",
+				OldValue: &existingTeam.SectionCode,
+				NewValue: input.SectionCode,
 			})
 		}
 

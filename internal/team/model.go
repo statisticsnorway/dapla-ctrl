@@ -332,6 +332,7 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 type UpdateTeamInput struct {
 	Slug        slug.Slug `json:"slug"`
 	DisplayName *string   `json:"displayName"`
+	SectionCode *string   `json:"sectionCode"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
@@ -346,6 +347,10 @@ func (i *UpdateTeamInput) Validate() error {
 	}
 
 	return verr.NilIfEmpty()
+}
+
+func (i *UpdateTeamInput) HasNoChanges() bool {
+	return i.DisplayName == nil && i.SectionCode == nil
 }
 
 type CreateTeamPayload struct {

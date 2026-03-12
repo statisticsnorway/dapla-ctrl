@@ -34,7 +34,7 @@ Test.gql("Create team", function(t)
 	}
 end)
 
-Test.gql("Update display name team", function(t)
+Test.gql("Update display name and section for team", function(t)
 	t.addHeader("x-user-email", user:email())
 
 	t.query(string.format([[
@@ -43,10 +43,14 @@ Test.gql("Update display name team", function(t)
 				input: {
 					slug: "%s"
 					displayName: "My Awesome Team"
+					sectionCode: "723"
 				}
 			) {
 				team {
 					displayName
+					section {
+						code
+					}
 				}
 			}
 		}
@@ -57,6 +61,9 @@ Test.gql("Update display name team", function(t)
 			updateTeam = {
 				team = {
 					displayName = "My Awesome Team",
+					section = {
+						code = "723",
+					},
 				},
 			},
 		},
@@ -178,11 +185,18 @@ Test.gql("Update team appear in activity log", function(t)
 							resourceName = teamSlug,
 							teamSlug = teamSlug,
 							data = {
-								updatedFields = { {
-									field = "displayName",
-									oldValue = "someteamname",
-									newValue = "My Awesome Team",
-								} },
+								updatedFields = {
+									{
+										field = "displayName",
+										oldValue = "someteamname",
+										newValue = "My Awesome Team",
+									},
+									{
+										field = "sectionCode",
+										oldValue = "724",
+										newValue = "723",
+									},
+								},
 							},
 						},
 					},

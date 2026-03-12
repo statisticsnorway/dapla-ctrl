@@ -342,20 +342,22 @@ func (q *Queries) SlugAvailable(ctx context.Context, argSlug slug.Slug) (bool, e
 const update = `-- name: Update :one
 UPDATE teams
 SET
-	display_name = COALESCE($1, display_name)
+	display_name = COALESCE($1, display_name),
+	section_code = COALESCE($2, section_code)
 WHERE
-	teams.slug = $2
+	teams.slug = $3
 RETURNING
 	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed
 `
 
 type UpdateParams struct {
 	DisplayName *string
+	SectionCode *string
 	Slug        slug.Slug
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
-	row := q.db.QueryRow(ctx, update, arg.DisplayName, arg.Slug)
+	row := q.db.QueryRow(ctx, update, arg.DisplayName, arg.SectionCode, arg.Slug)
 	var i Team
 	err := row.Scan(
 		&i.Slug,

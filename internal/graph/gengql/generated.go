@@ -6859,6 +6859,15 @@ input UpdateTeamInput {
 	When omitted the existing value will not be updated.
 	"""
 	displayName: String
+
+	"""
+	An optional new section code for the team.
+
+	When omitted, the existing value will not be updated.
+	Note that the current section manager will lose access to administer the team
+	when changing section code.
+	"""
+	sectionCode: String
 }
 
 "Ordering options when fetching teams."
@@ -25792,7 +25801,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName"}
+	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -25813,6 +25822,13 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.DisplayName = data
+		case "sectionCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sectionCode"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.SectionCode = data
 		}
 	}
 

@@ -10,7 +10,8 @@ RETURNING
 -- name: Update :one
 UPDATE teams
 SET
-	display_name = COALESCE(sqlc.narg(display_name), display_name)
+	display_name = COALESCE(sqlc.narg(display_name), display_name),
+	section_code = COALESCE(sqlc.narg(section_code), section_code)
 WHERE
 	teams.slug = @slug
 RETURNING

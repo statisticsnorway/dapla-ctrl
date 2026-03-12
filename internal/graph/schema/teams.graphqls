@@ -275,6 +275,15 @@ input UpdateTeamInput {
 	When omitted the existing value will not be updated.
 	"""
 	displayName: String
+
+	"""
+	An optional new section code for the team.
+
+	When omitted, the existing value will not be updated.
+	Note that the current section manager will lose access to administer the team
+	when changing section code.
+	"""
+	sectionCode: String
 }
 
 "Ordering options when fetching teams."
