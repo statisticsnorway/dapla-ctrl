@@ -53,6 +53,20 @@ extend type Mutation {
 	This mutation can be used to update team metadata. It is not possible to update the team slug.
 	"""
 	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
+
+	"""
+	Adds an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	addTeamAccessManager(input: AddTeamAccessManagerInput!): AddTeamAccessManagerPayload!
+
+	"""
+	Removes an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
 }
 
 """
@@ -174,6 +188,9 @@ type Team implements Node {
 
 	"Whether or not the viewer is a member of the team."
 	viewerIsMember: Boolean!
+
+	"The access managers for the team."
+	accessManagers: [TeamAccessManager!]!
 }
 
 type TeamMember {
@@ -187,6 +204,14 @@ type TeamMember {
 	groups: [Group!]!
 }
 
+type TeamAccessManager {
+	"Team instance."
+	team: Team!
+
+	"User instance."
+	user: User!
+}
+
 type CreateTeamPayload {
 	"The newly created team."
 	team: Team
@@ -195,6 +220,22 @@ type CreateTeamPayload {
 type UpdateTeamPayload {
 	"The updated team."
 	team: Team
+}
+
+type AddTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been added as access manager."
+	user: User!
+}
+
+type RemoveTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been removed as access manager."
+	user: User!
 }
 
 type TeamConnection {
@@ -284,6 +325,26 @@ input UpdateTeamInput {
 	when changing section code.
 	"""
 	sectionCode: String
+}
+
+input AddTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
+}
+
+input RemoveTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
 }
 
 "Ordering options when fetching teams."
@@ -387,9 +448,81 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	newValue: String
 }
 
+type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleAssignedActivityLogEntryData!
+}
+
+type TeamRoleAssignedActivityLogEntryData {
+	"The user who was assigned a role."
+	user: User!
+
+	"The role that was assigned to the user."
+	role: String!
+}
+
+type TeamRoleRevokedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleRevokedActivityLogEntryData!
+}
+
+type TeamRoleRevokedActivityLogEntryData {
+	"The user who had a role revoked."
+	user: User!
+
+	"The role that was revoked from the user."
+	role: String!
+}
+
 extend enum ActivityLogActivityType {
 	"Team was created."
 	TEAM_CREATED
 	"Team was updated."
 	TEAM_UPDATED
+	"User was granted a role."
+	TEAM_ROLE_ASSIGNED
+	"User had a role revoked."
+	TEAM_ROLE_REVOKED
 }

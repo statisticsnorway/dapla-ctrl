@@ -148,6 +148,11 @@ type TeamMember struct {
 	Groups   []string  `json:"-"`
 }
 
+type TeamAccessManager struct {
+	TeamSlug slug.Slug `json:"-"`
+	UserID   uuid.UUID `json:"-"`
+}
+
 type TeamMemberRole string
 
 const (
@@ -353,12 +358,34 @@ func (i *UpdateTeamInput) HasNoChanges() bool {
 	return i.DisplayName == nil && i.SectionCode == nil
 }
 
+type AddTeamAccessManagerInput struct {
+	TeamSlug  slug.Slug `json:"teamSlug"`
+	UserEmail string    `json:"userEmail"`
+	UserId    uuid.UUID `json:"-"`
+}
+
+type RemoveTeamAccessManagerInput struct {
+	TeamSlug  slug.Slug `json:"teamSlug"`
+	UserEmail string    `json:"userEmail"`
+	UserId    uuid.UUID `json:"-"`
+}
+
 type CreateTeamPayload struct {
 	Team *Team `json:"team"`
 }
 
 type UpdateTeamPayload struct {
 	Team *Team `json:"team"`
+}
+
+type AddTeamAccessManagerPayload struct {
+	TeamSlug slug.Slug `json:"-"`
+	UserId   uuid.UUID `json:"-"`
+}
+
+type RemoveTeamAccessManagerPayload struct {
+	TeamSlug slug.Slug `json:"-"`
+	UserId   uuid.UUID `json:"-"`
 }
 
 type RequestTeamDeletionInput struct {

@@ -56,6 +56,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	AddTeamAccessManagerPayload() AddTeamAccessManagerPayloadResolver
 	Group() GroupResolver
 	GroupMember() GroupMemberResolver
 	Mutation() MutationResolver
@@ -63,11 +64,15 @@ type ResolverRoot interface {
 	Reconciler() ReconcilerResolver
 	ReconcilerError() ReconcilerErrorResolver
 	RemoveGroupMemberPayload() RemoveGroupMemberPayloadResolver
+	RemoveTeamAccessManagerPayload() RemoveTeamAccessManagerPayloadResolver
 	Section() SectionResolver
 	ServiceAccount() ServiceAccountResolver
 	SharedBucket() SharedBucketResolver
 	Team() TeamResolver
+	TeamAccessManager() TeamAccessManagerResolver
 	TeamMember() TeamMemberResolver
+	TeamRoleAssignedActivityLogEntryData() TeamRoleAssignedActivityLogEntryDataResolver
+	TeamRoleRevokedActivityLogEntryData() TeamRoleRevokedActivityLogEntryDataResolver
 	User() UserResolver
 }
 
@@ -88,6 +93,11 @@ type ComplexityRoot struct {
 
 	AddGroupMemberPayload struct {
 		Member func(childComplexity int) int
+	}
+
+	AddTeamAccessManagerPayload struct {
+		Team func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	AssignRoleToServiceAccountPayload struct {
@@ -206,6 +216,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddGroupMember               func(childComplexity int, input group.AddGroupMemberInput) int
+		AddTeamAccessManager         func(childComplexity int, input team.AddTeamAccessManagerInput) int
 		AssignRoleToServiceAccount   func(childComplexity int, input serviceaccount.AssignRoleToServiceAccountInput) int
 		ConfigureReconciler          func(childComplexity int, input reconciler.ConfigureReconcilerInput) int
 		CreateGroup                  func(childComplexity int, input group.CreateGroupInput) int
@@ -217,6 +228,7 @@ type ComplexityRoot struct {
 		DisableReconciler            func(childComplexity int, input reconciler.DisableReconcilerInput) int
 		EnableReconciler             func(childComplexity int, input reconciler.EnableReconcilerInput) int
 		RemoveGroupMember            func(childComplexity int, input group.RemoveGroupMemberInput) int
+		RemoveTeamAccessManager      func(childComplexity int, input team.RemoveTeamAccessManagerInput) int
 		RevokeRoleFromServiceAccount func(childComplexity int, input serviceaccount.RevokeRoleFromServiceAccountInput) int
 		UpdateServiceAccount         func(childComplexity int, input serviceaccount.UpdateServiceAccountInput) int
 		UpdateServiceAccountToken    func(childComplexity int, input serviceaccount.UpdateServiceAccountTokenInput) int
@@ -345,6 +357,11 @@ type ComplexityRoot struct {
 	RemoveGroupMemberPayload struct {
 		Group func(childComplexity int) int
 		User  func(childComplexity int) int
+	}
+
+	RemoveTeamAccessManagerPayload struct {
+		Team func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	RevokeRoleFromServiceAccountPayload struct {
@@ -608,6 +625,7 @@ type ComplexityRoot struct {
 	}
 
 	Team struct {
+		AccessManagers      func(childComplexity int) int
 		ActivityLog         func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
 		DeletionInProgress  func(childComplexity int) int
 		DisplayName         func(childComplexity int) int
@@ -622,6 +640,11 @@ type ComplexityRoot struct {
 		Slug                func(childComplexity int) int
 		ViewerIsMember      func(childComplexity int) int
 		ViewerIsOwner       func(childComplexity int) int
+	}
+
+	TeamAccessManager struct {
+		Team func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	TeamConnection struct {
@@ -660,6 +683,38 @@ type ComplexityRoot struct {
 	TeamMemberEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	TeamRoleAssignedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		Data         func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	TeamRoleAssignedActivityLogEntryData struct {
+		Role func(childComplexity int) int
+		User func(childComplexity int) int
+	}
+
+	TeamRoleRevokedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		Data         func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	TeamRoleRevokedActivityLogEntryData struct {
+		Role func(childComplexity int) int
+		User func(childComplexity int) int
 	}
 
 	TeamUpdatedActivityLogEntry struct {
@@ -778,6 +833,10 @@ type ComplexityRoot struct {
 	}
 }
 
+type AddTeamAccessManagerPayloadResolver interface {
+	Team(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*team.Team, error)
+	User(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*user.User, error)
+}
 type GroupResolver interface {
 	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error)
 	ActivityLog(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
@@ -803,6 +862,8 @@ type MutationResolver interface {
 	DeleteServiceAccountToken(ctx context.Context, input serviceaccount.DeleteServiceAccountTokenInput) (*serviceaccount.DeleteServiceAccountTokenPayload, error)
 	CreateTeam(ctx context.Context, input team.CreateTeamInput) (*team.CreateTeamPayload, error)
 	UpdateTeam(ctx context.Context, input team.UpdateTeamInput) (*team.UpdateTeamPayload, error)
+	AddTeamAccessManager(ctx context.Context, input team.AddTeamAccessManagerInput) (*team.AddTeamAccessManagerPayload, error)
+	RemoveTeamAccessManager(ctx context.Context, input team.RemoveTeamAccessManagerInput) (*team.RemoveTeamAccessManagerPayload, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id ident.Ident) (model.Node, error)
@@ -839,6 +900,10 @@ type RemoveGroupMemberPayloadResolver interface {
 	User(ctx context.Context, obj *group.RemoveGroupMemberPayload) (*user.User, error)
 	Group(ctx context.Context, obj *group.RemoveGroupMemberPayload) (*group.Group, error)
 }
+type RemoveTeamAccessManagerPayloadResolver interface {
+	Team(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*team.Team, error)
+	User(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*user.User, error)
+}
 type SectionResolver interface {
 	Manager(ctx context.Context, obj *section.Section) (*user.User, error)
 }
@@ -865,12 +930,23 @@ type TeamResolver interface {
 
 	ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error)
 	ViewerIsMember(ctx context.Context, obj *team.Team) (bool, error)
+	AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error)
 	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
+}
+type TeamAccessManagerResolver interface {
+	Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error)
+	User(ctx context.Context, obj *team.TeamAccessManager) (*user.User, error)
 }
 type TeamMemberResolver interface {
 	Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error)
 	User(ctx context.Context, obj *team.TeamMember) (*user.User, error)
 	Groups(ctx context.Context, obj *team.TeamMember) ([]*group.Group, error)
+}
+type TeamRoleAssignedActivityLogEntryDataResolver interface {
+	User(ctx context.Context, obj *team.TeamRoleAssignedActivityLogEntryData) (*user.User, error)
+}
+type TeamRoleRevokedActivityLogEntryDataResolver interface {
+	User(ctx context.Context, obj *team.TeamRoleRevokedActivityLogEntryData) (*user.User, error)
 }
 type UserResolver interface {
 	FirstName(ctx context.Context, obj *user.User) (string, error)
@@ -942,6 +1018,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.AddGroupMemberPayload.Member(childComplexity), true
+
+	case "AddTeamAccessManagerPayload.team":
+		if e.complexity.AddTeamAccessManagerPayload.Team == nil {
+			break
+		}
+
+		return e.complexity.AddTeamAccessManagerPayload.Team(childComplexity), true
+	case "AddTeamAccessManagerPayload.user":
+		if e.complexity.AddTeamAccessManagerPayload.User == nil {
+			break
+		}
+
+		return e.complexity.AddTeamAccessManagerPayload.User(childComplexity), true
 
 	case "AssignRoleToServiceAccountPayload.serviceAccount":
 		if e.complexity.AssignRoleToServiceAccountPayload.ServiceAccount == nil {
@@ -1325,6 +1414,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.AddGroupMember(childComplexity, args["input"].(group.AddGroupMemberInput)), true
+	case "Mutation.addTeamAccessManager":
+		if e.complexity.Mutation.AddTeamAccessManager == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addTeamAccessManager_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddTeamAccessManager(childComplexity, args["input"].(team.AddTeamAccessManagerInput)), true
 	case "Mutation.assignRoleToServiceAccount":
 		if e.complexity.Mutation.AssignRoleToServiceAccount == nil {
 			break
@@ -1446,6 +1546,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.RemoveGroupMember(childComplexity, args["input"].(group.RemoveGroupMemberInput)), true
+	case "Mutation.removeTeamAccessManager":
+		if e.complexity.Mutation.RemoveTeamAccessManager == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeTeamAccessManager_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveTeamAccessManager(childComplexity, args["input"].(team.RemoveTeamAccessManagerInput)), true
 	case "Mutation.revokeRoleFromServiceAccount":
 		if e.complexity.Mutation.RevokeRoleFromServiceAccount == nil {
 			break
@@ -2096,6 +2207,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.RemoveGroupMemberPayload.User(childComplexity), true
+
+	case "RemoveTeamAccessManagerPayload.team":
+		if e.complexity.RemoveTeamAccessManagerPayload.Team == nil {
+			break
+		}
+
+		return e.complexity.RemoveTeamAccessManagerPayload.Team(childComplexity), true
+	case "RemoveTeamAccessManagerPayload.user":
+		if e.complexity.RemoveTeamAccessManagerPayload.User == nil {
+			break
+		}
+
+		return e.complexity.RemoveTeamAccessManagerPayload.User(childComplexity), true
 
 	case "RevokeRoleFromServiceAccountPayload.serviceAccount":
 		if e.complexity.RevokeRoleFromServiceAccountPayload.ServiceAccount == nil {
@@ -3075,6 +3199,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.SharedBucketEdge.Node(childComplexity), true
 
+	case "Team.accessManagers":
+		if e.complexity.Team.AccessManagers == nil {
+			break
+		}
+
+		return e.complexity.Team.AccessManagers(childComplexity), true
 	case "Team.activityLog":
 		if e.complexity.Team.ActivityLog == nil {
 			break
@@ -3184,6 +3314,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Team.ViewerIsOwner(childComplexity), true
+
+	case "TeamAccessManager.team":
+		if e.complexity.TeamAccessManager.Team == nil {
+			break
+		}
+
+		return e.complexity.TeamAccessManager.Team(childComplexity), true
+	case "TeamAccessManager.user":
+		if e.complexity.TeamAccessManager.User == nil {
+			break
+		}
+
+		return e.complexity.TeamAccessManager.User(childComplexity), true
 
 	case "TeamConnection.edges":
 		if e.complexity.TeamConnection.Edges == nil {
@@ -3310,6 +3453,130 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.TeamMemberEdge.Node(childComplexity), true
+
+	case "TeamRoleAssignedActivityLogEntry.actor":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.Actor(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.createdAt":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.data":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.Data == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.Data(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.id":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.ID(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.message":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.Message(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.resourceName":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.ResourceName(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.resourceType":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.ResourceType(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntry.teamSlug":
+		if e.complexity.TeamRoleAssignedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "TeamRoleAssignedActivityLogEntryData.role":
+		if e.complexity.TeamRoleAssignedActivityLogEntryData.Role == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntryData.Role(childComplexity), true
+	case "TeamRoleAssignedActivityLogEntryData.user":
+		if e.complexity.TeamRoleAssignedActivityLogEntryData.User == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleAssignedActivityLogEntryData.User(childComplexity), true
+
+	case "TeamRoleRevokedActivityLogEntry.actor":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.Actor(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.createdAt":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.data":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.Data == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.Data(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.id":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.ID(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.message":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.Message(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.resourceName":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.ResourceName(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.resourceType":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.ResourceType(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntry.teamSlug":
+		if e.complexity.TeamRoleRevokedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "TeamRoleRevokedActivityLogEntryData.role":
+		if e.complexity.TeamRoleRevokedActivityLogEntryData.Role == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntryData.Role(childComplexity), true
+	case "TeamRoleRevokedActivityLogEntryData.user":
+		if e.complexity.TeamRoleRevokedActivityLogEntryData.User == nil {
+			break
+		}
+
+		return e.complexity.TeamRoleRevokedActivityLogEntryData.User(childComplexity), true
 
 	case "TeamUpdatedActivityLogEntry.actor":
 		if e.complexity.TeamUpdatedActivityLogEntry.Actor == nil {
@@ -3759,6 +4026,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputActivityLogFilter,
 		ec.unmarshalInputAddGroupMemberInput,
+		ec.unmarshalInputAddTeamAccessManagerInput,
 		ec.unmarshalInputAssignRoleToServiceAccountInput,
 		ec.unmarshalInputConfigureReconcilerInput,
 		ec.unmarshalInputConfirmTeamDeletionInput,
@@ -3774,6 +4042,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGroupOrder,
 		ec.unmarshalInputReconcilerConfigInput,
 		ec.unmarshalInputRemoveGroupMemberInput,
+		ec.unmarshalInputRemoveTeamAccessManagerInput,
 		ec.unmarshalInputRequestTeamDeletionInput,
 		ec.unmarshalInputRevokeRoleFromServiceAccountInput,
 		ec.unmarshalInputSearchFilter,
@@ -6637,6 +6906,20 @@ extend type Mutation {
 	This mutation can be used to update team metadata. It is not possible to update the team slug.
 	"""
 	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
+
+	"""
+	Adds an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	addTeamAccessManager(input: AddTeamAccessManagerInput!): AddTeamAccessManagerPayload!
+
+	"""
+	Removes an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
 }
 
 """
@@ -6758,6 +7041,9 @@ type Team implements Node {
 
 	"Whether or not the viewer is a member of the team."
 	viewerIsMember: Boolean!
+
+	"The access managers for the team."
+	accessManagers: [TeamAccessManager!]!
 }
 
 type TeamMember {
@@ -6771,6 +7057,14 @@ type TeamMember {
 	groups: [Group!]!
 }
 
+type TeamAccessManager {
+	"Team instance."
+	team: Team!
+
+	"User instance."
+	user: User!
+}
+
 type CreateTeamPayload {
 	"The newly created team."
 	team: Team
@@ -6779,6 +7073,22 @@ type CreateTeamPayload {
 type UpdateTeamPayload {
 	"The updated team."
 	team: Team
+}
+
+type AddTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been added as access manager."
+	user: User!
+}
+
+type RemoveTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been removed as access manager."
+	user: User!
 }
 
 type TeamConnection {
@@ -6868,6 +7178,26 @@ input UpdateTeamInput {
 	when changing section code.
 	"""
 	sectionCode: String
+}
+
+input AddTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
+}
+
+input RemoveTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
 }
 
 "Ordering options when fetching teams."
@@ -6971,11 +7301,83 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	newValue: String
 }
 
+type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleAssignedActivityLogEntryData!
+}
+
+type TeamRoleAssignedActivityLogEntryData {
+	"The user who was assigned a role."
+	user: User!
+
+	"The role that was assigned to the user."
+	role: String!
+}
+
+type TeamRoleRevokedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleRevokedActivityLogEntryData!
+}
+
+type TeamRoleRevokedActivityLogEntryData {
+	"The user who had a role revoked."
+	user: User!
+
+	"The role that was revoked from the user."
+	role: String!
+}
+
 extend enum ActivityLogActivityType {
 	"Team was created."
 	TEAM_CREATED
 	"Team was updated."
 	TEAM_UPDATED
+	"User was granted a role."
+	TEAM_ROLE_ASSIGNED
+	"User had a role revoked."
+	TEAM_ROLE_REVOKED
 }
 `, BuiltIn: false},
 	{Name: "../schema/users.graphqls", Input: `extend type Query {
@@ -7692,6 +8094,17 @@ func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_addTeamAccessManager_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_assignRoleToServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -7806,6 +8219,17 @@ func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Co
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeTeamAccessManager_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -9052,6 +9476,126 @@ func (ec *executionContext) fieldContext_AddGroupMemberPayload_member(_ context.
 	return fc, nil
 }
 
+func (ec *executionContext) _AddTeamAccessManagerPayload_team(ctx context.Context, field graphql.CollectedField, obj *team.AddTeamAccessManagerPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AddTeamAccessManagerPayload_team,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.AddTeamAccessManagerPayload().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddTeamAccessManagerPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AddTeamAccessManagerPayload_user(ctx context.Context, field graphql.CollectedField, obj *team.AddTeamAccessManagerPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AddTeamAccessManagerPayload_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.AddTeamAccessManagerPayload().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddTeamAccessManagerPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
+			case "externalID":
+				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
+			case "teams":
+				return ec.fieldContext_User_teams(ctx, field)
+			case "teamMembers":
+				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
+			case "isAdmin":
+				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AssignRoleToServiceAccountPayload_serviceAccount(ctx context.Context, field graphql.CollectedField, obj *serviceaccount.AssignRoleToServiceAccountPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -9368,6 +9912,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -11811,6 +12357,100 @@ func (ec *executionContext) fieldContext_Mutation_updateTeam(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addTeamAccessManager(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_addTeamAccessManager,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().AddTeamAccessManager(ctx, fc.Args["input"].(team.AddTeamAccessManagerInput))
+		},
+		nil,
+		ec.marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addTeamAccessManager(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_AddTeamAccessManagerPayload_team(ctx, field)
+			case "user":
+				return ec.fieldContext_AddTeamAccessManagerPayload_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddTeamAccessManagerPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addTeamAccessManager_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeTeamAccessManager(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeTeamAccessManager,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RemoveTeamAccessManager(ctx, fc.Args["input"].(team.RemoveTeamAccessManagerInput))
+		},
+		nil,
+		ec.marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeTeamAccessManager(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_RemoveTeamAccessManagerPayload_team(ctx, field)
+			case "user":
+				return ec.fieldContext_RemoveTeamAccessManagerPayload_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoveTeamAccessManagerPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeTeamAccessManager_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *pagination.PageInfo) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -12812,6 +13452,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -14671,6 +15313,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -14970,6 +15614,126 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_group(_ contex
 				return ec.fieldContext_Group_activityLog(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoveTeamAccessManagerPayload_team(ctx context.Context, field graphql.CollectedField, obj *team.RemoveTeamAccessManagerPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RemoveTeamAccessManagerPayload_team,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.RemoveTeamAccessManagerPayload().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoveTeamAccessManagerPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RemoveTeamAccessManagerPayload_user(ctx context.Context, field graphql.CollectedField, obj *team.RemoveTeamAccessManagerPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RemoveTeamAccessManagerPayload_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.RemoveTeamAccessManagerPayload().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoveTeamAccessManagerPayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
+			case "externalID":
+				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
+			case "teams":
+				return ec.fieldContext_User_teams(ctx, field)
+			case "teamMembers":
+				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
+			case "isAdmin":
+				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
 	}
 	return fc, nil
@@ -16954,6 +17718,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -19521,6 +20287,8 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -20404,6 +21172,41 @@ func (ec *executionContext) fieldContext_Team_viewerIsMember(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_accessManagers(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_accessManagers,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Team().AccessManagers(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_accessManagers(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_TeamAccessManager_team(ctx, field)
+			case "user":
+				return ec.fieldContext_TeamAccessManager_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamAccessManager", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_activityLog(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -20449,6 +21252,126 @@ func (ec *executionContext) fieldContext_Team_activityLog(ctx context.Context, f
 	if fc.Args, err = ec.field_Team_activityLog_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamAccessManager_team(ctx context.Context, field graphql.CollectedField, obj *team.TeamAccessManager) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamAccessManager_team,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.TeamAccessManager().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamAccessManager_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamAccessManager",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamAccessManager_user(ctx context.Context, field graphql.CollectedField, obj *team.TeamAccessManager) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamAccessManager_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.TeamAccessManager().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamAccessManager_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamAccessManager",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
+			case "externalID":
+				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
+			case "teams":
+				return ec.fieldContext_User_teams(ctx, field)
+			case "teamMembers":
+				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
+			case "isAdmin":
+				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -20548,6 +21471,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -20874,6 +21799,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -20933,6 +21860,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -21224,6 +22153,658 @@ func (ec *executionContext) fieldContext_TeamMemberEdge_node(_ context.Context, 
 				return ec.fieldContext_TeamMember_groups(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TeamMember", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_data(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntry_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntry_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_TeamRoleAssignedActivityLogEntryData_user(ctx, field)
+			case "role":
+				return ec.fieldContext_TeamRoleAssignedActivityLogEntryData_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamRoleAssignedActivityLogEntryData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData_user(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntryData_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.TeamRoleAssignedActivityLogEntryData().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntryData_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
+			case "externalID":
+				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
+			case "teams":
+				return ec.fieldContext_User_teams(ctx, field)
+			case "teamMembers":
+				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
+			case "isAdmin":
+				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData_role(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleAssignedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleAssignedActivityLogEntryData_role,
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleAssignedActivityLogEntryData_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleAssignedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_data(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntry_data,
+		func(ctx context.Context) (any, error) {
+			return obj.Data, nil
+		},
+		nil,
+		ec.marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntry_data(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_TeamRoleRevokedActivityLogEntryData_user(ctx, field)
+			case "role":
+				return ec.fieldContext_TeamRoleRevokedActivityLogEntryData_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamRoleRevokedActivityLogEntryData", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData_user(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntryData_user,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.TeamRoleRevokedActivityLogEntryData().User(ctx, obj)
+		},
+		nil,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntryData_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "jobTitle":
+				return ec.fieldContext_User_jobTitle(ctx, field)
+			case "externalID":
+				return ec.fieldContext_User_externalID(ctx, field)
+			case "section":
+				return ec.fieldContext_User_section(ctx, field)
+			case "teams":
+				return ec.fieldContext_User_teams(ctx, field)
+			case "teamMembers":
+				return ec.fieldContext_User_teamMembers(ctx, field)
+			case "groups":
+				return ec.fieldContext_User_groups(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_User_sharedBucketsAccess(ctx, field)
+			case "isAdmin":
+				return ec.fieldContext_User_isAdmin(ctx, field)
+			case "isSectionManager":
+				return ec.fieldContext_User_isSectionManager(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData_role(ctx context.Context, field graphql.CollectedField, obj *team.TeamRoleRevokedActivityLogEntryData) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamRoleRevokedActivityLogEntryData_role,
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamRoleRevokedActivityLogEntryData_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamRoleRevokedActivityLogEntryData",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21782,6 +23363,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
 			case "viewerIsMember":
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			}
@@ -25005,6 +26588,40 @@ func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Contex
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputAddTeamAccessManagerInput(ctx context.Context, obj any) (team.AddTeamAccessManagerInput, error) {
+	var it team.AddTeamAccessManagerInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "userEmail"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "userEmail":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userEmail"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserEmail = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAssignRoleToServiceAccountInput(ctx context.Context, obj any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
 	var it serviceaccount.AssignRoleToServiceAccountInput
 	asMap := map[string]any{}
@@ -25522,6 +27139,40 @@ func (ec *executionContext) unmarshalInputRemoveGroupMemberInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx context.Context, obj any) (team.RemoveTeamAccessManagerInput, error) {
+	var it team.RemoveTeamAccessManagerInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "userEmail"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "userEmail":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("userEmail"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.UserEmail = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRequestTeamDeletionInput(ctx context.Context, obj any) (team.RequestTeamDeletionInput, error) {
 	var it team.RequestTeamDeletionInput
 	asMap := map[string]any{}
@@ -25884,6 +27535,20 @@ func (ec *executionContext) _ActivityLogEntry(ctx context.Context, sel ast.Selec
 			return graphql.Null
 		}
 		return ec._TeamUpdatedActivityLogEntry(ctx, sel, obj)
+	case team.TeamRoleRevokedActivityLogEntry:
+		return ec._TeamRoleRevokedActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamRoleRevokedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamRoleRevokedActivityLogEntry(ctx, sel, obj)
+	case team.TeamRoleAssignedActivityLogEntry:
+		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamRoleAssignedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, obj)
 	case team.TeamCreatedActivityLogEntry:
 		return ec._TeamCreatedActivityLogEntry(ctx, sel, &obj)
 	case *team.TeamCreatedActivityLogEntry:
@@ -26087,6 +27752,20 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._TeamUpdatedActivityLogEntry(ctx, sel, obj)
+	case team.TeamRoleRevokedActivityLogEntry:
+		return ec._TeamRoleRevokedActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamRoleRevokedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamRoleRevokedActivityLogEntry(ctx, sel, obj)
+	case team.TeamRoleAssignedActivityLogEntry:
+		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamRoleAssignedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, obj)
 	case team.TeamCreatedActivityLogEntry:
 		return ec._TeamCreatedActivityLogEntry(ctx, sel, &obj)
 	case *team.TeamCreatedActivityLogEntry:
@@ -26482,6 +28161,112 @@ func (ec *executionContext) _AddGroupMemberPayload(ctx context.Context, sel ast.
 			out.Values[i] = graphql.MarshalString("AddGroupMemberPayload")
 		case "member":
 			out.Values[i] = ec._AddGroupMemberPayload_member(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var addTeamAccessManagerPayloadImplementors = []string{"AddTeamAccessManagerPayload"}
+
+func (ec *executionContext) _AddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, obj *team.AddTeamAccessManagerPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addTeamAccessManagerPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AddTeamAccessManagerPayload")
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddTeamAccessManagerPayload_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._AddTeamAccessManagerPayload_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -27654,6 +29439,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateTeam":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateTeam(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addTeamAccessManager":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addTeamAccessManager(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeTeamAccessManager":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeTeamAccessManager(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -29076,6 +30875,112 @@ func (ec *executionContext) _RemoveGroupMemberPayload(ctx context.Context, sel a
 					}
 				}()
 				res = ec._RemoveGroupMemberPayload_group(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var removeTeamAccessManagerPayloadImplementors = []string{"RemoveTeamAccessManagerPayload"}
+
+func (ec *executionContext) _RemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, obj *team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, removeTeamAccessManagerPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoveTeamAccessManagerPayload")
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RemoveTeamAccessManagerPayload_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RemoveTeamAccessManagerPayload_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -31652,6 +33557,42 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "accessManagers":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Team_accessManagers(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "activityLog":
 			field := field
 
@@ -31662,6 +33603,112 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 					}
 				}()
 				res = ec._Team_activityLog(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamAccessManagerImplementors = []string{"TeamAccessManager"}
+
+func (ec *executionContext) _TeamAccessManager(ctx context.Context, sel ast.SelectionSet, obj *team.TeamAccessManager) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamAccessManagerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamAccessManager")
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamAccessManager_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamAccessManager_user(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -32084,6 +34131,304 @@ func (ec *executionContext) _TeamMemberEdge(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._TeamMemberEdge_node(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamRoleAssignedActivityLogEntryImplementors = []string{"TeamRoleAssignedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *team.TeamRoleAssignedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamRoleAssignedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamRoleAssignedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "data":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntry_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamRoleAssignedActivityLogEntryDataImplementors = []string{"TeamRoleAssignedActivityLogEntryData"}
+
+func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, obj *team.TeamRoleAssignedActivityLogEntryData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamRoleAssignedActivityLogEntryDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamRoleAssignedActivityLogEntryData")
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamRoleAssignedActivityLogEntryData_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "role":
+			out.Values[i] = ec._TeamRoleAssignedActivityLogEntryData_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamRoleRevokedActivityLogEntryImplementors = []string{"TeamRoleRevokedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *team.TeamRoleRevokedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamRoleRevokedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamRoleRevokedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "data":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntry_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamRoleRevokedActivityLogEntryDataImplementors = []string{"TeamRoleRevokedActivityLogEntryData"}
+
+func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, obj *team.TeamRoleRevokedActivityLogEntryData) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamRoleRevokedActivityLogEntryDataImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamRoleRevokedActivityLogEntryData")
+		case "user":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamRoleRevokedActivityLogEntryData_user(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "role":
+			out.Values[i] = ec._TeamRoleRevokedActivityLogEntryData_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -33687,6 +36032,25 @@ func (ec *executionContext) marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstat
 	return ec._AddGroupMemberPayload(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerInput(ctx context.Context, v any) (team.AddTeamAccessManagerInput, error) {
+	res, err := ec.unmarshalInputAddTeamAccessManagerInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAddTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.AddTeamAccessManagerPayload) graphql.Marshaler {
+	return ec._AddTeamAccessManagerPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.AddTeamAccessManagerPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AddTeamAccessManagerPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput(ctx context.Context, v any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
 	res, err := ec.unmarshalInputAssignRoleToServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -34528,6 +36892,25 @@ func (ec *executionContext) marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋs
 		return graphql.Null
 	}
 	return ec._RemoveGroupMemberPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput(ctx context.Context, v any) (team.RemoveTeamAccessManagerInput, error) {
+	res, err := ec.unmarshalInputRemoveTeamAccessManagerInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
+	return ec._RemoveTeamAccessManagerPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RemoveTeamAccessManagerPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput(ctx context.Context, v any) (serviceaccount.RevokeRoleFromServiceAccountInput, error) {
@@ -35580,6 +37963,60 @@ func (ec *executionContext) marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._Team(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamAccessManager) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx context.Context, sel ast.SelectionSet, v *team.TeamAccessManager) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamAccessManager(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNTeamConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.Team]) graphql.Marshaler {
 	return ec._TeamConnection(ctx, sel, &v)
 }
@@ -35766,6 +38203,26 @@ func (ec *executionContext) unmarshalNTeamOrderField2githubᚗcomᚋstatisticsno
 
 func (ec *executionContext) marshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, sel ast.SelectionSet, v team.TeamOrderField) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleAssignedActivityLogEntryData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamRoleAssignedActivityLogEntryData(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleRevokedActivityLogEntryData) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamRoleRevokedActivityLogEntryData(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamUpdatedActivityLogEntryData) graphql.Marshaler {

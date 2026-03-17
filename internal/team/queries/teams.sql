@@ -139,3 +139,31 @@ FROM
 ORDER BY
 	slug ASC
 ;
+
+-- name: GetAccessManagers :many
+SELECT
+	user_id
+FROM
+	user_roles
+WHERE
+	user_roles.target_team_slug = @team_slug::slug
+	AND user_roles.role_name = 'Tilgangsansvarlig'
+ORDER BY
+	user_id
+;
+
+-- name: AddAccessManager :exec
+INSERT INTO
+	user_roles (user_id, role_name, target_team_slug)
+VALUES
+	(@user_id, 'Tilgangsansvarlig', @team_slug::slug)
+ON CONFLICT DO NOTHING
+;
+
+-- name: RemoveAccessManager :exec
+DELETE FROM user_roles
+WHERE
+	user_id = @user_id
+	AND role_name = 'Tilgangsansvarlig'
+	AND target_team_slug = @team_slug::slug
+;

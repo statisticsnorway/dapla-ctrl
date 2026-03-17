@@ -10,11 +10,13 @@ import (
 )
 
 type Querier interface {
+	AddAccessManager(ctx context.Context, arg AddAccessManagerParams) error
 	ConfirmDeleteKey(ctx context.Context, key uuid.UUID) error
 	Create(ctx context.Context, arg CreateParams) (*Team, error)
 	CreateDeleteKey(ctx context.Context, arg CreateDeleteKeyParams) (*TeamDeleteKey, error)
 	Exists(ctx context.Context, argSlug slug.Slug) (bool, error)
 	Get(ctx context.Context, argSlug slug.Slug) (*Team, error)
+	GetAccessManagers(ctx context.Context, teamSlug slug.Slug) ([]uuid.UUID, error)
 	GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*TeamDeleteKey, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)
@@ -22,6 +24,7 @@ type Querier interface {
 	ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, error)
 	ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error)
 	ListMembers(ctx context.Context, arg ListMembersParams) ([]*ListMembersRow, error)
+	RemoveAccessManager(ctx context.Context, arg RemoveAccessManagerParams) error
 	SetDeleteKeyConfirmedAt(ctx context.Context, argSlug slug.Slug) error
 	SlugAvailable(ctx context.Context, argSlug slug.Slug) (bool, error)
 	Update(ctx context.Context, arg UpdateParams) (*Team, error)

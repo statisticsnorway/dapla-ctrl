@@ -14,6 +14,8 @@ const (
 	activityLogEntryActionCreateDeleteKey  activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
 	activityLogEntryActionConfirmDeleteKey activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
 	activityLogEntryActionSetMemberRole    activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
+	activityLogEntryActionAssignRole       activitylog.ActivityLogEntryAction       = "ASSIGN_ROLE"
+	activityLogEntryActionRevokeRole       activitylog.ActivityLogEntryAction       = "REVOKE_ROLE"
 )
 
 func init() {
@@ -79,6 +81,28 @@ func init() {
 				GenericActivityLogEntry: entry.WithMessage("Set member role"),
 				Data:                    data,
 			}, nil
+		case activityLogEntryActionAssignRole:
+			data, err := activitylog.TransformData(entry, func(data *TeamRoleAssignedActivityLogEntryData) *TeamRoleAssignedActivityLogEntryData {
+				return data
+			})
+			if err != nil {
+				return nil, err
+			}
+			return TeamRoleAssignedActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Assign role"),
+				Data:                    data,
+			}, nil
+		case activityLogEntryActionRevokeRole:
+			data, err := activitylog.TransformData(entry, func(data *TeamRoleRevokedActivityLogEntryData) *TeamRoleRevokedActivityLogEntryData {
+				return data
+			})
+			if err != nil {
+				return nil, err
+			}
+			return TeamRoleRevokedActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Revoke role"),
+				Data:                    data,
+			}, nil
 		default:
 			return nil, fmt.Errorf("unsupported team activity log entry action: %q", entry.Action)
 		}
@@ -86,6 +110,8 @@ func init() {
 
 	activitylog.RegisterFilter("TEAM_CREATED", activitylog.ActivityLogEntryActionCreated, activityLogEntryResourceTypeTeam)
 	activitylog.RegisterFilter("TEAM_UPDATED", activitylog.ActivityLogEntryActionUpdated, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_ROLE_ASSIGNED", activityLogEntryActionAssignRole, activityLogEntryResourceTypeTeam)
+	activitylog.RegisterFilter("TEAM_ROLE_REVOKED", activityLogEntryActionRevokeRole, activityLogEntryResourceTypeTeam)
 }
 
 type TeamCreatedActivityLogEntry struct {
@@ -157,4 +183,24 @@ type TeamMemberSetRoleActivityLogEntryData struct {
 
 func (t TeamMemberSetRoleActivityLogEntryData) UserID() ident.Ident {
 	return user.NewIdent(t.UserUUID)
+}
+
+type TeamRoleAssignedActivityLogEntry struct {
+	activitylog.GenericActivityLogEntry
+	Data *TeamRoleAssignedActivityLogEntryData `json:"data"`
+}
+
+type TeamRoleAssignedActivityLogEntryData struct {
+	Role   string    `json:"role"`
+	UserId uuid.UUID `json:"userId"`
+}
+
+type TeamRoleRevokedActivityLogEntry struct {
+	activitylog.GenericActivityLogEntry
+	Data *TeamRoleRevokedActivityLogEntryData `json:"data"`
+}
+
+type TeamRoleRevokedActivityLogEntryData struct {
+	Role   string    `json:"role"`
+	UserId uuid.UUID `json:"userId"`
 }

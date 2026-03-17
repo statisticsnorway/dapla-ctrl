@@ -19,6 +19,14 @@ import (
 	"k8s.io/utils/ptr"
 )
 
+func (r *addTeamAccessManagerPayloadResolver) Team(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *addTeamAccessManagerPayloadResolver) User(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*user.User, error) {
+	return user.Get(ctx, obj.UserId)
+}
+
 func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeamInput) (*team.CreateTeamPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
@@ -107,6 +115,51 @@ func (r *mutationResolver) UpdateTeam(ctx context.Context, input team.UpdateTeam
 	}, nil
 }
 
+func (r *mutationResolver) AddTeamAccessManager(ctx context.Context, input team.AddTeamAccessManagerInput) (*team.AddTeamAccessManagerPayload, error) {
+	actor := authz.ActorFromContext(ctx)
+
+	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
+		return nil, err
+	}
+
+	u, err := user.GetByEmail(ctx, input.UserEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	input.UserId = u.UUID
+	if err := team.AddAccessManager(ctx, input, actor); err != nil {
+		return nil, err
+	}
+
+	return &team.AddTeamAccessManagerPayload{
+		UserId:   input.UserId,
+		TeamSlug: input.TeamSlug,
+	}, nil
+}
+
+func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input team.RemoveTeamAccessManagerInput) (*team.RemoveTeamAccessManagerPayload, error) {
+	actor := authz.ActorFromContext(ctx)
+
+	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
+		return nil, err
+	}
+
+	u, err := user.GetByEmail(ctx, input.UserEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	input.UserId = u.UUID
+	if err := team.RemoveAccessManager(ctx, input, actor); err != nil {
+		return nil, err
+	}
+	return &team.RemoveTeamAccessManagerPayload{
+		UserId:   input.UserId,
+		TeamSlug: input.TeamSlug,
+	}, nil
+}
+
 func (r *queryResolver) Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
@@ -118,6 +171,14 @@ func (r *queryResolver) Teams(ctx context.Context, first *int, after *pagination
 
 func (r *queryResolver) Team(ctx context.Context, slug slug.Slug) (*team.Team, error) {
 	return team.Get(ctx, slug)
+}
+
+func (r *removeTeamAccessManagerPayloadResolver) Team(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *removeTeamAccessManagerPayloadResolver) User(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*user.User, error) {
+	return user.Get(ctx, obj.UserId)
 }
 
 func (r *teamResolver) Section(ctx context.Context, obj *team.Team) (*section.Section, error) {
@@ -166,6 +227,18 @@ func (r *teamResolver) ViewerIsMember(ctx context.Context, obj *team.Team) (bool
 	return team.UserIsMember(ctx, obj.Slug, authz.ActorFromContext(ctx).User.GetID())
 }
 
+func (r *teamResolver) AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error) {
+	return team.GetAccessManagers(ctx, obj.Slug)
+}
+
+func (r *teamAccessManagerResolver) Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *teamAccessManagerResolver) User(ctx context.Context, obj *team.TeamAccessManager) (*user.User, error) {
+	return user.Get(ctx, obj.UserID)
+}
+
 func (r *teamMemberResolver) Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
 }
@@ -178,11 +251,44 @@ func (r *teamMemberResolver) Groups(ctx context.Context, obj *team.TeamMember) (
 	return group.ListForTeamMember(ctx, obj.TeamSlug, obj.UserID)
 }
 
+func (r *teamRoleAssignedActivityLogEntryDataResolver) User(ctx context.Context, obj *team.TeamRoleAssignedActivityLogEntryData) (*user.User, error) {
+	return user.Get(ctx, obj.UserId)
+}
+
+func (r *teamRoleRevokedActivityLogEntryDataResolver) User(ctx context.Context, obj *team.TeamRoleRevokedActivityLogEntryData) (*user.User, error) {
+	return user.Get(ctx, obj.UserId)
+}
+
+func (r *Resolver) AddTeamAccessManagerPayload() gengql.AddTeamAccessManagerPayloadResolver {
+	return &addTeamAccessManagerPayloadResolver{r}
+}
+
+func (r *Resolver) RemoveTeamAccessManagerPayload() gengql.RemoveTeamAccessManagerPayloadResolver {
+	return &removeTeamAccessManagerPayloadResolver{r}
+}
+
 func (r *Resolver) Team() gengql.TeamResolver { return &teamResolver{r} }
+
+func (r *Resolver) TeamAccessManager() gengql.TeamAccessManagerResolver {
+	return &teamAccessManagerResolver{r}
+}
 
 func (r *Resolver) TeamMember() gengql.TeamMemberResolver { return &teamMemberResolver{r} }
 
+func (r *Resolver) TeamRoleAssignedActivityLogEntryData() gengql.TeamRoleAssignedActivityLogEntryDataResolver {
+	return &teamRoleAssignedActivityLogEntryDataResolver{r}
+}
+
+func (r *Resolver) TeamRoleRevokedActivityLogEntryData() gengql.TeamRoleRevokedActivityLogEntryDataResolver {
+	return &teamRoleRevokedActivityLogEntryDataResolver{r}
+}
+
 type (
-	teamResolver       struct{ *Resolver }
-	teamMemberResolver struct{ *Resolver }
+	addTeamAccessManagerPayloadResolver          struct{ *Resolver }
+	removeTeamAccessManagerPayloadResolver       struct{ *Resolver }
+	teamResolver                                 struct{ *Resolver }
+	teamAccessManagerResolver                    struct{ *Resolver }
+	teamMemberResolver                           struct{ *Resolver }
+	teamRoleAssignedActivityLogEntryDataResolver struct{ *Resolver }
+	teamRoleRevokedActivityLogEntryDataResolver  struct{ *Resolver }
 )

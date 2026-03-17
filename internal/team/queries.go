@@ -2,8 +2,10 @@ package team
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-api/internal/database"
@@ -12,6 +14,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
 	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-api/internal/validate"
 	"k8s.io/utils/ptr"
 )
 
@@ -306,4 +309,83 @@ func ListBySlugs(ctx context.Context, slugs []slug.Slug, page *pagination.Pagina
 
 func ListAllSlugs(ctx context.Context) ([]slug.Slug, error) {
 	return db(ctx).ListAllSlugs(ctx)
+}
+
+func GetAccessManagers(ctx context.Context, slug slug.Slug) ([]*TeamAccessManager, error) {
+	userIds, err := db(ctx).GetAccessManagers(ctx, slug)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	accessManagers := make([]*TeamAccessManager, 0, len(userIds))
+	for _, u := range userIds {
+		accessManagers = append(accessManagers, &TeamAccessManager{
+			UserID:   u,
+			TeamSlug: slug,
+		})
+	}
+
+	return accessManagers, nil
+}
+
+func AddAccessManager(ctx context.Context, input AddTeamAccessManagerInput, actor *authz.Actor) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		db := db(ctx)
+
+		currentManagers, err := GetAccessManagers(ctx, input.TeamSlug)
+		if err != nil {
+			return err
+		}
+
+		if len(currentManagers) >= 2 {
+			verr := validate.New()
+			verr.AddMessage("Et team kan ha maks to tilgangsansvarlige")
+			return verr
+		}
+
+		if err := db.AddAccessManager(ctx, teamsql.AddAccessManagerParams{
+			UserID:   input.UserId,
+			TeamSlug: input.TeamSlug,
+		}); err != nil {
+			return err
+		}
+
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activityLogEntryActionAssignRole,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeTeam,
+			ResourceName: input.TeamSlug.String(),
+			TeamSlug:     &input.TeamSlug,
+			Data: &TeamRoleAssignedActivityLogEntryData{
+				UserId: input.UserId,
+				Role:   "Tilgangsansvarlig",
+			},
+		})
+	})
+}
+
+func RemoveAccessManager(ctx context.Context, input RemoveTeamAccessManagerInput, actor *authz.Actor) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		if err := db(ctx).RemoveAccessManager(ctx, teamsql.RemoveAccessManagerParams{
+			UserID:   input.UserId,
+			TeamSlug: input.TeamSlug,
+		}); err != nil {
+			return err
+		}
+
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activityLogEntryActionRevokeRole,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeTeam,
+			ResourceName: input.TeamSlug.String(),
+			TeamSlug:     &input.TeamSlug,
+			Data: &TeamRoleRevokedActivityLogEntryData{
+				UserId: input.UserId,
+				Role:   "Tilgangsansvarlig",
+			},
+		})
+	})
 }

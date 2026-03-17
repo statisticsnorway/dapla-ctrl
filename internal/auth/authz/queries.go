@@ -201,6 +201,10 @@ func CanManageTeamMembers(ctx context.Context, teamSlug slug.Slug) error {
 }
 
 func CanManageGroupMembers(ctx context.Context, teamSlug slug.Slug) error {
+	if err := requireTeamAuthorization(ctx, teamSlug, "teams:members:admin"); err == nil {
+		return nil
+	}
+
 	return CanManageTeam(ctx, teamSlug)
 }
 
@@ -243,7 +247,7 @@ func RequireGlobalAdmin(ctx context.Context) error {
 	return ErrUnauthorized
 }
 
-/* func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authorizationName string) error {
+func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authorizationName string) error {
 	user := ActorFromContext(ctx).User
 	var (
 		hasAuthorization bool
@@ -271,7 +275,7 @@ func RequireGlobalAdmin(ctx context.Context) error {
 	}
 
 	return newMissingAuthorizationError(authorizationName)
-} */
+}
 
 /* func requireGlobalAuthorization(ctx context.Context, authorizationName string) error {
 	user := ActorFromContext(ctx).User

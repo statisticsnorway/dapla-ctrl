@@ -10,6 +10,24 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 )
 
+const addAccessManager = `-- name: AddAccessManager :exec
+INSERT INTO
+	user_roles (user_id, role_name, target_team_slug)
+VALUES
+	($1, 'Tilgangsansvarlig', $2::slug)
+ON CONFLICT DO NOTHING
+`
+
+type AddAccessManagerParams struct {
+	UserID   uuid.UUID
+	TeamSlug slug.Slug
+}
+
+func (q *Queries) AddAccessManager(ctx context.Context, arg AddAccessManagerParams) error {
+	_, err := q.db.Exec(ctx, addAccessManager, arg.UserID, arg.TeamSlug)
+	return err
+}
+
 const confirmDeleteKey = `-- name: ConfirmDeleteKey :exec
 UPDATE team_delete_keys
 SET
@@ -125,6 +143,38 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 		&i.IsManaged,
 	)
 	return &i, err
+}
+
+const getAccessManagers = `-- name: GetAccessManagers :many
+SELECT
+	user_id
+FROM
+	user_roles
+WHERE
+	user_roles.target_team_slug = $1::slug
+	AND user_roles.role_name = 'Tilgangsansvarlig'
+ORDER BY
+	user_id
+`
+
+func (q *Queries) GetAccessManagers(ctx context.Context, teamSlug slug.Slug) ([]uuid.UUID, error) {
+	rows, err := q.db.Query(ctx, getAccessManagers, teamSlug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []uuid.UUID{}
+	for rows.Next() {
+		var user_id uuid.UUID
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getDeleteKey = `-- name: GetDeleteKey :one
@@ -305,6 +355,24 @@ func (q *Queries) ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, 
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeAccessManager = `-- name: RemoveAccessManager :exec
+DELETE FROM user_roles
+WHERE
+	user_id = $1
+	AND role_name = 'Tilgangsansvarlig'
+	AND target_team_slug = $2::slug
+`
+
+type RemoveAccessManagerParams struct {
+	UserID   uuid.UUID
+	TeamSlug slug.Slug
+}
+
+func (q *Queries) RemoveAccessManager(ctx context.Context, arg RemoveAccessManagerParams) error {
+	_, err := q.db.Exec(ctx, removeAccessManager, arg.UserID, arg.TeamSlug)
+	return err
 }
 
 const setDeleteKeyConfirmedAt = `-- name: SetDeleteKeyConfirmedAt :exec
