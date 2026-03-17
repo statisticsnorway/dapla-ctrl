@@ -77,7 +77,7 @@
 					{/if}
 				</div>
 			</div>
-
+			<div class="spacer"></div>
 			<Heading level="2" as="h2" size="xsmall">
 				<Tooltip content="Tilgangsansvarlige kan legge til og fjerne medlemmer fra teamet"
 					>Tilgangsansvarlige</Tooltip
