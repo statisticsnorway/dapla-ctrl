@@ -79,14 +79,14 @@
 			</div>
 
 			<Heading level="2" as="h2" size="xsmall">
-				<Tooltip content="Tilgangsanvarlige kan legge til og fjerne medlemmer fra teamet"
+				<Tooltip content="Tilgangsansvarlige kan legge til og fjerne medlemmer fra teamet"
 					>Tilgangsansvarlige</Tooltip
 				>
 				{#if canManageTeam}
 					{@const canAddMore = team.accessManagers.length < 2}
 					<Tooltip
 						content={canAddMore
-							? 'Legg til ny tilgangsanvarlig'
+							? 'Legg til ny tilgangsansvarlig'
 							: 'Teamet kan ha maks 2 tilgangsansvarlige i tillegg til den teamansvarlige'}
 					>
 						<Button
