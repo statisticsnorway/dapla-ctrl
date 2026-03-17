@@ -36,7 +36,12 @@
 			ActivityLogActivityType.GROUP_MEMBER_ADDED,
 			ActivityLogActivityType.GROUP_MEMBER_REMOVED
 		],
-		Team: [ActivityLogActivityType.TEAM_CREATED, ActivityLogActivityType.TEAM_UPDATED]
+		Team: [
+			ActivityLogActivityType.TEAM_CREATED,
+			ActivityLogActivityType.TEAM_UPDATED,
+			ActivityLogActivityType.TEAM_ROLE_ASSIGNED,
+			ActivityLogActivityType.TEAM_ROLE_REVOKED
+		]
 	};
 
 	const activityTypeToNorweigan = (activityType: ActivityLogActivityType$options) => {
@@ -51,6 +56,10 @@
 				return 'Team opprettet';
 			case 'TEAM_UPDATED':
 				return 'Team oppdatert';
+			case 'TEAM_ROLE_ASSIGNED':
+				return 'Rolle gitt';
+			case 'TEAM_ROLE_REVOKED':
+				return 'Rolle fratatt';
 			default:
 				return capitalizeFirstLetter(activityType.split('_').join(' ').toLowerCase());
 		}

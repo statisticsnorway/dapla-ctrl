@@ -14,5 +14,15 @@ query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
 				email
 			}
 		}
+		accessManagers {
+			user {
+				id
+				name
+				email
+				section {
+					code
+				}
+			}
+		}
 	}
 }

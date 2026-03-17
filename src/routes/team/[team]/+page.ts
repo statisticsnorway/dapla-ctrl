@@ -32,18 +32,6 @@ export async function load(event) {
 		...(await addPageMeta(event, {
 			title: current.data?.team.displayName
 		})),
-		...(current.data
-			? current.data.team
-			: {
-					displayName: '',
-					slug: '',
-					isManaged: false,
-					section: {
-						code: '',
-						name: '',
-						manager: null
-					},
-					activityLog: { nodes: [] }
-				})
+		...team
 	};
 }

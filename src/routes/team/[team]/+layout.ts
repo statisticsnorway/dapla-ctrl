@@ -30,6 +30,7 @@ export async function load(event) {
 	}
 
 	const meta = await addPageMeta(event, {
+		title: current.data?.team.displayName,
 		breadcrumbs:
 			event.route.id === '/team/[team]'
 				? undefined

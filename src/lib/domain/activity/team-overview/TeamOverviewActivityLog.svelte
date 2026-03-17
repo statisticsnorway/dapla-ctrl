@@ -13,6 +13,8 @@
 	import GroupMemberRemovedActivityLogEntryText from '../shared/texts/GroupMemberRemovedActivityLogEntryText.svelte';
 	import TeamCreatedActivityLogEntryText from '../shared/texts/TeamCreatedActivityLogEntryText.svelte';
 	import TeamUpdatedActivityLogEntryText from '../shared/texts/TeamUpdatedActivityLogEntryText.svelte';
+	import TeamRoleAssignedActivityLogEntryText from '../shared/texts/TeamRoleAssignedActivityLogEntryText.svelte';
+	import TeamRoleRevokedActivityLogEntryText from '../shared/texts/TeamRoleRevokedActivityLogEntryText.svelte';
 
 	interface Props {
 		teamSlug: string;
@@ -28,7 +30,9 @@
 			ActivityLogActivityType.RECONCILER_DISABLED,
 			ActivityLogActivityType.RECONCILER_ENABLED,
 			ActivityLogActivityType.TEAM_CREATED,
-			ActivityLogActivityType.TEAM_UPDATED
+			ActivityLogActivityType.TEAM_UPDATED,
+			ActivityLogActivityType.TEAM_ROLE_ASSIGNED,
+			ActivityLogActivityType.TEAM_ROLE_REVOKED
 		]
 	};
 
@@ -59,6 +63,28 @@
 									userEmail
 								}
 							}
+							... on TeamRoleAssignedActivityLogEntry {
+								__typename
+								roleAssigned: data {
+									role
+									user {
+										id
+										name
+										email
+									}
+								}
+							}
+							... on TeamRoleRevokedActivityLogEntry {
+								__typename
+								roleRevoked: data {
+									role
+									user {
+										id
+										name
+										email
+									}
+								}
+							}
 						}
 					}
 				}
@@ -84,6 +110,10 @@
 				return GroupMemberAddedActivityLogEntryText as Component<{ data: unknown }>;
 			case 'GroupMemberRemovedActivityLogEntry':
 				return GroupMemberRemovedActivityLogEntryText as Component<{ data: unknown }>;
+			case 'TeamRoleAssignedActivityLogEntry':
+				return TeamRoleAssignedActivityLogEntryText as Component<{ data: unknown }>;
+			case 'TeamRoleRevokedActivityLogEntry':
+				return TeamRoleRevokedActivityLogEntryText as Component<{ data: unknown }>;
 			default:
 				return DefaultText as Component<{ data: unknown }>;
 		}
@@ -91,9 +121,7 @@
 </script>
 
 <div class="wrapper">
-	<Heading level="2" as="h2" size="small" spacing
-		><a href="/team/{teamSlug}/activity-log">Aktivitetslogg</a></Heading
-	>
+	<Heading><a href="/team/{teamSlug}/activity-log">Aktivitetslogg</a></Heading>
 	{#if $activityLogQuery.fetching || !$activityLogQuery.data}
 		<div style="display: flex; justify-content: center; align-items: center; min-height: 500px;">
 			<Loader size="3xlarge" />

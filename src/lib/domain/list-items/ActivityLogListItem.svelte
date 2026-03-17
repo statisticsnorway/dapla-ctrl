@@ -13,6 +13,8 @@
 	import GroupCreatedActivityLogEntryText from '../activity/shared/texts/GroupCreatedActivityLogEntryText.svelte';
 	import GroupMemberAddedActivityLogEntryText from '../activity/shared/texts/GroupMemberAddedActivityLogEntryText.svelte';
 	import GroupMemberRemovedActivityLogEntryText from '../activity/shared/texts/GroupMemberRemovedActivityLogEntryText.svelte';
+	import TeamRoleAssignedActivityLogEntryText from '../activity/shared/texts/TeamRoleAssignedActivityLogEntryText.svelte';
+	import TeamRoleRevokedActivityLogEntryText from '../activity/shared/texts/TeamRoleRevokedActivityLogEntryText.svelte';
 
 	interface Props {
 		item: ActivityLogEntryFragment;
@@ -58,6 +60,22 @@
 							userEmail
 						}
 					}
+					... on TeamRoleAssignedActivityLogEntry {
+						roleAssigned: data {
+							user {
+								email
+							}
+							role
+						}
+					}
+					... on TeamRoleRevokedActivityLogEntry {
+						roleRevoked: data {
+							user {
+								email
+							}
+							role
+						}
+					}
 				}
 			`)
 		)
@@ -77,6 +95,10 @@
 				return GroupMemberAddedActivityLogEntryText as Component<{ data: unknown }>;
 			case 'GroupMemberRemovedActivityLogEntry':
 				return GroupMemberRemovedActivityLogEntryText as Component<{ data: unknown }>;
+			case 'TeamRoleAssignedActivityLogEntry':
+				return TeamRoleAssignedActivityLogEntryText as Component<{ data: unknown }>;
+			case 'TeamRoleRevokedActivityLogEntry':
+				return TeamRoleRevokedActivityLogEntryText as Component<{ data: unknown }>;
 			default:
 				return null;
 		}

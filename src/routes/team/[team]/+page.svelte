@@ -1,10 +1,43 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Alert, CopyButton } from '@nais/ds-svelte-community';
+	import { Alert, Button, CopyButton, Heading, Tooltip } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import TeamOverviewActivityLog from '$lib/domain/activity/team-overview/TeamOverviewActivityLog.svelte';
+	import { PlusIcon, TrashIcon } from '@nais/ds-svelte-community/icons';
+	import AddAccessManager from './AddAccessManager.svelte';
+	import { graphql } from '$houdini';
+	import Confirm from '$lib/ui/Confirm.svelte';
 	let { data }: PageProps = $props();
-	let { teamSlug, slug, section } = $derived(data);
+	let { teamSlug, TeamOverview, UserInfo } = $derived(data);
+
+	let team = $derived($TeamOverview.data?.team);
+
+	let addAccessManagerOpen = $state(false);
+
+	let removeAccessManagerOpen = $state(false);
+	let removeAccessManager: { email: string; name: string } | null = $state(null);
+
+	let canManageTeam = $derived.by(() => {
+		let me = $UserInfo.data?.me;
+		if (me?.__typename !== 'User') return false;
+		return me.isAdmin || team?.section.manager?.email === me.email;
+	});
+
+	const refetch = () => {
+		TeamOverview.fetch({
+			policy: 'CacheAndNetwork'
+		});
+	};
+
+	const removeTeamAccessManager = graphql(`
+		mutation RemoveTeamAccessManager($input: RemoveTeamAccessManagerInput!) {
+			removeTeamAccessManager(input: $input) {
+				team {
+					slug
+				}
+			}
+		}
+	`);
 </script>
 
 {#if page.url.searchParams.has('deleted')}
@@ -15,50 +48,117 @@
 	</Alert>
 {/if}
 
-<div class="main-layout">
-	<div class="left-section">
-		<div class="team-slug">
-			<span class="slug-value">{slug || teamSlug}</span>
-			<CopyButton
-				copyText={slug || teamSlug}
-				title={slug || teamSlug}
-				iconPosition="right"
-				size="xsmall"
-			/>
-		</div>
-		<div class="spacer"></div>
-		<div class="info-item">
-			<div class="value">
-				{#if section?.manager}
-					{#if section.manager.email}
-						<a href="/member/{section.manager.email}">{section.manager.name}</a>
-					{:else}
-						{section.manager.name}
-					{/if}
-				{:else}
-					<span class="missing">Mangler seksjonsleder</span>
-				{/if}
+{#if team}
+	{@const section = team.section}
+	<div class="main-layout">
+		<div class="left-section">
+			<div class="team-slug">
+				<span class="slug-value">{team.slug || teamSlug}</span>
+				<CopyButton
+					copyText={team.slug || teamSlug}
+					title={team.slug || teamSlug}
+					iconPosition="right"
+					size="xsmall"
+				/>
 			</div>
-			{#if section?.manager?.email}
+			<div class="info-item">
 				<div class="value">
-					<a href="mailto:{section.manager.email}">{section.manager.email}</a>
-				</div>
-			{/if}
-		</div>
-		<div class="info-item">
-			<div class="value">
-				{#if section}
 					{section.name} ({section.code})
-				{:else}
-					<span class="missing">Ikke spesifisert</span>
+				</div>
+			</div>
+			<div class="spacer"></div>
+			<div class="info-item">
+				<Heading level="2" as="h2" size="xsmall">Teamansvarlig</Heading>
+				<div class="value">
+					{#if section.manager}
+						<a href="/member/{section.manager.email}">{section.manager.name} ({section.code})</a>
+					{:else}
+						<span class="missing">Mangler seksjonsleder</span>
+					{/if}
+				</div>
+			</div>
+
+			<Heading level="2" as="h2" size="xsmall">
+				<Tooltip content="Tilgangsanvarlige kan legge til og fjerne medlemmer fra teamet"
+					>Tilgangsansvarlige</Tooltip
+				>
+				{#if canManageTeam}
+					{@const canAddMore = team.accessManagers.length < 2}
+					<Tooltip
+						content={canAddMore
+							? 'Legg til ny tilgangsanvarlig'
+							: 'Teamet kan ha maks 2 tilgangsansvarlige i tillegg til den teamansvarlige'}
+					>
+						<Button
+							disabled={!canAddMore}
+							icon={PlusIcon}
+							size="xsmall"
+							onclick={() => {
+								addAccessManagerOpen = !addAccessManagerOpen;
+							}}
+						/>
+					</Tooltip>
 				{/if}
+			</Heading>
+			<div>
+				<div class="info-item">
+					<div class="value">
+						{#if section.manager}
+							<a href="/member/{section.manager.email}">{section.manager.name} ({section.code})</a>
+						{:else}
+							<span class="missing">Mangler seksjonsleder</span>
+						{/if}
+					</div>
+				</div>
+				{#each team.accessManagers as am (am.user.id)}
+					<div class="info-item">
+						<div class="value">
+							<a href="/member/{am.user.email}"
+								>{am.user.name} ({am.user.section?.code ?? 'Mangler seksjon'})</a
+							>
+							{#if canManageTeam}<Button
+									icon={TrashIcon}
+									size="xsmall"
+									variant="tertiary"
+									onclick={() => {
+										removeAccessManager = { email: am.user.email, name: am.user.name };
+										removeAccessManagerOpen = !removeAccessManagerOpen;
+									}}
+								/>
+							{/if}
+						</div>
+					</div>
+				{/each}
 			</div>
 		</div>
+		<div class="right-section">
+			<TeamOverviewActivityLog {teamSlug} />
+		</div>
 	</div>
-	<div class="right-section">
-		<TeamOverviewActivityLog {teamSlug} />
-	</div>
-</div>
+
+	{#if addAccessManagerOpen}
+		<AddAccessManager bind:open={addAccessManagerOpen} team={team.slug} oncreated={refetch} />
+	{/if}
+	{#if removeAccessManager && removeAccessManagerOpen}
+		{@const userId = removeAccessManager.email}
+		<Confirm
+			bind:open={removeAccessManagerOpen}
+			confirmText="Fjern"
+			variant="danger"
+			onconfirm={async () => {
+				await removeTeamAccessManager.mutate({
+					input: { teamSlug: team.slug, userEmail: userId }
+				});
+				refetch();
+			}}
+		>
+			{#snippet header()}
+				<Heading>Fjern tilgangsansvarlig</Heading>
+			{/snippet}
+			Er du sikker på at du vil fjerne <b>{removeAccessManager.name}</b> som tilgangsansvarlig?
+		</Confirm>
+	{/if}
+{/if}
 
 <style>
 	.main-layout {
