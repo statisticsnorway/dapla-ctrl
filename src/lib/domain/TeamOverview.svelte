@@ -23,6 +23,7 @@
 			name: string;
 		};
 		userGroups?: string[];
+		accessManagers: string[];
 	};
 	interface Props {
 		userEmail?: string;
@@ -118,8 +119,14 @@
 	{/if}
 {/snippet}
 {#snippet groupsCell(team: TeamsData)}
+	{@const isAccessManager = userEmail && team.accessManagers.includes(userEmail)}
+	{@const hasGroups = team.userGroups?.length ?? 0 > 0}
 	{#if team.manager.email === userEmail}
-		<i>Teamansvarlig</i>{#if team.userGroups?.length ?? 0 > 0},
+		<i>Teamansvarlig</i>{#if hasGroups || isAccessManager},
+		{/if}
+	{/if}
+	{#if isAccessManager}
+		<i>Tilgangsansvarlig</i>{#if hasGroups},
 		{/if}
 	{/if}
 	{team.userGroups

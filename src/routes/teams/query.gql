@@ -39,6 +39,11 @@ query AllTeams($orderBy: TeamOrder) @cache(policy: CacheAndNetwork) {
 					totalCount
 				}
 			}
+			accessManagers {
+				user {
+					email
+				}
+			}
 		}
 	}
 }

@@ -38,7 +38,8 @@
 			section: {
 				code: team.section.code,
 				name: team.section.name
-			}
+			},
+			accessManagers: team.accessManagers.map((u) => u.user.email)
 		};
 	}
 </script>

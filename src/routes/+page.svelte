@@ -44,7 +44,8 @@
 				code: team.team.section.code,
 				name: team.team.section.name
 			},
-			userGroups: team.groups.filter((g) => g !== null).map((g) => g.name) ?? []
+			userGroups: team.groups.filter((g) => g !== null).map((g) => g.name) ?? [],
+			accessManagers: team.team.accessManagers.map((u) => u.user.email)
 		};
 	}
 	let teamsData = $derived.by(() => {
