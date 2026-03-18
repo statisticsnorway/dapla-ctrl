@@ -52,9 +52,11 @@ FROM
 	LEFT JOIN group_members ON group_members.group_name = groups.name
 	LEFT JOIN users ON users.id = group_members.user_id
 	LEFT JOIN sections ON teams.section_code = sections.code
+	LEFT JOIN user_roles ON user_roles.target_team_slug = teams.slug
 WHERE
 	users.id = @user_id
 	OR sections.manager_id = @user_id
+	OR user_roles.user_id = @user_id
 GROUP BY
 	teams.slug
 ORDER BY

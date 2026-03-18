@@ -22,9 +22,11 @@ FROM
 	LEFT JOIN group_members ON group_members.group_name = groups.name
 	LEFT JOIN users ON users.id = group_members.user_id
 	LEFT JOIN sections ON teams.section_code = sections.code
+	LEFT JOIN user_roles ON user_roles.target_team_slug = teams.slug
 WHERE
 	users.id = $1
 	OR sections.manager_id = $1
+	OR user_roles.user_id = $1
 GROUP BY
 	teams.slug
 ORDER BY

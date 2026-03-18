@@ -86,6 +86,13 @@ FROM
 				WHERE
 					sections.manager_id = @user_id
 					AND teams.slug != 'dapla-felles'
+				UNION
+				SELECT
+					target_team_slug AS slug
+				FROM
+					user_roles
+				WHERE
+					user_roles.user_id = @user_id
 			) t
 			JOIN team_members ON team_members.team_slug = t.slug
 		WHERE

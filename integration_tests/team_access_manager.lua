@@ -103,7 +103,7 @@ Test.gql("Team access manager can add members", function(t)
 			}
 		}
 		}
-		]], team:slug() .. "-developers", delegate:email()))
+		]], team:slug() .. "-developers", extra1:email()))
 
 	t.check {
 		data = {
@@ -113,7 +113,7 @@ Test.gql("Team access manager can add members", function(t)
 						name = team:slug() .. "-developers",
 					},
 					user = {
-						email = delegate:email(),
+						email = extra1:email(),
 					},
 				},
 			},
@@ -159,6 +159,66 @@ Test.gql("Adding more than 2 access managers gives an error", function(t)
 			{
 				message = "Et team kan ha maks to tilgangsansvarlige",
 				path = Ignore(),
+			},
+		},
+	}
+end)
+
+Test.gql("Access manager sees team and its members on his overview", function(t)
+	t.addHeader("x-user-email", delegate:email())
+
+	t.query(string.format([[
+			query {
+				me {
+					... on User {
+						teams {
+							pageInfo {
+								totalCount
+							}
+							nodes {
+							    team {
+									slug
+								}
+							}
+						}
+						teamMembers {
+							pageInfo {
+								totalCount
+							}
+							nodes {
+								email
+							}
+						}
+					}
+				}
+			}
+		]], extra1:email()))
+
+	t.check {
+		data = {
+			me = {
+				teams = {
+					pageInfo = {
+						totalCount = 1,
+					},
+					nodes = {
+						{
+							team = {
+								slug = team:slug(),
+							},
+						},
+					},
+				},
+				teamMembers = {
+					pageInfo = {
+						totalCount = 1,
+					},
+					nodes = {
+						{
+							email = extra1:email(),
+						},
+					},
+				},
 			},
 		},
 	}
