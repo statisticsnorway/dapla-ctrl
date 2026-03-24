@@ -4,6 +4,7 @@ import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 import { Drawer } from '@mui/material'
+import type { ReactNode } from 'react'
 
 export interface SidebarHeader {
   modalType?: string
@@ -13,7 +14,7 @@ export interface SidebarHeader {
 
 interface SidebarBody {
   modalBodyTitle: string
-  modalBody: JSX.Element
+  modalBody: ReactNode
 }
 
 interface SidebarFooter {
@@ -30,7 +31,7 @@ interface SidebarModal {
   footer: SidebarFooter
 }
 
-const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader): JSX.Element => {
+const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: SidebarHeader) => {
   return (
     <div className={styles.modalHeader}>
       {modalType && <span>{modalType}</span>}
@@ -40,7 +41,7 @@ const SidebarModalHeader = ({ modalType, modalTitle, modalDescription }: Sidebar
   )
 }
 
-const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody): JSX.Element => {
+const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody) => {
   return (
     <div className={styles.modalBody}>
       <Title size={2}>{modalBodyTitle}</Title>
@@ -49,7 +50,7 @@ const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody): JSX.Eleme
   )
 }
 
-const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: SidebarFooter): JSX.Element => {
+const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: SidebarFooter) => {
   return (
     <div className={styles.modalFooter}>
       <Link onClick={onClose}>Avbryt</Link>

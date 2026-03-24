@@ -1,8 +1,9 @@
 import styles from './teamDetail.module.scss'
 
 import { Dialog } from '@statisticsnorway/ssb-component-library'
+import type { ReactNode } from 'react'
 
-export const renderSidebarModalInfo = (children: JSX.Element) => {
+export const renderSidebarModalInfo = (children: ReactNode) => {
   return (
     <div className={styles.modalBodyDialog}>
       <Dialog type='info'>Det tar opptil 30 sekunder før tilgangen er aktivert og tabellen er oppdatert.</Dialog>

@@ -4,11 +4,12 @@ import styles from './pagelayout.module.scss'
 
 import { Title } from '@statisticsnorway/ssb-component-library'
 import Banner from '../Banner/Banner.tsx'
+import type { ReactNode } from 'react'
 
 interface PageLayoutProps {
-  title?: string | JSX.Element | undefined
-  button?: JSX.Element | undefined
-  content?: JSX.Element | undefined
+  title?: string | ReactNode | undefined
+  button?: ReactNode | undefined
+  content?: ReactNode | undefined
 }
 
 const PageLayout = ({ title, button, content }: PageLayoutProps) => {
