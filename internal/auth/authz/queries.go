@@ -193,7 +193,7 @@ func CanCreateTeam(ctx context.Context) error {
 }
 
 func CanCreateGroup(ctx context.Context, teamSlug slug.Slug) error {
-	return CanManageTeam(ctx, teamSlug)
+	return RequireGlobalAdmin(ctx)
 }
 
 func CanManageTeamMembers(ctx context.Context, teamSlug slug.Slug) error {

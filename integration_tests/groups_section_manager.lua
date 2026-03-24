@@ -6,40 +6,46 @@ Helper.SQLExec([[
 	UPDATE sections SET  manager_id = $1 WHERE code = '724'
 ]], manager:id())
 
+-- NOTE: Temporary until we allow managers to create groups
+Helper.SQLExec([[
+	INSERT INTO groups (team_slug, category, suffix, name)
+	VALUES
+	('slug-one', 'developers', 'cowboys', 'slug-one-developers-cowboys')
+]])
 
-Test.gql("Manager can create group", function(t)
-	t.addHeader("x-user-email", manager:email())
+-- Test.gql("Manager can create group", function(t)
+-- 	t.addHeader("x-user-email", manager:email())
 
-	t.query(string.format([[
-		mutation {
-			createGroup(
-				input: {teamSlug: "%s", category: "developers", suffix: "cowboys"}
-			) {
-				group {
-					id
-					name
-					teamSlug
-					category
-					suffix
-				}
-			}
-		}
-	]], team:slug()))
+-- 	t.query(string.format([[
+-- 		mutation {
+-- 			createGroup(
+-- 				input: {teamSlug: "%s", category: "developers", suffix: "cowboys"}
+-- 			) {
+-- 				group {
+-- 					id
+-- 					name
+-- 					teamSlug
+-- 					category
+-- 					suffix
+-- 				}
+-- 			}
+-- 		}
+-- 	]], team:slug()))
 
-	t.check {
-		data = {
-			createGroup = {
-				group = {
-					id = NotNull(),
-					name = team:slug() .. "-developers-cowboys",
-					teamSlug = team:slug(),
-					category = "developers",
-					suffix = "cowboys",
-				},
-			},
-		},
-	}
-end)
+-- 	t.check {
+-- 		data = {
+-- 			createGroup = {
+-- 				group = {
+-- 					id = NotNull(),
+-- 					name = team:slug() .. "-developers-cowboys",
+-- 					teamSlug = team:slug(),
+-- 					category = "developers",
+-- 					suffix = "cowboys",
+-- 				},
+-- 			},
+-- 		},
+-- 	}
+-- end)
 
 Test.gql("Team shows up when listing the manager's teams", function(t)
 	t.addHeader("x-user-email", manager:email())
