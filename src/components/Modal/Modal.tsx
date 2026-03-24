@@ -2,13 +2,14 @@ import styles from './modal.module.scss'
 
 import { Modal as MUIModal } from '@mui/material'
 import { Title, Divider } from '@statisticsnorway/ssb-component-library'
+import type { ReactNode } from 'react'
 
 interface Modal {
   open: boolean
   onClose: CallableFunction
-  modalTitle?: string | JSX.Element
-  body?: JSX.Element
-  footer?: JSX.Element
+  modalTitle?: string | ReactNode
+  body?: ReactNode
+  footer?: ReactNode
 }
 
 const Modal = ({ open, onClose, modalTitle, body, footer }: Modal) => {

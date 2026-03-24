@@ -16,6 +16,7 @@ import {
 import { DaplaCtrlContext } from '../../provider/DaplaCtrlProvider'
 
 import { useState, useEffect, useContext } from 'react'
+import type { ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Dialog, LeadParagraph, Text, Link } from '@statisticsnorway/ssb-component-library'
 import { formatDisplayName, getGroupType, getTeamFromGroup } from '../../utils/utils'
@@ -36,11 +37,11 @@ const SharedBucketDetail = () => {
     const usersMap: {
       [principalName: string]: {
         id: string
-        navn: JSX.Element
+        navn: ReactNode
         seksjon: string
         principal_name: string
         gruppe: string[]
-        team: JSX.Element
+        team: ReactNode
         team_navn: string
       }
     } = {}
