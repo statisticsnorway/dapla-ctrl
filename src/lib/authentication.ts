@@ -21,6 +21,7 @@ export const handleMissingLogin = (...ignoredNames: string[]): ClientPlugin => {
 			afterNetwork(ctx, { value, resolve }) {
 				if (!ignoredNames.includes(ctx.name) && isUnauthenticated(value.errors)) {
 					isAuthenticated.set(false);
+					window.location.reload();
 				} else if (ctx.name == 'UserInfo' && value.data) {
 					if (value.data.me) {
 						isAuthenticated.set(true);
