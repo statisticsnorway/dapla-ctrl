@@ -70,7 +70,7 @@ func (q *BoostingQuery) Searcher(ctx context.Context, i index.IndexReader, m map
 
 func (q *BoostingQuery) makeFilter(dvReader index.DocValueReader) searcher.FilterFunc {
 	boost := q.Boost()
-	return func(d *search.DocumentMatch) bool {
+	return func(sctx *search.SearchContext, d *search.DocumentMatch) bool {
 		isPartOfMatch := make(map[string]bool, len(d.FieldTermLocations))
 		for _, ftloc := range d.FieldTermLocations {
 			isPartOfMatch[ftloc.Field] = true

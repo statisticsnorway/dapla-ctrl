@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -40,20 +39,10 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
-type Config struct {
-	Schema     *ast.Schema
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
+type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	AddTeamAccessManagerPayload() AddTeamAccessManagerPayloadResolver
@@ -961,153 +950,148 @@ type UserResolver interface {
 	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
 
 func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
-	ec := executionContext{nil, e, 0, 0, nil}
+	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
 
 	case "ActivityLogEntryConnection.edges":
-		if e.complexity.ActivityLogEntryConnection.Edges == nil {
+		if e.ComplexityRoot.ActivityLogEntryConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ActivityLogEntryConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.ActivityLogEntryConnection.Edges(childComplexity), true
 	case "ActivityLogEntryConnection.nodes":
-		if e.complexity.ActivityLogEntryConnection.Nodes == nil {
+		if e.ComplexityRoot.ActivityLogEntryConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.ActivityLogEntryConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.ActivityLogEntryConnection.Nodes(childComplexity), true
 	case "ActivityLogEntryConnection.pageInfo":
-		if e.complexity.ActivityLogEntryConnection.PageInfo == nil {
+		if e.ComplexityRoot.ActivityLogEntryConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ActivityLogEntryConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.ActivityLogEntryConnection.PageInfo(childComplexity), true
 
 	case "ActivityLogEntryEdge.cursor":
-		if e.complexity.ActivityLogEntryEdge.Cursor == nil {
+		if e.ComplexityRoot.ActivityLogEntryEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ActivityLogEntryEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.ActivityLogEntryEdge.Cursor(childComplexity), true
 	case "ActivityLogEntryEdge.node":
-		if e.complexity.ActivityLogEntryEdge.Node == nil {
+		if e.ComplexityRoot.ActivityLogEntryEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ActivityLogEntryEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ActivityLogEntryEdge.Node(childComplexity), true
 
 	case "AddGroupMemberPayload.member":
-		if e.complexity.AddGroupMemberPayload.Member == nil {
+		if e.ComplexityRoot.AddGroupMemberPayload.Member == nil {
 			break
 		}
 
-		return e.complexity.AddGroupMemberPayload.Member(childComplexity), true
+		return e.ComplexityRoot.AddGroupMemberPayload.Member(childComplexity), true
 
 	case "AddTeamAccessManagerPayload.team":
-		if e.complexity.AddTeamAccessManagerPayload.Team == nil {
+		if e.ComplexityRoot.AddTeamAccessManagerPayload.Team == nil {
 			break
 		}
 
-		return e.complexity.AddTeamAccessManagerPayload.Team(childComplexity), true
+		return e.ComplexityRoot.AddTeamAccessManagerPayload.Team(childComplexity), true
 	case "AddTeamAccessManagerPayload.user":
-		if e.complexity.AddTeamAccessManagerPayload.User == nil {
+		if e.ComplexityRoot.AddTeamAccessManagerPayload.User == nil {
 			break
 		}
 
-		return e.complexity.AddTeamAccessManagerPayload.User(childComplexity), true
+		return e.ComplexityRoot.AddTeamAccessManagerPayload.User(childComplexity), true
 
 	case "AssignRoleToServiceAccountPayload.serviceAccount":
-		if e.complexity.AssignRoleToServiceAccountPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.AssignRoleToServiceAccountPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.AssignRoleToServiceAccountPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.AssignRoleToServiceAccountPayload.ServiceAccount(childComplexity), true
 
 	case "CreateGroupPayload.group":
-		if e.complexity.CreateGroupPayload.Group == nil {
+		if e.ComplexityRoot.CreateGroupPayload.Group == nil {
 			break
 		}
 
-		return e.complexity.CreateGroupPayload.Group(childComplexity), true
+		return e.ComplexityRoot.CreateGroupPayload.Group(childComplexity), true
 
 	case "CreateServiceAccountPayload.serviceAccount":
-		if e.complexity.CreateServiceAccountPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.CreateServiceAccountPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.CreateServiceAccountPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.CreateServiceAccountPayload.ServiceAccount(childComplexity), true
 
 	case "CreateServiceAccountTokenPayload.secret":
-		if e.complexity.CreateServiceAccountTokenPayload.Secret == nil {
+		if e.ComplexityRoot.CreateServiceAccountTokenPayload.Secret == nil {
 			break
 		}
 
-		return e.complexity.CreateServiceAccountTokenPayload.Secret(childComplexity), true
+		return e.ComplexityRoot.CreateServiceAccountTokenPayload.Secret(childComplexity), true
 	case "CreateServiceAccountTokenPayload.serviceAccount":
-		if e.complexity.CreateServiceAccountTokenPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.CreateServiceAccountTokenPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.CreateServiceAccountTokenPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.CreateServiceAccountTokenPayload.ServiceAccount(childComplexity), true
 	case "CreateServiceAccountTokenPayload.serviceAccountToken":
-		if e.complexity.CreateServiceAccountTokenPayload.ServiceAccountToken == nil {
+		if e.ComplexityRoot.CreateServiceAccountTokenPayload.ServiceAccountToken == nil {
 			break
 		}
 
-		return e.complexity.CreateServiceAccountTokenPayload.ServiceAccountToken(childComplexity), true
+		return e.ComplexityRoot.CreateServiceAccountTokenPayload.ServiceAccountToken(childComplexity), true
 
 	case "CreateTeamPayload.team":
-		if e.complexity.CreateTeamPayload.Team == nil {
+		if e.ComplexityRoot.CreateTeamPayload.Team == nil {
 			break
 		}
 
-		return e.complexity.CreateTeamPayload.Team(childComplexity), true
+		return e.ComplexityRoot.CreateTeamPayload.Team(childComplexity), true
 
 	case "DeleteServiceAccountPayload.serviceAccountDeleted":
-		if e.complexity.DeleteServiceAccountPayload.ServiceAccountDeleted == nil {
+		if e.ComplexityRoot.DeleteServiceAccountPayload.ServiceAccountDeleted == nil {
 			break
 		}
 
-		return e.complexity.DeleteServiceAccountPayload.ServiceAccountDeleted(childComplexity), true
+		return e.ComplexityRoot.DeleteServiceAccountPayload.ServiceAccountDeleted(childComplexity), true
 
 	case "DeleteServiceAccountTokenPayload.serviceAccount":
-		if e.complexity.DeleteServiceAccountTokenPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.DeleteServiceAccountTokenPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.DeleteServiceAccountTokenPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.DeleteServiceAccountTokenPayload.ServiceAccount(childComplexity), true
 	case "DeleteServiceAccountTokenPayload.serviceAccountTokenDeleted":
-		if e.complexity.DeleteServiceAccountTokenPayload.ServiceAccountTokenDeleted == nil {
+		if e.ComplexityRoot.DeleteServiceAccountTokenPayload.ServiceAccountTokenDeleted == nil {
 			break
 		}
 
-		return e.complexity.DeleteServiceAccountTokenPayload.ServiceAccountTokenDeleted(childComplexity), true
+		return e.ComplexityRoot.DeleteServiceAccountTokenPayload.ServiceAccountTokenDeleted(childComplexity), true
 
 	case "Features.id":
-		if e.complexity.Features.ID == nil {
+		if e.ComplexityRoot.Features.ID == nil {
 			break
 		}
 
-		return e.complexity.Features.ID(childComplexity), true
+		return e.ComplexityRoot.Features.ID(childComplexity), true
 
 	case "Group.activityLog":
-		if e.complexity.Group.ActivityLog == nil {
+		if e.ComplexityRoot.Group.ActivityLog == nil {
 			break
 		}
 
@@ -1116,21 +1100,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Group.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
+		return e.ComplexityRoot.Group.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Group.category":
-		if e.complexity.Group.Category == nil {
+		if e.ComplexityRoot.Group.Category == nil {
 			break
 		}
 
-		return e.complexity.Group.Category(childComplexity), true
+		return e.ComplexityRoot.Group.Category(childComplexity), true
 	case "Group.id":
-		if e.complexity.Group.ID == nil {
+		if e.ComplexityRoot.Group.ID == nil {
 			break
 		}
 
-		return e.complexity.Group.ID(childComplexity), true
+		return e.ComplexityRoot.Group.ID(childComplexity), true
 	case "Group.members":
-		if e.complexity.Group.Members == nil {
+		if e.ComplexityRoot.Group.Members == nil {
 			break
 		}
 
@@ -1139,272 +1123,272 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Group.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.Group.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "Group.name":
-		if e.complexity.Group.Name == nil {
+		if e.ComplexityRoot.Group.Name == nil {
 			break
 		}
 
-		return e.complexity.Group.Name(childComplexity), true
+		return e.ComplexityRoot.Group.Name(childComplexity), true
 	case "Group.suffix":
-		if e.complexity.Group.Suffix == nil {
+		if e.ComplexityRoot.Group.Suffix == nil {
 			break
 		}
 
-		return e.complexity.Group.Suffix(childComplexity), true
+		return e.ComplexityRoot.Group.Suffix(childComplexity), true
 	case "Group.teamSlug":
-		if e.complexity.Group.TeamSlug == nil {
+		if e.ComplexityRoot.Group.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.Group.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.Group.TeamSlug(childComplexity), true
 
 	case "GroupConnection.edges":
-		if e.complexity.GroupConnection.Edges == nil {
+		if e.ComplexityRoot.GroupConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.GroupConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.GroupConnection.Edges(childComplexity), true
 	case "GroupConnection.nodes":
-		if e.complexity.GroupConnection.Nodes == nil {
+		if e.ComplexityRoot.GroupConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.GroupConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.GroupConnection.Nodes(childComplexity), true
 	case "GroupConnection.pageInfo":
-		if e.complexity.GroupConnection.PageInfo == nil {
+		if e.ComplexityRoot.GroupConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.GroupConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.GroupConnection.PageInfo(childComplexity), true
 
 	case "GroupCreatedActivityLogEntry.actor":
-		if e.complexity.GroupCreatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.Actor(childComplexity), true
 	case "GroupCreatedActivityLogEntry.createdAt":
-		if e.complexity.GroupCreatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "GroupCreatedActivityLogEntry.id":
-		if e.complexity.GroupCreatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.ID(childComplexity), true
 	case "GroupCreatedActivityLogEntry.message":
-		if e.complexity.GroupCreatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.Message(childComplexity), true
 	case "GroupCreatedActivityLogEntry.resourceName":
-		if e.complexity.GroupCreatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.ResourceName(childComplexity), true
 	case "GroupCreatedActivityLogEntry.resourceType":
-		if e.complexity.GroupCreatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.ResourceType(childComplexity), true
 	case "GroupCreatedActivityLogEntry.teamSlug":
-		if e.complexity.GroupCreatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.GroupCreatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.GroupCreatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.GroupCreatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "GroupEdge.cursor":
-		if e.complexity.GroupEdge.Cursor == nil {
+		if e.ComplexityRoot.GroupEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.GroupEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.GroupEdge.Cursor(childComplexity), true
 	case "GroupEdge.node":
-		if e.complexity.GroupEdge.Node == nil {
+		if e.ComplexityRoot.GroupEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.GroupEdge.Node(childComplexity), true
+		return e.ComplexityRoot.GroupEdge.Node(childComplexity), true
 
 	case "GroupMember.group":
-		if e.complexity.GroupMember.Group == nil {
+		if e.ComplexityRoot.GroupMember.Group == nil {
 			break
 		}
 
-		return e.complexity.GroupMember.Group(childComplexity), true
+		return e.ComplexityRoot.GroupMember.Group(childComplexity), true
 	case "GroupMember.user":
-		if e.complexity.GroupMember.User == nil {
+		if e.ComplexityRoot.GroupMember.User == nil {
 			break
 		}
 
-		return e.complexity.GroupMember.User(childComplexity), true
+		return e.ComplexityRoot.GroupMember.User(childComplexity), true
 
 	case "GroupMemberAddedActivityLogEntry.actor":
-		if e.complexity.GroupMemberAddedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Actor(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.createdAt":
-		if e.complexity.GroupMemberAddedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.CreatedAt(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.data":
-		if e.complexity.GroupMemberAddedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Data(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.id":
-		if e.complexity.GroupMemberAddedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ID(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.message":
-		if e.complexity.GroupMemberAddedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.Message(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.resourceName":
-		if e.complexity.GroupMemberAddedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ResourceName(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.resourceType":
-		if e.complexity.GroupMemberAddedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.ResourceType(childComplexity), true
 	case "GroupMemberAddedActivityLogEntry.teamSlug":
-		if e.complexity.GroupMemberAddedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "GroupMemberAddedActivityLogEntryData.userEmail":
-		if e.complexity.GroupMemberAddedActivityLogEntryData.UserEmail == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntryData.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntryData.UserEmail(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntryData.UserEmail(childComplexity), true
 	case "GroupMemberAddedActivityLogEntryData.userID":
-		if e.complexity.GroupMemberAddedActivityLogEntryData.UserID == nil {
+		if e.ComplexityRoot.GroupMemberAddedActivityLogEntryData.UserID == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberAddedActivityLogEntryData.UserID(childComplexity), true
+		return e.ComplexityRoot.GroupMemberAddedActivityLogEntryData.UserID(childComplexity), true
 
 	case "GroupMemberConnection.edges":
-		if e.complexity.GroupMemberConnection.Edges == nil {
+		if e.ComplexityRoot.GroupMemberConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.GroupMemberConnection.Edges(childComplexity), true
 	case "GroupMemberConnection.nodes":
-		if e.complexity.GroupMemberConnection.Nodes == nil {
+		if e.ComplexityRoot.GroupMemberConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.GroupMemberConnection.Nodes(childComplexity), true
 	case "GroupMemberConnection.pageInfo":
-		if e.complexity.GroupMemberConnection.PageInfo == nil {
+		if e.ComplexityRoot.GroupMemberConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.GroupMemberConnection.PageInfo(childComplexity), true
 
 	case "GroupMemberEdge.cursor":
-		if e.complexity.GroupMemberEdge.Cursor == nil {
+		if e.ComplexityRoot.GroupMemberEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.GroupMemberEdge.Cursor(childComplexity), true
 	case "GroupMemberEdge.node":
-		if e.complexity.GroupMemberEdge.Node == nil {
+		if e.ComplexityRoot.GroupMemberEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberEdge.Node(childComplexity), true
+		return e.ComplexityRoot.GroupMemberEdge.Node(childComplexity), true
 
 	case "GroupMemberRemovedActivityLogEntry.actor":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Actor(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.createdAt":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.CreatedAt(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.data":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Data(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.id":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ID(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.message":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.Message(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.resourceName":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ResourceName(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.resourceType":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.ResourceType(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntry.teamSlug":
-		if e.complexity.GroupMemberRemovedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "GroupMemberRemovedActivityLogEntryData.userEmail":
-		if e.complexity.GroupMemberRemovedActivityLogEntryData.UserEmail == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntryData.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntryData.UserEmail(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntryData.UserEmail(childComplexity), true
 	case "GroupMemberRemovedActivityLogEntryData.userID":
-		if e.complexity.GroupMemberRemovedActivityLogEntryData.UserID == nil {
+		if e.ComplexityRoot.GroupMemberRemovedActivityLogEntryData.UserID == nil {
 			break
 		}
 
-		return e.complexity.GroupMemberRemovedActivityLogEntryData.UserID(childComplexity), true
+		return e.ComplexityRoot.GroupMemberRemovedActivityLogEntryData.UserID(childComplexity), true
 
 	case "Mutation.addGroupMember":
-		if e.complexity.Mutation.AddGroupMember == nil {
+		if e.ComplexityRoot.Mutation.AddGroupMember == nil {
 			break
 		}
 
@@ -1413,9 +1397,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddGroupMember(childComplexity, args["input"].(group.AddGroupMemberInput)), true
+		return e.ComplexityRoot.Mutation.AddGroupMember(childComplexity, args["input"].(group.AddGroupMemberInput)), true
 	case "Mutation.addTeamAccessManager":
-		if e.complexity.Mutation.AddTeamAccessManager == nil {
+		if e.ComplexityRoot.Mutation.AddTeamAccessManager == nil {
 			break
 		}
 
@@ -1424,9 +1408,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddTeamAccessManager(childComplexity, args["input"].(team.AddTeamAccessManagerInput)), true
+		return e.ComplexityRoot.Mutation.AddTeamAccessManager(childComplexity, args["input"].(team.AddTeamAccessManagerInput)), true
 	case "Mutation.assignRoleToServiceAccount":
-		if e.complexity.Mutation.AssignRoleToServiceAccount == nil {
+		if e.ComplexityRoot.Mutation.AssignRoleToServiceAccount == nil {
 			break
 		}
 
@@ -1435,9 +1419,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AssignRoleToServiceAccount(childComplexity, args["input"].(serviceaccount.AssignRoleToServiceAccountInput)), true
+		return e.ComplexityRoot.Mutation.AssignRoleToServiceAccount(childComplexity, args["input"].(serviceaccount.AssignRoleToServiceAccountInput)), true
 	case "Mutation.configureReconciler":
-		if e.complexity.Mutation.ConfigureReconciler == nil {
+		if e.ComplexityRoot.Mutation.ConfigureReconciler == nil {
 			break
 		}
 
@@ -1446,9 +1430,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ConfigureReconciler(childComplexity, args["input"].(reconciler.ConfigureReconcilerInput)), true
+		return e.ComplexityRoot.Mutation.ConfigureReconciler(childComplexity, args["input"].(reconciler.ConfigureReconcilerInput)), true
 	case "Mutation.createGroup":
-		if e.complexity.Mutation.CreateGroup == nil {
+		if e.ComplexityRoot.Mutation.CreateGroup == nil {
 			break
 		}
 
@@ -1457,9 +1441,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateGroup(childComplexity, args["input"].(group.CreateGroupInput)), true
+		return e.ComplexityRoot.Mutation.CreateGroup(childComplexity, args["input"].(group.CreateGroupInput)), true
 	case "Mutation.createServiceAccount":
-		if e.complexity.Mutation.CreateServiceAccount == nil {
+		if e.ComplexityRoot.Mutation.CreateServiceAccount == nil {
 			break
 		}
 
@@ -1468,9 +1452,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceAccount(childComplexity, args["input"].(serviceaccount.CreateServiceAccountInput)), true
+		return e.ComplexityRoot.Mutation.CreateServiceAccount(childComplexity, args["input"].(serviceaccount.CreateServiceAccountInput)), true
 	case "Mutation.createServiceAccountToken":
-		if e.complexity.Mutation.CreateServiceAccountToken == nil {
+		if e.ComplexityRoot.Mutation.CreateServiceAccountToken == nil {
 			break
 		}
 
@@ -1479,9 +1463,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceAccountToken(childComplexity, args["input"].(serviceaccount.CreateServiceAccountTokenInput)), true
+		return e.ComplexityRoot.Mutation.CreateServiceAccountToken(childComplexity, args["input"].(serviceaccount.CreateServiceAccountTokenInput)), true
 	case "Mutation.createTeam":
-		if e.complexity.Mutation.CreateTeam == nil {
+		if e.ComplexityRoot.Mutation.CreateTeam == nil {
 			break
 		}
 
@@ -1490,9 +1474,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTeam(childComplexity, args["input"].(team.CreateTeamInput)), true
+		return e.ComplexityRoot.Mutation.CreateTeam(childComplexity, args["input"].(team.CreateTeamInput)), true
 	case "Mutation.deleteServiceAccount":
-		if e.complexity.Mutation.DeleteServiceAccount == nil {
+		if e.ComplexityRoot.Mutation.DeleteServiceAccount == nil {
 			break
 		}
 
@@ -1501,9 +1485,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteServiceAccount(childComplexity, args["input"].(serviceaccount.DeleteServiceAccountInput)), true
+		return e.ComplexityRoot.Mutation.DeleteServiceAccount(childComplexity, args["input"].(serviceaccount.DeleteServiceAccountInput)), true
 	case "Mutation.deleteServiceAccountToken":
-		if e.complexity.Mutation.DeleteServiceAccountToken == nil {
+		if e.ComplexityRoot.Mutation.DeleteServiceAccountToken == nil {
 			break
 		}
 
@@ -1512,9 +1496,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteServiceAccountToken(childComplexity, args["input"].(serviceaccount.DeleteServiceAccountTokenInput)), true
+		return e.ComplexityRoot.Mutation.DeleteServiceAccountToken(childComplexity, args["input"].(serviceaccount.DeleteServiceAccountTokenInput)), true
 	case "Mutation.disableReconciler":
-		if e.complexity.Mutation.DisableReconciler == nil {
+		if e.ComplexityRoot.Mutation.DisableReconciler == nil {
 			break
 		}
 
@@ -1523,9 +1507,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DisableReconciler(childComplexity, args["input"].(reconciler.DisableReconcilerInput)), true
+		return e.ComplexityRoot.Mutation.DisableReconciler(childComplexity, args["input"].(reconciler.DisableReconcilerInput)), true
 	case "Mutation.enableReconciler":
-		if e.complexity.Mutation.EnableReconciler == nil {
+		if e.ComplexityRoot.Mutation.EnableReconciler == nil {
 			break
 		}
 
@@ -1534,9 +1518,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EnableReconciler(childComplexity, args["input"].(reconciler.EnableReconcilerInput)), true
+		return e.ComplexityRoot.Mutation.EnableReconciler(childComplexity, args["input"].(reconciler.EnableReconcilerInput)), true
 	case "Mutation.removeGroupMember":
-		if e.complexity.Mutation.RemoveGroupMember == nil {
+		if e.ComplexityRoot.Mutation.RemoveGroupMember == nil {
 			break
 		}
 
@@ -1545,9 +1529,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RemoveGroupMember(childComplexity, args["input"].(group.RemoveGroupMemberInput)), true
+		return e.ComplexityRoot.Mutation.RemoveGroupMember(childComplexity, args["input"].(group.RemoveGroupMemberInput)), true
 	case "Mutation.removeTeamAccessManager":
-		if e.complexity.Mutation.RemoveTeamAccessManager == nil {
+		if e.ComplexityRoot.Mutation.RemoveTeamAccessManager == nil {
 			break
 		}
 
@@ -1556,9 +1540,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RemoveTeamAccessManager(childComplexity, args["input"].(team.RemoveTeamAccessManagerInput)), true
+		return e.ComplexityRoot.Mutation.RemoveTeamAccessManager(childComplexity, args["input"].(team.RemoveTeamAccessManagerInput)), true
 	case "Mutation.revokeRoleFromServiceAccount":
-		if e.complexity.Mutation.RevokeRoleFromServiceAccount == nil {
+		if e.ComplexityRoot.Mutation.RevokeRoleFromServiceAccount == nil {
 			break
 		}
 
@@ -1567,9 +1551,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RevokeRoleFromServiceAccount(childComplexity, args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput)), true
+		return e.ComplexityRoot.Mutation.RevokeRoleFromServiceAccount(childComplexity, args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput)), true
 	case "Mutation.updateServiceAccount":
-		if e.complexity.Mutation.UpdateServiceAccount == nil {
+		if e.ComplexityRoot.Mutation.UpdateServiceAccount == nil {
 			break
 		}
 
@@ -1578,9 +1562,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateServiceAccount(childComplexity, args["input"].(serviceaccount.UpdateServiceAccountInput)), true
+		return e.ComplexityRoot.Mutation.UpdateServiceAccount(childComplexity, args["input"].(serviceaccount.UpdateServiceAccountInput)), true
 	case "Mutation.updateServiceAccountToken":
-		if e.complexity.Mutation.UpdateServiceAccountToken == nil {
+		if e.ComplexityRoot.Mutation.UpdateServiceAccountToken == nil {
 			break
 		}
 
@@ -1589,9 +1573,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateServiceAccountToken(childComplexity, args["input"].(serviceaccount.UpdateServiceAccountTokenInput)), true
+		return e.ComplexityRoot.Mutation.UpdateServiceAccountToken(childComplexity, args["input"].(serviceaccount.UpdateServiceAccountTokenInput)), true
 	case "Mutation.updateTeam":
-		if e.complexity.Mutation.UpdateTeam == nil {
+		if e.ComplexityRoot.Mutation.UpdateTeam == nil {
 			break
 		}
 
@@ -1600,53 +1584,53 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTeam(childComplexity, args["input"].(team.UpdateTeamInput)), true
+		return e.ComplexityRoot.Mutation.UpdateTeam(childComplexity, args["input"].(team.UpdateTeamInput)), true
 
 	case "PageInfo.endCursor":
-		if e.complexity.PageInfo.EndCursor == nil {
+		if e.ComplexityRoot.PageInfo.EndCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.EndCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
 	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
+		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
 	case "PageInfo.hasPreviousPage":
-		if e.complexity.PageInfo.HasPreviousPage == nil {
+		if e.ComplexityRoot.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasPreviousPage(childComplexity), true
 	case "PageInfo.pageEnd":
-		if e.complexity.PageInfo.PageEnd == nil {
+		if e.ComplexityRoot.PageInfo.PageEnd == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.PageEnd(childComplexity), true
+		return e.ComplexityRoot.PageInfo.PageEnd(childComplexity), true
 	case "PageInfo.pageStart":
-		if e.complexity.PageInfo.PageStart == nil {
+		if e.ComplexityRoot.PageInfo.PageStart == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.PageStart(childComplexity), true
+		return e.ComplexityRoot.PageInfo.PageStart(childComplexity), true
 	case "PageInfo.startCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
+		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.StartCursor(childComplexity), true
 	case "PageInfo.totalCount":
-		if e.complexity.PageInfo.TotalCount == nil {
+		if e.ComplexityRoot.PageInfo.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.TotalCount(childComplexity), true
+		return e.ComplexityRoot.PageInfo.TotalCount(childComplexity), true
 
 	case "Query.activityLog":
-		if e.complexity.Query.ActivityLog == nil {
+		if e.ComplexityRoot.Query.ActivityLog == nil {
 			break
 		}
 
@@ -1655,15 +1639,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
+		return e.ComplexityRoot.Query.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Query.features":
-		if e.complexity.Query.Features == nil {
+		if e.ComplexityRoot.Query.Features == nil {
 			break
 		}
 
-		return e.complexity.Query.Features(childComplexity), true
+		return e.ComplexityRoot.Query.Features(childComplexity), true
 	case "Query.group":
-		if e.complexity.Query.Group == nil {
+		if e.ComplexityRoot.Query.Group == nil {
 			break
 		}
 
@@ -1672,9 +1656,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Group(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Query.Group(childComplexity, args["name"].(string)), true
 	case "Query.groups":
-		if e.complexity.Query.Groups == nil {
+		if e.ComplexityRoot.Query.Groups == nil {
 			break
 		}
 
@@ -1683,15 +1667,16 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
+		return e.ComplexityRoot.Query.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
+
 	case "Query.me":
-		if e.complexity.Query.Me == nil {
+		if e.ComplexityRoot.Query.Me == nil {
 			break
 		}
 
-		return e.complexity.Query.Me(childComplexity), true
+		return e.ComplexityRoot.Query.Me(childComplexity), true
 	case "Query.node":
-		if e.complexity.Query.Node == nil {
+		if e.ComplexityRoot.Query.Node == nil {
 			break
 		}
 
@@ -1700,9 +1685,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Node(childComplexity, args["id"].(ident.Ident)), true
+		return e.ComplexityRoot.Query.Node(childComplexity, args["id"].(ident.Ident)), true
 	case "Query.reconcilers":
-		if e.complexity.Query.Reconcilers == nil {
+		if e.ComplexityRoot.Query.Reconcilers == nil {
 			break
 		}
 
@@ -1711,9 +1696,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Reconcilers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Query.Reconcilers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Query.roles":
-		if e.complexity.Query.Roles == nil {
+		if e.ComplexityRoot.Query.Roles == nil {
 			break
 		}
 
@@ -1722,9 +1707,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Roles(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Query.Roles(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Query.search":
-		if e.complexity.Query.Search == nil {
+		if e.ComplexityRoot.Query.Search == nil {
 			break
 		}
 
@@ -1733,9 +1718,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Search(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(search.SearchFilter)), true
+		return e.ComplexityRoot.Query.Search(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(search.SearchFilter)), true
 	case "Query.section":
-		if e.complexity.Query.Section == nil {
+		if e.ComplexityRoot.Query.Section == nil {
 			break
 		}
 
@@ -1744,9 +1729,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Section(childComplexity, args["code"].(string)), true
+		return e.ComplexityRoot.Query.Section(childComplexity, args["code"].(string)), true
 	case "Query.sections":
-		if e.complexity.Query.Sections == nil {
+		if e.ComplexityRoot.Query.Sections == nil {
 			break
 		}
 
@@ -1755,9 +1740,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Sections(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*section.SectionOrder)), true
+		return e.ComplexityRoot.Query.Sections(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*section.SectionOrder)), true
 	case "Query.serviceAccount":
-		if e.complexity.Query.ServiceAccount == nil {
+		if e.ComplexityRoot.Query.ServiceAccount == nil {
 			break
 		}
 
@@ -1766,9 +1751,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceAccount(childComplexity, args["id"].(ident.Ident)), true
+		return e.ComplexityRoot.Query.ServiceAccount(childComplexity, args["id"].(ident.Ident)), true
 	case "Query.serviceAccounts":
-		if e.complexity.Query.ServiceAccounts == nil {
+		if e.ComplexityRoot.Query.ServiceAccounts == nil {
 			break
 		}
 
@@ -1777,9 +1762,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceAccounts(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Query.ServiceAccounts(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Query.sharedBucket":
-		if e.complexity.Query.SharedBucket == nil {
+		if e.ComplexityRoot.Query.SharedBucket == nil {
 			break
 		}
 
@@ -1788,9 +1773,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SharedBucket(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Query.SharedBucket(childComplexity, args["name"].(string)), true
 	case "Query.sharedBuckets":
-		if e.complexity.Query.SharedBuckets == nil {
+		if e.ComplexityRoot.Query.SharedBuckets == nil {
 			break
 		}
 
@@ -1799,9 +1784,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.Query.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
 	case "Query.team":
-		if e.complexity.Query.Team == nil {
+		if e.ComplexityRoot.Query.Team == nil {
 			break
 		}
 
@@ -1810,9 +1795,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Team(childComplexity, args["slug"].(slug.Slug)), true
+		return e.ComplexityRoot.Query.Team(childComplexity, args["slug"].(slug.Slug)), true
 	case "Query.teams":
-		if e.complexity.Query.Teams == nil {
+		if e.ComplexityRoot.Query.Teams == nil {
 			break
 		}
 
@@ -1821,9 +1806,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
+		return e.ComplexityRoot.Query.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
 	case "Query.user":
-		if e.complexity.Query.User == nil {
+		if e.ComplexityRoot.Query.User == nil {
 			break
 		}
 
@@ -1832,9 +1817,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["email"].(*string)), true
+		return e.ComplexityRoot.Query.User(childComplexity, args["email"].(*string)), true
 	case "Query.userSyncLog":
-		if e.complexity.Query.UserSyncLog == nil {
+		if e.ComplexityRoot.Query.UserSyncLog == nil {
 			break
 		}
 
@@ -1843,9 +1828,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.UserSyncLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Query.UserSyncLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Query.users":
-		if e.complexity.Query.Users == nil {
+		if e.ComplexityRoot.Query.Users == nil {
 			break
 		}
 
@@ -1854,10 +1839,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.Query.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 
 	case "Reconciler.activityLog":
-		if e.complexity.Reconciler.ActivityLog == nil {
+		if e.ComplexityRoot.Reconciler.ActivityLog == nil {
 			break
 		}
 
@@ -1866,39 +1851,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Reconciler.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
+		return e.ComplexityRoot.Reconciler.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Reconciler.config":
-		if e.complexity.Reconciler.Config == nil {
+		if e.ComplexityRoot.Reconciler.Config == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.Config(childComplexity), true
+		return e.ComplexityRoot.Reconciler.Config(childComplexity), true
 	case "Reconciler.configured":
-		if e.complexity.Reconciler.Configured == nil {
+		if e.ComplexityRoot.Reconciler.Configured == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.Configured(childComplexity), true
+		return e.ComplexityRoot.Reconciler.Configured(childComplexity), true
 	case "Reconciler.description":
-		if e.complexity.Reconciler.Description == nil {
+		if e.ComplexityRoot.Reconciler.Description == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.Description(childComplexity), true
+		return e.ComplexityRoot.Reconciler.Description(childComplexity), true
 	case "Reconciler.displayName":
-		if e.complexity.Reconciler.DisplayName == nil {
+		if e.ComplexityRoot.Reconciler.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.DisplayName(childComplexity), true
+		return e.ComplexityRoot.Reconciler.DisplayName(childComplexity), true
 	case "Reconciler.enabled":
-		if e.complexity.Reconciler.Enabled == nil {
+		if e.ComplexityRoot.Reconciler.Enabled == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.Enabled(childComplexity), true
+		return e.ComplexityRoot.Reconciler.Enabled(childComplexity), true
 	case "Reconciler.errors":
-		if e.complexity.Reconciler.Errors == nil {
+		if e.ComplexityRoot.Reconciler.Errors == nil {
 			break
 		}
 
@@ -1907,697 +1892,697 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Reconciler.Errors(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Reconciler.Errors(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Reconciler.id":
-		if e.complexity.Reconciler.ID == nil {
+		if e.ComplexityRoot.Reconciler.ID == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.ID(childComplexity), true
+		return e.ComplexityRoot.Reconciler.ID(childComplexity), true
 	case "Reconciler.name":
-		if e.complexity.Reconciler.Name == nil {
+		if e.ComplexityRoot.Reconciler.Name == nil {
 			break
 		}
 
-		return e.complexity.Reconciler.Name(childComplexity), true
+		return e.ComplexityRoot.Reconciler.Name(childComplexity), true
 
 	case "ReconcilerConfig.configured":
-		if e.complexity.ReconcilerConfig.Configured == nil {
+		if e.ComplexityRoot.ReconcilerConfig.Configured == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.Configured(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.Configured(childComplexity), true
 	case "ReconcilerConfig.description":
-		if e.complexity.ReconcilerConfig.Description == nil {
+		if e.ComplexityRoot.ReconcilerConfig.Description == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.Description(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.Description(childComplexity), true
 	case "ReconcilerConfig.displayName":
-		if e.complexity.ReconcilerConfig.DisplayName == nil {
+		if e.ComplexityRoot.ReconcilerConfig.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.DisplayName(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.DisplayName(childComplexity), true
 	case "ReconcilerConfig.key":
-		if e.complexity.ReconcilerConfig.Key == nil {
+		if e.ComplexityRoot.ReconcilerConfig.Key == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.Key(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.Key(childComplexity), true
 	case "ReconcilerConfig.secret":
-		if e.complexity.ReconcilerConfig.Secret == nil {
+		if e.ComplexityRoot.ReconcilerConfig.Secret == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.Secret(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.Secret(childComplexity), true
 	case "ReconcilerConfig.value":
-		if e.complexity.ReconcilerConfig.Value == nil {
+		if e.ComplexityRoot.ReconcilerConfig.Value == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfig.Value(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfig.Value(childComplexity), true
 
 	case "ReconcilerConfiguredActivityLogEntry.actor":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Actor(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.createdAt":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.CreatedAt(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.data":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Data(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.id":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ID(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.message":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.Message(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.resourceName":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ResourceName(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.resourceType":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.ResourceType(childComplexity), true
 	case "ReconcilerConfiguredActivityLogEntry.teamSlug":
-		if e.complexity.ReconcilerConfiguredActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ReconcilerConfiguredActivityLogEntryData.updatedKeys":
-		if e.complexity.ReconcilerConfiguredActivityLogEntryData.UpdatedKeys == nil {
+		if e.ComplexityRoot.ReconcilerConfiguredActivityLogEntryData.UpdatedKeys == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConfiguredActivityLogEntryData.UpdatedKeys(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConfiguredActivityLogEntryData.UpdatedKeys(childComplexity), true
 
 	case "ReconcilerConnection.edges":
-		if e.complexity.ReconcilerConnection.Edges == nil {
+		if e.ComplexityRoot.ReconcilerConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConnection.Edges(childComplexity), true
 	case "ReconcilerConnection.nodes":
-		if e.complexity.ReconcilerConnection.Nodes == nil {
+		if e.ComplexityRoot.ReconcilerConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConnection.Nodes(childComplexity), true
 	case "ReconcilerConnection.pageInfo":
-		if e.complexity.ReconcilerConnection.PageInfo == nil {
+		if e.ComplexityRoot.ReconcilerConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.ReconcilerConnection.PageInfo(childComplexity), true
 
 	case "ReconcilerDisabledActivityLogEntry.actor":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.Actor(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.createdAt":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.CreatedAt(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.id":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ID(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.message":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.Message(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.resourceName":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ResourceName(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.resourceType":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.ResourceType(childComplexity), true
 	case "ReconcilerDisabledActivityLogEntry.teamSlug":
-		if e.complexity.ReconcilerDisabledActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerDisabledActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ReconcilerDisabledActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ReconcilerEdge.cursor":
-		if e.complexity.ReconcilerEdge.Cursor == nil {
+		if e.ComplexityRoot.ReconcilerEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEdge.Cursor(childComplexity), true
 	case "ReconcilerEdge.node":
-		if e.complexity.ReconcilerEdge.Node == nil {
+		if e.ComplexityRoot.ReconcilerEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEdge.Node(childComplexity), true
 
 	case "ReconcilerEnabledActivityLogEntry.actor":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.Actor(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.createdAt":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.CreatedAt(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.id":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ID(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.message":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.Message(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.resourceName":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ResourceName(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.resourceType":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.ResourceType(childComplexity), true
 	case "ReconcilerEnabledActivityLogEntry.teamSlug":
-		if e.complexity.ReconcilerEnabledActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerEnabledActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ReconcilerEnabledActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ReconcilerError.correlationID":
-		if e.complexity.ReconcilerError.CorrelationID == nil {
+		if e.ComplexityRoot.ReconcilerError.CorrelationID == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerError.CorrelationID(childComplexity), true
+		return e.ComplexityRoot.ReconcilerError.CorrelationID(childComplexity), true
 	case "ReconcilerError.createdAt":
-		if e.complexity.ReconcilerError.CreatedAt == nil {
+		if e.ComplexityRoot.ReconcilerError.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerError.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ReconcilerError.CreatedAt(childComplexity), true
 	case "ReconcilerError.id":
-		if e.complexity.ReconcilerError.ID == nil {
+		if e.ComplexityRoot.ReconcilerError.ID == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerError.ID(childComplexity), true
+		return e.ComplexityRoot.ReconcilerError.ID(childComplexity), true
 	case "ReconcilerError.message":
-		if e.complexity.ReconcilerError.Message == nil {
+		if e.ComplexityRoot.ReconcilerError.Message == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerError.Message(childComplexity), true
+		return e.ComplexityRoot.ReconcilerError.Message(childComplexity), true
 	case "ReconcilerError.team":
-		if e.complexity.ReconcilerError.Team == nil {
+		if e.ComplexityRoot.ReconcilerError.Team == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerError.Team(childComplexity), true
+		return e.ComplexityRoot.ReconcilerError.Team(childComplexity), true
 
 	case "ReconcilerErrorConnection.edges":
-		if e.complexity.ReconcilerErrorConnection.Edges == nil {
+		if e.ComplexityRoot.ReconcilerErrorConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerErrorConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.ReconcilerErrorConnection.Edges(childComplexity), true
 	case "ReconcilerErrorConnection.nodes":
-		if e.complexity.ReconcilerErrorConnection.Nodes == nil {
+		if e.ComplexityRoot.ReconcilerErrorConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerErrorConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.ReconcilerErrorConnection.Nodes(childComplexity), true
 	case "ReconcilerErrorConnection.pageInfo":
-		if e.complexity.ReconcilerErrorConnection.PageInfo == nil {
+		if e.ComplexityRoot.ReconcilerErrorConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerErrorConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.ReconcilerErrorConnection.PageInfo(childComplexity), true
 
 	case "ReconcilerErrorEdge.cursor":
-		if e.complexity.ReconcilerErrorEdge.Cursor == nil {
+		if e.ComplexityRoot.ReconcilerErrorEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerErrorEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.ReconcilerErrorEdge.Cursor(childComplexity), true
 	case "ReconcilerErrorEdge.node":
-		if e.complexity.ReconcilerErrorEdge.Node == nil {
+		if e.ComplexityRoot.ReconcilerErrorEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ReconcilerErrorEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ReconcilerErrorEdge.Node(childComplexity), true
 
 	case "RemoveGroupMemberPayload.group":
-		if e.complexity.RemoveGroupMemberPayload.Group == nil {
+		if e.ComplexityRoot.RemoveGroupMemberPayload.Group == nil {
 			break
 		}
 
-		return e.complexity.RemoveGroupMemberPayload.Group(childComplexity), true
+		return e.ComplexityRoot.RemoveGroupMemberPayload.Group(childComplexity), true
 	case "RemoveGroupMemberPayload.user":
-		if e.complexity.RemoveGroupMemberPayload.User == nil {
+		if e.ComplexityRoot.RemoveGroupMemberPayload.User == nil {
 			break
 		}
 
-		return e.complexity.RemoveGroupMemberPayload.User(childComplexity), true
+		return e.ComplexityRoot.RemoveGroupMemberPayload.User(childComplexity), true
 
 	case "RemoveTeamAccessManagerPayload.team":
-		if e.complexity.RemoveTeamAccessManagerPayload.Team == nil {
+		if e.ComplexityRoot.RemoveTeamAccessManagerPayload.Team == nil {
 			break
 		}
 
-		return e.complexity.RemoveTeamAccessManagerPayload.Team(childComplexity), true
+		return e.ComplexityRoot.RemoveTeamAccessManagerPayload.Team(childComplexity), true
 	case "RemoveTeamAccessManagerPayload.user":
-		if e.complexity.RemoveTeamAccessManagerPayload.User == nil {
+		if e.ComplexityRoot.RemoveTeamAccessManagerPayload.User == nil {
 			break
 		}
 
-		return e.complexity.RemoveTeamAccessManagerPayload.User(childComplexity), true
+		return e.ComplexityRoot.RemoveTeamAccessManagerPayload.User(childComplexity), true
 
 	case "RevokeRoleFromServiceAccountPayload.serviceAccount":
-		if e.complexity.RevokeRoleFromServiceAccountPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.RevokeRoleFromServiceAccountPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.RevokeRoleFromServiceAccountPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.RevokeRoleFromServiceAccountPayload.ServiceAccount(childComplexity), true
 
 	case "Role.description":
-		if e.complexity.Role.Description == nil {
+		if e.ComplexityRoot.Role.Description == nil {
 			break
 		}
 
-		return e.complexity.Role.Description(childComplexity), true
+		return e.ComplexityRoot.Role.Description(childComplexity), true
 	case "Role.id":
-		if e.complexity.Role.ID == nil {
+		if e.ComplexityRoot.Role.ID == nil {
 			break
 		}
 
-		return e.complexity.Role.ID(childComplexity), true
+		return e.ComplexityRoot.Role.ID(childComplexity), true
 	case "Role.name":
-		if e.complexity.Role.Name == nil {
+		if e.ComplexityRoot.Role.Name == nil {
 			break
 		}
 
-		return e.complexity.Role.Name(childComplexity), true
+		return e.ComplexityRoot.Role.Name(childComplexity), true
 
 	case "RoleAssignedToServiceAccountActivityLogEntry.actor":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Actor(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.createdAt":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.CreatedAt(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.data":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Data(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.id":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ID(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.message":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.Message(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.resourceName":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ResourceName(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.resourceType":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.ResourceType(childComplexity), true
 	case "RoleAssignedToServiceAccountActivityLogEntry.teamSlug":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "RoleAssignedToServiceAccountActivityLogEntryData.roleName":
-		if e.complexity.RoleAssignedToServiceAccountActivityLogEntryData.RoleName == nil {
+		if e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntryData.RoleName == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedToServiceAccountActivityLogEntryData.RoleName(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedToServiceAccountActivityLogEntryData.RoleName(childComplexity), true
 
 	case "RoleAssignedUserSyncLogEntry.createdAt":
-		if e.complexity.RoleAssignedUserSyncLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.CreatedAt(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.id":
-		if e.complexity.RoleAssignedUserSyncLogEntry.ID == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.ID(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.message":
-		if e.complexity.RoleAssignedUserSyncLogEntry.Message == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.Message(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.roleName":
-		if e.complexity.RoleAssignedUserSyncLogEntry.RoleName == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.RoleName == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.RoleName(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.RoleName(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.userEmail":
-		if e.complexity.RoleAssignedUserSyncLogEntry.UserEmail == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.UserEmail(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserEmail(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.userID":
-		if e.complexity.RoleAssignedUserSyncLogEntry.UserID == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserID == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.UserID(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserID(childComplexity), true
 	case "RoleAssignedUserSyncLogEntry.userName":
-		if e.complexity.RoleAssignedUserSyncLogEntry.UserName == nil {
+		if e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserName == nil {
 			break
 		}
 
-		return e.complexity.RoleAssignedUserSyncLogEntry.UserName(childComplexity), true
+		return e.ComplexityRoot.RoleAssignedUserSyncLogEntry.UserName(childComplexity), true
 
 	case "RoleConnection.edges":
-		if e.complexity.RoleConnection.Edges == nil {
+		if e.ComplexityRoot.RoleConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.RoleConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.RoleConnection.Edges(childComplexity), true
 	case "RoleConnection.nodes":
-		if e.complexity.RoleConnection.Nodes == nil {
+		if e.ComplexityRoot.RoleConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.RoleConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.RoleConnection.Nodes(childComplexity), true
 	case "RoleConnection.pageInfo":
-		if e.complexity.RoleConnection.PageInfo == nil {
+		if e.ComplexityRoot.RoleConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.RoleConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.RoleConnection.PageInfo(childComplexity), true
 
 	case "RoleEdge.cursor":
-		if e.complexity.RoleEdge.Cursor == nil {
+		if e.ComplexityRoot.RoleEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.RoleEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.RoleEdge.Cursor(childComplexity), true
 	case "RoleEdge.node":
-		if e.complexity.RoleEdge.Node == nil {
+		if e.ComplexityRoot.RoleEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.RoleEdge.Node(childComplexity), true
+		return e.ComplexityRoot.RoleEdge.Node(childComplexity), true
 
 	case "RoleRevokedFromServiceAccountActivityLogEntry.actor":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Actor(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.createdAt":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.CreatedAt(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.data":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Data(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.id":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ID(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.message":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.Message(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.resourceName":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ResourceName(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.resourceType":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.ResourceType(childComplexity), true
 	case "RoleRevokedFromServiceAccountActivityLogEntry.teamSlug":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "RoleRevokedFromServiceAccountActivityLogEntryData.roleName":
-		if e.complexity.RoleRevokedFromServiceAccountActivityLogEntryData.RoleName == nil {
+		if e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntryData.RoleName == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedFromServiceAccountActivityLogEntryData.RoleName(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedFromServiceAccountActivityLogEntryData.RoleName(childComplexity), true
 
 	case "RoleRevokedUserSyncLogEntry.createdAt":
-		if e.complexity.RoleRevokedUserSyncLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.CreatedAt(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.id":
-		if e.complexity.RoleRevokedUserSyncLogEntry.ID == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.ID(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.message":
-		if e.complexity.RoleRevokedUserSyncLogEntry.Message == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.Message(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.roleName":
-		if e.complexity.RoleRevokedUserSyncLogEntry.RoleName == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.RoleName == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.RoleName(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.RoleName(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.userEmail":
-		if e.complexity.RoleRevokedUserSyncLogEntry.UserEmail == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.UserEmail(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserEmail(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.userID":
-		if e.complexity.RoleRevokedUserSyncLogEntry.UserID == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserID == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.UserID(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserID(childComplexity), true
 	case "RoleRevokedUserSyncLogEntry.userName":
-		if e.complexity.RoleRevokedUserSyncLogEntry.UserName == nil {
+		if e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserName == nil {
 			break
 		}
 
-		return e.complexity.RoleRevokedUserSyncLogEntry.UserName(childComplexity), true
+		return e.ComplexityRoot.RoleRevokedUserSyncLogEntry.UserName(childComplexity), true
 
 	case "SearchNodeConnection.edges":
-		if e.complexity.SearchNodeConnection.Edges == nil {
+		if e.ComplexityRoot.SearchNodeConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.SearchNodeConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.SearchNodeConnection.Edges(childComplexity), true
 	case "SearchNodeConnection.nodes":
-		if e.complexity.SearchNodeConnection.Nodes == nil {
+		if e.ComplexityRoot.SearchNodeConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.SearchNodeConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.SearchNodeConnection.Nodes(childComplexity), true
 	case "SearchNodeConnection.pageInfo":
-		if e.complexity.SearchNodeConnection.PageInfo == nil {
+		if e.ComplexityRoot.SearchNodeConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.SearchNodeConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.SearchNodeConnection.PageInfo(childComplexity), true
 
 	case "SearchNodeEdge.cursor":
-		if e.complexity.SearchNodeEdge.Cursor == nil {
+		if e.ComplexityRoot.SearchNodeEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.SearchNodeEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.SearchNodeEdge.Cursor(childComplexity), true
 	case "SearchNodeEdge.node":
-		if e.complexity.SearchNodeEdge.Node == nil {
+		if e.ComplexityRoot.SearchNodeEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.SearchNodeEdge.Node(childComplexity), true
+		return e.ComplexityRoot.SearchNodeEdge.Node(childComplexity), true
 
 	case "Section.code":
-		if e.complexity.Section.Code == nil {
+		if e.ComplexityRoot.Section.Code == nil {
 			break
 		}
 
-		return e.complexity.Section.Code(childComplexity), true
+		return e.ComplexityRoot.Section.Code(childComplexity), true
 	case "Section.id":
-		if e.complexity.Section.ID == nil {
+		if e.ComplexityRoot.Section.ID == nil {
 			break
 		}
 
-		return e.complexity.Section.ID(childComplexity), true
+		return e.ComplexityRoot.Section.ID(childComplexity), true
 	case "Section.manager":
-		if e.complexity.Section.Manager == nil {
+		if e.ComplexityRoot.Section.Manager == nil {
 			break
 		}
 
-		return e.complexity.Section.Manager(childComplexity), true
+		return e.ComplexityRoot.Section.Manager(childComplexity), true
 	case "Section.name":
-		if e.complexity.Section.Name == nil {
+		if e.ComplexityRoot.Section.Name == nil {
 			break
 		}
 
-		return e.complexity.Section.Name(childComplexity), true
+		return e.ComplexityRoot.Section.Name(childComplexity), true
 
 	case "SectionConnection.edges":
-		if e.complexity.SectionConnection.Edges == nil {
+		if e.ComplexityRoot.SectionConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.SectionConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.SectionConnection.Edges(childComplexity), true
 	case "SectionConnection.nodes":
-		if e.complexity.SectionConnection.Nodes == nil {
+		if e.ComplexityRoot.SectionConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.SectionConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.SectionConnection.Nodes(childComplexity), true
 	case "SectionConnection.pageInfo":
-		if e.complexity.SectionConnection.PageInfo == nil {
+		if e.ComplexityRoot.SectionConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.SectionConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.SectionConnection.PageInfo(childComplexity), true
 
 	case "SectionEdge.cursor":
-		if e.complexity.SectionEdge.Cursor == nil {
+		if e.ComplexityRoot.SectionEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.SectionEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.SectionEdge.Cursor(childComplexity), true
 	case "SectionEdge.node":
-		if e.complexity.SectionEdge.Node == nil {
+		if e.ComplexityRoot.SectionEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.SectionEdge.Node(childComplexity), true
+		return e.ComplexityRoot.SectionEdge.Node(childComplexity), true
 
 	case "ServiceAccount.createdAt":
-		if e.complexity.ServiceAccount.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccount.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.CreatedAt(childComplexity), true
 	case "ServiceAccount.description":
-		if e.complexity.ServiceAccount.Description == nil {
+		if e.ComplexityRoot.ServiceAccount.Description == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.Description(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.Description(childComplexity), true
 	case "ServiceAccount.id":
-		if e.complexity.ServiceAccount.ID == nil {
+		if e.ComplexityRoot.ServiceAccount.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.ID(childComplexity), true
 	case "ServiceAccount.lastUsedAt":
-		if e.complexity.ServiceAccount.LastUsedAt == nil {
+		if e.ComplexityRoot.ServiceAccount.LastUsedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.LastUsedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.LastUsedAt(childComplexity), true
 	case "ServiceAccount.name":
-		if e.complexity.ServiceAccount.Name == nil {
+		if e.ComplexityRoot.ServiceAccount.Name == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.Name(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.Name(childComplexity), true
 	case "ServiceAccount.roles":
-		if e.complexity.ServiceAccount.Roles == nil {
+		if e.ComplexityRoot.ServiceAccount.Roles == nil {
 			break
 		}
 
@@ -2606,15 +2591,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ServiceAccount.Roles(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.ServiceAccount.Roles(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "ServiceAccount.team":
-		if e.complexity.ServiceAccount.Team == nil {
+		if e.ComplexityRoot.ServiceAccount.Team == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.Team(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.Team(childComplexity), true
 	case "ServiceAccount.tokens":
-		if e.complexity.ServiceAccount.Tokens == nil {
+		if e.ComplexityRoot.ServiceAccount.Tokens == nil {
 			break
 		}
 
@@ -2623,477 +2608,477 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ServiceAccount.Tokens(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.ServiceAccount.Tokens(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "ServiceAccount.updatedAt":
-		if e.complexity.ServiceAccount.UpdatedAt == nil {
+		if e.ComplexityRoot.ServiceAccount.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccount.UpdatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccount.UpdatedAt(childComplexity), true
 
 	case "ServiceAccountConnection.edges":
-		if e.complexity.ServiceAccountConnection.Edges == nil {
+		if e.ComplexityRoot.ServiceAccountConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountConnection.Edges(childComplexity), true
 	case "ServiceAccountConnection.nodes":
-		if e.complexity.ServiceAccountConnection.Nodes == nil {
+		if e.ComplexityRoot.ServiceAccountConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountConnection.Nodes(childComplexity), true
 	case "ServiceAccountConnection.pageInfo":
-		if e.complexity.ServiceAccountConnection.PageInfo == nil {
+		if e.ComplexityRoot.ServiceAccountConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountConnection.PageInfo(childComplexity), true
 
 	case "ServiceAccountCreatedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.id":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.message":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountCreatedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountCreatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountCreatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountCreatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountDeletedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.id":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.message":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountDeletedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountDeletedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountDeletedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountDeletedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountEdge.cursor":
-		if e.complexity.ServiceAccountEdge.Cursor == nil {
+		if e.ComplexityRoot.ServiceAccountEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountEdge.Cursor(childComplexity), true
 	case "ServiceAccountEdge.node":
-		if e.complexity.ServiceAccountEdge.Node == nil {
+		if e.ComplexityRoot.ServiceAccountEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountEdge.Node(childComplexity), true
 
 	case "ServiceAccountToken.createdAt":
-		if e.complexity.ServiceAccountToken.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountToken.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.CreatedAt(childComplexity), true
 	case "ServiceAccountToken.description":
-		if e.complexity.ServiceAccountToken.Description == nil {
+		if e.ComplexityRoot.ServiceAccountToken.Description == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.Description(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.Description(childComplexity), true
 	case "ServiceAccountToken.expiresAt":
-		if e.complexity.ServiceAccountToken.ExpiresAt == nil {
+		if e.ComplexityRoot.ServiceAccountToken.ExpiresAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.ExpiresAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.ExpiresAt(childComplexity), true
 	case "ServiceAccountToken.id":
-		if e.complexity.ServiceAccountToken.ID == nil {
+		if e.ComplexityRoot.ServiceAccountToken.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.ID(childComplexity), true
 	case "ServiceAccountToken.lastUsedAt":
-		if e.complexity.ServiceAccountToken.LastUsedAt == nil {
+		if e.ComplexityRoot.ServiceAccountToken.LastUsedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.LastUsedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.LastUsedAt(childComplexity), true
 	case "ServiceAccountToken.name":
-		if e.complexity.ServiceAccountToken.Name == nil {
+		if e.ComplexityRoot.ServiceAccountToken.Name == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.Name(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.Name(childComplexity), true
 	case "ServiceAccountToken.updatedAt":
-		if e.complexity.ServiceAccountToken.UpdatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountToken.UpdatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountToken.UpdatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountToken.UpdatedAt(childComplexity), true
 
 	case "ServiceAccountTokenConnection.edges":
-		if e.complexity.ServiceAccountTokenConnection.Edges == nil {
+		if e.ComplexityRoot.ServiceAccountTokenConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenConnection.Edges(childComplexity), true
 	case "ServiceAccountTokenConnection.nodes":
-		if e.complexity.ServiceAccountTokenConnection.Nodes == nil {
+		if e.ComplexityRoot.ServiceAccountTokenConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenConnection.Nodes(childComplexity), true
 	case "ServiceAccountTokenConnection.pageInfo":
-		if e.complexity.ServiceAccountTokenConnection.PageInfo == nil {
+		if e.ComplexityRoot.ServiceAccountTokenConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenConnection.PageInfo(childComplexity), true
 
 	case "ServiceAccountTokenCreatedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.data":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Data(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.id":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.message":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountTokenCreatedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountTokenCreatedActivityLogEntryData.tokenName":
-		if e.complexity.ServiceAccountTokenCreatedActivityLogEntryData.TokenName == nil {
+		if e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntryData.TokenName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenCreatedActivityLogEntryData.TokenName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenCreatedActivityLogEntryData.TokenName(childComplexity), true
 
 	case "ServiceAccountTokenDeletedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.data":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Data(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.id":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.message":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountTokenDeletedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountTokenDeletedActivityLogEntryData.tokenName":
-		if e.complexity.ServiceAccountTokenDeletedActivityLogEntryData.TokenName == nil {
+		if e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntryData.TokenName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenDeletedActivityLogEntryData.TokenName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenDeletedActivityLogEntryData.TokenName(childComplexity), true
 
 	case "ServiceAccountTokenEdge.cursor":
-		if e.complexity.ServiceAccountTokenEdge.Cursor == nil {
+		if e.ComplexityRoot.ServiceAccountTokenEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenEdge.Cursor(childComplexity), true
 	case "ServiceAccountTokenEdge.node":
-		if e.complexity.ServiceAccountTokenEdge.Node == nil {
+		if e.ComplexityRoot.ServiceAccountTokenEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenEdge.Node(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenEdge.Node(childComplexity), true
 
 	case "ServiceAccountTokenUpdatedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.data":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Data(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.id":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.message":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountTokenUpdatedActivityLogEntryData.updatedFields":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntryData.UpdatedFields == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryData.UpdatedFields == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
 
 	case "ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.field":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.Field == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.Field == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.newValue":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
 	case "ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.oldValue":
-		if e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
+		if e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
 
 	case "ServiceAccountUpdatedActivityLogEntry.actor":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Actor(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.createdAt":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.data":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Data(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.id":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ID(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.message":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.Message(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.resourceName":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ResourceName(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.resourceType":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.ResourceType(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntry.teamSlug":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "ServiceAccountUpdatedActivityLogEntryData.updatedFields":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntryData.UpdatedFields == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryData.UpdatedFields == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
 
 	case "ServiceAccountUpdatedActivityLogEntryDataUpdatedField.field":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.Field == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.Field == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntryDataUpdatedField.newValue":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
 	case "ServiceAccountUpdatedActivityLogEntryDataUpdatedField.oldValue":
-		if e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
+		if e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
 			break
 		}
 
-		return e.complexity.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
+		return e.ComplexityRoot.ServiceAccountUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
 
 	case "SharedBucket.env":
-		if e.complexity.SharedBucket.Env == nil {
+		if e.ComplexityRoot.SharedBucket.Env == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.Env(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.Env(childComplexity), true
 	case "SharedBucket.groups":
-		if e.complexity.SharedBucket.Groups == nil {
+		if e.ComplexityRoot.SharedBucket.Groups == nil {
 			break
 		}
 
@@ -3102,39 +3087,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
+		return e.ComplexityRoot.SharedBucket.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "SharedBucket.id":
-		if e.complexity.SharedBucket.ID == nil {
+		if e.ComplexityRoot.SharedBucket.ID == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.ID(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.ID(childComplexity), true
 	case "SharedBucket.kind":
-		if e.complexity.SharedBucket.Kind == nil {
+		if e.ComplexityRoot.SharedBucket.Kind == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.Kind(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.Kind(childComplexity), true
 	case "SharedBucket.name":
-		if e.complexity.SharedBucket.Name == nil {
+		if e.ComplexityRoot.SharedBucket.Name == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.Name(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.Name(childComplexity), true
 	case "SharedBucket.shortName":
-		if e.complexity.SharedBucket.ShortName == nil {
+		if e.ComplexityRoot.SharedBucket.ShortName == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.ShortName(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.ShortName(childComplexity), true
 	case "SharedBucket.team":
-		if e.complexity.SharedBucket.Team == nil {
+		if e.ComplexityRoot.SharedBucket.Team == nil {
 			break
 		}
 
-		return e.complexity.SharedBucket.Team(childComplexity), true
+		return e.ComplexityRoot.SharedBucket.Team(childComplexity), true
 	case "SharedBucket.teams":
-		if e.complexity.SharedBucket.Teams == nil {
+		if e.ComplexityRoot.SharedBucket.Teams == nil {
 			break
 		}
 
@@ -3143,9 +3128,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
+		return e.ComplexityRoot.SharedBucket.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
 	case "SharedBucket.uniqueUsers":
-		if e.complexity.SharedBucket.UniqueUsers == nil {
+		if e.ComplexityRoot.SharedBucket.UniqueUsers == nil {
 			break
 		}
 
@@ -3154,9 +3139,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.UniqueUsers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.SharedBucket.UniqueUsers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "SharedBucket.users":
-		if e.complexity.SharedBucket.Users == nil {
+		if e.ComplexityRoot.SharedBucket.Users == nil {
 			break
 		}
 
@@ -3165,48 +3150,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.SharedBucket.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.SharedBucket.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 
 	case "SharedBucketConnection.edges":
-		if e.complexity.SharedBucketConnection.Edges == nil {
+		if e.ComplexityRoot.SharedBucketConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.SharedBucketConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.SharedBucketConnection.Edges(childComplexity), true
 	case "SharedBucketConnection.nodes":
-		if e.complexity.SharedBucketConnection.Nodes == nil {
+		if e.ComplexityRoot.SharedBucketConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.SharedBucketConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.SharedBucketConnection.Nodes(childComplexity), true
 	case "SharedBucketConnection.pageInfo":
-		if e.complexity.SharedBucketConnection.PageInfo == nil {
+		if e.ComplexityRoot.SharedBucketConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.SharedBucketConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.SharedBucketConnection.PageInfo(childComplexity), true
 
 	case "SharedBucketEdge.cursor":
-		if e.complexity.SharedBucketEdge.Cursor == nil {
+		if e.ComplexityRoot.SharedBucketEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.SharedBucketEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.SharedBucketEdge.Cursor(childComplexity), true
 	case "SharedBucketEdge.node":
-		if e.complexity.SharedBucketEdge.Node == nil {
+		if e.ComplexityRoot.SharedBucketEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.SharedBucketEdge.Node(childComplexity), true
+		return e.ComplexityRoot.SharedBucketEdge.Node(childComplexity), true
 
 	case "Team.accessManagers":
-		if e.complexity.Team.AccessManagers == nil {
+		if e.ComplexityRoot.Team.AccessManagers == nil {
 			break
 		}
 
-		return e.complexity.Team.AccessManagers(childComplexity), true
+		return e.ComplexityRoot.Team.AccessManagers(childComplexity), true
 	case "Team.activityLog":
-		if e.complexity.Team.ActivityLog == nil {
+		if e.ComplexityRoot.Team.ActivityLog == nil {
 			break
 		}
 
@@ -3215,21 +3200,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
+		return e.ComplexityRoot.Team.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
 	case "Team.deletionInProgress":
-		if e.complexity.Team.DeletionInProgress == nil {
+		if e.ComplexityRoot.Team.DeletionInProgress == nil {
 			break
 		}
 
-		return e.complexity.Team.DeletionInProgress(childComplexity), true
+		return e.ComplexityRoot.Team.DeletionInProgress(childComplexity), true
 	case "Team.displayName":
-		if e.complexity.Team.DisplayName == nil {
+		if e.ComplexityRoot.Team.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.Team.DisplayName(childComplexity), true
+		return e.ComplexityRoot.Team.DisplayName(childComplexity), true
 	case "Team.groups":
-		if e.complexity.Team.Groups == nil {
+		if e.ComplexityRoot.Team.Groups == nil {
 			break
 		}
 
@@ -3238,27 +3223,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
+		return e.ComplexityRoot.Team.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "Team.id":
-		if e.complexity.Team.ID == nil {
+		if e.ComplexityRoot.Team.ID == nil {
 			break
 		}
 
-		return e.complexity.Team.ID(childComplexity), true
+		return e.ComplexityRoot.Team.ID(childComplexity), true
 	case "Team.isManaged":
-		if e.complexity.Team.IsManaged == nil {
+		if e.ComplexityRoot.Team.IsManaged == nil {
 			break
 		}
 
-		return e.complexity.Team.IsManaged(childComplexity), true
+		return e.ComplexityRoot.Team.IsManaged(childComplexity), true
 	case "Team.lastSuccessfulSync":
-		if e.complexity.Team.LastSuccessfulSync == nil {
+		if e.ComplexityRoot.Team.LastSuccessfulSync == nil {
 			break
 		}
 
-		return e.complexity.Team.LastSuccessfulSync(childComplexity), true
+		return e.ComplexityRoot.Team.LastSuccessfulSync(childComplexity), true
 	case "Team.members":
-		if e.complexity.Team.Members == nil {
+		if e.ComplexityRoot.Team.Members == nil {
 			break
 		}
 
@@ -3267,15 +3252,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "Team.section":
-		if e.complexity.Team.Section == nil {
+		if e.ComplexityRoot.Team.Section == nil {
 			break
 		}
 
-		return e.complexity.Team.Section(childComplexity), true
+		return e.ComplexityRoot.Team.Section(childComplexity), true
 	case "Team.sharedBuckets":
-		if e.complexity.Team.SharedBuckets == nil {
+		if e.ComplexityRoot.Team.SharedBuckets == nil {
 			break
 		}
 
@@ -3284,9 +3269,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.Team.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
 	case "Team.sharedBucketsAccess":
-		if e.complexity.Team.SharedBucketsAccess == nil {
+		if e.ComplexityRoot.Team.SharedBucketsAccess == nil {
 			break
 		}
 
@@ -3295,411 +3280,411 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Team.SharedBucketsAccess(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.Team.SharedBucketsAccess(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
 	case "Team.slug":
-		if e.complexity.Team.Slug == nil {
+		if e.ComplexityRoot.Team.Slug == nil {
 			break
 		}
 
-		return e.complexity.Team.Slug(childComplexity), true
+		return e.ComplexityRoot.Team.Slug(childComplexity), true
 	case "Team.viewerIsMember":
-		if e.complexity.Team.ViewerIsMember == nil {
+		if e.ComplexityRoot.Team.ViewerIsMember == nil {
 			break
 		}
 
-		return e.complexity.Team.ViewerIsMember(childComplexity), true
+		return e.ComplexityRoot.Team.ViewerIsMember(childComplexity), true
 	case "Team.viewerIsOwner":
-		if e.complexity.Team.ViewerIsOwner == nil {
+		if e.ComplexityRoot.Team.ViewerIsOwner == nil {
 			break
 		}
 
-		return e.complexity.Team.ViewerIsOwner(childComplexity), true
+		return e.ComplexityRoot.Team.ViewerIsOwner(childComplexity), true
 
 	case "TeamAccessManager.team":
-		if e.complexity.TeamAccessManager.Team == nil {
+		if e.ComplexityRoot.TeamAccessManager.Team == nil {
 			break
 		}
 
-		return e.complexity.TeamAccessManager.Team(childComplexity), true
+		return e.ComplexityRoot.TeamAccessManager.Team(childComplexity), true
 	case "TeamAccessManager.user":
-		if e.complexity.TeamAccessManager.User == nil {
+		if e.ComplexityRoot.TeamAccessManager.User == nil {
 			break
 		}
 
-		return e.complexity.TeamAccessManager.User(childComplexity), true
+		return e.ComplexityRoot.TeamAccessManager.User(childComplexity), true
 
 	case "TeamConnection.edges":
-		if e.complexity.TeamConnection.Edges == nil {
+		if e.ComplexityRoot.TeamConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.TeamConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.TeamConnection.Edges(childComplexity), true
 	case "TeamConnection.nodes":
-		if e.complexity.TeamConnection.Nodes == nil {
+		if e.ComplexityRoot.TeamConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.TeamConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.TeamConnection.Nodes(childComplexity), true
 	case "TeamConnection.pageInfo":
-		if e.complexity.TeamConnection.PageInfo == nil {
+		if e.ComplexityRoot.TeamConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.TeamConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.TeamConnection.PageInfo(childComplexity), true
 
 	case "TeamCreatedActivityLogEntry.actor":
-		if e.complexity.TeamCreatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.Actor(childComplexity), true
 	case "TeamCreatedActivityLogEntry.createdAt":
-		if e.complexity.TeamCreatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "TeamCreatedActivityLogEntry.id":
-		if e.complexity.TeamCreatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.ID(childComplexity), true
 	case "TeamCreatedActivityLogEntry.message":
-		if e.complexity.TeamCreatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.Message(childComplexity), true
 	case "TeamCreatedActivityLogEntry.resourceName":
-		if e.complexity.TeamCreatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.ResourceName(childComplexity), true
 	case "TeamCreatedActivityLogEntry.resourceType":
-		if e.complexity.TeamCreatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.ResourceType(childComplexity), true
 	case "TeamCreatedActivityLogEntry.teamSlug":
-		if e.complexity.TeamCreatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.TeamCreatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.TeamCreatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.TeamCreatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "TeamEdge.cursor":
-		if e.complexity.TeamEdge.Cursor == nil {
+		if e.ComplexityRoot.TeamEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.TeamEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.TeamEdge.Cursor(childComplexity), true
 	case "TeamEdge.node":
-		if e.complexity.TeamEdge.Node == nil {
+		if e.ComplexityRoot.TeamEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.TeamEdge.Node(childComplexity), true
+		return e.ComplexityRoot.TeamEdge.Node(childComplexity), true
 
 	case "TeamMember.groups":
-		if e.complexity.TeamMember.Groups == nil {
+		if e.ComplexityRoot.TeamMember.Groups == nil {
 			break
 		}
 
-		return e.complexity.TeamMember.Groups(childComplexity), true
+		return e.ComplexityRoot.TeamMember.Groups(childComplexity), true
 	case "TeamMember.team":
-		if e.complexity.TeamMember.Team == nil {
+		if e.ComplexityRoot.TeamMember.Team == nil {
 			break
 		}
 
-		return e.complexity.TeamMember.Team(childComplexity), true
+		return e.ComplexityRoot.TeamMember.Team(childComplexity), true
 	case "TeamMember.user":
-		if e.complexity.TeamMember.User == nil {
+		if e.ComplexityRoot.TeamMember.User == nil {
 			break
 		}
 
-		return e.complexity.TeamMember.User(childComplexity), true
+		return e.ComplexityRoot.TeamMember.User(childComplexity), true
 
 	case "TeamMemberConnection.edges":
-		if e.complexity.TeamMemberConnection.Edges == nil {
+		if e.ComplexityRoot.TeamMemberConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.TeamMemberConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.TeamMemberConnection.Edges(childComplexity), true
 	case "TeamMemberConnection.nodes":
-		if e.complexity.TeamMemberConnection.Nodes == nil {
+		if e.ComplexityRoot.TeamMemberConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.TeamMemberConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.TeamMemberConnection.Nodes(childComplexity), true
 	case "TeamMemberConnection.pageInfo":
-		if e.complexity.TeamMemberConnection.PageInfo == nil {
+		if e.ComplexityRoot.TeamMemberConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.TeamMemberConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.TeamMemberConnection.PageInfo(childComplexity), true
 
 	case "TeamMemberEdge.cursor":
-		if e.complexity.TeamMemberEdge.Cursor == nil {
+		if e.ComplexityRoot.TeamMemberEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.TeamMemberEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.TeamMemberEdge.Cursor(childComplexity), true
 	case "TeamMemberEdge.node":
-		if e.complexity.TeamMemberEdge.Node == nil {
+		if e.ComplexityRoot.TeamMemberEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.TeamMemberEdge.Node(childComplexity), true
+		return e.ComplexityRoot.TeamMemberEdge.Node(childComplexity), true
 
 	case "TeamRoleAssignedActivityLogEntry.actor":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Actor(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.createdAt":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.CreatedAt(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.data":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Data(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.id":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ID(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.message":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.Message(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.resourceName":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ResourceName(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.resourceType":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.ResourceType(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntry.teamSlug":
-		if e.complexity.TeamRoleAssignedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "TeamRoleAssignedActivityLogEntryData.role":
-		if e.complexity.TeamRoleAssignedActivityLogEntryData.Role == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntryData.Role == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntryData.Role(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntryData.Role(childComplexity), true
 	case "TeamRoleAssignedActivityLogEntryData.user":
-		if e.complexity.TeamRoleAssignedActivityLogEntryData.User == nil {
+		if e.ComplexityRoot.TeamRoleAssignedActivityLogEntryData.User == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleAssignedActivityLogEntryData.User(childComplexity), true
+		return e.ComplexityRoot.TeamRoleAssignedActivityLogEntryData.User(childComplexity), true
 
 	case "TeamRoleRevokedActivityLogEntry.actor":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Actor(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.createdAt":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.CreatedAt(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.data":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Data(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.id":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ID(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.message":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.Message(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.resourceName":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ResourceName(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.resourceType":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.ResourceType(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntry.teamSlug":
-		if e.complexity.TeamRoleRevokedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "TeamRoleRevokedActivityLogEntryData.role":
-		if e.complexity.TeamRoleRevokedActivityLogEntryData.Role == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntryData.Role == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntryData.Role(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntryData.Role(childComplexity), true
 	case "TeamRoleRevokedActivityLogEntryData.user":
-		if e.complexity.TeamRoleRevokedActivityLogEntryData.User == nil {
+		if e.ComplexityRoot.TeamRoleRevokedActivityLogEntryData.User == nil {
 			break
 		}
 
-		return e.complexity.TeamRoleRevokedActivityLogEntryData.User(childComplexity), true
+		return e.ComplexityRoot.TeamRoleRevokedActivityLogEntryData.User(childComplexity), true
 
 	case "TeamUpdatedActivityLogEntry.actor":
-		if e.complexity.TeamUpdatedActivityLogEntry.Actor == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.Actor == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.Actor(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.Actor(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.createdAt":
-		if e.complexity.TeamUpdatedActivityLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.CreatedAt(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.data":
-		if e.complexity.TeamUpdatedActivityLogEntry.Data == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.Data == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.Data(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.Data(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.id":
-		if e.complexity.TeamUpdatedActivityLogEntry.ID == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.ID(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.message":
-		if e.complexity.TeamUpdatedActivityLogEntry.Message == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.Message(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.resourceName":
-		if e.complexity.TeamUpdatedActivityLogEntry.ResourceName == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.ResourceName == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.ResourceName(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.ResourceName(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.resourceType":
-		if e.complexity.TeamUpdatedActivityLogEntry.ResourceType == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.ResourceType == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.ResourceType(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.ResourceType(childComplexity), true
 	case "TeamUpdatedActivityLogEntry.teamSlug":
-		if e.complexity.TeamUpdatedActivityLogEntry.TeamSlug == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntry.TeamSlug == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntry.TeamSlug(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "TeamUpdatedActivityLogEntryData.updatedFields":
-		if e.complexity.TeamUpdatedActivityLogEntryData.UpdatedFields == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntryData.UpdatedFields == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntryData.UpdatedFields(childComplexity), true
 
 	case "TeamUpdatedActivityLogEntryDataUpdatedField.field":
-		if e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.Field == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.Field == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.Field(childComplexity), true
 	case "TeamUpdatedActivityLogEntryDataUpdatedField.newValue":
-		if e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.NewValue == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.NewValue(childComplexity), true
 	case "TeamUpdatedActivityLogEntryDataUpdatedField.oldValue":
-		if e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
+		if e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.OldValue == nil {
 			break
 		}
 
-		return e.complexity.TeamUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
+		return e.ComplexityRoot.TeamUpdatedActivityLogEntryDataUpdatedField.OldValue(childComplexity), true
 
 	case "UpdateServiceAccountPayload.serviceAccount":
-		if e.complexity.UpdateServiceAccountPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.UpdateServiceAccountPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.UpdateServiceAccountPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.UpdateServiceAccountPayload.ServiceAccount(childComplexity), true
 
 	case "UpdateServiceAccountTokenPayload.serviceAccount":
-		if e.complexity.UpdateServiceAccountTokenPayload.ServiceAccount == nil {
+		if e.ComplexityRoot.UpdateServiceAccountTokenPayload.ServiceAccount == nil {
 			break
 		}
 
-		return e.complexity.UpdateServiceAccountTokenPayload.ServiceAccount(childComplexity), true
+		return e.ComplexityRoot.UpdateServiceAccountTokenPayload.ServiceAccount(childComplexity), true
 	case "UpdateServiceAccountTokenPayload.serviceAccountToken":
-		if e.complexity.UpdateServiceAccountTokenPayload.ServiceAccountToken == nil {
+		if e.ComplexityRoot.UpdateServiceAccountTokenPayload.ServiceAccountToken == nil {
 			break
 		}
 
-		return e.complexity.UpdateServiceAccountTokenPayload.ServiceAccountToken(childComplexity), true
+		return e.ComplexityRoot.UpdateServiceAccountTokenPayload.ServiceAccountToken(childComplexity), true
 
 	case "UpdateTeamPayload.team":
-		if e.complexity.UpdateTeamPayload.Team == nil {
+		if e.ComplexityRoot.UpdateTeamPayload.Team == nil {
 			break
 		}
 
-		return e.complexity.UpdateTeamPayload.Team(childComplexity), true
+		return e.ComplexityRoot.UpdateTeamPayload.Team(childComplexity), true
 
 	case "User.email":
-		if e.complexity.User.Email == nil {
+		if e.ComplexityRoot.User.Email == nil {
 			break
 		}
 
-		return e.complexity.User.Email(childComplexity), true
+		return e.ComplexityRoot.User.Email(childComplexity), true
 	case "User.externalID":
-		if e.complexity.User.ExternalID == nil {
+		if e.ComplexityRoot.User.ExternalID == nil {
 			break
 		}
 
-		return e.complexity.User.ExternalID(childComplexity), true
+		return e.ComplexityRoot.User.ExternalID(childComplexity), true
 	case "User.firstName":
-		if e.complexity.User.FirstName == nil {
+		if e.ComplexityRoot.User.FirstName == nil {
 			break
 		}
 
-		return e.complexity.User.FirstName(childComplexity), true
+		return e.ComplexityRoot.User.FirstName(childComplexity), true
 	case "User.groups":
-		if e.complexity.User.Groups == nil {
+		if e.ComplexityRoot.User.Groups == nil {
 			break
 		}
 
@@ -3708,51 +3693,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
+		return e.ComplexityRoot.User.Groups(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*group.GroupOrder), args["filter"].(*group.GroupFilter)), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.isAdmin":
-		if e.complexity.User.IsAdmin == nil {
+		if e.ComplexityRoot.User.IsAdmin == nil {
 			break
 		}
 
-		return e.complexity.User.IsAdmin(childComplexity), true
+		return e.ComplexityRoot.User.IsAdmin(childComplexity), true
 	case "User.isSectionManager":
-		if e.complexity.User.IsSectionManager == nil {
+		if e.ComplexityRoot.User.IsSectionManager == nil {
 			break
 		}
 
-		return e.complexity.User.IsSectionManager(childComplexity), true
+		return e.ComplexityRoot.User.IsSectionManager(childComplexity), true
 	case "User.jobTitle":
-		if e.complexity.User.JobTitle == nil {
+		if e.ComplexityRoot.User.JobTitle == nil {
 			break
 		}
 
-		return e.complexity.User.JobTitle(childComplexity), true
+		return e.ComplexityRoot.User.JobTitle(childComplexity), true
 	case "User.lastName":
-		if e.complexity.User.LastName == nil {
+		if e.ComplexityRoot.User.LastName == nil {
 			break
 		}
 
-		return e.complexity.User.LastName(childComplexity), true
+		return e.ComplexityRoot.User.LastName(childComplexity), true
 	case "User.name":
-		if e.complexity.User.Name == nil {
+		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.ComplexityRoot.User.Name(childComplexity), true
 	case "User.section":
-		if e.complexity.User.Section == nil {
+		if e.ComplexityRoot.User.Section == nil {
 			break
 		}
 
-		return e.complexity.User.Section(childComplexity), true
+		return e.ComplexityRoot.User.Section(childComplexity), true
 	case "User.sharedBucketsAccess":
-		if e.complexity.User.SharedBucketsAccess == nil {
+		if e.ComplexityRoot.User.SharedBucketsAccess == nil {
 			break
 		}
 
@@ -3761,9 +3746,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.SharedBucketsAccess(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.User.SharedBucketsAccess(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
 	case "User.teamMembers":
-		if e.complexity.User.TeamMembers == nil {
+		if e.ComplexityRoot.User.TeamMembers == nil {
 			break
 		}
 
@@ -3772,9 +3757,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.TeamMembers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+		return e.ComplexityRoot.User.TeamMembers(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
 	case "User.teams":
-		if e.complexity.User.Teams == nil {
+		if e.ComplexityRoot.User.Teams == nil {
 			break
 		}
 
@@ -3783,238 +3768,238 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
+		return e.ComplexityRoot.User.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
 
 	case "UserConnection.edges":
-		if e.complexity.UserConnection.Edges == nil {
+		if e.ComplexityRoot.UserConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.UserConnection.Edges(childComplexity), true
 	case "UserConnection.nodes":
-		if e.complexity.UserConnection.Nodes == nil {
+		if e.ComplexityRoot.UserConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.UserConnection.Nodes(childComplexity), true
 	case "UserConnection.pageInfo":
-		if e.complexity.UserConnection.PageInfo == nil {
+		if e.ComplexityRoot.UserConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.UserConnection.PageInfo(childComplexity), true
 
 	case "UserCreatedUserSyncLogEntry.createdAt":
-		if e.complexity.UserCreatedUserSyncLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.CreatedAt(childComplexity), true
 	case "UserCreatedUserSyncLogEntry.id":
-		if e.complexity.UserCreatedUserSyncLogEntry.ID == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.ID(childComplexity), true
 	case "UserCreatedUserSyncLogEntry.message":
-		if e.complexity.UserCreatedUserSyncLogEntry.Message == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.Message(childComplexity), true
 	case "UserCreatedUserSyncLogEntry.userEmail":
-		if e.complexity.UserCreatedUserSyncLogEntry.UserEmail == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.UserEmail(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserEmail(childComplexity), true
 	case "UserCreatedUserSyncLogEntry.userID":
-		if e.complexity.UserCreatedUserSyncLogEntry.UserID == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserID == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.UserID(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserID(childComplexity), true
 	case "UserCreatedUserSyncLogEntry.userName":
-		if e.complexity.UserCreatedUserSyncLogEntry.UserName == nil {
+		if e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserName == nil {
 			break
 		}
 
-		return e.complexity.UserCreatedUserSyncLogEntry.UserName(childComplexity), true
+		return e.ComplexityRoot.UserCreatedUserSyncLogEntry.UserName(childComplexity), true
 
 	case "UserDeletedUserSyncLogEntry.createdAt":
-		if e.complexity.UserDeletedUserSyncLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.CreatedAt(childComplexity), true
 	case "UserDeletedUserSyncLogEntry.id":
-		if e.complexity.UserDeletedUserSyncLogEntry.ID == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.ID(childComplexity), true
 	case "UserDeletedUserSyncLogEntry.message":
-		if e.complexity.UserDeletedUserSyncLogEntry.Message == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.Message(childComplexity), true
 	case "UserDeletedUserSyncLogEntry.userEmail":
-		if e.complexity.UserDeletedUserSyncLogEntry.UserEmail == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.UserEmail(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserEmail(childComplexity), true
 	case "UserDeletedUserSyncLogEntry.userID":
-		if e.complexity.UserDeletedUserSyncLogEntry.UserID == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserID == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.UserID(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserID(childComplexity), true
 	case "UserDeletedUserSyncLogEntry.userName":
-		if e.complexity.UserDeletedUserSyncLogEntry.UserName == nil {
+		if e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserName == nil {
 			break
 		}
 
-		return e.complexity.UserDeletedUserSyncLogEntry.UserName(childComplexity), true
+		return e.ComplexityRoot.UserDeletedUserSyncLogEntry.UserName(childComplexity), true
 
 	case "UserEdge.cursor":
-		if e.complexity.UserEdge.Cursor == nil {
+		if e.ComplexityRoot.UserEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.UserEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.UserEdge.Cursor(childComplexity), true
 	case "UserEdge.node":
-		if e.complexity.UserEdge.Node == nil {
+		if e.ComplexityRoot.UserEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.UserEdge.Node(childComplexity), true
+		return e.ComplexityRoot.UserEdge.Node(childComplexity), true
 
 	case "UserSyncLogEntryConnection.edges":
-		if e.complexity.UserSyncLogEntryConnection.Edges == nil {
+		if e.ComplexityRoot.UserSyncLogEntryConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.UserSyncLogEntryConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.UserSyncLogEntryConnection.Edges(childComplexity), true
 	case "UserSyncLogEntryConnection.nodes":
-		if e.complexity.UserSyncLogEntryConnection.Nodes == nil {
+		if e.ComplexityRoot.UserSyncLogEntryConnection.Nodes == nil {
 			break
 		}
 
-		return e.complexity.UserSyncLogEntryConnection.Nodes(childComplexity), true
+		return e.ComplexityRoot.UserSyncLogEntryConnection.Nodes(childComplexity), true
 	case "UserSyncLogEntryConnection.pageInfo":
-		if e.complexity.UserSyncLogEntryConnection.PageInfo == nil {
+		if e.ComplexityRoot.UserSyncLogEntryConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.UserSyncLogEntryConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.UserSyncLogEntryConnection.PageInfo(childComplexity), true
 
 	case "UserSyncLogEntryEdge.cursor":
-		if e.complexity.UserSyncLogEntryEdge.Cursor == nil {
+		if e.ComplexityRoot.UserSyncLogEntryEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.UserSyncLogEntryEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.UserSyncLogEntryEdge.Cursor(childComplexity), true
 	case "UserSyncLogEntryEdge.node":
-		if e.complexity.UserSyncLogEntryEdge.Node == nil {
+		if e.ComplexityRoot.UserSyncLogEntryEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.UserSyncLogEntryEdge.Node(childComplexity), true
+		return e.ComplexityRoot.UserSyncLogEntryEdge.Node(childComplexity), true
 
 	case "UserSyncUserChangeUnit.new":
-		if e.complexity.UserSyncUserChangeUnit.New == nil {
+		if e.ComplexityRoot.UserSyncUserChangeUnit.New == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChangeUnit.New(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChangeUnit.New(childComplexity), true
 	case "UserSyncUserChangeUnit.old":
-		if e.complexity.UserSyncUserChangeUnit.Old == nil {
+		if e.ComplexityRoot.UserSyncUserChangeUnit.Old == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChangeUnit.Old(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChangeUnit.Old(childComplexity), true
 
 	case "UserSyncUserChanges.email":
-		if e.complexity.UserSyncUserChanges.Email == nil {
+		if e.ComplexityRoot.UserSyncUserChanges.Email == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChanges.Email(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChanges.Email(childComplexity), true
 	case "UserSyncUserChanges.jobTitle":
-		if e.complexity.UserSyncUserChanges.JobTitle == nil {
+		if e.ComplexityRoot.UserSyncUserChanges.JobTitle == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChanges.JobTitle(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChanges.JobTitle(childComplexity), true
 	case "UserSyncUserChanges.name":
-		if e.complexity.UserSyncUserChanges.Name == nil {
+		if e.ComplexityRoot.UserSyncUserChanges.Name == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChanges.Name(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChanges.Name(childComplexity), true
 	case "UserSyncUserChanges.sectionCode":
-		if e.complexity.UserSyncUserChanges.SectionCode == nil {
+		if e.ComplexityRoot.UserSyncUserChanges.SectionCode == nil {
 			break
 		}
 
-		return e.complexity.UserSyncUserChanges.SectionCode(childComplexity), true
+		return e.ComplexityRoot.UserSyncUserChanges.SectionCode(childComplexity), true
 
 	case "UserUpdatedUserSyncLogEntry.changes":
-		if e.complexity.UserUpdatedUserSyncLogEntry.Changes == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.Changes == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.Changes(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.Changes(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.createdAt":
-		if e.complexity.UserUpdatedUserSyncLogEntry.CreatedAt == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.CreatedAt(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.id":
-		if e.complexity.UserUpdatedUserSyncLogEntry.ID == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.ID == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.ID(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.ID(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.message":
-		if e.complexity.UserUpdatedUserSyncLogEntry.Message == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.Message == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.Message(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.Message(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.oldUserEmail":
-		if e.complexity.UserUpdatedUserSyncLogEntry.OldUserEmail == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.OldUserEmail == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.OldUserEmail(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.OldUserEmail(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.oldUserName":
-		if e.complexity.UserUpdatedUserSyncLogEntry.OldUserName == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.OldUserName == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.OldUserName(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.OldUserName(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.userEmail":
-		if e.complexity.UserUpdatedUserSyncLogEntry.UserEmail == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserEmail == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.UserEmail(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserEmail(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.userID":
-		if e.complexity.UserUpdatedUserSyncLogEntry.UserID == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserID == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.UserID(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserID(childComplexity), true
 	case "UserUpdatedUserSyncLogEntry.userName":
-		if e.complexity.UserUpdatedUserSyncLogEntry.UserName == nil {
+		if e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserName == nil {
 			break
 		}
 
-		return e.complexity.UserUpdatedUserSyncLogEntry.UserName(childComplexity), true
+		return e.ComplexityRoot.UserUpdatedUserSyncLogEntry.UserName(childComplexity), true
 
 	}
 	return 0, false
@@ -4022,7 +4007,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
-	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputActivityLogFilter,
 		ec.unmarshalInputAddGroupMemberInput,
@@ -4066,9 +4051,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
-				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
-					result := <-ec.deferredResults
-					atomic.AddInt32(&ec.pendingDeferred, -1)
+				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
+					result := <-ec.DeferredResults
+					atomic.AddInt32(&ec.PendingDeferred, -1)
 					data = result.Result
 					response.Path = result.Path
 					response.Label = result.Label
@@ -4080,8 +4065,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
-			if atomic.LoadInt32(&ec.deferred) > 0 {
-				hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+			if atomic.LoadInt32(&ec.Deferred) > 0 {
+				hasNext := atomic.LoadInt32(&ec.PendingDeferred) > 0
 				response.HasNext = &hasNext
 			}
 
@@ -4109,44 +4094,22 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 }
 
 type executionContext struct {
-	*graphql.OperationContext
-	*executableSchema
-	deferred        int32
-	pendingDeferred int32
-	deferredResults chan graphql.DeferredResult
+	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 }
 
-func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
-	atomic.AddInt32(&ec.pendingDeferred, 1)
-	go func() {
-		ctx := graphql.WithFreshResponseContext(dg.Context)
-		dg.FieldSet.Dispatch(ctx)
-		ds := graphql.DeferredResult{
-			Path:   dg.Path,
-			Label:  dg.Label,
-			Result: dg.FieldSet,
-			Errors: graphql.GetErrors(ctx),
-		}
-		// null fields should bubble up
-		if dg.FieldSet.Invalids > 0 {
-			ds.Result = graphql.Null
-		}
-		ec.deferredResults <- ds
-	}()
-}
-
-func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
+func newExecutionContext(
+	opCtx *graphql.OperationContext,
+	execSchema *executableSchema,
+	deferredResults chan graphql.DeferredResult,
+) executionContext {
+	return executionContext{
+		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
+			opCtx,
+			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),
+			parsedSchema,
+			deferredResults,
+		),
 	}
-	return introspection.WrapSchema(ec.Schema()), nil
-}
-
-func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-	if ec.DisableIntrospection {
-		return nil, errors.New("introspection disabled")
-	}
-	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -9483,7 +9446,7 @@ func (ec *executionContext) _AddTeamAccessManagerPayload_team(ctx context.Contex
 		field,
 		ec.fieldContext_AddTeamAccessManagerPayload_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.AddTeamAccessManagerPayload().Team(ctx, obj)
+			return ec.Resolvers.AddTeamAccessManagerPayload().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -9544,7 +9507,7 @@ func (ec *executionContext) _AddTeamAccessManagerPayload_user(ctx context.Contex
 		field,
 		ec.fieldContext_AddTeamAccessManagerPayload_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.AddTeamAccessManagerPayload().User(ctx, obj)
+			return ec.Resolvers.AddTeamAccessManagerPayload().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -10212,7 +10175,7 @@ func (ec *executionContext) _Group_members(ctx context.Context, field graphql.Co
 		ec.fieldContext_Group_members,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Group().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.Group().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -10261,7 +10224,7 @@ func (ec *executionContext) _Group_activityLog(ctx context.Context, field graphq
 		ec.fieldContext_Group_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Group().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
+			return ec.Resolvers.Group().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -10711,7 +10674,7 @@ func (ec *executionContext) _GroupMember_group(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_GroupMember_group,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.GroupMember().Group(ctx, obj)
+			return ec.Resolvers.GroupMember().Group(ctx, obj)
 		},
 		nil,
 		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
@@ -10756,7 +10719,7 @@ func (ec *executionContext) _GroupMember_user(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_GroupMember_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.GroupMember().User(ctx, obj)
+			return ec.Resolvers.GroupMember().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -11587,7 +11550,7 @@ func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field gra
 		ec.fieldContext_Mutation_createGroup,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateGroup(ctx, fc.Args["input"].(group.CreateGroupInput))
+			return ec.Resolvers.Mutation().CreateGroup(ctx, fc.Args["input"].(group.CreateGroupInput))
 		},
 		nil,
 		ec.marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupPayload,
@@ -11632,7 +11595,7 @@ func (ec *executionContext) _Mutation_addGroupMember(ctx context.Context, field 
 		ec.fieldContext_Mutation_addGroupMember,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().AddGroupMember(ctx, fc.Args["input"].(group.AddGroupMemberInput))
+			return ec.Resolvers.Mutation().AddGroupMember(ctx, fc.Args["input"].(group.AddGroupMemberInput))
 		},
 		nil,
 		ec.marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberPayload,
@@ -11677,7 +11640,7 @@ func (ec *executionContext) _Mutation_removeGroupMember(ctx context.Context, fie
 		ec.fieldContext_Mutation_removeGroupMember,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RemoveGroupMember(ctx, fc.Args["input"].(group.RemoveGroupMemberInput))
+			return ec.Resolvers.Mutation().RemoveGroupMember(ctx, fc.Args["input"].(group.RemoveGroupMemberInput))
 		},
 		nil,
 		ec.marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload,
@@ -11724,7 +11687,7 @@ func (ec *executionContext) _Mutation_enableReconciler(ctx context.Context, fiel
 		ec.fieldContext_Mutation_enableReconciler,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().EnableReconciler(ctx, fc.Args["input"].(reconciler.EnableReconcilerInput))
+			return ec.Resolvers.Mutation().EnableReconciler(ctx, fc.Args["input"].(reconciler.EnableReconcilerInput))
 		},
 		nil,
 		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
@@ -11785,7 +11748,7 @@ func (ec *executionContext) _Mutation_disableReconciler(ctx context.Context, fie
 		ec.fieldContext_Mutation_disableReconciler,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DisableReconciler(ctx, fc.Args["input"].(reconciler.DisableReconcilerInput))
+			return ec.Resolvers.Mutation().DisableReconciler(ctx, fc.Args["input"].(reconciler.DisableReconcilerInput))
 		},
 		nil,
 		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
@@ -11846,7 +11809,7 @@ func (ec *executionContext) _Mutation_configureReconciler(ctx context.Context, f
 		ec.fieldContext_Mutation_configureReconciler,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().ConfigureReconciler(ctx, fc.Args["input"].(reconciler.ConfigureReconcilerInput))
+			return ec.Resolvers.Mutation().ConfigureReconciler(ctx, fc.Args["input"].(reconciler.ConfigureReconcilerInput))
 		},
 		nil,
 		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
@@ -11907,7 +11870,7 @@ func (ec *executionContext) _Mutation_createServiceAccount(ctx context.Context, 
 		ec.fieldContext_Mutation_createServiceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateServiceAccount(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountInput))
+			return ec.Resolvers.Mutation().CreateServiceAccount(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountInput))
 		},
 		nil,
 		ec.marshalNCreateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload,
@@ -11952,7 +11915,7 @@ func (ec *executionContext) _Mutation_updateServiceAccount(ctx context.Context, 
 		ec.fieldContext_Mutation_updateServiceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateServiceAccount(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountInput))
+			return ec.Resolvers.Mutation().UpdateServiceAccount(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountInput))
 		},
 		nil,
 		ec.marshalNUpdateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload,
@@ -11997,7 +11960,7 @@ func (ec *executionContext) _Mutation_deleteServiceAccount(ctx context.Context, 
 		ec.fieldContext_Mutation_deleteServiceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DeleteServiceAccount(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountInput))
+			return ec.Resolvers.Mutation().DeleteServiceAccount(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountInput))
 		},
 		nil,
 		ec.marshalNDeleteServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload,
@@ -12042,7 +12005,7 @@ func (ec *executionContext) _Mutation_assignRoleToServiceAccount(ctx context.Con
 		ec.fieldContext_Mutation_assignRoleToServiceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().AssignRoleToServiceAccount(ctx, fc.Args["input"].(serviceaccount.AssignRoleToServiceAccountInput))
+			return ec.Resolvers.Mutation().AssignRoleToServiceAccount(ctx, fc.Args["input"].(serviceaccount.AssignRoleToServiceAccountInput))
 		},
 		nil,
 		ec.marshalNAssignRoleToServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload,
@@ -12087,7 +12050,7 @@ func (ec *executionContext) _Mutation_revokeRoleFromServiceAccount(ctx context.C
 		ec.fieldContext_Mutation_revokeRoleFromServiceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RevokeRoleFromServiceAccount(ctx, fc.Args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput))
+			return ec.Resolvers.Mutation().RevokeRoleFromServiceAccount(ctx, fc.Args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput))
 		},
 		nil,
 		ec.marshalNRevokeRoleFromServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload,
@@ -12132,7 +12095,7 @@ func (ec *executionContext) _Mutation_createServiceAccountToken(ctx context.Cont
 		ec.fieldContext_Mutation_createServiceAccountToken,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountTokenInput))
+			return ec.Resolvers.Mutation().CreateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountTokenInput))
 		},
 		nil,
 		ec.marshalNCreateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload,
@@ -12181,7 +12144,7 @@ func (ec *executionContext) _Mutation_updateServiceAccountToken(ctx context.Cont
 		ec.fieldContext_Mutation_updateServiceAccountToken,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountTokenInput))
+			return ec.Resolvers.Mutation().UpdateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountTokenInput))
 		},
 		nil,
 		ec.marshalNUpdateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload,
@@ -12228,7 +12191,7 @@ func (ec *executionContext) _Mutation_deleteServiceAccountToken(ctx context.Cont
 		ec.fieldContext_Mutation_deleteServiceAccountToken,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DeleteServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountTokenInput))
+			return ec.Resolvers.Mutation().DeleteServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountTokenInput))
 		},
 		nil,
 		ec.marshalNDeleteServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload,
@@ -12275,7 +12238,7 @@ func (ec *executionContext) _Mutation_createTeam(ctx context.Context, field grap
 		ec.fieldContext_Mutation_createTeam,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateTeam(ctx, fc.Args["input"].(team.CreateTeamInput))
+			return ec.Resolvers.Mutation().CreateTeam(ctx, fc.Args["input"].(team.CreateTeamInput))
 		},
 		nil,
 		ec.marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamPayload,
@@ -12320,7 +12283,7 @@ func (ec *executionContext) _Mutation_updateTeam(ctx context.Context, field grap
 		ec.fieldContext_Mutation_updateTeam,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateTeam(ctx, fc.Args["input"].(team.UpdateTeamInput))
+			return ec.Resolvers.Mutation().UpdateTeam(ctx, fc.Args["input"].(team.UpdateTeamInput))
 		},
 		nil,
 		ec.marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamPayload,
@@ -12365,7 +12328,7 @@ func (ec *executionContext) _Mutation_addTeamAccessManager(ctx context.Context, 
 		ec.fieldContext_Mutation_addTeamAccessManager,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().AddTeamAccessManager(ctx, fc.Args["input"].(team.AddTeamAccessManagerInput))
+			return ec.Resolvers.Mutation().AddTeamAccessManager(ctx, fc.Args["input"].(team.AddTeamAccessManagerInput))
 		},
 		nil,
 		ec.marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload,
@@ -12412,7 +12375,7 @@ func (ec *executionContext) _Mutation_removeTeamAccessManager(ctx context.Contex
 		ec.fieldContext_Mutation_removeTeamAccessManager,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().RemoveTeamAccessManager(ctx, fc.Args["input"].(team.RemoveTeamAccessManagerInput))
+			return ec.Resolvers.Mutation().RemoveTeamAccessManager(ctx, fc.Args["input"].(team.RemoveTeamAccessManagerInput))
 		},
 		nil,
 		ec.marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload,
@@ -12662,7 +12625,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_node,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Node(ctx, fc.Args["id"].(ident.Ident))
+			return ec.Resolvers.Query().Node(ctx, fc.Args["id"].(ident.Ident))
 		},
 		nil,
 		ec.marshalONode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐNode,
@@ -12703,7 +12666,7 @@ func (ec *executionContext) _Query_activityLog(ctx context.Context, field graphq
 		ec.fieldContext_Query_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ActivityLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
+			return ec.Resolvers.Query().ActivityLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12752,7 +12715,7 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_roles,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Roles(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Query().Roles(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12800,7 +12763,7 @@ func (ec *executionContext) _Query_features(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_features,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Features(ctx)
+			return ec.Resolvers.Query().Features(ctx)
 		},
 		nil,
 		ec.marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋfeatureᚐFeatures,
@@ -12834,7 +12797,7 @@ func (ec *executionContext) _Query_groups(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Groups(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
+			return ec.Resolvers.Query().Groups(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12883,7 +12846,7 @@ func (ec *executionContext) _Query_group(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_group,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Group(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Query().Group(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
@@ -12940,7 +12903,7 @@ func (ec *executionContext) _Query_reconcilers(ctx context.Context, field graphq
 		ec.fieldContext_Query_reconcilers,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Reconcilers(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Query().Reconcilers(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNReconcilerConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -12989,7 +12952,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query_search,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Search(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(search.SearchFilter))
+			return ec.Resolvers.Query().Search(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(search.SearchFilter))
 		},
 		nil,
 		ec.marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13038,7 +13001,7 @@ func (ec *executionContext) _Query_sections(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_sections,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Sections(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*section.SectionOrder))
+			return ec.Resolvers.Query().Sections(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*section.SectionOrder))
 		},
 		nil,
 		ec.marshalNSectionConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13087,7 +13050,7 @@ func (ec *executionContext) _Query_section(ctx context.Context, field graphql.Co
 		ec.fieldContext_Query_section,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Section(ctx, fc.Args["code"].(string))
+			return ec.Resolvers.Query().Section(ctx, fc.Args["code"].(string))
 		},
 		nil,
 		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
@@ -13138,7 +13101,7 @@ func (ec *executionContext) _Query_serviceAccounts(ctx context.Context, field gr
 		ec.fieldContext_Query_serviceAccounts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ServiceAccounts(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Query().ServiceAccounts(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNServiceAccountConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13187,7 +13150,7 @@ func (ec *executionContext) _Query_serviceAccount(ctx context.Context, field gra
 		ec.fieldContext_Query_serviceAccount,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ServiceAccount(ctx, fc.Args["id"].(ident.Ident))
+			return ec.Resolvers.Query().ServiceAccount(ctx, fc.Args["id"].(ident.Ident))
 		},
 		nil,
 		ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
@@ -13248,7 +13211,7 @@ func (ec *executionContext) _Query_sharedBuckets(ctx context.Context, field grap
 		ec.fieldContext_Query_sharedBuckets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SharedBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.Query().SharedBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13297,7 +13260,7 @@ func (ec *executionContext) _Query_sharedBucket(ctx context.Context, field graph
 		ec.fieldContext_Query_sharedBucket,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SharedBucket(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Query().SharedBucket(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
@@ -13360,7 +13323,7 @@ func (ec *executionContext) _Query_teams(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_teams,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Teams(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
+			return ec.Resolvers.Query().Teams(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
 		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13409,7 +13372,7 @@ func (ec *executionContext) _Query_team(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_team,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Team(ctx, fc.Args["slug"].(slug.Slug))
+			return ec.Resolvers.Query().Team(ctx, fc.Args["slug"].(slug.Slug))
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -13482,7 +13445,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_users,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Users(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.Query().Users(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13531,7 +13494,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_user,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().User(ctx, fc.Args["email"].(*string))
+			return ec.Resolvers.Query().User(ctx, fc.Args["email"].(*string))
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -13601,7 +13564,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Query_me,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Me(ctx)
+			return ec.Resolvers.Query().Me(ctx)
 		},
 		nil,
 		ec.marshalNAuthenticatedUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐAuthenticatedUser,
@@ -13631,7 +13594,7 @@ func (ec *executionContext) _Query_userSyncLog(ctx context.Context, field graphq
 		ec.fieldContext_Query_userSyncLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().UserSyncLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Query().UserSyncLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNUserSyncLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -13680,7 +13643,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query___type,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.introspectType(fc.Args["name"].(string))
+			return ec.IntrospectType(fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
@@ -13744,7 +13707,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query___schema,
 		func(ctx context.Context) (any, error) {
-			return ec.introspectSchema()
+			return ec.IntrospectSchema()
 		},
 		nil,
 		ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema,
@@ -13932,7 +13895,7 @@ func (ec *executionContext) _Reconciler_config(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Reconciler_config,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Reconciler().Config(ctx, obj)
+			return ec.Resolvers.Reconciler().Config(ctx, obj)
 		},
 		nil,
 		ec.marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ,
@@ -13975,7 +13938,7 @@ func (ec *executionContext) _Reconciler_configured(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Reconciler_configured,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Reconciler().Configured(ctx, obj)
+			return ec.Resolvers.Reconciler().Configured(ctx, obj)
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -14005,7 +13968,7 @@ func (ec *executionContext) _Reconciler_errors(ctx context.Context, field graphq
 		ec.fieldContext_Reconciler_errors,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Reconciler().Errors(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Reconciler().Errors(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -14054,7 +14017,7 @@ func (ec *executionContext) _Reconciler_activityLog(ctx context.Context, field g
 		ec.fieldContext_Reconciler_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Reconciler().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
+			return ec.Resolvers.Reconciler().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -15270,7 +15233,7 @@ func (ec *executionContext) _ReconcilerError_team(ctx context.Context, field gra
 		field,
 		ec.fieldContext_ReconcilerError_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ReconcilerError().Team(ctx, obj)
+			return ec.Resolvers.ReconcilerError().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -15522,7 +15485,7 @@ func (ec *executionContext) _RemoveGroupMemberPayload_user(ctx context.Context, 
 		field,
 		ec.fieldContext_RemoveGroupMemberPayload_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.RemoveGroupMemberPayload().User(ctx, obj)
+			return ec.Resolvers.RemoveGroupMemberPayload().User(ctx, obj)
 		},
 		nil,
 		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -15581,7 +15544,7 @@ func (ec *executionContext) _RemoveGroupMemberPayload_group(ctx context.Context,
 		field,
 		ec.fieldContext_RemoveGroupMemberPayload_group,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.RemoveGroupMemberPayload().Group(ctx, obj)
+			return ec.Resolvers.RemoveGroupMemberPayload().Group(ctx, obj)
 		},
 		nil,
 		ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
@@ -15626,7 +15589,7 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload_team(ctx context.Con
 		field,
 		ec.fieldContext_RemoveTeamAccessManagerPayload_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.RemoveTeamAccessManagerPayload().Team(ctx, obj)
+			return ec.Resolvers.RemoveTeamAccessManagerPayload().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -15687,7 +15650,7 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload_user(ctx context.Con
 		field,
 		ec.fieldContext_RemoveTeamAccessManagerPayload_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.RemoveTeamAccessManagerPayload().User(ctx, obj)
+			return ec.Resolvers.RemoveTeamAccessManagerPayload().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -17255,7 +17218,7 @@ func (ec *executionContext) _Section_manager(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Section_manager,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Section().Manager(ctx, obj)
+			return ec.Resolvers.Section().Manager(ctx, obj)
 		},
 		nil,
 		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -17646,7 +17609,7 @@ func (ec *executionContext) _ServiceAccount_lastUsedAt(ctx context.Context, fiel
 		field,
 		ec.fieldContext_ServiceAccount_lastUsedAt,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ServiceAccount().LastUsedAt(ctx, obj)
+			return ec.Resolvers.ServiceAccount().LastUsedAt(ctx, obj)
 		},
 		nil,
 		ec.marshalOTime2ᚖtimeᚐTime,
@@ -17675,7 +17638,7 @@ func (ec *executionContext) _ServiceAccount_team(ctx context.Context, field grap
 		field,
 		ec.fieldContext_ServiceAccount_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ServiceAccount().Team(ctx, obj)
+			return ec.Resolvers.ServiceAccount().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -17737,7 +17700,7 @@ func (ec *executionContext) _ServiceAccount_roles(ctx context.Context, field gra
 		ec.fieldContext_ServiceAccount_roles,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.ServiceAccount().Roles(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.ServiceAccount().Roles(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -17786,7 +17749,7 @@ func (ec *executionContext) _ServiceAccount_tokens(ctx context.Context, field gr
 		ec.fieldContext_ServiceAccount_tokens,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.ServiceAccount().Tokens(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.ServiceAccount().Tokens(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
 		ec.marshalNServiceAccountTokenConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20244,7 +20207,7 @@ func (ec *executionContext) _SharedBucket_team(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_SharedBucket_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.SharedBucket().Team(ctx, obj)
+			return ec.Resolvers.SharedBucket().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -20306,7 +20269,7 @@ func (ec *executionContext) _SharedBucket_groups(ctx context.Context, field grap
 		ec.fieldContext_SharedBucket_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
+			return ec.Resolvers.SharedBucket().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20355,7 +20318,7 @@ func (ec *executionContext) _SharedBucket_users(ctx context.Context, field graph
 		ec.fieldContext_SharedBucket_users,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().Users(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.SharedBucket().Users(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20404,7 +20367,7 @@ func (ec *executionContext) _SharedBucket_uniqueUsers(ctx context.Context, field
 		ec.fieldContext_SharedBucket_uniqueUsers,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().UniqueUsers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.SharedBucket().UniqueUsers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20453,7 +20416,7 @@ func (ec *executionContext) _SharedBucket_teams(ctx context.Context, field graph
 		ec.fieldContext_SharedBucket_teams,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.SharedBucket().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
+			return ec.Resolvers.SharedBucket().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
 		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20799,7 +20762,7 @@ func (ec *executionContext) _Team_section(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Team_section,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Team().Section(ctx, obj)
+			return ec.Resolvers.Team().Section(ctx, obj)
 		},
 		nil,
 		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
@@ -20868,7 +20831,7 @@ func (ec *executionContext) _Team_members(ctx context.Context, field graphql.Col
 		ec.fieldContext_Team_members,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.Team().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20917,7 +20880,7 @@ func (ec *executionContext) _Team_groups(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Team_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
+			return ec.Resolvers.Team().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -20966,7 +20929,7 @@ func (ec *executionContext) _Team_sharedBuckets(ctx context.Context, field graph
 		ec.fieldContext_Team_sharedBuckets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().SharedBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.Team().SharedBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21015,7 +20978,7 @@ func (ec *executionContext) _Team_sharedBucketsAccess(ctx context.Context, field
 		ec.fieldContext_Team_sharedBucketsAccess,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.Team().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21121,7 +21084,7 @@ func (ec *executionContext) _Team_viewerIsOwner(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Team_viewerIsOwner,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Team().ViewerIsOwner(ctx, obj)
+			return ec.Resolvers.Team().ViewerIsOwner(ctx, obj)
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -21150,7 +21113,7 @@ func (ec *executionContext) _Team_viewerIsMember(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Team_viewerIsMember,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Team().ViewerIsMember(ctx, obj)
+			return ec.Resolvers.Team().ViewerIsMember(ctx, obj)
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -21179,7 +21142,7 @@ func (ec *executionContext) _Team_accessManagers(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Team_accessManagers,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Team().AccessManagers(ctx, obj)
+			return ec.Resolvers.Team().AccessManagers(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ,
@@ -21215,7 +21178,7 @@ func (ec *executionContext) _Team_activityLog(ctx context.Context, field graphql
 		ec.fieldContext_Team_activityLog,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Team().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
+			return ec.Resolvers.Team().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
 		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21263,7 +21226,7 @@ func (ec *executionContext) _TeamAccessManager_team(ctx context.Context, field g
 		field,
 		ec.fieldContext_TeamAccessManager_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamAccessManager().Team(ctx, obj)
+			return ec.Resolvers.TeamAccessManager().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -21324,7 +21287,7 @@ func (ec *executionContext) _TeamAccessManager_user(ctx context.Context, field g
 		field,
 		ec.fieldContext_TeamAccessManager_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamAccessManager().User(ctx, obj)
+			return ec.Resolvers.TeamAccessManager().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -21817,7 +21780,7 @@ func (ec *executionContext) _TeamMember_team(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_TeamMember_team,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamMember().Team(ctx, obj)
+			return ec.Resolvers.TeamMember().Team(ctx, obj)
 		},
 		nil,
 		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
@@ -21878,7 +21841,7 @@ func (ec *executionContext) _TeamMember_user(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_TeamMember_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamMember().User(ctx, obj)
+			return ec.Resolvers.TeamMember().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -21937,7 +21900,7 @@ func (ec *executionContext) _TeamMember_groups(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_TeamMember_groups,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamMember().Groups(ctx, obj)
+			return ec.Resolvers.TeamMember().Groups(ctx, obj)
 		},
 		nil,
 		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ,
@@ -22403,7 +22366,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData_user(ctx conte
 		field,
 		ec.fieldContext_TeamRoleAssignedActivityLogEntryData_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamRoleAssignedActivityLogEntryData().User(ctx, obj)
+			return ec.Resolvers.TeamRoleAssignedActivityLogEntryData().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -22729,7 +22692,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData_user(ctx contex
 		field,
 		ec.fieldContext_TeamRoleRevokedActivityLogEntryData_user,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TeamRoleRevokedActivityLogEntryData().User(ctx, obj)
+			return ec.Resolvers.TeamRoleRevokedActivityLogEntryData().User(ctx, obj)
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
@@ -23468,7 +23431,7 @@ func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_User_firstName,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().FirstName(ctx, obj)
+			return ec.Resolvers.User().FirstName(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -23497,7 +23460,7 @@ func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_User_lastName,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().LastName(ctx, obj)
+			return ec.Resolvers.User().LastName(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -23584,7 +23547,7 @@ func (ec *executionContext) _User_section(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_User_section,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Section(ctx, obj)
+			return ec.Resolvers.User().Section(ctx, obj)
 		},
 		nil,
 		ec.marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
@@ -23624,7 +23587,7 @@ func (ec *executionContext) _User_teams(ctx context.Context, field graphql.Colle
 		ec.fieldContext_User_teams,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
+			return ec.Resolvers.User().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
 		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -23673,7 +23636,7 @@ func (ec *executionContext) _User_teamMembers(ctx context.Context, field graphql
 		ec.fieldContext_User_teamMembers,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().TeamMembers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
+			return ec.Resolvers.User().TeamMembers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
 		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -23722,7 +23685,7 @@ func (ec *executionContext) _User_groups(ctx context.Context, field graphql.Coll
 		ec.fieldContext_User_groups,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
+			return ec.Resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
 		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -23771,7 +23734,7 @@ func (ec *executionContext) _User_sharedBucketsAccess(ctx context.Context, field
 		ec.fieldContext_User_sharedBucketsAccess,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.User().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -23848,7 +23811,7 @@ func (ec *executionContext) _User_isSectionManager(ctx context.Context, field gr
 		field,
 		ec.fieldContext_User_isSectionManager,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().IsSectionManager(ctx, obj)
+			return ec.Resolvers.User().IsSectionManager(ctx, obj)
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -26529,6 +26492,10 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 func (ec *executionContext) unmarshalInputActivityLogFilter(ctx context.Context, obj any) (activitylog.ActivityLogFilter, error) {
 	var it activitylog.ActivityLogFilter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26550,12 +26517,15 @@ func (ec *executionContext) unmarshalInputActivityLogFilter(ctx context.Context,
 			it.ActivityTypes = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Context, obj any) (group.AddGroupMemberInput, error) {
 	var it group.AddGroupMemberInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26584,12 +26554,15 @@ func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Contex
 			it.UserEmail = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputAddTeamAccessManagerInput(ctx context.Context, obj any) (team.AddTeamAccessManagerInput, error) {
 	var it team.AddTeamAccessManagerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26618,12 +26591,15 @@ func (ec *executionContext) unmarshalInputAddTeamAccessManagerInput(ctx context.
 			it.UserEmail = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputAssignRoleToServiceAccountInput(ctx context.Context, obj any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
 	var it serviceaccount.AssignRoleToServiceAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26652,12 +26628,15 @@ func (ec *executionContext) unmarshalInputAssignRoleToServiceAccountInput(ctx co
 			it.RoleName = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputConfigureReconcilerInput(ctx context.Context, obj any) (reconciler.ConfigureReconcilerInput, error) {
 	var it reconciler.ConfigureReconcilerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26686,12 +26665,15 @@ func (ec *executionContext) unmarshalInputConfigureReconcilerInput(ctx context.C
 			it.Config = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputConfirmTeamDeletionInput(ctx context.Context, obj any) (team.ConfirmTeamDeletionInput, error) {
 	var it team.ConfirmTeamDeletionInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26720,12 +26702,15 @@ func (ec *executionContext) unmarshalInputConfirmTeamDeletionInput(ctx context.C
 			it.Key = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj any) (group.CreateGroupInput, error) {
 	var it group.CreateGroupInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26761,12 +26746,15 @@ func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, 
 			it.Suffix = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputCreateServiceAccountInput(ctx context.Context, obj any) (serviceaccount.CreateServiceAccountInput, error) {
 	var it serviceaccount.CreateServiceAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26802,12 +26790,15 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountInput(ctx context.
 			it.TeamSlug = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputCreateServiceAccountTokenInput(ctx context.Context, obj any) (serviceaccount.CreateServiceAccountTokenInput, error) {
 	var it serviceaccount.CreateServiceAccountTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26850,12 +26841,15 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountTokenInput(ctx con
 			it.ExpiresAt = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, obj any) (team.CreateTeamInput, error) {
 	var it team.CreateTeamInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26898,12 +26892,15 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 			it.IsManaged = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputDeleteServiceAccountInput(ctx context.Context, obj any) (serviceaccount.DeleteServiceAccountInput, error) {
 	var it serviceaccount.DeleteServiceAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26925,12 +26922,15 @@ func (ec *executionContext) unmarshalInputDeleteServiceAccountInput(ctx context.
 			it.ServiceAccountID = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputDeleteServiceAccountTokenInput(ctx context.Context, obj any) (serviceaccount.DeleteServiceAccountTokenInput, error) {
 	var it serviceaccount.DeleteServiceAccountTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26952,12 +26952,15 @@ func (ec *executionContext) unmarshalInputDeleteServiceAccountTokenInput(ctx con
 			it.ServiceAccountTokenID = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputDisableReconcilerInput(ctx context.Context, obj any) (reconciler.DisableReconcilerInput, error) {
 	var it reconciler.DisableReconcilerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -26979,12 +26982,15 @@ func (ec *executionContext) unmarshalInputDisableReconcilerInput(ctx context.Con
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputEnableReconcilerInput(ctx context.Context, obj any) (reconciler.EnableReconcilerInput, error) {
 	var it reconciler.EnableReconcilerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27006,12 +27012,15 @@ func (ec *executionContext) unmarshalInputEnableReconcilerInput(ctx context.Cont
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputGroupFilter(ctx context.Context, obj any) (group.GroupFilter, error) {
 	var it group.GroupFilter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27033,12 +27042,15 @@ func (ec *executionContext) unmarshalInputGroupFilter(ctx context.Context, obj a
 			it.Categories = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputGroupOrder(ctx context.Context, obj any) (group.GroupOrder, error) {
 	var it group.GroupOrder
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27067,12 +27079,15 @@ func (ec *executionContext) unmarshalInputGroupOrder(ctx context.Context, obj an
 			it.Direction = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputReconcilerConfigInput(ctx context.Context, obj any) (reconciler.ReconcilerConfigInput, error) {
 	var it reconciler.ReconcilerConfigInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27101,12 +27116,15 @@ func (ec *executionContext) unmarshalInputReconcilerConfigInput(ctx context.Cont
 			it.Value = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputRemoveGroupMemberInput(ctx context.Context, obj any) (group.RemoveGroupMemberInput, error) {
 	var it group.RemoveGroupMemberInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27135,12 +27153,15 @@ func (ec *executionContext) unmarshalInputRemoveGroupMemberInput(ctx context.Con
 			it.UserEmail = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx context.Context, obj any) (team.RemoveTeamAccessManagerInput, error) {
 	var it team.RemoveTeamAccessManagerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27169,12 +27190,15 @@ func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx conte
 			it.UserEmail = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputRequestTeamDeletionInput(ctx context.Context, obj any) (team.RequestTeamDeletionInput, error) {
 	var it team.RequestTeamDeletionInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27196,12 +27220,15 @@ func (ec *executionContext) unmarshalInputRequestTeamDeletionInput(ctx context.C
 			it.Slug = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputRevokeRoleFromServiceAccountInput(ctx context.Context, obj any) (serviceaccount.RevokeRoleFromServiceAccountInput, error) {
 	var it serviceaccount.RevokeRoleFromServiceAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27230,12 +27257,15 @@ func (ec *executionContext) unmarshalInputRevokeRoleFromServiceAccountInput(ctx 
 			it.RoleName = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj any) (search.SearchFilter, error) {
 	var it search.SearchFilter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27264,12 +27294,15 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 			it.Type = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputSectionOrder(ctx context.Context, obj any) (section.SectionOrder, error) {
 	var it section.SectionOrder
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27298,12 +27331,15 @@ func (ec *executionContext) unmarshalInputSectionOrder(ctx context.Context, obj 
 			it.Direction = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context, obj any) (sharedbucketsstopgap.SharedBucketOrder, error) {
 	var it sharedbucketsstopgap.SharedBucketOrder
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27332,12 +27368,15 @@ func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context,
 			it.Direction = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any) (team.TeamOrder, error) {
 	var it team.TeamOrder
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27366,12 +27405,15 @@ func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any
 			it.Direction = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputUpdateServiceAccountInput(ctx context.Context, obj any) (serviceaccount.UpdateServiceAccountInput, error) {
 	var it serviceaccount.UpdateServiceAccountInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27400,12 +27442,15 @@ func (ec *executionContext) unmarshalInputUpdateServiceAccountInput(ctx context.
 			it.Description = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputUpdateServiceAccountTokenInput(ctx context.Context, obj any) (serviceaccount.UpdateServiceAccountTokenInput, error) {
 	var it serviceaccount.UpdateServiceAccountTokenInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27441,12 +27486,15 @@ func (ec *executionContext) unmarshalInputUpdateServiceAccountTokenInput(ctx con
 			it.Description = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, obj any) (team.UpdateTeamInput, error) {
 	var it team.UpdateTeamInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27482,12 +27530,15 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 			it.SectionCode = data
 		}
 	}
-
 	return it, nil
 }
 
 func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj any) (user.UserOrder, error) {
 	var it user.UserOrder
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -27516,7 +27567,6 @@ func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj any
 			it.Direction = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -28090,10 +28140,10 @@ func (ec *executionContext) _ActivityLogEntryConnection(ctx context.Context, sel
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28134,10 +28184,10 @@ func (ec *executionContext) _ActivityLogEntryEdge(ctx context.Context, sel ast.S
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28170,10 +28220,10 @@ func (ec *executionContext) _AddGroupMemberPayload(ctx context.Context, sel ast.
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28276,10 +28326,10 @@ func (ec *executionContext) _AddTeamAccessManagerPayload(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28312,10 +28362,10 @@ func (ec *executionContext) _AssignRoleToServiceAccountPayload(ctx context.Conte
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28348,10 +28398,10 @@ func (ec *executionContext) _CreateGroupPayload(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28384,10 +28434,10 @@ func (ec *executionContext) _CreateServiceAccountPayload(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28424,10 +28474,10 @@ func (ec *executionContext) _CreateServiceAccountTokenPayload(ctx context.Contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28460,10 +28510,10 @@ func (ec *executionContext) _CreateTeamPayload(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28496,10 +28546,10 @@ func (ec *executionContext) _DeleteServiceAccountPayload(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28534,10 +28584,10 @@ func (ec *executionContext) _DeleteServiceAccountTokenPayload(ctx context.Contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28573,10 +28623,10 @@ func (ec *executionContext) _Features(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28701,10 +28751,10 @@ func (ec *executionContext) _Group(ctx context.Context, sel ast.SelectionSet, ob
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28750,10 +28800,10 @@ func (ec *executionContext) _GroupConnection(ctx context.Context, sel ast.Select
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28819,10 +28869,10 @@ func (ec *executionContext) _GroupCreatedActivityLogEntry(ctx context.Context, s
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28863,10 +28913,10 @@ func (ec *executionContext) _GroupEdge(ctx context.Context, sel ast.SelectionSet
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -28969,10 +29019,10 @@ func (ec *executionContext) _GroupMember(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29043,10 +29093,10 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntry(ctx context.Contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29087,10 +29137,10 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntryData(ctx context.Co
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29136,10 +29186,10 @@ func (ec *executionContext) _GroupMemberConnection(ctx context.Context, sel ast.
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29180,10 +29230,10 @@ func (ec *executionContext) _GroupMemberEdge(ctx context.Context, sel ast.Select
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29254,10 +29304,10 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntry(ctx context.Cont
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29298,10 +29348,10 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntryData(ctx context.
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29466,10 +29516,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -29529,10 +29579,10 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30016,10 +30066,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30219,10 +30269,10 @@ func (ec *executionContext) _Reconciler(ctx context.Context, sel ast.SelectionSe
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30280,10 +30330,10 @@ func (ec *executionContext) _ReconcilerConfig(ctx context.Context, sel ast.Selec
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30354,10 +30404,10 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntry(ctx context.Co
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30393,10 +30443,10 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntryData(ctx contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30442,10 +30492,10 @@ func (ec *executionContext) _ReconcilerConnection(ctx context.Context, sel ast.S
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30511,10 +30561,10 @@ func (ec *executionContext) _ReconcilerDisabledActivityLogEntry(ctx context.Cont
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30555,10 +30605,10 @@ func (ec *executionContext) _ReconcilerEdge(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30624,10 +30674,10 @@ func (ec *executionContext) _ReconcilerEnabledActivityLogEntry(ctx context.Conte
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30714,10 +30764,10 @@ func (ec *executionContext) _ReconcilerError(ctx context.Context, sel ast.Select
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30763,10 +30813,10 @@ func (ec *executionContext) _ReconcilerErrorConnection(ctx context.Context, sel 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30807,10 +30857,10 @@ func (ec *executionContext) _ReconcilerErrorEdge(ctx context.Context, sel ast.Se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -30907,10 +30957,10 @@ func (ec *executionContext) _RemoveGroupMemberPayload(ctx context.Context, sel a
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31013,10 +31063,10 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload(ctx context.Context,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31049,10 +31099,10 @@ func (ec *executionContext) _RevokeRoleFromServiceAccountPayload(ctx context.Con
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31098,10 +31148,10 @@ func (ec *executionContext) _Role(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31169,10 +31219,10 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntry(ctx co
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31208,10 +31258,10 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntryData(ct
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31277,10 +31327,10 @@ func (ec *executionContext) _RoleAssignedUserSyncLogEntry(ctx context.Context, s
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31326,10 +31376,10 @@ func (ec *executionContext) _RoleConnection(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31370,10 +31420,10 @@ func (ec *executionContext) _RoleEdge(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31441,10 +31491,10 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntry(ctx c
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31480,10 +31530,10 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntryData(c
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31549,10 +31599,10 @@ func (ec *executionContext) _RoleRevokedUserSyncLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31598,10 +31648,10 @@ func (ec *executionContext) _SearchNodeConnection(ctx context.Context, sel ast.S
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31642,10 +31692,10 @@ func (ec *executionContext) _SearchNodeEdge(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31724,10 +31774,10 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31773,10 +31823,10 @@ func (ec *executionContext) _SectionConnection(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -31817,10 +31867,10 @@ func (ec *executionContext) _SectionEdge(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32014,10 +32064,10 @@ func (ec *executionContext) _ServiceAccount(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32063,10 +32113,10 @@ func (ec *executionContext) _ServiceAccountConnection(ctx context.Context, sel a
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32129,10 +32179,10 @@ func (ec *executionContext) _ServiceAccountCreatedActivityLogEntry(ctx context.C
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32195,10 +32245,10 @@ func (ec *executionContext) _ServiceAccountDeletedActivityLogEntry(ctx context.C
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32239,10 +32289,10 @@ func (ec *executionContext) _ServiceAccountEdge(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32302,10 +32352,10 @@ func (ec *executionContext) _ServiceAccountToken(ctx context.Context, sel ast.Se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32351,10 +32401,10 @@ func (ec *executionContext) _ServiceAccountTokenConnection(ctx context.Context, 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32422,10 +32472,10 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntry(ctx cont
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32461,10 +32511,10 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntryData(ctx 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32532,10 +32582,10 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntry(ctx cont
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32571,10 +32621,10 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntryData(ctx 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32615,10 +32665,10 @@ func (ec *executionContext) _ServiceAccountTokenEdge(ctx context.Context, sel as
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32686,10 +32736,10 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntry(ctx cont
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32725,10 +32775,10 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntryData(ctx 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32768,10 +32818,10 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntryDataUpdat
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32839,10 +32889,10 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntry(ctx context.C
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32878,10 +32928,10 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntryData(ctx conte
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -32921,10 +32971,10 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntryDataUpdatedFie
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33160,10 +33210,10 @@ func (ec *executionContext) _SharedBucket(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33209,10 +33259,10 @@ func (ec *executionContext) _SharedBucketConnection(ctx context.Context, sel ast
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33253,10 +33303,10 @@ func (ec *executionContext) _SharedBucketEdge(ctx context.Context, sel ast.Selec
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33638,10 +33688,10 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33744,10 +33794,10 @@ func (ec *executionContext) _TeamAccessManager(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33793,10 +33843,10 @@ func (ec *executionContext) _TeamConnection(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33862,10 +33912,10 @@ func (ec *executionContext) _TeamCreatedActivityLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -33906,10 +33956,10 @@ func (ec *executionContext) _TeamEdge(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34048,10 +34098,10 @@ func (ec *executionContext) _TeamMember(ctx context.Context, sel ast.SelectionSe
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34097,10 +34147,10 @@ func (ec *executionContext) _TeamMemberConnection(ctx context.Context, sel ast.S
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34141,10 +34191,10 @@ func (ec *executionContext) _TeamMemberEdge(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34215,10 +34265,10 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntry(ctx context.Contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34290,10 +34340,10 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData(ctx context.Co
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34364,10 +34414,10 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntry(ctx context.Context
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34439,10 +34489,10 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData(ctx context.Con
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34513,10 +34563,10 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34552,10 +34602,10 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntryData(ctx context.Context
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34595,10 +34645,10 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntryDataUpdatedField(ctx con
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34631,10 +34681,10 @@ func (ec *executionContext) _UpdateServiceAccountPayload(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34669,10 +34719,10 @@ func (ec *executionContext) _UpdateServiceAccountTokenPayload(ctx context.Contex
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -34705,10 +34755,10 @@ func (ec *executionContext) _UpdateTeamPayload(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35051,10 +35101,10 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35100,10 +35150,10 @@ func (ec *executionContext) _UserConnection(ctx context.Context, sel ast.Selecti
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35164,10 +35214,10 @@ func (ec *executionContext) _UserCreatedUserSyncLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35228,10 +35278,10 @@ func (ec *executionContext) _UserDeletedUserSyncLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35272,10 +35322,10 @@ func (ec *executionContext) _UserEdge(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35321,10 +35371,10 @@ func (ec *executionContext) _UserSyncLogEntryConnection(ctx context.Context, sel
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35365,10 +35415,10 @@ func (ec *executionContext) _UserSyncLogEntryEdge(ctx context.Context, sel ast.S
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35403,10 +35453,10 @@ func (ec *executionContext) _UserSyncUserChangeUnit(ctx context.Context, sel ast
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35445,10 +35495,10 @@ func (ec *executionContext) _UserSyncUserChanges(ctx context.Context, sel ast.Se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35521,10 +35571,10 @@ func (ec *executionContext) _UserUpdatedUserSyncLogEntry(ctx context.Context, se
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35577,10 +35627,10 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35625,10 +35675,10 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35683,10 +35733,10 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35738,10 +35788,10 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35793,10 +35843,10 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35852,10 +35902,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
 
 	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
 			Label:    label,
 			Path:     graphql.GetPath(ctx),
 			FieldSet: dfs,
@@ -35891,39 +35941,11 @@ func (ec *executionContext) marshalNActivityLogEntry2githubᚗcomᚋstatisticsno
 }
 
 func (ec *executionContext) marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogEntry) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -35953,39 +35975,11 @@ func (ec *executionContext) marshalNActivityLogEntryEdge2githubᚗcomᚋstatisti
 }
 
 func (ec *executionContext) marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[activitylog.ActivityLogEntry]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36254,39 +36248,11 @@ func (ec *executionContext) marshalNGroup2githubᚗcomᚋstatisticsnorwayᚋdapl
 }
 
 func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.Group) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36326,39 +36292,11 @@ func (ec *executionContext) marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋ
 }
 
 func (ec *executionContext) marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.Group]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36370,39 +36308,11 @@ func (ec *executionContext) marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorway
 }
 
 func (ec *executionContext) marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.GroupMember) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36452,39 +36362,11 @@ func (ec *executionContext) marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnor
 }
 
 func (ec *executionContext) marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.GroupMember]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36560,39 +36442,11 @@ func (ec *executionContext) marshalNReconciler2githubᚗcomᚋstatisticsnorway�
 }
 
 func (ec *executionContext) marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.Reconciler) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36614,39 +36468,11 @@ func (ec *executionContext) marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwa
 }
 
 func (ec *executionContext) marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerConfig) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36716,39 +36542,11 @@ func (ec *executionContext) marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorw
 }
 
 func (ec *executionContext) marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.Reconciler]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36760,39 +36558,11 @@ func (ec *executionContext) marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsn
 }
 
 func (ec *executionContext) marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerError) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerError(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerError(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36832,39 +36602,11 @@ func (ec *executionContext) marshalNReconcilerErrorEdge2githubᚗcomᚋstatistic
 }
 
 func (ec *executionContext) marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.ReconcilerError]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -36933,39 +36675,11 @@ func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2ᚖgithu
 }
 
 func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*authz.Role) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRole(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRole(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37015,39 +36729,11 @@ func (ec *executionContext) marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋd
 }
 
 func (ec *executionContext) marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*authz.Role]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37084,39 +36770,11 @@ func (ec *executionContext) marshalNSearchNode2githubᚗcomᚋstatisticsnorway�
 }
 
 func (ec *executionContext) marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []search.SearchNode) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNode(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNode(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37146,39 +36804,11 @@ func (ec *executionContext) marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorw
 }
 
 func (ec *executionContext) marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[search.SearchNode]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37194,39 +36824,11 @@ func (ec *executionContext) marshalNSection2githubᚗcomᚋstatisticsnorwayᚋda
 }
 
 func (ec *executionContext) marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*section.Section) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37266,39 +36868,11 @@ func (ec *executionContext) marshalNSectionEdge2githubᚗcomᚋstatisticsnorway�
 }
 
 func (ec *executionContext) marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*section.Section]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37324,39 +36898,11 @@ func (ec *executionContext) marshalNServiceAccount2githubᚗcomᚋstatisticsnorw
 }
 
 func (ec *executionContext) marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccount) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37396,39 +36942,11 @@ func (ec *executionContext) marshalNServiceAccountEdge2githubᚗcomᚋstatistics
 }
 
 func (ec *executionContext) marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccount]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37440,39 +36958,11 @@ func (ec *executionContext) marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatist
 }
 
 func (ec *executionContext) marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountToken) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37532,39 +37022,11 @@ func (ec *executionContext) marshalNServiceAccountTokenEdge2githubᚗcomᚋstati
 }
 
 func (ec *executionContext) marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37586,39 +37048,11 @@ func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDa
 }
 
 func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37650,39 +37084,11 @@ func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryData2�
 }
 
 func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37708,39 +37114,11 @@ func (ec *executionContext) marshalNSharedBucket2githubᚗcomᚋstatisticsnorway
 }
 
 func (ec *executionContext) marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37780,39 +37158,11 @@ func (ec *executionContext) marshalNSharedBucketEdge2githubᚗcomᚋstatisticsno
 }
 
 func (ec *executionContext) marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37910,39 +37260,11 @@ func (ec *executionContext) marshalNTeam2githubᚗcomᚋstatisticsnorwayᚋdapla
 }
 
 func (ec *executionContext) marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.Team) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -37964,39 +37286,11 @@ func (ec *executionContext) marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 }
 
 func (ec *executionContext) marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamAccessManager) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38036,39 +37330,11 @@ func (ec *executionContext) marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋd
 }
 
 func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.Team]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38080,39 +37346,11 @@ func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 }
 
 func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamMember) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMember(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMember(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38152,39 +37390,11 @@ func (ec *executionContext) marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorw
 }
 
 func (ec *executionContext) marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.TeamMember]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38236,39 +37446,11 @@ func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗ
 }
 
 func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38367,39 +37549,11 @@ func (ec *executionContext) marshalNUser2githubᚗcomᚋstatisticsnorwayᚋdapla
 }
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*user.User) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38439,39 +37593,11 @@ func (ec *executionContext) marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋd
 }
 
 func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*user.User]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38503,39 +37629,11 @@ func (ec *executionContext) marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsno
 }
 
 func (ec *executionContext) marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []usersync.UserSyncLogEntry) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38565,39 +37663,11 @@ func (ec *executionContext) marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisti
 }
 
 func (ec *executionContext) marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[usersync.UserSyncLogEntry]) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38613,39 +37683,11 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38688,39 +37730,11 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__DirectiveLocation2string(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__DirectiveLocation2string(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38744,39 +37758,11 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38792,39 +37778,11 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -38883,39 +37841,11 @@ func (ec *executionContext) marshalOActivityLogActivityType2ᚕgithubᚗcomᚋst
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -39252,39 +38182,11 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -39299,39 +38201,11 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -39346,39 +38220,11 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -39400,39 +38246,11 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
+	})
 
 	for _, e := range ret {
 		if e == graphql.Null {
