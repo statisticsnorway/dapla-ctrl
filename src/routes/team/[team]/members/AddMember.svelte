@@ -2,18 +2,16 @@
 	import { graphql, type AddGroupMemberInput } from '$houdini';
 	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
-	import { createEventDispatcher } from 'svelte';
 
 	interface Props {
 		open: boolean;
 		groups: string[];
+		oncreated?: () => void;
 	}
 
-	let { open = $bindable(), groups }: Props = $props();
+	let { open = $bindable(), groups, oncreated }: Props = $props();
 
 	let group = $derived(groups[0]);
-
-	const dispatcher = createEventDispatcher<{ created: null }>();
 
 	const store = graphql(`
 		query AddMemberQuery($group: String!) {
@@ -103,7 +101,7 @@
 		open = false;
 		email = '';
 
-		dispatcher('created', null);
+		oncreated?.();
 	};
 </script>
 

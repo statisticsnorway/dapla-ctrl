@@ -11,10 +11,10 @@
 	let open = $state(false);
 
 	// Best effort SSR for mac to avoid blink
-	const isMacUserAgent = userAgent
-		? userAgent.includes('Macintosh') || userAgent.includes('Mac OS')
-		: false;
-	let isMac = $state(isMacUserAgent);
+	let isMac = $derived(
+		userAgent ? userAgent.includes('Macintosh') || userAgent.includes('Mac OS') : false
+	);
+
 	onMount(() => {
 		isMac = navigator.platform === 'MacIntel';
 	});

@@ -21,7 +21,9 @@
 	let { data, children }: LayoutProps = $props();
 	let { UserInfo, userAgent } = $derived(data);
 
-	themeSwitch.theme = data.theme;
+	$effect(() => {
+		themeSwitch.theme = data.theme;
+	});
 
 	let user = $derived(
 		$UserInfo.data?.me as

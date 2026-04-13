@@ -32,12 +32,12 @@
 				<Heading level="2">Visningsnavn</Heading>
 				<EditText
 					text={teamSettings.displayName}
-					on:save={async (e) => {
+					onsave={async (text) => {
 						descriptionErrors = undefined;
 						const data = await updateTeam.mutate({
 							input: {
 								slug: teamSlug,
-								displayName: e.detail
+								displayName: text
 							}
 						});
 

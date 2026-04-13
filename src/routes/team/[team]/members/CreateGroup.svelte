@@ -2,19 +2,17 @@
 	import { graphql, type CreateGroupInput } from '$houdini';
 	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
-	import { createEventDispatcher } from 'svelte';
 
 	interface Props {
 		open: boolean;
 		team: string;
+		oncreated?: () => void;
 	}
 
-	let { open = $bindable(), team }: Props = $props();
+	let { open = $bindable(), team, oncreated }: Props = $props();
 
 	let groupSuffix: string = $state('');
 	let groupCategory: string = $state('developers');
-
-	const dispatcher = createEventDispatcher<{ created: null }>();
 
 	const create = graphql(`
 		mutation CreateGroupMutation($input: CreateGroupInput!) {
@@ -47,7 +45,7 @@
 
 		open = false;
 
-		dispatcher('created', null);
+		oncreated?.();
 	};
 </script>
 

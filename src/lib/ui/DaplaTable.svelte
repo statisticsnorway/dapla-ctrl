@@ -71,17 +71,19 @@
 
 	let { data, columns, selected, fieldsCookie, exportTable }: Props = $props();
 
-	if (selected.length === 0) {
-		selected = columns.filter((c) => c.show !== 'DEFAULT_NO').map((c) => c.id);
-	}
-	let selectable = columns.filter((c) => c.show !== 'ALWAYS');
+	let selectedFields: string[] = $derived(
+		selected.length === 0
+			? columns.filter((c) => c.show !== 'DEFAULT_NO').map((c) => c.id)
+			: selected
+	);
 
-	let selectedFields: string[] = $state(selected);
+	let selectable = $derived(columns.filter((c) => c.show !== 'ALWAYS'));
+
 	let selectedColumns = $derived.by(() => {
 		return columns.filter((c) => selectedFields.includes(c.id));
 	});
 
-	const orderByFields = columns.map((c) => c.sortKey).filter((f) => f !== undefined);
+	const orderByFields = $derived(columns.map((c) => c.sortKey).filter((f) => f !== undefined));
 
 	const orderField = $derived(
 		orderByFields.find(

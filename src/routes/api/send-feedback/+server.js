@@ -22,14 +22,6 @@ export async function POST(event) {
 	const body = await request.json();
 	const { anonymous, feedback, path, type } = body;
 
-	let message = '';
-
-	try {
-		message = createFeedbackMessage(anonymous, email, feedback, path, type);
-	} catch (error) {
-		return json({ error: 'Failed to create feedback message - ' + error }, { status: 500 });
-	}
-
 	try {
 		const result = await fetch(webhookUrl, {
 			method: 'POST',
@@ -37,7 +29,7 @@ export async function POST(event) {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				feedback: message
+				feedback: createFeedbackMessage(anonymous, email, feedback, path, type)
 			})
 		});
 

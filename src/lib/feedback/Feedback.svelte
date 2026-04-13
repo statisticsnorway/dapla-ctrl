@@ -56,7 +56,6 @@
 		}
 
 		loading = true;
-		let response = '';
 		try {
 			const result = await fetch('/api/send-feedback', {
 				method: 'POST',
@@ -78,13 +77,12 @@
 				return;
 			}
 
-			response = data.ok ? 'Melding sendt!' : 'Klarte ikke sende melding.';
 			feedbackSent = true;
+			return data.ok ? 'Melding sendt!' : 'Klarte ikke sende melding.';
 		} catch (error) {
 			console.error('Error:', error);
-			response = 'Det oppsto en feil under sending av melding: ' + error;
+			return 'Det oppsto en feil under sending av melding: ' + error;
 		}
-		return response;
 	};
 </script>
 
