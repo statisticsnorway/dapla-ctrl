@@ -106,9 +106,11 @@
 			<a
 				href={`/member/${user?.email || ''}`}
 				class="action-menu-link"
-				style="text-decoration: none;"><PersonIcon />Min side</a
-			></ActionMenuItem
-		>
+				style="text-decoration: none;"
+			>
+				<PersonIcon />Min side</a
+			>
+		</ActionMenuItem>
 	</ActionMenu>
 </header>
 
