@@ -7,7 +7,7 @@ set -e
 # shellcheck disable=SC2154
 if [ "$usage_coverage" = "true" ]; then
 	rm -f hack/coverprofile.txt
-	GOTOOLCHAIN=go1.25.5+auto go test \
+	go test \
 	  -coverprofile=hack/coverprofile.txt \
 	  -coverpkg github.com/statisticsnorway/dapla-api-reconcilers/... \
 	  -v \
