@@ -437,7 +437,7 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ProvisioningResourceId = id
 		case configGroupPrefixKey:
 			rc.GroupPrefix = c.Value
-		case configMasterKey:
+		case configMasterKey, configMasterOverridesKey:
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
