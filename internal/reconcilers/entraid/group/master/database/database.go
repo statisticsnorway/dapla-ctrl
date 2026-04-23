@@ -5,17 +5,16 @@ import (
 	"errors"
 	"fmt"
 
-	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
-	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/entraidclient"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
 )
 
 type Master struct {
-	client *msgraphsdk.GraphServiceClient
+	client *entraidclient.Client
 }
 
-func New(client *msgraphsdk.GraphServiceClient) *Master {
+func New(client *entraidclient.Client) *Master {
 	return &Master{
 		client: client,
 	}
@@ -28,7 +27,7 @@ func (m *Master) Name() string {
 func (m *Master) RemoveUsers(ctx context.Context, group master.Group, localOnlyUsers, remoteOnlyUsers []master.User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range remoteOnlyUsers {
-		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().ByDirectoryObjectId(user.ExternalId).Ref().Delete(ctx, nil); err != nil {
+		if err := m.client.RemoveUserFromGroup(ctx, group.ExternalId, user.ExternalId); err != nil {
 			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
 		}
 	}
@@ -38,10 +37,7 @@ func (m *Master) RemoveUsers(ctx context.Context, group master.Group, localOnlyU
 func (m *Master) AddUsers(ctx context.Context, group master.Group, localOnlyUsers, remoteOnlyUsers []master.User, log logrus.FieldLogger) error {
 	var errs []error
 	for _, user := range localOnlyUsers {
-		requestBody := models.NewReferenceCreate()
-		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", user.ExternalId)
-		requestBody.SetOdataId(&odataId)
-		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().Ref().Post(ctx, requestBody, nil); err != nil {
+		if err := m.client.AddUserToGroup(ctx, group.ExternalId, user.ExternalId); err != nil {
 			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
 		}
 	}

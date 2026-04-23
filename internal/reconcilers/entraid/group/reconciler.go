@@ -6,14 +6,11 @@ import (
 	"fmt"
 	"slices"
 
-	"cloud.google.com/go/auth/credentials/idtoken"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/google/uuid"
-	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
-	msgraphcore "github.com/microsoftgraph/msgraph-sdk-go-core"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/entraidclient"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master/database"
@@ -43,12 +40,13 @@ type syncQueuer interface {
 }
 
 type entraIdGroupReconciler struct {
-	mainCtx            context.Context
-	service            *msgraphsdk.GraphServiceClient
-	entraIdConfig      entraIdConfig
-	syncQueuer         syncQueuer
-	masterHandler      master.Handler
-	memberMasterConfig memberMasterConfig
+	mainCtx             context.Context
+	entraIdClient       *entraidclient.Client
+	entraIdConfig       entraIdConfig
+	staticEntraIdClient bool
+	syncQueuer          syncQueuer
+	masterHandler       master.Handler
+	memberMasterConfig  memberMasterConfig
 }
 
 type entraIdConfig struct {
@@ -64,6 +62,10 @@ type memberMasterConfig struct {
 	defaultMaster string
 	overrides     string
 }
+
+type OptFunc func(*entraIdGroupReconciler)
+
+func WithEntraIdClient()
 
 func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
 	r := &entraIdGroupReconciler{
@@ -170,7 +172,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	return nil
 }
 
-func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, teamSlug string, groupName string, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *entraidclient.Client, client *apiclient.APIClient, teamSlug string, groupName string, log logrus.FieldLogger) error {
 	log = log.WithField("groupName", groupName)
 	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName, r.entraIdConfig.GroupPrefix)
 	if err != nil {
@@ -201,7 +203,7 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		return fmt.Errorf("get database members: %w", err)
 	}
 
-	entraIdUsers, err := getEntraIdMembers(ctx, entraId, group.ExternalId)
+	entraIdUsers, err := entraId.GetTransitiveMembers(ctx, group.ExternalId)
 	if err != nil {
 		return fmt.Errorf("get entra id members: %w", err)
 	}
@@ -256,28 +258,7 @@ func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group 
 	return dbMembers, dbMembersIt.Err()
 }
 
-func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string) ([]models.Userable, error) {
-	var entraIdUsers []models.Userable
-	entraIdUsersReq, err := entraId.Groups().ByGroupId(groupId).TransitiveMembers().GraphUser().Get(ctx, nil)
-	if err != nil {
-		return nil, fmt.Errorf("get entra id group members: %w", err)
-	}
-
-	pageIterator, err := msgraphcore.NewPageIterator[models.Userable](entraIdUsersReq, entraId.GetAdapter(), models.CreateUserCollectionResponseFromDiscriminatorValue)
-	if err != nil {
-		return nil, fmt.Errorf("create entra id users pageiterator: %w", err)
-	}
-
-	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
-		entraIdUsers = append(entraIdUsers, user)
-		return true
-	}); err != nil {
-		return nil, fmt.Errorf("list all users group members: %w", err)
-	}
-	return entraIdUsers, nil
-}
-
-func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *master.Group, created bool, err error) {
+func getOrCreateGroup(ctx context.Context, entraId *entraidclient.Client, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *master.Group, created bool, err error) {
 	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
 		Name: groupName,
 	})
@@ -286,8 +267,7 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 	}
 	entraIdGroupName := fmt.Sprintf("%s%s", groupPrefix, groupName)
 	if dbGroup.Group.ExternalId != nil {
-		_, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
-		if err == nil {
+		if _, err := entraId.GetGroup(ctx, *dbGroup.Group.ExternalId); err == nil {
 			return &master.Group{
 				ExternalId: *dbGroup.Group.ExternalId,
 				Name:       entraIdGroupName,
@@ -301,14 +281,7 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 		}
 	}
 
-	requestBody := models.NewGroup()
-	requestBody.SetDisplayName(&entraIdGroupName)
-	requestBody.SetSecurityEnabled(new(true))
-	requestBody.SetMailEnabled(new(false))
-	requestBody.SetMailNickname(&entraIdGroupName)
-	requestBody.SetDescription(new("source:dapla-api"))
-
-	group, err := entraId.Groups().Post(ctx, requestBody, nil)
+	group, err := entraId.CreateGroup(ctx, entraIdGroupName)
 	if err != nil {
 		return nil, false, fmt.Errorf("create group: %w", err)
 	}
@@ -320,48 +293,20 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 }
 
 // ensureAppRoles assigns any app roles which may be missing on the given group
-func ensureAppRoles(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
-	appRolesResponse, err := entraId.Groups().ByGroupId(groupId).AppRoleAssignments().Get(ctx, nil)
+func ensureAppRoles(ctx context.Context, entraId *entraidclient.Client, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
+	appRoleAssignments, err := entraId.GetAppRolesForGroup(ctx, groupId)
 	if err != nil {
 		return fmt.Errorf("get app role assignments for group %q: %w", groupId, err)
-	}
-
-	pageIterator, _ := msgraphcore.NewPageIterator[models.AppRoleAssignmentable](appRolesResponse, entraId.GetAdapter(), models.CreateAppRoleAssignmentCollectionResponseFromDiscriminatorValue)
-
-	var appRoleAssignments []models.AppRoleAssignmentable
-	if err := pageIterator.Iterate(ctx, func(apa models.AppRoleAssignmentable) bool {
-		appRoleAssignments = append(appRoleAssignments, apa)
-		return true
-	}); err != nil {
-		return fmt.Errorf("iterate through app role assignments for group %q: %w", groupId, err)
 	}
 
 	for _, resourceId := range resourceIds {
 		if !slices.ContainsFunc(appRoleAssignments, func(apa models.AppRoleAssignmentable) bool {
 			return apa.GetAppRoleId() != nil && *apa.GetAppRoleId() == *appRoleId && apa.GetResourceId() != nil && *apa.GetResourceId() == *resourceId
 		}) {
-			if err := assignAppRole(ctx, entraId, groupId, resourceId, appRoleId); err != nil {
+			if err := entraId.AssignAppRoleToGroup(ctx, groupId, resourceId, appRoleId); err != nil {
 				return fmt.Errorf("assign app role %q on resourceId %q for group %q: %w", appRoleId.String(), resourceId.String(), groupId, err)
 			}
 		}
-	}
-
-	return nil
-}
-
-// assignAppRole sets the necessary App Role on the given Entra ID group,
-// so that it can be synced by the GCP provisioning app.
-func assignAppRole(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, groupId string, resourceId *uuid.UUID, appRoleId *uuid.UUID) error {
-	gcpSyncAssignment := models.NewAppRoleAssignment()
-	gcpSyncAssignment.SetAppRoleId(appRoleId)
-	gcpSyncAssignment.SetResourceId(resourceId)
-	groupUuid, err := uuid.Parse(groupId)
-	if err != nil {
-		return fmt.Errorf("parse group id: %w", err)
-	}
-	gcpSyncAssignment.SetPrincipalId(&groupUuid)
-	if _, err := entraId.Groups().ByGroupId(groupId).AppRoleAssignments().Post(ctx, gcpSyncAssignment, nil); err != nil {
-		return fmt.Errorf("create app role assignment: %w", err)
 	}
 
 	return nil
@@ -409,7 +354,7 @@ func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Us
 	return remoteOnly
 }
 
-func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*msgraphsdk.GraphServiceClient, error) {
+func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*entraidclient.Client, error) {
 	rc := entraIdConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
@@ -444,36 +389,21 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 	}
 
 	if rc == r.entraIdConfig {
-		return r.service, nil
+		return r.entraIdClient, nil
 	}
 
-	creds, err := azidentity.NewClientAssertionCredential(rc.TenantId, rc.ClientId, func(ctx context.Context) (string, error) {
-		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
-		if err != nil {
-			return "", err
-		}
-		token, err := creds.Token(ctx)
-		if err != nil {
-			return "", err
-		}
-		return token.Value, nil
-	}, nil)
+	client, err := entraidclient.New(rc.TenantId, rc.ClientId)
 	if err != nil {
-		return nil, fmt.Errorf("exchange for azure credentials: %w", err)
+		return nil, fmt.Errorf("create entraid client: %w", err)
 	}
 
-	service, err := msgraphsdk.NewGraphServiceClientWithCredentials(creds, []string{"https://graph.microsoft.com/.default"})
-	if err != nil {
-		return nil, fmt.Errorf("create graph service client: %w", err)
-	}
-
-	r.service = service
+	r.entraIdClient = client
 	r.entraIdConfig = rc
 
-	return service, nil
+	return client, nil
 }
 
-func (r *entraIdGroupReconciler) configureMemberMasters(apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) error {
+func (r *entraIdGroupReconciler) configureMemberMasters(apiClient *apiclient.APIClient, entraidClient *entraidclient.Client, config *protoapi.ConfigReconcilerResponse) error {
 	newConfig := memberMasterConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
