@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"slices"
-	"strings"
 
 	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -16,12 +15,12 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models/odataerrors"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master/database"
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master/entraid"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"k8s.io/utils/ptr"
 )
 
 const (
@@ -34,19 +33,22 @@ const (
 	configGcpSSOResourceIdKey          = "gcpSSOResourceId"
 	configGroupPrefixKey               = "groupPrefix"
 	configMasterKey                    = "master"
-	configForceDbMasterTeamsKey        = "forceDbMasterTeams"
+	configMasterOverridesKey           = "masterOverrides"
 )
+
+var validMasters = []string{"entraid", "database"}
 
 type syncQueuer interface {
 	Add(group string, member *string) error
 }
 
 type entraIdGroupReconciler struct {
-	mainCtx       context.Context
-	service       *msgraphsdk.GraphServiceClient
-	entraIdConfig entraIdConfig
-	syncQueuer    syncQueuer
-	master        MemberMaster
+	mainCtx            context.Context
+	service            *msgraphsdk.GraphServiceClient
+	entraIdConfig      entraIdConfig
+	syncQueuer         syncQueuer
+	masterHandler      master.Handler
+	memberMasterConfig memberMasterConfig
 }
 
 type entraIdConfig struct {
@@ -56,6 +58,11 @@ type entraIdConfig struct {
 	ProvisioningResourceId uuid.UUID
 	AppRoleId              uuid.UUID
 	GroupPrefix            string
+}
+
+type memberMasterConfig struct {
+	defaultMaster string
+	overrides     string
 }
 
 func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
@@ -117,9 +124,9 @@ func (r *entraIdGroupReconciler) Configuration() *protoapi.NewReconciler {
 				Secret:      false,
 			},
 			{
-				Key:         configForceDbMasterTeamsKey,
-				DisplayName: "Forced DB Master teams",
-				Description: "Comma-separated list of team slugs for which to force database as master",
+				Key:         configMasterOverridesKey,
+				DisplayName: "Master Overrides",
+				Description: "Override the member master for specific team/groups. Comma-separated list of the form `<team/group>:<name>:<masterName>`. E.g. `team:my-team:database,group:my-team-developers:entraid`",
 				Secret:      false,
 			},
 		},
@@ -143,10 +150,10 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 		return fmt.Errorf("get entra id client: %w", err)
 	}
 
-	r.master, err = r.GetMemberMaster(ctx, daplaTeam.Slug, client, entraId, config)
-	if err != nil {
-		return fmt.Errorf("get master config: %w", err)
+	if err := r.configureMemberMasters(client, entraId, config); err != nil {
+		return fmt.Errorf("configure member masters: %w", err)
 	}
+
 	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
 		return client.Teams().Groups(ctx, &protoapi.ListTeamGroupsRequest{
@@ -155,7 +162,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	})
 
 	for groupsIt.Next() {
-		if err := r.reconcileGroup(ctx, entraId, client, groupsIt.Value().Group.Name, log); err != nil {
+		if err := r.reconcileGroup(ctx, entraId, client, daplaTeam.Slug, groupsIt.Value().Group.Name, log); err != nil {
 			return fmt.Errorf("reconcile group %q: %w", groupsIt.Value().Group.Name, err)
 		}
 	}
@@ -163,7 +170,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	return nil
 }
 
-func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, teamSlug string, groupName string, log logrus.FieldLogger) error {
 	log = log.WithField("groupName", groupName)
 	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName, r.entraIdConfig.GroupPrefix)
 	if err != nil {
@@ -206,11 +213,13 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		return nil
 	}
 
-	if err := r.master.RemoveUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
+	master := r.masterHandler.GetMasterFor(teamSlug, groupName)
+
+	if err := master.RemoveUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
 		return err
 	}
 
-	if err := r.master.AddUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
+	if err := master.AddUsers(ctx, *group, localOnlyUsers, remoteOnlyUsers, log); err != nil {
 		return err
 	}
 
@@ -229,84 +238,6 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	}
 
 	return nil
-}
-
-type User struct {
-	ExternalId string
-	Email      string
-}
-
-type Group struct {
-	ExternalId string
-	Name       string
-}
-
-type MemberMaster interface {
-	AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error
-	RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error
-}
-
-type DatabaseMaster struct {
-	client *msgraphsdk.GraphServiceClient
-}
-
-func (m *DatabaseMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
-	var errs []error
-	for _, user := range remoteOnlyUsers {
-		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().ByDirectoryObjectId(user.ExternalId).Ref().Delete(ctx, nil); err != nil {
-			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
-		}
-	}
-	return errors.Join(errs...)
-}
-
-func (m *DatabaseMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
-	var errs []error
-	for _, user := range localOnlyUsers {
-		requestBody := models.NewReferenceCreate()
-		odataId := fmt.Sprintf("https://graph.microsoft.com/v1.0/directoryObjects/%s", user.ExternalId)
-		requestBody.SetOdataId(&odataId)
-		if err := m.client.Groups().ByGroupId(group.ExternalId).Members().Ref().Post(ctx, requestBody, nil); err != nil {
-			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
-		}
-	}
-	return errors.Join(errs...)
-}
-
-type EntraIdMaster struct {
-	client *apiclient.APIClient
-}
-
-func (m *EntraIdMaster) RemoveUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
-	var errs []error
-	for _, user := range localOnlyUsers {
-		_, err := m.client.Groups().RemoveMember(ctx, &protoapi.RemoveMemberRequest{
-			Groupname:      group.Name,
-			UserExternalId: user.ExternalId,
-		})
-		if status.Code(err) == codes.NotFound {
-			log.Warn("user not found in database", "user", user.Email)
-		} else if err != nil {
-			errs = append(errs, fmt.Errorf("remove user %q from group %q: %w", user.Email, group.Name, err))
-		}
-	}
-	return errors.Join(errs...)
-}
-
-func (m *EntraIdMaster) AddUsers(ctx context.Context, group Group, localOnlyUsers, remoteOnlyUsers []User, log logrus.FieldLogger) error {
-	var errs []error
-	for _, user := range remoteOnlyUsers {
-		_, err := m.client.Groups().AddMember(ctx, &protoapi.AddMemberRequest{
-			Groupname:      group.Name,
-			UserExternalId: user.ExternalId,
-		})
-		if status.Code(err) == codes.NotFound {
-			log.Warn("user not found in database", "user", user.Email)
-		} else if err != nil {
-			errs = append(errs, fmt.Errorf("add user %q to group %q: %w", user.Email, group.Name, err))
-		}
-	}
-	return errors.Join(errs...)
 }
 
 func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group string) ([]*protoapi.GroupMember, error) {
@@ -346,7 +277,7 @@ func getEntraIdMembers(ctx context.Context, entraId *msgraphsdk.GraphServiceClie
 	return entraIdUsers, nil
 }
 
-func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *Group, created bool, err error) {
+func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *master.Group, created bool, err error) {
 	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
 		Name: groupName,
 	})
@@ -357,7 +288,7 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 	if dbGroup.Group.ExternalId != nil {
 		_, err := entraId.Groups().ByGroupId(*dbGroup.Group.ExternalId).Get(ctx, nil)
 		if err == nil {
-			return &Group{
+			return &master.Group{
 				ExternalId: *dbGroup.Group.ExternalId,
 				Name:       entraIdGroupName,
 			}, false, nil
@@ -372,17 +303,17 @@ func getOrCreateGroup(ctx context.Context, entraId *msgraphsdk.GraphServiceClien
 
 	requestBody := models.NewGroup()
 	requestBody.SetDisplayName(&entraIdGroupName)
-	requestBody.SetSecurityEnabled(ptr.To(true))
-	requestBody.SetMailEnabled(ptr.To(false))
+	requestBody.SetSecurityEnabled(new(true))
+	requestBody.SetMailEnabled(new(false))
 	requestBody.SetMailNickname(&entraIdGroupName)
-	requestBody.SetDescription(ptr.To("source:dapla-api"))
+	requestBody.SetDescription(new("source:dapla-api"))
 
 	group, err := entraId.Groups().Post(ctx, requestBody, nil)
 	if err != nil {
 		return nil, false, fmt.Errorf("create group: %w", err)
 	}
 
-	return &Group{
+	return &master.Group{
 		ExternalId: *group.GetId(),
 		Name:       entraIdGroupName,
 	}, true, nil
@@ -439,10 +370,10 @@ func assignAppRole(ctx context.Context, entraId *msgraphsdk.GraphServiceClient, 
 // getDatabaseOnlyUsers takes a list of database users and remote/Entra ID users and returns
 // those users which are only present in the database. These are the users that need to be added
 // to the Entra ID group.
-func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []User {
-	dbUserMap := make(map[string]User)
+func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []master.User {
+	dbUserMap := make(map[string]master.User)
 	for _, u := range dbUsers {
-		dbUserMap[u.User.ExternalId] = User{
+		dbUserMap[u.User.ExternalId] = master.User{
 			ExternalId: u.User.ExternalId,
 			Email:      u.User.Email,
 		}
@@ -450,7 +381,7 @@ func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.
 	for _, u := range remoteUsers {
 		delete(dbUserMap, *u.GetId())
 	}
-	var dbOnly []User
+	var dbOnly []master.User
 	for _, u := range dbUserMap {
 		dbOnly = append(dbOnly, u)
 	}
@@ -460,10 +391,10 @@ func getDatabaseOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.
 // getRemoteOnlyUsers takes a list of database users and remote/Entra ID users and returns
 // those users which are only present in Entra ID. These are the users that need to be removed
 // from the Entra ID group.
-func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []User {
-	remoteUserMap := make(map[string]User)
+func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Userable) []master.User {
+	remoteUserMap := make(map[string]master.User)
 	for _, u := range remoteUsers {
-		remoteUserMap[*u.GetId()] = User{
+		remoteUserMap[*u.GetId()] = master.User{
 			ExternalId: *u.GetId(),
 			Email:      *u.GetUserPrincipalName(),
 		}
@@ -471,7 +402,7 @@ func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Us
 	for _, u := range dbUsers {
 		delete(remoteUserMap, u.User.ExternalId)
 	}
-	var remoteOnly []User
+	var remoteOnly []master.User
 	for _, u := range remoteUserMap {
 		remoteOnly = append(remoteOnly, u)
 	}
@@ -506,7 +437,7 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 			rc.ProvisioningResourceId = id
 		case configGroupPrefixKey:
 			rc.GroupPrefix = c.Value
-		case configMasterKey, configForceDbMasterTeamsKey:
+		case configMasterKey:
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -542,41 +473,52 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 	return service, nil
 }
 
-func (r *entraIdGroupReconciler) GetMemberMaster(ctx context.Context, team string, apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) (MemberMaster, error) {
-	var master MemberMaster
+func (r *entraIdGroupReconciler) configureMemberMasters(apiClient *apiclient.APIClient, entraidClient *msgraphsdk.GraphServiceClient, config *protoapi.ConfigReconcilerResponse) error {
+	newConfig := memberMasterConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configForceDbMasterTeamsKey:
-			if slices.ContainsFunc(strings.Split(c.Value, ","), func(t string) bool {
-				return strings.EqualFold(
-					strings.TrimSpace(t),
-					team,
-				)
-			}) {
-				return &DatabaseMaster{
-					client: entraidClient,
-				}, nil
-			}
 		case configMasterKey:
-			switch c.Value {
-			case "entraid":
-				master = &EntraIdMaster{
-					client: apiClient,
-				}
-			case "database":
-				master = &DatabaseMaster{
-					client: entraidClient,
-				}
-			default:
-				return nil, fmt.Errorf("unknown master type %q, master must be 'entraid' or 'database'", c.Value)
+			if !slices.Contains(validMasters, c.Value) {
+				return fmt.Errorf("unknown master type %q, master must be 'entraid' or 'database'", c.Value)
 			}
+			newConfig.defaultMaster = c.Value
+		case configMasterOverridesKey:
+			newConfig.overrides = c.Value
 		}
 	}
 
-	if master != nil {
-		return master, nil
+	if newConfig.defaultMaster == "" {
+		return errors.New("default member master has to be set")
 	}
-	return nil, errors.New("no master config defined")
+
+	if newConfig == r.memberMasterConfig {
+		return nil
+	}
+
+	masters := []master.MemberMaster{
+		entraid.New(apiClient),
+		database.New(entraidClient),
+	}
+
+	var defaultMaster master.MemberMaster
+	for _, m := range masters {
+		if m.Name() == newConfig.defaultMaster {
+			defaultMaster = m
+		}
+	}
+	if defaultMaster == nil {
+		return fmt.Errorf("master %q does not exist", newConfig.defaultMaster)
+	}
+
+	handler, err := master.NewHandler(newConfig.overrides, defaultMaster, masters...)
+	if err != nil {
+		return fmt.Errorf("could not create member master handler: %w", err)
+	}
+
+	r.masterHandler = *handler
+	r.memberMasterConfig = newConfig
+
+	return nil
 }
 
 func (r *entraIdGroupReconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
