@@ -39,9 +39,19 @@ type syncQueuer interface {
 	Add(group string, member *string) error
 }
 
+type entraIdClient interface {
+	AddUserToGroup(ctx context.Context, groupId, userId string) error
+	RemoveUserFromGroup(ctx context.Context, groupId, userId string) error
+	CreateGroup(ctx context.Context, groupName string) (models.Groupable, error)
+	GetGroup(ctx context.Context, groupId string) (models.Groupable, error)
+	GetTransitiveMembers(ctx context.Context, groupId string) ([]models.Userable, error)
+	AssignAppRoleToGroup(ctx context.Context, groupId string, resourceId *uuid.UUID, appRoleId *uuid.UUID) error
+	GetAppRolesForGroup(ctx context.Context, groupId string) ([]models.AppRoleAssignmentable, error)
+}
+
 type entraIdGroupReconciler struct {
 	mainCtx             context.Context
-	entraIdClient       *entraidclient.Client
+	entraIdClient       entraIdClient
 	entraIdConfig       entraIdConfig
 	staticEntraIdClient bool
 	syncQueuer          syncQueuer
@@ -65,12 +75,21 @@ type memberMasterConfig struct {
 
 type OptFunc func(*entraIdGroupReconciler)
 
-func WithEntraIdClient()
+func WithEntraIdClient(client entraIdClient) OptFunc {
+	return func(r *entraIdGroupReconciler) {
+		r.entraIdClient = client
+		r.staticEntraIdClient = true
+	}
+}
 
-func New(ctx context.Context, sq syncQueuer) reconcilers.Reconciler {
+func New(ctx context.Context, sq syncQueuer, opts ...OptFunc) reconcilers.Reconciler {
 	r := &entraIdGroupReconciler{
 		mainCtx:    ctx,
 		syncQueuer: sq,
+	}
+
+	for _, opt := range opts {
+		opt(r)
 	}
 
 	return r
@@ -172,7 +191,7 @@ func (r *entraIdGroupReconciler) Reconcile(ctx context.Context, client *apiclien
 	return nil
 }
 
-func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *entraidclient.Client, client *apiclient.APIClient, teamSlug string, groupName string, log logrus.FieldLogger) error {
+func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId entraIdClient, client *apiclient.APIClient, teamSlug string, groupName string, log logrus.FieldLogger) error {
 	log = log.WithField("groupName", groupName)
 	group, created, err := getOrCreateGroup(ctx, entraId, client, groupName, r.entraIdConfig.GroupPrefix)
 	if err != nil {
@@ -258,7 +277,7 @@ func getDatabaseMembers(ctx context.Context, client *apiclient.APIClient, group 
 	return dbMembers, dbMembersIt.Err()
 }
 
-func getOrCreateGroup(ctx context.Context, entraId *entraidclient.Client, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *master.Group, created bool, err error) {
+func getOrCreateGroup(ctx context.Context, entraId entraIdClient, client *apiclient.APIClient, groupName string, groupPrefix string) (_ *master.Group, created bool, err error) {
 	dbGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
 		Name: groupName,
 	})
@@ -293,7 +312,7 @@ func getOrCreateGroup(ctx context.Context, entraId *entraidclient.Client, client
 }
 
 // ensureAppRoles assigns any app roles which may be missing on the given group
-func ensureAppRoles(ctx context.Context, entraId *entraidclient.Client, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
+func ensureAppRoles(ctx context.Context, entraId entraIdClient, groupId string, appRoleId *uuid.UUID, resourceIds ...*uuid.UUID) error {
 	appRoleAssignments, err := entraId.GetAppRolesForGroup(ctx, groupId)
 	if err != nil {
 		return fmt.Errorf("get app role assignments for group %q: %w", groupId, err)
@@ -354,7 +373,7 @@ func getRemoteOnlyUsers(dbUsers []*protoapi.GroupMember, remoteUsers []models.Us
 	return remoteOnly
 }
 
-func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (*entraidclient.Client, error) {
+func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconcilerResponse) (entraIdClient, error) {
 	rc := entraIdConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {
@@ -403,7 +422,7 @@ func (r *entraIdGroupReconciler) getEntraIdClient(config *protoapi.ConfigReconci
 	return client, nil
 }
 
-func (r *entraIdGroupReconciler) configureMemberMasters(apiClient *apiclient.APIClient, entraidClient *entraidclient.Client, config *protoapi.ConfigReconcilerResponse) error {
+func (r *entraIdGroupReconciler) configureMemberMasters(apiClient *apiclient.APIClient, entraidClient entraIdClient, config *protoapi.ConfigReconcilerResponse) error {
 	newConfig := memberMasterConfig{}
 	for _, c := range config.Nodes {
 		switch c.Key {

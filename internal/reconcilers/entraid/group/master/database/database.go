@@ -6,15 +6,19 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/entraidclient"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
 )
 
 type Master struct {
-	client *entraidclient.Client
+	client entraIdClient
 }
 
-func New(client *entraidclient.Client) *Master {
+type entraIdClient interface {
+	AddUserToGroup(ctx context.Context, groupId, userId string) error
+	RemoveUserFromGroup(ctx context.Context, groupId string, userId string) error
+}
+
+func New(client entraIdClient) *Master {
 	return &Master{
 		client: client,
 	}
