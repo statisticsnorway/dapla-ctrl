@@ -227,6 +227,15 @@ func (r *teamResolver) ViewerIsMember(ctx context.Context, obj *team.Team) (bool
 	return team.UserIsMember(ctx, obj.Slug, authz.ActorFromContext(ctx).User.GetID())
 }
 
+func (r *teamResolver) ViewerCanManageMembers(ctx context.Context, obj *team.Team) (bool, error) {
+	if err := authz.CanManageGroupMembers(ctx, obj.Slug); errors.Is(err, authz.ErrUnauthorized) {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (r *teamResolver) AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error) {
 	return team.GetAccessManagers(ctx, obj.Slug)
 }
