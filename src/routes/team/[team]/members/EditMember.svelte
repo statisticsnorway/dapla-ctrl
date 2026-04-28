@@ -130,7 +130,7 @@
 				selectedGroups = [];
 				submit();
 			}}
-			icon={TrashIcon}>Fjern</Button
+			icon={TrashIcon}>Fjern fra teamet</Button
 		>
 	{/snippet}
 </Modal>
