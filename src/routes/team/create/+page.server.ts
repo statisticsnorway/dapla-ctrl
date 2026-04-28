@@ -1,43 +1,40 @@
-import { graphql } from '$houdini';
-import { redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
+
+const webhookUrl = env.SLACK_CREATE_TEAM_WEBHOOK_URL || '';
 
 export const actions = {
 	default: async (event) => {
-		const query = graphql(`
-			mutation CreateTeam($input: CreateTeamInput!) {
-				createTeam(input: $input) {
-					team {
-						slug
-					}
-				}
-			}
-		`);
 		const data = await event.request.formData();
 		const displayName = (data.get('displayname') as string) || '';
 		const input = {
 			slug: (data.get('name') as string) || '',
 			displayName,
 			sectionCode: (data.get('section') as string) || '',
-			isManaged: (data.get('isManaged') as string) || 'true'
+			isManaged: (data.get('isManaged') as string) || 'true',
+			createdBy: (data.get('createdBy') as string) || ''
 		};
 
-		const resp = await query.mutate(
-			{
-				input: {
-					slug: input.slug,
-					displayName: input.displayName,
-					sectionCode: input.sectionCode,
-					isManaged: input.isManaged !== 'false'
-				}
-			},
-			{ event }
-		);
-		if (resp.errors) {
-			return { input, errors: resp.errors };
-		}
-		if (resp.data?.createTeam.team?.slug) {
-			redirect(303, `/team/${resp.data.createTeam.team.slug}`);
+		try {
+			const result = await fetch(webhookUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(input)
+			});
+
+			if (result.ok) {
+				return { success: true, input, message: 'Forespørsel om å opprette team er sendt!' };
+			} else {
+				return {
+					success: false,
+					input,
+					errors: [{ message: 'En feil oppsto under opprettelse av team' }]
+				};
+			}
+		} catch (error) {
+			return { success: false, input, errors: [{ message: 'En feil oppsto - ' + error }] };
 		}
 	}
 } satisfies Actions;
