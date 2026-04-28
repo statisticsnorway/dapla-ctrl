@@ -2,6 +2,7 @@ query TeamRoles($team: Slug!) {
 	team(slug: $team) {
 		viewerIsOwner
 		viewerIsMember
+		viewerCanManageMembers
 		deletionInProgress
 		lastSuccessfulSync
 		isManaged

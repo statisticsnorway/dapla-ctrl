@@ -1,20 +1,29 @@
 <script lang="ts">
 	import { graphql, type AddGroupMemberInput } from '$houdini';
-	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
+	import {
+		Alert,
+		Button,
+		Checkbox,
+		CheckboxGroup,
+		Heading,
+		Modal,
+		TextField
+	} from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 
 	interface Props {
 		open: boolean;
-		groups: string[];
+		team: string;
+		groups: { id: string; name: string }[];
 		oncreated?: () => void;
 	}
 
-	let { open = $bindable(), groups, oncreated }: Props = $props();
+	let { open = $bindable(), team, groups, oncreated }: Props = $props();
 
-	let group = $derived(groups[0]);
+	let selectedGroups: string[] = $state([]);
 
 	const store = graphql(`
-		query AddMemberQuery($group: String!) {
+		query AddMemberQuery($team: Slug!) {
 			users(first: 10000) {
 				nodes {
 					id
@@ -22,7 +31,7 @@
 					name
 				}
 			}
-			group(name: $group) {
+			team(slug: $team) {
 				members {
 					nodes {
 						user {
@@ -37,7 +46,7 @@
 	$effect(() => {
 		store.fetch({
 			variables: {
-				group: group
+				team: team
 			}
 		});
 	});
@@ -66,7 +75,7 @@
 	let users = $derived.by(() => {
 		const allUsers = $store.data?.users.nodes ?? [];
 		const groupMemberEmails = new Set(
-			$store.data?.group.members.nodes.map((member) => member.user.email) ?? []
+			$store.data?.team.members.nodes.map((member) => member.user.email) ?? []
 		);
 		return allUsers.filter((user) => !groupMemberEmails.has(user.email));
 	});
@@ -82,20 +91,22 @@
 			return;
 		}
 
-		const input: AddGroupMemberInput = {
-			groupName: group,
-			userEmail: userID
-		};
+		for (const group of selectedGroups) {
+			const input: AddGroupMemberInput = {
+				groupName: group,
+				userEmail: userID
+			};
 
-		const resp = await create.mutate({
-			input
-		});
+			const resp = await create.mutate({
+				input
+			});
 
-		if (resp.errors) {
-			errors = resp.errors
-				.filter((e: { message: string }) => e.message != 'unable to resolve')
-				.map((e: { message: string }) => e.message);
-			return;
+			if (resp.errors) {
+				errors = resp.errors
+					.filter((e: { message: string }) => e.message != 'unable to resolve')
+					.map((e: { message: string }) => e.message);
+				return;
+			}
 		}
 
 		open = false;
@@ -121,21 +132,22 @@
 		}}
 		class="wrapper"
 	>
-		<Select label="Gruppe" bind:value={group}>
-			{#each groups as groupName (groupName)}
-				<option value={groupName}>{groupName}</option>
-			{/each}
-		</Select>
 		<TextField list="add-member-email" type="email" bind:value={email}>
 			{#snippet label()}
 				E-post
 			{/snippet}
 		</TextField>
+		<br />
 		<datalist id="add-member-email">
 			{#each users as user (user.email)}
 				<option value={user.email}>{user.name}</option>
 			{/each}
 		</datalist>
+		<CheckboxGroup legend="Grupper" bind:value={selectedGroups}>
+			{#each groups as group (group.name)}
+				<Checkbox value={group.name}>{group.name.substring(team.length + 1)}</Checkbox>
+			{/each}
+		</CheckboxGroup>
 	</form>
 
 	{#snippet footer()}

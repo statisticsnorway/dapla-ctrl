@@ -31,5 +31,11 @@ query Groups($team: Slug!, $orderBy: UserOrder) {
 				}
 			}
 		}
+		groups(first: 1000) {
+			nodes {
+				id
+				name
+			}
+		}
 	}
 }

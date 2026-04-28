@@ -51,6 +51,7 @@ export async function load(event) {
 					deletionInProgress: false,
 					lastSuccessfulSync: null,
 					viewerIsMember: false,
+					viewerCanManageMembers: false,
 					externalResources: { gitHubTeam: null },
 					displayName: '',
 					isManaged: true,

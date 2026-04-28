@@ -42,7 +42,7 @@ enum ActivityLogActivityType {
 }
 
 """Interface for activity log entries."""
-interface ActivityLogEntry {
+interface ActivityLogEntry implements Node {
   """
   The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user.
   """
@@ -2240,6 +2240,9 @@ type Team implements ActivityLogger & Node {
   """Unique slug of the team."""
   slug: Slug!
 
+  """Whether or not the viewer can manage members of the team."""
+  viewerCanManageMembers: Boolean!
+
   """Whether or not the viewer is a member of the team."""
   viewerIsMember: Boolean!
 
@@ -2753,7 +2756,7 @@ enum UserOrderField {
 }
 
 """Interface for user sync log entries."""
-interface UserSyncLogEntry {
+interface UserSyncLogEntry implements Node {
   """Creation time of the entry."""
   createdAt: Time!
 
