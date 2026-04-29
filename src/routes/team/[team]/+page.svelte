@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { Alert, Button, CopyButton, Heading, Tooltip } from '@nais/ds-svelte-community';
+	import { Alert, Button, CopyButton, Heading, Tooltip, HelpText } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import TeamOverviewActivityLog from '$lib/domain/activity/team-overview/TeamOverviewActivityLog.svelte';
 	import { PlusIcon, TrashIcon } from '@nais/ds-svelte-community/icons';
@@ -8,15 +8,11 @@
 	import { graphql } from '$houdini';
 	import Confirm from '$lib/ui/Confirm.svelte';
 	let { data }: PageProps = $props();
-	let { teamSlug, TeamOverview, UserInfo } = $derived(data);
-
+	let { teamSlug, TeamOverview, UserInfo, isManaged } = $derived(data);
 	let team = $derived($TeamOverview.data?.team);
-
 	let addAccessManagerOpen = $state(false);
-
 	let removeAccessManagerOpen = $state(false);
 	let removeAccessManager: { email: string; name: string } | null = $state(null);
-
 	let canManageTeam = $derived.by(() => {
 		let me = $UserInfo.data?.me;
 		if (me?.__typename !== 'User') return false;
@@ -64,6 +60,16 @@
 			<div class="info-item">
 				<div class="value">
 					{section.name} ({section.code})
+				</div>
+			</div>
+			<div class="info-item">
+				<div class="value">
+					{isManaged ? 'MANAGED' : 'SELF_MANAGED'}
+					<HelpText title="About Managed Teams"
+						>Et managed Dapla-team er et team som kun kan bruke tjenester som tilbys på Dapla. Et
+						self-managed Dapla-team er et team som står helt fritt til å definere sin egen
+						infrastruktur og er ansvarlig for at den er satt opp i henhold til SSBs krav.
+					</HelpText>
 				</div>
 			</div>
 			<div class="spacer"></div>
