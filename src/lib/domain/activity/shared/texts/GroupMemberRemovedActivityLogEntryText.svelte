@@ -10,18 +10,10 @@
 	} = $props();
 </script>
 
-<div class="container">
+<div>
 	{data.groupMemberRemoved.userEmail} ble fjernet fra gruppen <i>{data.resourceName}</i>
 	<BodyShort textColor="subtle" size="small">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>
-
-<style>
-	.container {
-		overflow-wrap: normal;
-		word-break: normal;
-		line-height: 1.4;
-	}
-</style>

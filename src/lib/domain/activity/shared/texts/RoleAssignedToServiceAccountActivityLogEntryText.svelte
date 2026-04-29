@@ -6,13 +6,13 @@
 	let {
 		data
 	}: {
-		data: ActivityLogEntry<'GroupMemberAddedActivityLogEntry'>;
+		data: ActivityLogEntry<'RoleAssignedToServiceAccountActivityLogEntry'>;
 	} = $props();
 </script>
 
 <div>
-	{data.groupMemberAdded.userEmail} ble lagt til i gruppen <i>{data.resourceName}</i>
-	<BodyShort textColor="subtle" size="small">
+	Tjenestekonto <i>{data.resourceName}</i> ble gitt rollen <i>{data.data.roleName}</i>
+	<BodyShort size="small" textColor="subtle">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>

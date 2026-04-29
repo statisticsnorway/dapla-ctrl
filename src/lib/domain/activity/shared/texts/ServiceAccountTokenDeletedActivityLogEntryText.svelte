@@ -6,13 +6,13 @@
 	let {
 		data
 	}: {
-		data: ActivityLogEntry<'GroupMemberAddedActivityLogEntry'>;
+		data: ActivityLogEntry<'ServiceAccountTokenDeletedActivityLogEntry'>;
 	} = $props();
 </script>
 
 <div>
-	{data.groupMemberAdded.userEmail} ble lagt til i gruppen <i>{data.resourceName}</i>
-	<BodyShort textColor="subtle" size="small">
+	Nøkkel <i>{data.data.tokenName}</i> for tjenestekonto <i>{data.resourceName}</i> ble slettet
+	<BodyShort size="small" textColor="subtle">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>

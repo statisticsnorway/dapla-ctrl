@@ -6,13 +6,12 @@
 	let {
 		data
 	}: {
-		data: ActivityLogEntry<'TeamCreatedActivityLogEntry'>;
+		data: ActivityLogEntry<'GroupCreatedActivityLogEntry'>;
 	} = $props();
 </script>
 
 <div>
-	Gruppen
-	<i>{data.resourceName}</i> ble opprettet
+	Gruppen <i>{data.resourceName}</i> ble opprettet
 	<BodyShort textColor="subtle" size="small">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />

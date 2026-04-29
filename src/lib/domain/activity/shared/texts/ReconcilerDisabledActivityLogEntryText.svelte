@@ -6,13 +6,13 @@
 	let {
 		data
 	}: {
-		data: ActivityLogEntry<'GroupMemberAddedActivityLogEntry'>;
+		data: ActivityLogEntry<'ReconcilerDisabledActivityLogEntry'>;
 	} = $props();
 </script>
 
 <div>
-	{data.groupMemberAdded.userEmail} ble lagt til i gruppen <i>{data.resourceName}</i>
-	<BodyShort textColor="subtle" size="small">
+	Reconciler <i>{data.resourceName}</i> ble deaktivert
+	<BodyShort size="small" textColor="subtle">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>

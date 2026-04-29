@@ -2,7 +2,12 @@
 import type { Component } from 'svelte';
 
 // Resource icons (same "shapes" you use elsewhere)
-import { CogIcon, HexagonGridIcon, PersonGroupIcon } from '@nais/ds-svelte-community/icons';
+import {
+	CogIcon,
+	HexagonGridIcon,
+	PersonGroupIcon,
+	RobotSmileIcon
+} from '@nais/ds-svelte-community/icons';
 
 /**
  * ICON SHAPES (what is operated on)
@@ -21,5 +26,14 @@ export const icons: { [typename: string]: Component } = {
 	/* Fallback / infra ops */
 	ReconcilerConfiguredActivityLogEntry: CogIcon,
 	ReconcilerEnabledActivityLogEntry: CogIcon,
-	ReconcilerDisabledActivityLogEntry: CogIcon
+	ReconcilerDisabledActivityLogEntry: CogIcon,
+
+	ServiceAccountCreatedActivityLogEntry: RobotSmileIcon,
+	ServiceAccountTokenCreatedActivityLogEntry: RobotSmileIcon,
+	ServiceAccountDeletedActivityLogEntry: RobotSmileIcon,
+	ServiceAccountUpdatedActivityLogEntry: RobotSmileIcon,
+	ServiceAccountTokenDeletedActivityLogEntry: RobotSmileIcon,
+	ServiceAccountTokenUpdatedActivityLogEntry: RobotSmileIcon,
+	RoleAssignedToServiceAccountActivityLogEntry: RobotSmileIcon,
+	RoleRevokedFromServiceAccountActivityLogEntry: RobotSmileIcon
 };

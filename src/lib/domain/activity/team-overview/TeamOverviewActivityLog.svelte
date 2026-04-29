@@ -49,6 +49,12 @@
 							resourceName
 							resourceType
 							teamSlug
+							... on TeamCreatedActivityLogEntry {
+								__typename
+							}
+							... on GroupCreatedActivityLogEntry {
+								__typename
+							}
 							... on GroupMemberAddedActivityLogEntry {
 								__typename
 
@@ -84,6 +90,24 @@
 										email
 									}
 								}
+							}
+							... on TeamUpdatedActivityLogEntry {
+								__typename
+								teamUpdated: data {
+									updatedFields {
+										field
+										oldValue
+										newValue
+									}
+								}
+							}
+							... on ServiceAccountCreatedActivityLogEntry {
+								__typename
+								resourceName
+							}
+							... on ServiceAccountTokenCreatedActivityLogEntry {
+								__typename
+								resourceName
 							}
 						}
 					}

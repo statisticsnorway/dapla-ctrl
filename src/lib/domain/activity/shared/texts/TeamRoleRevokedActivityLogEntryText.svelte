@@ -10,18 +10,10 @@
 	} = $props();
 </script>
 
-<div class="container">
+<div>
 	{data.roleRevoked.user.email} ble fratatt rollen <i>{data.roleRevoked.role}</i>
 	<BodyShort textColor="subtle" size="small">
 		av {data.actor} for
 		<Time time={data.createdAt} distance />
 	</BodyShort>
 </div>
-
-<style>
-	.container {
-		overflow-wrap: normal;
-		word-break: normal;
-		line-height: 1.4;
-	}
-</style>
