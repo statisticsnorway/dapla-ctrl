@@ -152,14 +152,14 @@ func (m *MessageSender) ReceiveMessages(ctx context.Context, leaderElectionEnabl
 
 		if err := UpdateMessageStatus(ctx, m.pool, *m.querier, messageResult.Id, messageResult.Result, m.log); err != nil {
 			msg.Nack()
-			m.log.Error("could not update message status")
+			m.log.Errorf("could not update message status %v", err)
 			return
 		}
 		msg.Ack()
 		m.log.Debugf("received message with id %v", messageResult.Id)
 	})
 	if err != nil && err != context.Canceled {
-		m.log.Errorf("could not receive message")
+		m.log.Errorf("could not receive message %v", err)
 	}
 
 	return nil
