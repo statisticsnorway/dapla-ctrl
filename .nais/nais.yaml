@@ -87,9 +87,9 @@ spec:
     - name: POSTMAN_PROJECT_ID
       value: sup-p-2b
     - name: POSTMAN_OUTGOING_SUBSCRIPTION
-      value: sup-staging-postman-outgoing-subscription
+      value: sup-prod-dapla-api-sup-postman-outgoing-sub
     - name: POSTMAN_INCOMING_TOPIC
-      value: sup-staging-postman-incoming-topic
+      value: sup-prod-postman-incoming-topic
 
   envFrom:
     - secret: dapla-api
