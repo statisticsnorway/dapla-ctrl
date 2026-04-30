@@ -243,7 +243,7 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 				UserID:    existingAdmin.ID,
 				UserName:  existingAdmin.Name,
 				UserEmail: existingAdmin.Email,
-				RoleName:  ptr.To("Admin"),
+				RoleName:  new("Admin"),
 			}); err != nil {
 				log.WithError(err).Errorf("create user sync log entry")
 			}
@@ -262,7 +262,7 @@ func (s *Usersynchronizer) assignAdmins(ctx context.Context, querier usersyncsql
 				UserID:    admin.ID,
 				UserName:  admin.Name,
 				UserEmail: admin.Email,
-				RoleName:  ptr.To("Admin"),
+				RoleName:  new("Admin"),
 			}); err != nil {
 				log.WithError(err).Errorf("create user sync log entry")
 			}

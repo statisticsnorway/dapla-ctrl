@@ -16,7 +16,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
 	"github.com/statisticsnorway/dapla-api/internal/validate"
-	"k8s.io/utils/ptr"
 )
 
 type (
@@ -344,7 +343,7 @@ func (i *UpdateTeamInput) Validate() error {
 	verr := validate.New()
 
 	if i.DisplayName != nil {
-		i.DisplayName = ptr.To(strings.TrimSpace(*i.DisplayName))
+		i.DisplayName = new(strings.TrimSpace(*i.DisplayName))
 	}
 
 	if i.DisplayName != nil && *i.DisplayName == "" {

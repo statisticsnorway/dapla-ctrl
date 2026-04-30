@@ -13,7 +13,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"k8s.io/utils/ptr"
 )
 
 type CreateInput struct {
@@ -73,7 +72,7 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	q := db(ctx)
 
 	ret, err := q.ListForTeam(ctx, activitylogsql.ListForTeamParams{
-		TeamSlug: ptr.To(teamSlug),
+		TeamSlug: new(teamSlug),
 		Offset:   page.Offset(),
 		Limit:    page.Limit(),
 		Filter:   withFilters(filter),
@@ -149,7 +148,7 @@ func toGraphActivityLogEntry(row *activitylogsql.ActivityLogEntry) (ActivityLogE
 		Data:         row.Data,
 	}
 	if row.TeamSlug == nil {
-		entry.TeamSlug = ptr.To(slug.Slug(""))
+		entry.TeamSlug = new(slug.Slug(""))
 	}
 
 	transformer, ok := knownTransformers[ActivityLogEntryResourceType(row.ResourceType)]

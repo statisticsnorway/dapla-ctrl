@@ -15,7 +15,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 	"github.com/statisticsnorway/dapla-api/internal/validate"
-	"k8s.io/utils/ptr"
 )
 
 func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*Team, error) {
@@ -41,7 +40,7 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: input.Slug.String(),
-			TeamSlug:     ptr.To(input.Slug),
+			TeamSlug:     new(input.Slug),
 		})
 	})
 	if err != nil {
@@ -105,7 +104,7 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: input.Slug.String(),
-			TeamSlug:     ptr.To(input.Slug),
+			TeamSlug:     new(input.Slug),
 			Data: func(fields []*TeamUpdatedActivityLogEntryDataUpdatedField) *TeamUpdatedActivityLogEntryData {
 				if len(fields) == 0 {
 					return nil
@@ -231,7 +230,7 @@ func CreateDeleteKey(ctx context.Context, teamSlug slug.Slug, actor *authz.Actor
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: teamSlug.String(),
-			TeamSlug:     ptr.To(teamSlug),
+			TeamSlug:     new(teamSlug),
 		})
 	})
 	if err != nil {
@@ -258,7 +257,7 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: teamSlug.String(),
-			TeamSlug:     ptr.To(teamSlug),
+			TeamSlug:     new(teamSlug),
 		})
 	})
 }

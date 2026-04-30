@@ -17,7 +17,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/user"
-	"k8s.io/utils/ptr"
 )
 
 func GenerateName(input *CreateGroupInput) string {
@@ -51,7 +50,7 @@ func Create(ctx context.Context, input *CreateGroupInput, actor *authz.Actor) (*
 			Actor:        actor.User,
 			ResourceType: ActivityLogEntryResourceTypeGroup,
 			ResourceName: group.Name,
-			TeamSlug:     ptr.To(input.TeamSlug),
+			TeamSlug:     new(input.TeamSlug),
 		})
 	})
 	if err != nil {

@@ -15,7 +15,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/validate"
-	"k8s.io/utils/ptr"
 )
 
 type (
@@ -158,7 +157,7 @@ func (i *CreateGroupInput) Validate(ctx context.Context) error {
 	}
 
 	if i.Suffix == nil {
-		i.Suffix = ptr.To("")
+		i.Suffix = new("")
 	}
 
 	if exists, err := db(ctx).GroupExists(ctx, groupsql.GroupExistsParams{

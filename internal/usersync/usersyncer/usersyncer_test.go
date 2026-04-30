@@ -25,7 +25,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
-	"k8s.io/utils/ptr"
 )
 
 const (
@@ -334,7 +333,7 @@ func TestSync(t *testing.T) {
 			Name:       "Old Title",
 			Email:      "old-title@example.com",
 			ExternalID: "2",
-			JobTitle:   ptr.To("Old Job Title"),
+			JobTitle:   new("Old Job Title"),
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -345,7 +344,7 @@ func TestSync(t *testing.T) {
 			Name:       "Will Lose Title",
 			Email:      "lose-title@example.com",
 			ExternalID: "3",
-			JobTitle:   ptr.To("Current Title"),
+			JobTitle:   new("Current Title"),
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -355,10 +354,10 @@ func TestSync(t *testing.T) {
 			func(req *http.Request) *http.Response {
 				// All users response
 				return test.Response("200 OK", generateEntraIdResponse(
-					externalUser{Id: "1", Email: "no-title@example.com", Name: "No Job Title", JobTitle: ptr.To("New Job Title")},   // Will get job title added
-					externalUser{Id: "2", Email: "old-title@example.com", Name: "Old Title", JobTitle: ptr.To("Updated Job Title")}, // Will get job title updated
-					externalUser{Id: "3", Email: "lose-title@example.com", Name: "Will Lose Title"},                                 // Will lose job title (nil JobTitle)
-					externalUser{Id: "4", Email: "new-user@example.com", Name: "New User", JobTitle: ptr.To("Senior Developer")},    // Will be created with job title
+					externalUser{Id: "1", Email: "no-title@example.com", Name: "No Job Title", JobTitle: new("New Job Title")},   // Will get job title added
+					externalUser{Id: "2", Email: "old-title@example.com", Name: "Old Title", JobTitle: new("Updated Job Title")}, // Will get job title updated
+					externalUser{Id: "3", Email: "lose-title@example.com", Name: "Will Lose Title"},                              // Will lose job title (nil JobTitle)
+					externalUser{Id: "4", Email: "new-user@example.com", Name: "New User", JobTitle: new("Senior Developer")},    // Will be created with job title
 				))
 			},
 			func(req *http.Request) *http.Response {
@@ -441,11 +440,11 @@ func TestSync(t *testing.T) {
 
 		// Create two users, one who is currently manager in the API's database,
 		// and a new manager to replace them.
-		oldBossA := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: fullName(sectionA), JobTitle: ptr.To("Pensjonist")} // Will be removed
-		bossUserA := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: fullName(sectionA), JobTitle: ptr.To("Seksjonssjef")}  // Will be created
+		oldBossA := externalUser{Id: "1", Email: "goodbye@example.com", Name: "Pen Sjonist", Section: fullName(sectionA), JobTitle: new("Pensjonist")} // Will be removed
+		bossUserA := externalUser{Id: "2", Email: "eljefe@example.com", Name: "Das Boss", Section: fullName(sectionA), JobTitle: new("Seksjonssjef")}  // Will be created
 
 		// Create forskningsleder for 667
-		bossUserB := externalUser{Id: "3", Email: "einstein@example.com", Name: "Ein Stein", Section: fullName(sectionB), JobTitle: ptr.To("Forskningsleder")} // Will be created
+		bossUserB := externalUser{Id: "3", Email: "einstein@example.com", Name: "Ein Stein", Section: fullName(sectionB), JobTitle: new("Forskningsleder")} // Will be created
 
 		// Create the old boss in the database so we can use him as manager
 		oldBossDbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
@@ -550,7 +549,7 @@ func TestSync(t *testing.T) {
 		sectionFullName := fmt.Sprintf("O %s %s", sectionCode, sectionName)
 
 		// The user to demote (imagine they previously had the title "Seksjonssjef")
-		demoted := externalUser{Id: "1", Email: "ex-jefe@example.com", Name: "No Longer Boss", Section: sectionFullName, JobTitle: ptr.To("Ikke-seksjonssjef")} // Will be created
+		demoted := externalUser{Id: "1", Email: "ex-jefe@example.com", Name: "No Longer Boss", Section: sectionFullName, JobTitle: new("Ikke-seksjonssjef")} // Will be created
 
 		dbUser, err := querier.Create(ctx, usersyncsql.CreateParams{
 			Name:       demoted.Name,

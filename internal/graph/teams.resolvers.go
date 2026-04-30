@@ -16,7 +16,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
 	"github.com/statisticsnorway/dapla-api/internal/user"
-	"k8s.io/utils/ptr"
 )
 
 func (r *addTeamAccessManagerPayloadResolver) Team(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*team.Team, error) {
@@ -66,7 +65,7 @@ func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeam
 	}
 
 	if input.IsManaged == nil {
-		input.IsManaged = ptr.To(true)
+		input.IsManaged = new(true)
 	}
 
 	if isRegularUser && !*input.IsManaged {

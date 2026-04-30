@@ -9,7 +9,6 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/scalar"
 	"github.com/statisticsnorway/dapla-api/internal/serviceaccount/serviceaccountsql"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"k8s.io/utils/ptr"
 )
 
 type (
@@ -145,7 +144,7 @@ func toGraphServiceAccount(s *serviceaccountsql.ServiceAccount) *ServiceAccount 
 func toGraphServiceAccountToken(t *serviceaccountsql.ServiceAccountToken) *ServiceAccountToken {
 	var expiresAt *scalar.Date
 	if t.ExpiresAt.Valid {
-		expiresAt = ptr.To(scalar.NewDate(t.ExpiresAt.Time))
+		expiresAt = new(scalar.NewDate(t.ExpiresAt.Time))
 	}
 
 	var lastUsedAt *time.Time
