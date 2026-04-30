@@ -7,7 +7,7 @@
 	import '$lib/font-open-sans.css';
 	import '$lib/font-roboto-condensed.css';
 	import ProgressBar from '$lib/ui/ProgressBar.svelte';
-	import { themeSwitch } from '$lib/stores/theme.svelte';
+	import { persistTheme, type Themes } from '$lib/stores/theme.svelte';
 	import { Page, Theme } from '@nais/ds-svelte-community';
 	import { onMount } from 'svelte';
 	import '../styles/app.css';
@@ -21,9 +21,12 @@
 	let { data, children }: LayoutProps = $props();
 	let { UserInfo, userAgent } = $derived(data);
 
-	$effect(() => {
-		themeSwitch.theme = data.theme;
-	});
+	let theme: Themes = $derived(data.theme);
+
+	const toggleTheme = () => {
+		theme = theme == 'light' ? 'dark' : 'light';
+		persistTheme(theme);
+	};
 
 	let user = $derived(
 		$UserInfo.data?.me as
@@ -84,7 +87,7 @@
 	</title>
 </svelte:head>
 
-<Theme theme={themeSwitch.theme}>
+<Theme {theme}>
 	<Page contentBlockPadding="none">
 		<div class="full-wrapper">
 			{#if loading}
@@ -96,7 +99,7 @@
 				<Login />
 			{:else}
 				{#if user?.__typename === 'User'}
-					<PageHeader {user} {userAgent} />
+					<PageHeader {user} {userAgent} {theme} {toggleTheme} />
 				{/if}
 
 				{@render children?.()}

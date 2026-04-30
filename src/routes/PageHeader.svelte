@@ -1,6 +1,5 @@
 <script lang="ts">
 	import SearchButton from '$lib/domain/search/SearchButton.svelte';
-	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import { Button } from '@nais/ds-svelte-community';
 	import {
 		ActionMenu,
@@ -12,6 +11,7 @@
 	} from '@nais/ds-svelte-community/experimental';
 	import { CogIcon, PersonIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
 	import BetaBanner from './BetaBanner.svelte';
+	import type { Themes } from '$lib/stores/theme.svelte';
 
 	interface Props {
 		user:
@@ -22,9 +22,11 @@
 			  }
 			| undefined;
 		userAgent: string;
+		theme: Themes;
+		toggleTheme: () => void;
 	}
 
-	let { user, userAgent }: Props = $props();
+	let { user, userAgent, theme, toggleTheme }: Props = $props();
 </script>
 
 <BetaBanner />
@@ -48,18 +50,9 @@
 
 	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
 
-	<Button
-		style="background-color: inherit; color: inherit;"
-		onclick={() => {
-			if (themeSwitch.theme == 'dark') {
-				themeSwitch.setTheme('light');
-			} else {
-				themeSwitch.setTheme('dark');
-			}
-		}}
-	>
+	<Button style="background-color: inherit; color: inherit;" onclick={toggleTheme}>
 		<span class="switch-theme-icon">
-			{#if themeSwitch.theme == 'dark'}
+			{#if theme == 'dark'}
 				<SunIcon />
 			{:else}
 				<MoonIcon />

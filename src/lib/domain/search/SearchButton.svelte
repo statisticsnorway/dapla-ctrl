@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import { Theme } from '@nais/ds-svelte-community';
 	import { InternalHeaderButton } from '@nais/ds-svelte-community/experimental';
 	import { MagnifyingGlassIcon } from '@nais/ds-svelte-community/icons';
@@ -36,7 +35,7 @@
 	</div>
 </InternalHeaderButton>
 {#if open}
-	<Theme theme={themeSwitch.theme}>
+	<Theme>
 		<SearchModal bind:open />
 	</Theme>
 {/if}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { replacer } from '$lib/replacer';
-	import { themeSwitch } from '$lib/stores/theme.svelte';
 	import { Button, Checkbox, Heading, Modal, Select, Theme } from '@nais/ds-svelte-community';
 	import type { FeedbackType } from './types';
 
@@ -86,7 +85,7 @@
 	};
 </script>
 
-<Theme theme={themeSwitch.theme}>
+<Theme>
 	<Modal open width="medium" onclose={close}>
 		{#snippet header()}
 			<Heading level="1">Dapla Ctrl tilbakemelding</Heading>
