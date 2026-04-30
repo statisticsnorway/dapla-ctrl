@@ -1,0 +1,34 @@
+extend type Mutation {
+	"""
+	Send a message
+
+	This will send a message using SUP Postman to a users email address.
+	"""
+	sendMessage(input: SendMessageInput!): SendMessagePayload!
+}
+
+input SendMessageInput {
+	"""
+	Recipient of the email
+
+	Have to be a valid email address
+	"""
+	recipient: String!
+
+	"""
+	Subject of the email
+	"""
+	subject: String!
+
+	"""
+	Message body of the email
+	"""
+	message: String!
+}
+
+type SendMessagePayload {
+	"""
+	Unique message id
+	"""
+	messageId: String!
+}

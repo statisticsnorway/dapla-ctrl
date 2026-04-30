@@ -170,6 +170,10 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 		return runUsersync(ctx, pool, cfg, log)
 	})
 
+	wg.Go(func() error {
+		return runMessageHandling(ctx, pool, cfg, log)
+	})
+
 	<-ctx.Done()
 	signalStop()
 	log.Infof("shutting down...")

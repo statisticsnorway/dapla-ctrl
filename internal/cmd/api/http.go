@@ -22,6 +22,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/feature"
 	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
 	"github.com/statisticsnorway/dapla-api/internal/group"
+	"github.com/statisticsnorway/dapla-api/internal/message"
 	"github.com/statisticsnorway/dapla-api/internal/reconciler"
 	"github.com/statisticsnorway/dapla-api/internal/search"
 	"github.com/statisticsnorway/dapla-api/internal/section"
@@ -176,6 +177,7 @@ func ConfigureGraph(
 		ctx = feature.NewLoaderContext(ctx)
 		ctx = group.NewLoaderContext(ctx, pool)
 		ctx = sharedbucketsstopgap.NewLoaderContext(ctx, pool)
+		ctx = message.NewLoaderContext(ctx, pool)
 		return ctx
 	}
 

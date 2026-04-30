@@ -82,6 +82,14 @@ spec:
       value: 8bfaa3cb-f959-4eef-bb7a-4b9e09b55fc9
     - name: USERSYNC_ENABLED
       value: "true"
+    - name: POSTMAN_ENABLED
+      value: "true"
+    - name: POSTMAN_PROJECT_ID
+      value: sup-p-2b
+    - name: POSTMAN_OUTGOING_SUBSCRIPTION
+      value: sup-staging-postman-outgoing-subscription
+    - name: POSTMAN_INCOMING_TOPIC
+      value: sup-staging-postman-incoming-topic
 
   envFrom:
     - secret: dapla-api

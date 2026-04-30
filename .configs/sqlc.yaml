@@ -186,3 +186,12 @@ sql:
         <<: *default_go
         package: "grpcsharedbucketsstopgapsql"
         out: "../internal/grpc/grpcsharedbucketsstopgap/grpcsharedbucketsstopgapsql"
+
+  - <<: *default_domain
+    name: "Message SQL"
+    queries: "../internal/message/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "messagesql"
+        out: "../internal/message/messagesql"

@@ -21,6 +21,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/graph/scalar"
 	"github.com/statisticsnorway/dapla-api/internal/group"
+	"github.com/statisticsnorway/dapla-api/internal/message"
 	"github.com/statisticsnorway/dapla-api/internal/reconciler"
 	"github.com/statisticsnorway/dapla-api/internal/search"
 	"github.com/statisticsnorway/dapla-api/internal/section"
@@ -219,6 +220,7 @@ type ComplexityRoot struct {
 		RemoveGroupMember            func(childComplexity int, input group.RemoveGroupMemberInput) int
 		RemoveTeamAccessManager      func(childComplexity int, input team.RemoveTeamAccessManagerInput) int
 		RevokeRoleFromServiceAccount func(childComplexity int, input serviceaccount.RevokeRoleFromServiceAccountInput) int
+		SendMessage                  func(childComplexity int, input message.SendMessageInput) int
 		UpdateServiceAccount         func(childComplexity int, input serviceaccount.UpdateServiceAccountInput) int
 		UpdateServiceAccountToken    func(childComplexity int, input serviceaccount.UpdateServiceAccountTokenInput) int
 		UpdateTeam                   func(childComplexity int, input team.UpdateTeamInput) int
@@ -451,6 +453,10 @@ type ComplexityRoot struct {
 	SectionEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	SendMessagePayload struct {
+		MessageID func(childComplexity int) int
 	}
 
 	ServiceAccount struct {
@@ -839,6 +845,7 @@ type MutationResolver interface {
 	CreateGroup(ctx context.Context, input group.CreateGroupInput) (*group.CreateGroupPayload, error)
 	AddGroupMember(ctx context.Context, input group.AddGroupMemberInput) (*group.AddGroupMemberPayload, error)
 	RemoveGroupMember(ctx context.Context, input group.RemoveGroupMemberInput) (*group.RemoveGroupMemberPayload, error)
+	SendMessage(ctx context.Context, input message.SendMessageInput) (*message.SendMessagePayload, error)
 	EnableReconciler(ctx context.Context, input reconciler.EnableReconcilerInput) (*reconciler.Reconciler, error)
 	DisableReconciler(ctx context.Context, input reconciler.DisableReconcilerInput) (*reconciler.Reconciler, error)
 	ConfigureReconciler(ctx context.Context, input reconciler.ConfigureReconcilerInput) (*reconciler.Reconciler, error)
@@ -1554,6 +1561,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.RevokeRoleFromServiceAccount(childComplexity, args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput)), true
+	case "Mutation.sendMessage":
+		if e.ComplexityRoot.Mutation.SendMessage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_sendMessage_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.SendMessage(childComplexity, args["input"].(message.SendMessageInput)), true
 	case "Mutation.updateServiceAccount":
 		if e.ComplexityRoot.Mutation.UpdateServiceAccount == nil {
 			break
@@ -2552,6 +2570,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SectionEdge.Node(childComplexity), true
+
+	case "SendMessagePayload.messageId":
+		if e.ComplexityRoot.SendMessagePayload.MessageID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SendMessagePayload.MessageID(childComplexity), true
 
 	case "ServiceAccount.createdAt":
 		if e.ComplexityRoot.ServiceAccount.CreatedAt == nil {
@@ -4040,6 +4065,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputRevokeRoleFromServiceAccountInput,
 		ec.unmarshalInputSearchFilter,
 		ec.unmarshalInputSectionOrder,
+		ec.unmarshalInputSendMessageInput,
 		ec.unmarshalInputSharedBucketOrder,
 		ec.unmarshalInputTeamOrder,
 		ec.unmarshalInputUpdateServiceAccountInput,
@@ -4846,6 +4872,41 @@ extend enum ActivityLogActivityType {
 	GROUP_MEMBER_ADDED
 	"Group member was removed."
 	GROUP_MEMBER_REMOVED
+}
+`, BuiltIn: false},
+	{Name: "../schema/messages.graphqls", Input: `extend type Mutation {
+	"""
+	Send a message
+
+	This will send a message using SUP Postman to a users email address.
+	"""
+	sendMessage(input: SendMessageInput!): SendMessagePayload!
+}
+
+input SendMessageInput {
+	"""
+	Recipient of the email
+
+	Have to be a valid email address
+	"""
+	recipient: String!
+
+	"""
+	Subject of the email
+	"""
+	subject: String!
+
+	"""
+	Message body of the email
+	"""
+	message: String!
+}
+
+type SendMessagePayload {
+	"""
+	Unique message id
+	"""
+	messageId: String!
 }
 `, BuiltIn: false},
 	{Name: "../schema/reconcilers.graphqls", Input: `extend type Mutation {
@@ -8215,6 +8276,17 @@ func (ec *executionContext) field_Mutation_revokeRoleFromServiceAccount_args(ctx
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_sendMessage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessageInput)
 	if err != nil {
 		return nil, err
 	}
@@ -11688,6 +11760,51 @@ func (ec *executionContext) fieldContext_Mutation_removeGroupMember(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_removeGroupMember_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_sendMessage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_sendMessage,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().SendMessage(ctx, fc.Args["input"].(message.SendMessageInput))
+		},
+		nil,
+		ec.marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_sendMessage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "messageId":
+				return ec.fieldContext_SendMessagePayload_messageId(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SendMessagePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_sendMessage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -17473,6 +17590,35 @@ func (ec *executionContext) fieldContext_SectionEdge_node(_ context.Context, fie
 				return ec.fieldContext_Section_manager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SendMessagePayload_messageId(ctx context.Context, field graphql.CollectedField, obj *message.SendMessagePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SendMessagePayload_messageId,
+		func(ctx context.Context) (any, error) {
+			return obj.MessageID, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SendMessagePayload_messageId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SendMessagePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -27398,6 +27544,50 @@ func (ec *executionContext) unmarshalInputSectionOrder(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputSendMessageInput(ctx context.Context, obj any) (message.SendMessageInput, error) {
+	var it message.SendMessageInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"recipient", "subject", "message"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "recipient":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("recipient"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Recipient = data
+		case "subject":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("subject"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Subject = data
+		case "message":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Message = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context, obj any) (sharedbucketsstopgap.SharedBucketOrder, error) {
 	var it sharedbucketsstopgap.SharedBucketOrder
 	if obj == nil {
@@ -29462,6 +29652,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "removeGroupMember":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeGroupMember(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sendMessage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_sendMessage(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -31919,6 +32116,45 @@ func (ec *executionContext) _SectionEdge(ctx context.Context, sel ast.SelectionS
 			}
 		case "node":
 			out.Values[i] = ec._SectionEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var sendMessagePayloadImplementors = []string{"SendMessagePayload"}
+
+func (ec *executionContext) _SendMessagePayload(ctx context.Context, sel ast.SelectionSet, obj *message.SendMessagePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sendMessagePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SendMessagePayload")
+		case "messageId":
+			out.Values[i] = ec._SendMessagePayload_messageId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -36991,6 +37227,25 @@ func (ec *executionContext) unmarshalNSectionOrderField2githubᚗcomᚋstatistic
 
 func (ec *executionContext) marshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrderField(ctx context.Context, sel ast.SelectionSet, v section.SectionOrderField) graphql.Marshaler {
 	return v
+}
+
+func (ec *executionContext) unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessageInput(ctx context.Context, v any) (message.SendMessageInput, error) {
+	res, err := ec.unmarshalInputSendMessageInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSendMessagePayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v message.SendMessagePayload) graphql.Marshaler {
+	return ec._SendMessagePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v *message.SendMessagePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SendMessagePayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNServiceAccount2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v serviceaccount.ServiceAccount) graphql.Marshaler {

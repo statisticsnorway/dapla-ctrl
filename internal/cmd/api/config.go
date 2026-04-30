@@ -56,6 +56,18 @@ type JWTConfig struct {
 	SkipMiddleware bool `env:"JWT_SKIP_MIDDLEWARE,default=false"`
 }
 
+type PostmanConfig struct {
+	Enabled bool `env:"POSTMAN_ENABLED", default=false`
+	// Incoming for dapla-api, outgoing for SUP Postman
+	OutgoingSubscription string `env:"POSTMAN_OUTGOING_SUBSCRIPTION"`
+	// Outgoing for dapla-api, incoming for SUP Postman
+	IncomingTopic string `env:"POSTMAN_INCOMING_TOPIC"`
+	// SupPostman GCP project id
+	ProjectId string `env:"POSTMAN_PROJECT_ID"`
+	// AppName
+	PublishingAppName string `env:"POSTMAN_PUBLISHING_APP_NAME, default=DAPLA-API"`
+}
+
 type Config struct {
 	// GoogleManagementProjectID The ID of the Nais management project in the tenant organization in GCP.
 	GoogleManagementProjectID string `env:"GOOGLE_MANAGEMENT_PROJECT_ID"`
@@ -80,6 +92,7 @@ type Config struct {
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
 	JWT      JWTConfig
+	Postman  PostmanConfig
 
 	Fakes Fakes
 }

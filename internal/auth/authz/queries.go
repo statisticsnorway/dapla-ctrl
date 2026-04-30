@@ -239,6 +239,10 @@ func CanManageTeam(ctx context.Context, teamSlug slug.Slug) error {
 	return ErrUnauthorized
 }
 
+func CanSendMessage(ctx context.Context) error {
+	return requireGlobalAuthorization(ctx, "messages:send")
+}
+
 func RequireGlobalAdmin(ctx context.Context) error {
 	if ActorFromContext(ctx).User.IsAdmin() {
 		return nil
@@ -277,7 +281,7 @@ func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authoriza
 	return newMissingAuthorizationError(authorizationName)
 }
 
-/* func requireGlobalAuthorization(ctx context.Context, authorizationName string) error {
+func requireGlobalAuthorization(ctx context.Context, authorizationName string) error {
 	user := ActorFromContext(ctx).User
 	var (
 		authorized bool
@@ -303,7 +307,7 @@ func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authoriza
 	}
 
 	return newMissingAuthorizationError(authorizationName)
-} */
+}
 
 /* func requireAuthorization(ctx context.Context, authorizationName string, teamSlug *slug.Slug) error {
 	if teamSlug == nil {

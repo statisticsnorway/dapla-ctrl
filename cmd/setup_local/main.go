@@ -47,7 +47,7 @@ const (
 type seedConfig struct {
 	DatabaseURL               string `env:"DATABASE_URL,default=postgres://api:api@localhost:3002/api?sslmode=disable"`
 	Domain                    string `env:"TENANT_DOMAIN,default=example.com"`
-	GoogleManagementProjectID string `env:"GOOGLE_MANAGEMENT_PROJECT_ID,default=nais-local-dev"`
+	GoogleManagementProjectID string `env:"GOOGLE_MANAGEMENT_PROJECT_ID,default=dapla-local-dev"`
 
 	NumUsers          *int
 	NumTeams          *int
@@ -124,6 +124,18 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			}
 		}
 
+		postmanTopics := map[string]*pubsubpb.Topic{
+			"outgoing": {Name: fmt.Sprintf("projects/%s/topics/%s", projectID, "sup-staging-postman-outgoing-topic")},
+			"incoming": {Name: fmt.Sprintf("projects/%s/topics/%s", projectID, "sup-staging-postman-incoming-topic")},
+		}
+		for _, t := range postmanTopics {
+			if _, err = client.TopicAdminClient.CreateTopic(ctx, t); err != nil {
+				if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
+					return err
+				}
+			}
+		}
+
 		log.Infof("creating subscription")
 
 		subscription := &pubsubpb.Subscription{
@@ -134,6 +146,26 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 		if _, err := client.SubscriptionAdminClient.CreateSubscription(ctx, subscription); err != nil {
 			if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
 				return err
+			}
+		}
+
+		postmanSubscriptions := map[string]*pubsubpb.Subscription{
+			"outgoing": {
+				Name:                     fmt.Sprintf("projects/%s/subscriptions/%s", projectID, "sup-staging-postman-outgoing-subscription"),
+				Topic:                    postmanTopics["outgoing"].Name,
+				MessageRetentionDuration: durationpb.New(1 * time.Hour),
+			},
+			"incoming": {
+				Name:                     fmt.Sprintf("projects/%s/subscriptions/%s", projectID, "sup-staging-postman-incoming-subscription"),
+				Topic:                    postmanTopics["incoming"].Name,
+				MessageRetentionDuration: durationpb.New(1 * time.Hour),
+			},
+		}
+		for _, sub := range postmanSubscriptions {
+			if _, err := client.SubscriptionAdminClient.CreateSubscription(ctx, sub); err != nil {
+				if s, ok := status.FromError(err); !ok || s.Code() != codes.AlreadyExists {
+					return err
+				}
 			}
 		}
 	}
