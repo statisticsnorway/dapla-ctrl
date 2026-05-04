@@ -131,7 +131,7 @@ func (m *MessageSender) SendMessages(ctx context.Context) error {
 		pubsubMessage := pubsub.Message{
 			Data: byteMessage,
 			Attributes: map[string]string{
-				"PUBLISHING_APP_NAME": m.postmanPublishingAppName,
+				"PUBLISHER_APP_NAME": m.postmanPublishingAppName,
 			},
 		}
 
