@@ -34,6 +34,13 @@ type MessageSender struct {
 	log logrus.FieldLogger
 }
 
+type TopicEntry struct {
+	Data     *MessageRequest  `json:"data"`
+	Metadata *MessageMetadata `json:"metadata,omitempty"`
+}
+
+type MessageMetadata struct{}
+
 type MessageRequest struct {
 	Id             uuid.UUID     `json:"id"`
 	MessageChannel string        `json:"messageChannel"`
@@ -102,16 +109,18 @@ func (m *MessageSender) SendMessages(ctx context.Context) error {
 		if err != nil {
 			m.log.Errorf("could not get recipient: %s", err)
 		}
-		message := MessageRequest{
-			Id:             rawMessage.ID,
-			MessageChannel: "EMAIL",
-			EmailRequest: &EmailRequest{
-				Subject:         rawMessage.Subject,
-				Message:         rawMessage.Message,
-				Recipient:       recipient.Email,
-				FromType:        "NO_REPLY",
-				FromDisplayName: "Dapla CTRL",
-				IncludeLogo:     false,
+		message := TopicEntry{
+			Data: &MessageRequest{
+				Id:             rawMessage.ID,
+				MessageChannel: "EMAIL",
+				EmailRequest: &EmailRequest{
+					Subject:         rawMessage.Subject,
+					Message:         rawMessage.Message,
+					Recipient:       recipient.Email,
+					FromType:        "NO_REPLY",
+					FromDisplayName: "Dapla Ctrl",
+					IncludeLogo:     false,
+				},
 			},
 		}
 		byteMessage, err := json.Marshal(message)
@@ -126,7 +135,7 @@ func (m *MessageSender) SendMessages(ctx context.Context) error {
 			},
 		}
 
-		err = Send(ctx, m.pool, *m.querier, publisher, pubsubMessage, message.Id, m.log)
+		err = Send(ctx, m.pool, *m.querier, publisher, pubsubMessage, message.Data.Id, m.log)
 		if err != nil {
 			return err
 		}
