@@ -57,7 +57,7 @@ type JWTConfig struct {
 }
 
 type PostmanConfig struct {
-	Enabled bool `env:"POSTMAN_ENABLED", default=false`
+	Enabled bool `env:"POSTMAN_ENABLED,default=false"`
 	// Incoming for dapla-api, outgoing for SUP Postman
 	OutgoingSubscription string `env:"POSTMAN_OUTGOING_SUBSCRIPTION"`
 	// Outgoing for dapla-api, incoming for SUP Postman
@@ -65,7 +65,7 @@ type PostmanConfig struct {
 	// SupPostman GCP project id
 	ProjectId string `env:"POSTMAN_PROJECT_ID"`
 	// AppName
-	PublishingAppName string `env:"POSTMAN_PUBLISHING_APP_NAME, default=DAPLA-API"`
+	PublishingAppName string `env:"POSTMAN_PUBLISHING_APP_NAME,default=DAPLA-API"`
 }
 
 type Config struct {
