@@ -11,23 +11,11 @@ import (
 
 const create = `-- name: Create :one
 INSERT INTO
-	messages (
-		actor,
-		recipient,
-		status,
-		subject,
-		message
-	)
+	messages (actor, recipient, status, subject, message)
 VALUES
-	(
-		$1,
-		$2,
-		'PENDING',
-		$3,
-		$4
-	)
+	($1, $2, 'PENDING', $3, $4)
 RETURNING
-    id, actor, recipient, subject, message, status, created_at
+	id, actor, recipient, subject, message, status, created_at
 `
 
 type CreateParams struct {
@@ -61,11 +49,11 @@ const getByIDs = `-- name: GetByIDs :many
 SELECT
 	id, actor, recipient, subject, message, status, created_at
 FROM
-    messages
+	messages
 WHERE
 	id = ANY ($1::UUID[])
 ORDER BY
-    created_at DESC
+	created_at DESC
 `
 
 func (q *Queries) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*Message, error) {
@@ -98,13 +86,13 @@ func (q *Queries) GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*Message, er
 
 const getByStatus = `-- name: GetByStatus :many
 SELECT
-    id, actor, recipient, subject, message, status, created_at
+	id, actor, recipient, subject, message, status, created_at
 FROM
-    messages
+	messages
 WHERE
-    status = $1
+	status = $1
 ORDER BY
-    created_at DESC
+	created_at DESC
 `
 
 func (q *Queries) GetByStatus(ctx context.Context, status string) ([]*Message, error) {

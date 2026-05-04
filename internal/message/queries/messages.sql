@@ -1,22 +1,10 @@
 -- name: Create :one
 INSERT INTO
-	messages (
-		actor,
-		recipient,
-		status,
-		subject,
-		message
-	)
+	messages (actor, recipient, status, subject, message)
 VALUES
-	(
-		@actor,
-		@recipient,
-		'PENDING',
-		@subject,
-		@message
-	)
+	(@actor, @recipient, 'PENDING', @subject, @message)
 RETURNING
-    *
+	*
 ;
 
 -- name: UpdateStatus :one
@@ -33,22 +21,22 @@ RETURNING
 SELECT
 	*
 FROM
-    messages
+	messages
 WHERE
 	id = ANY (@ids::UUID[])
 ORDER BY
-    created_at DESC
+	created_at DESC
 ;
 
 -- name: GetByStatus :many
 SELECT
-    *
+	*
 FROM
-    messages
+	messages
 WHERE
-    status = @status
+	status = @status
 ORDER BY
-    created_at DESC
+	created_at DESC
 ;
 
 -- name: GetUserByID :one
