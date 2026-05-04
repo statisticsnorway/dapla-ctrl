@@ -1,6 +1,6 @@
 import styles from './sidebarmodal.module.scss'
 
-import { Title, Link, Button } from '@statisticsnorway/ssb-component-library'
+import { Title, Link } from '@statisticsnorway/ssb-component-library'
 import { X } from 'react-feather'
 
 import { Drawer } from '@mui/material'
@@ -18,7 +18,6 @@ interface SidebarBody {
 }
 
 interface SidebarFooter {
-  submitButtonText: string
   onClose?: () => void
   handleSubmit?: () => void
 }
@@ -50,15 +49,10 @@ const SidebarModalBody = ({ modalBodyTitle, modalBody }: SidebarBody) => {
   )
 }
 
-const SidebarModalFooter = ({ submitButtonText, onClose, handleSubmit }: SidebarFooter) => {
+const SidebarModalFooter = ({ onClose }: SidebarFooter) => {
   return (
     <div className={styles.modalFooter}>
       <Link onClick={onClose}>Avbryt</Link>
-      <div className={styles.modalFooterButtonText}>
-        <Button onClick={handleSubmit} primary>
-          {submitButtonText}
-        </Button>
-      </div>
     </div>
   )
 }
