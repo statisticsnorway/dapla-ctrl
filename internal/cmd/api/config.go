@@ -23,12 +23,18 @@ type usersyncConfig struct {
 	// Entra ID tenant ID
 	EntraIdTenantId string `env:"ENTRA_ID_TENANT_ID"`
 
-	// Entra ID group containing all valid users
-	// Required when usersyncer is enabled
-	AllUsersGroup string `env:"ENTRA_ID_ALL_USERS_GROUP"`
+	// JSON list of groups to use for population. Each group is defined by its Entra ID ID and
+	// employment type.
+	// E.g: `[{"groupId": "123-456-789", "employmentType": "Fast"}]
+	UserPopulationGroups string `env:"ENTRA_ID_USER_POPULATION_GROUPS"`
 
 	// Regex to match against Job Titles in Entra ID to determine who is a section manager
 	SectionManagerRegex *regexp.Regexp `env:"SECTION_MANAGER_REGEX,default=^(Seksjonssjef|Forskningsleder)"`
+}
+
+type EntraIdUserGroup struct {
+	GroupId        string
+	EmploymentType string
 }
 
 type oAuthConfig struct {

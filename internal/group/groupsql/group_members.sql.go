@@ -30,7 +30,7 @@ func (q *Queries) AddMember(ctx context.Context, arg AddMemberParams) error {
 
 const getMember = `-- name: GetMember :one
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
 FROM
 	group_members
 	JOIN users ON users.id = group_members.user_id
@@ -55,13 +55,14 @@ func (q *Queries) GetMember(ctx context.Context, arg GetMemberParams) (*User, er
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }
 
 const getMemberByEmail = `-- name: GetMemberByEmail :one
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
 FROM
 	group_members
 	JOIN users ON users.id = group_members.user_id
@@ -86,6 +87,7 @@ func (q *Queries) GetMemberByEmail(ctx context.Context, arg GetMemberByEmailPara
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }
@@ -224,7 +226,7 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 
 const listMembers = `-- name: ListMembers :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type,
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
@@ -295,6 +297,7 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 			&i.User.Admin,
 			&i.User.SectionCode,
 			&i.User.JobTitle,
+			&i.User.EmploymentType,
 			&i.Group.Name,
 			&i.Group.TeamSlug,
 			&i.Group.Category,

@@ -28,7 +28,8 @@ INSERT INTO
 		external_id,
 		admin,
 		section_code,
-		job_title
+		job_title,
+		employment_type
 	)
 VALUES
 	(
@@ -37,7 +38,8 @@ VALUES
 		@external_id,
 		FALSE,
 		@section_code,
-		@job_title
+		@job_title,
+		@employment_type
 	)
 RETURNING
 	*
@@ -50,7 +52,8 @@ SET
 	email = LOWER(@email),
 	external_id = @external_id,
 	section_code = @section_code,
-	job_title = @job_title
+	job_title = @job_title,
+	employment_type = @employment_type
 WHERE
 	id = @id
 ;

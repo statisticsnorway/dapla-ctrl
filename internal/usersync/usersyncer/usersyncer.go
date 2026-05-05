@@ -2,8 +2,10 @@ package usersyncer
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"iter"
 	"regexp"
 	"slices"
 	"strings"
@@ -29,7 +31,7 @@ type Usersynchronizer struct {
 	pool                *pgxpool.Pool
 	querier             *usersyncsql.Queries
 	adminGroup          string
-	allUsersGroup       string
+	populationGroups    []EntraIdUserGroup
 	sectionManagerRegex *regexp.Regexp
 	service             *msgraphsdk.GraphServiceClient
 
@@ -43,18 +45,24 @@ type userMap struct {
 }
 
 type entraIdUser struct {
-	ID          string
-	Email       string
-	Name        string
-	SectionCode *string
-	JobTitle    *string
+	ID             string
+	Email          string
+	Name           string
+	SectionCode    *string
+	JobTitle       *string
+	EmploymentType string
 }
 
-func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) *Usersynchronizer {
+type EntraIdUserGroup struct {
+	GroupId        string
+	EmploymentType string
+}
+
+func New(pool *pgxpool.Pool, populationGroups []EntraIdUserGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) *Usersynchronizer {
 	return &Usersynchronizer{
 		pool:                pool,
 		querier:             usersyncsql.New(pool),
-		allUsersGroup:       allUsersGroup,
+		populationGroups:    populationGroups,
 		adminGroup:          adminGroup,
 		sectionManagerRegex: sectionManagerRegex,
 		service:             service,
@@ -62,7 +70,7 @@ func New(pool *pgxpool.Pool, allUsersGroup, adminGroup string, service *msgraphs
 	}
 }
 
-func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, allUsersGroup, adminGroup string, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) (*Usersynchronizer, error) {
+func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, populationGroupsConfig, adminGroup string, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) (*Usersynchronizer, error) {
 	creds, err := azidentity.NewClientAssertionCredential(tenantId, clientId, func(ctx context.Context) (string, error) {
 		creds, err := idtoken.NewCredentials(&idtoken.Options{Audience: "api://AzureADTokenExchange"})
 		if err != nil {
@@ -87,7 +95,12 @@ func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, 
 		return nil, errors.New("section managers regex must be provided")
 	}
 
-	return New(pool, allUsersGroup, adminGroup, srv, sectionManagerRegex, log), nil
+	var populationGroups []EntraIdUserGroup
+	if err := json.Unmarshal([]byte(populationGroupsConfig), &populationGroups); err != nil {
+		return nil, fmt.Errorf("could not unmarshal population groups: %w", err)
+	}
+
+	return New(pool, populationGroups, adminGroup, srv, sectionManagerRegex, log), nil
 }
 
 // Sync fetches all users from Entra ID and adds them as users in Nais API.
@@ -140,12 +153,13 @@ func (s *Usersynchronizer) Sync(ctx context.Context) error {
 
 		if userIsOutdated(user, eu) {
 			if err := querier.Update(ctx, usersyncsql.UpdateParams{
-				ID:          user.ID,
-				Name:        eu.Name,
-				Email:       eu.Email,
-				ExternalID:  eu.ID,
-				SectionCode: eu.SectionCode,
-				JobTitle:    eu.JobTitle,
+				ID:             user.ID,
+				Name:           eu.Name,
+				Email:          eu.Email,
+				ExternalID:     eu.ID,
+				SectionCode:    eu.SectionCode,
+				JobTitle:       eu.JobTitle,
+				EmploymentType: eu.EmploymentType,
 			}); err != nil {
 				return fmt.Errorf("update user %q: %w", eu.Email, err)
 			}
@@ -366,6 +380,10 @@ func userIsOutdated(user *usersyncsql.User, eu *entraIdUser) bool {
 		return true
 	}
 
+	if user.EmploymentType != eu.EmploymentType {
+		return true
+	}
+
 	return false
 }
 
@@ -401,6 +419,13 @@ func buildUserChanges(user *usersyncsql.User, eu *entraIdUser) *changes.UserSync
 		}
 	}
 
+	if user.EmploymentType != eu.EmploymentType {
+		ch.EmploymentType = &changes.UserSyncUserChangeUnit{
+			Old: &user.EmploymentType,
+			New: &eu.EmploymentType,
+		}
+	}
+
 	return ch
 }
 
@@ -415,11 +440,12 @@ func getOrCreateUserFromEntraIdUser(ctx context.Context, querier usersyncsql.Que
 	}
 
 	createdUser, err := querier.Create(ctx, usersyncsql.CreateParams{
-		Name:        entraIdUser.Name,
-		Email:       entraIdUser.Email,
-		ExternalID:  entraIdUser.ID,
-		SectionCode: entraIdUser.SectionCode,
-		JobTitle:    entraIdUser.JobTitle,
+		Name:           entraIdUser.Name,
+		Email:          entraIdUser.Email,
+		ExternalID:     entraIdUser.ID,
+		SectionCode:    entraIdUser.SectionCode,
+		JobTitle:       entraIdUser.JobTitle,
+		EmploymentType: entraIdUser.EmploymentType,
 	})
 	if err != nil {
 		return nil, err
@@ -441,14 +467,8 @@ func getOrCreateUserFromEntraIdUser(ctx context.Context, querier usersyncsql.Que
 	return createdUser, nil
 }
 
-// getEntraIdUsers fetches all users from Entra ID.
-func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.FieldLogger) ([]*entraIdUser, error) {
-	users := make([]*entraIdUser, 0)
-
-	log.Debugf("start fetching users from Entra ID")
-	t := time.Now()
-
-	usersResponse, err := s.service.Groups().ByGroupId(s.allUsersGroup).TransitiveMembers().Get(ctx, &groups.ItemTransitiveMembersRequestBuilderGetRequestConfiguration{
+func (s *Usersynchronizer) getEntraIdGroupMembers(ctx context.Context, group EntraIdUserGroup) (iter.Seq2[*entraIdUser, error], error) {
+	usersResponse, err := s.service.Groups().ByGroupId(group.GroupId).TransitiveMembers().Get(ctx, &groups.ItemTransitiveMembersRequestBuilderGetRequestConfiguration{
 		QueryParameters: &groups.ItemTransitiveMembersRequestBuilderGetQueryParameters{
 			Select: []string{"department", "jobTitle", "id", "email", "displayName", "userPrincipalName"},
 		},
@@ -462,28 +482,63 @@ func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.Field
 		return nil, fmt.Errorf("create pageiterator: %w", err)
 	}
 
-	if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
-		jobTitle := user.GetJobTitle()
-		if jobTitle != nil && *jobTitle == "" {
-			jobTitle = nil
+	return func(yield func(*entraIdUser, error) bool) {
+		if err := pageIterator.Iterate(ctx, func(user models.Userable) bool {
+			jobTitle := user.GetJobTitle()
+			if jobTitle != nil && *jobTitle == "" {
+				jobTitle = nil
+			}
+			eIdUser := &entraIdUser{
+				ID:             *user.GetId(),
+				Email:          strings.ToLower(*user.GetUserPrincipalName()),
+				Name:           *user.GetDisplayName(),
+				SectionCode:    parseSectionCode(user.GetDepartment()),
+				JobTitle:       jobTitle,
+				EmploymentType: group.EmploymentType,
+			}
+			if ok := yield(eIdUser, nil); !ok {
+				return false
+			}
+			return true
+		}); err != nil {
+			yield(nil, fmt.Errorf("list members of group %q: %w", group.GroupId, err))
+			return
 		}
-		users = append(users, &entraIdUser{
-			ID:          *user.GetId(),
-			Email:       strings.ToLower(*user.GetUserPrincipalName()),
-			Name:        *user.GetDisplayName(),
-			SectionCode: parseSectionCode(user.GetDepartment()),
-			JobTitle:    jobTitle,
-		})
-		return true
-	}); err != nil {
-		return nil, fmt.Errorf("list all users group members: %w", err)
+	}, nil
+}
+
+// getEntraIdUsers fetches all users from Entra ID.
+func (s *Usersynchronizer) getEntraIdUsers(ctx context.Context, log logrus.FieldLogger) ([]*entraIdUser, error) {
+	users := make([]*entraIdUser, 0)
+	seenUsers := make(map[string]*entraIdUser)
+
+	log.Debugf("start fetching users from Entra ID")
+	t := time.Now()
+
+	for _, group := range s.populationGroups {
+		members, err := s.getEntraIdGroupMembers(ctx, group)
+		if err != nil {
+			return nil, err
+		}
+
+		for eidUser, err := range members {
+			if err != nil {
+				return nil, err
+			}
+			if seenUser, ok := seenUsers[eidUser.ID]; ok {
+				log.Warnf("user %q found with multiple employment types: %q and %q", eidUser.Email, seenUser.EmploymentType, group.EmploymentType)
+				continue
+			}
+			users = append(users, eidUser)
+			seenUsers[eidUser.ID] = eidUser
+		}
 	}
 
 	log.WithFields(logrus.Fields{
 		"duration":  time.Since(t),
 		"num_users": len(users),
 	}).Infof("finished fetching users from Entra ID")
-	return users, err
+	return users, nil
 }
 
 // getDbUsers return a collection of maps of users by ID, external ID and email.

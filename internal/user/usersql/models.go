@@ -7,11 +7,12 @@ import (
 )
 
 type User struct {
-	ID          uuid.UUID
-	Email       string
-	Name        string
-	ExternalID  string
-	Admin       bool
-	SectionCode *string
-	JobTitle    *string
+	ID             uuid.UUID
+	Email          string
+	Name           string
+	ExternalID     string
+	Admin          bool
+	SectionCode    *string
+	JobTitle       *string
+	EmploymentType string
 }

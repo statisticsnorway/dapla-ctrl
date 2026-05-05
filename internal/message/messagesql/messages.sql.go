@@ -125,7 +125,7 @@ func (q *Queries) GetByStatus(ctx context.Context, status string) ([]*Message, e
 
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
-	id, email, name, external_id, admin, section_code, job_title
+	id, email, name, external_id, admin, section_code, job_title, employment_type
 FROM
 	users
 WHERE
@@ -143,13 +143,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (*User, erro
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
 SELECT
-	id, email, name, external_id, admin, section_code, job_title
+	id, email, name, external_id, admin, section_code, job_title, employment_type
 FROM
 	users
 WHERE
@@ -170,6 +171,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*User, error) 
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }

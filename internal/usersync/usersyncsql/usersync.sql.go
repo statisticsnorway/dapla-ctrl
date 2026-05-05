@@ -63,7 +63,8 @@ INSERT INTO
 		external_id,
 		admin,
 		section_code,
-		job_title
+		job_title,
+		employment_type
 	)
 VALUES
 	(
@@ -72,18 +73,20 @@ VALUES
 		$3,
 		FALSE,
 		$4,
-		$5
+		$5,
+		$6
 	)
 RETURNING
-	id, email, name, external_id, admin, section_code, job_title
+	id, email, name, external_id, admin, section_code, job_title, employment_type
 `
 
 type CreateParams struct {
-	Name        string
-	Email       string
-	ExternalID  string
-	SectionCode *string
-	JobTitle    *string
+	Name           string
+	Email          string
+	ExternalID     string
+	SectionCode    *string
+	JobTitle       *string
+	EmploymentType string
 }
 
 func (q *Queries) Create(ctx context.Context, arg CreateParams) (*User, error) {
@@ -93,6 +96,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*User, error) {
 		arg.ExternalID,
 		arg.SectionCode,
 		arg.JobTitle,
+		arg.EmploymentType,
 	)
 	var i User
 	err := row.Scan(
@@ -103,6 +107,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*User, error) {
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }
@@ -221,7 +226,7 @@ func (q *Queries) GetSections(ctx context.Context) ([]*Section, error) {
 
 const list = `-- name: List :many
 SELECT
-	id, email, name, external_id, admin, section_code, job_title
+	id, email, name, external_id, admin, section_code, job_title, employment_type
 FROM
 	users
 ORDER BY
@@ -246,6 +251,7 @@ func (q *Queries) List(ctx context.Context) ([]*User, error) {
 			&i.Admin,
 			&i.SectionCode,
 			&i.JobTitle,
+			&i.EmploymentType,
 		); err != nil {
 			return nil, err
 		}
@@ -259,7 +265,7 @@ func (q *Queries) List(ctx context.Context) ([]*User, error) {
 
 const listGlobalAdmins = `-- name: ListGlobalAdmins :many
 SELECT
-	u.id, u.email, u.name, u.external_id, u.admin, u.section_code, u.job_title
+	u.id, u.email, u.name, u.external_id, u.admin, u.section_code, u.job_title, u.employment_type
 FROM
 	users u
 WHERE
@@ -286,6 +292,7 @@ func (q *Queries) ListGlobalAdmins(ctx context.Context) ([]*User, error) {
 			&i.Admin,
 			&i.SectionCode,
 			&i.JobTitle,
+			&i.EmploymentType,
 		); err != nil {
 			return nil, err
 		}
@@ -463,18 +470,20 @@ SET
 	email = LOWER($2),
 	external_id = $3,
 	section_code = $4,
-	job_title = $5
+	job_title = $5,
+	employment_type = $6
 WHERE
-	id = $6
+	id = $7
 `
 
 type UpdateParams struct {
-	Name        string
-	Email       string
-	ExternalID  string
-	SectionCode *string
-	JobTitle    *string
-	ID          uuid.UUID
+	Name           string
+	Email          string
+	ExternalID     string
+	SectionCode    *string
+	JobTitle       *string
+	EmploymentType string
+	ID             uuid.UUID
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
@@ -484,6 +493,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) error {
 		arg.ExternalID,
 		arg.SectionCode,
 		arg.JobTitle,
+		arg.EmploymentType,
 		arg.ID,
 	)
 	return err

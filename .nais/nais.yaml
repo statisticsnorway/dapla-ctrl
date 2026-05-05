@@ -78,8 +78,34 @@ spec:
       value: "true"
     - name: USERSYNC_ADMIN_GROUP
       value: 57448440-d89e-45b7-ab0a-c915d7d8593d
-    - name: ENTRA_ID_ALL_USERS_GROUP
-      value: 8bfaa3cb-f959-4eef-bb7a-4b9e09b55fc9
+    - name: ENTRA_ID_USER_POPULATION_GROUPS
+      value: |-
+        [
+          {
+            "groupId": "06e3f8a4-de02-472e-899e-a82a195bec85",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "b9b78597-f851-4a98-a36a-a4b192352ecd",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "62629f34-d4a0-4a67-8773-a40b6c17d674",
+            "employmentType": "Midlertidig"
+          },
+          {
+            "groupId": "8c6432c8-92b7-4c47-a986-c355f58242cc",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "6563e5d3-779e-41a0-b6c4-2c624a626d85",
+            "employmentType": "Midlertidig"
+          },
+          {
+            "groupId": "770d458b-6c05-43a7-a85d-969fd528e7ba",
+            "employmentType": "Ekstern"
+          }
+        ]
     - name: USERSYNC_ENABLED
       value: "true"
     - name: POSTMAN_ENABLED

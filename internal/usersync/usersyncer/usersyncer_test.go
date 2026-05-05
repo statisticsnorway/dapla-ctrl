@@ -28,9 +28,10 @@ import (
 )
 
 const (
-	allUsersGroup = "all-users"
-	adminGroup    = "api-admins"
+	adminGroup = "api-admins"
 )
+
+var populationGroups = []usersyncer.EntraIdUserGroup{{GroupId: "all-users", EmploymentType: "Fast"}}
 
 func TestSync(t *testing.T) {
 	ctx := context.Background()
@@ -76,7 +77,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatalf("failed to sync: %v", err)
@@ -145,7 +146,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -201,9 +202,20 @@ func TestSync(t *testing.T) {
 		}
 
 		userWithOutdatedSection, err := querier.Create(ctx, usersyncsql.CreateParams{
-			Name:       "I Am No Longer In Section 723",
-			Email:      "fix-my-section@example.com",
-			ExternalID: "5",
+			Name:        "I Am No Longer In Section 723",
+			SectionCode: new("723"),
+			Email:       "fix-my-section@example.com",
+			ExternalID:  "5",
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		userWithNewEmploymentType, err := querier.Create(ctx, usersyncsql.CreateParams{
+			Name:           "Jens Stoltenberg",
+			EmploymentType: "Utsending fra NATO",
+			Email:          "gensek@nato.com",
+			ExternalID:     "6",
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -221,15 +233,16 @@ func TestSync(t *testing.T) {
 					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},                                                                    // Will update euserPrincipalName of local user
 					externalUser{Id: "4", Email: "should-lose-admin@example.com", Name: "Should Lose Admin"},                                                // Will lose admin role
 					externalUser{Id: "5", Email: "fix-my-section@example.com", Name: "I Am No Longer In Section 723", Section: "O 724 Seksjon for Testing"}, // Will get their section updated
-					externalUser{Id: "6", Email: "create-me@example.com", Name: "Create Me", Section: "O 724 Seksjon for Testing"},                          // Will be created
-					externalUser{Id: "7", Email: "invalid-section@example.com", Name: "My Section Doesn't Exist", Section: "O 1337 Seksjon for fantasi"}),   // Will be created, with section NULL
+					externalUser{Id: "6", Email: "gensek@nato.com", Name: "Jens Stolenberg"},                                                                // Will have their employment type updated
+					externalUser{Id: "7", Email: "create-me@example.com", Name: "Create Me", Section: "O 724 Seksjon for Testing"},                          // Will be created
+					externalUser{Id: "8", Email: "invalid-section@example.com", Name: "My Section Doesn't Exist", Section: "O 1337 Seksjon for fantasi"}),   // Will be created, with section NULL
 				)
 			},
 			func(req *http.Request) *http.Response {
 				// Admin users response
 				return test.Response("200 OK", generateEntraIdResponse(
 					externalUser{Id: "2", Email: "user2@example.com", Name: "Some Name"},              // Will be granted admin role
-					externalUser{Id: "8", Email: "unknown-admin@example.com", Name: "Unknown Admin"}), // Unknown user, will be logged
+					externalUser{Id: "9", Email: "unknown-admin@example.com", Name: "Unknown Admin"}), // Unknown user, will be logged
 				)
 			},
 		)
@@ -245,7 +258,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -254,8 +267,8 @@ func TestSync(t *testing.T) {
 		p, _ := pagination.ParsePage(nil, nil, nil, nil)
 		if users, err := user.List(ctx, p, nil); err != nil {
 			t.Fatal(err)
-		} else if total := users.PageInfo.TotalCount; total != 6 {
-			t.Errorf("expected 6 users, got %d", total)
+		} else if total := users.PageInfo.TotalCount; total != 7 {
+			t.Errorf("expected 7 users, got %d", total)
 		}
 
 		if u, err := user.Get(ctx, userWithIncorrectName.ID); err != nil {
@@ -311,6 +324,12 @@ func TestSync(t *testing.T) {
 			t.Fatal(err)
 		} else if updatedUserWithInvalidSection.SectionCode != nil {
 			t.Errorf("expected user %q to have no section, got %q", updatedUserWithInvalidSection.Email, *updatedUserWithInvalidSection.SectionCode)
+		}
+
+		if updatedUserWithNewEmploymentType, err := user.GetByEmail(ctx, userWithNewEmploymentType.Email); err != nil {
+			t.Fatal(err)
+		} else if updatedUserWithNewEmploymentType.EmploymentType != "Fast" {
+			t.Errorf("expected user %q to have employment type %q, got %q", updatedUserWithNewEmploymentType.Email, "Fast", updatedUserWithNewEmploymentType.EmploymentType)
 		}
 	})
 
@@ -377,7 +396,7 @@ func TestSync(t *testing.T) {
 		client := msgraphsdk.NewGraphServiceClient(adapter)
 
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -503,7 +522,7 @@ func TestSync(t *testing.T) {
 
 		// Run usersync, this should replace our old boss with the new one as manager of the section
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)
@@ -596,7 +615,7 @@ func TestSync(t *testing.T) {
 
 		// Run usersync, this should demote the ex-manager
 		err = usersyncer.
-			New(pool, allUsersGroup, adminGroup, client, sectionManagerRegex, log).
+			New(pool, populationGroups, adminGroup, client, sectionManagerRegex, log).
 			Sync(ctx)
 		if err != nil {
 			t.Fatal(err)

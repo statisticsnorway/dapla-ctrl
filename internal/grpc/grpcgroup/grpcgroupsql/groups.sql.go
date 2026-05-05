@@ -70,7 +70,7 @@ func (q *Queries) Get(ctx context.Context, name string) (*GetRow, error) {
 
 const getUserByExternalId = `-- name: GetUserByExternalId :one
 SELECT
-	id, email, name, external_id, admin, section_code, job_title
+	id, email, name, external_id, admin, section_code, job_title, employment_type
 FROM
 	users
 WHERE
@@ -88,13 +88,14 @@ func (q *Queries) GetUserByExternalId(ctx context.Context, externalID string) (*
 		&i.Admin,
 		&i.SectionCode,
 		&i.JobTitle,
+		&i.EmploymentType,
 	)
 	return &i, err
 }
 
 const listMembers = `-- name: ListMembers :many
 SELECT
-	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title,
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type,
 	groups.name, groups.team_slug, groups.category, groups.suffix, groups.external_id,
 	COUNT(*) OVER () AS total_count
 FROM
@@ -159,6 +160,7 @@ func (q *Queries) ListMembers(ctx context.Context, arg ListMembersParams) ([]*Li
 			&i.User.Admin,
 			&i.User.SectionCode,
 			&i.User.JobTitle,
+			&i.User.EmploymentType,
 			&i.Group.Name,
 			&i.Group.TeamSlug,
 			&i.Group.Category,
