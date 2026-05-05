@@ -104,6 +104,10 @@ spec:
           {
             "groupId": "770d458b-6c05-43a7-a85d-969fd528e7ba",
             "employmentType": "Ekstern"
+          },
+          {
+            "groupId": "bfa286d2-ccc2-48b6-820d-f14696400150",
+            "employmentType": "Testbruker"
           }
         ]
     - name: USERSYNC_ENABLED
