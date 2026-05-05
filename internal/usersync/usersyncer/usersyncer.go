@@ -58,6 +58,22 @@ type EntraIdUserGroup struct {
 	EmploymentType string
 }
 
+func (g EntraIdUserGroup) IsValid() bool {
+	return g.GroupId != "" && g.EmploymentType != ""
+}
+
+func validatePopulationGroups(groups []EntraIdUserGroup) bool {
+	if len(groups) == 0 {
+		return false
+	}
+	for _, g := range groups {
+		if !g.IsValid() {
+			return false
+		}
+	}
+	return true
+}
+
 func New(pool *pgxpool.Pool, populationGroups []EntraIdUserGroup, adminGroup string, service *msgraphsdk.GraphServiceClient, sectionManagerRegex *regexp.Regexp, log logrus.FieldLogger) *Usersynchronizer {
 	return &Usersynchronizer{
 		pool:                pool,
@@ -98,6 +114,10 @@ func NewFromConfig(ctx context.Context, pool *pgxpool.Pool, clientId, tenantId, 
 	var populationGroups []EntraIdUserGroup
 	if err := json.Unmarshal([]byte(populationGroupsConfig), &populationGroups); err != nil {
 		return nil, fmt.Errorf("could not unmarshal population groups: %w", err)
+	}
+
+	if valid := validatePopulationGroups(populationGroups); !valid {
+		return nil, fmt.Errorf("invalid population group config (either none given or one is incomplete): %s", populationGroups)
 	}
 
 	return New(pool, populationGroups, adminGroup, srv, sectionManagerRegex, log), nil
