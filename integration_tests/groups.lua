@@ -474,3 +474,74 @@ Test.gql("Remove non-member fails", function(t)
 		},
 	}
 end)
+
+-- Add user to group and remove from users table
+Helper.SQLExec([[
+		INSERT INTO
+			group_members (group_name, user_id)
+		VALUES
+			($1, $2)
+		]], groupName, member:id())
+
+Helper.SQLExec([[
+		DELETE FROM
+			users
+		WHERE id = $1
+		]], member:id())
+
+Test.gql("System user removal appears in activity log", function(t)
+	t.addHeader("x-user-email", admin:email())
+
+	t.query(string.format([[
+		query {
+			group(name: "%s") {
+				activityLog(
+				first: 1
+					filter: {
+						activityTypes: [
+							GROUP_MEMBER_REMOVED
+						]
+					}
+				) {
+					nodes {
+						__typename
+						message
+						actor
+						createdAt
+						resourceType
+						resourceName
+						teamSlug
+						... on GroupMemberRemovedActivityLogEntry {
+							data {
+								userEmail
+							}
+						}
+					}
+				}
+			}
+		}
+	]], groupName))
+
+	t.check {
+		data = {
+			group = {
+				activityLog = {
+					nodes = {
+						{
+							__typename = "GroupMemberRemovedActivityLogEntry",
+							message = "Remove member",
+							actor = 'system',
+							createdAt = NotNull(),
+							resourceType = "GROUP",
+							resourceName = groupName,
+							teamSlug = team:slug(),
+							data = {
+								userEmail = member:email(),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+end)
