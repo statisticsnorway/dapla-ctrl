@@ -63,9 +63,8 @@ type SMSRequest struct {
 }
 
 type MessageResult struct {
-	Id        uuid.UUID
-	Result    string
-	Timestamp string
+	Id     uuid.UUID
+	Result string
 }
 
 func New(pool *pgxpool.Pool, postmanOutgoingSubscription, postmanIncomingTopic, postmanProjectId, postmanPublishingAppName string, pubsubClient *pubsub.Client, log logrus.FieldLogger) *MessageSender {
