@@ -1,7 +1,8 @@
 local admin = User.new("Admin member", "admin@example.com", "admin-member")
 admin:admin(true)
 
-local member = User.new("Group Member", "member@example.com", "group-member")
+local memberName = "Group Member"
+local member = User.new(memberName, "member@example.com", "group-member")
 local other = User.new("Other Member", "other-member@example.com", "other-member")
 
 local team = Team.new("slug-one", "724")
@@ -368,6 +369,28 @@ Test.gql("Admin can remove group member", function(t)
 					name = groupName,
 				},
 			},
+		},
+	}
+end)
+
+
+Test.sql("Check that message for add and remove group are added to messages DB", function(t)
+	t.query("SELECT m.actor, u.name, m.subject, m.message FROM messages m JOIN users u ON m.recipient = u.id")
+
+	t.check {
+		{
+			actor = "admin@example.com",
+			name = memberName,
+			subject = "Innmelding i 'developers-cowboys'-gruppen i teamet slug-one",
+			message = Contains("Hei member@example.com"),
+			recipient = Ignore(),
+		},
+		{
+			actor = "admin@example.com",
+			name = memberName,
+			subject = "Utmelding fra 'developers-cowboys'-gruppen i teamet slug-one",
+			message = Contains("Hei member@example.com"),
+			recipient = Ignore(),
 		},
 	}
 end)

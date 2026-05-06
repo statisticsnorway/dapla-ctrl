@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
@@ -14,8 +15,8 @@ type ctxKey int
 
 const loadersKey ctxKey = iota
 
-func NewLoaderContext(ctx context.Context, dbConn *pgxpool.Pool) context.Context {
-	return context.WithValue(ctx, loadersKey, newLoaders(dbConn))
+func NewLoaderContext(ctx context.Context, dbConn *pgxpool.Pool, log logrus.FieldLogger) context.Context {
+	return context.WithValue(ctx, loadersKey, newLoaders(dbConn, log))
 }
 
 func fromContext(ctx context.Context) *loaders {
@@ -25,15 +26,17 @@ func fromContext(ctx context.Context) *loaders {
 type loaders struct {
 	internalQuerier *groupsql.Queries
 	groupLoader     *dataloadgen.Loader[string, *Group]
+	log             logrus.FieldLogger
 }
 
-func newLoaders(dbConn *pgxpool.Pool) *loaders {
+func newLoaders(dbConn *pgxpool.Pool, log logrus.FieldLogger) *loaders {
 	db := groupsql.New(dbConn)
 	groupLoader := &dataloader{db: db}
 
 	return &loaders{
 		internalQuerier: db,
 		groupLoader:     dataloadgen.NewLoader(groupLoader.list, loader.DefaultDataLoaderOptions...),
+		log:             log,
 	}
 }
 

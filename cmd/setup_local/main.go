@@ -23,6 +23,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group"
 	"github.com/statisticsnorway/dapla-api/internal/logger"
+	"github.com/statisticsnorway/dapla-api/internal/message"
 	"github.com/statisticsnorway/dapla-api/internal/section"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team"
@@ -195,8 +196,9 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 	ctx = user.NewLoaderContext(ctx, pool)
 	ctx = team.NewLoaderContext(ctx, pool)
 	ctx = authz.NewLoaderContext(ctx, pool)
-	ctx = group.NewLoaderContext(ctx, pool)
+	ctx = group.NewLoaderContext(ctx, pool, log)
 	ctx = section.NewLoaderContext(ctx, pool)
+	ctx = message.NewLoaderContext(ctx, pool)
 
 	emails := map[string]struct{}{}
 	slugs := map[slug.Slug]struct{}{}

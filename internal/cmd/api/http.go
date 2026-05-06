@@ -175,7 +175,7 @@ func ConfigureGraph(
 		ctx = section.NewLoaderContext(ctx, pool)
 		ctx = search.NewLoaderContext(ctx, pool, searcher)
 		ctx = feature.NewLoaderContext(ctx)
-		ctx = group.NewLoaderContext(ctx, pool)
+		ctx = group.NewLoaderContext(ctx, pool, log)
 		ctx = sharedbucketsstopgap.NewLoaderContext(ctx, pool)
 		ctx = message.NewLoaderContext(ctx, pool)
 		return ctx

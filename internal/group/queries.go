@@ -15,6 +15,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/group/groupsql"
+	"github.com/statisticsnorway/dapla-api/internal/message"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/user"
 )
@@ -197,6 +198,17 @@ func AddMember(ctx context.Context, input AddGroupMemberInput, actor *authz.Acto
 			return err
 		}
 
+		categoryAndSuffix := strings.TrimPrefix(group.Name, group.TeamSlug.String()+"-")
+		emailMessage := generateEmailMessage("lagt til i", input.UserEmail, categoryAndSuffix, group.TeamSlug.String(), actor.User.Identity())
+		_, err = message.Create(ctx, &message.SendMessageInput{
+			Recipient: input.UserEmail,
+			Subject:   fmt.Sprintf("Innmelding i '%s'-gruppen i teamet %s", categoryAndSuffix, group.TeamSlug.String()),
+			Message:   emailMessage,
+		}, actor)
+		if err != nil {
+			fromContext(ctx).log.WithError(err).Warnf("error during send message for member '%s' added to group '%s'", input.UserEmail, group.TeamSlug.String())
+		}
+
 		// Not the end of the world if it fails
 		_ = db(ctx).RefreshTeamMembers(ctx)
 
@@ -237,6 +249,18 @@ func RemoveMember(ctx context.Context, input RemoveGroupMemberInput, actor *auth
 		if err != nil {
 			return err
 		}
+
+		categoryAndSuffix := strings.TrimPrefix(group.Name, group.TeamSlug.String()+"-")
+		emailMessage := generateEmailMessage("meldt ut av", input.UserEmail, categoryAndSuffix, group.TeamSlug.String(), actor.User.Identity())
+		_, err = message.Create(ctx, &message.SendMessageInput{
+			Recipient: input.UserEmail,
+			Subject:   fmt.Sprintf("Utmelding fra '%s'-gruppen i teamet %s", categoryAndSuffix, group.TeamSlug.String()),
+			Message:   emailMessage,
+		}, actor)
+		if err != nil {
+			fromContext(ctx).log.WithError(err).Warnf("error during send message for member '%s' removed from group '%s'", input.UserEmail, group.TeamSlug.String())
+		}
+
 		// Not the end of the world if it fails
 		_ = db(ctx).RefreshTeamMembers(ctx)
 
@@ -275,4 +299,20 @@ func ListByTeamSlug(ctx context.Context, teamSlug slug.Slug, page *pagination.Pa
 
 	p := pagination.Slice(ret, page)
 	return pagination.NewConvertConnection(p, page, len(ret), toGraphGroup), nil
+}
+
+func generateEmailMessage(action, userEmail, groupCategory, teamSlug, actorEmail string) string {
+	return fmt.Sprintf(`
+        Hei %s,
+        <p>
+            Du har blitt %s <b>%s</b>-gruppen i teamet <span>%s</span>.
+        </p>
+        <p>
+            Se mer informasjon om teamet i <a href="https://dapla-ctrl.intern.ssb.no/team/%s">Dapla Ctrl</a>.
+            Ta kontakt med teamansvarlig eller en av teamets tilgangsansvarlige dersom du har spørsmål.
+        </p>
+
+        <br><br>
+        <i>Endringen er utført av %s. Denne e-posten kan ikke besvares.</i>
+        `, userEmail, action, groupCategory, teamSlug, teamSlug, actorEmail)
 }
