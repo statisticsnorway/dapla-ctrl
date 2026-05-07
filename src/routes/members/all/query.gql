@@ -5,7 +5,7 @@ query AllTeamMembers(
 	$last: Int
 	$orderBy: UserOrder
 ) {
-	users(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+	teamMembers(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
 		pageInfo {
 			hasNextPage
 			hasPreviousPage

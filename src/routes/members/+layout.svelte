@@ -14,7 +14,7 @@
 			: 0
 	);
 
-	let allTeamMembersCount = $derived($AllTeamMembers.data?.users?.pageInfo?.totalCount ?? 0);
+	let allTeamMembersCount = $derived($AllTeamMembers.data?.teamMembers?.pageInfo?.totalCount ?? 0);
 
 	const isAllTeamMembersPage = $derived(page.url.pathname === '/members/all');
 

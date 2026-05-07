@@ -7,7 +7,7 @@
 	let { data }: PageProps = $props();
 	let { AllTeamMembers } = $derived(data);
 
-	type TeamMember = AllTeamMembers$result['users']['nodes'][0];
+	type TeamMember = AllTeamMembers$result['teamMembers']['nodes'][0];
 
 	const changeQuery = (params: { after?: string; before?: string }) => {
 		changeParams(params);
@@ -29,15 +29,21 @@
 
 {#if $AllTeamMembers.data}
 	<TeamMembersTable
-		teamMembers={$AllTeamMembers.data?.users.nodes.map(transformTeamMembersData)}
-		pageInfo={$AllTeamMembers.data.users.pageInfo}
+		teamMembers={$AllTeamMembers.data?.teamMembers.nodes.map(transformTeamMembersData)}
+		pageInfo={$AllTeamMembers.data.teamMembers.pageInfo}
 		selected={data.teamMembersTableField}
 		loaders={{
 			loadPreviousPage: () => {
-				changeQuery({ after: '', before: $AllTeamMembers.data?.users.pageInfo.startCursor ?? '' });
+				changeQuery({
+					after: '',
+					before: $AllTeamMembers.data?.teamMembers.pageInfo.startCursor ?? ''
+				});
 			},
 			loadNextPage: () => {
-				changeQuery({ before: '', after: $AllTeamMembers.data?.users.pageInfo.endCursor ?? '' });
+				changeQuery({
+					before: '',
+					after: $AllTeamMembers.data?.teamMembers.pageInfo.endCursor ?? ''
+				});
 			}
 		}}
 	/>
