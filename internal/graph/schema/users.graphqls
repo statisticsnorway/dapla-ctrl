@@ -30,6 +30,36 @@ extend type Query {
 	): UserConnection!
 
 	"""
+	Get a list of team members. I.e. users who are members of at least one team.
+	"""
+	teamMembers(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): UserConnection!
+
+	"""
 	Get a user by an identifier.
 	"""
 	user(email: String): User!

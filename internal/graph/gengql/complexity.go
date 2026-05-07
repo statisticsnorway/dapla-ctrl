@@ -46,6 +46,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Query.SharedBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Query.TeamMembers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Query.Teams = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}

@@ -9,6 +9,22 @@ end
 
 local user = User.new("Authenticated User", "authenticated@example.com", "authenticated", "724")
 
+-- Add user to team to test that teamMembers works correctly
+local team = Team.new("snegle-ein", "724")
+
+Helper.SQLExec([[
+	INSERT INTO groups (team_slug, category, suffix, name)
+	VALUES
+	('snegle-ein', 'developers', '', 'snegle-ein-developers')
+]])
+
+Helper.SQLExec([[
+	INSERT INTO group_members (group_name, user_id)
+	VALUES
+	($1, $2)
+	]], "snegle-ein-developers", user:id())
+
+
 Test.gql("list users", function(t)
 	t.addHeader("x-user-email", user:email())
 
@@ -151,6 +167,60 @@ Test.gql("list users with offset", function(t)
 					endCursor = Ignore(),
 					hasNextPage = true,
 					hasPreviousPage = true,
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("List users who are members of at least one team", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query([[
+		query {
+			teamMembers(first: 1) {
+				pageInfo {
+					totalCount
+				}
+				nodes {
+					email
+					teams {
+						pageInfo {
+							totalCount
+						}
+						nodes {
+							team {
+								slug
+							}
+						}
+					}
+				}
+			}
+		}
+	]])
+
+	t.check {
+		data = {
+			teamMembers = {
+				pageInfo = {
+					totalCount = 1,
+				},
+				nodes = {
+					{
+						email = user:email(),
+						teams = {
+							pageInfo = {
+								totalCount = 1,
+							},
+							nodes = {
+								{
+									team = {
+										slug = team:slug(),
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

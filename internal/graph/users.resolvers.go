@@ -24,6 +24,15 @@ func (r *queryResolver) Users(ctx context.Context, first *int, after *pagination
 	return user.List(ctx, page, orderBy)
 }
 
+func (r *queryResolver) TeamMembers(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
+	return user.ListUsersWithTeams(ctx, page, orderBy)
+}
+
 func (r *queryResolver) User(ctx context.Context, email *string) (*user.User, error) {
 	if email == nil {
 		return nil, apierror.Errorf("email argument must be provided")

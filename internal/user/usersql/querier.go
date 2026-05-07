@@ -14,6 +14,7 @@ type Querier interface {
 	GetByIDs(ctx context.Context, ids []uuid.UUID) ([]*User, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListTeamMembersForUser(ctx context.Context, arg ListTeamMembersForUserParams) ([]*ListTeamMembersForUserRow, error)
+	ListUsersWithTeams(ctx context.Context, arg ListUsersWithTeamsParams) ([]*ListUsersWithTeamsRow, error)
 }
 
 var _ Querier = (*Queries)(nil)

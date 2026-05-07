@@ -31,6 +31,42 @@ OFFSET
 	sqlc.arg('offset')
 ;
 
+-- name: ListUsersWithTeams :many
+SELECT
+	sqlc.embed(users),
+	COUNT(*) OVER () AS total_count
+FROM
+	users
+	JOIN group_members ON users.id = group_members.user_id
+GROUP BY
+	users.id
+ORDER BY
+	CASE
+		WHEN @order_by::TEXT = 'name:asc' THEN name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'name:desc' THEN name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'email:asc' THEN email
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'email:desc' THEN email
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN section_code
+	END DESC,
+	name,
+	email ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;
+
 -- name: GetByIDs :many
 SELECT
 	*
