@@ -194,7 +194,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 	ctx = database.NewLoaderContext(ctx, pool)
 	ctx = activitylog.NewLoaderContext(ctx, pool)
 	ctx = user.NewLoaderContext(ctx, pool)
-	ctx = team.NewLoaderContext(ctx, pool)
+	ctx = team.NewLoaderContext(ctx, pool, log)
 	ctx = authz.NewLoaderContext(ctx, pool)
 	ctx = group.NewLoaderContext(ctx, pool, log)
 	ctx = section.NewLoaderContext(ctx, pool)

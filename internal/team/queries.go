@@ -3,6 +3,7 @@ package team
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -11,6 +12,7 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/database"
 	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-api/internal/message"
 	"github.com/statisticsnorway/dapla-api/internal/slug"
 	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
 	"github.com/statisticsnorway/dapla-api/internal/user"
@@ -352,6 +354,16 @@ func AddAccessManager(ctx context.Context, input AddTeamAccessManagerInput, acto
 			return err
 		}
 
+		emailMessage := generateEmailMessage(true, input.UserEmail, input.TeamSlug.String(), actor.User.Identity())
+		_, err = message.Create(ctx, &message.SendMessageInput{
+			Recipient: input.UserEmail,
+			Subject:   fmt.Sprintf("Du har blitt Tilgangsansvarlig for teamet %s", input.TeamSlug.String()),
+			Message:   emailMessage,
+		}, actor)
+		if err != nil {
+			fromContext(ctx).log.WithError(err).Warnf("error during send message for member '%s' set as access manager for team '%s'", input.UserEmail, input.TeamSlug.String())
+		}
+
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activityLogEntryActionAssignRole,
 			Actor:        actor.User,
@@ -375,6 +387,15 @@ func RemoveAccessManager(ctx context.Context, input RemoveTeamAccessManagerInput
 			return err
 		}
 
+		emailMessage := generateEmailMessage(true, input.UserEmail, input.TeamSlug.String(), actor.User.Identity())
+		if _, err := message.Create(ctx, &message.SendMessageInput{
+			Recipient: input.UserEmail,
+			Subject:   fmt.Sprintf("Du har blitt fjernet som Tilgangsansvarlig for teamet %s", input.TeamSlug.String()),
+			Message:   emailMessage,
+		}, actor); err != nil {
+			fromContext(ctx).log.WithError(err).Warnf("error during send message for member '%s' removed as access manager for team '%s'", input.UserEmail, input.TeamSlug.String())
+		}
+
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activityLogEntryActionRevokeRole,
 			Actor:        actor.User,
@@ -387,4 +408,30 @@ func RemoveAccessManager(ctx context.Context, input RemoveTeamAccessManagerInput
 			},
 		})
 	})
+}
+
+func generateEmailMessage(isAddAction bool, userEmail, teamSlug, actorEmail string) string {
+	action := "fjernet deg"
+	extraInfo := ""
+	if isAddAction {
+		action = "lagt deg til"
+		extraInfo = `
+			Rollen gir deg mulighet til å tilgangsstyre medlemmer i teamet fra Dapla Ctrl på lik linje med Teamansvarlig.
+			Rollen innebærer at du må vurdere søknad om medlemskap etter samme kriterier som Teamansvarlig, før de legges til i teamet.
+		`
+	}
+	return fmt.Sprintf(`
+        Hei %s,
+        <p>
+            Teamansvarlig %s for team %s har %s som Tilgangsansvarlig for teamet.
+            %s
+        </p>
+        <p>
+            Se mer informasjon om teamet i <a href="https://dapla-ctrl.intern.ssb.no/team/%s">Dapla Ctrl</a>.
+            Ta kontakt med teamansvarlig eller en av teamets tilgangsansvarlige dersom du har spørsmål.
+        </p>
+
+        <br><br>
+        <i>Endringen er utført av %s. Denne e-posten kan ikke besvares.</i>
+        `, userEmail, actorEmail, teamSlug, action, extraInfo, teamSlug, actorEmail)
 }
