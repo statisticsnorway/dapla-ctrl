@@ -4,7 +4,8 @@
 	import {
 		PersonGroupIcon,
 		HexagonGridIcon,
-		FloppydiskIcon
+		FloppydiskIcon,
+		PersonIcon
 	} from '@nais/ds-svelte-community/icons';
 	import Search from './Search.svelte';
 
@@ -35,6 +36,10 @@
 							slug
 						}
 					}
+					... on User {
+						name
+						email
+					}
 				}
 			}
 		}
@@ -58,6 +63,12 @@
 			urlName: 'sharedbucket',
 			prefix: 'delt',
 			type: 'SHAREDBUCKET'
+		},
+		User: {
+			icon: PersonIcon,
+			urlName: 'user',
+			prefix: 'bruker',
+			type: 'USER'
 		}
 	} as const;
 
@@ -110,6 +121,14 @@
 							label: result.name,
 							description: `${memberCount} medlem${memberCount != 1 ? 'mer' : ''}`,
 							href: `/team/${result.teamSlug}/members`,
+							type: 'link'
+						};
+					} else if (result.__typename === 'User') {
+						return {
+							icon,
+							label: result.name,
+							description: result.email,
+							href: `/member/${result.email}`,
 							type: 'link'
 						};
 					}

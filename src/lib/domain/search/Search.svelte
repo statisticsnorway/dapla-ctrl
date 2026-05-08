@@ -19,7 +19,7 @@
 		results,
 		close,
 		suggestions = true,
-		placeholder = 'Søk etter team, grupper eller delte data'
+		placeholder = 'Søk etter team, grupper, brukere eller delte data'
 	}: {
 		placeholder?: string;
 		suggestions?: boolean;

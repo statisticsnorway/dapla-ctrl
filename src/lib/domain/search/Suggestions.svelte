@@ -3,6 +3,7 @@
 	<code>gruppe:min-gruppe</code>
 	<code>team:mitt-team</code>
 	<code>delt:min-bøtte</code>
+	<code>bruker:min-bruker</code>
 </div>
 
 <style>
