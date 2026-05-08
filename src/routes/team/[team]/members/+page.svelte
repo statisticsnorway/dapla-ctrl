@@ -10,13 +10,7 @@
 	import EditMember from './EditMember.svelte';
 
 	let { data }: PageProps = $props();
-	let { Groups, displayName, UserInfo, teamSlug } = $derived(data);
-
-	// TODO: When releasing to the public, replace this with simply `viewerCanManageMembers` in the
-	// destructure on line 13
-	let viewerCanManageMembers = $derived(
-		$UserInfo.data?.me.__typename === 'User' && $UserInfo.data.me.isAdmin
-	);
+	let { Groups, displayName, teamSlug, viewerCanManageMembers } = $derived(data);
 
 	let groups = $derived($Groups.data?.team.groups.nodes);
 
