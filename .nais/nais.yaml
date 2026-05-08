@@ -31,8 +31,7 @@ spec:
     failureThreshold: 3
 
   ingresses:
-    - https://dapla-ctrl.intern.ssb.no/beta
-    - https://dapla-ctrl-alt-del.intern.ssb.no
+    - https://dapla-ctrl.intern.ssb.no/
 
   accessPolicy:
     outbound:
