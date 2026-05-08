@@ -51,7 +51,7 @@ spec:
 
   ingresses:
     - https://dapla-ctrl.intern.ssb.no/graphql
-    - https://dapla-ctrl.intern.ssb.no/beta/oauth2
+    - https://dapla-ctrl.intern.ssb.no/oauth2
     - https://dapla-ctrl.intern.ssb.no/api-docs
     - https://dapla-ctrl-alt-del.intern.ssb.no/graphql
     - https://dapla-ctrl-alt-del.intern.ssb.no/oauth2
