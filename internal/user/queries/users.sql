@@ -165,3 +165,12 @@ LIMIT
 OFFSET
 	sqlc.arg('offset')
 ;
+
+-- name: ListAllForSearch :many
+SELECT
+	sqlc.embed(users)
+FROM
+	users
+ORDER BY
+	name ASC
+;

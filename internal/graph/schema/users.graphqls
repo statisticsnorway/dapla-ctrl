@@ -250,6 +250,12 @@ type User implements Node {
 	isSectionManager: Boolean!
 }
 
+extend union SearchNode = User
+
+extend enum SearchType {
+	USER
+}
+
 """
 User connection.
 """

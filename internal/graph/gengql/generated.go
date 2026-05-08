@@ -7680,6 +7680,12 @@ type User implements Node {
 	isSectionManager: Boolean!
 }
 
+extend union SearchNode = User
+
+extend enum SearchType {
+	USER
+}
+
 """
 User connection.
 """
@@ -28424,6 +28430,11 @@ func (ec *executionContext) _SearchNode(ctx context.Context, sel ast.SelectionSe
 			return graphql.Null
 		}
 		return ec._Group(ctx, sel, obj)
+	case *user.User:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._User(ctx, sel, obj)
 	case sharedbucketsstopgap.SharedBucket:
 		return ec._SharedBucket(ctx, sel, &obj)
 	case *sharedbucketsstopgap.SharedBucket:
@@ -35250,7 +35261,7 @@ func (ec *executionContext) _UpdateTeamPayload(ctx context.Context, sel ast.Sele
 	return out
 }
 
-var userImplementors = []string{"User", "Node", "AuthenticatedUser"}
+var userImplementors = []string{"User", "SearchNode", "Node", "AuthenticatedUser"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *user.User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)

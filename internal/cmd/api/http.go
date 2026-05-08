@@ -156,6 +156,7 @@ func ConfigureGraph(
 	team.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "team_search"))
 	group.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "group_search"))
 	sharedbucketsstopgap.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "sharedbucket_search"))
+	user.AddSearch(searcher, pool, notifier, log.WithField("subsystem", "user_search"))
 
 	// Re-index all to initialize the search index
 	if err := searcher.ReIndex(ctx); err != nil {
