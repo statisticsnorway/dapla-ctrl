@@ -387,7 +387,7 @@ func RemoveAccessManager(ctx context.Context, input RemoveTeamAccessManagerInput
 			return err
 		}
 
-		emailMessage := generateEmailMessage(true, input.UserEmail, input.TeamSlug.String(), actor.User.Identity())
+		emailMessage := generateEmailMessage(false, input.UserEmail, input.TeamSlug.String(), actor.User.Identity())
 		if _, err := message.Create(ctx, &message.SendMessageInput{
 			Recipient: input.UserEmail,
 			Subject:   fmt.Sprintf("Du har blitt fjernet som Tilgangsansvarlig for teamet %s", input.TeamSlug.String()),
