@@ -84,19 +84,17 @@ func ForServiceAccount(ctx context.Context, serviceAccountID uuid.UUID) ([]*Role
 }
 
 func AssignRoleToServiceAccount(ctx context.Context, serviceAccountID uuid.UUID, roleName string) error {
-	return ErrNotSupported
-	// return db(ctx).AssignRoleToServiceAccount(ctx, authzsql.AssignRoleToServiceAccountParams{
-	// 	ServiceAccountID: serviceAccountID,
-	// 	RoleName:         roleName,
-	// })
+	return db(ctx).AssignRoleToServiceAccount(ctx, authzsql.AssignRoleToServiceAccountParams{
+		ServiceAccountID: serviceAccountID,
+		RoleName:         roleName,
+	})
 }
 
 func RevokeRoleFromServiceAccount(ctx context.Context, serviceAccountID uuid.UUID, roleName string) error {
-	return ErrNotSupported
-	// return db(ctx).RevokeRoleFromServiceAccount(ctx, authzsql.RevokeRoleFromServiceAccountParams{
-	// 	ServiceAccountID: serviceAccountID,
-	// 	RoleName:         roleName,
-	// })
+	return db(ctx).RevokeRoleFromServiceAccount(ctx, authzsql.RevokeRoleFromServiceAccountParams{
+		ServiceAccountID: serviceAccountID,
+		RoleName:         roleName,
+	})
 }
 
 func MakeUserTeamMember(ctx context.Context, userID uuid.UUID, teamSlug slug.Slug) error {
@@ -134,8 +132,8 @@ func ServiceAccountHasRole(ctx context.Context, serviceAccountID uuid.UUID, role
 }
 
 func CanAssignRole(ctx context.Context, roleName string, targetTeamSlug *slug.Slug) (bool, error) {
-	return false, ErrNotSupported
-	// actor := ActorFromContext(ctx)
+	err := RequireGlobalAdmin(ctx)
+	return err == nil, err
 	// if actor.User.IsServiceAccount() {
 	// 	return serviceAccountCanAssignRole(ctx, actor.User.GetID(), roleName, targetTeamSlug)
 	// }
@@ -160,15 +158,15 @@ func CanAssignRole(ctx context.Context, roleName string, targetTeamSlug *slug.Sl
 } */
 
 func CanCreateServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:create", teamSlug)
+	return requireAuthorization(ctx, "service_accounts:create", teamSlug)
 }
 
 func CanUpdateServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:update", teamSlug)
+	return requireAuthorization(ctx, "service_accounts:update", teamSlug)
 }
 
 func CanDeleteServiceAccounts(ctx context.Context, teamSlug *slug.Slug) error {
-	return ErrNotSupported // requireAuthorization(ctx, "service_accounts:delete", teamSlug)
+	return requireAuthorization(ctx, "service_accounts:delete", teamSlug)
 }
 
 func CanCreateTeam(ctx context.Context) error {
@@ -258,10 +256,9 @@ func requireTeamAuthorization(ctx context.Context, teamSlug slug.Slug, authoriza
 		err              error
 	)
 	if user.IsServiceAccount() {
-		hasAuthorization, err = db(ctx).ServiceAccountHasTeamAuthorization(ctx, authzsql.ServiceAccountHasTeamAuthorizationParams{
+		hasAuthorization, err = db(ctx).ServiceAccountHasAuthorization(ctx, authzsql.ServiceAccountHasAuthorizationParams{
 			ServiceAccountID:  user.GetID(),
 			AuthorizationName: authorizationName,
-			TeamSlug:          teamSlug,
 		})
 	} else {
 		hasAuthorization, err = db(ctx).HasTeamAuthorization(ctx, authzsql.HasTeamAuthorizationParams{
@@ -288,7 +285,7 @@ func requireGlobalAuthorization(ctx context.Context, authorizationName string) e
 		err        error
 	)
 	if user.IsServiceAccount() {
-		authorized, err = db(ctx).ServiceAccountHasGlobalAuthorization(ctx, authzsql.ServiceAccountHasGlobalAuthorizationParams{
+		authorized, err = db(ctx).ServiceAccountHasAuthorization(ctx, authzsql.ServiceAccountHasAuthorizationParams{
 			ServiceAccountID:  user.GetID(),
 			AuthorizationName: authorizationName,
 		})
@@ -309,10 +306,10 @@ func requireGlobalAuthorization(ctx context.Context, authorizationName string) e
 	return newMissingAuthorizationError(authorizationName)
 }
 
-/* func requireAuthorization(ctx context.Context, authorizationName string, teamSlug *slug.Slug) error {
+func requireAuthorization(ctx context.Context, authorizationName string, teamSlug *slug.Slug) error {
 	if teamSlug == nil {
 		return requireGlobalAuthorization(ctx, authorizationName)
 	}
 
 	return requireTeamAuthorization(ctx, *teamSlug, authorizationName)
-} */
+}

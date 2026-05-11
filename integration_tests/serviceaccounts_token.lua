@@ -160,7 +160,7 @@ Test.gql("Assign role to service account as non-admin", function(t)
 		data = Null,
 		errors = {
 			{
-				message = "You are authenticated, but this functionality is not supported",
+				message = Contains("Specifically, you need the \"service_accounts:update\" authorization."),
 				path = {
 					"assignRoleToServiceAccount",
 				},
@@ -193,12 +193,17 @@ Test.gql("Assign role to service account as admin", function(t)
 	]], State.saID))
 
 	t.check {
-		data = Null,
-		errors = {
-			{
-				message = "You are authenticated, but this functionality is not supported",
-				path = {
-					"assignRoleToServiceAccount",
+		data = {
+			assignRoleToServiceAccount = {
+				serviceAccount = {
+					id = State.saID,
+					roles = {
+						nodes = {
+							{
+								name = "Team owner",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -231,7 +236,7 @@ Test.gql("Assign duplicate role to service account as admin", function(t)
 	t.check {
 		errors = {
 			{
-				message = "You are authenticated, but this functionality is not supported",
+				message = Contains("has already been assigned the \"Team owner\" role"),
 				path = {
 					"assignRoleToServiceAccount",
 				},
@@ -265,12 +270,20 @@ Test.gql("Assign another role to service account as admin", function(t)
 	]], State.saID))
 
 	t.check {
-		data = Null,
-		errors = {
-			{
-				message = "You are authenticated, but this functionality is not supported",
-				path = {
-					"assignRoleToServiceAccount",
+		data = {
+			assignRoleToServiceAccount = {
+				serviceAccount = {
+					id = State.saID,
+					roles = {
+						nodes = {
+							{
+								name = "Team creator",
+							},
+							{
+								name = "Team owner",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -299,7 +312,7 @@ Test.gql("Revoke role from service account as non-admin", function(t)
 		data = Null,
 		errors = {
 			{
-				message = "You are authenticated, but this functionality is not supported",
+				message = Contains("Specifically, you need the \"service_accounts:update\" authorization."),
 				path = {
 					"revokeRoleFromServiceAccount",
 				},
@@ -332,11 +345,18 @@ Test.gql("Revoke role from service account as admin", function(t)
 	]], State.saID))
 
 	t.check {
-		data = Null,
-		errors = {
-			{
-				message = "You are authenticated, but this functionality is not supported",
-				path = { "revokeRoleFromServiceAccount" },
+		data = {
+			revokeRoleFromServiceAccount = {
+				serviceAccount = {
+					id = State.saID,
+					roles = {
+						nodes = {
+							{
+								name = "Team owner",
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -350,7 +370,7 @@ Test.gql("Revoke unassigned role from service account as admin", function(t)
 			revokeRoleFromServiceAccount(
 				input: {
 					serviceAccountID: "%s"
-					roleName: "Deploy key viewer"
+					roleName: "Message sender"
 				}
 			) {
 				serviceAccount {
@@ -369,7 +389,7 @@ Test.gql("Revoke unassigned role from service account as admin", function(t)
 		data = Null,
 		errors = {
 			{
-				message = "You are authenticated, but this functionality is not supported",
+				message = Contains("does not have the \"Message sender\" role assigned"),
 				path = {
 					"revokeRoleFromServiceAccount",
 				},

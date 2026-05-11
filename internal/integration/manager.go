@@ -158,7 +158,7 @@ func newGQLRunner(ctx context.Context, pool *pgxpool.Pool, topic graph.PubsubTop
 			r = r.WithContext(authz.ContextWithActor(ctx, usr, roles))
 		}
 
-		(middleware.RequireAuthenticatedUser()(srv)).ServeHTTP(w, r)
+		middleware.ApiKeyAuthentication()((middleware.RequireAuthenticatedUser()(srv))).ServeHTTP(w, r)
 	})
 
 	return runner.NewGQLRunner(graphMiddleware(authProxy)), notifyCancel, nil

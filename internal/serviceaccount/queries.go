@@ -407,9 +407,10 @@ func AssignRole(ctx context.Context, input AssignRoleToServiceAccountInput) (*Se
 		return nil, apierror.Errorf("Service account already has already been assigned the %q role.", role.Name)
 	}
 
-	if role.OnlyGlobal && sa.TeamSlug != nil {
-		return nil, apierror.Errorf("Role %q is only allowed on global service accounts.", input.RoleName)
-	}
+	// All service accounts are scoped to global for now, but they are tied to team, thus the TeamSlug is always set for the sa.
+	// if role.OnlyGlobal && sa.TeamSlug != nil {
+	// return nil, apierror.Errorf("Role %q is only allowed on global service accounts.", input.RoleName)
+	// }
 
 	err = database.Transaction(ctx, func(ctx context.Context) error {
 		if err := authz.AssignRoleToServiceAccount(ctx, sa.UUID, role.Name); err != nil {
