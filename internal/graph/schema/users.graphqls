@@ -210,7 +210,7 @@ type User implements Node {
 	): GroupMemberConnection!
 
 	"""
-	Get the shared buckets the user has access to.
+	Get the shared buckets the user has access to, with team and groups context supplied.
 	"""
 	sharedBucketsAccess(
 		"""
@@ -237,7 +237,7 @@ type User implements Node {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: SharedBucketOrder
-	): SharedBucketConnection!
+	): SharedBucketAccessConnection!
 
 	"""
 	True if the user is global admin.

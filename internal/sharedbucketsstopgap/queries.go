@@ -179,7 +179,7 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	}), nil
 }
 
-func ListForUser(ctx context.Context, userId uuid.UUID, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketConnection, error) {
+func ListForUser(ctx context.Context, userId uuid.UUID, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketAccessConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForUser(ctx, sharedbucketsstopgapsql.ListForUserParams{
@@ -197,8 +197,12 @@ func ListForUser(ctx context.Context, userId uuid.UUID, page *pagination.Paginat
 		total = int(ret[0].TotalCount)
 	}
 
-	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListForUserRow) *SharedBucket {
-		return toGraphBucket(&from.SharedBucketsStopgap)
+	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListForUserRow) *SharedBucketAccess {
+		return &SharedBucketAccess{
+			TeamSlug:   from.TeamSlug,
+			BucketName: from.Name,
+			GroupNames: from.Groups,
+		}
 	}), nil
 }
 

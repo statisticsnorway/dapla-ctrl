@@ -15,8 +15,10 @@ import (
 )
 
 type (
-	SharedBucketConnection = pagination.Connection[*SharedBucket]
-	SharedBucketEdge       = pagination.Edge[*SharedBucket]
+	SharedBucketConnection       = pagination.Connection[*SharedBucket]
+	SharedBucketEdge             = pagination.Edge[*SharedBucket]
+	SharedBucketAccessConnection = pagination.Connection[*SharedBucketAccess]
+	SharedBucketAccessEdge       = pagination.Edge[*SharedBucketAccess]
 )
 
 type SharedBucket struct {
@@ -32,6 +34,12 @@ func (SharedBucket) IsSearchNode() {}
 
 func (s SharedBucket) ID() ident.Ident {
 	return NewIdent(s.Name)
+}
+
+type SharedBucketAccess struct {
+	BucketName string    `json:"-"`
+	TeamSlug   slug.Slug `json:"-"`
+	GroupNames []string  `json:"-"`
 }
 
 func toGraphBucket(s *sharedbucketsstopgapsql.SharedBucketsStopgap) *SharedBucket {

@@ -189,3 +189,94 @@ Test.gql("shared-with-a has access to 2 buckets", function(t)
 		},
 	}
 end)
+
+-- Add sharedUser1 to shared-with-b-developers to make API response "bigger"
+Helper.SQLExec([[
+	INSERT INTO
+		group_members (group_name, user_id)
+	VALUES
+		('shared-with-b-developers', $1)
+	]], sharedUser1:id())
+
+Test.gql("user has access to 2 buckets, through 3 'connections'", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		query {
+			user(email: "%s") {
+				sharedBucketsAccess {
+					pageInfo {
+						totalCount
+					}
+					nodes {
+						bucket {
+							name
+						}
+						team {
+							slug
+						}
+						groups {
+							name
+						}
+					}
+				}
+			}
+		}
+		]], sharedUser1:email()))
+
+	t.check {
+		data = {
+			user = {
+				sharedBucketsAccess = {
+					pageInfo = {
+						totalCount = 3,
+					},
+					nodes = {
+						{
+							bucket = {
+								name = "ssb-sharing-data-delt-testing-test",
+							},
+							groups = {
+								{
+									name = "shared-with-b-developers",
+								},
+							},
+							team = {
+								slug = "shared-with-b",
+							},
+						},
+						{
+							bucket = {
+								name = "ssb-sharing-data-delt-testing-test",
+							},
+							groups = {
+								{
+									name = "shared-with-a-developers",
+								},
+								{
+									name = "shared-with-a-developers-abc",
+								},
+							},
+							team = {
+								slug = "shared-with-a",
+							},
+						},
+						{
+							bucket = {
+								name = "ssb-sharing-data-delt-testing2-test",
+							},
+							groups = {
+								{
+									name = "shared-with-a-developers",
+								},
+							},
+							team = {
+								slug = "shared-with-a",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+end)

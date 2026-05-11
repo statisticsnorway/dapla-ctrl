@@ -58,6 +58,7 @@ type ResolverRoot interface {
 	Section() SectionResolver
 	ServiceAccount() ServiceAccountResolver
 	SharedBucket() SharedBucketResolver
+	SharedBucketAccess() SharedBucketAccessResolver
 	Team() TeamResolver
 	TeamAccessManager() TeamAccessManagerResolver
 	TeamMember() TeamMemberResolver
@@ -609,6 +610,23 @@ type ComplexityRoot struct {
 		Users       func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 	}
 
+	SharedBucketAccess struct {
+		Bucket func(childComplexity int) int
+		Groups func(childComplexity int) int
+		Team   func(childComplexity int) int
+	}
+
+	SharedBucketAccessConnection struct {
+		Edges    func(childComplexity int) int
+		Nodes    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	SharedBucketAccessEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
 	SharedBucketConnection struct {
 		Edges    func(childComplexity int) int
 		Nodes    func(childComplexity int) int
@@ -919,6 +937,11 @@ type SharedBucketResolver interface {
 	UniqueUsers(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
 	Teams(ctx context.Context, obj *sharedbucketsstopgap.SharedBucket, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error)
 }
+type SharedBucketAccessResolver interface {
+	Bucket(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) (*sharedbucketsstopgap.SharedBucket, error)
+	Team(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) (*team.Team, error)
+	Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) ([]*group.Group, error)
+}
 type TeamResolver interface {
 	Section(ctx context.Context, obj *team.Team) (*section.Section, error)
 
@@ -956,7 +979,7 @@ type UserResolver interface {
 	Teams(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.TeamMember], error)
 	TeamMembers(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
 	Groups(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.GroupMember], error)
-	SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
+	SharedBucketsAccess(ctx context.Context, obj *user.User, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess], error)
 
 	IsSectionManager(ctx context.Context, obj *user.User) (bool, error)
 }
@@ -3191,6 +3214,57 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.SharedBucket.Users(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
+
+	case "SharedBucketAccess.bucket":
+		if e.ComplexityRoot.SharedBucketAccess.Bucket == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccess.Bucket(childComplexity), true
+	case "SharedBucketAccess.groups":
+		if e.ComplexityRoot.SharedBucketAccess.Groups == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccess.Groups(childComplexity), true
+	case "SharedBucketAccess.team":
+		if e.ComplexityRoot.SharedBucketAccess.Team == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccess.Team(childComplexity), true
+
+	case "SharedBucketAccessConnection.edges":
+		if e.ComplexityRoot.SharedBucketAccessConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccessConnection.Edges(childComplexity), true
+	case "SharedBucketAccessConnection.nodes":
+		if e.ComplexityRoot.SharedBucketAccessConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccessConnection.Nodes(childComplexity), true
+	case "SharedBucketAccessConnection.pageInfo":
+		if e.ComplexityRoot.SharedBucketAccessConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccessConnection.PageInfo(childComplexity), true
+
+	case "SharedBucketAccessEdge.cursor":
+		if e.ComplexityRoot.SharedBucketAccessEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccessEdge.Cursor(childComplexity), true
+	case "SharedBucketAccessEdge.node":
+		if e.ComplexityRoot.SharedBucketAccessEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.SharedBucketAccessEdge.Node(childComplexity), true
 
 	case "SharedBucketConnection.edges":
 		if e.ComplexityRoot.SharedBucketConnection.Edges == nil {
@@ -6817,7 +6891,20 @@ extend enum SearchType {
 }
 
 """
-SharedBucketStopgap connection.
+The SharedBucketAccess type represents a team which has access to a specific buckets through a set of groups.
+This type can be used to represent e.g. a team's access to other teams' buckets,
+or one user's access to several buckets in different teams.
+"""
+type SharedBucketAccess {
+	bucket: SharedBucket!
+
+	team: Team!
+
+	groups: [Group!]!
+}
+
+"""
+SharedBucket connection.
 """
 type SharedBucketConnection {
 	"""
@@ -6837,6 +6924,26 @@ type SharedBucketConnection {
 }
 
 """
+SharedBucketAccess connection.
+"""
+type SharedBucketAccessConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [SharedBucketAccess!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [SharedBucketAccessEdge!]!
+}
+
+"""
 SharedBucket edge.
 """
 type SharedBucketEdge {
@@ -6849,6 +6956,21 @@ type SharedBucketEdge {
 	The SharedBucketStopgap.
 	"""
 	node: SharedBucket!
+}
+
+"""
+SharedBucketAccess edge.
+"""
+type SharedBucketAccessEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The SharedBucketStopgap.
+	"""
+	node: SharedBucketAccess!
 }
 
 """
@@ -7640,7 +7762,7 @@ type User implements Node {
 	): GroupMemberConnection!
 
 	"""
-	Get the shared buckets the user has access to.
+	Get the shared buckets the user has access to, with team and groups context supplied.
 	"""
 	sharedBucketsAccess(
 		"""
@@ -7667,7 +7789,7 @@ type User implements Node {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: SharedBucketOrder
-	): SharedBucketConnection!
+	): SharedBucketAccessConnection!
 
 	"""
 	True if the user is global admin.
@@ -20757,6 +20879,348 @@ func (ec *executionContext) fieldContext_SharedBucket_teams(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _SharedBucketAccess_bucket(ctx context.Context, field graphql.CollectedField, obj *sharedbucketsstopgap.SharedBucketAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccess_bucket,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.SharedBucketAccess().Bucket(ctx, obj)
+		},
+		nil,
+		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccess_bucket(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccess",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_SharedBucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_SharedBucket_name(ctx, field)
+			case "kind":
+				return ec.fieldContext_SharedBucket_kind(ctx, field)
+			case "shortName":
+				return ec.fieldContext_SharedBucket_shortName(ctx, field)
+			case "env":
+				return ec.fieldContext_SharedBucket_env(ctx, field)
+			case "team":
+				return ec.fieldContext_SharedBucket_team(ctx, field)
+			case "groups":
+				return ec.fieldContext_SharedBucket_groups(ctx, field)
+			case "users":
+				return ec.fieldContext_SharedBucket_users(ctx, field)
+			case "uniqueUsers":
+				return ec.fieldContext_SharedBucket_uniqueUsers(ctx, field)
+			case "teams":
+				return ec.fieldContext_SharedBucket_teams(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SharedBucket", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccess_team(ctx context.Context, field graphql.CollectedField, obj *sharedbucketsstopgap.SharedBucketAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccess_team,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.SharedBucketAccess().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccess_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccess",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "viewerCanManageMembers":
+				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccess_groups(ctx context.Context, field graphql.CollectedField, obj *sharedbucketsstopgap.SharedBucketAccess) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccess_groups,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.SharedBucketAccess().Groups(ctx, obj)
+		},
+		nil,
+		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccess_groups(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccess",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Group_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Group_name(ctx, field)
+			case "teamSlug":
+				return ec.fieldContext_Group_teamSlug(ctx, field)
+			case "category":
+				return ec.fieldContext_Group_category(ctx, field)
+			case "suffix":
+				return ec.fieldContext_Group_suffix(ctx, field)
+			case "members":
+				return ec.fieldContext_Group_members(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Group_activityLog(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Group", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccessConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccessConnection_pageInfo,
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccessConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccessConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+			case "pageStart":
+				return ec.fieldContext_PageInfo_pageStart(ctx, field)
+			case "pageEnd":
+				return ec.fieldContext_PageInfo_pageEnd(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccessConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccessConnection_nodes,
+		func(ctx context.Context) (any, error) {
+			return obj.Nodes(), nil
+		},
+		nil,
+		ec.marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccessConnection_nodes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccessConnection",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "bucket":
+				return ec.fieldContext_SharedBucketAccess_bucket(ctx, field)
+			case "team":
+				return ec.fieldContext_SharedBucketAccess_team(ctx, field)
+			case "groups":
+				return ec.fieldContext_SharedBucketAccess_groups(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SharedBucketAccess", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccessConnection_edges(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccessConnection_edges,
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		ec.marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccessConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccessConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_SharedBucketAccessEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_SharedBucketAccessEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SharedBucketAccessEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccessEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccessEdge_cursor,
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccessEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccessEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SharedBucketAccessEdge_node(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_SharedBucketAccessEdge_node,
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_SharedBucketAccessEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SharedBucketAccessEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "bucket":
+				return ec.fieldContext_SharedBucketAccess_bucket(ctx, field)
+			case "team":
+				return ec.fieldContext_SharedBucketAccess_team(ctx, field)
+			case "groups":
+				return ec.fieldContext_SharedBucketAccess_groups(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SharedBucketAccess", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SharedBucketConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucket]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -24076,7 +24540,7 @@ func (ec *executionContext) _User_sharedBucketsAccess(ctx context.Context, field
 			return ec.Resolvers.User().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
-		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -24091,13 +24555,13 @@ func (ec *executionContext) fieldContext_User_sharedBucketsAccess(ctx context.Co
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "pageInfo":
-				return ec.fieldContext_SharedBucketConnection_pageInfo(ctx, field)
+				return ec.fieldContext_SharedBucketAccessConnection_pageInfo(ctx, field)
 			case "nodes":
-				return ec.fieldContext_SharedBucketConnection_nodes(ctx, field)
+				return ec.fieldContext_SharedBucketAccessConnection_nodes(ctx, field)
 			case "edges":
-				return ec.fieldContext_SharedBucketConnection_edges(ctx, field)
+				return ec.fieldContext_SharedBucketAccessConnection_edges(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type SharedBucketConnection", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type SharedBucketAccessConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -33680,6 +34144,241 @@ func (ec *executionContext) _SharedBucket(ctx context.Context, sel ast.Selection
 	return out
 }
 
+var sharedBucketAccessImplementors = []string{"SharedBucketAccess"}
+
+func (ec *executionContext) _SharedBucketAccess(ctx context.Context, sel ast.SelectionSet, obj *sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sharedBucketAccessImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SharedBucketAccess")
+		case "bucket":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SharedBucketAccess_bucket(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SharedBucketAccess_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "groups":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._SharedBucketAccess_groups(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var sharedBucketAccessConnectionImplementors = []string{"SharedBucketAccessConnection"}
+
+func (ec *executionContext) _SharedBucketAccessConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sharedBucketAccessConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SharedBucketAccessConnection")
+		case "pageInfo":
+			out.Values[i] = ec._SharedBucketAccessConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nodes":
+			out.Values[i] = ec._SharedBucketAccessConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._SharedBucketAccessConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var sharedBucketAccessEdgeImplementors = []string{"SharedBucketAccessEdge"}
+
+func (ec *executionContext) _SharedBucketAccessEdge(ctx context.Context, sel ast.SelectionSet, obj *pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, sharedBucketAccessEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SharedBucketAccessEdge")
+		case "cursor":
+			out.Values[i] = ec._SharedBucketAccessEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._SharedBucketAccessEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var sharedBucketConnectionImplementors = []string{"SharedBucketConnection"}
 
 func (ec *executionContext) _SharedBucketConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
@@ -37648,6 +38347,66 @@ func (ec *executionContext) marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnor
 		return graphql.Null
 	}
 	return ec._SharedBucket(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx context.Context, sel ast.SelectionSet, v *sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SharedBucketAccess(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSharedBucketAccessConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	return ec._SharedBucketAccessConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._SharedBucketAccessConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	return ec._SharedBucketAccessEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNSharedBucketConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {

@@ -69,6 +69,14 @@ func Get(ctx context.Context, name string) (*Group, error) {
 	return g, nil
 }
 
+func GetByNames(ctx context.Context, names []string) ([]*Group, error) {
+	gs, err := fromContext(ctx).groupLoader.LoadAll(ctx, names)
+	if err != nil {
+		return nil, handleError(err)
+	}
+	return gs, nil
+}
+
 func GetByIdent(ctx context.Context, id ident.Ident) (*Group, error) {
 	groupName, err := parseIdent(id)
 	if err != nil {

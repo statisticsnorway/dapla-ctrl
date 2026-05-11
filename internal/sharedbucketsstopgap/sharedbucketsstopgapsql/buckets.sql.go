@@ -352,22 +352,26 @@ func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*Li
 
 const listForUser = `-- name: ListForUser :many
 SELECT
-	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env,
+	sbs.name,
+	groups.team_slug,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups,
 	COUNT(*) OVER () AS total_count
 FROM
-	shared_buckets_stopgap
-	JOIN shared_buckets_access_stopgap ON shared_buckets_access_stopgap.bucket_name = shared_buckets_stopgap.name
-	JOIN group_members ON shared_buckets_access_stopgap.group_name = group_members.group_name
+	shared_buckets_stopgap sbs
+	JOIN shared_buckets_access_stopgap sbas ON sbs.name = sbas.bucket_name
+	JOIN group_members gm ON sbas.group_name = gm.group_name
+	JOIN groups ON gm.group_name = groups.name
 WHERE
-	group_members.user_id = $1
+	gm.user_id = $1
 GROUP BY
-	name
+	sbs.name,
+	groups.team_slug
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'name:asc' THEN name
+		WHEN $2::TEXT = 'name:asc' THEN sbs.name
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'name:desc' THEN name
+		WHEN $2::TEXT = 'name:desc' THEN sbs.name
 	END DESC,
 	CASE
 		WHEN $2::TEXT = 'kind:asc' THEN kind
@@ -388,10 +392,10 @@ ORDER BY
 		WHEN $2::TEXT = 'env:desc' THEN env
 	END DESC,
 	CASE
-		WHEN $2::TEXT = 'team:asc' THEN team_slug
+		WHEN $2::TEXT = 'team:asc' THEN sbs.team_slug
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'team:desc' THEN team_slug
+		WHEN $2::TEXT = 'team:desc' THEN sbs.team_slug
 	END DESC,
 	short_name ASC
 LIMIT
@@ -408,8 +412,10 @@ type ListForUserParams struct {
 }
 
 type ListForUserRow struct {
-	SharedBucketsStopgap SharedBucketsStopgap
-	TotalCount           int64
+	Name       string
+	TeamSlug   slug.Slug
+	Groups     []string
+	TotalCount int64
 }
 
 func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*ListForUserRow, error) {
@@ -427,11 +433,9 @@ func (q *Queries) ListForUser(ctx context.Context, arg ListForUserParams) ([]*Li
 	for rows.Next() {
 		var i ListForUserRow
 		if err := rows.Scan(
-			&i.SharedBucketsStopgap.Name,
-			&i.SharedBucketsStopgap.TeamSlug,
-			&i.SharedBucketsStopgap.ShortName,
-			&i.SharedBucketsStopgap.Kind,
-			&i.SharedBucketsStopgap.Env,
+			&i.Name,
+			&i.TeamSlug,
+			&i.Groups,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

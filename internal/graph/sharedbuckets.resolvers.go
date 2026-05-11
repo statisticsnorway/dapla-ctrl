@@ -64,6 +64,25 @@ func (r *sharedBucketResolver) Teams(ctx context.Context, obj *sharedbucketsstop
 	return sharedbucketsstopgap.ListTeams(ctx, obj.Name, page, orderBy)
 }
 
+func (r *sharedBucketAccessResolver) Bucket(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) (*sharedbucketsstopgap.SharedBucket, error) {
+	return sharedbucketsstopgap.Get(ctx, obj.BucketName)
+}
+
+func (r *sharedBucketAccessResolver) Team(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *sharedBucketAccessResolver) Groups(ctx context.Context, obj *sharedbucketsstopgap.SharedBucketAccess) ([]*group.Group, error) {
+	return group.GetByNames(ctx, obj.GroupNames)
+}
+
 func (r *Resolver) SharedBucket() gengql.SharedBucketResolver { return &sharedBucketResolver{r} }
 
-type sharedBucketResolver struct{ *Resolver }
+func (r *Resolver) SharedBucketAccess() gengql.SharedBucketAccessResolver {
+	return &sharedBucketAccessResolver{r}
+}
+
+type (
+	sharedBucketResolver       struct{ *Resolver }
+	sharedBucketAccessResolver struct{ *Resolver }
+)

@@ -207,7 +207,20 @@ extend enum SearchType {
 }
 
 """
-SharedBucketStopgap connection.
+The SharedBucketAccess type represents a team which has access to a specific buckets through a set of groups.
+This type can be used to represent e.g. a team's access to other teams' buckets,
+or one user's access to several buckets in different teams.
+"""
+type SharedBucketAccess {
+	bucket: SharedBucket!
+
+	team: Team!
+
+	groups: [Group!]!
+}
+
+"""
+SharedBucket connection.
 """
 type SharedBucketConnection {
 	"""
@@ -227,6 +240,26 @@ type SharedBucketConnection {
 }
 
 """
+SharedBucketAccess connection.
+"""
+type SharedBucketAccessConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [SharedBucketAccess!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [SharedBucketAccessEdge!]!
+}
+
+"""
 SharedBucket edge.
 """
 type SharedBucketEdge {
@@ -239,6 +272,21 @@ type SharedBucketEdge {
 	The SharedBucketStopgap.
 	"""
 	node: SharedBucket!
+}
+
+"""
+SharedBucketAccess edge.
+"""
+type SharedBucketAccessEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The SharedBucketStopgap.
+	"""
+	node: SharedBucketAccess!
 }
 
 """
