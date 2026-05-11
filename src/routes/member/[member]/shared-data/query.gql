@@ -11,15 +11,25 @@ query UserSharedBucketAccess($user: String!) {
 				totalCount
 			}
 			nodes {
-				id
-				name
-				shortName
-				kind
-				env
 				team {
 					id
 					slug
 					displayName
+				}
+				groups {
+					name
+				}
+				bucket {
+					id
+					name
+					shortName
+					kind
+					env
+					team {
+						id
+						slug
+						displayName
+					}
 				}
 			}
 		}

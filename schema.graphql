@@ -2088,7 +2088,39 @@ type SharedBucket implements Node {
   ): TeamMemberConnection!
 }
 
-"""SharedBucketStopgap connection."""
+"""
+The SharedBucketAccess type represents a team which has access to a specific buckets through a set of groups.
+This type can be used to represent e.g. a team's access to other teams' buckets,
+or one user's access to several buckets in different teams.
+"""
+type SharedBucketAccess {
+  bucket: SharedBucket!
+  groups: [Group!]!
+  team: Team!
+}
+
+"""SharedBucketAccess connection."""
+type SharedBucketAccessConnection {
+  """List of edges."""
+  edges: [SharedBucketEdge!]!
+
+  """List of nodes."""
+  nodes: [SharedBucketAccess!]!
+
+  """Pagination information."""
+  pageInfo: PageInfo!
+}
+
+"""SharedBucketAccess edge."""
+type SharedBucketAccessEdge {
+  """Cursor for this edge that can be used for pagination."""
+  cursor: Cursor!
+
+  """The SharedBucketStopgap."""
+  node: SharedBucketAccess!
+}
+
+"""SharedBucket connection."""
 type SharedBucketConnection {
   """List of edges."""
   edges: [SharedBucketEdge!]!
@@ -2656,7 +2688,9 @@ type User implements Node {
   """
   section: Section
 
-  """Get the shared buckets the user has access to."""
+  """
+  Get the shared buckets the user has access to, with team and groups context supplied.
+  """
   sharedBucketsAccess(
     """Get items after this cursor."""
     after: Cursor
@@ -2676,7 +2710,7 @@ type User implements Node {
 
     """Ordering options for items returned from the connection."""
     orderBy: SharedBucketOrder
-  ): SharedBucketConnection!
+  ): SharedBucketAccessConnection!
 
   """List of users the user is in a team with."""
   teamMembers(

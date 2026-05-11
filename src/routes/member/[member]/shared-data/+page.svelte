@@ -10,27 +10,41 @@
 
 	let { UserSharedBucketAccess, userDisplayName } = $derived(data);
 
-	type BucketItem = UserSharedBucketAccess$result['user']['sharedBucketsAccess']['nodes'][0];
+	type UserAccessNode = UserSharedBucketAccess$result['user']['sharedBucketsAccess']['nodes'][0];
+
+	type BucketAccessItem = UserAccessNode & { id: string };
+
+	const addIdToItems = (items: UserAccessNode[]): BucketAccessItem[] => {
+		return items.map((i) => {
+			return { id: `${i.bucket.id}_${i.team.id}`, ...i };
+		});
+	};
 </script>
 
-{#snippet nameCell(bucket: BucketItem)}
-	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}><b>{bucket.shortName}</b></a>
+{#snippet nameCell(item: BucketAccessItem)}
+	<a href={`/team/${item.team.slug}/shared-data/${item.bucket.name}`}
+		><b>{item.bucket.shortName}</b></a
+	>
 	<br />
-	{bucket.name}
+	{item.bucket.name}
 {/snippet}
 
-{#snippet typeCell(bucket: BucketItem)}
-	{capitalizeFirstLetter(bucket.kind)}
+{#snippet typeCell(item: BucketAccessItem)}
+	{capitalizeFirstLetter(item.bucket.kind)}
 {/snippet}
 
-{#snippet envCell(bucket: BucketItem)}
-	{bucket.env}
+{#snippet envCell(item: BucketAccessItem)}
+	{item.bucket.env}
 {/snippet}
 
-{#snippet teamCell(bucket: BucketItem)}
-	<a href={`/team/${bucket.team.slug}`}><b>{bucket.team.displayName}</b></a>
+{#snippet teamCell(item: BucketAccessItem)}
+	<a href={`/team/${item.team.slug}`}><b>{item.team.displayName}</b></a>
 	<br />
-	{bucket.team.slug}
+	{item.team.slug}
+{/snippet}
+
+{#snippet groupCell(item: BucketAccessItem)}
+	{item.groups.map((g) => g.name.slice(item.team.slug.length + 1)).join(', ')}
 {/snippet}
 
 <div class="description">
@@ -42,7 +56,7 @@
 {#if $UserSharedBucketAccess.data}
 	<div class="container">
 		<DaplaTable
-			data={$UserSharedBucketAccess.data.user.sharedBucketsAccess.nodes ?? []}
+			data={addIdToItems($UserSharedBucketAccess.data.user.sharedBucketsAccess.nodes ?? [])}
 			fieldsCookie={{
 				path: '/member',
 				key: 'sharedBucketsTableFields/member'
@@ -69,9 +83,12 @@
 				},
 				{
 					id: 'TEAM',
-					name: 'Team',
+					name: 'Tilgang via',
 					show: 'DEFAULT_YES',
-					cell: teamCell
+					cell: [
+						{ id: 'team', snippet: teamCell },
+						{ id: 'groups', snippet: groupCell }
+					]
 				}
 			]}
 		/>
