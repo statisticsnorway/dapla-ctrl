@@ -28,7 +28,7 @@
 	{bucket.name}
 {/snippet}
 {#snippet ownerCell(bucket: BucketItem)}
-	{bucket.team.displayName}
+	<a href={`/team/${bucket.team.slug}`}><b>{bucket.team.displayName}</b></a>
 	<br />
 	{bucket.team.slug}
 	<CopyButton
@@ -87,7 +87,7 @@
 				},
 				{
 					id: 'OWNER',
-					name: 'Eier team',
+					name: 'Eierteam',
 					show: 'DEFAULT_YES',
 					cell: ownerCell
 				},
