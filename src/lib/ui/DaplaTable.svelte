@@ -71,7 +71,8 @@
 
 	let { data, columns, selected, fieldsCookie, exportTable }: Props = $props();
 
-	let selectedFields: string[] = $derived(
+	// svelte-ignore state_referenced_locally
+	let selectedFields: string[] = $state(
 		selected.length === 0
 			? columns.filter((c) => c.show !== 'DEFAULT_NO').map((c) => c.id)
 			: selected
