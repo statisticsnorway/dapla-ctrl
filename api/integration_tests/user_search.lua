@@ -1,13 +1,13 @@
-local alice = User.new("Alice Example", "alice@example.com", "alice")
-local bob = User.new("Bob Example", "bob@example.com", "bob")
-local searcher = User.new("Searcher", "searcher@example.com", "searcher")
+local dev = User.new("dev usersen", "dev.usersen@example.com")
+local bob = User.new("Bob Example", "bob@example.com")
+local searcher = User.new("Searcher", "searcher@example.com")
 
 Test.gql("Search existing user by name (type USER)", function(t)
-	t.addHeader("x-user-email", searcher:email())
+	t.addHeader("x-user-email", dev:email())
 
 	t.query([[
 		query {
-			search(first: 1, filter: { query: "Alice", type: USER }) {
+			search(first: 1, filter: { query: "dev", type: USER }) {
 				pageInfo {
 					totalCount
 				}
@@ -30,9 +30,9 @@ Test.gql("Search existing user by name (type USER)", function(t)
 				},
 				nodes = {
 					{
-						id = Save("aliceID"),
-						name = "Alice Example",
-						email = "alice@example.com",
+						id = Save("devID"),
+						name = "dev usersen",
+						email = "dev.usersen@example.com",
 					},
 				},
 			},
