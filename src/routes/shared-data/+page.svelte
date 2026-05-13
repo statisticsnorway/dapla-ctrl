@@ -146,6 +146,11 @@
 		margin-inline: var(--margin-default);
 	}
 
+	.content-wrapper {
+		margin: auto;
+		max-width: 1432px;
+	}
+
 	.description {
 		margin-top: var(--ax-space-8);
 		margin-bottom: var(--ax-space-16);
