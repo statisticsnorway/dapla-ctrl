@@ -64,93 +64,82 @@
 <svelte:head><title>Datadeling - Dapla Ctrl</title></svelte:head>
 
 <div class="page">
-	<div class="content-wrapper">
-		<div class="header">
-			<Heading level="1" size="xlarge">Datadeling</Heading>
-			<div class="description">
-				<BodyShort textColor="subtle" size="medium">
-					Oversikt over alle deltbøtter på Dapla.
-				</BodyShort>
-			</div>
+	<div class="header">
+		<Heading level="1" size="xlarge">Datadeling</Heading>
+		<div class="description">
+			<BodyShort textColor="subtle" size="medium">
+				Oversikt over alle deltbøtter på Dapla.
+			</BodyShort>
 		</div>
-		<div class="container">
-			<DaplaTable
-				data={$AllSharedData.data?.sharedBuckets.nodes.map(transformBucketdata) ?? []}
-				selected={data.bucketTableFields}
-				columns={[
-					{
-						id: 'NAME',
-						name: 'Navn',
-						show: 'ALWAYS',
-						cell: nameCell,
-						sortKey: SharedBucketOrderField.SHORT_NAME
-					},
-					{
-						id: 'TYPE',
-						name: 'Type',
-						show: 'DEFAULT_YES',
-						cell: typeCell,
-						sortKey: SharedBucketOrderField.KIND
-					},
-					{
-						id: 'TEAM',
-						name: 'Team',
-						show: 'DEFAULT_YES',
-						cell: teamCell,
-						sortKey: SharedBucketOrderField.TEAM
-					},
-					{
-						id: 'SECTION',
-						name: 'Seksjon',
-						align: 'right',
-						show: 'DEFAULT_YES',
-						cell: sectionCell
-					},
-					{
-						id: 'ENV',
-						name: 'Miljø',
-						show: 'DEFAULT_YES',
-						cell: envCell,
-						sortKey: SharedBucketOrderField.ENV
-					},
-					{
-						id: 'TEAM_COUNT',
-						name: 'Antall team',
-						align: 'right',
-						show: 'DEFAULT_YES',
-						cell: teamsCell
-					},
-					{
-						id: 'USER_COUNT',
-						name: 'Antall personer',
-						align: 'right',
-						show: 'DEFAULT_YES',
-						cell: usersCell
-					}
-				]}
-			/>
-		</div>
-
-		<Pagination
-			page={$AllSharedData.data?.sharedBuckets.pageInfo}
-			loaders={{
-				loadPreviousPage: () => AllSharedData.loadPreviousPage(),
-				loadNextPage: () => AllSharedData.loadNextPage()
-			}}
+	</div>
+	<div class="container">
+		<DaplaTable
+			data={$AllSharedData.data?.sharedBuckets.nodes.map(transformBucketdata) ?? []}
+			selected={data.bucketTableFields}
+			columns={[
+				{
+					id: 'NAME',
+					name: 'Navn',
+					show: 'ALWAYS',
+					cell: nameCell,
+					sortKey: SharedBucketOrderField.SHORT_NAME
+				},
+				{
+					id: 'TYPE',
+					name: 'Type',
+					show: 'DEFAULT_YES',
+					cell: typeCell,
+					sortKey: SharedBucketOrderField.KIND
+				},
+				{
+					id: 'TEAM',
+					name: 'Team',
+					show: 'DEFAULT_YES',
+					cell: teamCell,
+					sortKey: SharedBucketOrderField.TEAM
+				},
+				{
+					id: 'SECTION',
+					name: 'Seksjon',
+					align: 'right',
+					show: 'DEFAULT_YES',
+					cell: sectionCell
+				},
+				{
+					id: 'ENV',
+					name: 'Miljø',
+					show: 'DEFAULT_YES',
+					cell: envCell,
+					sortKey: SharedBucketOrderField.ENV
+				},
+				{
+					id: 'TEAM_COUNT',
+					name: 'Antall team',
+					align: 'right',
+					show: 'DEFAULT_YES',
+					cell: teamsCell
+				},
+				{
+					id: 'USER_COUNT',
+					name: 'Antall personer',
+					align: 'right',
+					show: 'DEFAULT_YES',
+					cell: usersCell
+				}
+			]}
 		/>
 	</div>
+
+	<Pagination
+		page={$AllSharedData.data?.sharedBuckets.pageInfo}
+		loaders={{
+			loadPreviousPage: () => AllSharedData.loadPreviousPage(),
+			loadNextPage: () => AllSharedData.loadNextPage()
+		}}
+	/>
 </div>
 
 <style>
-	.page {
-		margin-inline: var(--margin-default);
-	}
-
-	.content-wrapper {
-		margin: auto;
-		max-width: 1432px;
-	}
-
 	.description {
 		margin-top: var(--ax-space-8);
 		margin-bottom: var(--ax-space-16);

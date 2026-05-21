@@ -30,50 +30,37 @@
 </svelte:head>
 
 <div class="page">
-	<div class="content-wrapper">
-		<div class="header">
-			<div>
-				<Heading level="1" size="xlarge">Medlemmer</Heading>
-				<div class="description">
-					<BodyShort textColor="subtle" size="medium">{description}</BodyShort>
-				</div>
+	<div class="header">
+		<div>
+			<Heading level="1" size="xlarge">Medlemmer</Heading>
+			<div class="description">
+				<BodyShort textColor="subtle" size="medium">{description}</BodyShort>
 			</div>
 		</div>
-		<div class="container" data-sveltekit-preload-data="hover">
-			<div>
-				<Tabs>
-					<Tab
-						data-sveltekit-noscroll
-						href="/members"
-						active={page.url.pathname === '/members' || page.url.pathname === '/members/'}
-						title="Mine teammedlemmer ({myTeamMembersCount})"
-					/>
-					<Tab
-						data-sveltekit-noscroll
-						href="/members/all"
-						active={page.url.pathname === '/members/all'}
-						title="Alle teammedlemmer ({allTeamMembersCount})"
-					/>
-				</Tabs>
+	</div>
+	<div class="container" data-sveltekit-preload-data="hover">
+		<div>
+			<Tabs>
+				<Tab
+					data-sveltekit-noscroll
+					href="/members"
+					active={page.url.pathname === '/members' || page.url.pathname === '/members/'}
+					title="Mine teammedlemmer ({myTeamMembersCount})"
+				/>
+				<Tab
+					data-sveltekit-noscroll
+					href="/members/all"
+					active={page.url.pathname === '/members/all'}
+					title="Alle teammedlemmer ({allTeamMembersCount})"
+				/>
+			</Tabs>
 
-				{@render children()}
-			</div>
+			{@render children()}
 		</div>
 	</div>
 </div>
 
 <style>
-	.page {
-		margin-inline: var(--margin-default);
-	}
-
-	.content-wrapper {
-		background: var(--ax-bg-default);
-		position: relative;
-		margin: auto;
-		max-width: 1432px;
-	}
-
 	.header {
 		display: flex;
 		justify-content: space-between;

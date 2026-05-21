@@ -62,9 +62,6 @@
 </div>
 
 <style>
-	.page {
-		margin-inline: var(--margin-default);
-	}
 	.container {
 		margin: auto;
 		max-width: 1432px;

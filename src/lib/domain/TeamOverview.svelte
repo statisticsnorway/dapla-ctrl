@@ -147,49 +147,40 @@
 	{team.section.name} ({team.section.code})
 {/snippet}
 
-<div class="content-wrapper">
-	<div class="header">
-		<div>
-			<Heading level="1" size="xlarge">Team</Heading>
-			<div class="description">
-				<BodyShort textColor="subtle" size="medium">{description}</BodyShort>
-			</div>
-		</div>
-		{#if canCreateTeam}
-			<Button as="a" size="medium" href="/team/create" variant="secondary">+ Opprett team</Button>
-		{/if}
-	</div>
-	<div class="container" data-sveltekit-preload-data="hover">
-		<div>
-			<Tabs>
-				<Tab
-					data-sveltekit-noscroll
-					href="/"
-					active={page.url.pathname === '/'}
-					title="Mine team ({userTeamsCount})"
-				/>
-				<Tab
-					data-sveltekit-noscroll
-					href="/teams"
-					active={page.url.pathname === '/teams'}
-					title="Alle team ({allTeamsCount})"
-				/>
-			</Tabs>
-
-			<DaplaTable data={teamsData} selected={teamTableDefaultFields} {columns} />
+<div class="header">
+	<div>
+		<Heading level="1" size="xlarge">Team</Heading>
+		<div class="description">
+			<BodyShort textColor="subtle" size="medium">{description}</BodyShort>
 		</div>
 	</div>
-	<Pagination page={pageInfo} {loaders} fetching={!teamsData} />
+	{#if canCreateTeam}
+		<Button as="a" size="medium" href="/team/create" variant="secondary">+ Opprett team</Button>
+	{/if}
 </div>
+<div class="container" data-sveltekit-preload-data="hover">
+	<div>
+		<Tabs>
+			<Tab
+				data-sveltekit-noscroll
+				href="/"
+				active={page.url.pathname === '/'}
+				title="Mine team ({userTeamsCount})"
+			/>
+			<Tab
+				data-sveltekit-noscroll
+				href="/teams"
+				active={page.url.pathname === '/teams'}
+				title="Alle team ({allTeamsCount})"
+			/>
+		</Tabs>
+
+		<DaplaTable data={teamsData} selected={teamTableDefaultFields} {columns} />
+	</div>
+</div>
+<Pagination page={pageInfo} {loaders} fetching={!teamsData} />
 
 <style>
-	.content-wrapper {
-		background: var(--ax-bg-default);
-		position: relative;
-		margin: auto;
-		max-width: 1432px;
-	}
-
 	.header {
 		display: flex;
 		justify-content: space-between;

@@ -60,9 +60,3 @@
 		}}
 	/>
 </div>
-
-<style>
-	.page {
-		margin-inline: var(--margin-default);
-	}
-</style>
