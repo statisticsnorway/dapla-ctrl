@@ -145,6 +145,9 @@ type Team implements Node {
 
 		"Ordering options for items returned from the connection."
 		orderBy: SharedBucketOrder
+
+		"Filter the results"
+		filter: SharedBucketFilter
 	): SharedBucketConnection!
 
 	"""

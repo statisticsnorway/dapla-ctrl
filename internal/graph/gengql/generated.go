@@ -252,7 +252,7 @@ type ComplexityRoot struct {
 		ServiceAccount  func(childComplexity int, id ident.Ident) int
 		ServiceAccounts func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
 		SharedBucket    func(childComplexity int, name string) int
-		SharedBuckets   func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
+		SharedBuckets   func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
 		Team            func(childComplexity int, slug slug.Slug) int
 		TeamMembers     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 		Teams           func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int
@@ -649,7 +649,7 @@ type ComplexityRoot struct {
 		LastSuccessfulSync     func(childComplexity int) int
 		Members                func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 		Section                func(childComplexity int) int
-		SharedBuckets          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
+		SharedBuckets          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
 		SharedBucketsAccess    func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		Slug                   func(childComplexity int) int
 		ViewerCanManageMembers func(childComplexity int) int
@@ -894,7 +894,7 @@ type QueryResolver interface {
 	Section(ctx context.Context, code string) (*section.Section, error)
 	ServiceAccounts(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*serviceaccount.ServiceAccount], error)
 	ServiceAccount(ctx context.Context, id ident.Ident) (*serviceaccount.ServiceAccount, error)
-	SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
+	SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 	SharedBucket(ctx context.Context, name string) (*sharedbucketsstopgap.SharedBucket, error)
 	Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error)
 	Team(ctx context.Context, slug slug.Slug) (*team.Team, error)
@@ -947,7 +947,7 @@ type TeamResolver interface {
 
 	Members(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*team.TeamMember], error)
 	Groups(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) (*pagination.Connection[*group.Group], error)
-	SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
+	SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 	SharedBucketsAccess(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 
 	ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error)
@@ -1829,7 +1829,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Query.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.Query.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), args["filter"].(*sharedbucketsstopgap.SharedBucketFilter)), true
 	case "Query.team":
 		if e.ComplexityRoot.Query.Team == nil {
 			break
@@ -3383,7 +3383,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Team.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder)), true
+		return e.ComplexityRoot.Team.SharedBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), args["filter"].(*sharedbucketsstopgap.SharedBucketFilter)), true
 	case "Team.sharedBucketsAccess":
 		if e.ComplexityRoot.Team.SharedBucketsAccess == nil {
 			break
@@ -4153,6 +4153,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSearchFilter,
 		ec.unmarshalInputSectionOrder,
 		ec.unmarshalInputSendMessageInput,
+		ec.unmarshalInputSharedBucketFilter,
 		ec.unmarshalInputSharedBucketOrder,
 		ec.unmarshalInputTeamOrder,
 		ec.unmarshalInputUpdateServiceAccountInput,
@@ -6711,6 +6712,11 @@ type ServiceAccountTokenDeletedActivityLogEntryData {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: SharedBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: SharedBucketFilter
 	): SharedBucketConnection!
 
 	"""
@@ -6882,6 +6888,18 @@ type SharedBucket implements Node {
 		"""
 		orderBy: TeamOrder
 	): TeamConnection!
+}
+
+input SharedBucketFilter {
+	"""
+	Filter by kinds (e.g. standard/delomaten)
+	"""
+	kinds: [String!]
+
+	"""
+	Filter by the envs the buckets belong to
+	"""
+	envs: [String!]
 }
 
 extend union SearchNode = SharedBucket
@@ -7165,6 +7183,9 @@ type Team implements Node {
 
 		"Ordering options for items returned from the connection."
 		orderBy: SharedBucketOrder
+
+		"Filter the results"
+		filter: SharedBucketFilter
 	): SharedBucketConnection!
 
 	"""
@@ -8799,6 +8820,11 @@ func (ec *executionContext) field_Query_sharedBuckets_args(ctx context.Context, 
 		return nil, err
 	}
 	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -9338,6 +9364,11 @@ func (ec *executionContext) field_Team_sharedBuckets_args(ctx context.Context, r
 		return nil, err
 	}
 	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
 	return args, nil
 }
 
@@ -13545,7 +13576,7 @@ func (ec *executionContext) _Query_sharedBuckets(ctx context.Context, field grap
 		ec.fieldContext_Query_sharedBuckets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Query().SharedBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.Query().SharedBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), fc.Args["filter"].(*sharedbucketsstopgap.SharedBucketFilter))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -21693,7 +21724,7 @@ func (ec *executionContext) _Team_sharedBuckets(ctx context.Context, field graph
 		ec.fieldContext_Team_sharedBuckets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Team().SharedBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
+			return ec.Resolvers.Team().SharedBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), fc.Args["filter"].(*sharedbucketsstopgap.SharedBucketFilter))
 		},
 		nil,
 		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
@@ -28176,6 +28207,43 @@ func (ec *executionContext) unmarshalInputSendMessageInput(ctx context.Context, 
 				return it, err
 			}
 			it.Message = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSharedBucketFilter(ctx context.Context, obj any) (sharedbucketsstopgap.SharedBucketFilter, error) {
+	var it sharedbucketsstopgap.SharedBucketFilter
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"kinds", "envs"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "kinds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("kinds"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Kinds = data
+		case "envs":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("envs"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Envs = data
 		}
 	}
 	return it, nil
@@ -39294,6 +39362,14 @@ func (ec *executionContext) marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatis
 		return graphql.Null
 	}
 	return ec._ServiceAccountToken(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputSharedBucketFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketOrder, error) {

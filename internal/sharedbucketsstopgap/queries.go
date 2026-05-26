@@ -29,13 +29,15 @@ func GetByIdent(ctx context.Context, ident ident.Ident) (*SharedBucket, error) {
 	return Get(ctx, sectionCode)
 }
 
-func List(ctx context.Context, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketConnection, error) {
+func List(ctx context.Context, page *pagination.Pagination, orderBy *SharedBucketOrder, filter *SharedBucketFilter) (*SharedBucketConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.List(ctx, sharedbucketsstopgapsql.ListParams{
 		Offset:  page.Offset(),
 		Limit:   page.Limit(),
 		OrderBy: orderBy.String(),
+		Kinds:   filter.KindFilter(),
+		Envs:    filter.EnvFilter(),
 	})
 	if err != nil {
 		return nil, err
@@ -156,7 +158,7 @@ func ListTeams(ctx context.Context, name string, page *pagination.Pagination, or
 	}), nil
 }
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketConnection, error) {
+func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, orderBy *SharedBucketOrder, filter *SharedBucketFilter) (*SharedBucketConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForTeam(ctx, sharedbucketsstopgapsql.ListForTeamParams{
@@ -164,6 +166,8 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 		Offset:   page.Offset(),
 		Limit:    page.Limit(),
 		OrderBy:  orderBy.String(),
+		Kinds:    filter.KindFilter(),
+		Envs:     filter.EnvFilter(),
 	})
 	if err != nil {
 		return nil, err

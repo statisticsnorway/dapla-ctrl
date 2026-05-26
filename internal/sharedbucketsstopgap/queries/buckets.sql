@@ -4,6 +4,15 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_stopgap
+WHERE
+	(
+		sqlc.narg('kinds')::TEXT[] IS NULL
+		OR (kind) = ANY (sqlc.narg('kinds')::TEXT[])
+	)
+	AND (
+		sqlc.narg('envs')::TEXT[] IS NULL
+		OR (env) = ANY (sqlc.narg('envs')::TEXT[])
+	)
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:asc' THEN name
@@ -219,6 +228,14 @@ FROM
 	shared_buckets_stopgap
 WHERE
 	team_slug = @team_slug
+	AND (
+		sqlc.narg('kinds')::TEXT[] IS NULL
+		OR (kind) = ANY (sqlc.narg('kinds')::TEXT[])
+	)
+	AND (
+		sqlc.narg('envs')::TEXT[] IS NULL
+		OR (env) = ANY (sqlc.narg('envs')::TEXT[])
+	)
 ORDER BY
 	CASE
 		WHEN @order_by::TEXT = 'name:asc' THEN name

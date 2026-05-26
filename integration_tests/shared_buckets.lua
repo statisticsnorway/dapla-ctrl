@@ -10,13 +10,15 @@ local sharedUser2 = User.new()
 local bucketName = "ssb-sharing-data-delt-testing-test"
 local bucketName2 = "ssb-sharing-data-delt-testing2-test"
 
--- Create two shared buckets in team "sharing"
+-- Create some shared buckets
 Helper.SQLExec([[
 	INSERT INTO
 		shared_buckets_stopgap (name, short_name, kind, env, team_slug)
 	VALUES
 		($1, 'testing', 'standard', 'test', 'sharing'),
-		($2, 'testing2', 'standard', 'test', 'sharing')
+		($2, 'testing2', 'standard', 'test', 'sharing'),
+		('ssb-sharing-data-delt-delomat-test', 'delomat', 'delomat', 'test', 'sharing'),
+		('ssb-sharing-data-delt-standard-prod', 'standard', 'standard', 'prod', 'sharing')
 	]], bucketName, bucketName2)
 
 -- Create some groups in shared-with-a and shared-with-b which we can grant access to the bucket
@@ -44,7 +46,7 @@ Helper.SQLExec([[
 	]], sharedUser1:id(), sharedUser2:id())
 
 
--- The bucket should be the only one in the database, and no users should have access yet
+-- No users should have access yet
 Test.gql("Get shared bucket of team", function(t)
 	t.addHeader("x-user-email", user:email())
 
@@ -56,7 +58,6 @@ Test.gql("Get shared bucket of team", function(t)
 					totalCount
 				}
 				nodes {
-					name
 					users(first: 1) {
 						pageInfo {
 							totalCount
@@ -73,11 +74,10 @@ Test.gql("Get shared bucket of team", function(t)
 			team = {
 				sharedBuckets = {
 					pageInfo = {
-						totalCount = 2,
+						totalCount = 4,
 					},
 					nodes = {
 						{
-							name = "ssb-sharing-data-delt-testing-test",
 							users = {
 								pageInfo = {
 									totalCount = 0,
@@ -275,6 +275,85 @@ Test.gql("user has access to 2 buckets, through 3 'connections'", function(t)
 							},
 						},
 					},
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("filter for env and kind returns the expected responses", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		query {
+			standardProd: sharedBuckets(filter: {
+				envs: ["prod"]
+				kinds: ["standard"]
+			}) {
+				pageInfo {
+					totalCount
+				}
+			}
+			delomatenProd: sharedBuckets(filter: {
+				envs: ["prod"]
+				kinds: ["delomat"]
+			}) {
+				pageInfo {
+					totalCount
+				}
+			}
+			standardTest: sharedBuckets(filter: {
+				envs: ["test"]
+				kinds: ["standard"]
+			}) {
+				pageInfo {
+					totalCount
+				}
+			}
+			delomatenTest: sharedBuckets(filter: {
+				envs: ["test"]
+				kinds: ["delomat"]
+			}) {
+				pageInfo {
+					totalCount
+				}
+			}
+			allInclusive: sharedBuckets(filter: {
+				envs: ["prod", "test"]
+				kinds: ["standard", "delomat"]
+			}) {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+		]]))
+
+	t.check {
+		data = {
+			standardProd = {
+				pageInfo = {
+					totalCount = 1,
+				},
+			},
+			delomatenProd = {
+				pageInfo = {
+					totalCount = 0,
+				},
+			},
+			standardTest = {
+				pageInfo = {
+					totalCount = 2,
+				},
+			},
+			delomatenTest = {
+				pageInfo = {
+					totalCount = 1,
+				},
+			},
+			allInclusive = {
+				pageInfo = {
+					totalCount = 4,
 				},
 			},
 		},

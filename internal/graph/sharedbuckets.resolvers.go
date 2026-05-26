@@ -11,13 +11,13 @@ import (
 	"github.com/statisticsnorway/dapla-api/internal/user"
 )
 
-func (r *queryResolver) SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+func (r *queryResolver) SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return sharedbucketsstopgap.List(ctx, page, orderBy)
+	return sharedbucketsstopgap.List(ctx, page, orderBy, filter)
 }
 
 func (r *queryResolver) SharedBucket(ctx context.Context, name string) (*sharedbucketsstopgap.SharedBucket, error) {

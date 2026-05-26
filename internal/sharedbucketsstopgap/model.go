@@ -107,3 +107,28 @@ func (e *SharedBucketOrderField) UnmarshalGQL(v any) error {
 func (e SharedBucketOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
+
+type SharedBucketFilter struct {
+	Envs  []string `json:"envs,omitempty"`
+	Kinds []string `json:"kinds,omitempty"`
+}
+
+func (f *SharedBucketFilter) EnvFilter() []string {
+	var envFilter []string
+	if f != nil {
+		for _, c := range f.Envs {
+			envFilter = append(envFilter, strings.ToLower(c))
+		}
+	}
+	return envFilter
+}
+
+func (f *SharedBucketFilter) KindFilter() []string {
+	var kindFilter []string
+	if f != nil {
+		for _, c := range f.Kinds {
+			kindFilter = append(kindFilter, strings.ToLower(c))
+		}
+	}
+	return kindFilter
+}

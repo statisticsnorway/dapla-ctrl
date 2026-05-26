@@ -27,6 +27,11 @@ extend type Query {
 		Ordering options for items returned from the connection.
 		"""
 		orderBy: SharedBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: SharedBucketFilter
 	): SharedBucketConnection!
 
 	"""
@@ -198,6 +203,18 @@ type SharedBucket implements Node {
 		"""
 		orderBy: TeamOrder
 	): TeamConnection!
+}
+
+input SharedBucketFilter {
+	"""
+	Filter by kinds (e.g. standard/delomaten)
+	"""
+	kinds: [String!]
+
+	"""
+	Filter by the envs the buckets belong to
+	"""
+	envs: [String!]
 }
 
 extend union SearchNode = SharedBucket

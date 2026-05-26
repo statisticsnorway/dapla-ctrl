@@ -54,45 +54,56 @@ SELECT
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_stopgap
+WHERE
+	(
+		$1::TEXT[] IS NULL
+		OR (kind) = ANY ($1::TEXT[])
+	)
+	AND (
+		$2::TEXT[] IS NULL
+		OR (env) = ANY ($2::TEXT[])
+	)
 ORDER BY
 	CASE
-		WHEN $1::TEXT = 'name:asc' THEN name
+		WHEN $3::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'name:desc' THEN name
+		WHEN $3::TEXT = 'name:desc' THEN name
 	END DESC,
 	CASE
-		WHEN $1::TEXT = 'kind:asc' THEN kind
+		WHEN $3::TEXT = 'kind:asc' THEN kind
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'kind:desc' THEN kind
+		WHEN $3::TEXT = 'kind:desc' THEN kind
 	END DESC,
 	CASE
-		WHEN $1::TEXT = 'short_name:asc' THEN short_name
+		WHEN $3::TEXT = 'short_name:asc' THEN short_name
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'short_name:desc' THEN short_name
+		WHEN $3::TEXT = 'short_name:desc' THEN short_name
 	END DESC,
 	CASE
-		WHEN $1::TEXT = 'env:asc' THEN env
+		WHEN $3::TEXT = 'env:asc' THEN env
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'env:desc' THEN env
+		WHEN $3::TEXT = 'env:desc' THEN env
 	END DESC,
 	CASE
-		WHEN $1::TEXT = 'team:asc' THEN team_slug
+		WHEN $3::TEXT = 'team:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN $1::TEXT = 'team:desc' THEN team_slug
+		WHEN $3::TEXT = 'team:desc' THEN team_slug
 	END DESC,
 	short_name ASC
 LIMIT
-	$3
+	$5
 OFFSET
-	$2
+	$4
 `
 
 type ListParams struct {
+	Kinds   []string
+	Envs    []string
 	OrderBy string
 	Offset  int32
 	Limit   int32
@@ -104,7 +115,13 @@ type ListRow struct {
 }
 
 func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) {
-	rows, err := q.db.Query(ctx, list, arg.OrderBy, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, list,
+		arg.Kinds,
+		arg.Envs,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -268,46 +285,56 @@ FROM
 	shared_buckets_stopgap
 WHERE
 	team_slug = $1
+	AND (
+		$2::TEXT[] IS NULL
+		OR (kind) = ANY ($2::TEXT[])
+	)
+	AND (
+		$3::TEXT[] IS NULL
+		OR (env) = ANY ($3::TEXT[])
+	)
 ORDER BY
 	CASE
-		WHEN $2::TEXT = 'name:asc' THEN name
+		WHEN $4::TEXT = 'name:asc' THEN name
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'name:desc' THEN name
+		WHEN $4::TEXT = 'name:desc' THEN name
 	END DESC,
 	CASE
-		WHEN $2::TEXT = 'kind:asc' THEN kind
+		WHEN $4::TEXT = 'kind:asc' THEN kind
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'kind:desc' THEN kind
+		WHEN $4::TEXT = 'kind:desc' THEN kind
 	END DESC,
 	CASE
-		WHEN $2::TEXT = 'short_name:asc' THEN short_name
+		WHEN $4::TEXT = 'short_name:asc' THEN short_name
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'short_name:desc' THEN short_name
+		WHEN $4::TEXT = 'short_name:desc' THEN short_name
 	END DESC,
 	CASE
-		WHEN $2::TEXT = 'env:asc' THEN env
+		WHEN $4::TEXT = 'env:asc' THEN env
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'env:desc' THEN env
+		WHEN $4::TEXT = 'env:desc' THEN env
 	END DESC,
 	CASE
-		WHEN $2::TEXT = 'team:asc' THEN team_slug
+		WHEN $4::TEXT = 'team:asc' THEN team_slug
 	END ASC,
 	CASE
-		WHEN $2::TEXT = 'team:desc' THEN team_slug
+		WHEN $4::TEXT = 'team:desc' THEN team_slug
 	END DESC,
 	short_name ASC
 LIMIT
-	$4
+	$6
 OFFSET
-	$3
+	$5
 `
 
 type ListForTeamParams struct {
 	TeamSlug slug.Slug
+	Kinds    []string
+	Envs     []string
 	OrderBy  string
 	Offset   int32
 	Limit    int32
@@ -321,6 +348,8 @@ type ListForTeamRow struct {
 func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error) {
 	rows, err := q.db.Query(ctx, listForTeam,
 		arg.TeamSlug,
+		arg.Kinds,
+		arg.Envs,
 		arg.OrderBy,
 		arg.Offset,
 		arg.Limit,

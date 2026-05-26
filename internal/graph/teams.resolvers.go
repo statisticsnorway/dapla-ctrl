@@ -202,12 +202,12 @@ func (r *teamResolver) Groups(ctx context.Context, obj *team.Team, first *int, a
 	return group.ListByTeamSlug(ctx, obj.Slug, page, orderBy, filter)
 }
 
-func (r *teamResolver) SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+func (r *teamResolver) SharedBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
-	return sharedbucketsstopgap.ListForTeam(ctx, obj.Slug, page, orderBy)
+	return sharedbucketsstopgap.ListForTeam(ctx, obj.Slug, page, orderBy, filter)
 }
 
 func (r *teamResolver) SharedBucketsAccess(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
