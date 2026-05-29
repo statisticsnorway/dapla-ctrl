@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-api/internal/message/messagesql"
 	"github.com/statisticsnorway/dapla-api/internal/validate"
@@ -15,24 +16,39 @@ type (
 )
 
 type Message struct {
-	Id        uuid.UUID `json:"id"`
+	UUID      uuid.UUID `json:"id"`
 	Actor     string    `json:"actor"`
 	Recipient uuid.UUID `json:"recipient"`
 	Subject   string    `json:"subject"`
 	Message   string    `json:"message"`
+	Status    string    `json:"status"`
 }
 
 func (Message) IsNode() {}
 
+func (m Message) ID() ident.Ident {
+	return newMessageIdent(m.UUID)
+}
+
 func toGraphMessage(m *messagesql.Message) *Message {
 	ret := &Message{
-		Id:        m.ID,
+		UUID:      m.ID,
 		Actor:     m.Actor,
 		Recipient: m.Recipient,
 		Subject:   m.Subject,
 		Message:   m.Message,
+		Status:    m.Status,
 	}
 	return ret
+}
+
+type MessageFilter struct {
+	// Filter by message status, e.g PENDING, PUBLISHED, SUCCESSFUL and FAILED
+	Status *string `json:"status,omitempty"`
+	// Filter by message actor
+	Actor *string `json:"actor,omitempty"`
+	// Filter by message recipient
+	Recipient *string `json:"recipient,omitempty"`
 }
 
 type SendMessageInput struct {

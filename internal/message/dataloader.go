@@ -43,7 +43,7 @@ type dataloader struct {
 }
 
 func (l dataloader) list(ctx context.Context, ids []uuid.UUID) ([]*Message, []error) {
-	makeKey := func(obj *Message) uuid.UUID { return obj.Id }
+	makeKey := func(obj *Message) uuid.UUID { return obj.UUID }
 	return loader.LoadModels(ctx, ids, l.db.GetByIDs, toGraphMessage, makeKey)
 }
 

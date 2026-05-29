@@ -6,6 +6,7 @@ import (
 	activitylog "github.com/statisticsnorway/dapla-api/internal/activitylog"
 	pagination "github.com/statisticsnorway/dapla-api/internal/graph/pagination"
 	group "github.com/statisticsnorway/dapla-api/internal/group"
+	message "github.com/statisticsnorway/dapla-api/internal/message"
 	search "github.com/statisticsnorway/dapla-api/internal/search"
 	section "github.com/statisticsnorway/dapla-api/internal/section"
 	sharedbucketsstopgap "github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
@@ -26,6 +27,9 @@ func NewComplexityRoot() ComplexityRoot {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Query.Messages = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *message.MessageFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.Reconcilers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {

@@ -176,6 +176,81 @@ func (q *Queries) GetUserByID(ctx context.Context, id uuid.UUID) (*User, error) 
 	return &i, err
 }
 
+const list = `-- name: List :many
+SELECT
+	messages.id, messages.actor, messages.recipient, messages.subject, messages.message, messages.status, messages.created_at,
+	COUNT(*) OVER () AS total_count
+FROM
+	messages
+WHERE
+	(
+		$1::TEXT IS NULL
+		OR status = $1::TEXT
+	)
+	AND (
+		$2::TEXT IS NULL
+		OR actor = $2::TEXT
+	)
+	AND (
+		$3::UUID IS NULL
+		OR recipient = $3::UUID
+	)
+ORDER BY
+	messages.created_at ASC
+LIMIT
+	$5
+OFFSET
+	$4
+`
+
+type ListParams struct {
+	Status    *string
+	Actor     *string
+	Recipient *uuid.UUID
+	Offset    int32
+	Limit     int32
+}
+
+type ListRow struct {
+	Message    Message
+	TotalCount int64
+}
+
+func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) {
+	rows, err := q.db.Query(ctx, list,
+		arg.Status,
+		arg.Actor,
+		arg.Recipient,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListRow{}
+	for rows.Next() {
+		var i ListRow
+		if err := rows.Scan(
+			&i.Message.ID,
+			&i.Message.Actor,
+			&i.Message.Recipient,
+			&i.Message.Subject,
+			&i.Message.Message,
+			&i.Message.Status,
+			&i.Message.CreatedAt,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateStatus = `-- name: UpdateStatus :one
 UPDATE messages
 SET

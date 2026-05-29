@@ -71,3 +71,30 @@ SELECT
 			email = @email
 	)
 ;
+
+-- name: List :many
+SELECT
+	sqlc.embed(messages),
+	COUNT(*) OVER () AS total_count
+FROM
+	messages
+WHERE
+	(
+		sqlc.narg(status)::TEXT IS NULL
+		OR status = sqlc.narg(status)::TEXT
+	)
+	AND (
+		sqlc.narg(actor)::TEXT IS NULL
+		OR actor = sqlc.narg(actor)::TEXT
+	)
+	AND (
+		sqlc.narg(recipient)::UUID IS NULL
+		OR recipient = sqlc.narg(recipient)::UUID
+	)
+ORDER BY
+	messages.created_at ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;

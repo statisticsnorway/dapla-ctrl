@@ -32,3 +32,101 @@ type SendMessagePayload {
 	"""
 	messageId: String!
 }
+
+extend type Query {
+	"""
+	Get a list messages
+	"""
+	messages(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"Filter"
+		filter: MessageFilter
+	): MessageConnection!
+
+	"""
+	Get a message by messageId
+	"""
+	message(messageId: String!): Message
+}
+
+input MessageFilter {
+	"""
+	Filter by message status, e.g PENDING, PUBLISHED, SUCCESSFUL and FAILED
+	"""
+	status: String
+
+	"""
+	Filter by message actor
+	"""
+	actor: String
+
+	"""
+	Filter by message recipient
+	"""
+	recipient: String
+}
+
+type Message implements Node {
+	"""
+	The globally unique ID of the message.
+	"""
+	id: ID!
+
+	"""
+	Message ID
+	"""
+	messageId: String!
+
+	"""
+	Who sent the message
+	"""
+	actor: String!
+
+	"""
+	Who the message was sent to
+	"""
+	recipient: User!
+
+	"""
+	Message status
+	"""
+	status: String!
+}
+
+type MessageConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [Message!]!
+
+	"List of edges."
+	edges: [MessageEdge!]!
+}
+
+type MessageEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The team."
+	node: Message!
+}

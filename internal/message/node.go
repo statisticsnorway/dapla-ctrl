@@ -29,6 +29,11 @@ func init() {
 	ident.RegisterIdentType(identMessage, "M", GetByIdent)
 }
 
+// newMessageIdent creates a new identifier for a specific message
+func newMessageIdent(messageId uuid.UUID) ident.Ident {
+	return ident.NewIdent(identMessage, messageId.String())
+}
+
 // parseMessageIdent returns the message uuid from a message identifier. If the identifier is invalid, an error is returned.
 func parseMessageIdent(id ident.Ident) (uuid.UUID, error) {
 	parts := id.Parts()

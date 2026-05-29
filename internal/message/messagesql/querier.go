@@ -14,6 +14,7 @@ type Querier interface {
 	GetByStatus(ctx context.Context, status string) ([]*Message, error)
 	GetUserByEmail(ctx context.Context, email string) (*User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*User, error)
+	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	UpdateStatus(ctx context.Context, arg UpdateStatusParams) (*Message, error)
 	UserExists(ctx context.Context, email string) (bool, error)
 }
