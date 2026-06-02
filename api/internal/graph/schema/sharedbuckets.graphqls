@@ -1,0 +1,352 @@
+extend type Query {
+	"""
+	Get a list of Shared Buckets.
+	"""
+	sharedBuckets(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: SharedBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: SharedBucketFilter
+	): SharedBucketConnection!
+
+	"""
+	Get a Shared Bucket by its name, e.g. 'ssb-my-team-data-delt-abc-prod'.
+	"""
+	sharedBucket(name: String!): SharedBucket!
+}
+
+"""
+The SharedBucket type represents a Shared Bucket of the Dapla platform and the Dapla GraphQL API.
+"""
+type SharedBucket implements Node {
+	"""
+	The globally unique ID of the SharedBucket.
+	"""
+	id: ID!
+
+	"""
+	Name of the Shared Bucket.
+
+	This is equal to "ssb-<teamSlug>-data-delt-<shortName>-<env>"
+	"""
+	name: String!
+
+	"""
+	The kind of the (standard/delomat).
+	"""
+	kind: String!
+
+	"""
+	Shortname of the bucket
+	"""
+	shortName: String!
+
+	"""
+	Which env the bucket is in (test/prod)
+	"""
+	env: String!
+
+	"""
+	The team that owns the bucket
+	"""
+	team: Team!
+
+	"""
+	List the groups who have access to the bucket.
+	"""
+	groups(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupConnection!
+
+	"""
+	List the users who have access to the bucket.
+
+	The entries are not unique, i.e. one user might show up multiple times if they have access
+	via multiple groups. Use uniqueUsers to get a list of unique users with access.
+	"""
+	users(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): TeamMemberConnection!
+
+	"""
+	List the unique users who have access to the bucket.
+	"""
+	uniqueUsers(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): UserConnection!
+
+	"""
+	List the teams that have access to the bucket.
+	"""
+	teams(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamOrder
+	): TeamConnection!
+}
+
+input SharedBucketFilter {
+	"""
+	Filter by kinds (e.g. standard/delomaten)
+	"""
+	kinds: [String!]
+
+	"""
+	Filter by the envs the buckets belong to
+	"""
+	envs: [String!]
+}
+
+extend union SearchNode = SharedBucket
+
+extend enum SearchType {
+	SHAREDBUCKET
+}
+
+"""
+The SharedBucketAccess type represents a team which has access to a specific buckets through a set of groups.
+This type can be used to represent e.g. a team's access to other teams' buckets,
+or one user's access to several buckets in different teams.
+"""
+type SharedBucketAccess {
+	bucket: SharedBucket!
+
+	team: Team!
+
+	groups: [Group!]!
+}
+
+"""
+SharedBucket connection.
+"""
+type SharedBucketConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [SharedBucket!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [SharedBucketEdge!]!
+}
+
+"""
+SharedBucketAccess connection.
+"""
+type SharedBucketAccessConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [SharedBucketAccess!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [SharedBucketAccessEdge!]!
+}
+
+"""
+SharedBucket edge.
+"""
+type SharedBucketEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The SharedBucketStopgap.
+	"""
+	node: SharedBucket!
+}
+
+"""
+SharedBucketAccess edge.
+"""
+type SharedBucketAccessEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The SharedBucketStopgap.
+	"""
+	node: SharedBucketAccess!
+}
+
+"""
+Ordering options when fetching SharedBucket.
+"""
+input SharedBucketOrder {
+	"""
+	The field to order items by.
+	"""
+	field: SharedBucketOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order SharedBucket by.
+"""
+enum SharedBucketOrderField {
+	"""
+	The name of the shared bucket.
+	"""
+	NAME
+
+	"""
+	The kind of the shared bucket.
+	"""
+	KIND
+
+	"""
+	The short name of the shared bucket.
+	"""
+	SHORT_NAME
+
+	"""
+	The environment of the shared bucket.
+	"""
+	ENV
+
+	"""
+	The team who owns the shared bucket.
+	"""
+	TEAM
+}

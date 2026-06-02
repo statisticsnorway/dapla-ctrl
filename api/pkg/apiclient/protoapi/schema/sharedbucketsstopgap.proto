@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+import "groups.proto";
+
+option go_package = "./pkg/apiclient/protoapi";
+
+message SharedBucketStopgap {
+  string team_slug = 1;
+  string short_name = 2;
+  string type = 3;
+  string env = 4;
+}
+
+service SharedBucketsStopgap {
+  rpc Create(CreateSharedBucketsStopgapRequest) returns (CreateSharedBucketsStopgapResponse) {}
+  rpc Get(GetSharedBucketsStopgapRequest) returns (GetSharedBucketsStopgapResponse) {}
+  rpc Groups(ListSharedBucketsStopgapGroupsRequest) returns (ListSharedBucketsStopgapGroupsResponse) {}
+  rpc AddGroup(AddSharedBucketsStopgapGroupRequest) returns (AddSharedBucketsStopgapGroupResponse) {}
+  rpc RemoveGroup(RemoveSharedBucketsStopgapGroupRequest) returns (RemoveSharedBucketsStopgapGroupResponse) {}
+}
+
+message GetSharedBucketsStopgapRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+}
+
+message GetSharedBucketsStopgapResponse {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+}
+
+message CreateSharedBucketsStopgapRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+}
+
+message CreateSharedBucketsStopgapResponse {}
+
+message ListSharedBucketsStopgapGroupsRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+}
+
+message ListSharedBucketsStopgapGroupsResponse {
+  repeated Group nodes = 1;
+}
+
+message AddSharedBucketsStopgapGroupRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+  string group = 2;
+}
+
+message AddSharedBucketsStopgapGroupResponse {}
+
+message RemoveSharedBucketsStopgapGroupRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+  string group = 2;
+}
+
+message RemoveSharedBucketsStopgapGroupResponse {}

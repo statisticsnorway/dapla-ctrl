@@ -1,0 +1,72 @@
+name: Build and push image and chart
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    paths-ignore: [data/**]
+  workflow_dispatch:
+jobs:
+  test:
+    name: Check pull request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - run: cd api
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 #v4.0.1
+        with:
+          cache_key_prefix: mise-test
+      - uses: ./.github/actions/go-cache
+        with:
+          key: test
+      - run: mise run build:api
+      - run: mise run test
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - run: cd api
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 #v4.0.1
+        with:
+          cache_key_prefix: mise-lint
+      - uses: ./.github/actions/go-cache
+        with:
+          key: lint
+          restore-keys: test
+      - run: mise run check:staticcheck
+      - run: mise run check:vulncheck
+      - name: Check code format and run code generators
+        run: |
+          mise run generate
+          mise run fmt
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run generate' and 'mise run fmt'"
+          git diff --name-only | grep -v '^package-lock.json$' | xargs -r git diff --exit-code --
+
+  build_push:
+    permissions:
+      contents: read
+      id-token: write
+    if: github.triggering_actor != 'dependabot[bot]'
+    name: Build and push
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.build-push-sign.outputs.version }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
+      - run: cd api
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 #v4.0.1
+        with:
+          cache_key_prefix: mise-build-push
+      - uses: ./.github/actions/go-cache
+        with:
+          key: build
+          restore-keys: test
+      - name: Build api
+        run: mise run build:api
+      - name: Build and push image and SBOM to Nais OCI registry
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
+        with:
+          team: dapla-platform

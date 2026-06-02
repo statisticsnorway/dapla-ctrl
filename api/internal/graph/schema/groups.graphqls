@@ -1,0 +1,370 @@
+extend type Query {
+	"""
+	Get a list of groups.
+	"""
+	groups(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupConnection!
+
+	"""
+	Get a group by its name.
+	"""
+	group(name: String!): Group!
+}
+
+extend type Mutation {
+	"""
+	Create a new team group
+	"""
+	createGroup(input: CreateGroupInput!): CreateGroupPayload!
+
+	"""
+	Add a group member
+
+	If the user is already a member or an owner of the team, the mutation will result in an error.
+	"""
+	addGroupMember(input: AddGroupMemberInput!): AddGroupMemberPayload!
+
+	"""
+	Remove a team member
+
+	If the user is not already a member or an owner of the team, the mutation will result in an error.
+	"""
+	removeGroupMember(input: RemoveGroupMemberInput!): RemoveGroupMemberPayload!
+}
+
+"""
+The group type represents a group of the Dapla platform and the Dapla GraphQL API.
+"""
+type Group implements Node {
+	"""
+	The globally unique ID of the group.
+	"""
+	id: ID!
+
+	"""
+	Full name of group.
+	"""
+	name: String!
+
+	"""
+	The team the group belongs to.
+	"""
+	teamSlug: Slug!
+
+	"""
+	Category of the group.
+	"""
+	category: String!
+
+	"""
+	Suffix of the group.
+	"""
+	suffix: String
+
+	"Group members."
+	members(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+
+		"Ordering options for items returned from the connection."
+		orderBy: UserOrder
+	): GroupMemberConnection!
+}
+
+input GroupFilter {
+	"""
+	Filter by group categories, e.g. developers and data-admins
+	"""
+	categories: [String!]
+}
+
+extend union SearchNode = Group
+
+extend enum SearchType {
+	GROUP
+}
+
+type GroupMember {
+	"Group instance."
+	group: Group!
+
+	"User instance."
+	user: User!
+}
+
+"""
+Group connection.
+"""
+type GroupConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [Group!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [GroupEdge!]!
+}
+
+type GroupMemberConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [GroupMember!]!
+
+	"List of edges."
+	edges: [GroupMemberEdge!]!
+}
+
+"""
+Group edge.
+"""
+type GroupEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The group.
+	"""
+	node: Group!
+}
+
+type GroupMemberEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The team member."
+	node: GroupMember!
+}
+
+"""
+Ordering options when fetching users.
+"""
+input GroupOrder {
+	"""
+	The field to order items by.
+	"""
+	field: GroupOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order groups by.
+"""
+enum GroupOrderField {
+	"""
+	The full name of the group.
+	"""
+	NAME
+
+	"""
+	The team of the group.
+	"""
+	TEAM
+
+	"""
+	The category of the group.
+	"""
+	CATEGORY
+}
+
+type CreateGroupPayload {
+	"The newly created group."
+	group: Group
+}
+
+"The added group member."
+type AddGroupMemberPayload {
+	member: GroupMember
+}
+
+type RemoveGroupMemberPayload {
+	"The user who was removed from the group."
+	user: User
+
+	"The group the user was removed from."
+	group: Group
+}
+
+input CreateGroupInput {
+	"Slug of the team the group belongs to."
+	teamSlug: Slug!
+
+	"Category of the group."
+	category: String!
+
+	"Suffix of the group."
+	suffix: String
+}
+
+input AddGroupMemberInput {
+	"Name of the group that should receive a new member."
+	groupName: String!
+
+	"Email of the user to add to the group."
+	userEmail: String!
+}
+
+input RemoveGroupMemberInput {
+	"Name of the group that the member should be removed from."
+	groupName: String!
+
+	"Email of the user to remove from the group."
+	userEmail: String!
+}
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to groups will use this resource type."
+	GROUP
+}
+
+type GroupCreatedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+}
+
+type GroupMemberAddedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberAddedActivityLogEntryData!
+}
+
+type GroupMemberAddedActivityLogEntryData {
+	"The ID of the user that was added."
+	userID: ID!
+
+	"The email address of the user that was added."
+	userEmail: String!
+}
+
+type GroupMemberRemovedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the action."
+	data: GroupMemberRemovedActivityLogEntryData!
+}
+
+type GroupMemberRemovedActivityLogEntryData {
+	"The ID of the user that was removed."
+	userID: ID!
+
+	"The email address of the user that was removed."
+	userEmail: String!
+}
+
+extend enum ActivityLogActivityType {
+	"Group was created."
+	GROUP_CREATED
+	"Group member was added."
+	GROUP_MEMBER_ADDED
+	"Group member was removed."
+	GROUP_MEMBER_REMOVED
+}

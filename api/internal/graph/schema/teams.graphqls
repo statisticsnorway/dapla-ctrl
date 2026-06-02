@@ -1,0 +1,534 @@
+extend type Query {
+	"""
+	Get a list of teams.
+	"""
+	teams(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamOrder
+	): TeamConnection!
+
+	"""
+	Get a team by its slug.
+	"""
+	team(slug: Slug!): Team!
+}
+
+extend type Mutation {
+	"""
+	Create a new Dapla team
+
+	The user creating the team will be granted team ownership, unless the user is a service account, in which case the
+	team will not get an initial owner. To add one or more owners to the team, refer to the `addTeamOwners` mutation.
+
+	Creation of a team will also create external resources for the team, which will be managed by the Dapla API
+	reconcilers. This will be done asynchronously.
+	"""
+	createTeam(input: CreateTeamInput!): CreateTeamPayload!
+
+	"""
+	Update an existing Dapla team
+
+	This mutation can be used to update team metadata. It is not possible to update the team slug.
+	"""
+	updateTeam(input: UpdateTeamInput!): UpdateTeamPayload!
+
+	"""
+	Adds an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	addTeamAccessManager(input: AddTeamAccessManagerInput!): AddTeamAccessManagerPayload!
+
+	"""
+	Removes an access manager for a team.
+
+	This lets section managers delegate access management to up to two other people.
+	"""
+	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
+}
+
+"""
+The team type represents a team on the Dapla platform.
+
+External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by Dapla API reconcilers.
+"""
+type Team implements Node {
+	"The globally unique ID of the team."
+	id: ID!
+
+	"Unique slug of the team."
+	slug: Slug!
+
+	"The human friendly name of the team"
+	displayName: String!
+
+	"Section who owns the team"
+	section: Section!
+
+	"The autonomy level of the team"
+	isManaged: Boolean!
+
+	"Team members."
+	members(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+
+		"Ordering options for items returned from the connection."
+		orderBy: UserOrder
+	): TeamMemberConnection!
+
+	groups(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+
+		"Ordering options for items returned from the connection."
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupConnection!
+
+	sharedBuckets(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+
+		"Ordering options for items returned from the connection."
+		orderBy: SharedBucketOrder
+
+		"Filter the results"
+		filter: SharedBucketFilter
+	): SharedBucketConnection!
+
+	"""
+	Get the shared buckets the team has access to.
+	"""
+	sharedBucketsAccess(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: SharedBucketOrder
+	): SharedBucketConnection!
+
+	"Timestamp of the last successful synchronization of the team."
+	lastSuccessfulSync: Time
+
+	"Whether or not the team is currently being deleted."
+	deletionInProgress: Boolean!
+
+	"Whether or not the viewer is an owner of the team."
+	viewerIsOwner: Boolean!
+
+	"Whether or not the viewer is a member of the team."
+	viewerIsMember: Boolean!
+
+	"Whether or not the viewer can manage members of the team."
+	viewerCanManageMembers: Boolean!
+
+	"The access managers for the team."
+	accessManagers: [TeamAccessManager!]!
+}
+
+type TeamMember {
+	"Team instance."
+	team: Team!
+
+	"User instance."
+	user: User!
+
+	"Groups the user has in the team."
+	groups: [Group!]!
+}
+
+type TeamAccessManager {
+	"Team instance."
+	team: Team!
+
+	"User instance."
+	user: User!
+}
+
+type CreateTeamPayload {
+	"The newly created team."
+	team: Team
+}
+
+type UpdateTeamPayload {
+	"The updated team."
+	team: Team
+}
+
+type AddTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been added as access manager."
+	user: User!
+}
+
+type RemoveTeamAccessManagerPayload {
+	"The team access manager have been added for."
+	team: Team!
+
+	"The user who has been removed as access manager."
+	user: User!
+}
+
+type TeamConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [Team!]!
+
+	"List of edges."
+	edges: [TeamEdge!]!
+}
+
+type TeamMemberConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [TeamMember!]!
+
+	"List of edges."
+	edges: [TeamMemberEdge!]!
+}
+
+type TeamEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The team."
+	node: Team!
+}
+
+type TeamMemberEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The team member."
+	node: TeamMember!
+}
+
+input CreateTeamInput {
+	"""
+	Unique team slug.
+
+	After creation, this value can not be changed. Also, after a potential deletion of the team, the slug can not be
+	reused, so please choose wisely.
+	"""
+	slug: Slug!
+
+	"""
+	Human friendly name of the team.
+	"""
+	displayName: String!
+
+	"""
+	The code of the section the team belongs to.
+
+	If this is not provided, it will be set to the user's section (if they are a section manager) or 724 if they are
+	Dapla Admins. Non-admins cannot set this to a custom value.
+	"""
+	sectionCode: String
+
+	"""
+	The autonomy level of the team.
+
+	If this is not provided, it will be set to true.
+	"""
+	isManaged: Boolean
+}
+
+input UpdateTeamInput {
+	"Slug of the team to update."
+	slug: Slug!
+
+	"""
+	An optional new display name of the team.
+
+	When omitted the existing value will not be updated.
+	"""
+	displayName: String
+
+	"""
+	An optional new section code for the team.
+
+	When omitted, the existing value will not be updated.
+	Note that the current section manager will lose access to administer the team
+	when changing section code.
+	"""
+	sectionCode: String
+}
+
+input AddTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
+}
+
+input RemoveTeamAccessManagerInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Emails of the users who should be made access managers.
+	"""
+	userEmail: String!
+}
+
+"Ordering options when fetching teams."
+input TeamOrder {
+	"The field to order items by."
+	field: TeamOrderField!
+
+	"The direction to order items by."
+	direction: OrderDirection!
+}
+
+input RequestTeamDeletionInput {
+	"Slug of the team to request a team deletion key for."
+	slug: Slug!
+}
+
+input ConfirmTeamDeletionInput {
+	"Slug of the team to confirm deletion for."
+	slug: Slug!
+
+	"Deletion key, acquired using the requestTeamDeletion mutation."
+	key: String!
+}
+
+"Possible fields to order teams by."
+enum TeamOrderField {
+	"The unique slug of the team."
+	SLUG
+
+	"The section code of the team."
+	SECTION_CODE
+}
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to teams will use this resource type."
+	TEAM
+}
+
+type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+}
+
+type TeamUpdatedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamUpdatedActivityLogEntryData!
+}
+
+type TeamUpdatedActivityLogEntryData {
+	"Fields that were updated."
+	updatedFields: [TeamUpdatedActivityLogEntryDataUpdatedField!]!
+}
+
+type TeamUpdatedActivityLogEntryDataUpdatedField {
+	"The name of the field."
+	field: String!
+
+	"The old value of the field."
+	oldValue: String
+
+	"The new value of the field."
+	newValue: String
+}
+
+type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleAssignedActivityLogEntryData!
+}
+
+type TeamRoleAssignedActivityLogEntryData {
+	"The user who was assigned a role."
+	user: User!
+
+	"The role that was assigned to the user."
+	role: String!
+}
+
+type TeamRoleRevokedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug!
+
+	"Data associated with the update."
+	data: TeamRoleRevokedActivityLogEntryData!
+}
+
+type TeamRoleRevokedActivityLogEntryData {
+	"The user who had a role revoked."
+	user: User!
+
+	"The role that was revoked from the user."
+	role: String!
+}
+
+extend enum ActivityLogActivityType {
+	"Team was created."
+	TEAM_CREATED
+	"Team was updated."
+	TEAM_UPDATED
+	"User was granted a role."
+	TEAM_ROLE_ASSIGNED
+	"User had a role revoked."
+	TEAM_ROLE_REVOKED
+}

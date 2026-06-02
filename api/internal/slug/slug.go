@@ -1,0 +1,69 @@
+package slug
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
+type Slug string
+
+func (s *Slug) UnmarshalGQLContext(_ context.Context, v any) error {
+	input, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("slug must be a string")
+	}
+
+	*s = Slug(strings.ToLower(strings.TrimSpace(input)))
+	return s.Validate()
+}
+
+func (s Slug) MarshalGQLContext(_ context.Context, w io.Writer) error {
+	txt := strconv.Quote(s.String())
+	_, err := io.WriteString(w, txt)
+	return err
+}
+
+func (s Slug) String() string {
+	return string(s)
+}
+
+type ErrInvalidSlug struct {
+	Message string
+}
+
+func (e *ErrInvalidSlug) Error() string {
+	return e.Message
+}
+
+func (e *ErrInvalidSlug) GraphError() string {
+	return e.Message
+}
+
+var slugPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{0,15}[a-z]$`)
+
+func (s Slug) Validate() error {
+	if len(s) < 2 {
+		return invalid("A team slug must be at least 2 characters long.")
+	}
+
+	if len(s) > 17 {
+		return invalid("A team slug must be at most 17 characters long.")
+	}
+	if strings.Contains(s.String(), "--") {
+		return invalid("A team slug must not contain two dashes after another")
+	}
+
+	if !slugPattern.MatchString(s.String()) {
+		return invalid("A team slug must match the following pattern: %q.", slugPattern.String())
+	}
+
+	return nil
+}
+
+func invalid(format string, a ...any) error {
+	return &ErrInvalidSlug{Message: fmt.Sprintf(format, a...)}
+}

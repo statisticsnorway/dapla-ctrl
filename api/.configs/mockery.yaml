@@ -1,0 +1,16 @@
+dir: "{{ .InterfaceDir }}"
+filename: "mock_{{.InterfaceName | snakecase }}.go"
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/statisticsnorway/dapla-api/internal/auth/authn:
+    interfaces:
+      Handler:
+  github.com/statisticsnorway/dapla-api/internal/auth/authz:
+    interfaces:
+      AuthenticatedUser:
+  github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi:
+    config:
+      include-interface-regex: .*Server
+      exclude-interface-regex: Unsafe.*

@@ -1,0 +1,332 @@
+extend type Query {
+	"""
+	Get a list of users.
+	"""
+	users(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): UserConnection!
+
+	"""
+	Get a list of team members. I.e. users who are members of at least one team.
+	"""
+	teamMembers(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): UserConnection!
+
+	"""
+	Get a user by an identifier.
+	"""
+	user(email: String): User!
+
+	"""
+	The currently authenticated user.
+	"""
+	me: AuthenticatedUser!
+}
+
+"""
+The user type represents a user of the Dapla platform and the Dapla GraphQL API.
+"""
+type User implements Node {
+	"""
+	The globally unique ID of the user.
+	"""
+	id: ID!
+
+	"""
+	The email address of the user.
+	"""
+	email: String!
+
+	"""
+	The full name of the user.
+	"""
+	name: String!
+
+	"""
+	The first name of the user.
+	"""
+	firstName: String!
+
+	"""
+	The last name of the user.
+	"""
+	lastName: String!
+
+	"""
+	The job title of the user.
+	"""
+	jobTitle: String
+
+	"""
+	The external ID of the user. This value is managed by the Dapla API user synchronization.
+	"""
+	externalID: String!
+
+	"""
+	The section the user belongs to, nullable in case the user has an invalid section, i.e. not synced to the database.
+	"""
+	section: Section
+
+	"""
+	List of teams the user is connected to.
+	"""
+	teams(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamOrder
+	): TeamMemberConnection!
+
+	"""
+	List of users the user is in a team with.
+	"""
+	teamMembers(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: UserOrder
+	): UserConnection!
+
+	"""
+	Get a list of the groups the user is a member of.
+	"""
+	groups(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: GroupOrder
+
+		"""
+		Filter the results
+		"""
+		filter: GroupFilter
+	): GroupMemberConnection!
+
+	"""
+	Get the shared buckets the user has access to, with team and groups context supplied.
+	"""
+	sharedBucketsAccess(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: SharedBucketOrder
+	): SharedBucketAccessConnection!
+
+	"""
+	True if the user is global admin.
+	"""
+	isAdmin: Boolean!
+
+	"""
+	True if the user is a section mnager.
+	"""
+	isSectionManager: Boolean!
+}
+
+extend union SearchNode = User
+
+extend enum SearchType {
+	USER
+}
+
+"""
+User connection.
+"""
+type UserConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [User!]!
+
+	"""
+	List of edges.
+	"""
+	edges: [UserEdge!]!
+}
+
+"""
+User edge.
+"""
+type UserEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The user.
+	"""
+	node: User!
+}
+
+"""
+Ordering options when fetching users.
+"""
+input UserOrder {
+	"""
+	The field to order items by.
+	"""
+	field: UserOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order users by.
+"""
+enum UserOrderField {
+	"""
+	The name of the user.
+	"""
+	NAME
+
+	"""
+	The email address of the user.
+	"""
+	EMAIL
+
+	"""
+	The section code of the user.
+	"""
+	SECTION_CODE
+}
+
+"""
+Authenticated user type.
+"""
+union AuthenticatedUser = User | ServiceAccount

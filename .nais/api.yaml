@@ -1,0 +1,151 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-api
+  namespace: dapla-platform
+  labels:
+    team: dapla-platform
+  annotations:
+    nais.io/read-only-file-system: "true"
+    nais.io/run-as-user: "1001"
+spec:
+  image: "{{image}}"
+
+  port: 3000
+
+  accessPolicy:
+    inbound:
+      rules:
+        - application: "*"
+          namespace: dapla-platform
+    outbound:
+      external:
+        - host: auth.ssb.no
+        - host: login.microsoftonline.com
+        - ipv4: 100.71.16.226
+
+  resources:
+    requests:
+      memory: "64Mi"
+      cpu: "50m"
+    limits:
+      memory: "512Mi"
+
+  leaderElection: true
+
+  replicas:
+    max: 2
+    min: 1
+
+  readiness:
+    path: /healthz
+    port: 3005
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /healthz
+    port: 3005
+    failureThreshold: 3
+
+  ingresses:
+    - https://dapla-ctrl.intern.ssb.no/graphql
+    - https://dapla-ctrl.intern.ssb.no/oauth2
+    - https://dapla-ctrl.intern.ssb.no/api-docs
+    - https://dapla-ctrl-alt-del.intern.ssb.no/graphql
+    - https://dapla-ctrl-alt-del.intern.ssb.no/oauth2
+    - https://dapla-ctrl-alt-del.intern.ssb.no/api-docs
+
+  env:
+    - name: LISTEN_ADDRESS
+      value: ":3000"
+    - name: INTERNAL_LISTEN_ADDRESS
+      value: ":3005"
+    - name: GRPC_LISTEN_ADDRESS
+      value: ":3001"
+    - name: GOOGLE_MANAGEMENT_PROJECT_ID
+      value: dapla-api-pp
+    - name: JWT_ISSUER
+      value: https://auth.ssb.no/realms/ssb
+    - name: OAUTH_ISSUER
+      value: "https://login.microsoftonline.com/c7217092-b240-4e1d-bd61-fa97ba975cbc/v2.0"
+    - name: OAUTH_REDIRECT_URL
+      value: "https://dapla-ctrl.intern.ssb.no/oauth2/callback"
+    - name: OAUTH_FRONTEND_URL
+      value: "https://dapla-ctrl.intern.ssb.no/"
+    - name: LEADER_ELECTION_ENABLED
+      value: "true"
+    - name: USERSYNC_ADMIN_GROUP
+      value: 57448440-d89e-45b7-ab0a-c915d7d8593d
+    - name: ENTRA_ID_USER_POPULATION_GROUPS
+      value: |-
+        [
+          {
+            "groupId": "06e3f8a4-de02-472e-899e-a82a195bec85",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "b9b78597-f851-4a98-a36a-a4b192352ecd",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "62629f34-d4a0-4a67-8773-a40b6c17d674",
+            "employmentType": "Midlertidig"
+          },
+          {
+            "groupId": "8c6432c8-92b7-4c47-a986-c355f58242cc",
+            "employmentType": "Fast"
+          },
+          {
+            "groupId": "6563e5d3-779e-41a0-b6c4-2c624a626d85",
+            "employmentType": "Midlertidig"
+          },
+          {
+            "groupId": "770d458b-6c05-43a7-a85d-969fd528e7ba",
+            "employmentType": "Ekstern"
+          },
+          {
+            "groupId": "bfa286d2-ccc2-48b6-820d-f14696400150",
+            "employmentType": "Testbruker"
+          }
+        ]
+    - name: USERSYNC_ENABLED
+      value: "true"
+    - name: POSTMAN_ENABLED
+      value: "true"
+    - name: POSTMAN_PROJECT_ID
+      value: sup-p-2b
+    - name: POSTMAN_OUTGOING_SUBSCRIPTION
+      value: sup-prod-dapla-api-sup-postman-outgoing-sub
+    - name: POSTMAN_INCOMING_TOPIC
+      value: sup-prod-postman-incoming-topic
+
+  envFrom:
+    - secret: dapla-api
+
+  # Sql DB set up outside of nais manifest
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dapla-api
+    team: dapla-platform
+  name: dapla-api-grpc
+  namespace: dapla-platform
+spec:
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: grpc
+      port: 3001
+      protocol: TCP
+      targetPort: 3001
+  selector:
+    app: dapla-api
+  sessionAffinity: None
+  type: ClusterIP
