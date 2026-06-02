@@ -23,6 +23,8 @@ jobs:
         with:
           fetch-depth: 0
 
+      - run: cd frontend
+
       - name: Install pnpm
         uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 #v5.0.0
         with:
@@ -80,10 +82,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #v6.0.2
 
+      - run: cd frontend
+
       - uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod
-          RESOURCE: .nais/nais.yaml
+          RESOURCE: .nais/frontend.yaml
           WORKLOAD_IMAGE: ${{ needs.docker-build.outputs.image }}
           DEPLOY_SERVER: deploy.ssb.cloud.nais.io:443
           WAIT: true

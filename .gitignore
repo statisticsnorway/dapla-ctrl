@@ -4,6 +4,9 @@ node_modules
 /build
 /.svelte-kit
 /package
+frontend/build
+frontend/.svelte-kit
+frontend/package
 .env
 .env.*
 .envrc
@@ -15,6 +18,8 @@ $houdini
 .houdini
 /.idea/
 /.direnv/
+frontend/.idea/
+frontend/.direnv/
 
 values.json
 

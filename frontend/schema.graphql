@@ -2102,7 +2102,7 @@ type SharedBucketAccess {
 """SharedBucketAccess connection."""
 type SharedBucketAccessConnection {
   """List of edges."""
-  edges: [SharedBucketEdge!]!
+  edges: [SharedBucketAccessEdge!]!
 
   """List of nodes."""
   nodes: [SharedBucketAccess!]!
