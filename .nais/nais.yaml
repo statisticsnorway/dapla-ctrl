@@ -1,0 +1,55 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-api-reconcilers
+  namespace: dapla-platform
+  labels:
+    team: dapla-platform
+  annotations:
+    nais.io/read-only-file-system: "true"
+    nais.io/run-as-user: "1001"
+spec:
+  image: "{{image}}"
+
+  accessPolicy:
+    outbound:
+      rules:
+        - application: dapla-api
+      external:
+        - host: graph.microsoft.com
+        - host: login.microsoftonline.com
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "1024Mi"
+
+  replicas:
+    max: 1
+    min: 1
+
+  readiness:
+    path: /healthz
+    port: 3105
+    failureThreshold: 3
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /healthz
+    port: 3105
+    failureThreshold: 5
+
+  env:
+    - name: PUBSUB_PROJECT_ID
+      value: dapla-api-pp
+    - name: PUBSUB_SUBSCRIPTION_ID
+      value: dapla-api-reconcilers-api-events
+    - name: GRPC_TARGET
+      value: dapla-api-grpc:3001
+    - name: INSECURE_GRPC
+      value: "true"
+    - name: LISTEN_ADDRESS
+      value: ":3105"

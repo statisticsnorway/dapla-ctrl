@@ -1,0 +1,51 @@
+package queue_test
+
+import (
+	"testing"
+	"time"
+
+	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
+)
+
+func Test_Queue(t *testing.T) {
+	input := struct{}{}
+
+	t.Run("add to queue", func(t *testing.T) {
+		q, ch := queue.NewQueue[struct{}]()
+		if q.Add(input) != nil {
+			t.Errorf("expected no error when adding to queue")
+		}
+
+		if len(ch) != 1 {
+			t.Errorf("expected queue to contain one item")
+		}
+
+		if input != <-ch {
+			t.Errorf("expected input to match")
+		}
+
+		if len(ch) != 0 {
+			t.Errorf("expected queue to be empty")
+		}
+	})
+
+	t.Run("race test", func(t *testing.T) {
+		q, _ := queue.NewQueue[struct{}]()
+		go func(q queue.Queue[struct{}]) {
+			for range 100 {
+				_ = q.Add(input)
+				time.Sleep(time.Millisecond)
+			}
+		}(q)
+		q.Close()
+	})
+
+	t.Run("close channel", func(t *testing.T) {
+		q, _ := queue.NewQueue[struct{}]()
+		q.Close()
+
+		if q.Add(input).Error() != "queue channel is closed" {
+			t.Errorf("expected error when adding to closed queue")
+		}
+	})
+}
