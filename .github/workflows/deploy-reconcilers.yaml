@@ -22,5 +22,5 @@ jobs:
         env:
           TEAM: dapla-platform
           CLUSTER: prod
-          RESOURCE: .nais/nais.yaml
+          RESOURCE: .nais/reconcilers.yaml
           VAR: image=europe-north1-docker.pkg.dev/${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}/dapla-platform/dapla-api-reconcilers:${{ github.event.inputs.image_version }}
