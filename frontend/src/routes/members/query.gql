@@ -1,0 +1,39 @@
+query MyTeamMembers($after: Cursor, $before: Cursor, $first: Int, $last: Int, $orderBy: UserOrder)
+@cache(policy: CacheAndNetwork) {
+	me {
+		__typename
+		... on User {
+			teamMembers(after: $after, before: $before, first: $first, last: $last, orderBy: $orderBy) {
+				pageInfo {
+					hasNextPage
+					hasPreviousPage
+					pageEnd
+					pageStart
+					startCursor
+					endCursor
+					totalCount
+				}
+				nodes {
+					id
+					name
+					email
+					section {
+						id
+						name
+						code
+					}
+					teams(first: 1) {
+						pageInfo {
+							totalCount
+						}
+					}
+					dataAdmins: groups(first: 1, filter: { categories: ["data-admins"] }) {
+						pageInfo {
+							totalCount
+						}
+					}
+				}
+			}
+		}
+	}
+}

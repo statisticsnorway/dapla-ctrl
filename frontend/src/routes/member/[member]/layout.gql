@@ -1,0 +1,6 @@
+query UserLayoutInfo($user: String) {
+	user(email: $user) {
+		id
+		name
+	}
+}

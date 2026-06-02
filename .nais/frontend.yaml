@@ -1,0 +1,44 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: dapla-ctrl
+  namespace: dapla-platform
+
+spec:
+  port: 3000
+
+  resources:
+    requests:
+      memory: '128Mi'
+      cpu: '50m'
+    limits:
+      memory: '512Mi'
+
+  replicas:
+    max: 2
+    min: 1
+
+  readiness:
+    path: /isReady
+    port: 3000
+    failureThreshold: 1
+    initialDelay: 5
+    periodSeconds: 5
+
+  liveness:
+    path: /isAlive
+    port: 3000
+    failureThreshold: 3
+
+  ingresses:
+    - https://dapla-ctrl.intern.ssb.no/
+
+  accessPolicy:
+    outbound:
+      external:
+        - host: hooks.slack.com
+      rules:
+        - application: dapla-api
+
+  envFrom:
+    - secret: dapla-ctrl

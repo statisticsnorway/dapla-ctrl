@@ -1,0 +1,29 @@
+<script lang="ts">
+	interface Props {
+		href?: string;
+		active?: boolean;
+		title?: string;
+		[key: string]: unknown;
+	}
+
+	let { href = '', active = false, title = '', ...rest }: Props = $props();
+</script>
+
+<a {...rest} {href} class="tab" class:active>
+	{title}
+</a>
+
+<style>
+	.tab {
+		font-family: 'Roboto', sans-serif;
+		font-weight: 700;
+		text-decoration: none;
+		color: var(--ax-text-subtle);
+		padding: 0.75rem 1rem;
+		border-bottom: 3px solid transparent;
+	}
+	.tab.active {
+		color: var(--ax-text-neutral);
+		border-bottom: 3px solid var(--ax-border-accent-strong);
+	}
+</style>

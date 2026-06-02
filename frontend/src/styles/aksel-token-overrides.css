@@ -1,0 +1,62 @@
+:root {
+	/* Major hack, as everything in Aksel seem to be text size large, but we wont 1 rem, aka medium*/
+	--ax-font-size-large: var(--ax-font-size-medium);
+}
+
+.light {
+	--dapla-ctrl-logo: var(--ssb-dark-6);
+
+	--ax-text-default: var(--ssb-dark-6);
+	--ax-text-neutral: var(--ssb-dark-6);
+	--ax-text-subtle: var(--ssb-dark-6);
+	--ax-border-neutral-subtleA: var(--ssb-dark-2);
+	--ax-bg-strong: var(--ssb-green-4);
+	--ax-bg-strong-hover: var(--ssb-green-5);
+	--ax-bg-moderate-hoverA: var(--ax-neutral-400A); /* Used in button hover color*/
+	--ax-bg-neutral-softA: var(--ssb-green-1); /* Used in table zebra stripes*/
+	--ax-bg-moderate-pressedA: var(--ax-neutral-400A); /* Used in table header during sort.*/
+	--ax-border-accent-strong: var(--ssb-green-3); /* Used in tab border */
+
+	--ax-border-default: var(--ssb-green-4);
+
+	color: var(--ssb-dark-6);
+
+	table a b {
+		/* Default color of table links are --ax-text-neutral, thus override it*/
+		color: var(--ssb-green-4);
+	}
+	table,
+	th,
+	td {
+		border: 1px solid var(--ax-bg-moderate-pressedA);
+	}
+}
+
+.dark {
+	--ax-bg-default: var(--ssb-dark-6);
+	--ax-bg-raised: hsl(from var(--ssb-dark-6) h s calc(l - 3));
+	--dapla-ctrl-logo: var(--ssb-dark-1);
+
+	--ax-text-default: var(--ssb-dark-1);
+	--ax-text-neutral: var(--ssb-dark-1);
+	--ax-text-subtle: var(--ssb-dark-1);
+	--ax-bg-strong: var(--ssb-green-4);
+	--ax-bg-strong-hover: var(--ssb-green-5);
+	--ax-bg-moderate-pressedA: var(--ax-neutral-400A); /* Used in table header during sort.*/
+	--ax-bg-moderate-hoverA: var(--ssb-green-5);
+	--ax-border-accent-strong: var(--ssb-green-4);
+
+	--ax-border-default: var(--ssb-green-4);
+
+	--ax-bg-accent-strong-pressed: var(--ssb-dark-2); /* check box, e.g. dark theme */
+
+	table a b {
+		/* Default color of table links are --ax-text-neutral, thus override it*/
+		color: var(--ssb-green-2);
+	}
+	table,
+	th,
+	td {
+		border: 1px solid var(--ax-bg-moderate-pressedA);
+	}
+}

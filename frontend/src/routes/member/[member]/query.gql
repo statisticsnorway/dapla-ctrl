@@ -1,0 +1,14 @@
+query UserOverview($user: String) @cache(policy: NetworkOnly) {
+	user(email: $user) {
+		id
+		name
+		email
+		jobTitle
+		isAdmin
+		isSectionManager
+		section {
+			code
+			name
+		}
+	}
+}

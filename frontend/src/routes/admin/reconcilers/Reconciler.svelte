@@ -1,0 +1,216 @@
+<script lang="ts">
+	import { fragment, graphql, type ReconcilerFragment } from '$houdini';
+	import Confirm from '$lib/ui/Confirm.svelte';
+	import {
+		Accordion,
+		AccordionItem,
+		Alert,
+		Button,
+		Heading,
+		Switch,
+		TextField
+	} from '@nais/ds-svelte-community';
+	import { InformationSquareFillIcon } from '@nais/ds-svelte-community/icons';
+	import { untrack } from 'svelte';
+
+	interface Props {
+		reconciler: ReconcilerFragment;
+	}
+
+	let { reconciler }: Props = $props();
+
+	let confirm = $state(false);
+	let errors: string[] = $state([]);
+	let configErrors: string[] = $state([]);
+	let reconcileLoading = $state(false);
+	let configLoading = $state(false);
+
+	let r = $derived(
+		fragment(
+			reconciler,
+			graphql(`
+				fragment ReconcilerFragment on Reconciler {
+					id
+					configured
+					description
+					displayName
+					enabled
+					name
+					config {
+						configured
+						description
+						displayName
+						key
+						value
+						secret
+					}
+					errors {
+						pageInfo {
+							totalCount
+						}
+					}
+				}
+			`)
+		)
+	);
+
+	const enableReconciler = graphql(`
+		mutation EnableReconciler($name: String!) {
+			enableReconciler(input: { name: $name }) {
+				enabled
+			}
+		}
+	`);
+
+	const disableReconciler = graphql(`
+		mutation DisableReconciler($name: String!) {
+			disableReconciler(input: { name: $name }) {
+				enabled
+			}
+		}
+	`);
+
+	const toggle = async () => {
+		errors = [];
+		reconcileLoading = true;
+		try {
+			const resp = $r.enabled
+				? await disableReconciler.mutate({ name: $r.name })
+				: await enableReconciler.mutate({ name: $r.name });
+
+			if (resp.errors) {
+				errors = resp.errors.filter((e) => e.message != 'unable to resolve').map((e) => e.message);
+			}
+		} catch (error) {
+			errors = [error instanceof Error ? error.message : 'Failed to update reconciler state'];
+		} finally {
+			reconcileLoading = false;
+		}
+	};
+
+	// We do not submit secrets with no value
+	let config: { key: string; value: string; secret: boolean }[] = $state([]);
+
+	$effect(() => {
+		untrack(() => {
+			if (config.length > 0) {
+				return;
+			}
+
+			config = $r.config.map((c) => {
+				return { key: c.key, value: c.value || '', secret: c.secret };
+			});
+		});
+	});
+
+	const saveConfigMutation = graphql(`
+		mutation SaveReconcilerConfig($name: String!, $config: [ReconcilerConfigInput!]!) {
+			configureReconciler(input: { name: $name, config: $config }) {
+				configured
+			}
+		}
+	`);
+
+	const saveConfig = async () => {
+		configErrors = [];
+		configLoading = true;
+
+		const resp = await saveConfigMutation.mutate({
+			name: $r.name,
+			config: config
+				.filter((c) => {
+					return !c.secret || !!c.value;
+				})
+				.map((c) => ({ key: c.key, value: c.value }))
+		});
+
+		configLoading = false;
+		if (resp.errors) {
+			errors = resp.errors.filter((e) => e.message != 'unable to resolve').map((e) => e.message);
+		}
+	};
+</script>
+
+<!-- <Card style="margin-bottom:1rem;"> -->
+<div class="card">
+	<Heading level="2">{$r.displayName}</Heading>
+	{#if $r.errors.pageInfo.totalCount}
+		<span class="reconciler-error">
+			Reconcileren har {$r.errors.pageInfo.totalCount} feilmeldinger. Vennligst sjekk
+			<a href="/admin/reconcilerLogs/{$r.id}">loggene</a> 🙏
+		</span>
+	{/if}
+	<p>{$r.description}</p>
+
+	{#each errors as error (error)}
+		<Alert variant="error">{error}</Alert>
+	{/each}
+
+	<Switch
+		checked={$r.enabled}
+		loading={reconcileLoading}
+		disabled={reconcileLoading}
+		onclick={(e: MouseEvent) => {
+			e.preventDefault();
+			confirm = true;
+		}}
+	>
+		Synchronize {$r.displayName}</Switch
+	>
+	{#if $r.config.length > 0 && config.length > 0}
+		<Accordion>
+			<AccordionItem heading="Configuration">
+				<form
+					onsubmit={(e: SubmitEvent) => {
+						e.preventDefault();
+						saveConfig();
+					}}
+				>
+					{#each configErrors as error (error)}
+						<Alert variant="error">{error}</Alert>
+					{/each}
+
+					{#each $r.config as c, i (c.key)}
+						<TextField bind:value={config[i].value} style="width:400px">
+							{#snippet label()}
+								{c.displayName}
+							{/snippet}
+							{#snippet description()}
+								{c.description}
+								{#if c.secret && c.configured}
+									<br />
+									<InformationSquareFillIcon /> Denne verdien er allerede konfigurert. Den er skjult fordi
+									den er hemmelig.
+								{/if}
+							{/snippet}
+						</TextField>
+					{/each}
+					<Button loading={configLoading} disabled={configLoading}>Save</Button>
+				</form>
+			</AccordionItem>
+		</Accordion>
+	{/if}
+	<!-- </Card> -->
+</div>
+<Confirm bind:open={confirm} onconfirm={toggle}>
+	{#snippet header()}
+		Bekreftelse
+	{/snippet}
+	Dette vil <b>{$r.enabled ? 'slå av' : 'slå på'}</b> synkronisering av <i>{$r.displayName}</i><br
+	/>
+	Er du sikker?
+</Confirm>
+
+<style>
+	.reconciler-error {
+		color: var(--ax-text-danger);
+	}
+	.card {
+		margin-bottom: 1rem;
+		background-color: var(--ax-bg-sunken);
+		border-radius: 12px;
+		align-items: stretch;
+		border: 1px solid var(--ax-border-neutral);
+		padding: var(--ax-space-20);
+	}
+</style>

@@ -1,0 +1,22 @@
+query ActivityLogs {
+	activityLog(first: 20) @paginate(mode: SinglePage) {
+		nodes {
+			id
+			createdAt
+			message
+			actor
+			resourceName
+			resourceType
+			teamSlug
+		}
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageStart
+			pageEnd
+			totalCount
+			startCursor
+			endCursor
+		}
+	}
+}

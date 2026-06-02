@@ -1,0 +1,37 @@
+query UserSharedBucketAccess($user: String!) {
+	user(email: $user) {
+		sharedBucketsAccess(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				team {
+					id
+					slug
+					displayName
+				}
+				groups {
+					name
+				}
+				bucket {
+					id
+					name
+					shortName
+					kind
+					env
+					team {
+						id
+						slug
+						displayName
+					}
+				}
+			}
+		}
+	}
+}

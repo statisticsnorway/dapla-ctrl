@@ -1,0 +1,8 @@
+query TeamSettings($team: Slug!) {
+	team(slug: $team) {
+		id
+		slug
+		lastSuccessfulSync
+		displayName
+	}
+}

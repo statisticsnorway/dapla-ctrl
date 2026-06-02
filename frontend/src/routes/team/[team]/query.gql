@@ -1,0 +1,28 @@
+query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
+	team(slug: $team) {
+		id
+		displayName
+		slug
+		isManaged
+		section {
+			id
+			code
+			name
+			manager {
+				id
+				name
+				email
+			}
+		}
+		accessManagers {
+			user {
+				id
+				name
+				email
+				section {
+					code
+				}
+			}
+		}
+	}
+}

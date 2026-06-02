@@ -1,0 +1,30 @@
+import { load_TeamSettings } from '$houdini';
+import { addPageMeta } from '$lib/utils/pageMeta';
+import { error } from '@sveltejs/kit';
+import { get } from 'svelte/store';
+import type { BeforeLoadEvent } from './$houdini';
+
+export async function _houdini_beforeLoad({ parent }: BeforeLoadEvent) {
+	const pd = await parent();
+
+	const userInfoData = get(pd.UserInfo);
+
+	if (
+		!pd.viewerIsMember &&
+		!(userInfoData.data?.me.__typename === 'User' && userInfoData.data?.me.isAdmin)
+	) {
+		error(403, 'Du har ikke tilgang til denne siden');
+	}
+}
+
+export async function load(event) {
+	return {
+		...(await addPageMeta(event, { title: 'Innstillinger' })),
+		...(await load_TeamSettings({
+			event,
+			variables: {
+				team: event.params.team
+			}
+		}))
+	};
+}

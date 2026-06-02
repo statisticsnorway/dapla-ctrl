@@ -1,0 +1,26 @@
+<script lang="ts">
+	import { PersonGroupIcon } from '@nais/ds-svelte-community/icons';
+	import IconLabel from '$lib/ui/IconLabel.svelte';
+	import ListItem from '$lib/ui/ListItem.svelte';
+
+	const {
+		team
+		// badge
+	}: {
+		team: { slug: string };
+		// badge?: BadgeProps;
+	} = $props();
+</script>
+
+<ListItem>
+	<IconLabel
+		label={team.slug}
+		icon={PersonGroupIcon}
+		size="large"
+		level="3"
+		href="/team/{team.slug}"
+	/>
+	<!-- {#if badge}
+		<Badge {...badge} />
+	{/if} -->
+</ListItem>

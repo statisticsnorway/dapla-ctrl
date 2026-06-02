@@ -1,0 +1,62 @@
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@nais/ds-svelte-community/css' layer(components);
+
+:root {
+	--spacing-layout: var(--ax-space-40);
+	--margin-default: 12rem;
+}
+
+html,
+body {
+	min-height: 100vh;
+	font-size: 1rem;
+}
+
+body {
+	margin: 0px;
+	padding: 0px;
+	font-family: 'Open Sans', arial;
+}
+h1 {
+	font-family: 'Roboto Condensed', arial;
+}
+h2,
+h3,
+h4,
+h5,
+h6,
+input,
+a.aksel-button {
+	font-family: 'Roboto', sans-serif;
+}
+html {
+	font-size: 16px;
+	overflow-y: scroll;
+}
+
+.text-aligned-icon {
+	height: var(--ax-font-line-height-large);
+	vertical-align: bottom;
+}
+
+.aksel-heading--medium .heading-aligned-icon {
+	height: var(--ax-font-line-height-heading-medium);
+	vertical-align: bottom;
+}
+
+.search-modal {
+	height: 90%;
+	max-height: 52rem;
+
+	> .aksel-modal__header {
+		display: none;
+	}
+
+	> .aksel-modal__body {
+		padding: 0;
+		height: 100%;
+	}
+}

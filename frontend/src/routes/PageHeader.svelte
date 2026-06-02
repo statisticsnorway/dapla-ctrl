@@ -1,0 +1,134 @@
+<script lang="ts">
+	import SearchButton from '$lib/domain/search/SearchButton.svelte';
+	import { Button } from '@nais/ds-svelte-community';
+	import {
+		ActionMenu,
+		ActionMenuDivider,
+		ActionMenuItem,
+		InternalHeaderButton,
+		InternalHeaderTitle,
+		InternalHeaderUserButton
+	} from '@nais/ds-svelte-community/experimental';
+	import { CogIcon, PersonIcon, MoonIcon, SunIcon } from '@nais/ds-svelte-community/icons';
+	import BetaBanner from './BetaBanner.svelte';
+	import type { Themes } from '$lib/stores/theme.svelte';
+
+	interface Props {
+		user:
+			| {
+					readonly name: string;
+					readonly email: string;
+					readonly isAdmin: boolean;
+			  }
+			| undefined;
+		userAgent: string;
+		theme: Themes;
+		toggleTheme: () => void;
+	}
+
+	let { user, userAgent, theme, toggleTheme }: Props = $props();
+</script>
+
+<BetaBanner />
+
+<header class="aksel-internalheader header">
+	<InternalHeaderTitle
+		as="a"
+		href="/"
+		style="border: none; padding: 0rem; margin-right: 3rem; background-color: transparent;"
+	>
+		<div class="title">Dapla Ctrl</div>
+	</InternalHeaderTitle>
+	<InternalHeaderButton as="a" href="/" style="font-size: var(--ax-font-size-medium);">
+		Team
+	</InternalHeaderButton>
+	<InternalHeaderButton as="a" href="/members" style="font-size: var(--ax-font-size-medium);">
+		Medlemmer
+	</InternalHeaderButton>
+
+	<InternalHeaderButton as="a" href="/shared-data">Datadeling</InternalHeaderButton>
+
+	<div class="aksel-stack__spacer aksel-stack__spacer"></div>
+
+	<Button style="background-color: inherit; color: inherit;" onclick={toggleTheme}>
+		<span class="switch-theme-icon">
+			{#if theme == 'dark'}
+				<SunIcon />
+			{:else}
+				<MoonIcon />
+			{/if}
+		</span>
+	</Button>
+
+	<SearchButton {userAgent} />
+	<InternalHeaderButton
+		as="a"
+		href="https://manual.dapla.ssb.no/statistikkere/dapla-ctrl"
+		target="_blank"
+		style="font-size: var(--ax-font-size-medium);"
+	>
+		Dokumentasjon
+	</InternalHeaderButton>
+
+	{#if !user?.isAdmin}
+		<InternalHeaderButton
+			as="a"
+			href={`/member/${user?.email || ''}`}
+			style="font-size: var(--ax-font-size-medium);"
+		>
+			{user ? user.name : 'unauthorized'}
+		</InternalHeaderButton>
+	{/if}
+
+	<ActionMenu>
+		{#snippet trigger(props)}
+			{#if user?.isAdmin}
+				<InternalHeaderUserButton name={user ? user.name : 'unauthorized'} {...props} />
+			{/if}
+		{/snippet}
+
+		{#if user?.isAdmin}
+			<ActionMenuItem>
+				<a href="/admin" class="action-menu-link" style="text-decoration: none;"><CogIcon />Admin</a
+				></ActionMenuItem
+			>
+			<ActionMenuDivider />
+		{/if}
+
+		<ActionMenuItem>
+			<a
+				href={`/member/${user?.email || ''}`}
+				class="action-menu-link"
+				style="text-decoration: none;"
+			>
+				<PersonIcon />Min side</a
+			>
+		</ActionMenuItem>
+	</ActionMenu>
+</header>
+
+<style>
+	.header {
+		height: 80px;
+		padding-left: 4rem;
+	}
+	.title {
+		color: var(--dapla-ctrl-logo);
+		text-decoration: none;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-family: 'Roboto Condensed';
+		font-size: 2rem;
+		font-weight: 700;
+	}
+	.action-menu-link {
+		color: var(--ax-text-neutral);
+		text-decoration: none;
+	}
+	.switch-theme-icon {
+		display: flex;
+		align-items: center;
+		padding-top: 3px;
+	}
+</style>

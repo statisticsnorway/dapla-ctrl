@@ -1,0 +1,50 @@
+query TeamSharedBucketAccess($bucket: String!, $orderBy: UserOrder) {
+	sharedBucket(name: $bucket) {
+		id
+		shortName
+		kind
+		env
+		uniqueUsers {
+			pageInfo {
+				totalCount
+			}
+		}
+		teams {
+			pageInfo {
+				totalCount
+			}
+		}
+		users(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				team {
+					id
+					slug
+					displayName
+				}
+				groups {
+					id
+					name
+				}
+				user {
+					id
+					name
+					email
+					section {
+						id
+						code
+						name
+					}
+				}
+			}
+		}
+	}
+}

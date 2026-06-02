@@ -1,0 +1,43 @@
+query ConsumesSharedData($team: Slug!, $orderBy: SharedBucketOrder) {
+	team(slug: $team) {
+		id
+		slug
+		sharedBuckets(first: 1) {
+			pageInfo {
+				totalCount
+			}
+		}
+		sharedBucketsAccess(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageEnd
+				pageStart
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				id
+				name
+				shortName
+				kind
+				env
+				team {
+					slug
+					displayName
+				}
+				uniqueUsers {
+					pageInfo {
+						totalCount
+					}
+				}
+				teams {
+					pageInfo {
+						totalCount
+					}
+				}
+			}
+		}
+	}
+}

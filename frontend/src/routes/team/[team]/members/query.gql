@@ -1,0 +1,41 @@
+query Groups($team: Slug!, $orderBy: UserOrder) {
+	team(slug: $team) {
+		id
+		slug
+		members(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
+			pageInfo {
+				totalCount
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+			}
+			nodes {
+				groups {
+					id
+					name
+					category
+					suffix
+				}
+				user {
+					id
+					name
+					email
+					section {
+						id
+						name
+						code
+					}
+				}
+			}
+		}
+		groups(first: 1000) {
+			nodes {
+				id
+				name
+			}
+		}
+	}
+}

@@ -1,0 +1,20 @@
+query AdminUsers {
+	users(first: 20) @paginate(mode: SinglePage) {
+		nodes {
+			id
+			name
+			email
+			externalID
+			isAdmin
+		}
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageStart
+			pageEnd
+			totalCount
+			startCursor
+			endCursor
+		}
+	}
+}

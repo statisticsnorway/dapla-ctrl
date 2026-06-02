@@ -1,0 +1,50 @@
+query TeamSharedBucketAccessTeams($bucket: String!) {
+	sharedBucket(name: $bucket) {
+		id
+		shortName
+		kind
+		env
+		uniqueUsers {
+			pageInfo {
+				totalCount
+			}
+		}
+		teams(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+				totalCount
+			}
+			nodes {
+				id
+				slug
+				displayName
+				isManaged
+				members {
+					pageInfo {
+						totalCount
+					}
+				}
+				section {
+					id
+					name
+					code
+					manager {
+						id
+						name
+						email
+					}
+				}
+			}
+		}
+		users {
+			pageInfo {
+				totalCount
+			}
+		}
+	}
+}

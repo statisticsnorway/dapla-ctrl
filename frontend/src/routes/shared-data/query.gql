@@ -1,0 +1,39 @@
+query AllSharedData($orderBy: SharedBucketOrder) {
+	sharedBuckets(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageEnd
+			pageStart
+			startCursor
+			endCursor
+			totalCount
+		}
+		nodes {
+			id
+			name
+			shortName
+			kind
+			env
+			team {
+				id
+				slug
+				displayName
+				section {
+					id
+					code
+				}
+			}
+			uniqueUsers {
+				pageInfo {
+					totalCount
+				}
+			}
+			teams {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+	}
+}

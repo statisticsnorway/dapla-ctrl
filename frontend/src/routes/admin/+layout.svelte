@@ -1,0 +1,69 @@
+<script lang="ts">
+	import { page } from '$app/state';
+	import PageHeader from '$lib/ui/PageHeader.svelte';
+	import { replacer } from '$lib/replacer';
+	import Tab from '$lib/ui/Tab.svelte';
+	import Tabs from '$lib/ui/Tabs.svelte';
+	import type { LayoutProps } from './$houdini';
+
+	let { children }: LayoutProps = $props();
+
+	let currentRoute = $derived(page.route.id);
+	const nav = [
+		{
+			tab: 'Brukere',
+			routeId: '/admin',
+			withSubRoutes: false
+		},
+		{
+			tab: 'Brukersynkroniseringslogg',
+			routeId: '/admin/userSyncLog',
+			withSubRoutes: false
+		},
+		{
+			tab: 'Reconcilers',
+			routeId: '/admin/reconcilers',
+			withSubRoutes: false
+		},
+		{
+			tab: 'Aktivitetslogg',
+			routeId: '/admin/activityLog',
+			withSubRoutes: false
+		}
+	];
+
+	const isActive = (current: string | null, routeID: string, allWithPrefix = false) => {
+		if (current === routeID) {
+			return true;
+		}
+		if (current && allWithPrefix) {
+			return current.startsWith(routeID);
+		}
+		return false;
+	};
+</script>
+
+<svelte:head><title>Admin - Dapla Ctrl</title></svelte:head>
+
+<div class="page">
+	<PageHeader />
+	<Tabs>
+		{#each nav as { tab, routeId, withSubRoutes } (routeId)}
+			<Tab
+				href={replacer(routeId, {})}
+				active={isActive(currentRoute, routeId, withSubRoutes)}
+				title={tab}
+			/>
+		{/each}
+	</Tabs>
+	<div class="container">
+		{@render children?.()}
+	</div>
+</div>
+
+<style>
+	.container {
+		margin: auto;
+		max-width: 1432px;
+	}
+</style>

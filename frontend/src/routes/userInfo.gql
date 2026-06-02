@@ -1,0 +1,14 @@
+query UserInfo {
+	me {
+		... on User {
+			id
+			name
+			email
+			isAdmin
+			isSectionManager
+			section {
+				code
+			}
+		}
+	}
+}

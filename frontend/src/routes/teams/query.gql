@@ -1,0 +1,49 @@
+query AllTeams($orderBy: TeamOrder) @cache(policy: CacheAndNetwork) {
+	me {
+		__typename
+		... on User {
+			teams(first: 1) {
+				pageInfo {
+					totalCount
+				}
+			}
+		}
+	}
+	teams(first: 25, orderBy: $orderBy) @paginate(mode: SinglePage) {
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			pageEnd
+			pageStart
+			startCursor
+			endCursor
+			totalCount
+		}
+		nodes {
+			id
+			slug
+			displayName
+			isManaged
+			section {
+				id
+				code
+				name
+				manager {
+					id
+					name
+					email
+				}
+			}
+			members(first: 1) {
+				pageInfo {
+					totalCount
+				}
+			}
+			accessManagers {
+				user {
+					email
+				}
+			}
+		}
+	}
+}
