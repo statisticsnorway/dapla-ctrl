@@ -1,0 +1,14 @@
+sa.json
+kubeconfig
+values.json
+.idea
+api/bin
+.vscode/
+.DS_Store
+.direnv
+__debug_bin*
+.env*
+node_modules
+hack/coverprofile.txt
+.eslintcache
+result*
