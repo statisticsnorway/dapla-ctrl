@@ -1,6 +1,6 @@
 module github.com/statisticsnorway/dapla-api-reconcilers
 
-go 1.26.2
+go 1.26.3
 
 tool (
 	github.com/securego/gosec/v2/cmd/gosec
@@ -150,4 +150,4 @@ require (
 	mvdan.cc/gofumpt v0.9.1 // indirect
 )
 
-replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ./pkg/apiclient
+replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ../api/pkg/apiclient
