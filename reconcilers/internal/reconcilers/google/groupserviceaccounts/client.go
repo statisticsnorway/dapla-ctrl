@@ -11,8 +11,8 @@ import (
 )
 
 type GroupServiceAccounts interface {
-	GetOrCreate(group, projectId string) (*iam.ServiceAccount, error)
-	UpdateDescription(name string, description string, projectId string) error
+	GetOrCreate(ctx context.Context, group, projectId string) (*iam.ServiceAccount, error)
+	UpdateDescription(ctx context.Context, name string, description string, projectId string) error
 }
 
 type GoogleServiceAccounts struct {
@@ -30,20 +30,20 @@ func NewGoogleServiceAccounts(ctx context.Context) (*GoogleServiceAccounts, erro
 	}, nil
 }
 
-func (g *GoogleServiceAccounts) GetOrCreate(group, projectId string) (*iam.ServiceAccount, error) {
+func (g *GoogleServiceAccounts) GetOrCreate(ctx context.Context, group, projectId string) (*iam.ServiceAccount, error) {
 	saName := fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", group, projectId)
-	sa, err := g.client.Projects.ServiceAccounts.Get(saName).Do()
+	sa, err := g.client.Projects.ServiceAccounts.Get(saName).Context(ctx).Do()
 
 	// TODO: replace with
 	if gErr, ok := errors.AsType[*googleapi.Error](err); ok && gErr.Code == http.StatusNotFound {
-		return g.createServiceAccount(group, projectId)
+		return g.createServiceAccount(ctx, group, projectId)
 	} else if err != nil {
 		return nil, fmt.Errorf("unexpected error getting service account: %w", err)
 	}
 	return sa, nil
 }
 
-func (g *GoogleServiceAccounts) createServiceAccount(groupName, projectId string) (*iam.ServiceAccount, error) {
+func (g *GoogleServiceAccounts) createServiceAccount(ctx context.Context, groupName, projectId string) (*iam.ServiceAccount, error) {
 	req := iam.CreateServiceAccountRequest{
 		AccountId: groupName,
 		ServiceAccount: &iam.ServiceAccount{
@@ -51,7 +51,7 @@ func (g *GoogleServiceAccounts) createServiceAccount(groupName, projectId string
 		},
 	}
 
-	sa, err := g.client.Projects.ServiceAccounts.Create(fmt.Sprintf("projects/%s", projectId), &req).Do()
+	sa, err := g.client.Projects.ServiceAccounts.Create(fmt.Sprintf("projects/%s", projectId), &req).Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("unexpected error creating service account: %w", err)
 	}
@@ -59,7 +59,7 @@ func (g *GoogleServiceAccounts) createServiceAccount(groupName, projectId string
 	return sa, nil
 }
 
-func (g *GoogleServiceAccounts) UpdateDescription(group, description, projectId string) error {
+func (g *GoogleServiceAccounts) UpdateDescription(ctx context.Context, group, description, projectId string) error {
 	req := iam.PatchServiceAccountRequest{
 		ServiceAccount: &iam.ServiceAccount{
 			Description: saDescription,
@@ -68,7 +68,7 @@ func (g *GoogleServiceAccounts) UpdateDescription(group, description, projectId 
 	}
 
 	saName := fmt.Sprintf("projects/-/serviceAccounts/%s@%s.iam.gserviceaccount.com", group, projectId)
-	if _, err := g.client.Projects.ServiceAccounts.Patch(saName, &req).Do(); err != nil {
+	if _, err := g.client.Projects.ServiceAccounts.Patch(saName, &req).Context(ctx).Do(); err != nil {
 		return fmt.Errorf("unexpected error patching sa description: %w", err)
 	}
 	return nil

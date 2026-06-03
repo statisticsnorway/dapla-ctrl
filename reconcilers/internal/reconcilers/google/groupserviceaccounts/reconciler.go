@@ -91,7 +91,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	for groupsIt.Next() {
 		groupName := groupsIt.Value().Group.Name
 		for _, envProjectId := range r.config.DaplaGroupSaProjectIds {
-			if err := r.reconcileEnv(envProjectId, groupName); err != nil {
+			if err := r.reconcileEnv(ctx, envProjectId, groupName); err != nil {
 				return fmt.Errorf("reconcile group %q: %w", groupName, err)
 			}
 		}
@@ -100,8 +100,8 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	return nil
 }
 
-func (r *reconciler) reconcileEnv(envProjectId, groupName string) error {
-	sa, err := r.client.GetOrCreate(groupName, envProjectId)
+func (r *reconciler) reconcileEnv(ctx context.Context, envProjectId, groupName string) error {
+	sa, err := r.client.GetOrCreate(ctx, groupName, envProjectId)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (r *reconciler) reconcileEnv(envProjectId, groupName string) error {
 		return nil
 	}
 
-	if err := r.client.UpdateDescription(groupName, saDescription, envProjectId); err != nil {
+	if err := r.client.UpdateDescription(ctx, groupName, saDescription, envProjectId); err != nil {
 		return err
 	}
 
