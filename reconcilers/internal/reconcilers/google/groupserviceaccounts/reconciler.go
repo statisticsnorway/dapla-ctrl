@@ -3,6 +3,7 @@ package groupserviceaccounts
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
@@ -16,7 +17,7 @@ const (
 
 	saDescription = "source:dapla-api"
 
-	configDaplaGroupSaProjectIdKey = "daplaGroupSaProjectId"
+	configDaplaGroupSaProjectIdsKey = "daplaGroupSaProjectIds"
 )
 
 type reconciler struct {
@@ -25,7 +26,7 @@ type reconciler struct {
 }
 
 type groupSaConfig struct {
-	DaplaGroupSaProjectId string
+	DaplaGroupSaProjectIds []string
 }
 
 type optFunc func(*reconciler)
@@ -62,9 +63,9 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
-				Key:         configDaplaGroupSaProjectIdKey,
-				DisplayName: "Dapla Group SA Project ID",
-				Description: "The Google project to create Dapla Group SAs in",
+				Key:         configDaplaGroupSaProjectIdsKey,
+				DisplayName: "Dapla Group SA Project IDs",
+				Description: "Comma-separated list of Google projects to create Dapla Group SAs in",
 				Secret:      false,
 			},
 		},
@@ -88,16 +89,19 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	})
 
 	for groupsIt.Next() {
-		if err := r.reconcileGroup(groupsIt.Value().Group.Name); err != nil {
-			return fmt.Errorf("reconcile group %q: %w", groupsIt.Value().Group.Name, err)
+		groupName := groupsIt.Value().Group.Name
+		for _, envProjectId := range r.config.DaplaGroupSaProjectIds {
+			if err := r.reconcileEnv(envProjectId, groupName); err != nil {
+				return fmt.Errorf("reconcile group %q: %w", groupName, err)
+			}
 		}
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileGroup(groupName string) error {
-	sa, err := r.client.GetOrCreate(groupName, r.config.DaplaGroupSaProjectId)
+func (r *reconciler) reconcileEnv(envProjectId, groupName string) error {
+	sa, err := r.client.GetOrCreate(groupName, envProjectId)
 	if err != nil {
 		return err
 	}
@@ -106,7 +110,7 @@ func (r *reconciler) reconcileGroup(groupName string) error {
 		return nil
 	}
 
-	if err := r.client.UpdateDescription(groupName, saDescription, r.config.DaplaGroupSaProjectId); err != nil {
+	if err := r.client.UpdateDescription(groupName, saDescription, envProjectId); err != nil {
 		return err
 	}
 
@@ -125,8 +129,8 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configDaplaGroupSaProjectIdKey:
-			gac.DaplaGroupSaProjectId = c.Value
+		case configDaplaGroupSaProjectIdsKey:
+			gac.DaplaGroupSaProjectIds = strings.Split(c.Value, ",")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
