@@ -9,14 +9,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/gcpsyncer"
-	entraidreconciler "github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/google/groupserviceaccounts"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
+	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 
 	"github.com/joho/godotenv"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/cmd/reconciler/config"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/logger"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler/config"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/logger"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"

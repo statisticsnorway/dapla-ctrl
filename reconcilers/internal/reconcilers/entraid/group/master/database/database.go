@@ -8,7 +8,7 @@ import (
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master"
 )
 
 type Master struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/cmd/reconciler/config"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler/config"
 
 	"github.com/sethvargo/go-envconfig"
 )

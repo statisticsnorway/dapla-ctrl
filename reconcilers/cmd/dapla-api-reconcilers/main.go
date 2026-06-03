@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/cmd/reconciler"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler"
 )
 
 func main() {

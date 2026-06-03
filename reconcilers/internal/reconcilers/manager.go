@@ -10,7 +10,7 @@ import (
 	pubsub "cloud.google.com/go/pubsub/v2"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/queue"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"

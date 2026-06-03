@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers/entraid/group/master"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master"
 )
 
 type FakeMaster struct {
