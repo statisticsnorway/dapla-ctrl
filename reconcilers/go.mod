@@ -150,4 +150,4 @@ require (
 	mvdan.cc/gofumpt v0.9.1 // indirect
 )
 
-replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ./pkg/apiclient
+replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ../api/pkg/apiclient
