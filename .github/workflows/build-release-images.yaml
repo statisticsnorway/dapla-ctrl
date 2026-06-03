@@ -1,0 +1,52 @@
+name: Build release images
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  api:
+    name: API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build and push API image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: api
+          image_suffix: api
+          tag: ${{ github.event.release.tag_name }}
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build and push frontend image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: frontend
+          image_suffix: frontend
+          tag: ${{ github.event.release.tag_name }}
+
+  reconcilers:
+    name: Reconcilers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build and push reconcilers image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: reconcilers
+          image_suffix: reconcilers
+          tag: ${{ github.event.release.tag_name }}

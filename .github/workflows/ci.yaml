@@ -1,0 +1,293 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changed services
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      reconcilers: ${{ steps.filter.outputs.reconcilers }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed services
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Build all when we trigger a manual dispatches.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            {
+              echo "api=true"
+              echo "frontend=true"
+              echo "reconcilers=true"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Find base and head, such that we can check diff
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+
+            # GitHub reports an all-zero "before" SHA for some push events, such as
+            # the first push to a branch. Use the root commit instead so git diff
+            # still has a valid base revision.
+            if [ "$base" = "0000000000000000000000000000000000000000" ]; then
+              base="$(git rev-list --max-parents=0 "$head")"
+            fi
+          fi
+
+          git diff --name-only "$base" "$head" > changed-files.txt
+          cat changed-files.txt
+
+          api=false
+          frontend=false
+          reconcilers=false
+
+          # Check for changed files in given paths. '.nais' is not included since this should not trigger build
+          while IFS= read -r file; do
+            case "$file" in
+              api/*)
+                api=true
+                ;;
+              frontend/*)
+                frontend=true
+                ;;
+              reconcilers/*)
+                reconcilers=true
+                ;;
+            esac
+          done < changed-files.txt
+
+          {
+            echo "api=$api"
+            echo "frontend=$frontend"
+            echo "reconcilers=$reconcilers"
+          } >> "$GITHUB_OUTPUT"
+
+  api-test:
+    name: API / Test
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-api-test
+          working_directory: api
+      - uses: ./.github/actions/go-cache
+        with:
+          key: api-test
+      - run: mise run build:api
+      - run: mise run test
+
+  api-lint:
+    name: API / Lint
+    needs: changes
+    if: ${{ needs.changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-api-lint
+          working_directory: api
+      - uses: ./.github/actions/go-cache
+        with:
+          key: api-lint
+          restore-keys: api-test
+      - run: mise run check:staticcheck
+      - run: mise run check:vulncheck
+      - name: Check code format and generated files
+        run: |
+          mise run generate
+          mise run fmt
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run generate' and 'mise run fmt'"
+          git diff --name-only | grep -v '^package-lock.json$' | xargs -r git diff --exit-code --
+
+  api-build-push:
+    name: API / Build and push image
+    needs:
+      - changes
+      - api-test
+      - api-lint
+    if: ${{ needs.changes.outputs.api == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-api-build-push
+          working_directory: api
+      - uses: ./.github/actions/go-cache
+        with:
+          key: api-build
+          restore-keys: api-test
+      - name: Build API
+        working-directory: api
+        run: mise run build:api
+      - name: Build and push API image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: api
+          image_suffix: api
+          tag: ${{ github.sha }}
+
+  frontend:
+    name: Frontend / Check
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Install pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5.0.0
+        with:
+          version: 10
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Install dependencies
+        run: pnpm install
+      - name: Lint
+        run: pnpm run lint
+      - name: Type check
+        run: pnpm run check
+      - name: Run tests
+        run: pnpm test --run
+      - name: Build
+        env:
+          VITE_GRAPHQL_ENDPOINT: http://dapla-api/graphql
+        run: pnpm run build
+
+  frontend-build-push:
+    name: Frontend / Build and push image
+    needs:
+      - changes
+      - frontend
+    if: ${{ needs.changes.outputs.frontend == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Build and push frontend image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: frontend
+          image_suffix: frontend
+          tag: ${{ github.sha }}
+
+  reconcilers-test:
+    name: Reconcilers / Test
+    needs: changes
+    if: ${{ needs.changes.outputs.reconcilers == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: reconcilers
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-reconcilers-test
+          working_directory: reconcilers
+      - uses: ./.github/actions/go-cache
+        with:
+          key: reconcilers-test
+      - run: mise run build
+      - run: mise run test
+
+  reconcilers-lint:
+    name: Reconcilers / Lint
+    needs: changes
+    if: ${{ needs.changes.outputs.reconcilers == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: reconcilers
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-reconcilers-lint
+          working_directory: reconcilers
+      - uses: ./.github/actions/go-cache
+        with:
+          key: reconcilers-lint
+          restore-keys: reconcilers-test
+      - run: mise run check:staticcheck
+      - run: mise run check:vulncheck
+      - name: Check code format and generated files
+        run: |
+          mise run fmt ::: generate
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run fmt'"
+          git diff --name-only | grep -v '^package-lock.json$' | xargs -r git diff --exit-code --
+
+  reconcilers-build-push:
+    name: Reconcilers / Build and push image
+    needs:
+      - changes
+      - reconcilers-test
+      - reconcilers-lint
+    if: ${{ needs.changes.outputs.reconcilers == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: jdx/mise-action@1648a7812b9aeae629881980618f079932869151 # v4.0.1
+        with:
+          cache_key_prefix: mise-reconcilers-build-push
+          working_directory: reconcilers
+      - uses: ./.github/actions/go-cache
+        with:
+          key: reconcilers-build
+          restore-keys: reconcilers-test
+      - name: Build reconcilers
+        working-directory: reconcilers
+        run: mise run build
+      - name: Build and push reconcilers image and SBOM to NAIS OCI registry
+        uses: nais/docker-build-push@v0
+        with:
+          team: dapla-platform
+          docker_context: reconcilers
+          image_suffix: reconcilers
+          tag: ${{ github.sha }}

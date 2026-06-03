@@ -1,0 +1,83 @@
+name: Deploy to Nais
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_version:
+        description: "Image tag to deploy, for example the commit SHA or release tag built by CI"
+        required: true
+        type: string
+      deploy_api:
+        description: "Deploy API"
+        required: true
+        type: boolean
+        default: false
+      deploy_frontend:
+        description: "Deploy frontend"
+        required: true
+        type: boolean
+        default: false
+      deploy_reconcilers:
+        description: "Deploy reconcilers"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+
+jobs:
+  prepare:
+    name: Prepare deploy matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Build deploy matrix
+        id: matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          include=()
+
+          if [ "${{ inputs.deploy_api }}" = "true" ]; then
+            include+=('{"name":"API","resource":".nais/api.yaml","image":"dapla-ctrl-api"}')
+          fi
+
+          if [ "${{ inputs.deploy_frontend }}" = "true" ]; then
+            include+=('{"name":"frontend","resource":".nais/frontend.yaml","image":"dapla-ctrl-frontend"}')
+          fi
+
+          if [ "${{ inputs.deploy_reconcilers }}" = "true" ]; then
+            include+=('{"name":"reconcilers","resource":".nais/reconcilers.yaml","image":"dapla-ctrl-reconcilers"}')
+          fi
+
+          if [ "${#include[@]}" -eq 0 ]; then
+            echo "::error::Select at least one application to deploy."
+            exit 1
+          fi
+
+          matrix_entries=$(IFS=,; echo "${include[*]}")
+          echo "matrix={\"include\":[$matrix_entries]}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy ${{ matrix.name }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Deploy ${{ matrix.name }} to NAIS
+        uses: nais/deploy/actions/deploy@v2
+        env:
+          TEAM: dapla-platform
+          CLUSTER: prod
+          RESOURCE: ${{ matrix.resource }}
+          VAR: image=europe-north1-docker.pkg.dev/${{ secrets.NAIS_MANAGEMENT_PROJECT_ID }}/dapla-platform/${{ matrix.image }}:${{ inputs.image_version }}
