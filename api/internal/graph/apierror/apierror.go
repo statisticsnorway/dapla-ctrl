@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
-	"github.com/statisticsnorway/dapla-api/internal/validate"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

@@ -7,8 +7,8 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

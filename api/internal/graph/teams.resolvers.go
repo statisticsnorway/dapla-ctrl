@@ -6,16 +6,16 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/section"
-	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"github.com/statisticsnorway/dapla-api/internal/team"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func (r *addTeamAccessManagerPayloadResolver) Team(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*team.Team, error) {

@@ -5,8 +5,8 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 )
 
 type (

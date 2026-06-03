@@ -2,7 +2,7 @@ sa.json
 kubeconfig
 values.json
 .idea
-api/bin
+bin
 .vscode/
 .DS_Store
 .direnv

@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/nais/tester/lua"
-	"github.com/statisticsnorway/dapla-api/internal/integration"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/integration"
 )
 
 func main() {

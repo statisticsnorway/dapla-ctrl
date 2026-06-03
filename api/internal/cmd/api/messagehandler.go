@@ -7,8 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/leaderelection"
-	"github.com/statisticsnorway/dapla-api/internal/message/messagesender"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/leaderelection"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/message/messagesender"
 	"golang.org/x/sync/errgroup"
 )
 

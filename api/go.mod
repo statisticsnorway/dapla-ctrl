@@ -1,4 +1,4 @@
-module github.com/statisticsnorway/dapla-api
+module github.com/statisticsnorway/dapla-ctrl/api
 
 go 1.26.4
 
@@ -41,7 +41,7 @@ require (
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/sirupsen/logrus v1.9.4
 	github.com/sourcegraph/conc v0.3.0
-	github.com/statisticsnorway/dapla-api/pkg/apiclient v0.0.0-20250219111538-2b76a0fd6ed9
+	github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient v0.0.0-20250219111538-2b76a0fd6ed9
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.42.0
@@ -285,4 +285,4 @@ replace github.com/GoogleCloudPlatform/k8s-config-connector/mockgcp => ./mockgcp
 
 replace github.com/hashicorp/terraform-provider-google-beta => ./third_party/github.com/hashicorp/terraform-provider-google-beta
 
-replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ./pkg/apiclient
+replace github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient => ./pkg/apiclient

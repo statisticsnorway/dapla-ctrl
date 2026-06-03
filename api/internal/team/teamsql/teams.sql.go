@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 const addAccessManager = `-- name: AddAccessManager :exec

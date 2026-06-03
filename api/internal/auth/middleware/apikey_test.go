@@ -10,10 +10,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/auth/middleware"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/middleware"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount"
 )
 
 func TestApiKeyAuthentication(t *testing.T) {

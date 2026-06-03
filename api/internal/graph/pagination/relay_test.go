@@ -3,7 +3,7 @@ package pagination_test
 import (
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 )
 
 func TestParsePage(t *testing.T) {

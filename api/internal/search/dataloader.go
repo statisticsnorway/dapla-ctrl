@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-api/internal/search/searchsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/search/searchsql"
 )
 
 type ctxKey int

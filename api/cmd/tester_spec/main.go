@@ -7,7 +7,7 @@ import (
 	"flag"
 	"path/filepath"
 
-	"github.com/statisticsnorway/dapla-api/internal/integration"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/integration"
 )
 
 func main() {

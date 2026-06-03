@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/nais/tester/lua"
-	"github.com/statisticsnorway/dapla-api/internal/integration"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/integration"
 )
 
 func TestIntegration(t *testing.T) {

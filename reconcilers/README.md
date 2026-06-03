@@ -8,12 +8,12 @@ The main purpose is to create team resources, permissions and maintain them.
 
 ## Local development
 
-[dapla-api](https://github.com/statisticsnorway/dapla-api) is a dependency for this project, and you will need to
+[dapla-api](../api/README.md) is a dependency for this project, and you will need to
 have [mise](https://mise.jdx.dev/) installed
 on your system.
 
 To run the reconciler locally, you need to have the nais/api project cloned and running.
-See the [dapla-api README](https://github.com/statisticsnorway/dapla-api?tab=readme-ov-file#local-development) for more information.
+See the [dapla-api README local development](../api/README.md) for more information.
 
 Given that a lot of the reconcilers are using external services, most of these requires authentication and access to
 these services.
@@ -48,5 +48,3 @@ A manager is responsible for running the reconcilers and handling the errors.
 The manager will listen for pubsub events and trigger the correct reconcilers when needed.
 
 All state and data is stored in Dapla API, and the communication with the API is done through GRPC.
-
-

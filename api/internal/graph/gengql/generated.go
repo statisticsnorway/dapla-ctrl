@@ -13,25 +13,25 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/statisticsnorway/dapla-api/internal/activitylog"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/feature"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/graph/scalar"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/message"
-	"github.com/statisticsnorway/dapla-api/internal/reconciler"
-	"github.com/statisticsnorway/dapla-api/internal/search"
-	"github.com/statisticsnorway/dapla-api/internal/section"
-	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
-	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"github.com/statisticsnorway/dapla-api/internal/team"
-	"github.com/statisticsnorway/dapla-api/internal/user"
-	"github.com/statisticsnorway/dapla-api/internal/usersync"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/feature"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/scalar"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/message"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/reconciler"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/search"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -8469,7 +8469,7 @@ func (ec *executionContext) field_Group_activityLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8479,12 +8479,12 @@ func (ec *executionContext) field_Group_activityLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -8500,7 +8500,7 @@ func (ec *executionContext) field_Group_members_args(ctx context.Context, rawArg
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8510,12 +8510,12 @@ func (ec *executionContext) field_Group_members_args(ctx context.Context, rawArg
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -8526,7 +8526,7 @@ func (ec *executionContext) field_Group_members_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8537,7 +8537,7 @@ func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_addTeamAccessManager_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8548,7 +8548,7 @@ func (ec *executionContext) field_Mutation_addTeamAccessManager_args(ctx context
 func (ec *executionContext) field_Mutation_assignRoleToServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8559,7 +8559,7 @@ func (ec *executionContext) field_Mutation_assignRoleToServiceAccount_args(ctx c
 func (ec *executionContext) field_Mutation_configureReconciler_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNConfigureReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐConfigureReconcilerInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNConfigureReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐConfigureReconcilerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8570,7 +8570,7 @@ func (ec *executionContext) field_Mutation_configureReconciler_args(ctx context.
 func (ec *executionContext) field_Mutation_createGroup_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateGroupInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateGroupInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐCreateGroupInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8581,7 +8581,7 @@ func (ec *executionContext) field_Mutation_createGroup_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_createServiceAccountToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8592,7 +8592,7 @@ func (ec *executionContext) field_Mutation_createServiceAccountToken_args(ctx co
 func (ec *executionContext) field_Mutation_createServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8603,7 +8603,7 @@ func (ec *executionContext) field_Mutation_createServiceAccount_args(ctx context
 func (ec *executionContext) field_Mutation_createTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNCreateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐCreateTeamInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8614,7 +8614,7 @@ func (ec *executionContext) field_Mutation_createTeam_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteServiceAccountToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDeleteServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDeleteServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8625,7 +8625,7 @@ func (ec *executionContext) field_Mutation_deleteServiceAccountToken_args(ctx co
 func (ec *executionContext) field_Mutation_deleteServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDeleteServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDeleteServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8636,7 +8636,7 @@ func (ec *executionContext) field_Mutation_deleteServiceAccount_args(ctx context
 func (ec *executionContext) field_Mutation_disableReconciler_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDisableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐDisableReconcilerInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDisableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐDisableReconcilerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8647,7 +8647,7 @@ func (ec *executionContext) field_Mutation_disableReconciler_args(ctx context.Co
 func (ec *executionContext) field_Mutation_enableReconciler_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐEnableReconcilerInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐEnableReconcilerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8658,7 +8658,7 @@ func (ec *executionContext) field_Mutation_enableReconciler_args(ctx context.Con
 func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8669,7 +8669,7 @@ func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Co
 func (ec *executionContext) field_Mutation_removeTeamAccessManager_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8680,7 +8680,7 @@ func (ec *executionContext) field_Mutation_removeTeamAccessManager_args(ctx cont
 func (ec *executionContext) field_Mutation_revokeRoleFromServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8691,7 +8691,7 @@ func (ec *executionContext) field_Mutation_revokeRoleFromServiceAccount_args(ctx
 func (ec *executionContext) field_Mutation_sendMessage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessageInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐSendMessageInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8702,7 +8702,7 @@ func (ec *executionContext) field_Mutation_sendMessage_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_updateServiceAccountToken_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8713,7 +8713,7 @@ func (ec *executionContext) field_Mutation_updateServiceAccountToken_args(ctx co
 func (ec *executionContext) field_Mutation_updateServiceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8724,7 +8724,7 @@ func (ec *executionContext) field_Mutation_updateServiceAccount_args(ctx context
 func (ec *executionContext) field_Mutation_updateTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐUpdateTeamInput)
 	if err != nil {
 		return nil, err
 	}
@@ -8751,7 +8751,7 @@ func (ec *executionContext) field_Query_activityLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8761,12 +8761,12 @@ func (ec *executionContext) field_Query_activityLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -8793,7 +8793,7 @@ func (ec *executionContext) field_Query_groups_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8803,17 +8803,17 @@ func (ec *executionContext) field_Query_groups_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -8840,7 +8840,7 @@ func (ec *executionContext) field_Query_messages_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8850,12 +8850,12 @@ func (ec *executionContext) field_Query_messages_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOMessageFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessageFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOMessageFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessageFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -8866,7 +8866,7 @@ func (ec *executionContext) field_Query_messages_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_node_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent)
 	if err != nil {
 		return nil, err
 	}
@@ -8882,7 +8882,7 @@ func (ec *executionContext) field_Query_reconcilers_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8892,7 +8892,7 @@ func (ec *executionContext) field_Query_reconcilers_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8908,7 +8908,7 @@ func (ec *executionContext) field_Query_roles_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8918,7 +8918,7 @@ func (ec *executionContext) field_Query_roles_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8934,7 +8934,7 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8944,12 +8944,12 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalNSearchFilter2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalNSearchFilter2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -8976,7 +8976,7 @@ func (ec *executionContext) field_Query_sections_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -8986,12 +8986,12 @@ func (ec *executionContext) field_Query_sections_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9002,7 +9002,7 @@ func (ec *executionContext) field_Query_sections_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_serviceAccount_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent)
 	if err != nil {
 		return nil, err
 	}
@@ -9018,7 +9018,7 @@ func (ec *executionContext) field_Query_serviceAccounts_args(ctx context.Context
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9028,7 +9028,7 @@ func (ec *executionContext) field_Query_serviceAccounts_args(ctx context.Context
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9055,7 +9055,7 @@ func (ec *executionContext) field_Query_sharedBuckets_args(ctx context.Context, 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9065,17 +9065,17 @@ func (ec *executionContext) field_Query_sharedBuckets_args(ctx context.Context, 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9091,7 +9091,7 @@ func (ec *executionContext) field_Query_teamMembers_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9101,12 +9101,12 @@ func (ec *executionContext) field_Query_teamMembers_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9117,7 +9117,7 @@ func (ec *executionContext) field_Query_teamMembers_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_team_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "slug", ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "slug", ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -9133,7 +9133,7 @@ func (ec *executionContext) field_Query_teams_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9143,12 +9143,12 @@ func (ec *executionContext) field_Query_teams_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9164,7 +9164,7 @@ func (ec *executionContext) field_Query_userSyncLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9174,7 +9174,7 @@ func (ec *executionContext) field_Query_userSyncLog_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9201,7 +9201,7 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9211,12 +9211,12 @@ func (ec *executionContext) field_Query_users_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9232,7 +9232,7 @@ func (ec *executionContext) field_Reconciler_activityLog_args(ctx context.Contex
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9242,12 +9242,12 @@ func (ec *executionContext) field_Reconciler_activityLog_args(ctx context.Contex
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9263,7 +9263,7 @@ func (ec *executionContext) field_Reconciler_errors_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9273,7 +9273,7 @@ func (ec *executionContext) field_Reconciler_errors_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9289,7 +9289,7 @@ func (ec *executionContext) field_ServiceAccount_roles_args(ctx context.Context,
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9299,7 +9299,7 @@ func (ec *executionContext) field_ServiceAccount_roles_args(ctx context.Context,
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9315,7 +9315,7 @@ func (ec *executionContext) field_ServiceAccount_tokens_args(ctx context.Context
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9325,7 +9325,7 @@ func (ec *executionContext) field_ServiceAccount_tokens_args(ctx context.Context
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9341,7 +9341,7 @@ func (ec *executionContext) field_SharedBucket_groups_args(ctx context.Context, 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9351,17 +9351,17 @@ func (ec *executionContext) field_SharedBucket_groups_args(ctx context.Context, 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9377,7 +9377,7 @@ func (ec *executionContext) field_SharedBucket_teams_args(ctx context.Context, r
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9387,12 +9387,12 @@ func (ec *executionContext) field_SharedBucket_teams_args(ctx context.Context, r
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9408,7 +9408,7 @@ func (ec *executionContext) field_SharedBucket_uniqueUsers_args(ctx context.Cont
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9418,12 +9418,12 @@ func (ec *executionContext) field_SharedBucket_uniqueUsers_args(ctx context.Cont
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9439,7 +9439,7 @@ func (ec *executionContext) field_SharedBucket_users_args(ctx context.Context, r
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9449,12 +9449,12 @@ func (ec *executionContext) field_SharedBucket_users_args(ctx context.Context, r
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9470,7 +9470,7 @@ func (ec *executionContext) field_Team_activityLog_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9480,12 +9480,12 @@ func (ec *executionContext) field_Team_activityLog_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9501,7 +9501,7 @@ func (ec *executionContext) field_Team_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9511,17 +9511,17 @@ func (ec *executionContext) field_Team_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9537,7 +9537,7 @@ func (ec *executionContext) field_Team_members_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9547,12 +9547,12 @@ func (ec *executionContext) field_Team_members_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9568,7 +9568,7 @@ func (ec *executionContext) field_Team_sharedBucketsAccess_args(ctx context.Cont
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9578,12 +9578,12 @@ func (ec *executionContext) field_Team_sharedBucketsAccess_args(ctx context.Cont
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9599,7 +9599,7 @@ func (ec *executionContext) field_Team_sharedBuckets_args(ctx context.Context, r
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9609,17 +9609,17 @@ func (ec *executionContext) field_Team_sharedBuckets_args(ctx context.Context, r
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9635,7 +9635,7 @@ func (ec *executionContext) field_User_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9645,17 +9645,17 @@ func (ec *executionContext) field_User_groups_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrder)
 	if err != nil {
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -9671,7 +9671,7 @@ func (ec *executionContext) field_User_sharedBucketsAccess_args(ctx context.Cont
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9681,12 +9681,12 @@ func (ec *executionContext) field_User_sharedBucketsAccess_args(ctx context.Cont
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9702,7 +9702,7 @@ func (ec *executionContext) field_User_teamMembers_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9712,12 +9712,12 @@ func (ec *executionContext) field_User_teamMembers_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9733,7 +9733,7 @@ func (ec *executionContext) field_User_teams_args(ctx context.Context, rawArgs m
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
@@ -9743,12 +9743,12 @@ func (ec *executionContext) field_User_teams_args(ctx context.Context, rawArgs m
 		return nil, err
 	}
 	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
 	if err != nil {
 		return nil, err
 	}
 	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -9818,7 +9818,7 @@ func (ec *executionContext) _ActivityLogEntryConnection_pageInfo(ctx context.Con
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -9863,7 +9863,7 @@ func (ec *executionContext) _ActivityLogEntryConnection_nodes(ctx context.Contex
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryᚄ,
+		ec.marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryᚄ,
 		true,
 		true,
 	)
@@ -9892,7 +9892,7 @@ func (ec *executionContext) _ActivityLogEntryConnection_edges(ctx context.Contex
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -9927,7 +9927,7 @@ func (ec *executionContext) _ActivityLogEntryEdge_cursor(ctx context.Context, fi
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -9956,7 +9956,7 @@ func (ec *executionContext) _ActivityLogEntryEdge_node(ctx context.Context, fiel
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry,
+		ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntry,
 		true,
 		true,
 	)
@@ -9985,7 +9985,7 @@ func (ec *executionContext) _AddGroupMemberPayload_member(ctx context.Context, f
 			return obj.Member, nil
 		},
 		nil,
-		ec.marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember,
+		ec.marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMember,
 		true,
 		false,
 	)
@@ -10020,7 +10020,7 @@ func (ec *executionContext) _AddTeamAccessManagerPayload_team(ctx context.Contex
 			return ec.Resolvers.AddTeamAccessManagerPayload().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -10083,7 +10083,7 @@ func (ec *executionContext) _AddTeamAccessManagerPayload_user(ctx context.Contex
 			return ec.Resolvers.AddTeamAccessManagerPayload().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -10142,7 +10142,7 @@ func (ec *executionContext) _AssignRoleToServiceAccountPayload_serviceAccount(ct
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -10191,7 +10191,7 @@ func (ec *executionContext) _CreateGroupPayload_group(ctx context.Context, field
 			return obj.Group, nil
 		},
 		nil,
-		ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup,
 		true,
 		false,
 	)
@@ -10236,7 +10236,7 @@ func (ec *executionContext) _CreateServiceAccountPayload_serviceAccount(ctx cont
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -10285,7 +10285,7 @@ func (ec *executionContext) _CreateServiceAccountTokenPayload_serviceAccount(ctx
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -10334,7 +10334,7 @@ func (ec *executionContext) _CreateServiceAccountTokenPayload_serviceAccountToke
 			return obj.ServiceAccountToken, nil
 		},
 		nil,
-		ec.marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
+		ec.marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
 		true,
 		false,
 	)
@@ -10408,7 +10408,7 @@ func (ec *executionContext) _CreateTeamPayload_team(ctx context.Context, field g
 			return obj.Team, nil
 		},
 		nil,
-		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		false,
 	)
@@ -10500,7 +10500,7 @@ func (ec *executionContext) _DeleteServiceAccountTokenPayload_serviceAccount(ctx
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -10578,7 +10578,7 @@ func (ec *executionContext) _Features_id(ctx context.Context, field graphql.Coll
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -10607,7 +10607,7 @@ func (ec *executionContext) _Group_id(ctx context.Context, field graphql.Collect
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -10665,7 +10665,7 @@ func (ec *executionContext) _Group_teamSlug(ctx context.Context, field graphql.C
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -10753,7 +10753,7 @@ func (ec *executionContext) _Group_members(ctx context.Context, field graphql.Co
 			return ec.Resolvers.Group().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -10802,7 +10802,7 @@ func (ec *executionContext) _Group_activityLog(ctx context.Context, field graphq
 			return ec.Resolvers.Group().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
-		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -10850,7 +10850,7 @@ func (ec *executionContext) _GroupConnection_pageInfo(ctx context.Context, field
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -10895,7 +10895,7 @@ func (ec *executionContext) _GroupConnection_nodes(ctx context.Context, field gr
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ,
+		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupᚄ,
 		true,
 		true,
 	)
@@ -10940,7 +10940,7 @@ func (ec *executionContext) _GroupConnection_edges(ctx context.Context, field gr
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -10975,7 +10975,7 @@ func (ec *executionContext) _GroupCreatedActivityLogEntry_id(ctx context.Context
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -11091,7 +11091,7 @@ func (ec *executionContext) _GroupCreatedActivityLogEntry_resourceType(ctx conte
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -11149,7 +11149,7 @@ func (ec *executionContext) _GroupCreatedActivityLogEntry_teamSlug(ctx context.C
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -11178,7 +11178,7 @@ func (ec *executionContext) _GroupEdge_cursor(ctx context.Context, field graphql
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -11207,7 +11207,7 @@ func (ec *executionContext) _GroupEdge_node(ctx context.Context, field graphql.C
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup,
 		true,
 		true,
 	)
@@ -11252,7 +11252,7 @@ func (ec *executionContext) _GroupMember_group(ctx context.Context, field graphq
 			return ec.Resolvers.GroupMember().Group(ctx, obj)
 		},
 		nil,
-		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup,
 		true,
 		true,
 	)
@@ -11297,7 +11297,7 @@ func (ec *executionContext) _GroupMember_user(ctx context.Context, field graphql
 			return ec.Resolvers.GroupMember().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -11356,7 +11356,7 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntry_id(ctx context.Con
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -11472,7 +11472,7 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntry_resourceType(ctx c
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -11530,7 +11530,7 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntry_teamSlug(ctx conte
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -11559,7 +11559,7 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntry_data(ctx context.C
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData,
+		ec.marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -11594,7 +11594,7 @@ func (ec *executionContext) _GroupMemberAddedActivityLogEntryData_userID(ctx con
 			return obj.UserID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -11652,7 +11652,7 @@ func (ec *executionContext) _GroupMemberConnection_pageInfo(ctx context.Context,
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -11697,7 +11697,7 @@ func (ec *executionContext) _GroupMemberConnection_nodes(ctx context.Context, fi
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberᚄ,
+		ec.marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberᚄ,
 		true,
 		true,
 	)
@@ -11732,7 +11732,7 @@ func (ec *executionContext) _GroupMemberConnection_edges(ctx context.Context, fi
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -11767,7 +11767,7 @@ func (ec *executionContext) _GroupMemberEdge_cursor(ctx context.Context, field g
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -11796,7 +11796,7 @@ func (ec *executionContext) _GroupMemberEdge_node(ctx context.Context, field gra
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember,
+		ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMember,
 		true,
 		true,
 	)
@@ -11831,7 +11831,7 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_id(ctx context.C
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -11947,7 +11947,7 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_resourceType(ctx
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -12005,7 +12005,7 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_teamSlug(ctx con
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -12034,7 +12034,7 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntry_data(ctx context
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData,
+		ec.marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -12069,7 +12069,7 @@ func (ec *executionContext) _GroupMemberRemovedActivityLogEntryData_userID(ctx c
 			return obj.UserID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -12127,7 +12127,7 @@ func (ec *executionContext) _Message_id(ctx context.Context, field graphql.Colle
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -12214,7 +12214,7 @@ func (ec *executionContext) _Message_recipient(ctx context.Context, field graphq
 			return ec.Resolvers.Message().Recipient(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -12302,7 +12302,7 @@ func (ec *executionContext) _MessageConnection_pageInfo(ctx context.Context, fie
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -12347,7 +12347,7 @@ func (ec *executionContext) _MessageConnection_nodes(ctx context.Context, field 
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNMessage2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessageᚄ,
+		ec.marshalNMessage2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessageᚄ,
 		true,
 		true,
 	)
@@ -12388,7 +12388,7 @@ func (ec *executionContext) _MessageConnection_edges(ctx context.Context, field 
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNMessageEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNMessageEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -12423,7 +12423,7 @@ func (ec *executionContext) _MessageEdge_cursor(ctx context.Context, field graph
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -12452,7 +12452,7 @@ func (ec *executionContext) _MessageEdge_node(ctx context.Context, field graphql
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessage,
+		ec.marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessage,
 		true,
 		true,
 	)
@@ -12494,7 +12494,7 @@ func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field gra
 			return ec.Resolvers.Mutation().CreateGroup(ctx, fc.Args["input"].(group.CreateGroupInput))
 		},
 		nil,
-		ec.marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupPayload,
+		ec.marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐCreateGroupPayload,
 		true,
 		true,
 	)
@@ -12539,7 +12539,7 @@ func (ec *executionContext) _Mutation_addGroupMember(ctx context.Context, field 
 			return ec.Resolvers.Mutation().AddGroupMember(ctx, fc.Args["input"].(group.AddGroupMemberInput))
 		},
 		nil,
-		ec.marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberPayload,
+		ec.marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberPayload,
 		true,
 		true,
 	)
@@ -12584,7 +12584,7 @@ func (ec *executionContext) _Mutation_removeGroupMember(ctx context.Context, fie
 			return ec.Resolvers.Mutation().RemoveGroupMember(ctx, fc.Args["input"].(group.RemoveGroupMemberInput))
 		},
 		nil,
-		ec.marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload,
+		ec.marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload,
 		true,
 		true,
 	)
@@ -12631,7 +12631,7 @@ func (ec *executionContext) _Mutation_sendMessage(ctx context.Context, field gra
 			return ec.Resolvers.Mutation().SendMessage(ctx, fc.Args["input"].(message.SendMessageInput))
 		},
 		nil,
-		ec.marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload,
+		ec.marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐSendMessagePayload,
 		true,
 		true,
 	)
@@ -12676,7 +12676,7 @@ func (ec *executionContext) _Mutation_enableReconciler(ctx context.Context, fiel
 			return ec.Resolvers.Mutation().EnableReconciler(ctx, fc.Args["input"].(reconciler.EnableReconcilerInput))
 		},
 		nil,
-		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
+		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler,
 		true,
 		true,
 	)
@@ -12737,7 +12737,7 @@ func (ec *executionContext) _Mutation_disableReconciler(ctx context.Context, fie
 			return ec.Resolvers.Mutation().DisableReconciler(ctx, fc.Args["input"].(reconciler.DisableReconcilerInput))
 		},
 		nil,
-		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
+		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler,
 		true,
 		true,
 	)
@@ -12798,7 +12798,7 @@ func (ec *executionContext) _Mutation_configureReconciler(ctx context.Context, f
 			return ec.Resolvers.Mutation().ConfigureReconciler(ctx, fc.Args["input"].(reconciler.ConfigureReconcilerInput))
 		},
 		nil,
-		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
+		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler,
 		true,
 		true,
 	)
@@ -12859,7 +12859,7 @@ func (ec *executionContext) _Mutation_createServiceAccount(ctx context.Context, 
 			return ec.Resolvers.Mutation().CreateServiceAccount(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountInput))
 		},
 		nil,
-		ec.marshalNCreateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload,
+		ec.marshalNCreateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload,
 		true,
 		true,
 	)
@@ -12904,7 +12904,7 @@ func (ec *executionContext) _Mutation_updateServiceAccount(ctx context.Context, 
 			return ec.Resolvers.Mutation().UpdateServiceAccount(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountInput))
 		},
 		nil,
-		ec.marshalNUpdateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload,
+		ec.marshalNUpdateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload,
 		true,
 		true,
 	)
@@ -12949,7 +12949,7 @@ func (ec *executionContext) _Mutation_deleteServiceAccount(ctx context.Context, 
 			return ec.Resolvers.Mutation().DeleteServiceAccount(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountInput))
 		},
 		nil,
-		ec.marshalNDeleteServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload,
+		ec.marshalNDeleteServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload,
 		true,
 		true,
 	)
@@ -12994,7 +12994,7 @@ func (ec *executionContext) _Mutation_assignRoleToServiceAccount(ctx context.Con
 			return ec.Resolvers.Mutation().AssignRoleToServiceAccount(ctx, fc.Args["input"].(serviceaccount.AssignRoleToServiceAccountInput))
 		},
 		nil,
-		ec.marshalNAssignRoleToServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload,
+		ec.marshalNAssignRoleToServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload,
 		true,
 		true,
 	)
@@ -13039,7 +13039,7 @@ func (ec *executionContext) _Mutation_revokeRoleFromServiceAccount(ctx context.C
 			return ec.Resolvers.Mutation().RevokeRoleFromServiceAccount(ctx, fc.Args["input"].(serviceaccount.RevokeRoleFromServiceAccountInput))
 		},
 		nil,
-		ec.marshalNRevokeRoleFromServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload,
+		ec.marshalNRevokeRoleFromServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload,
 		true,
 		true,
 	)
@@ -13084,7 +13084,7 @@ func (ec *executionContext) _Mutation_createServiceAccountToken(ctx context.Cont
 			return ec.Resolvers.Mutation().CreateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.CreateServiceAccountTokenInput))
 		},
 		nil,
-		ec.marshalNCreateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload,
+		ec.marshalNCreateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload,
 		true,
 		true,
 	)
@@ -13133,7 +13133,7 @@ func (ec *executionContext) _Mutation_updateServiceAccountToken(ctx context.Cont
 			return ec.Resolvers.Mutation().UpdateServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.UpdateServiceAccountTokenInput))
 		},
 		nil,
-		ec.marshalNUpdateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload,
+		ec.marshalNUpdateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload,
 		true,
 		true,
 	)
@@ -13180,7 +13180,7 @@ func (ec *executionContext) _Mutation_deleteServiceAccountToken(ctx context.Cont
 			return ec.Resolvers.Mutation().DeleteServiceAccountToken(ctx, fc.Args["input"].(serviceaccount.DeleteServiceAccountTokenInput))
 		},
 		nil,
-		ec.marshalNDeleteServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload,
+		ec.marshalNDeleteServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload,
 		true,
 		true,
 	)
@@ -13227,7 +13227,7 @@ func (ec *executionContext) _Mutation_createTeam(ctx context.Context, field grap
 			return ec.Resolvers.Mutation().CreateTeam(ctx, fc.Args["input"].(team.CreateTeamInput))
 		},
 		nil,
-		ec.marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamPayload,
+		ec.marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐCreateTeamPayload,
 		true,
 		true,
 	)
@@ -13272,7 +13272,7 @@ func (ec *executionContext) _Mutation_updateTeam(ctx context.Context, field grap
 			return ec.Resolvers.Mutation().UpdateTeam(ctx, fc.Args["input"].(team.UpdateTeamInput))
 		},
 		nil,
-		ec.marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamPayload,
+		ec.marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐUpdateTeamPayload,
 		true,
 		true,
 	)
@@ -13317,7 +13317,7 @@ func (ec *executionContext) _Mutation_addTeamAccessManager(ctx context.Context, 
 			return ec.Resolvers.Mutation().AddTeamAccessManager(ctx, fc.Args["input"].(team.AddTeamAccessManagerInput))
 		},
 		nil,
-		ec.marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload,
+		ec.marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload,
 		true,
 		true,
 	)
@@ -13364,7 +13364,7 @@ func (ec *executionContext) _Mutation_removeTeamAccessManager(ctx context.Contex
 			return ec.Resolvers.Mutation().RemoveTeamAccessManager(ctx, fc.Args["input"].(team.RemoveTeamAccessManagerInput))
 		},
 		nil,
-		ec.marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload,
+		ec.marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload,
 		true,
 		true,
 	)
@@ -13439,7 +13439,7 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 			return obj.EndCursor, nil
 		},
 		nil,
-		ec.marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		false,
 	)
@@ -13497,7 +13497,7 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 			return obj.StartCursor, nil
 		},
 		nil,
-		ec.marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		false,
 	)
@@ -13614,7 +13614,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().Node(ctx, fc.Args["id"].(ident.Ident))
 		},
 		nil,
-		ec.marshalONode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐNode,
+		ec.marshalONode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐNode,
 		true,
 		false,
 	)
@@ -13655,7 +13655,7 @@ func (ec *executionContext) _Query_activityLog(ctx context.Context, field graphq
 			return ec.Resolvers.Query().ActivityLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
-		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -13704,7 +13704,7 @@ func (ec *executionContext) _Query_roles(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Query().Roles(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -13752,7 +13752,7 @@ func (ec *executionContext) _Query_features(ctx context.Context, field graphql.C
 			return ec.Resolvers.Query().Features(ctx)
 		},
 		nil,
-		ec.marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋfeatureᚐFeatures,
+		ec.marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋfeatureᚐFeatures,
 		true,
 		true,
 	)
@@ -13786,7 +13786,7 @@ func (ec *executionContext) _Query_groups(ctx context.Context, field graphql.Col
 			return ec.Resolvers.Query().Groups(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
-		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -13835,7 +13835,7 @@ func (ec *executionContext) _Query_group(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Query().Group(ctx, fc.Args["name"].(string))
 		},
 		nil,
-		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup,
 		true,
 		true,
 	)
@@ -13892,7 +13892,7 @@ func (ec *executionContext) _Query_messages(ctx context.Context, field graphql.C
 			return ec.Resolvers.Query().Messages(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*message.MessageFilter))
 		},
 		nil,
-		ec.marshalNMessageConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNMessageConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -13941,7 +13941,7 @@ func (ec *executionContext) _Query_message(ctx context.Context, field graphql.Co
 			return ec.Resolvers.Query().Message(ctx, fc.Args["messageId"].(string))
 		},
 		nil,
-		ec.marshalOMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessage,
+		ec.marshalOMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessage,
 		true,
 		false,
 	)
@@ -13994,7 +13994,7 @@ func (ec *executionContext) _Query_reconcilers(ctx context.Context, field graphq
 			return ec.Resolvers.Query().Reconcilers(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNReconcilerConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNReconcilerConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14043,7 +14043,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 			return ec.Resolvers.Query().Search(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(search.SearchFilter))
 		},
 		nil,
-		ec.marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14092,7 +14092,7 @@ func (ec *executionContext) _Query_sections(ctx context.Context, field graphql.C
 			return ec.Resolvers.Query().Sections(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*section.SectionOrder))
 		},
 		nil,
-		ec.marshalNSectionConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSectionConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14141,7 +14141,7 @@ func (ec *executionContext) _Query_section(ctx context.Context, field graphql.Co
 			return ec.Resolvers.Query().Section(ctx, fc.Args["code"].(string))
 		},
 		nil,
-		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
+		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection,
 		true,
 		true,
 	)
@@ -14192,7 +14192,7 @@ func (ec *executionContext) _Query_serviceAccounts(ctx context.Context, field gr
 			return ec.Resolvers.Query().ServiceAccounts(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNServiceAccountConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNServiceAccountConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14241,7 +14241,7 @@ func (ec *executionContext) _Query_serviceAccount(ctx context.Context, field gra
 			return ec.Resolvers.Query().ServiceAccount(ctx, fc.Args["id"].(ident.Ident))
 		},
 		nil,
-		ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		true,
 	)
@@ -14302,7 +14302,7 @@ func (ec *executionContext) _Query_sharedBuckets(ctx context.Context, field grap
 			return ec.Resolvers.Query().SharedBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), fc.Args["filter"].(*sharedbucketsstopgap.SharedBucketFilter))
 		},
 		nil,
-		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14351,7 +14351,7 @@ func (ec *executionContext) _Query_sharedBucket(ctx context.Context, field graph
 			return ec.Resolvers.Query().SharedBucket(ctx, fc.Args["name"].(string))
 		},
 		nil,
-		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
+		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
 		true,
 		true,
 	)
@@ -14414,7 +14414,7 @@ func (ec *executionContext) _Query_teams(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Query().Teams(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
-		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14463,7 +14463,7 @@ func (ec *executionContext) _Query_team(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().Team(ctx, fc.Args["slug"].(slug.Slug))
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -14538,7 +14538,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Query().Users(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14587,7 +14587,7 @@ func (ec *executionContext) _Query_teamMembers(ctx context.Context, field graphq
 			return ec.Resolvers.Query().TeamMembers(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14636,7 +14636,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.Query().User(ctx, fc.Args["email"].(*string))
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -14706,7 +14706,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 			return ec.Resolvers.Query().Me(ctx)
 		},
 		nil,
-		ec.marshalNAuthenticatedUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐAuthenticatedUser,
+		ec.marshalNAuthenticatedUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐAuthenticatedUser,
 		true,
 		true,
 	)
@@ -14736,7 +14736,7 @@ func (ec *executionContext) _Query_userSyncLog(ctx context.Context, field graphq
 			return ec.Resolvers.Query().UserSyncLog(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNUserSyncLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNUserSyncLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -14892,7 +14892,7 @@ func (ec *executionContext) _Reconciler_id(ctx context.Context, field graphql.Co
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -15037,7 +15037,7 @@ func (ec *executionContext) _Reconciler_config(ctx context.Context, field graphq
 			return ec.Resolvers.Reconciler().Config(ctx, obj)
 		},
 		nil,
-		ec.marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ,
+		ec.marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ,
 		true,
 		true,
 	)
@@ -15110,7 +15110,7 @@ func (ec *executionContext) _Reconciler_errors(ctx context.Context, field graphq
 			return ec.Resolvers.Reconciler().Errors(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -15159,7 +15159,7 @@ func (ec *executionContext) _Reconciler_activityLog(ctx context.Context, field g
 			return ec.Resolvers.Reconciler().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
-		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -15381,7 +15381,7 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntry_id(ctx context
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -15497,7 +15497,7 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntry_resourceType(c
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -15555,7 +15555,7 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntry_teamSlug(ctx c
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -15584,7 +15584,7 @@ func (ec *executionContext) _ReconcilerConfiguredActivityLogEntry_data(ctx conte
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNReconcilerConfiguredActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfiguredActivityLogEntryData,
+		ec.marshalNReconcilerConfiguredActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfiguredActivityLogEntryData,
 		true,
 		true,
 	)
@@ -15646,7 +15646,7 @@ func (ec *executionContext) _ReconcilerConnection_pageInfo(ctx context.Context, 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -15691,7 +15691,7 @@ func (ec *executionContext) _ReconcilerConnection_nodes(ctx context.Context, fie
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerᚄ,
+		ec.marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerᚄ,
 		true,
 		true,
 	)
@@ -15740,7 +15740,7 @@ func (ec *executionContext) _ReconcilerConnection_edges(ctx context.Context, fie
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -15775,7 +15775,7 @@ func (ec *executionContext) _ReconcilerDisabledActivityLogEntry_id(ctx context.C
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -15891,7 +15891,7 @@ func (ec *executionContext) _ReconcilerDisabledActivityLogEntry_resourceType(ctx
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -15949,7 +15949,7 @@ func (ec *executionContext) _ReconcilerDisabledActivityLogEntry_teamSlug(ctx con
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -15978,7 +15978,7 @@ func (ec *executionContext) _ReconcilerEdge_cursor(ctx context.Context, field gr
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -16007,7 +16007,7 @@ func (ec *executionContext) _ReconcilerEdge_node(ctx context.Context, field grap
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler,
+		ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler,
 		true,
 		true,
 	)
@@ -16056,7 +16056,7 @@ func (ec *executionContext) _ReconcilerEnabledActivityLogEntry_id(ctx context.Co
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -16172,7 +16172,7 @@ func (ec *executionContext) _ReconcilerEnabledActivityLogEntry_resourceType(ctx 
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -16230,7 +16230,7 @@ func (ec *executionContext) _ReconcilerEnabledActivityLogEntry_teamSlug(ctx cont
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -16259,7 +16259,7 @@ func (ec *executionContext) _ReconcilerError_id(ctx context.Context, field graph
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -16375,7 +16375,7 @@ func (ec *executionContext) _ReconcilerError_team(ctx context.Context, field gra
 			return ec.Resolvers.ReconcilerError().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -16438,7 +16438,7 @@ func (ec *executionContext) _ReconcilerErrorConnection_pageInfo(ctx context.Cont
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -16483,7 +16483,7 @@ func (ec *executionContext) _ReconcilerErrorConnection_nodes(ctx context.Context
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerErrorᚄ,
+		ec.marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerErrorᚄ,
 		true,
 		true,
 	)
@@ -16524,7 +16524,7 @@ func (ec *executionContext) _ReconcilerErrorConnection_edges(ctx context.Context
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -16559,7 +16559,7 @@ func (ec *executionContext) _ReconcilerErrorEdge_cursor(ctx context.Context, fie
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -16588,7 +16588,7 @@ func (ec *executionContext) _ReconcilerErrorEdge_node(ctx context.Context, field
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerError,
+		ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerError,
 		true,
 		true,
 	)
@@ -16629,7 +16629,7 @@ func (ec *executionContext) _RemoveGroupMemberPayload_user(ctx context.Context, 
 			return ec.Resolvers.RemoveGroupMemberPayload().User(ctx, obj)
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		false,
 	)
@@ -16688,7 +16688,7 @@ func (ec *executionContext) _RemoveGroupMemberPayload_group(ctx context.Context,
 			return ec.Resolvers.RemoveGroupMemberPayload().Group(ctx, obj)
 		},
 		nil,
-		ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup,
+		ec.marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup,
 		true,
 		false,
 	)
@@ -16733,7 +16733,7 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload_team(ctx context.Con
 			return ec.Resolvers.RemoveTeamAccessManagerPayload().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -16796,7 +16796,7 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload_user(ctx context.Con
 			return ec.Resolvers.RemoveTeamAccessManagerPayload().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -16855,7 +16855,7 @@ func (ec *executionContext) _RevokeRoleFromServiceAccountPayload_serviceAccount(
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -16904,7 +16904,7 @@ func (ec *executionContext) _Role_id(ctx context.Context, field graphql.Collecte
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -16991,7 +16991,7 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntry_id(ctx
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -17107,7 +17107,7 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntry_resour
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -17165,7 +17165,7 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntry_teamSl
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -17194,7 +17194,7 @@ func (ec *executionContext) _RoleAssignedToServiceAccountActivityLogEntry_data(c
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNRoleAssignedToServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRoleAssignedToServiceAccountActivityLogEntryData,
+		ec.marshalNRoleAssignedToServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRoleAssignedToServiceAccountActivityLogEntryData,
 		true,
 		true,
 	)
@@ -17256,7 +17256,7 @@ func (ec *executionContext) _RoleAssignedUserSyncLogEntry_id(ctx context.Context
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -17343,7 +17343,7 @@ func (ec *executionContext) _RoleAssignedUserSyncLogEntry_userID(ctx context.Con
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -17459,7 +17459,7 @@ func (ec *executionContext) _RoleConnection_nodes(ctx context.Context, field gra
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRoleᚄ,
+		ec.marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐRoleᚄ,
 		true,
 		true,
 	)
@@ -17496,7 +17496,7 @@ func (ec *executionContext) _RoleConnection_edges(ctx context.Context, field gra
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -17531,7 +17531,7 @@ func (ec *executionContext) _RoleConnection_pageInfo(ctx context.Context, field 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -17576,7 +17576,7 @@ func (ec *executionContext) _RoleEdge_node(ctx context.Context, field graphql.Co
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRole,
+		ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐRole,
 		true,
 		true,
 	)
@@ -17613,7 +17613,7 @@ func (ec *executionContext) _RoleEdge_cursor(ctx context.Context, field graphql.
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -17642,7 +17642,7 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntry_id(ct
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -17758,7 +17758,7 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntry_resou
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -17816,7 +17816,7 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntry_teamS
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -17845,7 +17845,7 @@ func (ec *executionContext) _RoleRevokedFromServiceAccountActivityLogEntry_data(
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNRoleRevokedFromServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRoleRevokedFromServiceAccountActivityLogEntryData,
+		ec.marshalNRoleRevokedFromServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRoleRevokedFromServiceAccountActivityLogEntryData,
 		true,
 		true,
 	)
@@ -17907,7 +17907,7 @@ func (ec *executionContext) _RoleRevokedUserSyncLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -17994,7 +17994,7 @@ func (ec *executionContext) _RoleRevokedUserSyncLogEntry_userID(ctx context.Cont
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -18110,7 +18110,7 @@ func (ec *executionContext) _SearchNodeConnection_pageInfo(ctx context.Context, 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -18155,7 +18155,7 @@ func (ec *executionContext) _SearchNodeConnection_nodes(ctx context.Context, fie
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNodeᚄ,
+		ec.marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchNodeᚄ,
 		true,
 		true,
 	)
@@ -18184,7 +18184,7 @@ func (ec *executionContext) _SearchNodeConnection_edges(ctx context.Context, fie
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -18219,7 +18219,7 @@ func (ec *executionContext) _SearchNodeEdge_cursor(ctx context.Context, field gr
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -18248,7 +18248,7 @@ func (ec *executionContext) _SearchNodeEdge_node(ctx context.Context, field grap
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNode,
+		ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchNode,
 		true,
 		true,
 	)
@@ -18277,7 +18277,7 @@ func (ec *executionContext) _Section_id(ctx context.Context, field graphql.Colle
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -18364,7 +18364,7 @@ func (ec *executionContext) _Section_manager(ctx context.Context, field graphql.
 			return ec.Resolvers.Section().Manager(ctx, obj)
 		},
 		nil,
-		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		false,
 	)
@@ -18423,7 +18423,7 @@ func (ec *executionContext) _SectionConnection_pageInfo(ctx context.Context, fie
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -18468,7 +18468,7 @@ func (ec *executionContext) _SectionConnection_nodes(ctx context.Context, field 
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionᚄ,
+		ec.marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionᚄ,
 		true,
 		true,
 	)
@@ -18507,7 +18507,7 @@ func (ec *executionContext) _SectionConnection_edges(ctx context.Context, field 
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -18542,7 +18542,7 @@ func (ec *executionContext) _SectionEdge_cursor(ctx context.Context, field graph
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -18571,7 +18571,7 @@ func (ec *executionContext) _SectionEdge_node(ctx context.Context, field graphql
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
+		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection,
 		true,
 		true,
 	)
@@ -18639,7 +18639,7 @@ func (ec *executionContext) _ServiceAccount_id(ctx context.Context, field graphq
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -18813,7 +18813,7 @@ func (ec *executionContext) _ServiceAccount_team(ctx context.Context, field grap
 			return ec.Resolvers.ServiceAccount().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		false,
 	)
@@ -18877,7 +18877,7 @@ func (ec *executionContext) _ServiceAccount_roles(ctx context.Context, field gra
 			return ec.Resolvers.ServiceAccount().Roles(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -18926,7 +18926,7 @@ func (ec *executionContext) _ServiceAccount_tokens(ctx context.Context, field gr
 			return ec.Resolvers.ServiceAccount().Tokens(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNServiceAccountTokenConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNServiceAccountTokenConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -18974,7 +18974,7 @@ func (ec *executionContext) _ServiceAccountConnection_nodes(ctx context.Context,
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountᚄ,
+		ec.marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountᚄ,
 		true,
 		true,
 	)
@@ -19023,7 +19023,7 @@ func (ec *executionContext) _ServiceAccountConnection_edges(ctx context.Context,
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -19058,7 +19058,7 @@ func (ec *executionContext) _ServiceAccountConnection_pageInfo(ctx context.Conte
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -19103,7 +19103,7 @@ func (ec *executionContext) _ServiceAccountCreatedActivityLogEntry_id(ctx contex
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -19219,7 +19219,7 @@ func (ec *executionContext) _ServiceAccountCreatedActivityLogEntry_resourceType(
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -19277,7 +19277,7 @@ func (ec *executionContext) _ServiceAccountCreatedActivityLogEntry_teamSlug(ctx 
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -19306,7 +19306,7 @@ func (ec *executionContext) _ServiceAccountDeletedActivityLogEntry_id(ctx contex
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -19422,7 +19422,7 @@ func (ec *executionContext) _ServiceAccountDeletedActivityLogEntry_resourceType(
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -19480,7 +19480,7 @@ func (ec *executionContext) _ServiceAccountDeletedActivityLogEntry_teamSlug(ctx 
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -19509,7 +19509,7 @@ func (ec *executionContext) _ServiceAccountEdge_node(ctx context.Context, field 
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		true,
 	)
@@ -19558,7 +19558,7 @@ func (ec *executionContext) _ServiceAccountEdge_cursor(ctx context.Context, fiel
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -19587,7 +19587,7 @@ func (ec *executionContext) _ServiceAccountToken_id(ctx context.Context, field g
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -19761,7 +19761,7 @@ func (ec *executionContext) _ServiceAccountToken_expiresAt(ctx context.Context, 
 			return obj.ExpiresAt, nil
 		},
 		nil,
-		ec.marshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋscalarᚐDate,
+		ec.marshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋscalarᚐDate,
 		true,
 		false,
 	)
@@ -19790,7 +19790,7 @@ func (ec *executionContext) _ServiceAccountTokenConnection_nodes(ctx context.Con
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenᚄ,
+		ec.marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenᚄ,
 		true,
 		true,
 	)
@@ -19835,7 +19835,7 @@ func (ec *executionContext) _ServiceAccountTokenConnection_edges(ctx context.Con
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -19870,7 +19870,7 @@ func (ec *executionContext) _ServiceAccountTokenConnection_pageInfo(ctx context.
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -19915,7 +19915,7 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntry_id(ctx c
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -20031,7 +20031,7 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntry_resource
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -20089,7 +20089,7 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntry_teamSlug
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -20118,7 +20118,7 @@ func (ec *executionContext) _ServiceAccountTokenCreatedActivityLogEntry_data(ctx
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNServiceAccountTokenCreatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenCreatedActivityLogEntryData,
+		ec.marshalNServiceAccountTokenCreatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenCreatedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -20180,7 +20180,7 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntry_id(ctx c
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -20296,7 +20296,7 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntry_resource
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -20354,7 +20354,7 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntry_teamSlug
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -20383,7 +20383,7 @@ func (ec *executionContext) _ServiceAccountTokenDeletedActivityLogEntry_data(ctx
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNServiceAccountTokenDeletedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenDeletedActivityLogEntryData,
+		ec.marshalNServiceAccountTokenDeletedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenDeletedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -20445,7 +20445,7 @@ func (ec *executionContext) _ServiceAccountTokenEdge_node(ctx context.Context, f
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
+		ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
 		true,
 		true,
 	)
@@ -20490,7 +20490,7 @@ func (ec *executionContext) _ServiceAccountTokenEdge_cursor(ctx context.Context,
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -20519,7 +20519,7 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntry_id(ctx c
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -20635,7 +20635,7 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntry_resource
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -20693,7 +20693,7 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntry_teamSlug
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -20722,7 +20722,7 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntry_data(ctx
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNServiceAccountTokenUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryData,
+		ec.marshalNServiceAccountTokenUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -20755,7 +20755,7 @@ func (ec *executionContext) _ServiceAccountTokenUpdatedActivityLogEntryData_upda
 			return obj.UpdatedFields, nil
 		},
 		nil,
-		ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedFieldᚄ,
+		ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedFieldᚄ,
 		true,
 		true,
 	)
@@ -20879,7 +20879,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntry_id(ctx contex
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -20995,7 +20995,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntry_resourceType(
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -21053,7 +21053,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntry_teamSlug(ctx 
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		false,
 	)
@@ -21082,7 +21082,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntry_data(ctx cont
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNServiceAccountUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryData,
+		ec.marshalNServiceAccountUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -21115,7 +21115,7 @@ func (ec *executionContext) _ServiceAccountUpdatedActivityLogEntryData_updatedFi
 			return obj.UpdatedFields, nil
 		},
 		nil,
-		ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedFieldᚄ,
+		ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedFieldᚄ,
 		true,
 		true,
 	)
@@ -21239,7 +21239,7 @@ func (ec *executionContext) _SharedBucket_id(ctx context.Context, field graphql.
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -21384,7 +21384,7 @@ func (ec *executionContext) _SharedBucket_team(ctx context.Context, field graphq
 			return ec.Resolvers.SharedBucket().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -21448,7 +21448,7 @@ func (ec *executionContext) _SharedBucket_groups(ctx context.Context, field grap
 			return ec.Resolvers.SharedBucket().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
-		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -21497,7 +21497,7 @@ func (ec *executionContext) _SharedBucket_users(ctx context.Context, field graph
 			return ec.Resolvers.SharedBucket().Users(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -21546,7 +21546,7 @@ func (ec *executionContext) _SharedBucket_uniqueUsers(ctx context.Context, field
 			return ec.Resolvers.SharedBucket().UniqueUsers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -21595,7 +21595,7 @@ func (ec *executionContext) _SharedBucket_teams(ctx context.Context, field graph
 			return ec.Resolvers.SharedBucket().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
-		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -21643,7 +21643,7 @@ func (ec *executionContext) _SharedBucketAccess_bucket(ctx context.Context, fiel
 			return ec.Resolvers.SharedBucketAccess().Bucket(ctx, obj)
 		},
 		nil,
-		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
+		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
 		true,
 		true,
 	)
@@ -21694,7 +21694,7 @@ func (ec *executionContext) _SharedBucketAccess_team(ctx context.Context, field 
 			return ec.Resolvers.SharedBucketAccess().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -21757,7 +21757,7 @@ func (ec *executionContext) _SharedBucketAccess_groups(ctx context.Context, fiel
 			return ec.Resolvers.SharedBucketAccess().Groups(ctx, obj)
 		},
 		nil,
-		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ,
+		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupᚄ,
 		true,
 		true,
 	)
@@ -21802,7 +21802,7 @@ func (ec *executionContext) _SharedBucketAccessConnection_pageInfo(ctx context.C
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -21847,7 +21847,7 @@ func (ec *executionContext) _SharedBucketAccessConnection_nodes(ctx context.Cont
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ,
+		ec.marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ,
 		true,
 		true,
 	)
@@ -21884,7 +21884,7 @@ func (ec *executionContext) _SharedBucketAccessConnection_edges(ctx context.Cont
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -21919,7 +21919,7 @@ func (ec *executionContext) _SharedBucketAccessEdge_cursor(ctx context.Context, 
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -21948,7 +21948,7 @@ func (ec *executionContext) _SharedBucketAccessEdge_node(ctx context.Context, fi
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess,
+		ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess,
 		true,
 		true,
 	)
@@ -21985,7 +21985,7 @@ func (ec *executionContext) _SharedBucketConnection_pageInfo(ctx context.Context
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -22030,7 +22030,7 @@ func (ec *executionContext) _SharedBucketConnection_nodes(ctx context.Context, f
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketᚄ,
+		ec.marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketᚄ,
 		true,
 		true,
 	)
@@ -22081,7 +22081,7 @@ func (ec *executionContext) _SharedBucketConnection_edges(ctx context.Context, f
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -22116,7 +22116,7 @@ func (ec *executionContext) _SharedBucketEdge_cursor(ctx context.Context, field 
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -22145,7 +22145,7 @@ func (ec *executionContext) _SharedBucketEdge_node(ctx context.Context, field gr
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
+		ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket,
 		true,
 		true,
 	)
@@ -22196,7 +22196,7 @@ func (ec *executionContext) _Team_id(ctx context.Context, field graphql.Collecte
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -22225,7 +22225,7 @@ func (ec *executionContext) _Team_slug(ctx context.Context, field graphql.Collec
 			return obj.Slug, nil
 		},
 		nil,
-		ec.marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -22283,7 +22283,7 @@ func (ec *executionContext) _Team_section(ctx context.Context, field graphql.Col
 			return ec.Resolvers.Team().Section(ctx, obj)
 		},
 		nil,
-		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
+		ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection,
 		true,
 		true,
 	)
@@ -22352,7 +22352,7 @@ func (ec *executionContext) _Team_members(ctx context.Context, field graphql.Col
 			return ec.Resolvers.Team().Members(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -22401,7 +22401,7 @@ func (ec *executionContext) _Team_groups(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.Team().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
-		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -22450,7 +22450,7 @@ func (ec *executionContext) _Team_sharedBuckets(ctx context.Context, field graph
 			return ec.Resolvers.Team().SharedBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder), fc.Args["filter"].(*sharedbucketsstopgap.SharedBucketFilter))
 		},
 		nil,
-		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -22499,7 +22499,7 @@ func (ec *executionContext) _Team_sharedBucketsAccess(ctx context.Context, field
 			return ec.Resolvers.Team().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
-		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -22692,7 +22692,7 @@ func (ec *executionContext) _Team_accessManagers(ctx context.Context, field grap
 			return ec.Resolvers.Team().AccessManagers(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ,
+		ec.marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamAccessManagerᚄ,
 		true,
 		true,
 	)
@@ -22728,7 +22728,7 @@ func (ec *executionContext) _Team_activityLog(ctx context.Context, field graphql
 			return ec.Resolvers.Team().ActivityLog(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*activitylog.ActivityLogFilter))
 		},
 		nil,
-		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -22776,7 +22776,7 @@ func (ec *executionContext) _TeamAccessManager_team(ctx context.Context, field g
 			return ec.Resolvers.TeamAccessManager().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -22839,7 +22839,7 @@ func (ec *executionContext) _TeamAccessManager_user(ctx context.Context, field g
 			return ec.Resolvers.TeamAccessManager().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -22898,7 +22898,7 @@ func (ec *executionContext) _TeamConnection_pageInfo(ctx context.Context, field 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -22943,7 +22943,7 @@ func (ec *executionContext) _TeamConnection_nodes(ctx context.Context, field gra
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamᚄ,
+		ec.marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamᚄ,
 		true,
 		true,
 	)
@@ -23006,7 +23006,7 @@ func (ec *executionContext) _TeamConnection_edges(ctx context.Context, field gra
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -23041,7 +23041,7 @@ func (ec *executionContext) _TeamCreatedActivityLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -23157,7 +23157,7 @@ func (ec *executionContext) _TeamCreatedActivityLogEntry_resourceType(ctx contex
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -23215,7 +23215,7 @@ func (ec *executionContext) _TeamCreatedActivityLogEntry_teamSlug(ctx context.Co
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -23244,7 +23244,7 @@ func (ec *executionContext) _TeamEdge_cursor(ctx context.Context, field graphql.
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -23273,7 +23273,7 @@ func (ec *executionContext) _TeamEdge_node(ctx context.Context, field graphql.Co
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -23336,7 +23336,7 @@ func (ec *executionContext) _TeamMember_team(ctx context.Context, field graphql.
 			return ec.Resolvers.TeamMember().Team(ctx, obj)
 		},
 		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		true,
 	)
@@ -23399,7 +23399,7 @@ func (ec *executionContext) _TeamMember_user(ctx context.Context, field graphql.
 			return ec.Resolvers.TeamMember().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -23458,7 +23458,7 @@ func (ec *executionContext) _TeamMember_groups(ctx context.Context, field graphq
 			return ec.Resolvers.TeamMember().Groups(ctx, obj)
 		},
 		nil,
-		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ,
+		ec.marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupᚄ,
 		true,
 		true,
 	)
@@ -23503,7 +23503,7 @@ func (ec *executionContext) _TeamMemberConnection_pageInfo(ctx context.Context, 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -23548,7 +23548,7 @@ func (ec *executionContext) _TeamMemberConnection_nodes(ctx context.Context, fie
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberᚄ,
+		ec.marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMemberᚄ,
 		true,
 		true,
 	)
@@ -23585,7 +23585,7 @@ func (ec *executionContext) _TeamMemberConnection_edges(ctx context.Context, fie
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -23620,7 +23620,7 @@ func (ec *executionContext) _TeamMemberEdge_cursor(ctx context.Context, field gr
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -23649,7 +23649,7 @@ func (ec *executionContext) _TeamMemberEdge_node(ctx context.Context, field grap
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMember,
+		ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember,
 		true,
 		true,
 	)
@@ -23686,7 +23686,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_id(ctx context.Con
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -23802,7 +23802,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_resourceType(ctx c
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -23860,7 +23860,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_teamSlug(ctx conte
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -23889,7 +23889,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntry_data(ctx context.C
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData,
+		ec.marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -23924,7 +23924,7 @@ func (ec *executionContext) _TeamRoleAssignedActivityLogEntryData_user(ctx conte
 			return ec.Resolvers.TeamRoleAssignedActivityLogEntryData().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -24012,7 +24012,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_id(ctx context.Cont
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -24128,7 +24128,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_resourceType(ctx co
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -24186,7 +24186,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_teamSlug(ctx contex
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -24215,7 +24215,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntry_data(ctx context.Co
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData,
+		ec.marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -24250,7 +24250,7 @@ func (ec *executionContext) _TeamRoleRevokedActivityLogEntryData_user(ctx contex
 			return ec.Resolvers.TeamRoleRevokedActivityLogEntryData().User(ctx, obj)
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -24338,7 +24338,7 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -24454,7 +24454,7 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntry_resourceType(ctx contex
 			return obj.ResourceType, nil
 		},
 		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
 		true,
 		true,
 	)
@@ -24512,7 +24512,7 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntry_teamSlug(ctx context.Co
 			return obj.TeamSlug, nil
 		},
 		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
 		true,
 		true,
 	)
@@ -24541,7 +24541,7 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntry_data(ctx context.Contex
 			return obj.Data, nil
 		},
 		nil,
-		ec.marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryData,
+		ec.marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryData,
 		true,
 		true,
 	)
@@ -24574,7 +24574,7 @@ func (ec *executionContext) _TeamUpdatedActivityLogEntryData_updatedFields(ctx c
 			return obj.UpdatedFields, nil
 		},
 		nil,
-		ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedFieldᚄ,
+		ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedFieldᚄ,
 		true,
 		true,
 	)
@@ -24698,7 +24698,7 @@ func (ec *executionContext) _UpdateServiceAccountPayload_serviceAccount(ctx cont
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -24747,7 +24747,7 @@ func (ec *executionContext) _UpdateServiceAccountTokenPayload_serviceAccount(ctx
 			return obj.ServiceAccount, nil
 		},
 		nil,
-		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount,
+		ec.marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount,
 		true,
 		false,
 	)
@@ -24796,7 +24796,7 @@ func (ec *executionContext) _UpdateServiceAccountTokenPayload_serviceAccountToke
 			return obj.ServiceAccountToken, nil
 		},
 		nil,
-		ec.marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
+		ec.marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken,
 		true,
 		false,
 	)
@@ -24841,7 +24841,7 @@ func (ec *executionContext) _UpdateTeamPayload_team(ctx context.Context, field g
 			return obj.Team, nil
 		},
 		nil,
-		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam,
+		ec.marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
 		true,
 		false,
 	)
@@ -24904,7 +24904,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -25107,7 +25107,7 @@ func (ec *executionContext) _User_section(ctx context.Context, field graphql.Col
 			return ec.Resolvers.User().Section(ctx, obj)
 		},
 		nil,
-		ec.marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection,
+		ec.marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection,
 		true,
 		false,
 	)
@@ -25147,7 +25147,7 @@ func (ec *executionContext) _User_teams(ctx context.Context, field graphql.Colle
 			return ec.Resolvers.User().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
 		},
 		nil,
-		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -25196,7 +25196,7 @@ func (ec *executionContext) _User_teamMembers(ctx context.Context, field graphql
 			return ec.Resolvers.User().TeamMembers(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*user.UserOrder))
 		},
 		nil,
-		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -25245,7 +25245,7 @@ func (ec *executionContext) _User_groups(ctx context.Context, field graphql.Coll
 			return ec.Resolvers.User().Groups(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*group.GroupOrder), fc.Args["filter"].(*group.GroupFilter))
 		},
 		nil,
-		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -25294,7 +25294,7 @@ func (ec *executionContext) _User_sharedBucketsAccess(ctx context.Context, field
 			return ec.Resolvers.User().SharedBucketsAccess(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*sharedbucketsstopgap.SharedBucketOrder))
 		},
 		nil,
-		ec.marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
@@ -25400,7 +25400,7 @@ func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field 
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -25445,7 +25445,7 @@ func (ec *executionContext) _UserConnection_nodes(ctx context.Context, field gra
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserᚄ,
+		ec.marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserᚄ,
 		true,
 		true,
 	)
@@ -25504,7 +25504,7 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -25539,7 +25539,7 @@ func (ec *executionContext) _UserCreatedUserSyncLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -25626,7 +25626,7 @@ func (ec *executionContext) _UserCreatedUserSyncLogEntry_userID(ctx context.Cont
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -25713,7 +25713,7 @@ func (ec *executionContext) _UserDeletedUserSyncLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -25800,7 +25800,7 @@ func (ec *executionContext) _UserDeletedUserSyncLogEntry_userID(ctx context.Cont
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -25887,7 +25887,7 @@ func (ec *executionContext) _UserEdge_cursor(ctx context.Context, field graphql.
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -25916,7 +25916,7 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser,
+		ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser,
 		true,
 		true,
 	)
@@ -25975,7 +25975,7 @@ func (ec *executionContext) _UserSyncLogEntryConnection_pageInfo(ctx context.Con
 			return obj.PageInfo, nil
 		},
 		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
 		true,
 		true,
 	)
@@ -26020,7 +26020,7 @@ func (ec *executionContext) _UserSyncLogEntryConnection_nodes(ctx context.Contex
 			return obj.Nodes(), nil
 		},
 		nil,
-		ec.marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntryᚄ,
+		ec.marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚐUserSyncLogEntryᚄ,
 		true,
 		true,
 	)
@@ -26049,7 +26049,7 @@ func (ec *executionContext) _UserSyncLogEntryConnection_edges(ctx context.Contex
 			return obj.Edges, nil
 		},
 		nil,
-		ec.marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		ec.marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
 		true,
 		true,
 	)
@@ -26084,7 +26084,7 @@ func (ec *executionContext) _UserSyncLogEntryEdge_cursor(ctx context.Context, fi
 			return obj.Cursor, nil
 		},
 		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
 		true,
 		true,
 	)
@@ -26113,7 +26113,7 @@ func (ec *executionContext) _UserSyncLogEntryEdge_node(ctx context.Context, fiel
 			return obj.Node, nil
 		},
 		nil,
-		ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntry,
+		ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚐUserSyncLogEntry,
 		true,
 		true,
 	)
@@ -26200,7 +26200,7 @@ func (ec *executionContext) _UserSyncUserChanges_name(ctx context.Context, field
 			return obj.Name, nil
 		},
 		nil,
-		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
 		true,
 		false,
 	)
@@ -26235,7 +26235,7 @@ func (ec *executionContext) _UserSyncUserChanges_email(ctx context.Context, fiel
 			return obj.Email, nil
 		},
 		nil,
-		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
 		true,
 		false,
 	)
@@ -26270,7 +26270,7 @@ func (ec *executionContext) _UserSyncUserChanges_sectionCode(ctx context.Context
 			return obj.SectionCode, nil
 		},
 		nil,
-		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
 		true,
 		false,
 	)
@@ -26305,7 +26305,7 @@ func (ec *executionContext) _UserSyncUserChanges_jobTitle(ctx context.Context, f
 			return obj.JobTitle, nil
 		},
 		nil,
-		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
+		ec.marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit,
 		true,
 		false,
 	)
@@ -26340,7 +26340,7 @@ func (ec *executionContext) _UserUpdatedUserSyncLogEntry_id(ctx context.Context,
 			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -26427,7 +26427,7 @@ func (ec *executionContext) _UserUpdatedUserSyncLogEntry_userID(ctx context.Cont
 			return obj.UserID, nil
 		},
 		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -26572,7 +26572,7 @@ func (ec *executionContext) _UserUpdatedUserSyncLogEntry_changes(ctx context.Con
 			return obj.Changes, nil
 		},
 		nil,
-		ec.marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges,
+		ec.marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges,
 		true,
 		false,
 	)
@@ -28067,7 +28067,7 @@ func (ec *executionContext) unmarshalInputActivityLogFilter(ctx context.Context,
 		switch k {
 		case "activityTypes":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activityTypes"))
-			data, err := ec.unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx, v)
+			data, err := ec.unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28134,7 +28134,7 @@ func (ec *executionContext) unmarshalInputAddTeamAccessManagerInput(ctx context.
 		switch k {
 		case "teamSlug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28171,7 +28171,7 @@ func (ec *executionContext) unmarshalInputAssignRoleToServiceAccountInput(ctx co
 		switch k {
 		case "serviceAccountID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28215,7 +28215,7 @@ func (ec *executionContext) unmarshalInputConfigureReconcilerInput(ctx context.C
 			it.Name = data
 		case "config":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("config"))
-			data, err := ec.unmarshalNReconcilerConfigInput2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigInputᚄ(ctx, v)
+			data, err := ec.unmarshalNReconcilerConfigInput2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigInputᚄ(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28245,7 +28245,7 @@ func (ec *executionContext) unmarshalInputConfirmTeamDeletionInput(ctx context.C
 		switch k {
 		case "slug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28282,7 +28282,7 @@ func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, 
 		switch k {
 		case "teamSlug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28340,7 +28340,7 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountInput(ctx context.
 			it.Description = data
 		case "teamSlug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28370,7 +28370,7 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountTokenInput(ctx con
 		switch k {
 		case "serviceAccountID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28391,7 +28391,7 @@ func (ec *executionContext) unmarshalInputCreateServiceAccountTokenInput(ctx con
 			it.Description = data
 		case "expiresAt":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expiresAt"))
-			data, err := ec.unmarshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋscalarᚐDate(ctx, v)
+			data, err := ec.unmarshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋscalarᚐDate(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28421,7 +28421,7 @@ func (ec *executionContext) unmarshalInputCreateTeamInput(ctx context.Context, o
 		switch k {
 		case "slug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28472,7 +28472,7 @@ func (ec *executionContext) unmarshalInputDeleteServiceAccountInput(ctx context.
 		switch k {
 		case "serviceAccountID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28502,7 +28502,7 @@ func (ec *executionContext) unmarshalInputDeleteServiceAccountTokenInput(ctx con
 		switch k {
 		case "serviceAccountTokenID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountTokenID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28622,14 +28622,14 @@ func (ec *executionContext) unmarshalInputGroupOrder(ctx context.Context, obj an
 		switch k {
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrderField(ctx, v)
+			data, err := ec.unmarshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Field = data
 		case "direction":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28777,7 +28777,7 @@ func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx conte
 		switch k {
 		case "teamSlug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28814,7 +28814,7 @@ func (ec *executionContext) unmarshalInputRequestTeamDeletionInput(ctx context.C
 		switch k {
 		case "slug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28844,7 +28844,7 @@ func (ec *executionContext) unmarshalInputRevokeRoleFromServiceAccountInput(ctx 
 		switch k {
 		case "serviceAccountID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28888,7 +28888,7 @@ func (ec *executionContext) unmarshalInputSearchFilter(ctx context.Context, obj 
 			it.Query = data
 		case "type":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-			data, err := ec.unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchType(ctx, v)
+			data, err := ec.unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -28918,14 +28918,14 @@ func (ec *executionContext) unmarshalInputSectionOrder(ctx context.Context, obj 
 		switch k {
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrderField(ctx, v)
+			data, err := ec.unmarshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Field = data
 		case "direction":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29036,14 +29036,14 @@ func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context,
 		switch k {
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx, v)
+			data, err := ec.unmarshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Field = data
 		case "direction":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29073,14 +29073,14 @@ func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any
 		switch k {
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrderField(ctx, v)
+			data, err := ec.unmarshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Field = data
 		case "direction":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29110,7 +29110,7 @@ func (ec *executionContext) unmarshalInputUpdateServiceAccountInput(ctx context.
 		switch k {
 		case "serviceAccountID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29147,7 +29147,7 @@ func (ec *executionContext) unmarshalInputUpdateServiceAccountTokenInput(ctx con
 		switch k {
 		case "serviceAccountTokenID":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("serviceAccountTokenID"))
-			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
+			data, err := ec.unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29191,7 +29191,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		switch k {
 		case "slug":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx, v)
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -29235,14 +29235,14 @@ func (ec *executionContext) unmarshalInputUserOrder(ctx context.Context, obj any
 		switch k {
 		case "field":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx, v)
+			data, err := ec.unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrderField(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Field = data
 		case "direction":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -38208,17 +38208,17 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, v any) (activitylog.ActivityLogActivityType, error) {
+func (ec *executionContext) unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, v any) (activitylog.ActivityLogActivityType, error) {
 	var res activitylog.ActivityLogActivityType
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogActivityType) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogActivityType) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogEntry) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogEntry) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38228,11 +38228,11 @@ func (ec *executionContext) marshalNActivityLogEntry2githubᚗcomᚋstatisticsno
 	return ec._ActivityLogEntry(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogEntry) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogEntry) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx, sel, v[i])
+		return ec.marshalNActivityLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntry(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38244,11 +38244,11 @@ func (ec *executionContext) marshalNActivityLogEntry2ᚕgithubᚗcomᚋstatistic
 	return ret
 }
 
-func (ec *executionContext) marshalNActivityLogEntryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[activitylog.ActivityLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[activitylog.ActivityLogEntry]) graphql.Marshaler {
 	return ec._ActivityLogEntryConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[activitylog.ActivityLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[activitylog.ActivityLogEntry]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38258,15 +38258,15 @@ func (ec *executionContext) marshalNActivityLogEntryConnection2ᚖgithubᚗcom�
 	return ec._ActivityLogEntryConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[activitylog.ActivityLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[activitylog.ActivityLogEntry]) graphql.Marshaler {
 	return ec._ActivityLogEntryEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[activitylog.ActivityLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[activitylog.ActivityLogEntry]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNActivityLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38278,13 +38278,13 @@ func (ec *executionContext) marshalNActivityLogEntryEdge2ᚕgithubᚗcomᚋstati
 	return ret
 }
 
-func (ec *executionContext) unmarshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType(ctx context.Context, v any) (activitylog.ActivityLogEntryResourceType, error) {
+func (ec *executionContext) unmarshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType(ctx context.Context, v any) (activitylog.ActivityLogEntryResourceType, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := activitylog.ActivityLogEntryResourceType(tmp)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogEntryResourceType) graphql.Marshaler {
+func (ec *executionContext) marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType(ctx context.Context, sel ast.SelectionSet, v activitylog.ActivityLogEntryResourceType) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalString(string(v))
 	if res == graphql.Null {
@@ -38295,16 +38295,16 @@ func (ec *executionContext) marshalNActivityLogEntryResourceType2githubᚗcomᚋ
 	return res
 }
 
-func (ec *executionContext) unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberInput(ctx context.Context, v any) (group.AddGroupMemberInput, error) {
+func (ec *executionContext) unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberInput(ctx context.Context, v any) (group.AddGroupMemberInput, error) {
 	res, err := ec.unmarshalInputAddGroupMemberInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAddGroupMemberPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v group.AddGroupMemberPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAddGroupMemberPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v group.AddGroupMemberPayload) graphql.Marshaler {
 	return ec._AddGroupMemberPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐAddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v *group.AddGroupMemberPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v *group.AddGroupMemberPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38314,16 +38314,16 @@ func (ec *executionContext) marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstat
 	return ec._AddGroupMemberPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerInput(ctx context.Context, v any) (team.AddTeamAccessManagerInput, error) {
+func (ec *executionContext) unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerInput(ctx context.Context, v any) (team.AddTeamAccessManagerInput, error) {
 	res, err := ec.unmarshalInputAddTeamAccessManagerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAddTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.AddTeamAccessManagerPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAddTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.AddTeamAccessManagerPayload) graphql.Marshaler {
 	return ec._AddTeamAccessManagerPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.AddTeamAccessManagerPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.AddTeamAccessManagerPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38333,16 +38333,16 @@ func (ec *executionContext) marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcom�
 	return ec._AddTeamAccessManagerPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput(ctx context.Context, v any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
+func (ec *executionContext) unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput(ctx context.Context, v any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
 	res, err := ec.unmarshalInputAssignRoleToServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNAssignRoleToServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.AssignRoleToServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAssignRoleToServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.AssignRoleToServiceAccountPayload) graphql.Marshaler {
 	return ec._AssignRoleToServiceAccountPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNAssignRoleToServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.AssignRoleToServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNAssignRoleToServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.AssignRoleToServiceAccountPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38352,7 +38352,7 @@ func (ec *executionContext) marshalNAssignRoleToServiceAccountPayload2ᚖgithub�
 	return ec._AssignRoleToServiceAccountPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNAuthenticatedUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐAuthenticatedUser(ctx context.Context, sel ast.SelectionSet, v authz.AuthenticatedUser) graphql.Marshaler {
+func (ec *executionContext) marshalNAuthenticatedUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐAuthenticatedUser(ctx context.Context, sel ast.SelectionSet, v authz.AuthenticatedUser) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38378,21 +38378,21 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNConfigureReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐConfigureReconcilerInput(ctx context.Context, v any) (reconciler.ConfigureReconcilerInput, error) {
+func (ec *executionContext) unmarshalNConfigureReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐConfigureReconcilerInput(ctx context.Context, v any) (reconciler.ConfigureReconcilerInput, error) {
 	res, err := ec.unmarshalInputConfigureReconcilerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupInput(ctx context.Context, v any) (group.CreateGroupInput, error) {
+func (ec *executionContext) unmarshalNCreateGroupInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐCreateGroupInput(ctx context.Context, v any) (group.CreateGroupInput, error) {
 	res, err := ec.unmarshalInputCreateGroupInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCreateGroupPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupPayload(ctx context.Context, sel ast.SelectionSet, v group.CreateGroupPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateGroupPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐCreateGroupPayload(ctx context.Context, sel ast.SelectionSet, v group.CreateGroupPayload) graphql.Marshaler {
 	return ec._CreateGroupPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐCreateGroupPayload(ctx context.Context, sel ast.SelectionSet, v *group.CreateGroupPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐCreateGroupPayload(ctx context.Context, sel ast.SelectionSet, v *group.CreateGroupPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38402,16 +38402,16 @@ func (ec *executionContext) marshalNCreateGroupPayload2ᚖgithubᚗcomᚋstatist
 	return ec._CreateGroupPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountInput(ctx context.Context, v any) (serviceaccount.CreateServiceAccountInput, error) {
+func (ec *executionContext) unmarshalNCreateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountInput(ctx context.Context, v any) (serviceaccount.CreateServiceAccountInput, error) {
 	res, err := ec.unmarshalInputCreateServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCreateServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.CreateServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.CreateServiceAccountPayload) graphql.Marshaler {
 	return ec._CreateServiceAccountPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCreateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.CreateServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.CreateServiceAccountPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38421,16 +38421,16 @@ func (ec *executionContext) marshalNCreateServiceAccountPayload2ᚖgithubᚗcom�
 	return ec._CreateServiceAccountPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.CreateServiceAccountTokenInput, error) {
+func (ec *executionContext) unmarshalNCreateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.CreateServiceAccountTokenInput, error) {
 	res, err := ec.unmarshalInputCreateServiceAccountTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCreateServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.CreateServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.CreateServiceAccountTokenPayload) graphql.Marshaler {
 	return ec._CreateServiceAccountTokenPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCreateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.CreateServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐCreateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.CreateServiceAccountTokenPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38440,16 +38440,16 @@ func (ec *executionContext) marshalNCreateServiceAccountTokenPayload2ᚖgithub�
 	return ec._CreateServiceAccountTokenPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCreateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamInput(ctx context.Context, v any) (team.CreateTeamInput, error) {
+func (ec *executionContext) unmarshalNCreateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐCreateTeamInput(ctx context.Context, v any) (team.CreateTeamInput, error) {
 	res, err := ec.unmarshalInputCreateTeamInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCreateTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamPayload(ctx context.Context, sel ast.SelectionSet, v team.CreateTeamPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐCreateTeamPayload(ctx context.Context, sel ast.SelectionSet, v team.CreateTeamPayload) graphql.Marshaler {
 	return ec._CreateTeamPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐCreateTeamPayload(ctx context.Context, sel ast.SelectionSet, v *team.CreateTeamPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐCreateTeamPayload(ctx context.Context, sel ast.SelectionSet, v *team.CreateTeamPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38459,26 +38459,26 @@ func (ec *executionContext) marshalNCreateTeamPayload2ᚖgithubᚗcomᚋstatisti
 	return ec._CreateTeamPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, v any) (pagination.Cursor, error) {
+func (ec *executionContext) unmarshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, v any) (pagination.Cursor, error) {
 	var res pagination.Cursor
 	err := res.UnmarshalGQLContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, sel ast.SelectionSet, v pagination.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, sel ast.SelectionSet, v pagination.Cursor) graphql.Marshaler {
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNDeleteServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountInput(ctx context.Context, v any) (serviceaccount.DeleteServiceAccountInput, error) {
+func (ec *executionContext) unmarshalNDeleteServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountInput(ctx context.Context, v any) (serviceaccount.DeleteServiceAccountInput, error) {
 	res, err := ec.unmarshalInputDeleteServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNDeleteServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.DeleteServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNDeleteServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.DeleteServiceAccountPayload) graphql.Marshaler {
 	return ec._DeleteServiceAccountPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDeleteServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.DeleteServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNDeleteServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.DeleteServiceAccountPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38488,16 +38488,16 @@ func (ec *executionContext) marshalNDeleteServiceAccountPayload2ᚖgithubᚗcom�
 	return ec._DeleteServiceAccountPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNDeleteServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.DeleteServiceAccountTokenInput, error) {
+func (ec *executionContext) unmarshalNDeleteServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.DeleteServiceAccountTokenInput, error) {
 	res, err := ec.unmarshalInputDeleteServiceAccountTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNDeleteServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.DeleteServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNDeleteServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.DeleteServiceAccountTokenPayload) graphql.Marshaler {
 	return ec._DeleteServiceAccountTokenPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNDeleteServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.DeleteServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNDeleteServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐDeleteServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.DeleteServiceAccountTokenPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38507,21 +38507,21 @@ func (ec *executionContext) marshalNDeleteServiceAccountTokenPayload2ᚖgithub�
 	return ec._DeleteServiceAccountTokenPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNDisableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐDisableReconcilerInput(ctx context.Context, v any) (reconciler.DisableReconcilerInput, error) {
+func (ec *executionContext) unmarshalNDisableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐDisableReconcilerInput(ctx context.Context, v any) (reconciler.DisableReconcilerInput, error) {
 	res, err := ec.unmarshalInputDisableReconcilerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐEnableReconcilerInput(ctx context.Context, v any) (reconciler.EnableReconcilerInput, error) {
+func (ec *executionContext) unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐEnableReconcilerInput(ctx context.Context, v any) (reconciler.EnableReconcilerInput, error) {
 	res, err := ec.unmarshalInputEnableReconcilerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNFeatures2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋfeatureᚐFeatures(ctx context.Context, sel ast.SelectionSet, v feature.Features) graphql.Marshaler {
+func (ec *executionContext) marshalNFeatures2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋfeatureᚐFeatures(ctx context.Context, sel ast.SelectionSet, v feature.Features) graphql.Marshaler {
 	return ec._Features(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋfeatureᚐFeatures(ctx context.Context, sel ast.SelectionSet, v *feature.Features) graphql.Marshaler {
+func (ec *executionContext) marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋfeatureᚐFeatures(ctx context.Context, sel ast.SelectionSet, v *feature.Features) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38531,15 +38531,15 @@ func (ec *executionContext) marshalNFeatures2ᚖgithubᚗcomᚋstatisticsnorway�
 	return ec._Features(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroup2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v group.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v group.Group) graphql.Marshaler {
 	return ec._Group(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.Group) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx, sel, v[i])
+		return ec.marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38551,7 +38551,7 @@ func (ec *executionContext) marshalNGroup2ᚕᚖgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v *group.Group) graphql.Marshaler {
+func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v *group.Group) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38561,11 +38561,11 @@ func (ec *executionContext) marshalNGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋd
 	return ec._Group(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroupConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*group.Group]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*group.Group]) graphql.Marshaler {
 	return ec._GroupConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*group.Group]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*group.Group]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38575,15 +38575,15 @@ func (ec *executionContext) marshalNGroupConnection2ᚖgithubᚗcomᚋstatistics
 	return ec._GroupConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*group.Group]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*group.Group]) graphql.Marshaler {
 	return ec._GroupEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.Group]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.Group]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNGroupEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38595,11 +38595,11 @@ func (ec *executionContext) marshalNGroupEdge2ᚕgithubᚗcomᚋstatisticsnorway
 	return ret
 }
 
-func (ec *executionContext) marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.GroupMember) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*group.GroupMember) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx, sel, v[i])
+		return ec.marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMember(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38611,7 +38611,7 @@ func (ec *executionContext) marshalNGroupMember2ᚕᚖgithubᚗcomᚋstatisticsn
 	return ret
 }
 
-func (ec *executionContext) marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx context.Context, sel ast.SelectionSet, v *group.GroupMember) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMember(ctx context.Context, sel ast.SelectionSet, v *group.GroupMember) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38621,7 +38621,7 @@ func (ec *executionContext) marshalNGroupMember2ᚖgithubᚗcomᚋstatisticsnorw
 	return ec._GroupMember(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberAddedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberAddedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberAddedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberAddedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38631,11 +38631,11 @@ func (ec *executionContext) marshalNGroupMemberAddedActivityLogEntryData2ᚖgith
 	return ec._GroupMemberAddedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroupMemberConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*group.GroupMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*group.GroupMember]) graphql.Marshaler {
 	return ec._GroupMemberConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*group.GroupMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*group.GroupMember]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38645,15 +38645,15 @@ func (ec *executionContext) marshalNGroupMemberConnection2ᚖgithubᚗcomᚋstat
 	return ec._GroupMemberConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*group.GroupMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*group.GroupMember]) graphql.Marshaler {
 	return ec._GroupMemberEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.GroupMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*group.GroupMember]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNGroupMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38665,7 +38665,7 @@ func (ec *executionContext) marshalNGroupMemberEdge2ᚕgithubᚗcomᚋstatistics
 	return ret
 }
 
-func (ec *executionContext) marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberRemovedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupMemberRemovedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMemberRemovedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *group.GroupMemberRemovedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38675,23 +38675,23 @@ func (ec *executionContext) marshalNGroupMemberRemovedActivityLogEntryData2ᚖgi
 	return ec._GroupMemberRemovedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrderField(ctx context.Context, v any) (group.GroupOrderField, error) {
+func (ec *executionContext) unmarshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrderField(ctx context.Context, v any) (group.GroupOrderField, error) {
 	var res group.GroupOrderField
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrderField(ctx context.Context, sel ast.SelectionSet, v group.GroupOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNGroupOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrderField(ctx context.Context, sel ast.SelectionSet, v group.GroupOrderField) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, v any) (ident.Ident, error) {
+func (ec *executionContext) unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, v any) (ident.Ident, error) {
 	var res ident.Ident
 	err := res.UnmarshalGQLContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, sel ast.SelectionSet, v ident.Ident) graphql.Marshaler {
+func (ec *executionContext) marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, sel ast.SelectionSet, v ident.Ident) graphql.Marshaler {
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 
@@ -38711,11 +38711,11 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*message.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessageᚄ(ctx context.Context, sel ast.SelectionSet, v []*message.Message) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessage(ctx, sel, v[i])
+		return ec.marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessage(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38727,7 +38727,7 @@ func (ec *executionContext) marshalNMessage2ᚕᚖgithubᚗcomᚋstatisticsnorwa
 	return ret
 }
 
-func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessage(ctx context.Context, sel ast.SelectionSet, v *message.Message) graphql.Marshaler {
+func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessage(ctx context.Context, sel ast.SelectionSet, v *message.Message) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38737,11 +38737,11 @@ func (ec *executionContext) marshalNMessage2ᚖgithubᚗcomᚋstatisticsnorway�
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMessageConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*message.Message]) graphql.Marshaler {
+func (ec *executionContext) marshalNMessageConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*message.Message]) graphql.Marshaler {
 	return ec._MessageConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessageConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*message.Message]) graphql.Marshaler {
+func (ec *executionContext) marshalNMessageConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*message.Message]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38751,15 +38751,15 @@ func (ec *executionContext) marshalNMessageConnection2ᚖgithubᚗcomᚋstatisti
 	return ec._MessageConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNMessageEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*message.Message]) graphql.Marshaler {
+func (ec *executionContext) marshalNMessageEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*message.Message]) graphql.Marshaler {
 	return ec._MessageEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNMessageEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*message.Message]) graphql.Marshaler {
+func (ec *executionContext) marshalNMessageEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*message.Message]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNMessageEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNMessageEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38771,29 +38771,29 @@ func (ec *executionContext) marshalNMessageEdge2ᚕgithubᚗcomᚋstatisticsnorw
 	return ret
 }
 
-func (ec *executionContext) unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx context.Context, v any) (model.OrderDirection, error) {
+func (ec *executionContext) unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx context.Context, v any) (model.OrderDirection, error) {
 	var res model.OrderDirection
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx context.Context, sel ast.SelectionSet, v model.OrderDirection) graphql.Marshaler {
+func (ec *executionContext) marshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx context.Context, sel ast.SelectionSet, v model.OrderDirection) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v pagination.PageInfo) graphql.Marshaler {
+func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v pagination.PageInfo) graphql.Marshaler {
 	return ec._PageInfo(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconciler2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler(ctx context.Context, sel ast.SelectionSet, v reconciler.Reconciler) graphql.Marshaler {
+func (ec *executionContext) marshalNReconciler2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler(ctx context.Context, sel ast.SelectionSet, v reconciler.Reconciler) graphql.Marshaler {
 	return ec._Reconciler(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.Reconciler) graphql.Marshaler {
+func (ec *executionContext) marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.Reconciler) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler(ctx, sel, v[i])
+		return ec.marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38805,7 +38805,7 @@ func (ec *executionContext) marshalNReconciler2ᚕᚖgithubᚗcomᚋstatisticsno
 	return ret
 }
 
-func (ec *executionContext) marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconciler(ctx context.Context, sel ast.SelectionSet, v *reconciler.Reconciler) graphql.Marshaler {
+func (ec *executionContext) marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconciler(ctx context.Context, sel ast.SelectionSet, v *reconciler.Reconciler) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38815,11 +38815,11 @@ func (ec *executionContext) marshalNReconciler2ᚖgithubᚗcomᚋstatisticsnorwa
 	return ec._Reconciler(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerConfig) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx, sel, v[i])
+		return ec.marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38831,7 +38831,7 @@ func (ec *executionContext) marshalNReconcilerConfig2ᚕᚖgithubᚗcomᚋstatis
 	return ret
 }
 
-func (ec *executionContext) marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerConfig) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfig(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerConfig) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38841,14 +38841,14 @@ func (ec *executionContext) marshalNReconcilerConfig2ᚖgithubᚗcomᚋstatistic
 	return ec._ReconcilerConfig(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNReconcilerConfigInput2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigInputᚄ(ctx context.Context, v any) ([]*reconciler.ReconcilerConfigInput, error) {
+func (ec *executionContext) unmarshalNReconcilerConfigInput2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigInputᚄ(ctx context.Context, v any) ([]*reconciler.ReconcilerConfigInput, error) {
 	var vSlice []any
 	vSlice = graphql.CoerceList(v)
 	var err error
 	res := make([]*reconciler.ReconcilerConfigInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNReconcilerConfigInput2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNReconcilerConfigInput2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -38856,12 +38856,12 @@ func (ec *executionContext) unmarshalNReconcilerConfigInput2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNReconcilerConfigInput2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfigInput(ctx context.Context, v any) (*reconciler.ReconcilerConfigInput, error) {
+func (ec *executionContext) unmarshalNReconcilerConfigInput2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfigInput(ctx context.Context, v any) (*reconciler.ReconcilerConfigInput, error) {
 	res, err := ec.unmarshalInputReconcilerConfigInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNReconcilerConfiguredActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerConfiguredActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerConfiguredActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerConfiguredActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerConfiguredActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerConfiguredActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38871,11 +38871,11 @@ func (ec *executionContext) marshalNReconcilerConfiguredActivityLogEntryData2ᚖ
 	return ec._ReconcilerConfiguredActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReconcilerConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*reconciler.Reconciler]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*reconciler.Reconciler]) graphql.Marshaler {
 	return ec._ReconcilerConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconcilerConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*reconciler.Reconciler]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*reconciler.Reconciler]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38885,15 +38885,15 @@ func (ec *executionContext) marshalNReconcilerConnection2ᚖgithubᚗcomᚋstati
 	return ec._ReconcilerConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*reconciler.Reconciler]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*reconciler.Reconciler]) graphql.Marshaler {
 	return ec._ReconcilerEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.Reconciler]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.Reconciler]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNReconcilerEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38905,11 +38905,11 @@ func (ec *executionContext) marshalNReconcilerEdge2ᚕgithubᚗcomᚋstatisticsn
 	return ret
 }
 
-func (ec *executionContext) marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerError) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerErrorᚄ(ctx context.Context, sel ast.SelectionSet, v []*reconciler.ReconcilerError) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerError(ctx, sel, v[i])
+		return ec.marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerError(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38921,7 +38921,7 @@ func (ec *executionContext) marshalNReconcilerError2ᚕᚖgithubᚗcomᚋstatist
 	return ret
 }
 
-func (ec *executionContext) marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋreconcilerᚐReconcilerError(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerError) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerError2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐReconcilerError(ctx context.Context, sel ast.SelectionSet, v *reconciler.ReconcilerError) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38931,11 +38931,11 @@ func (ec *executionContext) marshalNReconcilerError2ᚖgithubᚗcomᚋstatistics
 	return ec._ReconcilerError(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReconcilerErrorConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*reconciler.ReconcilerError]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerErrorConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*reconciler.ReconcilerError]) graphql.Marshaler {
 	return ec._ReconcilerErrorConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*reconciler.ReconcilerError]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*reconciler.ReconcilerError]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38945,15 +38945,15 @@ func (ec *executionContext) marshalNReconcilerErrorConnection2ᚖgithubᚗcomᚋ
 	return ec._ReconcilerErrorConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*reconciler.ReconcilerError]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*reconciler.ReconcilerError]) graphql.Marshaler {
 	return ec._ReconcilerErrorEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.ReconcilerError]) graphql.Marshaler {
+func (ec *executionContext) marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*reconciler.ReconcilerError]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNReconcilerErrorEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -38965,16 +38965,16 @@ func (ec *executionContext) marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatis
 	return ret
 }
 
-func (ec *executionContext) unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberInput(ctx context.Context, v any) (group.RemoveGroupMemberInput, error) {
+func (ec *executionContext) unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberInput(ctx context.Context, v any) (group.RemoveGroupMemberInput, error) {
 	res, err := ec.unmarshalInputRemoveGroupMemberInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRemoveGroupMemberPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v group.RemoveGroupMemberPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRemoveGroupMemberPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v group.RemoveGroupMemberPayload) graphql.Marshaler {
 	return ec._RemoveGroupMemberPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v *group.RemoveGroupMemberPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, v *group.RemoveGroupMemberPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -38984,16 +38984,16 @@ func (ec *executionContext) marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋs
 	return ec._RemoveGroupMemberPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput(ctx context.Context, v any) (team.RemoveTeamAccessManagerInput, error) {
+func (ec *executionContext) unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput(ctx context.Context, v any) (team.RemoveTeamAccessManagerInput, error) {
 	res, err := ec.unmarshalInputRemoveTeamAccessManagerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
 	return ec._RemoveTeamAccessManagerPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerPayload(ctx context.Context, sel ast.SelectionSet, v *team.RemoveTeamAccessManagerPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39003,16 +39003,16 @@ func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗc
 	return ec._RemoveTeamAccessManagerPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput(ctx context.Context, v any) (serviceaccount.RevokeRoleFromServiceAccountInput, error) {
+func (ec *executionContext) unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput(ctx context.Context, v any) (serviceaccount.RevokeRoleFromServiceAccountInput, error) {
 	res, err := ec.unmarshalInputRevokeRoleFromServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.RevokeRoleFromServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.RevokeRoleFromServiceAccountPayload) graphql.Marshaler {
 	return ec._RevokeRoleFromServiceAccountPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RevokeRoleFromServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RevokeRoleFromServiceAccountPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39022,11 +39022,11 @@ func (ec *executionContext) marshalNRevokeRoleFromServiceAccountPayload2ᚖgithu
 	return ec._RevokeRoleFromServiceAccountPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*authz.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐRoleᚄ(ctx context.Context, sel ast.SelectionSet, v []*authz.Role) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRole(ctx, sel, v[i])
+		return ec.marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐRole(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39038,7 +39038,7 @@ func (ec *executionContext) marshalNRole2ᚕᚖgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋauthᚋauthzᚐRole(ctx context.Context, sel ast.SelectionSet, v *authz.Role) graphql.Marshaler {
+func (ec *executionContext) marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋauthᚋauthzᚐRole(ctx context.Context, sel ast.SelectionSet, v *authz.Role) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39048,7 +39048,7 @@ func (ec *executionContext) marshalNRole2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._Role(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRoleAssignedToServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRoleAssignedToServiceAccountActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RoleAssignedToServiceAccountActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleAssignedToServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRoleAssignedToServiceAccountActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RoleAssignedToServiceAccountActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39058,11 +39058,11 @@ func (ec *executionContext) marshalNRoleAssignedToServiceAccountActivityLogEntry
 	return ec._RoleAssignedToServiceAccountActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRoleConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*authz.Role]) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*authz.Role]) graphql.Marshaler {
 	return ec._RoleConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*authz.Role]) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*authz.Role]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39072,15 +39072,15 @@ func (ec *executionContext) marshalNRoleConnection2ᚖgithubᚗcomᚋstatisticsn
 	return ec._RoleConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*authz.Role]) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*authz.Role]) graphql.Marshaler {
 	return ec._RoleEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*authz.Role]) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*authz.Role]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNRoleEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39092,7 +39092,7 @@ func (ec *executionContext) marshalNRoleEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNRoleRevokedFromServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐRoleRevokedFromServiceAccountActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RoleRevokedFromServiceAccountActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNRoleRevokedFromServiceAccountActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRoleRevokedFromServiceAccountActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.RoleRevokedFromServiceAccountActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39102,12 +39102,12 @@ func (ec *executionContext) marshalNRoleRevokedFromServiceAccountActivityLogEntr
 	return ec._RoleRevokedFromServiceAccountActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSearchFilter2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchFilter(ctx context.Context, v any) (search.SearchFilter, error) {
+func (ec *executionContext) unmarshalNSearchFilter2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchFilter(ctx context.Context, v any) (search.SearchFilter, error) {
 	res, err := ec.unmarshalInputSearchFilter(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNode(ctx context.Context, sel ast.SelectionSet, v search.SearchNode) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchNode(ctx context.Context, sel ast.SelectionSet, v search.SearchNode) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39117,11 +39117,11 @@ func (ec *executionContext) marshalNSearchNode2githubᚗcomᚋstatisticsnorway�
 	return ec._SearchNode(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []search.SearchNode) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchNodeᚄ(ctx context.Context, sel ast.SelectionSet, v []search.SearchNode) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchNode(ctx, sel, v[i])
+		return ec.marshalNSearchNode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchNode(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39133,11 +39133,11 @@ func (ec *executionContext) marshalNSearchNode2ᚕgithubᚗcomᚋstatisticsnorwa
 	return ret
 }
 
-func (ec *executionContext) marshalNSearchNodeConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[search.SearchNode]) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNodeConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[search.SearchNode]) graphql.Marshaler {
 	return ec._SearchNodeConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[search.SearchNode]) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[search.SearchNode]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39147,15 +39147,15 @@ func (ec *executionContext) marshalNSearchNodeConnection2ᚖgithubᚗcomᚋstati
 	return ec._SearchNodeConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[search.SearchNode]) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[search.SearchNode]) graphql.Marshaler {
 	return ec._SearchNodeEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[search.SearchNode]) graphql.Marshaler {
+func (ec *executionContext) marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[search.SearchNode]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNSearchNodeEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39167,15 +39167,15 @@ func (ec *executionContext) marshalNSearchNodeEdge2ᚕgithubᚗcomᚋstatisticsn
 	return ret
 }
 
-func (ec *executionContext) marshalNSection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v section.Section) graphql.Marshaler {
+func (ec *executionContext) marshalNSection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v section.Section) graphql.Marshaler {
 	return ec._Section(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*section.Section) graphql.Marshaler {
+func (ec *executionContext) marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionᚄ(ctx context.Context, sel ast.SelectionSet, v []*section.Section) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx, sel, v[i])
+		return ec.marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39187,7 +39187,7 @@ func (ec *executionContext) marshalNSection2ᚕᚖgithubᚗcomᚋstatisticsnorwa
 	return ret
 }
 
-func (ec *executionContext) marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v *section.Section) graphql.Marshaler {
+func (ec *executionContext) marshalNSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v *section.Section) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39197,11 +39197,11 @@ func (ec *executionContext) marshalNSection2ᚖgithubᚗcomᚋstatisticsnorway�
 	return ec._Section(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSectionConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*section.Section]) graphql.Marshaler {
+func (ec *executionContext) marshalNSectionConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*section.Section]) graphql.Marshaler {
 	return ec._SectionConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSectionConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*section.Section]) graphql.Marshaler {
+func (ec *executionContext) marshalNSectionConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*section.Section]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39211,15 +39211,15 @@ func (ec *executionContext) marshalNSectionConnection2ᚖgithubᚗcomᚋstatisti
 	return ec._SectionConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*section.Section]) graphql.Marshaler {
+func (ec *executionContext) marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*section.Section]) graphql.Marshaler {
 	return ec._SectionEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*section.Section]) graphql.Marshaler {
+func (ec *executionContext) marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*section.Section]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNSectionEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39231,26 +39231,26 @@ func (ec *executionContext) marshalNSectionEdge2ᚕgithubᚗcomᚋstatisticsnorw
 	return ret
 }
 
-func (ec *executionContext) unmarshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrderField(ctx context.Context, v any) (section.SectionOrderField, error) {
+func (ec *executionContext) unmarshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionOrderField(ctx context.Context, v any) (section.SectionOrderField, error) {
 	var res section.SectionOrderField
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrderField(ctx context.Context, sel ast.SelectionSet, v section.SectionOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNSectionOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionOrderField(ctx context.Context, sel ast.SelectionSet, v section.SectionOrderField) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessageInput(ctx context.Context, v any) (message.SendMessageInput, error) {
+func (ec *executionContext) unmarshalNSendMessageInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐSendMessageInput(ctx context.Context, v any) (message.SendMessageInput, error) {
 	res, err := ec.unmarshalInputSendMessageInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSendMessagePayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v message.SendMessagePayload) graphql.Marshaler {
+func (ec *executionContext) marshalNSendMessagePayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v message.SendMessagePayload) graphql.Marshaler {
 	return ec._SendMessagePayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v *message.SendMessagePayload) graphql.Marshaler {
+func (ec *executionContext) marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐSendMessagePayload(ctx context.Context, sel ast.SelectionSet, v *message.SendMessagePayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39260,15 +39260,15 @@ func (ec *executionContext) marshalNSendMessagePayload2ᚖgithubᚗcomᚋstatist
 	return ec._SendMessagePayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccount2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v serviceaccount.ServiceAccount) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccount2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v serviceaccount.ServiceAccount) graphql.Marshaler {
 	return ec._ServiceAccount(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccount) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccount) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx, sel, v[i])
+		return ec.marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39280,7 +39280,7 @@ func (ec *executionContext) marshalNServiceAccount2ᚕᚖgithubᚗcomᚋstatisti
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccount) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccount) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39290,11 +39290,11 @@ func (ec *executionContext) marshalNServiceAccount2ᚖgithubᚗcomᚋstatisticsn
 	return ec._ServiceAccount(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*serviceaccount.ServiceAccount]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*serviceaccount.ServiceAccount]) graphql.Marshaler {
 	return ec._ServiceAccountConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNServiceAccountConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*serviceaccount.ServiceAccount]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*serviceaccount.ServiceAccount]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39304,15 +39304,15 @@ func (ec *executionContext) marshalNServiceAccountConnection2ᚖgithubᚗcomᚋs
 	return ec._ServiceAccountConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*serviceaccount.ServiceAccount]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*serviceaccount.ServiceAccount]) graphql.Marshaler {
 	return ec._ServiceAccountEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccount]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccount]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNServiceAccountEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39324,11 +39324,11 @@ func (ec *executionContext) marshalNServiceAccountEdge2ᚕgithubᚗcomᚋstatist
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountToken) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountToken) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx, sel, v[i])
+		return ec.marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39340,7 +39340,7 @@ func (ec *executionContext) marshalNServiceAccountToken2ᚕᚖgithubᚗcomᚋsta
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountToken) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountToken) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39350,11 +39350,11 @@ func (ec *executionContext) marshalNServiceAccountToken2ᚖgithubᚗcomᚋstatis
 	return ec._ServiceAccountToken(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
 	return ec._ServiceAccountTokenConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39364,7 +39364,7 @@ func (ec *executionContext) marshalNServiceAccountTokenConnection2ᚖgithubᚗco
 	return ec._ServiceAccountTokenConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenCreatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenCreatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenCreatedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenCreatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenCreatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenCreatedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39374,7 +39374,7 @@ func (ec *executionContext) marshalNServiceAccountTokenCreatedActivityLogEntryDa
 	return ec._ServiceAccountTokenCreatedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenDeletedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenDeletedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenDeletedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenDeletedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenDeletedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenDeletedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39384,15 +39384,15 @@ func (ec *executionContext) marshalNServiceAccountTokenDeletedActivityLogEntryDa
 	return ec._ServiceAccountTokenDeletedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
 	return ec._ServiceAccountTokenEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*serviceaccount.ServiceAccountToken]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNServiceAccountTokenEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39404,7 +39404,7 @@ func (ec *executionContext) marshalNServiceAccountTokenEdge2ᚕgithubᚗcomᚋst
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39414,11 +39414,11 @@ func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDa
 	return ec._ServiceAccountTokenUpdatedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+		return ec.marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39430,7 +39430,7 @@ func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDa
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39440,7 +39440,7 @@ func (ec *executionContext) marshalNServiceAccountTokenUpdatedActivityLogEntryDa
 	return ec._ServiceAccountTokenUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountUpdatedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountUpdatedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39450,11 +39450,11 @@ func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryData2�
 	return ec._ServiceAccountUpdatedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*serviceaccount.ServiceAccountUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+		return ec.marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39466,7 +39466,7 @@ func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpd
 	return ret
 }
 
-func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39476,15 +39476,15 @@ func (ec *executionContext) marshalNServiceAccountUpdatedActivityLogEntryDataUpd
 	return ec._ServiceAccountUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSharedBucket2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx context.Context, sel ast.SelectionSet, v sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucket2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx context.Context, sel ast.SelectionSet, v sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
 	return ec._SharedBucket(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx, sel, v[i])
+		return ec.marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39496,7 +39496,7 @@ func (ec *executionContext) marshalNSharedBucket2ᚕᚖgithubᚗcomᚋstatistics
 	return ret
 }
 
-func (ec *executionContext) marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx context.Context, sel ast.SelectionSet, v *sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucket(ctx context.Context, sel ast.SelectionSet, v *sharedbucketsstopgap.SharedBucket) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39506,11 +39506,11 @@ func (ec *executionContext) marshalNSharedBucket2ᚖgithubᚗcomᚋstatisticsnor
 	return ec._SharedBucket(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccessᚄ(ctx context.Context, sel ast.SelectionSet, v []*sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx, sel, v[i])
+		return ec.marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39522,7 +39522,7 @@ func (ec *executionContext) marshalNSharedBucketAccess2ᚕᚖgithubᚗcomᚋstat
 	return ret
 }
 
-func (ec *executionContext) marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx context.Context, sel ast.SelectionSet, v *sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketAccess(ctx context.Context, sel ast.SelectionSet, v *sharedbucketsstopgap.SharedBucketAccess) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39532,11 +39532,11 @@ func (ec *executionContext) marshalNSharedBucketAccess2ᚖgithubᚗcomᚋstatist
 	return ec._SharedBucketAccess(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSharedBucketAccessConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccessConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
 	return ec._SharedBucketAccessConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccessConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39546,15 +39546,15 @@ func (ec *executionContext) marshalNSharedBucketAccessConnection2ᚖgithubᚗcom
 	return ec._SharedBucketAccessConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
 	return ec._SharedBucketAccessEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucketAccess]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNSharedBucketAccessEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39566,11 +39566,11 @@ func (ec *executionContext) marshalNSharedBucketAccessEdge2ᚕgithubᚗcomᚋsta
 	return ret
 }
 
-func (ec *executionContext) marshalNSharedBucketConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
 	return ec._SharedBucketConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39580,15 +39580,15 @@ func (ec *executionContext) marshalNSharedBucketConnection2ᚖgithubᚗcomᚋsta
 	return ec._SharedBucketConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
 	return ec._SharedBucketEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*sharedbucketsstopgap.SharedBucket]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNSharedBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39600,33 +39600,33 @@ func (ec *executionContext) marshalNSharedBucketEdge2ᚕgithubᚗcomᚋstatistic
 	return ret
 }
 
-func (ec *executionContext) unmarshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx context.Context, v any) (sharedbucketsstopgap.SharedBucketOrderField, error) {
+func (ec *executionContext) unmarshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx context.Context, v any) (sharedbucketsstopgap.SharedBucketOrderField, error) {
 	var res sharedbucketsstopgap.SharedBucketOrderField
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx context.Context, sel ast.SelectionSet, v sharedbucketsstopgap.SharedBucketOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNSharedBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrderField(ctx context.Context, sel ast.SelectionSet, v sharedbucketsstopgap.SharedBucketOrderField) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (slug.Slug, error) {
+func (ec *executionContext) unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (slug.Slug, error) {
 	var res slug.Slug
 	err := res.UnmarshalGQLContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v slug.Slug) graphql.Marshaler {
+func (ec *executionContext) marshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v slug.Slug) graphql.Marshaler {
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 
-func (ec *executionContext) unmarshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (*slug.Slug, error) {
+func (ec *executionContext) unmarshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (*slug.Slug, error) {
 	var res = new(slug.Slug)
 	err := res.UnmarshalGQLContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v *slug.Slug) graphql.Marshaler {
+func (ec *executionContext) marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v *slug.Slug) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39682,15 +39682,15 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	return ret
 }
 
-func (ec *executionContext) marshalNTeam2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v team.Team) graphql.Marshaler {
+func (ec *executionContext) marshalNTeam2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v team.Team) graphql.Marshaler {
 	return ec._Team(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.Team) graphql.Marshaler {
+func (ec *executionContext) marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.Team) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx, sel, v[i])
+		return ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39702,7 +39702,7 @@ func (ec *executionContext) marshalNTeam2ᚕᚖgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v *team.Team) graphql.Marshaler {
+func (ec *executionContext) marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v *team.Team) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39712,11 +39712,11 @@ func (ec *executionContext) marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._Team(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManagerᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamAccessManager) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamAccessManagerᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamAccessManager) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx, sel, v[i])
+		return ec.marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamAccessManager(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39728,7 +39728,7 @@ func (ec *executionContext) marshalNTeamAccessManager2ᚕᚖgithubᚗcomᚋstati
 	return ret
 }
 
-func (ec *executionContext) marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamAccessManager(ctx context.Context, sel ast.SelectionSet, v *team.TeamAccessManager) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamAccessManager(ctx context.Context, sel ast.SelectionSet, v *team.TeamAccessManager) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39738,11 +39738,11 @@ func (ec *executionContext) marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisti
 	return ec._TeamAccessManager(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.Team]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.Team]) graphql.Marshaler {
 	return ec._TeamConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*team.Team]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*team.Team]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39752,15 +39752,15 @@ func (ec *executionContext) marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsn
 	return ec._TeamConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*team.Team]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*team.Team]) graphql.Marshaler {
 	return ec._TeamEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.Team]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.Team]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNTeamEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39772,11 +39772,11 @@ func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamMember) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamMember) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMember(ctx, sel, v[i])
+		return ec.marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39788,7 +39788,7 @@ func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsno
 	return ret
 }
 
-func (ec *executionContext) marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamMember(ctx context.Context, sel ast.SelectionSet, v *team.TeamMember) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember(ctx context.Context, sel ast.SelectionSet, v *team.TeamMember) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39798,11 +39798,11 @@ func (ec *executionContext) marshalNTeamMember2ᚖgithubᚗcomᚋstatisticsnorwa
 	return ec._TeamMember(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamMemberConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.TeamMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMemberConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.TeamMember]) graphql.Marshaler {
 	return ec._TeamMemberConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*team.TeamMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*team.TeamMember]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39812,15 +39812,15 @@ func (ec *executionContext) marshalNTeamMemberConnection2ᚖgithubᚗcomᚋstati
 	return ec._TeamMemberConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*team.TeamMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*team.TeamMember]) graphql.Marshaler {
 	return ec._TeamMemberEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.TeamMember]) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*team.TeamMember]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNTeamMemberEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39832,17 +39832,17 @@ func (ec *executionContext) marshalNTeamMemberEdge2ᚕgithubᚗcomᚋstatisticsn
 	return ret
 }
 
-func (ec *executionContext) unmarshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, v any) (team.TeamOrderField, error) {
+func (ec *executionContext) unmarshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, v any) (team.TeamOrderField, error) {
 	var res team.TeamOrderField
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, sel ast.SelectionSet, v team.TeamOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrderField(ctx context.Context, sel ast.SelectionSet, v team.TeamOrderField) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleAssignedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamRoleAssignedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamRoleAssignedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleAssignedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39852,7 +39852,7 @@ func (ec *executionContext) marshalNTeamRoleAssignedActivityLogEntryData2ᚖgith
 	return ec._TeamRoleAssignedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleRevokedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamRoleRevokedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamRoleRevokedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39862,7 +39862,7 @@ func (ec *executionContext) marshalNTeamRoleRevokedActivityLogEntryData2ᚖgithu
 	return ec._TeamRoleRevokedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamUpdatedActivityLogEntryData) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryData(ctx context.Context, sel ast.SelectionSet, v *team.TeamUpdatedActivityLogEntryData) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39872,11 +39872,11 @@ func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryData2ᚖgithubᚗ
 	return ec._TeamUpdatedActivityLogEntryData(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
+		return ec.marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39888,7 +39888,7 @@ func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2
 	return ret
 }
 
-func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *team.TeamUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
+func (ec *executionContext) marshalNTeamUpdatedActivityLogEntryDataUpdatedField2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamUpdatedActivityLogEntryDataUpdatedField(ctx context.Context, sel ast.SelectionSet, v *team.TeamUpdatedActivityLogEntryDataUpdatedField) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39914,16 +39914,16 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) unmarshalNUpdateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountInput(ctx context.Context, v any) (serviceaccount.UpdateServiceAccountInput, error) {
+func (ec *executionContext) unmarshalNUpdateServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountInput(ctx context.Context, v any) (serviceaccount.UpdateServiceAccountInput, error) {
 	res, err := ec.unmarshalInputUpdateServiceAccountInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUpdateServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.UpdateServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateServiceAccountPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.UpdateServiceAccountPayload) graphql.Marshaler {
 	return ec._UpdateServiceAccountPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUpdateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.UpdateServiceAccountPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateServiceAccountPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.UpdateServiceAccountPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39933,16 +39933,16 @@ func (ec *executionContext) marshalNUpdateServiceAccountPayload2ᚖgithubᚗcom�
 	return ec._UpdateServiceAccountPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUpdateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.UpdateServiceAccountTokenInput, error) {
+func (ec *executionContext) unmarshalNUpdateServiceAccountTokenInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenInput(ctx context.Context, v any) (serviceaccount.UpdateServiceAccountTokenInput, error) {
 	res, err := ec.unmarshalInputUpdateServiceAccountTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUpdateServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.UpdateServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateServiceAccountTokenPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v serviceaccount.UpdateServiceAccountTokenPayload) graphql.Marshaler {
 	return ec._UpdateServiceAccountTokenPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUpdateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.UpdateServiceAccountTokenPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateServiceAccountTokenPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐUpdateServiceAccountTokenPayload(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.UpdateServiceAccountTokenPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39952,16 +39952,16 @@ func (ec *executionContext) marshalNUpdateServiceAccountTokenPayload2ᚖgithub�
 	return ec._UpdateServiceAccountTokenPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUpdateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamInput(ctx context.Context, v any) (team.UpdateTeamInput, error) {
+func (ec *executionContext) unmarshalNUpdateTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐUpdateTeamInput(ctx context.Context, v any) (team.UpdateTeamInput, error) {
 	res, err := ec.unmarshalInputUpdateTeamInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUpdateTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamPayload(ctx context.Context, sel ast.SelectionSet, v team.UpdateTeamPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐUpdateTeamPayload(ctx context.Context, sel ast.SelectionSet, v team.UpdateTeamPayload) graphql.Marshaler {
 	return ec._UpdateTeamPayload(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐUpdateTeamPayload(ctx context.Context, sel ast.SelectionSet, v *team.UpdateTeamPayload) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐUpdateTeamPayload(ctx context.Context, sel ast.SelectionSet, v *team.UpdateTeamPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -39971,15 +39971,15 @@ func (ec *executionContext) marshalNUpdateTeamPayload2ᚖgithubᚗcomᚋstatisti
 	return ec._UpdateTeamPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v user.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v user.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*user.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*user.User) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx, sel, v[i])
+		return ec.marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -39991,7 +39991,7 @@ func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v *user.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v *user.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -40001,11 +40001,11 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*user.User]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*user.User]) graphql.Marshaler {
 	return ec._UserConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*user.User]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*user.User]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -40015,15 +40015,15 @@ func (ec *executionContext) marshalNUserConnection2ᚖgithubᚗcomᚋstatisticsn
 	return ec._UserConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*user.User]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*user.User]) graphql.Marshaler {
 	return ec._UserEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*user.User]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*user.User]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNUserEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -40035,17 +40035,17 @@ func (ec *executionContext) marshalNUserEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	return ret
 }
 
-func (ec *executionContext) unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, v any) (user.UserOrderField, error) {
+func (ec *executionContext) unmarshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, v any) (user.UserOrderField, error) {
 	var res user.UserOrderField
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, sel ast.SelectionSet, v user.UserOrderField) graphql.Marshaler {
+func (ec *executionContext) marshalNUserOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrderField(ctx context.Context, sel ast.SelectionSet, v user.UserOrderField) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx context.Context, sel ast.SelectionSet, v usersync.UserSyncLogEntry) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx context.Context, sel ast.SelectionSet, v usersync.UserSyncLogEntry) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -40055,11 +40055,11 @@ func (ec *executionContext) marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsno
 	return ec._UserSyncLogEntry(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []usersync.UserSyncLogEntry) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚐUserSyncLogEntryᚄ(ctx context.Context, sel ast.SelectionSet, v []usersync.UserSyncLogEntry) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx, sel, v[i])
+		return ec.marshalNUserSyncLogEntry2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚐUserSyncLogEntry(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -40071,11 +40071,11 @@ func (ec *executionContext) marshalNUserSyncLogEntry2ᚕgithubᚗcomᚋstatistic
 	return ret
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[usersync.UserSyncLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[usersync.UserSyncLogEntry]) graphql.Marshaler {
 	return ec._UserSyncLogEntryConnection(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[usersync.UserSyncLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[usersync.UserSyncLogEntry]) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
@@ -40085,15 +40085,15 @@ func (ec *executionContext) marshalNUserSyncLogEntryConnection2ᚖgithubᚗcom�
 	return ec._UserSyncLogEntryConnection(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[usersync.UserSyncLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[usersync.UserSyncLogEntry]) graphql.Marshaler {
 	return ec._UserSyncLogEntryEdge(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[usersync.UserSyncLogEntry]) graphql.Marshaler {
+func (ec *executionContext) marshalNUserSyncLogEntryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[usersync.UserSyncLogEntry]) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+		return ec.marshalNUserSyncLogEntryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -40246,7 +40246,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, v any) ([]activitylog.ActivityLogActivityType, error) {
+func (ec *executionContext) unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, v any) ([]activitylog.ActivityLogActivityType, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40256,7 +40256,7 @@ func (ec *executionContext) unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋ
 	res := make([]activitylog.ActivityLogActivityType, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, vSlice[i])
+		res[i], err = ec.unmarshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -40264,14 +40264,14 @@ func (ec *executionContext) unmarshalOActivityLogActivityType2ᚕgithubᚗcomᚋ
 	return res, nil
 }
 
-func (ec *executionContext) marshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogActivityType) graphql.Marshaler {
+func (ec *executionContext) marshalOActivityLogActivityType2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []activitylog.ActivityLogActivityType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, sel, v[i])
+		return ec.marshalNActivityLogActivityType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogActivityType(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -40283,7 +40283,7 @@ func (ec *executionContext) marshalOActivityLogActivityType2ᚕgithubᚗcomᚋst
 	return ret
 }
 
-func (ec *executionContext) unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋactivitylogᚐActivityLogFilter(ctx context.Context, v any) (*activitylog.ActivityLogFilter, error) {
+func (ec *executionContext) unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogFilter(ctx context.Context, v any) (*activitylog.ActivityLogFilter, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40321,7 +40321,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, v any) (*pagination.Cursor, error) {
+func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, v any) (*pagination.Cursor, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40330,14 +40330,14 @@ func (ec *executionContext) unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorway�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, sel ast.SelectionSet, v *pagination.Cursor) graphql.Marshaler {
+func (ec *executionContext) marshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor(ctx context.Context, sel ast.SelectionSet, v *pagination.Cursor) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 
-func (ec *executionContext) unmarshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋscalarᚐDate(ctx context.Context, v any) (*scalar.Date, error) {
+func (ec *executionContext) unmarshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋscalarᚐDate(ctx context.Context, v any) (*scalar.Date, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40346,21 +40346,21 @@ func (ec *executionContext) unmarshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋscalarᚐDate(ctx context.Context, sel ast.SelectionSet, v *scalar.Date) graphql.Marshaler {
+func (ec *executionContext) marshalODate2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋscalarᚐDate(ctx context.Context, sel ast.SelectionSet, v *scalar.Date) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 
-func (ec *executionContext) marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v *group.Group) graphql.Marshaler {
+func (ec *executionContext) marshalOGroup2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroup(ctx context.Context, sel ast.SelectionSet, v *group.Group) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Group(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupFilter(ctx context.Context, v any) (*group.GroupFilter, error) {
+func (ec *executionContext) unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupFilter(ctx context.Context, v any) (*group.GroupFilter, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40368,14 +40368,14 @@ func (ec *executionContext) unmarshalOGroupFilter2ᚖgithubᚗcomᚋstatisticsno
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupMember(ctx context.Context, sel ast.SelectionSet, v *group.GroupMember) graphql.Marshaler {
+func (ec *executionContext) marshalOGroupMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupMember(ctx context.Context, sel ast.SelectionSet, v *group.GroupMember) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._GroupMember(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgroupᚐGroupOrder(ctx context.Context, v any) (*group.GroupOrder, error) {
+func (ec *executionContext) unmarshalOGroupOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐGroupOrder(ctx context.Context, v any) (*group.GroupOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40401,14 +40401,14 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	return res
 }
 
-func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessage(ctx context.Context, sel ast.SelectionSet, v *message.Message) graphql.Marshaler {
+func (ec *executionContext) marshalOMessage2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessage(ctx context.Context, sel ast.SelectionSet, v *message.Message) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Message(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOMessageFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋmessageᚐMessageFilter(ctx context.Context, v any) (*message.MessageFilter, error) {
+func (ec *executionContext) unmarshalOMessageFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋmessageᚐMessageFilter(ctx context.Context, v any) (*message.MessageFilter, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40416,14 +40416,14 @@ func (ec *executionContext) unmarshalOMessageFilter2ᚖgithubᚗcomᚋstatistics
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalONode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋgraphᚋmodelᚐNode(ctx context.Context, sel ast.SelectionSet, v model.Node) graphql.Marshaler {
+func (ec *executionContext) marshalONode2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐNode(ctx context.Context, sel ast.SelectionSet, v model.Node) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Node(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchType(ctx context.Context, v any) (*search.SearchType, error) {
+func (ec *executionContext) unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchType(ctx context.Context, v any) (*search.SearchType, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40432,21 +40432,21 @@ func (ec *executionContext) unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnor
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsearchᚐSearchType(ctx context.Context, sel ast.SelectionSet, v *search.SearchType) graphql.Marshaler {
+func (ec *executionContext) marshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchType(ctx context.Context, sel ast.SelectionSet, v *search.SearchType) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v *section.Section) graphql.Marshaler {
+func (ec *executionContext) marshalOSection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSection(ctx context.Context, sel ast.SelectionSet, v *section.Section) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Section(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsectionᚐSectionOrder(ctx context.Context, v any) (*section.SectionOrder, error) {
+func (ec *executionContext) unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsectionᚐSectionOrder(ctx context.Context, v any) (*section.SectionOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40454,21 +40454,21 @@ func (ec *executionContext) unmarshalOSectionOrder2ᚖgithubᚗcomᚋstatisticsn
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccount) graphql.Marshaler {
+func (ec *executionContext) marshalOServiceAccount2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccount(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccount) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ServiceAccount(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountToken) graphql.Marshaler {
+func (ec *executionContext) marshalOServiceAccountToken2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐServiceAccountToken(ctx context.Context, sel ast.SelectionSet, v *serviceaccount.ServiceAccountToken) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ServiceAccountToken(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketFilter, error) {
+func (ec *executionContext) unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketFilter(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketFilter, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40476,7 +40476,7 @@ func (ec *executionContext) unmarshalOSharedBucketFilter2ᚖgithubᚗcomᚋstati
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketOrder, error) {
+func (ec *executionContext) unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsharedbucketsstopgapᚐSharedBucketOrder(ctx context.Context, v any) (*sharedbucketsstopgap.SharedBucketOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40484,7 +40484,7 @@ func (ec *executionContext) unmarshalOSharedBucketOrder2ᚖgithubᚗcomᚋstatis
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (*slug.Slug, error) {
+func (ec *executionContext) unmarshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, v any) (*slug.Slug, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40493,7 +40493,7 @@ func (ec *executionContext) unmarshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋ
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v *slug.Slug) graphql.Marshaler {
+func (ec *executionContext) marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx context.Context, sel ast.SelectionSet, v *slug.Slug) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -40566,14 +40566,14 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	return res
 }
 
-func (ec *executionContext) marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v *team.Team) graphql.Marshaler {
+func (ec *executionContext) marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam(ctx context.Context, sel ast.SelectionSet, v *team.Team) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Team(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋteamᚐTeamOrder(ctx context.Context, v any) (*team.TeamOrder, error) {
+func (ec *executionContext) unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder(ctx context.Context, v any) (*team.TeamOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40599,14 +40599,14 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v *user.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUser(ctx context.Context, sel ast.SelectionSet, v *user.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋuserᚐUserOrder(ctx context.Context, v any) (*user.UserOrder, error) {
+func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋuserᚐUserOrder(ctx context.Context, v any) (*user.UserOrder, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -40614,14 +40614,14 @@ func (ec *executionContext) unmarshalOUserOrder2ᚖgithubᚗcomᚋstatisticsnorw
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChangeUnit) graphql.Marshaler {
+func (ec *executionContext) marshalOUserSyncUserChangeUnit2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChangeUnit(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChangeUnit) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._UserSyncUserChangeUnit(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChanges) graphql.Marshaler {
+func (ec *executionContext) marshalOUserSyncUserChanges2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋusersyncᚋchangesᚐUserSyncUserChanges(ctx context.Context, sel ast.SelectionSet, v *changes.UserSyncUserChanges) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

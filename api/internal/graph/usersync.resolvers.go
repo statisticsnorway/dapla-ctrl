@@ -3,9 +3,9 @@ package graph
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/usersync"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
 )
 
 func (r *queryResolver) UserSyncLog(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[usersync.UserSyncLogEntry], error) {

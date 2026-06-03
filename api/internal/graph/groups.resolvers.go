@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func (r *groupResolver) Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error) {

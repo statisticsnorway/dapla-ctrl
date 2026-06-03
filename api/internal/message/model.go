@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/message/messagesql"
-	"github.com/statisticsnorway/dapla-api/internal/validate"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/message/messagesql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 )
 
 type (

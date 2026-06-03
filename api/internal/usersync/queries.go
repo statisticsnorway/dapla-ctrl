@@ -3,8 +3,8 @@ package usersync
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/usersyncsql"
 )
 
 func ListLogEntries(ctx context.Context, page *pagination.Pagination) (*UserSyncLogEntryConnection, error) {

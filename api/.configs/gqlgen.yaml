@@ -26,21 +26,21 @@ omit_root_models: true
 # if they match it will use them, otherwise it will generate them.
 autobind:
   - "github.com/99designs/gqlgen/graphql/introspection" # Without this line in the beginning, a `prelude.resolver.go` is generated
-  - "github.com/statisticsnorway/dapla-api/internal/activitylog"
-  - "github.com/statisticsnorway/dapla-api/internal/auth/authz"
-  - "github.com/statisticsnorway/dapla-api/internal/feature"
-  - "github.com/statisticsnorway/dapla-api/internal/graph/model"
-  - "github.com/statisticsnorway/dapla-api/internal/group"
-  - "github.com/statisticsnorway/dapla-api/internal/message"
-  - "github.com/statisticsnorway/dapla-api/internal/reconciler"
-  - "github.com/statisticsnorway/dapla-api/internal/search"
-  - "github.com/statisticsnorway/dapla-api/internal/section"
-  - "github.com/statisticsnorway/dapla-api/internal/serviceaccount"
-  - "github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
-  - "github.com/statisticsnorway/dapla-api/internal/team"
-  - "github.com/statisticsnorway/dapla-api/internal/user"
-  - "github.com/statisticsnorway/dapla-api/internal/usersync"
-  - "github.com/statisticsnorway/dapla-api/internal/usersync/changes"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/feature"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/message"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/reconciler"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/search"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/user"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"
 
 # Don't generate Get<FieldName> functions for fields included in the GraphQL interfaces
 omit_getters: true
@@ -64,7 +64,7 @@ skip_validation: true
 models:
   ID:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/graph/ident.Ident
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident.Ident
 
   UUID:
     model:
@@ -78,20 +78,20 @@ models:
 
   Date:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/graph/scalar.Date
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/graph/scalar.Date
 
   Time:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/graph/scalar.Time
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/graph/scalar.Time
 
   Slug:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/slug.Slug
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/slug.Slug
 
   Cursor:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/graph/pagination.Cursor
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination.Cursor
 
   PageInfo:
     model:
-      - github.com/statisticsnorway/dapla-api/internal/graph/pagination.PageInfo
+      - github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination.PageInfo

@@ -1,4 +1,4 @@
-module github.com/statisticsnorway/dapla-api/pkg/apiclient
+module github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient
 
 go 1.26.3
 

@@ -6,13 +6,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/statisticsnorway/dapla-api/internal/activitylog"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/serviceaccount/serviceaccountsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount/serviceaccountsql"
 )
 
 func Get(ctx context.Context, serviceAccountID uuid.UUID) (*ServiceAccount, error) {

@@ -3,15 +3,15 @@
 package gengql
 
 import (
-	activitylog "github.com/statisticsnorway/dapla-api/internal/activitylog"
-	pagination "github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	group "github.com/statisticsnorway/dapla-api/internal/group"
-	message "github.com/statisticsnorway/dapla-api/internal/message"
-	search "github.com/statisticsnorway/dapla-api/internal/search"
-	section "github.com/statisticsnorway/dapla-api/internal/section"
-	sharedbucketsstopgap "github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
-	team "github.com/statisticsnorway/dapla-api/internal/team"
-	user "github.com/statisticsnorway/dapla-api/internal/user"
+	activitylog "github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	pagination "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	group "github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	message "github.com/statisticsnorway/dapla-ctrl/api/internal/message"
+	search "github.com/statisticsnorway/dapla-ctrl/api/internal/search"
+	section "github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+	sharedbucketsstopgap "github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
+	team "github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	user "github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func NewComplexityRoot() ComplexityRoot {

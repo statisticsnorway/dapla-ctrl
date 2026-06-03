@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 func Get(ctx context.Context) (*Features, error) {

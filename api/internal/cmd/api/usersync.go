@@ -6,8 +6,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/leaderelection"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncer"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/leaderelection"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/usersyncer"
 )
 
 const (

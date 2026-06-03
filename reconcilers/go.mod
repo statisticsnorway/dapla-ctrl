@@ -24,7 +24,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/sethvargo/go-envconfig v1.3.0
 	github.com/sirupsen/logrus v1.9.4
-	github.com/statisticsnorway/dapla-api/pkg/apiclient v0.0.0-00010101000000-000000000000
+	github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.66.0
@@ -149,4 +149,4 @@ require (
 	mvdan.cc/gofumpt v0.9.1 // indirect
 )
 
-replace github.com/statisticsnorway/dapla-api/pkg/apiclient => ../api/pkg/apiclient
+replace github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient => ../api/pkg/apiclient

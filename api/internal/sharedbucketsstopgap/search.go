@@ -5,11 +5,11 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/database/notify"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/search"
-	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap/sharedbucketsstopgapsql"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database/notify"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/search"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap/sharedbucketsstopgapsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 func AddSearch(client search.Client, pool *pgxpool.Pool, notifier *notify.Notifier, log logrus.FieldLogger) {

@@ -12,12 +12,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authn"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/auth/middleware"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/session"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authn"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/middleware"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/session"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 	"github.com/stretchr/testify/mock"
 )
 

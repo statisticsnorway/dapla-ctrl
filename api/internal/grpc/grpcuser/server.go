@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcpagination"
-	"github.com/statisticsnorway/dapla-api/internal/grpc/grpcuser/grpcusersql"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcpagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcuser/grpcusersql"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

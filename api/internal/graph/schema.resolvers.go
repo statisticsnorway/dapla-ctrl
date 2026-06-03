@@ -3,9 +3,9 @@ package graph
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 func (r *queryResolver) Node(ctx context.Context, id ident.Ident) (model.Node, error) {

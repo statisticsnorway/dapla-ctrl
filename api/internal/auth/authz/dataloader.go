@@ -5,9 +5,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz/authzsql"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz/authzsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/loader"
 	"github.com/vikstrous/dataloadgen"
 )
 

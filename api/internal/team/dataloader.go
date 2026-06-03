@@ -5,10 +5,10 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team/teamsql"
 	"github.com/vikstrous/dataloadgen"
 )
 

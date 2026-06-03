@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/auth/middleware"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/middleware"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func TestRequireAuthenticatedUser(t *testing.T) {

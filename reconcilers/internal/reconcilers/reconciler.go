@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 )
 
 type Reconciler interface {

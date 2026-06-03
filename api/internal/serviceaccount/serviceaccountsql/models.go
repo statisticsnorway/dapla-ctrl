@@ -5,7 +5,7 @@ package serviceaccountsql
 import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type ServiceAccount struct {

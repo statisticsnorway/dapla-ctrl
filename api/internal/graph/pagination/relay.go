@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
 )
 
 const DefaultPageSize = 20

@@ -18,9 +18,9 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master/database"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group/master/entraid"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/iterator"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 )
 
 const (

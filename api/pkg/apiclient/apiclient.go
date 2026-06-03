@@ -1,7 +1,7 @@
 package apiclient
 
 import (
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"google.golang.org/grpc"
 )
 

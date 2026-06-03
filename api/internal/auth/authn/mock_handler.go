@@ -7,7 +7,7 @@ package authn
 import (
 	"net/http"
 
-	"github.com/statisticsnorway/dapla-api/internal/session"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/session"
 	mock "github.com/stretchr/testify/mock"
 )
 

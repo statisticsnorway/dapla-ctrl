@@ -3,7 +3,7 @@ package reconciler
 import (
 	"fmt"
 
-	"github.com/statisticsnorway/dapla-api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
 )
 
 const (

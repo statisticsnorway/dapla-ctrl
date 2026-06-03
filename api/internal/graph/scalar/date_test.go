@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/scalar"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/scalar"
 )
 
 var tm = time.Date(2020, time.April, 20, 0, 0, 0, 0, time.UTC)

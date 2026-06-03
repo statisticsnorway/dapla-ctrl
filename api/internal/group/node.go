@@ -3,7 +3,7 @@ package group
 import (
 	"fmt"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 )
 
 // identType is an enumeration type for the different identifiers defined by this domain package. Each domain package

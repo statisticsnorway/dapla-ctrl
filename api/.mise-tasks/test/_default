@@ -7,7 +7,7 @@ set -e
 # shellcheck disable=SC2154
 if [ "$usage_coverage" = "true" ]; then
 	rm -f hack/coverprofile.txt
-	go test -coverprofile=hack/coverprofile.txt -coverpkg github.com/statisticsnorway/dapla-api/... -v -tags integration_test --race ./integration_tests
+	go test -coverprofile=hack/coverprofile.txt -coverpkg github.com/statisticsnorway/dapla-ctrl/api/... -v -tags integration_test --race ./integration_tests
 else
-	go test -cover -tags integration_test --race ./... github.com/statisticsnorway/dapla-api/pkg/apiclient/...
+	go test -cover -tags integration_test --race ./... github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/...
 fi

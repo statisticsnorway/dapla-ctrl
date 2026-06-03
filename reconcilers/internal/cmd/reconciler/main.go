@@ -20,7 +20,7 @@ import (
 
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"

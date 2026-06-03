@@ -3,7 +3,7 @@ package model_test
 import (
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 func TestCompare(t *testing.T) {

@@ -4,7 +4,7 @@ package grpcteamsql
 
 import (
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Team struct {
