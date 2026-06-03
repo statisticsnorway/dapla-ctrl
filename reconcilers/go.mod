@@ -1,6 +1,6 @@
 module github.com/statisticsnorway/dapla-api-reconcilers
 
-go 1.26.2
+go 1.26.4
 
 tool (
 	github.com/securego/gosec/v2/cmd/gosec
