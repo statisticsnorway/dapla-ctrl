@@ -35,10 +35,7 @@ func (g *GoogleServiceAccounts) GetOrCreate(group, projectId string) (*iam.Servi
 	sa, err := g.client.Projects.ServiceAccounts.Get(saName).Do()
 
 	// TODO: replace with
-	// 	if gErr, ok := errors.AsType[*googleapi.Error](err); ok && gErr.Code == http.StatusNotFound
-	// when go 1.26 is out. Also, do this anywhere this nightmare fuel is used
-	var apiError *googleapi.Error
-	if errors.As(err, &apiError) && apiError.Code == http.StatusNotFound {
+	if gErr, ok := errors.AsType[*googleapi.Error](err); ok && gErr.Code == http.StatusNotFound {
 		return g.createServiceAccount(group, projectId)
 	} else if err != nil {
 		return nil, fmt.Errorf("unexpected error getting service account: %w", err)
