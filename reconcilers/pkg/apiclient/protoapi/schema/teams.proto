@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+option go_package = "./pkg/apiclient/protoapi";
+
+import "google/protobuf/timestamp.proto";
+import "groups.proto";
+import "pagination.proto";
+
+message Team {
+  string slug = 1;
+  optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
+}
+
+service Teams {
+  rpc Get(GetTeamRequest) returns (GetTeamResponse) {}
+  rpc List(ListTeamsRequest) returns (ListTeamsResponse) {}
+  rpc Groups(ListTeamGroupsRequest) returns (ListTeamGroupsResponse) {}
+  rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
+}
+
+message DeleteTeamRequest {
+  string slug = 1;
+}
+
+message DeleteTeamResponse {}
+
+message GetTeamResponse {
+  Team team = 1;
+}
+
+message GetTeamRequest {
+  string slug = 1;
+}
+
+message ListTeamsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+}
+
+message ListTeamsResponse {
+  repeated Team nodes = 1;
+  PageInfo page_info = 2;
+}
+
+message ListTeamGroupsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string slug = 3;
+}
+
+message ListTeamGroupsResponse {
+  repeated TeamGroup nodes = 1;
+  PageInfo page_info = 2;
+}
+
+message TeamGroup {
+    Group group = 1;
+}

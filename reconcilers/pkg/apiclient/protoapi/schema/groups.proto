@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+option go_package = "./pkg/apiclient/protoapi";
+
+import "pagination.proto";
+import "users.proto";
+
+message Group {
+    string team_slug = 1;
+    string name = 2;
+    optional string external_id = 3;
+}
+
+service Groups {
+    rpc Members(ListGroupMembersRequest) returns (ListGroupMembersResponse) {}
+    rpc Get(GetGroupRequest) returns (GetGroupResponse) {}
+    rpc SetExternalId(SetExternalIdRequest) returns (SetExternalIdResponse) {}
+    rpc AddMember(AddMemberRequest) returns (AddMemberResponse) {}
+    rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {}
+}
+
+message ListGroupMembersRequest {
+    int64 limit = 1;
+    int64 offset = 2;
+    string name = 3;
+}
+
+message GetGroupRequest {
+    string name = 1;
+}
+
+message SetExternalIdRequest {
+    string name = 1;
+    string external_id = 2;
+}
+
+message ListGroupMembersResponse {
+    repeated GroupMember nodes = 1;
+    PageInfo page_info = 2;
+}
+
+message GetGroupResponse {
+    Group group = 1;
+}
+
+message SetExternalIdResponse {}
+
+message GroupMember {
+    User user = 1;
+}
+
+message AddMemberRequest {
+    string user_external_id = 1;
+    string groupname = 2;
+}
+
+message AddMemberResponse {}
+
+message RemoveMemberRequest {
+    string user_external_id = 1;
+    string groupname = 2;
+}
+
+message RemoveMemberResponse {}
