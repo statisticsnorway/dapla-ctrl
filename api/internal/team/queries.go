@@ -75,8 +75,8 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		input.SectionCode = &existingTeam.SectionCode
 	}
 
-	if input.ManualEditing == nil {
-		input.ManualEditing = &existingTeam.HasManualEditing
+	if input.HasManualEditing == nil {
+		input.HasManualEditing = &existingTeam.HasManualEditing
 	}
 
 	var team *teamsql.Team
@@ -85,7 +85,7 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 			DisplayName:      input.DisplayName,
 			Slug:             input.Slug,
 			SectionCode:      input.SectionCode,
-			HasManualEditing: input.ManualEditing,
+			HasManualEditing: input.HasManualEditing,
 		})
 		if err != nil {
 			return err
@@ -107,11 +107,11 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 			})
 		}
 
-		if input.ManualEditing != nil && *input.ManualEditing != existingTeam.HasManualEditing {
+		if input.HasManualEditing != nil && *input.HasManualEditing != existingTeam.HasManualEditing {
 			updatedFields = append(updatedFields, &TeamUpdatedActivityLogEntryDataUpdatedField{
 				Field:    "hasManualEditing",
 				OldValue: new(strconv.FormatBool(existingTeam.HasManualEditing)),
-				NewValue: new(strconv.FormatBool(*input.ManualEditing)),
+				NewValue: new(strconv.FormatBool(*input.HasManualEditing)),
 			})
 		}
 

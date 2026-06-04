@@ -7597,7 +7597,7 @@ input UpdateTeamInput {
 	If manual editing (service from team dapla-ffunk) should be enabled for the team
 	When omitted, the existing value will not be updated.
 	"""
-	manualEditing: Boolean
+	hasManualEditing: Boolean
 }
 
 input AddTeamAccessManagerInput {
@@ -29253,7 +29253,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "manualEditing"}
+	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "hasManualEditing"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29281,13 +29281,13 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.SectionCode = data
-		case "manualEditing":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("manualEditing"))
+		case "hasManualEditing":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasManualEditing"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.ManualEditing = data
+			it.HasManualEditing = data
 		}
 	}
 	return it, nil

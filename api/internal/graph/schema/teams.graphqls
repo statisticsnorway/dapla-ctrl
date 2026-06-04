@@ -339,7 +339,7 @@ input UpdateTeamInput {
 	If manual editing (service from team dapla-ffunk) should be enabled for the team
 	When omitted, the existing value will not be updated.
 	"""
-	manualEditing: Boolean
+	hasManualEditing: Boolean
 }
 
 input AddTeamAccessManagerInput {

@@ -44,7 +44,7 @@ Test.gql("Update display name and section for team", function(t)
 					slug: "%s"
 					displayName: "My Awesome Team"
 					sectionCode: "723"
-					manualEditing: true
+					hasManualEditing: true
 				}
 			) {
 				team {
@@ -64,8 +64,8 @@ Test.gql("Update display name and section for team", function(t)
 					displayName = "My Awesome Team",
 					section = {
 						code = "723",
-                    },
-                    hasManualEditing = true
+					},
+					hasManualEditing = true,
 				},
 			},
 		},
