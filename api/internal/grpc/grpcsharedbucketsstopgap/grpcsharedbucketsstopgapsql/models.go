@@ -3,7 +3,7 @@
 package grpcsharedbucketsstopgapsql
 
 import (
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Group struct {

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/queue"
 )
 
 func Test_Queue(t *testing.T) {

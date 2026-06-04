@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
 )
 
 func TestError(t *testing.T) {

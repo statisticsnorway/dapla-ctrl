@@ -11,8 +11,8 @@ import (
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/session"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/session"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 	"golang.org/x/oauth2"
 )
 

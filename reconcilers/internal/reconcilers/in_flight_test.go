@@ -3,7 +3,7 @@ package reconcilers_test
 import (
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/reconcilers"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 )
 
 func TestInFlight(t *testing.T) {

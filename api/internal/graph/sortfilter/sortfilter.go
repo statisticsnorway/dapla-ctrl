@@ -8,7 +8,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/sourcegraph/conc/pool"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 // SortFunc compares two values of type V and returns an integer indicating their order.

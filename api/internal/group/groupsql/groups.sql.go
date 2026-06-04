@@ -6,7 +6,7 @@ package groupsql
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 const create = `-- name: Create :one

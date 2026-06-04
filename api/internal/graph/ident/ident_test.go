@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 type (

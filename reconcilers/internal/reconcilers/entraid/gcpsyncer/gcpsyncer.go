@@ -14,9 +14,9 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	graphserviceprincipals "github.com/microsoftgraph/msgraph-sdk-go/serviceprincipals"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api-reconcilers/internal/queue"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient"
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/queue"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"k8s.io/utils/ptr"
 )
 

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/loader"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"

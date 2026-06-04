@@ -5,7 +5,7 @@ package grpcteamsql
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Querier interface {

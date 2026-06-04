@@ -3,12 +3,12 @@ package graph
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap"
-	"github.com/statisticsnorway/dapla-api/internal/team"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func (r *queryResolver) SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {

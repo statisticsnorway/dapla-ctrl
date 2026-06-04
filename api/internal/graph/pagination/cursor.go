@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
 )
 
 var cursorVersions = map[string]func(c *Cursor, i []byte) error{

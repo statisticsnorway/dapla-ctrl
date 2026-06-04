@@ -3,7 +3,7 @@ package search
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 )
 
 func Search(ctx context.Context, page *pagination.Pagination, filter SearchFilter) (*SearchNodeConnection, error) {

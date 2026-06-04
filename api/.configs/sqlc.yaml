@@ -30,17 +30,17 @@ sql:
         omit_sqlc_version: true
         overrides:
           - db_type: "slug"
-            go_type: "*github.com/statisticsnorway/dapla-api/internal/slug.Slug"
+            go_type: "*github.com/statisticsnorway/dapla-ctrl/api/internal/slug.Slug"
             nullable: true
           - db_type: "slug"
-            go_type: "github.com/statisticsnorway/dapla-api/internal/slug.Slug"
+            go_type: "github.com/statisticsnorway/dapla-ctrl/api/internal/slug.Slug"
           - db_type: "uuid"
             go_type: "*github.com/google/uuid.UUID"
             nullable: true
           - db_type: "uuid"
             go_type: "github.com/google/uuid.UUID"
           - column: "usersync_log_entries.changes"
-            go_type: "*github.com/statisticsnorway/dapla-api/internal/usersync/changes.UserSyncUserChanges"
+            go_type: "*github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes.UserSyncUserChanges"
             nullable: true
 
   - <<: *default_domain

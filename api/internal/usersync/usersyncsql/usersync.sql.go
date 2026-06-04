@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"
 )
 
 const assignGlobalAdmin = `-- name: AssignGlobalAdmin :exec

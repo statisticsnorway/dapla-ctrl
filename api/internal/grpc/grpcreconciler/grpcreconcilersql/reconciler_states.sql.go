@@ -6,7 +6,7 @@ package grpcreconcilersql
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 const deleteStateForTeam = `-- name: DeleteStateForTeam :exec

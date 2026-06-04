@@ -6,11 +6,11 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/activitylog/activitylogsql"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog/activitylogsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

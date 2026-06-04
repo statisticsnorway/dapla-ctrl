@@ -1,6 +1,6 @@
 package feature
 
-import "github.com/statisticsnorway/dapla-api/internal/graph/ident"
+import "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 
 type Features struct{}
 

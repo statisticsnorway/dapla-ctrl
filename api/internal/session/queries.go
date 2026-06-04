@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/statisticsnorway/dapla-api/internal/session/sessionsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/session/sessionsql"
 )
 
 const (

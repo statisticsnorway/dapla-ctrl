@@ -5,7 +5,7 @@ import (
 
 	"github.com/btcsuite/btcutil/base58"
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 )
 
 type identType int

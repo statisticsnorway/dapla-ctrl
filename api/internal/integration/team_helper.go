@@ -3,8 +3,8 @@ package integration
 import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nais/tester/lua/spec"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"github.com/statisticsnorway/dapla-api/internal/team/teamsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team/teamsql"
 	lua "github.com/yuin/gopher-lua"
 )
 

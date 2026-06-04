@@ -3,10 +3,10 @@ package graph
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/section"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func (r *queryResolver) Sections(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *section.SectionOrder) (*pagination.Connection[*section.Section], error) {

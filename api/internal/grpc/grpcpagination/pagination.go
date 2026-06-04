@@ -3,7 +3,7 @@ package grpcpagination
 import (
 	"math"
 
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 )
 
 type Paginatable interface {

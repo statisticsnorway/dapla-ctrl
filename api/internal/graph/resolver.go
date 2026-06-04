@@ -10,8 +10,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/ravilushqa/otelgqlgen"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
-	"github.com/statisticsnorway/dapla-api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
 	"github.com/vektah/gqlparser/v2/ast"
 	"go.opentelemetry.io/otel"
 )

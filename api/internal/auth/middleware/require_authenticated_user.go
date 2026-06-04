@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 )
 
 func RequireAuthenticatedUser() func(next http.Handler) http.Handler {

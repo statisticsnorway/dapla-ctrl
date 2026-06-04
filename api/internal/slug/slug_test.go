@@ -5,7 +5,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 func TestMarshalSlug(t *testing.T) {

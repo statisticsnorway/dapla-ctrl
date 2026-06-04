@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authn"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/session"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authn"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/session"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 // Oauth2Authentication If the request has a session cookie, look up the session from the store, and if it exists, try

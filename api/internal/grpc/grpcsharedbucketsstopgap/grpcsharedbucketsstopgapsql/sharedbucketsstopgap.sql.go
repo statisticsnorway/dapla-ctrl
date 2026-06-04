@@ -6,7 +6,7 @@ package grpcsharedbucketsstopgapsql
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 const addGroup = `-- name: AddGroup :exec

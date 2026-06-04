@@ -4,13 +4,13 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/sharedbucketsstopgap/sharedbucketsstopgapsql"
-	"github.com/statisticsnorway/dapla-api/internal/slug"
-	"github.com/statisticsnorway/dapla-api/internal/team"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap/sharedbucketsstopgapsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 func Get(ctx context.Context, name string) (*SharedBucket, error) {

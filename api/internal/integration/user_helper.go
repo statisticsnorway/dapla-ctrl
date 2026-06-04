@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nais/tester/lua/spec"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncer"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/usersyncer"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/usersyncsql"
 	lua "github.com/yuin/gopher-lua"
 )
 

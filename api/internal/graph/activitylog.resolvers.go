@@ -3,11 +3,11 @@ package graph
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/activitylog"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/group"
-	"github.com/statisticsnorway/dapla-api/internal/reconciler"
-	"github.com/statisticsnorway/dapla-api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/reconciler"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 )
 
 func (r *groupResolver) ActivityLog(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error) {

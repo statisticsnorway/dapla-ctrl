@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/user"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
 // InsecureUserHeader returns a middleware that sets the email address of the authenticated user from the x-user-email

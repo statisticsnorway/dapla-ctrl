@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/serviceaccount"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount"
 )
 
 // ApiKeyAuthentication will authenticate a service account from a token found in the authorization header

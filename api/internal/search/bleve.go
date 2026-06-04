@@ -13,11 +13,11 @@ import (
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/auth/authz"
-	"github.com/statisticsnorway/dapla-api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-api/internal/graph/pagination"
-	"github.com/statisticsnorway/dapla-api/internal/search/bleveext"
-	"github.com/statisticsnorway/dapla-api/internal/search/searchsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/search/bleveext"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/search/searchsql"
 )
 
 type Document struct {

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcutil/base58"
-	"github.com/statisticsnorway/dapla-api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 )
 
 type Lookup func(ctx context.Context, id Ident) (model.Node, error)

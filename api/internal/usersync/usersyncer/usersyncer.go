@@ -22,8 +22,8 @@ import (
 	"github.com/microsoftgraph/msgraph-sdk-go/groups"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/changes"
-	"github.com/statisticsnorway/dapla-api/internal/usersync/usersyncsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/usersyncsql"
 	"k8s.io/utils/ptr"
 )
 

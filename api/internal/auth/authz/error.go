@@ -3,7 +3,7 @@ package authz
 import (
 	"fmt"
 
-	"github.com/statisticsnorway/dapla-api/internal/graph/apierror"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
 )
 
 var ErrUnauthorized = apierror.Errorf("You are authenticated, but your account is not authorized to perform this action.")

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/internal/cmd/api"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/cmd/api"
 )
 
 func main() {

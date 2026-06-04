@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-api/internal/database"
-	"github.com/statisticsnorway/dapla-api/internal/graph/loader"
-	"github.com/statisticsnorway/dapla-api/internal/section/sectionsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/loader"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/section/sectionsql"
 	"github.com/vikstrous/dataloadgen"
 )
 
