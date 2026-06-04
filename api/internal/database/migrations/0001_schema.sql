@@ -102,7 +102,7 @@ CREATE TABLE authorizations (name TEXT PRIMARY KEY, description TEXT NOT NULL)
 ;
 
 CREATE TABLE activity_log_entries (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	actor TEXT NOT NULL,
 	action TEXT NOT NULL,
@@ -131,7 +131,7 @@ CREATE TABLE group_members (
 ;
 
 CREATE TABLE reconciler_errors (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	correlation_id UUID NOT NULL,
 	reconciler TEXT NOT NULL,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE reconciler_config (
 ;
 
 CREATE TABLE reconciler_states (
-	id UUID DEFAULT gen_random_uuid () NOT NULL PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() NOT NULL PRIMARY KEY,
 	reconciler_name TEXT NOT NULL,
 	team_slug slug NOT NULL,
 	value bytea NOT NULL,
@@ -197,7 +197,7 @@ CREATE TABLE sections (
 ;
 
 CREATE TABLE sessions (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	user_id UUID NOT NULL,
 	expires TIMESTAMP WITH TIME ZONE NOT NULL,
 	created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CLOCK_TIMESTAMP()
@@ -205,7 +205,7 @@ CREATE TABLE sessions (
 ;
 
 CREATE TABLE team_delete_keys (
-	key UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	key UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	team_slug slug NOT NULL,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	created_by UUID NOT NULL,
@@ -237,7 +237,7 @@ CREATE TABLE teams (
 ;
 
 CREATE TABLE service_accounts (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
 	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
 	name TEXT NOT NULL CONSTRAINT name_length CHECK (CHAR_LENGTH(name) <= 80),
@@ -255,7 +255,7 @@ CREATE TABLE service_account_roles (
 ;
 
 CREATE TABLE service_account_tokens (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
 	updated_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
 	last_used_at TIMESTAMP WITH TIME ZONE,
@@ -276,7 +276,7 @@ CREATE TABLE user_roles (
 ;
 
 CREATE TABLE users (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	email TEXT NOT NULL UNIQUE,
 	name TEXT NOT NULL,
 	external_id TEXT NOT NULL UNIQUE,
@@ -286,7 +286,7 @@ CREATE TABLE users (
 ;
 
 CREATE TABLE usersync_log_entries (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	created_at TIMESTAMP WITH TIME ZONE DEFAULT CLOCK_TIMESTAMP() NOT NULL,
 	action usersync_log_entry_action NOT NULL,
 	user_id UUID NOT NULL,
@@ -404,19 +404,17 @@ ADD FOREIGN KEY (role_name) REFERENCES roles (name) ON DELETE CASCADE ON UPDATE 
 
 -- triggers
 CREATE TRIGGER groups_notify
-AFTER INSERT
-OR
-UPDATE
-OR DELETE ON groups FOR EACH ROW
+AFTER INSERT OR UPDATE OR DELETE ON groups FOR EACH ROW
 EXECUTE PROCEDURE api_notify ("name", "team_slug")
 ;
 
-CREATE TRIGGER reconciler_states_set_updated BEFORE
-UPDATE ON reconciler_states FOR EACH ROW
+CREATE TRIGGER reconciler_states_set_updated
+BEFORE UPDATE ON reconciler_states FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at ()
 ;
 
-CREATE TRIGGER unique_team_slug BEFORE INSERT ON teams FOR EACH ROW
+CREATE TRIGGER unique_team_slug
+BEFORE INSERT ON teams FOR EACH ROW
 EXECUTE PROCEDURE unique_team_slug ()
 ;
 
@@ -425,21 +423,18 @@ AFTER INSERT ON teams FOR EACH ROW
 EXECUTE PROCEDURE register_team_slug ()
 ;
 
-CREATE TRIGGER service_accounts_set_updated BEFORE
-UPDATE ON service_accounts FOR EACH ROW
+CREATE TRIGGER service_accounts_set_updated
+BEFORE UPDATE ON service_accounts FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at ()
 ;
 
-CREATE TRIGGER service_account_tokens_set_updated BEFORE
-UPDATE ON service_account_tokens FOR EACH ROW
+CREATE TRIGGER service_account_tokens_set_updated
+BEFORE UPDATE ON service_account_tokens FOR EACH ROW
 EXECUTE PROCEDURE set_updated_at ()
 ;
 
 CREATE TRIGGER teams_notify
-AFTER INSERT
-OR
-UPDATE
-OR DELETE ON teams FOR EACH ROW
+AFTER INSERT OR UPDATE OR DELETE ON teams FOR EACH ROW
 EXECUTE PROCEDURE api_notify ("slug", "purpose", "section_code")
 ;
 

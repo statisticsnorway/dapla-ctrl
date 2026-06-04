@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE messages (
-	id UUID DEFAULT gen_random_uuid () PRIMARY KEY,
+	id UUID DEFAULT GEN_RANDOM_UUID() PRIMARY KEY,
 	actor TEXT NOT NULL,
 	recipient UUID NOT NULL REFERENCES users (id),
 	subject TEXT NOT NULL,

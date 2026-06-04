@@ -16,9 +16,6 @@ CREATE TABLE shared_buckets_access_stopgap (
 ;
 
 CREATE TRIGGER shared_buckets_stopgap_notify
-AFTER INSERT
-OR
-UPDATE
-OR DELETE ON shared_buckets_stopgap FOR EACH ROW
+AFTER INSERT OR UPDATE OR DELETE ON shared_buckets_stopgap FOR EACH ROW
 EXECUTE PROCEDURE api_notify ("name", "team_slug")
 ;
