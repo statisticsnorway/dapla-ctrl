@@ -3,7 +3,7 @@ package iterator
 import (
 	"context"
 
-	"github.com/statisticsnorway/dapla-api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 )
 
 type Iterable[T any] interface {
