@@ -334,6 +334,12 @@ input UpdateTeamInput {
 	when changing section code.
 	"""
 	sectionCode: String
+
+	"""
+	If manual editing (service from team dapla-ffunk) should be enabled for the team
+	When omitted, the existing value will not be updated.
+	"""
+	manualEditing: Boolean
 }
 
 input AddTeamAccessManagerInput {

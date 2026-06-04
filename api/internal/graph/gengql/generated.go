@@ -7592,6 +7592,12 @@ input UpdateTeamInput {
 	when changing section code.
 	"""
 	sectionCode: String
+
+	"""
+	If manual editing (service from team dapla-ffunk) should be enabled for the team
+	When omitted, the existing value will not be updated.
+	"""
+	manualEditing: Boolean
 }
 
 input AddTeamAccessManagerInput {
@@ -29247,7 +29253,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode"}
+	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "manualEditing"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -29275,6 +29281,13 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.SectionCode = data
+		case "manualEditing":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("manualEditing"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ManualEditing = data
 		}
 	}
 	return it, nil

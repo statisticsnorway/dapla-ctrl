@@ -415,21 +415,31 @@ const update = `-- name: Update :one
 UPDATE teams
 SET
 	display_name = COALESCE($1, display_name),
-	section_code = COALESCE($2, section_code)
+	section_code = COALESCE($2, section_code),
+	has_manual_editing = COALESCE(
+		$3,
+		has_manual_editing
+	)
 WHERE
-	teams.slug = $3
+	teams.slug = $4
 RETURNING
 	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
 `
 
 type UpdateParams struct {
-	DisplayName *string
-	SectionCode *string
-	Slug        slug.Slug
+	DisplayName      *string
+	SectionCode      *string
+	HasManualEditing *bool
+	Slug             slug.Slug
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
-	row := q.db.QueryRow(ctx, update, arg.DisplayName, arg.SectionCode, arg.Slug)
+	row := q.db.QueryRow(ctx, update,
+		arg.DisplayName,
+		arg.SectionCode,
+		arg.HasManualEditing,
+		arg.Slug,
+	)
 	var i Team
 	err := row.Scan(
 		&i.Slug,

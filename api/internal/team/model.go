@@ -336,9 +336,10 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 }
 
 type UpdateTeamInput struct {
-	Slug        slug.Slug `json:"slug"`
-	DisplayName *string   `json:"displayName"`
-	SectionCode *string   `json:"sectionCode"`
+	Slug          slug.Slug `json:"slug"`
+	DisplayName   *string   `json:"displayName"`
+	SectionCode   *string   `json:"sectionCode"`
+	ManualEditing *bool     `json:"manualEditing"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
@@ -356,7 +357,7 @@ func (i *UpdateTeamInput) Validate() error {
 }
 
 func (i *UpdateTeamInput) HasNoChanges() bool {
-	return i.DisplayName == nil && i.SectionCode == nil
+	return i.DisplayName == nil && i.SectionCode == nil && i.ManualEditing == nil
 }
 
 type AddTeamAccessManagerInput struct {
