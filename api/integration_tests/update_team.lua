@@ -52,6 +52,7 @@ Test.gql("Update display name and section for team", function(t)
 					section {
 						code
 					}
+					hasManualEditing
 				}
 			}
 		}
