@@ -558,7 +558,12 @@ func (q *Queries) ListGroupsForBucket(ctx context.Context, arg ListGroupsForBuck
 
 const listTeamsForBucket = `-- name: ListTeamsForBucket :many
 SELECT
-	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed,
+	teams.slug,
+	teams.display_name,
+	teams.last_successful_sync,
+	teams.delete_key_confirmed_at,
+	teams.section_code,
+	teams.is_managed,
 	COUNT(*) OVER () AS total_count
 FROM
 	shared_buckets_access_stopgap

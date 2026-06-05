@@ -44,6 +44,7 @@ Test.gql("Update display name and section for team", function(t)
 					slug: "%s"
 					displayName: "My Awesome Team"
 					sectionCode: "723"
+					hasManualEditing: true
 				}
 			) {
 				team {
@@ -51,6 +52,7 @@ Test.gql("Update display name and section for team", function(t)
 					section {
 						code
 					}
+					hasManualEditing
 				}
 			}
 		}
@@ -64,6 +66,7 @@ Test.gql("Update display name and section for team", function(t)
 					section = {
 						code = "723",
 					},
+					hasManualEditing = true,
 				},
 			},
 		},
@@ -195,6 +198,11 @@ Test.gql("Update team appear in activity log", function(t)
 										field = "sectionCode",
 										oldValue = "724",
 										newValue = "723",
+									},
+									{
+										field = "hasManualEditing",
+										oldValue = "false",
+										newValue = "true",
 									},
 								},
 							},

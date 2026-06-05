@@ -11,7 +11,11 @@ RETURNING
 UPDATE teams
 SET
 	display_name = COALESCE(sqlc.narg(display_name), display_name),
-	section_code = COALESCE(sqlc.narg(section_code), section_code)
+	section_code = COALESCE(sqlc.narg(section_code), section_code),
+	has_manual_editing = COALESCE(
+		sqlc.narg(has_manual_editing),
+		has_manual_editing
+	)
 WHERE
 	teams.slug = @slug
 RETURNING

@@ -32,6 +32,7 @@ type Team struct {
 	DisplayName          string     `json:"displayName"`
 	SectionCode          string     `json:"sectionCode"`
 	IsManaged            bool       `json:"isManaged"`
+	HasManualEditing     bool       `json:"hasManualEditing"`
 	LastSuccessfulSync   *time.Time `json:"lastSuccessfulSync"`
 	DeleteKeyConfirmedAt *time.Time `json:"-"`
 }
@@ -108,10 +109,11 @@ func (e TeamOrderField) MarshalGQL(w io.Writer) {
 
 func toGraphTeam(m *teamsql.Team) *Team {
 	ret := &Team{
-		Slug:        m.Slug,
-		DisplayName: m.DisplayName,
-		SectionCode: m.SectionCode,
-		IsManaged:   m.IsManaged,
+		Slug:             m.Slug,
+		DisplayName:      m.DisplayName,
+		SectionCode:      m.SectionCode,
+		IsManaged:        m.IsManaged,
+		HasManualEditing: m.HasManualEditing,
 	}
 
 	if m.LastSuccessfulSync.Valid {
@@ -334,9 +336,10 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 }
 
 type UpdateTeamInput struct {
-	Slug        slug.Slug `json:"slug"`
-	DisplayName *string   `json:"displayName"`
-	SectionCode *string   `json:"sectionCode"`
+	Slug             slug.Slug `json:"slug"`
+	DisplayName      *string   `json:"displayName"`
+	SectionCode      *string   `json:"sectionCode"`
+	HasManualEditing *bool     `json:"hasManualEditing"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
@@ -354,7 +357,7 @@ func (i *UpdateTeamInput) Validate() error {
 }
 
 func (i *UpdateTeamInput) HasNoChanges() bool {
-	return i.DisplayName == nil && i.SectionCode == nil
+	return i.DisplayName == nil && i.SectionCode == nil && i.HasManualEditing == nil
 }
 
 type AddTeamAccessManagerInput struct {

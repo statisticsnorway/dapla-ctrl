@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -74,12 +75,17 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 		input.SectionCode = &existingTeam.SectionCode
 	}
 
+	if input.HasManualEditing == nil {
+		input.HasManualEditing = &existingTeam.HasManualEditing
+	}
+
 	var team *teamsql.Team
 	err = database.Transaction(ctx, func(ctx context.Context) error {
 		team, err = db(ctx).Update(ctx, teamsql.UpdateParams{
-			DisplayName: input.DisplayName,
-			Slug:        input.Slug,
-			SectionCode: input.SectionCode,
+			DisplayName:      input.DisplayName,
+			Slug:             input.Slug,
+			SectionCode:      input.SectionCode,
+			HasManualEditing: input.HasManualEditing,
 		})
 		if err != nil {
 			return err
@@ -98,6 +104,14 @@ func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*T
 				Field:    "sectionCode",
 				OldValue: &existingTeam.SectionCode,
 				NewValue: input.SectionCode,
+			})
+		}
+
+		if input.HasManualEditing != nil && *input.HasManualEditing != existingTeam.HasManualEditing {
+			updatedFields = append(updatedFields, &TeamUpdatedActivityLogEntryDataUpdatedField{
+				Field:    "hasManualEditing",
+				OldValue: new(strconv.FormatBool(existingTeam.HasManualEditing)),
+				NewValue: new(strconv.FormatBool(*input.HasManualEditing)),
 			})
 		}
 
