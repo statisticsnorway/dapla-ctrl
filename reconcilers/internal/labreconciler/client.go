@@ -40,20 +40,19 @@ func New(endpoint, secret string, opts ...optFunc) (*client, error) {
 	return c, nil
 }
 
-func (c *client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+func (c *client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.secret))
-	req.WithContext(ctx)
 
 	return c.httpClient.Do(req)
 }
 
 func (c *client) EnableFfunkEditing(ctx context.Context, team string) error {
-	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+	req, err := http.NewRequestWithContext(ctx, "PUT", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.do(ctx, req)
+	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}
@@ -67,12 +66,12 @@ func (c *client) EnableFfunkEditing(ctx context.Context, team string) error {
 }
 
 func (c *client) HasFfunkEditing(ctx context.Context, team string) (bool, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
 	if err != nil {
 		return false, err
 	}
 
-	resp, err := c.do(ctx, req)
+	resp, err := c.do(req)
 	if err != nil {
 		return false, err
 	}
@@ -89,12 +88,12 @@ func (c *client) HasFfunkEditing(ctx context.Context, team string) (bool, error)
 	return false, fmt.Errorf("unexpected response code %d: %s", resp.StatusCode, resp.Status)
 }
 func (c *client) DisableFfunkEditing(ctx context.Context, team string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
 	if err != nil {
 		return err
 	}
 
-	resp, err := c.do(ctx, req)
+	resp, err := c.do(req)
 	if err != nil {
 		return err
 	}
