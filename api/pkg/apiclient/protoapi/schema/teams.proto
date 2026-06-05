@@ -2,14 +2,15 @@ syntax = "proto3";
 
 package dapla.api.protobuf;
 
-option go_package = "./pkg/apiclient/protoapi";
-
 import "google/protobuf/timestamp.proto";
 import "groups.proto";
 import "pagination.proto";
 
+option go_package = "./pkg/apiclient/protoapi";
+
 message Team {
   string slug = 1;
+  bool has_manual_editing = 2;
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
 }
 
@@ -56,5 +57,5 @@ message ListTeamGroupsResponse {
 }
 
 message TeamGroup {
-    Group group = 1;
+  Group group = 1;
 }
