@@ -58,7 +58,7 @@ func (c *client) EnableFfunkEditing(ctx context.Context, team string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNotModified {
+	if resp.StatusCode == http.StatusOK {
 		return nil
 	}
 
@@ -99,7 +99,7 @@ func (c *client) DisableFfunkEditing(ctx context.Context, team string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusNotModified {
+	if resp.StatusCode == http.StatusOK {
 		return nil
 	}
 
