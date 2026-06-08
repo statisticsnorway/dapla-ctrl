@@ -22,7 +22,7 @@
 </script>
 
 {#snippet nameCell(item: BucketAccessItem)}
-	<a href={`/team/${item.team.slug}/shared-data/${item.bucket.name}`}
+	<a href={`/team/${item.bucket.team.slug}/shared-data/${item.bucket.name}`}
 		><b>{item.bucket.shortName}</b></a
 	>
 	<br />
