@@ -106,7 +106,8 @@ func (t *Server) Groups(ctx context.Context, req *protoapi.ListTeamGroupsRequest
 
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
-		Slug: team.Slug.String(),
+		Slug:         team.Slug.String(),
+		HasParquedit: team.HasManualEditing,
 	}
 
 	if team.DeleteKeyConfirmedAt.Valid {
