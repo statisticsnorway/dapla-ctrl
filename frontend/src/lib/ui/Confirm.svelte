@@ -49,7 +49,7 @@
 
 	{#snippet footer()}
 		<Button {variant} type="submit" onclick={confirm}>{confirmText}</Button>
-		<Button variant="tertiary" type="reset" onclick={cancel}>Cancel</Button>
+		<Button variant="tertiary" type="reset" onclick={cancel}>Avbryt</Button>
 	{/snippet}
 </Modal>
 
