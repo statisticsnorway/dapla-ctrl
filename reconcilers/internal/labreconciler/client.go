@@ -46,8 +46,8 @@ func (c *client) do(req *http.Request) (*http.Response, error) {
 	return c.httpClient.Do(req)
 }
 
-func (c *client) EnableFfunkEditing(ctx context.Context, team string) error {
-	req, err := http.NewRequestWithContext(ctx, "PUT", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+func (c *client) EnableParquedit(ctx context.Context, team string) error {
+	req, err := http.NewRequestWithContext(ctx, "PUT", fmt.Sprintf("%s/parquedit/%s", c.endpoint, team), nil)
 	if err != nil {
 		return err
 	}
@@ -65,8 +65,8 @@ func (c *client) EnableFfunkEditing(ctx context.Context, team string) error {
 	return fmt.Errorf("unexpected response code %d: %s", resp.StatusCode, resp.Status)
 }
 
-func (c *client) HasFfunkEditing(ctx context.Context, team string) (bool, error) {
-	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+func (c *client) HasParquedit(ctx context.Context, team string) (bool, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/parquedit/%s", c.endpoint, team), nil)
 	if err != nil {
 		return false, err
 	}
@@ -87,8 +87,8 @@ func (c *client) HasFfunkEditing(ctx context.Context, team string) (bool, error)
 
 	return false, fmt.Errorf("unexpected response code %d: %s", resp.StatusCode, resp.Status)
 }
-func (c *client) DisableFfunkEditing(ctx context.Context, team string) error {
-	req, err := http.NewRequestWithContext(ctx, "DELETE", fmt.Sprintf("%s/ffunk-editering/%s", c.endpoint, team), nil)
+func (c *client) DisableParquedit(ctx context.Context, team string) error {
+	req, err := http.NewRequestWithContext(ctx, "DELETE", fmt.Sprintf("%s/parquedit/%s", c.endpoint, team), nil)
 	if err != nil {
 		return err
 	}

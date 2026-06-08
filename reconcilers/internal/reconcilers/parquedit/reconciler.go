@@ -1,4 +1,4 @@
-package manualediting
+package parquedit
 
 import (
 	"context"
@@ -8,14 +8,13 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/labreconciler"
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 )
 
 const (
-	reconcilerName = "dapla:ffunk:manualediting"
+	reconcilerName = "dapla:ffunk:parquedit"
 
-	configExternalReconcilerEndpointKey = "externalReconcilerEndpoint"
-	configExternalReconcilerSecretKey   = "externalReconcilerSecret"
+	configExternalReconcilerEndpointKey = "labReconcilerEndpoint"
+	configExternalReconcilerSecretKey   = "labReconcilerSecret"
 )
 
 type reconciler struct {
@@ -25,19 +24,19 @@ type reconciler struct {
 }
 
 type config struct {
-	ExternalReconcilerEndpoint string
-	ExternalReconcilerSecret   string
+	LabReconcilerEndpoint string
+	LabReconcilerSecret   string
 }
 
 type client interface {
-	EnableFfunkEditing(ctx context.Context, team string) error
-	HasFfunkEditing(ctx context.Context, team string) (bool, error)
-	DisableFfunkEditing(ctx context.Context, team string) error
+	EnableParquedit(ctx context.Context, team string) error
+	HasParquedit(ctx context.Context, team string) (bool, error)
+	DisableParquedit(ctx context.Context, team string) error
 }
 
 type optFunc func(*reconciler)
 
-func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
+func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
 	r := new(reconciler)
 
 	for _, opt := range opts {
@@ -50,19 +49,19 @@ func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
 	return &protoapi.NewReconciler{
 		Name:        r.Name(),
-		DisplayName: "Ffunk editering reconciler",
-		Description: "Manage manual editing resources in ffunk's database",
+		DisplayName: "Parquedit",
+		Description: "Manage Parquedit resources in ffunk's database",
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
 				Key:         configExternalReconcilerEndpointKey,
-				DisplayName: "External Reconciler Endpoint",
+				DisplayName: "Lab Reconciler Endpoint",
 				Description: "The endpoint to use to access the external (in Dapla Lab) reconciler application",
 				Secret:      false,
 			},
 			{
 				Key:         configExternalReconcilerSecretKey,
-				DisplayName: "External Reconciler Secret",
+				DisplayName: "Lab Reconciler Secret",
 				Description: "The secret to use for authorization of request to the external reconciler",
 				Secret:      true,
 			},
@@ -75,27 +74,27 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
-	editingClient, err := r.getClient(ctx, client)
+	parqueditClient, err := r.getClient(ctx, client)
 	if err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	hasEditing, err := editingClient.HasFfunkEditing(ctx, naisTeam.Slug)
+	hasParquedit, err := parqueditClient.HasParquedit(ctx, naisTeam.Slug)
 	if err != nil {
-		return fmt.Errorf("check if team has ffunk editing: %w", err)
+		return fmt.Errorf("check if team has parquedit: %w", err)
 	}
 
-	shouldHaveEditing := naisTeam.HasManualEditing
+	shouldHaveParquedit := naisTeam.HasParquedit
 
-	if hasEditing == shouldHaveEditing {
+	if hasParquedit == shouldHaveParquedit {
 		return nil
 	}
 
-	if shouldHaveEditing {
-		return editingClient.EnableFfunkEditing(ctx, naisTeam.Slug)
+	if shouldHaveParquedit {
+		return parqueditClient.EnableParquedit(ctx, naisTeam.Slug)
 	}
 
-	return editingClient.DisableFfunkEditing(ctx, naisTeam.Slug)
+	return parqueditClient.DisableParquedit(ctx, naisTeam.Slug)
 }
 
 func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient) (client, error) {
@@ -115,9 +114,9 @@ func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient)
 	for _, c := range cfg.Nodes {
 		switch c.Key {
 		case configExternalReconcilerEndpointKey:
-			rc.ExternalReconcilerEndpoint = c.Value
+			rc.LabReconcilerEndpoint = c.Value
 		case configExternalReconcilerSecretKey:
-			rc.ExternalReconcilerSecret = c.Value
+			rc.LabReconcilerSecret = c.Value
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -127,7 +126,7 @@ func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient)
 		return r.client, nil
 	}
 
-	newClient, err := labreconciler.New(rc.ExternalReconcilerEndpoint, rc.ExternalReconcilerSecret)
+	newClient, err := labreconciler.New(rc.LabReconcilerEndpoint, rc.LabReconcilerSecret)
 	if err != nil {
 		return nil, fmt.Errorf("create labreconciler client: %w", err)
 	}
@@ -139,18 +138,18 @@ func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient)
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
-	editingClient, err := r.getClient(ctx, client)
+	parqueditClient, err := r.getClient(ctx, client)
 	if err != nil {
 		return err
 	}
 
-	hasEditing, err := editingClient.HasFfunkEditing(ctx, naisTeam.Slug)
+	hasParquedit, err := parqueditClient.HasParquedit(ctx, naisTeam.Slug)
 	if err != nil {
 		return err
 	}
 
-	if hasEditing {
-		return editingClient.DisableFfunkEditing(ctx, naisTeam.Slug)
+	if hasParquedit {
+		return parqueditClient.DisableParquedit(ctx, naisTeam.Slug)
 	}
 
 	return nil

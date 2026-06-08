@@ -10,7 +10,7 @@ option go_package = "./pkg/apiclient/protoapi";
 
 message Team {
   string slug = 1;
-  bool has_manual_editing = 2;
+  bool has_parquedit = 2;
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
 }
 
