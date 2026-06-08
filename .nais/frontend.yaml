@@ -3,8 +3,14 @@ kind: Application
 metadata:
   name: dapla-ctrl
   namespace: dapla-platform
-
+  labels:
+    team: dapla-platform
+  annotations:
+    nais.io/read-only-file-system: "true"
+    nais.io/run-as-user: "1001"
 spec:
+  image: "{{image}}"
+
   port: 3000
 
   resources:
