@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 )
 
 const (
@@ -76,7 +76,7 @@ func (r *reconciler) Name() string {
 	return reconcilerName
 }
 
-func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	if err := r.updateConfig(ctx, client); err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
@@ -84,7 +84,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	// Iterate through all the groups in the team, and reconcile them one by one
 	groupsIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListTeamGroupsResponse, error) {
 		return client.Teams().Groups(ctx, &protoapi.ListTeamGroupsRequest{
-			Slug: naisTeam.Slug,
+			Slug: daplaTeam.Slug,
 		})
 	})
 
@@ -140,7 +140,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	return nil
 }
 
-func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	log.Debug("Executing some action to delete the resource owned by this reconciler")
 
 	return nil

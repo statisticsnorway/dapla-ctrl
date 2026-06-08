@@ -73,28 +73,28 @@ func (r *reconciler) Name() string {
 	return reconcilerName
 }
 
-func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	parqueditClient, err := r.getClient(ctx, client)
 	if err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	hasParquedit, err := parqueditClient.HasParquedit(ctx, naisTeam.Slug)
+	hasParquedit, err := parqueditClient.HasParquedit(ctx, daplaTeam.Slug)
 	if err != nil {
 		return fmt.Errorf("check if team has parquedit: %w", err)
 	}
 
-	shouldHaveParquedit := naisTeam.HasParquedit
+	shouldHaveParquedit := daplaTeam.HasParquedit
 
 	if hasParquedit == shouldHaveParquedit {
 		return nil
 	}
 
 	if shouldHaveParquedit {
-		return parqueditClient.EnableParquedit(ctx, naisTeam.Slug)
+		return parqueditClient.EnableParquedit(ctx, daplaTeam.Slug)
 	}
 
-	return parqueditClient.DisableParquedit(ctx, naisTeam.Slug)
+	return parqueditClient.DisableParquedit(ctx, daplaTeam.Slug)
 }
 
 func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient) (client, error) {
@@ -137,19 +137,19 @@ func (r *reconciler) getClient(ctx context.Context, client *apiclient.APIClient)
 	return newClient, nil
 }
 
-func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, naisTeam *protoapi.Team, log logrus.FieldLogger) error {
+func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	parqueditClient, err := r.getClient(ctx, client)
 	if err != nil {
 		return err
 	}
 
-	hasParquedit, err := parqueditClient.HasParquedit(ctx, naisTeam.Slug)
+	hasParquedit, err := parqueditClient.HasParquedit(ctx, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
 
 	if hasParquedit {
-		return parqueditClient.DisableParquedit(ctx, naisTeam.Slug)
+		return parqueditClient.DisableParquedit(ctx, daplaTeam.Slug)
 	}
 
 	return nil
