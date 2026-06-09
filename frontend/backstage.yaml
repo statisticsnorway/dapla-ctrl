@@ -1,0 +1,22 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dapla-ctrl
+  title: Dapla Ctrl
+  description: |
+    Web interface for managing Dapla teams and their resources
+  tags:
+    - typescript
+    - sveltekit
+    - dapla
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-ctrl
+spec:
+  type: website
+  owner: dapla-skyinfra-developers
+  lifecycle: production
+  system: kuben
+  dependsOn:
+    - system:nais
+  consumesApis:
+    - api:dapla-api
