@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dapla-api-reconcilers
+  title: Dapla API Reconcilers
+  description: |
+    Reconciliation service for resources defined by Dapla API
+  tags:
+    - go
+    - dapla
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-ctrl
+spec:
+  type: service
+  owner: dapla-skyinfra-developers
+  lifecycle: production
+  system: kuben
+  consumesApis:
+    - api:dapla-api-internal
