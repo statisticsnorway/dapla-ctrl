@@ -1,0 +1,55 @@
+package api
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/parquedit"
+	"golang.org/x/sync/errgroup"
+)
+
+func Run(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	ctx, signalStop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
+	defer signalStop()
+
+	parqueditClient, err := parquedit.New(ctx, parseConfigOrDie[parquedit.ParqueditConfig]())
+	if err != nil {
+		return fmt.Errorf("Could not configure Parquedit: %w", err)
+	}
+	defer parqueditClient.Close()
+
+	router := SetupRoutes(parseConfigOrDie[RouterConfig](), parqueditClient)
+
+	wg, ctx := errgroup.WithContext(ctx)
+	wg.Go(func() error {
+		return runHTTPServer(
+			ctx,
+			router,
+		)
+	})
+
+	<-ctx.Done()
+	signalStop()
+	slog.Info("shutting down...")
+
+	ch := make(chan error)
+	go func() {
+		ch <- wg.Wait()
+	}()
+
+	select {
+	case <-time.After(10 * time.Second):
+		slog.Warn("timed out waiting for graceful shutdown")
+	case err := <-ch:
+		return err
+	}
+
+	return nil
+}
