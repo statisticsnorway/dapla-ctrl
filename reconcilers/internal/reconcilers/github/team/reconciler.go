@@ -124,6 +124,15 @@ func (r *reconciler) reconcileGroup(ctx context.Context, groupName, entraIdGroup
 		return err
 	}
 
+	if team.GetPrivacy() != "closed" {
+		if team, _, err = r.teamsClient.EditTeamBySlug(ctx, r.org, *team.Slug, github.NewTeam{
+			Name:    team.GetSlug(),
+			Privacy: new("closed"),
+		}, true); err != nil {
+			return err
+		}
+	}
+
 	groups, _, err := r.teamsClient.ListIDPGroupsForTeamBySlug(ctx, r.org, *team.Slug)
 	if err != nil {
 		return err
@@ -153,7 +162,7 @@ func (r *reconciler) getOrCreateGitHubTeam(ctx context.Context, groupName string
 		return team, nil
 	}
 	if githubError, ok := errors.AsType[*github.ErrorResponse](err); ok && githubError.Response.StatusCode == http.StatusNotFound {
-		team, _, err := r.teamsClient.CreateTeam(ctx, r.org, github.NewTeam{Name: teamSlug})
+		team, _, err := r.teamsClient.CreateTeam(ctx, r.org, github.NewTeam{Name: teamSlug, Privacy: new("closed")})
 		return team, err
 	}
 	return nil, err
