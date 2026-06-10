@@ -23,6 +23,23 @@ type Config struct {
 		ProjectID string `env:"PUBSUB_PROJECT_ID,default=$GOOGLE_MANAGEMENT_PROJECT_ID"`
 	}
 
+	GitHub struct {
+		// Whether to enable the GitHub reconcilers.
+		Enabled bool `env:"GITHUB_ENABLED"`
+
+		// The GitHub App ID.
+		AppId int64 `env:"GITHUB_APP_ID"`
+
+		// The GitHub app's installation ID.
+		InstallationId int64 `env:"GITHUB_INSTALLATION_ID"`
+
+		// Path to the private key to use for authentication.
+		PrivateKeyFile string `env:"GITHUB_PRIVATE_KEY_FILE"`
+
+		// Name of the GitHub organization
+		Org string `env:"GITHUB_ORG"`
+	}
+
 	// ListenAddress The host:port combination used by the http server.
 	ListenAddress string `env:"LISTEN_ADDRESS,default=127.0.0.1:3105"`
 
