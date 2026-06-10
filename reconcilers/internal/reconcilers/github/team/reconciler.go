@@ -180,6 +180,10 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	for _, c := range config.Nodes {
 		switch c.Key {
 		case configTeamAllowlistKey:
+			if c.Value == "" {
+				r.teamAllowlist = nil
+				break
+			}
 			whitelist := strings.Split(c.Value, ",")
 			if !slices.Equal(r.teamAllowlist, whitelist) {
 				r.teamAllowlist = whitelist
