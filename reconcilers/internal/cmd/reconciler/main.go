@@ -11,6 +11,7 @@ import (
 
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
 
@@ -102,26 +103,34 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	log.WithField("duration", time.Since(start).String()).Debug("Created reconciler manager")
 
 	// Init reconcilers
+	// The reconcilers will be run in the order they are added to the manager
 	gcpSyncer := gcpsyncer.New(client)
 
 	entraIdGroupReconciler := entraidreconciler.New(ctx, gcpSyncer)
 	log.WithField("duration", time.Since(start).String()).Debug("Created Entra ID group reconciler")
 
+	reconcilerManager.AddReconciler(entraIdGroupReconciler)
+	reconcilerManager.AddReconciler(gcpSyncer)
+
 	daplaGroupSaReconciler, err := groupserviceaccounts.New(ctx)
 	if err != nil {
 		return fmt.Errorf("error creating dapla group sa reconciler: %w", err)
 	}
+	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
 
 	parqueditReconciler, err := parquedit.New(ctx)
 	if err != nil {
 		return fmt.Errorf("create parquedit reconciler: %w", err)
 	}
-
-	// The reconcilers will be run in the order they are added to the manager
-	reconcilerManager.AddReconciler(entraIdGroupReconciler)
-	reconcilerManager.AddReconciler(gcpSyncer)
-	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
 	reconcilerManager.AddReconciler(parqueditReconciler)
+
+	if cfg.GitHub.Enabled {
+		githubTeam, err := team.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
+		if err != nil {
+			return fmt.Errorf("create github team reconciler: %w", err)
+		}
+		reconcilerManager.AddReconciler(githubTeam)
+	}
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 

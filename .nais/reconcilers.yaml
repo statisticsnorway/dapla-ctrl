@@ -53,3 +53,14 @@ spec:
       value: "true"
     - name: LISTEN_ADDRESS
       value: ":3105"
+    - name: GITHUB_ENABLED
+      value: "true"
+    - name: "GITHUB_ORG"
+      value: "statisticsnorway"
+
+  envFrom:
+    - secret: dapla-api-reconcilers
+
+  filesFrom:
+    - mountPath: /secrets
+      secret: dapla-api-github-private-key
