@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -45,7 +46,7 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 
 func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	// TODO, should we set AUTHORIZATION on the schema
-	team := chi.URLParam(req, "team")
+	team := teamNameFromRequest(req)
 	err := validateSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -65,9 +66,14 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func teamNameFromRequest(req *http.Request) string {
+	teamNameWithPotentialDash := strings.ToLower(chi.URLParam(req, "team"))
+	return strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
+}
+
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	// TODO
-	team := chi.URLParam(req, "team")
+	team := teamNameFromRequest(req)
 	err := validateSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -88,7 +94,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 
 func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	// TODO
-	team := chi.URLParam(req, "team")
+	team := teamNameFromRequest(req)
 	if err := validateSchemaName(team); err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -118,8 +124,14 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 }
 
 func validateSchemaName(schema string) error {
+	// https://www.postgresql.org/docs/18/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+	validSchemaName, _ := regexp.MatchString("^[a-z][a-z0-9_]{0,62}$", schema)
+	if !validSchemaName {
+		return fmt.Errorf("schema name %q is invalid", schema)
+	}
+
 	if strings.HasPrefix(schema, "pg_") || strings.EqualFold(schema, "public") || strings.EqualFold(schema, "information_schema") {
-		return fmt.Errorf("schema name '%s' is illegal", schema)
+		return fmt.Errorf("schema name %q is reserved", schema)
 	}
 	return nil
 }
