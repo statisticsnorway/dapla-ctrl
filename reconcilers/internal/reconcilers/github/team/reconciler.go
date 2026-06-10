@@ -20,12 +20,12 @@ import (
 const (
 	reconcilerName = "github:team"
 
-	configTeamWhitelistKey = "teamWhitelist"
+	configTeamAllowlistKey = "teamAllowlist"
 	configTeamPrefixKey    = "teamPrefix"
 )
 
 type reconciler struct {
-	teamWhitelist []string
+	teamAllowlist []string
 	teamPrefix    string
 	org           string
 	teamsClient   *github.TeamsService
@@ -70,7 +70,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
-				Key:         configTeamWhitelistKey,
+				Key:         configTeamAllowlistKey,
 				DisplayName: "Team whitelist",
 				Description: "Comma-separated list of teams to sync to GitHub",
 				Secret:      false,
@@ -94,7 +94,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	if !slices.Contains(r.teamWhitelist, daplaTeam.Slug) {
+	if !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
 		return nil
 	}
 
@@ -168,10 +168,10 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configTeamWhitelistKey:
+		case configTeamAllowlistKey:
 			whitelist := strings.Split(c.Value, ",")
-			if !slices.Equal(r.teamWhitelist, whitelist) {
-				r.teamWhitelist = whitelist
+			if !slices.Equal(r.teamAllowlist, whitelist) {
+				r.teamAllowlist = whitelist
 			}
 		case configTeamPrefixKey:
 			if r.teamPrefix != c.Value {
