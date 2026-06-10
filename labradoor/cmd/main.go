@@ -15,7 +15,6 @@ func main() {
 	slog.SetDefault(log)
 	slog.SetLogLoggerLevel(slog.LevelWarn)
 
-
 	if err := loadEnvFile(); err != nil {
 		slog.Error("error loading .env file", "error", err)
 		os.Exit(1)
@@ -28,7 +27,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
 
 // loadEnvFile will load a .env file if it exists. This is useful for local development.
 func loadEnvFile() error {
