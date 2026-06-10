@@ -136,8 +136,9 @@ func (r *reconciler) reconcileGroup(ctx context.Context, groupName, entraIdGroup
 	_, _, err = r.teamsClient.CreateOrUpdateIDPGroupConnectionsBySlug(ctx, r.org, *team.Slug, github.IDPGroupList{
 		Groups: []*github.IDPGroup{
 			{
-				GroupID:   &entraIdGroupId,
-				GroupName: &groupName,
+				GroupID:          &entraIdGroupId,
+				GroupName:        &groupName,
+				GroupDescription: new("Configured by Dapla API"),
 			},
 		},
 	})
