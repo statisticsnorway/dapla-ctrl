@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
+    ports:
+      - "3012:5432"
+    environment:
+      POSTGRES_USER: labradoor
+      POSTGRES_PASSWORD: labradoor
+      POSTGRES_DB: labradoor
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

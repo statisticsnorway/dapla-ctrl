@@ -4,7 +4,7 @@ WORKDIR /src
 COPY go.* /src/
 RUN go mod download
 COPY . /src
-RUN go build -o bin/labradoor ./cmd/dapla-ctrl-labradoor
+RUN go build -o bin/labradoor ./cmd
 
 FROM gcr.io/distroless/base
 WORKDIR /app

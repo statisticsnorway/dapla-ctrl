@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v3"
@@ -43,48 +44,82 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 }
 
 func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
-	// TODO
+	// TODO, should we set AUTHORIZATION on the schema
 	team := chi.URLParam(req, "team")
+	err := validateSchemaName(team)
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	schema := pgx.Identifier{team}.Sanitize()
 
 	result, err := c.db.Exec(req.Context(), "CREATE SCHEMA IF NOT EXISTS "+schema)
 	if err != nil {
-		w.WriteHeader(500)
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info(result.String())
+	slog.Info("enabled parquedit for team", "team", team, "result", result.String())
 
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	// TODO
 	team := chi.URLParam(req, "team")
+	err := validateSchemaName(team)
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	schema := pgx.Identifier{team}.Sanitize()
 
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info(result.String())
-	w.WriteHeader(200)
+	slog.Info("disabled parquedit for team", "team", team, "result", result.String())
+	w.WriteHeader(http.StatusOK)
 }
 
 func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	// TODO
 	team := chi.URLParam(req, "team")
+	if err := validateSchemaName(team); err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
-	var schema_name string
-	err := c.db.QueryRow(req.Context(), "SELECT schema_name FROM information_schema.schemata WHERE schema_name = $1", team).Scan(&schema_name)
-	if err == pgx.ErrNoRows {
-		w.WriteHeader(404)
-		return
-	}
+	var exists bool
+	err := c.db.QueryRow(req.Context(), `
+		SELECT EXISTS (
+			SELECT 1
+			FROM information_schema.schemata
+			WHERE schema_name = $1
+		)`, team).Scan(&exists)
+
 	if err != nil {
-		w.WriteHeader(500)
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(200)
+
+	if exists {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+}
+
+func validateSchemaName(schema string) error {
+	if strings.HasPrefix(schema, "pg_") || strings.EqualFold(schema, "public") || strings.EqualFold(schema, "information_schema") {
+		return fmt.Errorf("schema name '%s' is illegal", schema)
+	}
+	return nil
 }
