@@ -21,7 +21,7 @@ func Run(ctx context.Context) error {
 
 	parqueditClient, err := parquedit.New(ctx, parseConfigOrDie[parquedit.ParqueditConfig]())
 	if err != nil {
-		return fmt.Errorf("Could not configure Parquedit: %w", err)
+		return fmt.Errorf("could not configure Parquedit: %w", err)
 	}
 	defer parqueditClient.Close()
 

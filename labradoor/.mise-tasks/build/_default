@@ -3,4 +3,4 @@
 
 set -e
 
-go build -o bin/dapla-ctrl-labradoor ./cmd/dapla-ctrl-labradoor
+go build -o bin/dapla-ctrl-labradoor ./cmd

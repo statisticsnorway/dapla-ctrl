@@ -3,4 +3,4 @@
 
 set -e
 
-dlv debug --headless --listen=:2345 --api-version=2 ./cmd/dapla-ctrl-labradoor
+dlv debug --headless --listen=:2345 --api-version=2 ./cmd
