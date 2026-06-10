@@ -72,7 +72,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 			{
 				Key:         configTeamAllowlistKey,
 				DisplayName: "Team whitelist",
-				Description: "Comma-separated list of teams to sync to GitHub",
+				Description: "Comma-separated list of teams to sync to GitHub. Empty list means include all teams.",
 				Secret:      false,
 			},
 			{
@@ -94,7 +94,8 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	if !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
+	// Only check allowlist if there is anything in it.
+	if len(r.teamAllowlist) > 0 && !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
 		return nil
 	}
 
