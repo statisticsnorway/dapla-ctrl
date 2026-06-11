@@ -62,7 +62,8 @@ export const menuItems = ({
 		[
 			menuItem('Medlemmer', 'members'),
 			menuItem('Datadeling', 'shared-data'),
-			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log')
+			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log'),
+			isAdmin && menuItem('Innstillinger', 'settings')
 		].filter(Boolean) as { label: string; href: string; active?: boolean }[]
 	];
 };

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		CogIcon,
 		FloppydiskIcon,
 		HexagonGridIcon,
 		PersonGroupIcon,
@@ -19,13 +20,14 @@
 			case 'groups':
 			case 'grupper':
 				return PersonGroupIcon;
-			case 'settings':
 			case 'activity log':
 			case 'aktivitetslogg':
 				return ShieldLockIcon;
 			case 'datadeling':
 			case 'datatilgang':
 				return FloppydiskIcon;
+			case 'innstillinger':
+				return CogIcon;
 			default:
 				return QuestionmarkIcon;
 		}
