@@ -108,7 +108,6 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 			FROM information_schema.schemata
 			WHERE schema_name = $1
 		)`, team).Scan(&exists)
-
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)

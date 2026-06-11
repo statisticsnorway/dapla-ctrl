@@ -12,18 +12,18 @@ func TestValidateSchemaName(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:   "simple name",
-			schema: "team",
+			name:    "simple name",
+			schema:  "team",
 			wantErr: false,
 		},
 		{
-			name:   "name with underscore",
-			schema: "team_understrek",
+			name:    "name with underscore",
+			schema:  "team_understrek",
 			wantErr: false,
 		},
 		{
-			name:   "name with dash",
-			schema: "team-bindestrek",
+			name:    "name with dash",
+			schema:  "team-bindestrek",
 			wantErr: true,
 		},
 		{
@@ -47,8 +47,8 @@ func TestValidateSchemaName(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "long team name",
-			schema:  "a" + strings.Repeat("b", 62),
+			name:   "long team name",
+			schema: "a" + strings.Repeat("b", 62),
 		},
 		{
 			name:    "too long",
