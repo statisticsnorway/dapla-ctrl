@@ -27,7 +27,7 @@ func (c *Client) Close() {
 }
 
 func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
-	pool, err := pgxpool.New(context.Background(), config.DatabaseUrl)
+	pool, err := pgxpool.New(ctx, config.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
 	}
