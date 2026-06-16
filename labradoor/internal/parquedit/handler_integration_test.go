@@ -28,8 +28,8 @@ func TestManageTeamSchema(t *testing.T) {
 
 	handler := setupTestRoutes(client)
 
-	team := "team-bindestrek"
-	schema := "team_bindestrek"
+	team := "binde-strek"
+	schema := "team_binde_strek"
 
 	t.Run("check status for non enabled team", func(t *testing.T) {
 		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
@@ -57,8 +57,8 @@ func TestManageTeamSchema(t *testing.T) {
 	})
 }
 
-func TestRejectInvalidTeamNames(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+func TestTeamNamesArePrefixed(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	connectionString := startPostgres(ctx, t)
@@ -70,12 +70,11 @@ func TestRejectInvalidTeamNames(t *testing.T) {
 
 	handler := setupTestRoutes(client)
 
-	for _, method := range []string{http.MethodGet, http.MethodPut, http.MethodDelete} {
-		for _, team := range []string{"team-name", "1team", "public", "information_schema", "pg_team"} {
-			t.Run(fmt.Sprintf("%s %s", method, team), func(t *testing.T) {
-				assertStatus(t, handler, method, team, http.StatusBadRequest)
-			})
-		}
+	for _, team := range []string{"1team", "public", "information_schema", "pg_team"} {
+		t.Run(fmt.Sprintf("enable for %s", team), func(t *testing.T) {
+			assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
+			assertSchemaExists(ctx, t, client, "team_"+team, true)
+		})
 	}
 }
 

@@ -46,7 +46,7 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 
 func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	// TODO, should we set AUTHORIZATION on the schema
-	team := teamNameFromRequest(req)
+	team := teamNameWithPrefix(req)
 	err := validateSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -66,14 +66,14 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func teamNameFromRequest(req *http.Request) string {
+func teamNameWithPrefix(req *http.Request) string {
 	teamNameWithPotentialDash := strings.ToLower(chi.URLParam(req, "team"))
-	return strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
+	return "team_" + strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
 }
 
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	// TODO
-	team := teamNameFromRequest(req)
+	team := teamNameWithPrefix(req)
 	err := validateSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -94,7 +94,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 
 func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	// TODO
-	team := teamNameFromRequest(req)
+	team := teamNameWithPrefix(req)
 	if err := validateSchemaName(team); err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
