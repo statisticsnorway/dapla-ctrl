@@ -158,7 +158,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	slog.Info("user removed from sql instance", "identifier", op.Name)
-	
+
 	schema := pgx.Identifier{team}.Sanitize()
 
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
@@ -220,7 +220,7 @@ func teamNameWithPrefix(req *http.Request) string {
 
 // the sa email to be used for binding in gcloud
 func saDevelopersEmail(team, project string) string {
-	return team + "-developers@" + project + ".iam.gserviceaccount.com"
+	return "serviceAccount:" + team + "-developers@" + project + ".iam.gserviceaccount.com"
 }
 
 // the sa member name to be used for binding in cloudsql when using cloud iam service account
