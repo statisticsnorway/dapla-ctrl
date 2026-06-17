@@ -92,9 +92,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 
 	saMember := team + "-developers@" + c.daplaGroupSaProject + ".iam"
-	c.gcrm.AddBinding(req.Context(), c.cloudSqlProject, saMember, cloudSQLClientRole)
-	c.gcrm.AddBinding(req.Context(), c.cloudSqlProject, saMember, cloudSQLInstanceUserRole)
-
+	err = c.gcrm.AddBindings(req.Context(), c.cloudSqlProject, saMember, cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
