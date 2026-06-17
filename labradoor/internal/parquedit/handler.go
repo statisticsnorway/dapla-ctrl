@@ -12,7 +12,6 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googleresourcemanager"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -22,19 +21,19 @@ const (
 )
 
 type ParqueditConfig struct {
-	DatabaseUrl         string `env:"PARQUEDIT_DATABASE_URL,required"`
-	CloudSQLProject     string `env:"PARQUEDIT_CLOUDSQL_PROJECT"`
-	CloudSQLInstance    string `env:"PARQUEDIT_CLOUDSQL_INSTANCE"`
-	DaplaGroupSaProject string `env:"PARQUEDIT_DAPLA_GROUP_SA_PROJECT"`
+	DatabaseUrl        string `env:"PARQUEDIT_DATABASE_URL,required"`
+	CloudSQLProject    string `env:"PARQUEDIT_CLOUDSQL_PROJECT"`
+	CloudSQLInstance   string `env:"PARQUEDIT_CLOUDSQL_INSTANCE"`
+	CloudSqlUserSuffix string `env:"PARQUEDIT_CLOUDSQL_USER_SUFFIX"` // e.g. "-developers@my-project-1d.iam.gserviceaccount.com"
 }
 
 type Client struct {
-	db                  *pgxpool.Pool
-	gcrm                *googleresourcemanager.GoogleCloudResourceManager
-	sqladmin            *sqladmin.Service
-	cloudSqlProject     string
-	cloudSqlInstance    string
-	daplaGroupSaProject string
+	db                 *pgxpool.Pool
+	crm                cloudResourceManager
+	sqlManager         sqlManager
+	cloudSqlProject    string
+	cloudSqlInstance   string
+	cloudSqlUserSuffix string
 }
 
 type enableForTeamRequest struct {
@@ -46,7 +45,17 @@ func (c *Client) Close() {
 	c.db.Close()
 }
 
-func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
+type cloudResourceManager interface {
+	AddBindings(ctx context.Context, projectID, member string, roles ...string) error
+	RemoveMember(ctx context.Context, projectID, member string, roles ...string) error
+}
+
+type sqlManager interface {
+	AddUser(ctx context.Context, projectID, instance string, user *sqladmin.User) error
+	RemoveUser(ctx context.Context, projectID, instance, user string) error
+}
+
+func New(ctx context.Context, config ParqueditConfig, crm cloudResourceManager, sqlClient sqlManager) (*Client, error) {
 	pool, err := pgxpool.New(ctx, config.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
@@ -57,25 +66,13 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 		return nil, fmt.Errorf("unable to connect to DB: %w", err)
 	}
 
-	crm, err := googleresourcemanager.New(ctx)
-	if err != nil {
-		pool.Close()
-		return nil, fmt.Errorf("unable to create google cloud resource manager client: %w", err)
-	}
-
-	sqladminService, err := sqladmin.NewService(ctx)
-	if err != nil {
-		pool.Close()
-		return nil, fmt.Errorf("unable to create google sqladmin client: %w", err)
-	}
-
 	parquedit := &Client{
-		db:                  pool,
-		gcrm:                crm,
-		sqladmin:            sqladminService,
-		cloudSqlProject:     config.CloudSQLProject,
-		cloudSqlInstance:    config.CloudSQLInstance,
-		daplaGroupSaProject: config.DaplaGroupSaProject,
+		db:                 pool,
+		crm:                crm,
+		sqlManager:         sqlClient,
+		cloudSqlProject:    config.CloudSQLProject,
+		cloudSqlInstance:   config.CloudSQLInstance,
+		cloudSqlUserSuffix: config.CloudSqlUserSuffix,
 	}
 
 	return parquedit, nil
@@ -90,7 +87,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = c.gcrm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.daplaGroupSaProject), cloudSQLClientRole, cloudSQLInstanceUserRole)
+	err = c.crm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -98,11 +95,11 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	slog.Info("bindings for cloudsql on project created")
 
-	saMember := saDevelopersCloudSqlMember(team, c.daplaGroupSaProject)
-	op, err := c.sqladmin.Users.Insert(c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
+	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
+	err = c.sqlManager.AddUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
 		Name: saMember,
 		Type: "CLOUD_IAM_SERVICE_ACCOUNT",
-	}).Context(req.Context()).Do()
+	})
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -151,7 +148,19 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = c.gcrm.RemoveMember(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.daplaGroupSaProject), cloudSQLClientRole, cloudSQLInstanceUserRole)
+	schema := pgx.Identifier{team}.Sanitize()
+
+	slog.Info("drop schema for team")
+	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("droped schema for team", "result", result.String())
+
+	slog.Info("remove bindings for cloudsql on project")
+	err = c.crm.RemoveMember(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -159,24 +168,17 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	slog.Info("removed bindings for cloudsql on project")
 
-	saMember := saDevelopersCloudSqlMember(team, c.daplaGroupSaProject)
-	op, err := c.sqladmin.Users.Delete(c.cloudSqlProject, c.cloudSqlInstance).Name(saMember).Context(req.Context()).Do()
+	slog.Info("remove user from sql instance")
+	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
+	err = c.sqlManager.RemoveUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("user removed from sql instance", "identifier", op.Name)
+	slog.Info("removed user from sql instance")
 
-	schema := pgx.Identifier{team}.Sanitize()
-
-	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
-	if err != nil {
-		httplog.SetError(req.Context(), err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	slog.Info("disabled parquedit for team", "result", result.String())
+	slog.Info("disabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -228,11 +230,11 @@ func teamNameWithPrefix(req *http.Request) string {
 }
 
 // the sa email to be used for binding in gcloud
-func saDevelopersEmail(team, project string) string {
-	return "serviceAccount:" + team + "-developers@" + project + ".iam.gserviceaccount.com"
+func saDevelopersEmail(team, teamSuffix string) string {
+	return "serviceAccount:" + team + teamSuffix
 }
 
 // the sa member name to be used for binding in cloudsql when using cloud iam service account
-func saDevelopersCloudSqlMember(team, project string) string {
-	return team + "-developers@" + project + ".iam"
+func saDevelopersCloudSqlMember(team, teamSuffix string) string {
+	return strings.TrimSuffix(team+teamSuffix, ".gserviceaccount.com")
 }
