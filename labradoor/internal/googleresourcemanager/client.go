@@ -3,6 +3,7 @@ package googleresourcemanager
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
@@ -25,7 +26,7 @@ func New(ctx context.Context) (*GoogleCloudResourceManager, error) {
 	}, nil
 }
 
-// AddBinding adds the principal to one or more roles in the project's IAM policy.
+// AddBindings adds the principal to one or more roles in the project's IAM policy.
 func (c *GoogleCloudResourceManager) AddBindings(ctx context.Context, projectID, member string, roles ...string) error {
 	if len(roles) == 0 {
 		return nil
@@ -35,6 +36,16 @@ func (c *GoogleCloudResourceManager) AddBindings(ctx context.Context, projectID,
 	if err != nil {
 		return err
 	}
+
+	if addBindingsToPolicy(policy, member, roles...) {
+		return c.setPolicy(ctx, projectID, policy)
+	}
+
+	return nil
+}
+
+func addBindingsToPolicy(policy *cloudresourcemanager.Policy, member string, roles ...string) bool {
+	changed := false
 
 	for _, role := range roles {
 		// Find the policy binding for role. Only one binding can have the role.
@@ -46,20 +57,26 @@ func (c *GoogleCloudResourceManager) AddBindings(ctx context.Context, projectID,
 			}
 		}
 
-		if binding != nil {
-			// If the binding exists, adds the principal to the binding.
-			binding.Members = append(binding.Members, member)
-		} else {
-			// If the binding does not exist, adds a new binding to the policy.
-			binding = &cloudresourcemanager.Binding{
+		if binding == nil {
+			// create binding and add member
+			policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 				Role:    role,
 				Members: []string{member},
-			}
-			policy.Bindings = append(policy.Bindings, binding)
+			})
+			changed = true
+			continue
 		}
+
+		memberExists := slices.Contains(binding.Members, member)
+		if memberExists {
+			continue
+		}
+
+		binding.Members = append(binding.Members, member)
+		changed = true
 	}
 
-	return c.setPolicy(ctx, projectID, policy)
+	return changed
 }
 
 // RemoveMember removes the principal from the project's IAM policy
@@ -141,7 +158,6 @@ func (c *GoogleCloudResourceManager) setPolicy(ctx context.Context, projectID st
 	request := new(cloudresourcemanager.SetIamPolicyRequest)
 	request.Policy = policy
 	policy, err := c.client.Projects.SetIamPolicy(projectID, request).Context(ctx).Do()
-
 	if err != nil {
 		return fmt.Errorf("set iam policy on project: %w", err)
 	}
