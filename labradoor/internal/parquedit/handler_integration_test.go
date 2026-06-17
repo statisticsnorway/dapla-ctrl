@@ -5,14 +5,19 @@ package parquedit
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/httplog/v3"
+	"github.com/jackc/pgx/v5"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func TestManageTeamSchema(t *testing.T) {
@@ -20,7 +25,7 @@ func TestManageTeamSchema(t *testing.T) {
 	defer cancel()
 
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString})
+	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString}, &fakeCloudResourceManager{}, &fakeSqlManager{DatabaseUrl: connectionString})
 	if err != nil {
 		t.Fatalf("failed to create parquedit client: %v", err)
 	}
@@ -62,7 +67,7 @@ func TestTeamNamesArePrefixed(t *testing.T) {
 	defer cancel()
 
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString})
+	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString}, &fakeCloudResourceManager{}, &fakeSqlManager{DatabaseUrl: connectionString})
 	if err != nil {
 		t.Fatalf("failed to create parquedit client: %v", err)
 	}
@@ -105,6 +110,7 @@ func startPostgres(ctx context.Context, t *testing.T) string {
 
 func setupTestRoutes(client *Client) http.Handler {
 	router := chi.NewRouter()
+	router.Use(httplog.RequestLogger(slog.Default(), &httplog.Options{}))
 	router.Route("/parquedit/{team}", func(r chi.Router) {
 		r.Get("/", client.HasEnabled)
 		r.Put("/", client.EnableForTeam)
@@ -142,4 +148,60 @@ func assertSchemaExists(ctx context.Context, t *testing.T, client *Client, schem
 	if exists != want {
 		t.Fatalf("schema %q exists = %v, want %v", schema, exists, want)
 	}
+}
+
+type fakeCloudResourceManager struct{}
+
+func (f *fakeCloudResourceManager) AddBindings(
+	ctx context.Context,
+	projectID string,
+	member string,
+	roles ...string,
+) error {
+	return nil
+}
+
+func (f *fakeCloudResourceManager) RemoveMember(
+	ctx context.Context,
+	projectID string,
+	member string,
+	roles ...string,
+) error {
+	return nil
+}
+
+type fakeSqlManager struct {
+	DatabaseUrl string
+}
+
+func (f *fakeSqlManager) AddUser(ctx context.Context, projectID, instance string, user *sqladmin.User) error {
+	conn, err := pgx.Connect(ctx, f.DatabaseUrl)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(ctx)
+
+	var exists bool
+	err = conn.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = $1)", user.Name).Scan(&exists)
+	if err != nil {
+		return err
+	}
+
+	if!exists {
+		_, err = conn.Exec(ctx, "CREATE USER "+user.Name)
+	}
+	return err
+}
+
+func (f *fakeSqlManager) RemoveUser(ctx context.Context, projectID, instance, user string) error {
+	conn, err := pgx.Connect(ctx, f.DatabaseUrl)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
+		os.Exit(1)
+	}
+	defer conn.Close(ctx)
+
+	_, err = conn.Exec(ctx, "DROP USER IF EXISTS "+user)
+	return err
 }

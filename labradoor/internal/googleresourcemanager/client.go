@@ -15,15 +15,10 @@ type GoogleCloudResourceManager struct {
 	client *cloudresourcemanager.Service
 }
 
-func New(ctx context.Context) (*GoogleCloudResourceManager, error) {
-	client, err := cloudresourcemanager.NewService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
+func New(client *cloudresourcemanager.Service) *GoogleCloudResourceManager {
 	return &GoogleCloudResourceManager{
 		client: client,
-	}, nil
+	}
 }
 
 // AddBindings adds the principal to one or more roles in the project's IAM policy.

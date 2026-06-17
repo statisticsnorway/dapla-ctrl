@@ -81,4 +81,3 @@ func TestValidateSchemaName(t *testing.T) {
 		})
 	}
 }
-

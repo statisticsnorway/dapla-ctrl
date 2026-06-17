@@ -8,8 +8,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googleresourcemanager"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googlesqladmin"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/parquedit"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/api/cloudresourcemanager/v1"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
 func Run(ctx context.Context) error {
@@ -19,7 +23,17 @@ func Run(ctx context.Context) error {
 	ctx, signalStop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer signalStop()
 
-	parqueditClient, err := parquedit.New(ctx, parseConfigOrDie[parquedit.ParqueditConfig]())
+	gcrm, err := cloudresourcemanager.NewService(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to create google cloudresourcemanager client: %w", err)
+	}
+
+	sqladminService, err := sqladmin.NewService(ctx)
+	if err != nil {
+		return fmt.Errorf("unable to create google sqladmin client: %w", err)
+	}
+
+	parqueditClient, err := parquedit.New(ctx, parseConfigOrDie[parquedit.ParqueditConfig](), googleresourcemanager.New(gcrm), googlesqladmin.New(sqladminService))
 	if err != nil {
 		return fmt.Errorf("could not configure Parquedit: %w", err)
 	}
