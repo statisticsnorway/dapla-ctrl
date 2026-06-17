@@ -108,7 +108,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("user inserted in sql instance", "identifier", op.Name)
+	slog.Info("user inserted in sql instance")
 
 	schema := pgx.Identifier{team}.Sanitize()
 
@@ -120,14 +120,23 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	slog.Info("created schema", "result", result.String())
 
-	// TODO: double check with ffunk if grant all is correct
-	result, err = c.db.Exec(req.Context(), "GRANT TEAM_CREATE_SCHEMA TO "+saMember)
+	slog.Info("grant on schema", "user", saMember)
+	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO "+saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	slog.Info("granted privileges on schema", "result", result.String())
+
+	slog.Info("grant on all tables in schema")
+	result, err = c.db.Exec(req.Context(), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("granted privileges on all tables in schema", "result", result.String())
 
 	slog.Info("enabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
