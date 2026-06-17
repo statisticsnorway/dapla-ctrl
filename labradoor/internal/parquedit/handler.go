@@ -121,7 +121,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	slog.Info("created schema", "result", result.String())
 
 	// TODO: double check with ffunk if grant all is correct
-	result, err = c.db.Exec(req.Context(), "GRANT ALL ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
+	result, err = c.db.Exec(req.Context(), "GRANT TEAM_CREATE_SCHEMA TO "+saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -134,7 +134,6 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
-	// TODO
 	team := teamNameWithPrefix(req)
 	err := validateSchemaName(team)
 	if err != nil {
@@ -142,6 +141,24 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	err = c.gcrm.RemoveMember(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.daplaGroupSaProject), cloudSQLClientRole, cloudSQLInstanceUserRole)
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("removed bindings for cloudsql on project")
+
+	saMember := saDevelopersCloudSqlMember(team, c.daplaGroupSaProject)
+	op, err := c.sqladmin.Users.Delete(c.cloudSqlProject, c.cloudSqlInstance).Name(saMember).Context(req.Context()).Do()
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("user removed from sql instance", "identifier", op.Name)
+	
 	schema := pgx.Identifier{team}.Sanitize()
 
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
@@ -155,7 +172,6 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
-	// TODO
 	team := teamNameWithPrefix(req)
 	if err := validateSchemaName(team); err != nil {
 		httplog.SetError(req.Context(), err)

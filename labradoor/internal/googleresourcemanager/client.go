@@ -112,7 +112,7 @@ func (c *GoogleCloudResourceManager) RemoveMember(ctx context.Context, projectID
 // getPolicy gets the project's IAM policy
 func (c *GoogleCloudResourceManager) getPolicy(ctx context.Context, projectID string) (*cloudresourcemanager.Policy, error) {
 	request := new(cloudresourcemanager.GetIamPolicyRequest)
-	policy, err := c.client.Projects.GetIamPolicy(projectID, request).Do()
+	policy, err := c.client.Projects.GetIamPolicy(projectID, request).Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("get iam policy on project: %w", err)
 	}
@@ -124,7 +124,7 @@ func (c *GoogleCloudResourceManager) getPolicy(ctx context.Context, projectID st
 func (c *GoogleCloudResourceManager) setPolicy(ctx context.Context, projectID string, policy *cloudresourcemanager.Policy) error {
 	request := new(cloudresourcemanager.SetIamPolicyRequest)
 	request.Policy = policy
-	policy, err := c.client.Projects.SetIamPolicy(projectID, request).Do()
+	policy, err := c.client.Projects.SetIamPolicy(projectID, request).Context(ctx).Do()
 
 	if err != nil {
 		return fmt.Errorf("set iam policy on project: %w", err)
