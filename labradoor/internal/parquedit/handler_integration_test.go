@@ -188,7 +188,7 @@ func (f *fakeSqlManager) AddUser(ctx context.Context, projectID, instance string
 		return err
 	}
 
-	if!exists {
+	if !exists {
 		_, err = conn.Exec(ctx, "CREATE USER "+user.Name)
 	}
 	return err

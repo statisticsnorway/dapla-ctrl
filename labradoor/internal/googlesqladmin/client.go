@@ -25,9 +25,9 @@ func (c *GoogleSqlAdmin) AddUser(ctx context.Context, projectID, instance string
 		return nil
 	}
 	var gerr *googleapi.Error
-    if errors.As(err, &gerr) && gerr.Code == http.StatusNotFound {
-    	return nil
-    }
+	if errors.As(err, &gerr) && gerr.Code == http.StatusNotFound {
+		return nil
+	}
 	return err
 }
 
@@ -37,8 +37,8 @@ func (c *GoogleSqlAdmin) RemoveUser(ctx context.Context, projectID, instance, us
 		return nil
 	}
 	var gerr *googleapi.Error
-    if errors.As(err, &gerr) && gerr.Code == http.StatusNotFound {
-    	return nil
-    }
+	if errors.As(err, &gerr) && gerr.Code == http.StatusNotFound {
+		return nil
+	}
 	return err
 }
