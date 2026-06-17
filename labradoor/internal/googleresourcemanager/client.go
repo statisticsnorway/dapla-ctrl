@@ -73,40 +73,56 @@ func (c *GoogleCloudResourceManager) RemoveMember(ctx context.Context, projectID
 		return err
 	}
 
+	if removeMemberFromPolicy(policy, member, roles...) {
+		return c.setPolicy(ctx, projectID, policy)
+	}
+
+	return nil
+}
+
+func removeMemberFromPolicy(policy *cloudresourcemanager.Policy, member string, roles ...string) bool {
+	changed := false
+
 	for _, role := range roles {
 		// Find the policy binding for role. Only one binding can have the role.
-		var binding *cloudresourcemanager.Binding
-		var bindingIndex int
+		bindingIndex := -1
 		for i, b := range policy.Bindings {
 			if b.Role == role {
-				binding = b
 				bindingIndex = i
 				break
 			}
 		}
+		if bindingIndex == -1 {
+			continue
+		}
 
-		// Order doesn't matter for bindings or members, so to remove, move the last item
-		// into the removed spot and shrink the slice.
-		if len(binding.Members) == 1 {
-			// If the principal is the only member in the binding, removes the binding
+		// Loop over and readd all members without the one we want to remove
+		binding := policy.Bindings[bindingIndex]
+		members := binding.Members[:0]
+		removed := false
+		for _, mm := range binding.Members {
+			if mm == member {
+				removed = true
+				continue
+			}
+			members = append(members, mm)
+		}
+		if !removed {
+			continue
+		}
+
+		changed = true
+		if len(members) == 0 {
+			// Remove the binding if there are no members assigned to it
 			last := len(policy.Bindings) - 1
 			policy.Bindings[bindingIndex] = policy.Bindings[last]
 			policy.Bindings = policy.Bindings[:last]
 		} else {
-			// If there is more than one member in the binding, removes the principal
-			var memberIndex int
-			for i, mm := range binding.Members {
-				if mm == member {
-					memberIndex = i
-				}
-			}
-			last := len(policy.Bindings[bindingIndex].Members) - 1
-			binding.Members[memberIndex] = binding.Members[last]
-			binding.Members = binding.Members[:last]
+			binding.Members = members
 		}
 	}
 
-	return c.setPolicy(ctx, projectID, policy)
+	return changed
 }
 
 // getPolicy gets the project's IAM policy
