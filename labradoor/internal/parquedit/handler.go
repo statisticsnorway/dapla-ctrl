@@ -82,7 +82,6 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 }
 
 func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
-	// TODO, should we set AUTHORIZATION on the schema
 	team := teamNameWithPrefix(req)
 	err := validateSchemaName(team)
 	if err != nil {
@@ -91,18 +90,25 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	saMember := team + "-developers@" + c.daplaGroupSaProject + ".iam"
-	err = c.gcrm.AddBindings(req.Context(), c.cloudSqlProject, saMember, cloudSQLClientRole, cloudSQLInstanceUserRole)
+	err = c.gcrm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.daplaGroupSaProject), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	slog.Info("bindings for cloudsql on project created")
 
-	c.sqladmin.Users.Insert(c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
+	saMember := saDevelopersCloudSqlMember(team, c.daplaGroupSaProject)
+	op, err := c.sqladmin.Users.Insert(c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
 		Name: saMember,
 		Type: "CLOUD_IAM_SERVICE_ACCOUNT",
-	})
+	}).Context(req.Context()).Do()
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("user inserted in sql instance", "identifier", op.Name)
 
 	schema := pgx.Identifier{team}.Sanitize()
 
@@ -112,7 +118,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("created schema", "team", team, "result", result.String())
+	slog.Info("created schema", "result", result.String())
 
 	// TODO: double check with ffunk if grant all is correct
 	result, err = c.db.Exec(req.Context(), "GRANT ALL ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
@@ -121,15 +127,10 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("granted all on schema", "team", team, "result", result.String())
+	slog.Info("granted privileges on schema", "result", result.String())
 
-	slog.Info("enabled parquedit for team", "team", team)
+	slog.Info("enabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
-}
-
-func teamNameWithPrefix(req *http.Request) string {
-	teamNameWithPotentialDash := strings.ToLower(chi.URLParam(req, "team"))
-	return "team_" + strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
 }
 
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
@@ -149,7 +150,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("disabled parquedit for team", "team", team, "result", result.String())
+	slog.Info("disabled parquedit for team", "result", result.String())
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -194,4 +195,19 @@ func validateSchemaName(schema string) error {
 		return fmt.Errorf("schema name %q is reserved", schema)
 	}
 	return nil
+}
+
+func teamNameWithPrefix(req *http.Request) string {
+	teamNameWithPotentialDash := strings.ToLower(chi.URLParam(req, "team"))
+	return "team_" + strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
+}
+
+// the sa email to be used for binding in gcloud
+func saDevelopersEmail(team, project string) string {
+	return team + "-developers@" + project + ".iam.gserviceaccount.com"
+}
+
+// the sa member name to be used for binding in cloudsql when using cloud iam service account
+func saDevelopersCloudSqlMember(team, project string) string {
+	return team + "-developers@" + project + ".iam"
 }
