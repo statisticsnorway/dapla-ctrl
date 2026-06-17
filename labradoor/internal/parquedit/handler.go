@@ -12,14 +12,34 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googleresourcemanager"
+	sqladmin "google.golang.org/api/sqladmin/v1beta4"
+)
+
+const (
+	cloudSQLClientRole       = "roles/cloudsql.client"
+	cloudSQLInstanceUserRole = "roles/cloudsql.instanceUser"
 )
 
 type ParqueditConfig struct {
-	DatabaseUrl string `env:"PARQUEDIT_DATABASE_URL,required"`
+	DatabaseUrl         string `env:"PARQUEDIT_DATABASE_URL,required"`
+	CloudSQLProject     string `env:"PARQUEDIT_CLOUDSQL_PROJECT"`
+	CloudSQLInstance    string `env:"PARQUEDIT_CLOUDSQL_INSTANCE"`
+	DaplaGroupSaProject string `env:"PARQUEDIT_DAPLA_GROUP_SA_PROJECT"`
 }
 
 type Client struct {
-	db *pgxpool.Pool
+	db                  *pgxpool.Pool
+	gcrm                *googleresourcemanager.GoogleCloudResourceManager
+	sqladmin            *sqladmin.Service
+	cloudSqlProject     string
+	cloudSqlInstance    string
+	daplaGroupSaProject string
+}
+
+type enableForTeamRequest struct {
+	Project string `json:"project"`
+	User    string `json:"user"`
 }
 
 func (c *Client) Close() {
@@ -37,8 +57,25 @@ func New(ctx context.Context, config ParqueditConfig) (*Client, error) {
 		return nil, fmt.Errorf("unable to connect to DB: %w", err)
 	}
 
+	crm, err := googleresourcemanager.New(ctx)
+	if err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("unable to create google cloud resource manager client: %w", err)
+	}
+
+	sqladminService, err := sqladmin.NewService(ctx)
+	if err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("unable to create google sqladmin client: %w", err)
+	}
+
 	parquedit := &Client{
-		db: pool,
+		db:                  pool,
+		gcrm:                crm,
+		sqladmin:            sqladminService,
+		cloudSqlProject:     config.CloudSQLProject,
+		cloudSqlInstance:    config.CloudSQLInstance,
+		daplaGroupSaProject: config.DaplaGroupSaProject,
 	}
 
 	return parquedit, nil
@@ -53,6 +90,22 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	saMember := team + "-developers@" + c.daplaGroupSaProject + ".iam"
+	c.gcrm.AddBinding(req.Context(), c.cloudSqlProject, saMember, cloudSQLClientRole)
+	c.gcrm.AddBinding(req.Context(), c.cloudSqlProject, saMember, cloudSQLInstanceUserRole)
+
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	c.sqladmin.Users.Insert(c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
+		Name: saMember,
+		Type: "CLOUD_IAM_SERVICE_ACCOUNT",
+	})
+
 	schema := pgx.Identifier{team}.Sanitize()
 
 	result, err := c.db.Exec(req.Context(), "CREATE SCHEMA IF NOT EXISTS "+schema)
@@ -61,8 +114,18 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("enabled parquedit for team", "team", team, "result", result.String())
+	slog.Info("created schema", "team", team, "result", result.String())
 
+	// TODO: double check with ffunk if grant all is correct
+	result, err = c.db.Exec(req.Context(), "GRANT ALL ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	slog.Info("granted all on schema", "team", team, "result", result.String())
+
+	slog.Info("enabled parquedit for team", "team", team)
 	w.WriteHeader(http.StatusOK)
 }
 
