@@ -29,8 +29,8 @@ type ParqueditConfig struct {
 
 type Client struct {
 	db                 *pgxpool.Pool
-	crm                cloudResourceManager
-	sqlManager         sqlManager
+	crm                CloudResourceManager
+	sqlManager         SqlManager
 	cloudSqlProject    string
 	cloudSqlInstance   string
 	cloudSqlUserSuffix string
@@ -40,17 +40,17 @@ func (c *Client) Close() {
 	c.db.Close()
 }
 
-type cloudResourceManager interface {
+type CloudResourceManager interface {
 	AddBindings(ctx context.Context, projectID, member string, roles ...string) error
 	RemoveMember(ctx context.Context, projectID, member string, roles ...string) error
 }
 
-type sqlManager interface {
+type SqlManager interface {
 	AddUser(ctx context.Context, projectID, instance string, user *sqladmin.User) error
 	RemoveUser(ctx context.Context, projectID, instance, user string) error
 }
 
-func New(ctx context.Context, config ParqueditConfig, crm cloudResourceManager, sqlClient sqlManager) (*Client, error) {
+func New(ctx context.Context, config ParqueditConfig, crm CloudResourceManager, sqlClient SqlManager) (*Client, error) {
 	pool, err := pgxpool.New(ctx, config.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
