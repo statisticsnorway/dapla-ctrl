@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v3"
 
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/logger"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/parquedit"
 )
 
@@ -31,6 +32,10 @@ func SetupRoutes(cfg RouterConfig, parquedit *parquedit.Client) *chi.Mux {
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					ctx := r.Context()
 					httplog.SetAttrs(ctx, slog.String("team", chi.URLParam(r, "team")))
+
+					// TODO: trace id
+					// So we can use slog as normal in other handler functions
+					ctx = logger.CtxWithLogger(ctx, slog.Default().With("team", chi.URLParam(r, "team")))
 					h.ServeHTTP(w, r.WithContext(ctx))
 				})
 			})

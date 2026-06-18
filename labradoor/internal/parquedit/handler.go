@@ -3,7 +3,6 @@ package parquedit
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"regexp"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/logger"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -81,6 +81,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	log := logger.LoggerFromCtx(req.Context())
 
 	err = c.crm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
@@ -88,8 +89,9 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("bindings for cloudsql on project created")
+	log.Info("bindings for cloudsql on project created")
 
+	log.Info("Add user to sql instance")
 	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
 	err = c.sqlManager.AddUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
 		Name: saMember,
@@ -100,7 +102,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("user inserted in sql instance")
+	log.Info("Added user to sql instance")
 
 	schema := pgx.Identifier{team}.Sanitize()
 
@@ -110,27 +112,27 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("created schema", "result", result.String())
+	log.Info("created schema", "result", result.String())
 
-	slog.Info("grant on schema", "user", saMember)
+	log.Info("grant on schema", "user", saMember)
 	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO "+saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("granted privileges on schema", "result", result.String())
+	log.Info("granted privileges on schema", "result", result.String())
 
-	slog.Info("grant on all tables in schema")
+	log.Info("grant on all tables in schema")
 	result, err = c.db.Exec(req.Context(), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("granted privileges on all tables in schema", "result", result.String())
+	log.Info("granted privileges on all tables in schema", "result", result.String())
 
-	slog.Info("enabled parquedit for team")
+	log.Info("enabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -142,28 +144,28 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	log := logger.LoggerFromCtx(req.Context())
 	schema := pgx.Identifier{team}.Sanitize()
 
-	slog.Info("drop schema for team")
+	log.Info("drop schema for team")
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("droped schema for team", "result", result.String())
+	log.Info("droped schema for team", "result", result.String())
 
-	slog.Info("remove bindings for cloudsql on project")
+	log.Info("remove bindings for cloudsql on project")
 	err = c.crm.RemoveMember(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("removed bindings for cloudsql on project")
+	log.Info("removed bindings for cloudsql on project")
 
-	slog.Info("remove user from sql instance")
+	log.Info("remove user from sql instance")
 	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
 	err = c.sqlManager.RemoveUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, saMember)
 	if err != nil {
@@ -171,9 +173,9 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	slog.Info("removed user from sql instance")
+	log.Info("removed user from sql instance")
 
-	slog.Info("disabled parquedit for team")
+	log.Info("disabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
 }
 
