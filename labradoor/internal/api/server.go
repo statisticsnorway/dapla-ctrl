@@ -14,7 +14,7 @@ import (
 )
 
 type ServerConfig struct {
-	ListenAddr string `env:"LISTEN_ADDR,default=:8080"`
+	ListenAddr string `env:"LISTEN_ADDR" envDefault:":8080"`
 }
 
 func runHTTPServer(ctx context.Context, router *chi.Mux) error {
