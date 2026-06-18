@@ -301,7 +301,7 @@ jobs:
   labradoor-test:
     name: Labradoor / Test
     needs: changes
-    if: ${{ needs.changes.outputs.reconcilers == 'true' }}
+    if: ${{ needs.changes.outputs.labradoor == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
