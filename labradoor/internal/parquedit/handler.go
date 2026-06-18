@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/httplog/v3"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/logger"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
@@ -19,13 +19,6 @@ const (
 	cloudSQLClientRole       = "roles/cloudsql.client"
 	cloudSQLInstanceUserRole = "roles/cloudsql.instanceUser"
 )
-
-type ParqueditConfig struct {
-	DatabaseUrl        string `env:"PARQUEDIT_DATABASE_URL,required"`
-	CloudSQLProject    string `env:"PARQUEDIT_CLOUDSQL_PROJECT"`
-	CloudSQLInstance   string `env:"PARQUEDIT_CLOUDSQL_INSTANCE"`
-	CloudSqlUserSuffix string `env:"PARQUEDIT_CLOUDSQL_USER_SUFFIX"` // e.g. "-developers@my-project-1d.iam.gserviceaccount.com"
-}
 
 type Client struct {
 	db                 *pgxpool.Pool
@@ -50,7 +43,7 @@ type SqlManager interface {
 	RemoveUser(ctx context.Context, projectID, instance, user string) error
 }
 
-func New(ctx context.Context, config ParqueditConfig, crm CloudResourceManager, sqlClient SqlManager) (*Client, error) {
+func New(ctx context.Context, config config.ParqueditConfig, crm CloudResourceManager, sqlClient SqlManager) (*Client, error) {
 	pool, err := pgxpool.New(ctx, config.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
@@ -81,7 +74,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log := logger.LoggerFromCtx(req.Context())
+	log := config.LoggerFromCtx(req.Context())
 
 	err = c.crm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
@@ -144,7 +137,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	log := logger.LoggerFromCtx(req.Context())
+	log := config.LoggerFromCtx(req.Context())
 	schema := pgx.Identifier{team}.Sanitize()
 
 	log.Info("drop schema for team")

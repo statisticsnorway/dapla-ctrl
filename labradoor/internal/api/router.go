@@ -10,15 +10,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httplog/v3"
 
-	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/logger"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/parquedit"
 )
 
-type RouterConfig struct {
-	AuthToken string `env:"AUTH_TOKEN,required"`
-}
-
-func SetupRoutes(cfg RouterConfig, parquedit *parquedit.Client) *chi.Mux {
+func SetupRoutes(cfg config.RouterConfig, parquedit *parquedit.Client) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Heartbeat("/ping"))
 	r.Use(httplog.RequestLogger(slog.Default(), &httplog.Options{}))
@@ -35,7 +31,7 @@ func SetupRoutes(cfg RouterConfig, parquedit *parquedit.Client) *chi.Mux {
 
 					// TODO: trace id
 					// So we can use slog as normal in other handler functions
-					ctx = logger.CtxWithLogger(ctx, slog.Default().With("team", chi.URLParam(r, "team")))
+					ctx = config.CtxWithLogger(ctx, slog.Default().With("team", chi.URLParam(r, "team")))
 					h.ServeHTTP(w, r.WithContext(ctx))
 				})
 			})

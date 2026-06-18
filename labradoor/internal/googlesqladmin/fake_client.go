@@ -9,17 +9,17 @@ import (
 )
 
 type FakeSqlManager struct {
-	DatabaseUrl string
+	ConnectionString string
 }
 
-func NewFake(databaseUrl string) *FakeSqlManager {
+func NewFake(connectionString string) *FakeSqlManager {
 	return &FakeSqlManager{
-		DatabaseUrl: databaseUrl,
+		ConnectionString: connectionString,
 	}
 }
 
 func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string, user *sqladmin.User) error {
-	conn, err := pgx.Connect(ctx, f.DatabaseUrl)
+	conn, err := pgx.Connect(ctx, f.ConnectionString)
 	if err != nil {
 		return fmt.Errorf("unable to connect to database: %v\n", err)
 	}
@@ -38,7 +38,7 @@ func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string
 }
 
 func (f *FakeSqlManager) RemoveUser(ctx context.Context, projectID, instance, user string) error {
-	conn, err := pgx.Connect(ctx, f.DatabaseUrl)
+	conn, err := pgx.Connect(ctx, f.ConnectionString)
 	if err != nil {
 		return fmt.Errorf("unable to connect to database: %v\n", err)
 	}

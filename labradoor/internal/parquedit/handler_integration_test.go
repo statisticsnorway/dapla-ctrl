@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v3"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googleresourcemanager"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googlesqladmin"
 	"github.com/testcontainers/testcontainers-go"
@@ -24,7 +25,7 @@ func TestManageTeamSchema(t *testing.T) {
 	defer cancel()
 
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString}, &googleresourcemanager.FakeCloudResourceManager{}, &googlesqladmin.FakeSqlManager{DatabaseUrl: connectionString})
+	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, googleresourcemanager.NewFake(), googlesqladmin.NewFake(connectionString))
 	if err != nil {
 		t.Fatalf("failed to create parquedit client: %v", err)
 	}
@@ -66,7 +67,7 @@ func TestTeamNamesArePrefixed(t *testing.T) {
 	defer cancel()
 
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, ParqueditConfig{DatabaseUrl: connectionString}, &googleresourcemanager.FakeCloudResourceManager{}, &googlesqladmin.FakeSqlManager{DatabaseUrl: connectionString})
+	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, googleresourcemanager.NewFake(), googlesqladmin.NewFake(connectionString))
 	if err != nil {
 		t.Fatalf("failed to create parquedit client: %v", err)
 	}

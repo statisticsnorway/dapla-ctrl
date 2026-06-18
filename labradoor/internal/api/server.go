@@ -5,22 +5,16 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
-	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	"golang.org/x/sync/errgroup"
 )
 
-type ServerConfig struct {
-	ListenAddr string `env:"LISTEN_ADDR" envDefault:":8080"`
-}
-
-func runHTTPServer(ctx context.Context, router *chi.Mux) error {
-	serverConfig := parseConfigOrDie[ServerConfig]()
+func runHTTPServer(ctx context.Context, cfg config.ServerConfig, router *chi.Mux) error {
 	server := &http.Server{
-		Addr:              serverConfig.ListenAddr,
+		Addr:              cfg.ListenAddr,
 		Handler:           router,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
@@ -39,7 +33,7 @@ func runHTTPServer(ctx context.Context, router *chi.Mux) error {
 	})
 
 	wg.Go(func() error {
-		slog.Info("HTTP server accepting requests on " + serverConfig.ListenAddr)
+		slog.Info("HTTP server accepting requests on " + cfg.ListenAddr)
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Info("unexpected error from HTTP server", "error", err)
 			return err
@@ -48,13 +42,4 @@ func runHTTPServer(ctx context.Context, router *chi.Mux) error {
 		return nil
 	})
 	return wg.Wait()
-}
-
-func parseConfigOrDie[T any]() T {
-	result, err := env.ParseAs[T]()
-	if err != nil {
-		slog.Error("could not parse config", "error", err)
-		os.Exit(1)
-	}
-	return result
 }

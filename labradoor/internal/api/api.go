@@ -8,6 +8,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googleresourcemanager"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/googlesqladmin"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/parquedit"
@@ -16,12 +17,6 @@ import (
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
 
-type APIConfig struct {
-	WithFakeCloudResourceManager   bool   `env:"WITH_FAKE_CLOUD_RESOURCE_MANAGER"`
-	WithFakeSqlAdmin               bool   `env:"WITH_FAKE_SQL_ADMIN"`
-	FakeSqlAdminDatabaseConnString string `env:"FAKE_SQL_ADMIN_DB_CONN_STRING"`
-}
-
 func Run(ctx context.Context) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -29,10 +24,13 @@ func Run(ctx context.Context) error {
 	ctx, signalStop := signal.NotifyContext(ctx, syscall.SIGTERM, syscall.SIGINT)
 	defer signalStop()
 
-	cfg := parseConfigOrDie[APIConfig]()
+	cfg, err := config.ParseConfig[config.Config]()
+	if err != nil {
+		return fmt.Errorf("could not parse config, %w", err)
+	}
 
 	var resourceManager parquedit.CloudResourceManager
-	if cfg.WithFakeCloudResourceManager {
+	if cfg.Fakes.WithFakeCloudResourceManager {
 		slog.Warn("running with fake cloud resource manager")
 		resourceManager = googleresourcemanager.NewFake()
 	} else {
@@ -44,9 +42,9 @@ func Run(ctx context.Context) error {
 	}
 
 	var sqlAdminClient parquedit.SqlManager
-	if cfg.WithFakeSqlAdmin {
+	if cfg.Fakes.WithFakeSqlAdmin {
 		slog.Warn("running with fake sql admin")
-		sqlAdminClient = googlesqladmin.NewFake(cfg.FakeSqlAdminDatabaseConnString)
+		sqlAdminClient = googlesqladmin.NewFake(cfg.Fakes.FakeSqlAdminDatabaseConnString)
 	} else {
 		sqladminService, err := sqladmin.NewService(ctx)
 		if err != nil {
@@ -55,18 +53,19 @@ func Run(ctx context.Context) error {
 		sqlAdminClient = googlesqladmin.New(sqladminService)
 	}
 
-	parqueditClient, err := parquedit.New(ctx, parseConfigOrDie[parquedit.ParqueditConfig](), resourceManager, sqlAdminClient)
+	parqueditClient, err := parquedit.New(ctx, cfg.Parquedit, resourceManager, sqlAdminClient)
 	if err != nil {
 		return fmt.Errorf("could not configure Parquedit: %w", err)
 	}
 	defer parqueditClient.Close()
 
-	router := SetupRoutes(parseConfigOrDie[RouterConfig](), parqueditClient)
+	router := SetupRoutes(cfg.Router, parqueditClient)
 
 	wg, ctx := errgroup.WithContext(ctx)
 	wg.Go(func() error {
 		return runHTTPServer(
 			ctx,
+			cfg.Server,
 			router,
 		)
 	})
