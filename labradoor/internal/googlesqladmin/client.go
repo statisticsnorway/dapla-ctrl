@@ -24,9 +24,6 @@ func (c *GoogleSqlAdmin) AddUser(ctx context.Context, projectID, instance string
 	if googleapi.IsNotModified(err) {
 		return nil
 	}
-	if gerr, ok := errors.AsType[*googleapi.Error](err); ok && gerr.Code == http.StatusNotFound {
-		return nil
-	}
 	return err
 }
 
