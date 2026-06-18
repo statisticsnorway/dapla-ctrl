@@ -36,11 +36,6 @@ type Client struct {
 	cloudSqlUserSuffix string
 }
 
-type enableForTeamRequest struct {
-	Project string `json:"project"`
-	User    string `json:"user"`
-}
-
 func (c *Client) Close() {
 	c.db.Close()
 }
