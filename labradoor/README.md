@@ -6,6 +6,7 @@ A: No. 🚪
 
 The app will receive commands from the reconciler and handle them appropriately.
 
+
 ## Configuration
 
 Environment variables can be provided via a local `.env` file for development.
