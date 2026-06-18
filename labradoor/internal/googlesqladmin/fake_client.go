@@ -21,7 +21,7 @@ func NewFake(connectionString string) *FakeSqlManager {
 func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string, user *sqladmin.User) error {
 	conn, err := pgx.Connect(ctx, f.ConnectionString)
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v\n", err)
+		return fmt.Errorf("unable to connect to database: %v", err)
 	}
 	defer conn.Close(ctx)
 
@@ -40,7 +40,7 @@ func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string
 func (f *FakeSqlManager) RemoveUser(ctx context.Context, projectID, instance, user string) error {
 	conn, err := pgx.Connect(ctx, f.ConnectionString)
 	if err != nil {
-		return fmt.Errorf("unable to connect to database: %v\n", err)
+		return fmt.Errorf("unable to connect to database: %v", err)
 	}
 	defer conn.Close(ctx)
 

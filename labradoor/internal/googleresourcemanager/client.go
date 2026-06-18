@@ -152,7 +152,7 @@ func (c *GoogleCloudResourceManager) getPolicy(ctx context.Context, projectID st
 func (c *GoogleCloudResourceManager) setPolicy(ctx context.Context, projectID string, policy *cloudresourcemanager.Policy) error {
 	request := new(cloudresourcemanager.SetIamPolicyRequest)
 	request.Policy = policy
-	policy, err := c.client.Projects.SetIamPolicy(projectID, request).Context(ctx).Do()
+	_, err := c.client.Projects.SetIamPolicy(projectID, request).Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("set iam policy on project: %w", err)
 	}

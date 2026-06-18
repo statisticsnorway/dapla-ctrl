@@ -31,7 +31,7 @@ func SetupRoutes(cfg config.RouterConfig, parquedit *parquedit.Client) *chi.Mux 
 					// So we can use slog as normal in other handler functions
 					ctx = config.CtxWithLogger(ctx, slog.Default().With("team", chi.URLParam(r, "team")))
 
-					if correlation_id:= r.Header.Get("X-Reconciler-CorrID"); correlation_id != "" {
+					if correlation_id := r.Header.Get("X-Reconciler-CorrID"); correlation_id != "" {
 						httplog.SetAttrs(ctx, slog.String("correlation_id", correlation_id))
 						ctx = config.CtxWithLogger(ctx, slog.Default().With("correlation_id", correlation_id))
 
