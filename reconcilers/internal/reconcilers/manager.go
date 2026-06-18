@@ -26,7 +26,7 @@ type ctxKey int
 
 const (
 	reconcilerTimeout        = time.Minute * 15
-	ctxCorrelationID  ctxKey = iota
+	CtxCorrelationID  ctxKey = iota
 )
 
 type Manager struct {
@@ -300,7 +300,7 @@ func (m *Manager) deleteTeam(ctx context.Context, reconcilers []Reconciler, dapl
 
 	if req.CorrelationID != "" {
 		log = log.WithField("correlation_id", req.CorrelationID)
-		ctx = context.WithValue(ctx, ctxCorrelationID, req.CorrelationID)
+		ctx = context.WithValue(ctx, CtxCorrelationID, req.CorrelationID)
 	}
 
 	if req.TraceID != "" {
@@ -391,7 +391,7 @@ func (m *Manager) reconcileTeam(ctx context.Context, reconcilers []Reconciler, d
 
 	if input.CorrelationID != "" {
 		log = log.WithField("correlation_id", input.CorrelationID)
-		ctx = context.WithValue(ctx, ctxCorrelationID, input.CorrelationID)
+		ctx = context.WithValue(ctx, CtxCorrelationID, input.CorrelationID)
 	}
 
 	if input.TraceID != "" {

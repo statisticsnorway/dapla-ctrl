@@ -28,10 +28,14 @@ func SetupRoutes(cfg config.RouterConfig, parquedit *parquedit.Client) *chi.Mux 
 				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					ctx := r.Context()
 					httplog.SetAttrs(ctx, slog.String("team", chi.URLParam(r, "team")))
-
-					// TODO: trace id
 					// So we can use slog as normal in other handler functions
 					ctx = config.CtxWithLogger(ctx, slog.Default().With("team", chi.URLParam(r, "team")))
+
+					if correlation_id:= r.Header.Get("X-Reconciler-CorrID"); correlation_id != "" {
+						httplog.SetAttrs(ctx, slog.String("correlation_id", correlation_id))
+						ctx = config.CtxWithLogger(ctx, slog.Default().With("correlation_id", correlation_id))
+
+					}
 					h.ServeHTTP(w, r.WithContext(ctx))
 				})
 			})
