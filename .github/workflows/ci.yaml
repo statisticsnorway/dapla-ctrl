@@ -6,6 +6,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      api:
+        description: Build api
+        type: boolean
+        default: false
+      frontend:
+        description: Build frontend
+        type: boolean
+        default: false
+      reconcilers:
+        description: Build reconcilers
+        type: boolean
+        default: false
+      labradoor:
+        description: Build labradoor
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -30,14 +47,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build all when we trigger a manual dispatches.
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            api="${{ inputs.api }}"
+            frontend="${{ inputs.frontend }}"
+            reconcilers="${{ inputs.reconcilers }}"
+            labradoor="${{ inputs.labradoor }}"
+
             {
-              echo "api=true"
-              echo "frontend=true"
-              echo "reconcilers=true"
-              echo "labradoor=true"
+              echo "api=$api"
+              echo "frontend=$frontend"
+              echo "reconcilers=$reconcilers"
+              echo "labradoor=$labradoor"
             } >> "$GITHUB_OUTPUT"
+
+            {
+              echo "## Triggered build for service"
+              echo
+              echo "| Service | Build |"
+              echo "| --- | --- |"
+              echo "| API | $api |"
+              echo "| Frontend | $frontend |"
+              echo "| Reconcilers | $reconcilers |"
+              echo "| Labradoor | $labradoor |"
+            } >> "$GITHUB_STEP_SUMMARY"
+
             exit 0
           fi
 
