@@ -18,6 +18,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       frontend: ${{ steps.filter.outputs.frontend }}
       reconcilers: ${{ steps.filter.outputs.reconcilers }}
+      labradoor: ${{ steps.filter.outputs.labradoor }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -77,7 +78,7 @@ jobs:
                 reconcilers=true
                 ;;
               labradoor/*)
-              labradoor=true
+                labradoor=true
                 ;;
             esac
           done < changed-files.txt
@@ -88,6 +89,17 @@ jobs:
             echo "reconcilers=$reconcilers"
             echo "labradoor=$labradoor"
           } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Detected service changes"
+            echo
+            echo "| Service | Changed |"
+            echo "| --- | --- |"
+            echo "| API | $api |"
+            echo "| Frontend | $frontend |"
+            echo "| Reconcilers | $reconcilers |"
+            echo "| Labradoor | $labradoor |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   api-test:
     name: API / Test
@@ -305,13 +317,13 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: reconcilers
+        working-directory: labradoor
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
         with:
           cache_key_prefix: mise-labradoor-test
-          working_directory: reconcilers
+          working_directory: labradoor
       - uses: ./.github/actions/go-cache
         with:
           key: labradoor-test
@@ -390,24 +402,27 @@ jobs:
       - name: Determine Image Tag
         id: set-tag
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-          TAG="${GITHUB_REF#refs/tags/}"
-          echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
-          echo "RELEASE_BUILD=true" >> $GITHUB_ENV
-          else
-          echo "TAG=${{ github.sha }}" >> $GITHUB_ENV
-          echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
-          echo "RELEASE_BUILD=false" >> $GITHUB_ENV
+          tag="${GITHUB_SHA}"
+          release_build=false
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            tag="${GITHUB_REF#refs/tags/}"
+            release_build=true
           fi
-          echo "Final image tag: ${TAG}"
+
+          {
+            echo "TAG=${tag}"
+            echo "RELEASE_BUILD=${release_build}"
+          } >> "$GITHUB_ENV"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "Final image tag: ${tag}"
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f #v7.1.0
         with:
           context: labradoor/.
           platforms: ${{ env.PLATFORMS }}
-          file: Dockerfile
+          file: labradoor/Dockerfile
           push: true
           tags: |
             europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-lab-docker/dapla-ctrl-labradoor:${{ steps.set-tag.outputs.tag }}
