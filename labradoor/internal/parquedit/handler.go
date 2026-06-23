@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v3"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -67,8 +66,8 @@ func New(ctx context.Context, config config.ParqueditConfig, crm CloudResourceMa
 }
 
 func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
-	team := teamNameWithPrefix(req)
-	err := validateSchemaName(team)
+	team := strings.ToLower(chi.URLParam(req, "team"))
+	schema, err := toSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -84,8 +83,8 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Info("bindings for cloudsql on project created")
 
-	log.Info("Add user to sql instance")
 	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
+	log.Info("Add user to sql instance", "user", saMember)
 	err = c.sqlManager.AddUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, &sqladmin.User{
 		Name: saMember,
 		Type: "CLOUD_IAM_SERVICE_ACCOUNT",
@@ -97,17 +96,17 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Info("Added user to sql instance")
 
-	schema := pgx.Identifier{team}.Sanitize()
-
+	log.Info("create schema", "schema", schema)
 	result, err := c.db.Exec(req.Context(), "CREATE SCHEMA IF NOT EXISTS "+schema)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	log.Info("created schema", "result", result.String())
+	log.Info("created schema", "schema", schema, "result", result.String())
 
 	log.Info("grant on schema", "user", saMember)
+	
 	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO "+saMember)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -130,17 +129,16 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
-	team := teamNameWithPrefix(req)
-	err := validateSchemaName(team)
+	team := strings.ToLower(chi.URLParam(req, "team"))
+	schema, err := toSchemaName(team)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	log := config.LoggerFromCtx(req.Context())
-	schema := pgx.Identifier{team}.Sanitize()
 
-	log.Info("drop schema for team")
+	log.Info("drop schema for team", "schema", schema)
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
@@ -173,20 +171,21 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
-	team := teamNameWithPrefix(req)
-	if err := validateSchemaName(team); err != nil {
+	team := strings.ToLower(chi.URLParam(req, "team"))
+	schema, err := toSchemaName(team)
+	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	var exists bool
-	err := c.db.QueryRow(req.Context(), `
+	err = c.db.QueryRow(req.Context(), `
 		SELECT EXISTS (
 			SELECT 1
 			FROM information_schema.schemata
 			WHERE schema_name = $1
-		)`, team).Scan(&exists)
+		)`, schema).Scan(&exists)
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -201,22 +200,23 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
 
-func validateSchemaName(schema string) error {
+// schema names are prefixed with _team to be clear in the DB and avoid potential collisions
+func toSchemaName(team string) (string, error) {
+	if len(team) == 0 {
+		return "", fmt.Errorf("team must not be empty")
+	}
+
+	schema := "team_" + strings.ReplaceAll(team, "-", "_")
 	// https://www.postgresql.org/docs/18/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 	validSchemaName, _ := regexp.MatchString("^[a-z][a-z0-9_]{0,62}$", schema)
 	if !validSchemaName {
-		return fmt.Errorf("schema name %q is invalid", schema)
+		return "", fmt.Errorf("schema name %q is invalid", schema)
 	}
 
 	if strings.HasPrefix(schema, "pg_") || strings.EqualFold(schema, "public") || strings.EqualFold(schema, "information_schema") {
-		return fmt.Errorf("schema name %q is reserved", schema)
+		return "", fmt.Errorf("schema name %q is reserved", schema)
 	}
-	return nil
-}
-
-func teamNameWithPrefix(req *http.Request) string {
-	teamNameWithPotentialDash := strings.ToLower(chi.URLParam(req, "team"))
-	return "team_" + strings.ReplaceAll(teamNameWithPotentialDash, "-", "_")
+	return schema, nil
 }
 
 // the sa email to be used for binding in gcloud

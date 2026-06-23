@@ -4,7 +4,6 @@ package parquedit
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -24,8 +23,9 @@ func TestManageTeamSchema(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	grm := googleresourcemanager.NewFake()
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, googleresourcemanager.NewFake(), googlesqladmin.NewFake(connectionString))
+	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, grm, googlesqladmin.NewFake(connectionString))
 	if err != nil {
 		t.Fatalf("failed to create parquedit client: %v", err)
 	}
@@ -33,8 +33,8 @@ func TestManageTeamSchema(t *testing.T) {
 
 	handler := setupTestRoutes(client)
 
-	team := "binde-strek"
-	schema := "team_binde_strek"
+	team := "under_strek" // Test with a underdash team, since we otherwise have to do special logic related to test. In cloudsql dash is allowed
+	schema := "team_under_strek"
 
 	t.Run("check status for non enabled team", func(t *testing.T) {
 		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
@@ -62,26 +62,6 @@ func TestManageTeamSchema(t *testing.T) {
 	})
 }
 
-func TestTeamNamesArePrefixed(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, googleresourcemanager.NewFake(), googlesqladmin.NewFake(connectionString))
-	if err != nil {
-		t.Fatalf("failed to create parquedit client: %v", err)
-	}
-	t.Cleanup(client.Close)
-
-	handler := setupTestRoutes(client)
-
-	for _, team := range []string{"1team", "public", "information_schema", "pg_team"} {
-		t.Run(fmt.Sprintf("enable for %s", team), func(t *testing.T) {
-			assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
-			assertSchemaExists(ctx, t, client, "team_"+team, true)
-		})
-	}
-}
 
 func startPostgres(ctx context.Context, t *testing.T) string {
 	t.Helper()

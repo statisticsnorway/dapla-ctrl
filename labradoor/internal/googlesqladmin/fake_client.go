@@ -3,6 +3,8 @@ package googlesqladmin
 import (
 	"context"
 	"fmt"
+	"log/slog"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -25,14 +27,18 @@ func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string
 	}
 	defer conn.Close(ctx)
 
+	// Take into account that google uses iam users (with dash), we'll mimic this in this fake
+	username := googleSaUsernameToDBFriendly(user.Name)
+	slog.Info("got username " + user.Name + " but replacing with " + username + "in fake sqladmin")
+
 	var exists bool
-	err = conn.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = $1)", user.Name).Scan(&exists)
+	err = conn.QueryRow(ctx, "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = $1)", username).Scan(&exists)
 	if err != nil {
 		return err
 	}
 
 	if !exists {
-		_, err = conn.Exec(ctx, "CREATE USER "+user.Name)
+		_, err = conn.Exec(ctx, "CREATE USER "+username)
 	}
 	return err
 }
@@ -44,6 +50,13 @@ func (f *FakeSqlManager) RemoveUser(ctx context.Context, projectID, instance, us
 	}
 	defer conn.Close(ctx)
 
-	_, err = conn.Exec(ctx, "DROP USER IF EXISTS "+user)
+	username := googleSaUsernameToDBFriendly(user)
+	slog.Info("got username " + user + " but replacing with " + username + " in fake sqladmin")
+	// Take into account that google uses iam users (with dash), we'll mimic this in this fake
+	_, err = conn.Exec(ctx, "DROP USER IF EXISTS "+username)
 	return err
+}
+
+func googleSaUsernameToDBFriendly(str string) string{
+	return strings.TrimPrefix(strings.ReplaceAll(str, "-", "_"), "serviceAccount:")
 }
