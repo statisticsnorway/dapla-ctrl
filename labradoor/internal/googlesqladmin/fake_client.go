@@ -38,7 +38,7 @@ func (f *FakeSqlManager) AddUser(ctx context.Context, projectID, instance string
 	}
 
 	if !exists {
-		_, err = conn.Exec(ctx, "CREATE USER "+username)
+		_, err = conn.Exec(ctx, "CREATE USER \""+username+"\"")
 	}
 	return err
 }
@@ -53,10 +53,10 @@ func (f *FakeSqlManager) RemoveUser(ctx context.Context, projectID, instance, us
 	username := googleSaUsernameToDBFriendly(user)
 	slog.Info("got username " + user + " but replacing with " + username + " in fake sqladmin")
 	// Take into account that google uses iam users (with dash), we'll mimic this in this fake
-	_, err = conn.Exec(ctx, "DROP USER IF EXISTS "+username)
+	_, err = conn.Exec(ctx, "DROP USER IF EXISTS \""+username+"\"")
 	return err
 }
 
-func googleSaUsernameToDBFriendly(str string) string{
-	return strings.TrimPrefix(strings.ReplaceAll(str, "-", "_"), "serviceAccount:")
+func googleSaUsernameToDBFriendly(str string) string {
+	return strings.TrimPrefix(str, "serviceAccount:")
 }

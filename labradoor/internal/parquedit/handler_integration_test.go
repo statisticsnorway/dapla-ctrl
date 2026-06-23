@@ -33,8 +33,8 @@ func TestManageTeamSchema(t *testing.T) {
 
 	handler := setupTestRoutes(client)
 
-	team := "under_strek" // Test with a underdash team, since we otherwise have to do special logic related to test. In cloudsql dash is allowed
-	schema := "team_under_strek"
+	team := "binde-strek" // Test with a underdash team, since we otherwise have to do special logic related to test. In cloudsql dash is allowed
+	schema := "team_binde_strek"
 
 	t.Run("check status for non enabled team", func(t *testing.T) {
 		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
@@ -61,7 +61,6 @@ func TestManageTeamSchema(t *testing.T) {
 		assertSchemaExists(ctx, t, client, schema, false)
 	})
 }
-
 
 func startPostgres(ctx context.Context, t *testing.T) string {
 	t.Helper()

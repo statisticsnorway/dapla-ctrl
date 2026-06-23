@@ -62,9 +62,9 @@ func TestToSchemaName(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "public schema is prefixed with team",
-			schema:  "public",
-			wantErr: false,
+			name:       "public schema is prefixed with team",
+			schema:     "public",
+			wantErr:    false,
 			wantSchema: "team_public",
 		},
 		{

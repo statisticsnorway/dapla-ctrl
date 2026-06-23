@@ -106,8 +106,8 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	log.Info("created schema", "schema", schema, "result", result.String())
 
 	log.Info("grant on schema", "user", saMember)
-	
-	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO "+saMember)
+
+	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -116,7 +116,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	log.Info("granted privileges on schema", "result", result.String())
 
 	log.Info("grant on all tables in schema")
-	result, err = c.db.Exec(req.Context(), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "+schema+" TO "+saMember)
+	result, err = c.db.Exec(req.Context(), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
