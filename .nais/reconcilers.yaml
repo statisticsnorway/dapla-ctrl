@@ -16,6 +16,7 @@ spec:
       rules:
         - application: dapla-api
       external:
+        - host: labradoor.lab.dapla.ssb.no
         - host: graph.microsoft.com
         - host: login.microsoftonline.com
 

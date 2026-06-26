@@ -1,0 +1,9 @@
+.idea
+bin
+.vscode/
+.DS_Store
+.direnv
+__debug_bin*
+.env*
+node_modules
+hack/coverprofile.txt

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="Build binary"
+
+set -e
+
+go build -o bin/dapla-ctrl-labradoor ./cmd

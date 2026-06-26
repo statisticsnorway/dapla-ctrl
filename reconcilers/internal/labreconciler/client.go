@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 )
 
 type client struct {
@@ -40,6 +42,8 @@ func New(endpoint, secret string, opts ...optFunc) (*client, error) {
 	return c, nil
 }
 
+const traceHeaderName = "X-Reconciler-CorrID"
+
 func (c *client) do(req *http.Request) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.secret))
 
@@ -51,6 +55,8 @@ func (c *client) EnableParquedit(ctx context.Context, team string) error {
 	if err != nil {
 		return err
 	}
+	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)
 	if err != nil {
@@ -70,6 +76,8 @@ func (c *client) HasParquedit(ctx context.Context, team string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)
 	if err != nil {
@@ -92,6 +100,8 @@ func (c *client) DisableParquedit(ctx context.Context, team string) error {
 	if err != nil {
 		return err
 	}
+	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)
 	if err != nil {

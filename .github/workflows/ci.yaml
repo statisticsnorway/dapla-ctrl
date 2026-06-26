@@ -6,6 +6,23 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      api:
+        description: Build api
+        type: boolean
+        default: false
+      frontend:
+        description: Build frontend
+        type: boolean
+        default: false
+      reconcilers:
+        description: Build reconcilers
+        type: boolean
+        default: false
+      labradoor:
+        description: Build labradoor
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -18,6 +35,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       frontend: ${{ steps.filter.outputs.frontend }}
       reconcilers: ${{ steps.filter.outputs.reconcilers }}
+      labradoor: ${{ steps.filter.outputs.labradoor }}
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
@@ -29,13 +47,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Build all when we trigger a manual dispatches.
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            api="${{ inputs.api }}"
+            frontend="${{ inputs.frontend }}"
+            reconcilers="${{ inputs.reconcilers }}"
+            labradoor="${{ inputs.labradoor }}"
+
             {
-              echo "api=true"
-              echo "frontend=true"
-              echo "reconcilers=true"
+              echo "api=$api"
+              echo "frontend=$frontend"
+              echo "reconcilers=$reconcilers"
+              echo "labradoor=$labradoor"
             } >> "$GITHUB_OUTPUT"
+
+            {
+              echo "## Triggered build for service"
+              echo
+              echo "| Service | Build |"
+              echo "| --- | --- |"
+              echo "| API | $api |"
+              echo "| Frontend | $frontend |"
+              echo "| Reconcilers | $reconcilers |"
+              echo "| Labradoor | $labradoor |"
+            } >> "$GITHUB_STEP_SUMMARY"
+
             exit 0
           fi
 
@@ -61,6 +96,7 @@ jobs:
           api=false
           frontend=false
           reconcilers=false
+          labradoor=false
 
           # Check for changed files in given paths. '.nais' is not included since this should not trigger build
           while IFS= read -r file; do
@@ -74,6 +110,9 @@ jobs:
               reconcilers/*)
                 reconcilers=true
                 ;;
+              labradoor/*)
+                labradoor=true
+                ;;
             esac
           done < changed-files.txt
 
@@ -81,7 +120,19 @@ jobs:
             echo "api=$api"
             echo "frontend=$frontend"
             echo "reconcilers=$reconcilers"
+            echo "labradoor=$labradoor"
           } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Detected service changes"
+            echo
+            echo "| Service | Changed |"
+            echo "| --- | --- |"
+            echo "| API | $api |"
+            echo "| Frontend | $frontend |"
+            echo "| Reconcilers | $reconcilers |"
+            echo "| Labradoor | $labradoor |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   api-test:
     name: API / Test
@@ -136,7 +187,7 @@ jobs:
       - changes
       - api-test
       - api-lint
-    if: ${{ needs.changes.outputs.api == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    if: ${{ needs.changes.outputs.api == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.triggering_actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -178,7 +229,7 @@ jobs:
           version: 10
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: '22'
+          node-version: "22"
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - name: Install dependencies
@@ -199,7 +250,7 @@ jobs:
     needs:
       - changes
       - frontend
-    if: ${{ needs.changes.outputs.frontend == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    if: ${{ needs.changes.outputs.frontend == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.triggering_actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -266,7 +317,7 @@ jobs:
       - changes
       - reconcilers-test
       - reconcilers-lint
-    if: ${{ needs.changes.outputs.reconcilers == 'true' && github.event_name == 'push' && github.triggering_actor != 'dependabot[bot]' }}
+    if: ${{ needs.changes.outputs.reconcilers == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.triggering_actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -291,3 +342,120 @@ jobs:
           docker_context: reconcilers
           image_suffix: reconcilers
           tag: ${{ github.sha }}
+
+  labradoor-test:
+    name: Labradoor / Test
+    needs: changes
+    if: ${{ needs.changes.outputs.labradoor == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: labradoor
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          cache_key_prefix: mise-labradoor-test
+          working_directory: labradoor
+      - uses: ./.github/actions/go-cache
+        with:
+          key: labradoor-test
+      - run: mise run build
+      - run: mise run test
+
+  labradoor-lint:
+    name: Labradoor / Lint
+    needs: changes
+    if: ${{ needs.changes.outputs.labradoor == 'true' }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: labradoor
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          cache_key_prefix: mise-labradoor-lint
+          working_directory: labradoor
+      - uses: ./.github/actions/go-cache
+        with:
+          key: labradoor-lint
+          restore-keys: labradoor-test
+      - run: mise run check:staticcheck
+      - run: mise run check:vulncheck
+      - name: Check code format
+        run: |
+          mise run fmt
+          echo "checking for diff after running generators and formatters, if this fails, run 'mise run fmt'"
+          git diff --name-only  | xargs -r git diff --exit-code --
+
+  labradoor-build-push:
+    name: Labradoor / Build and push image
+    needs:
+      - changes
+      - labradoor-test
+      - labradoor-lint
+    if: ${{ needs.changes.outputs.labradoor == 'true' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.triggering_actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: jdx/mise-action@dba19683ed58901619b14f395a24841710cb4925 # v4.1.0
+        with:
+          cache_key_prefix: mise-labradoor-build-push
+          working_directory: labradoor
+      - uses: ./.github/actions/go-cache
+        with:
+          key: labradoor-build
+          restore-keys: labradoor-test
+      - name: Build labradoor
+        working-directory: labradoor
+        run: mise run build
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 #v3.0.0
+        with:
+          workload_identity_provider: "projects/848539402404/locations/global/workloadIdentityPools/gh-actions/providers/gh-actions"
+          service_account: "gh-actions-dapla-lab@artifact-registry-5n.iam.gserviceaccount.com"
+          token_format: "access_token"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd #v4.0.0
+
+      - name: Login to GCP Artifact Registry
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 #v4.1.0
+        with:
+          registry: europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-lab-docker
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+
+      - name: Determine Image Tag
+        id: set-tag
+        run: |
+          tag="${GITHUB_SHA}"
+          release_build=false
+
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            tag="${GITHUB_REF#refs/tags/}"
+            release_build=true
+          fi
+
+          {
+            echo "TAG=${tag}"
+            echo "RELEASE_BUILD=${release_build}"
+          } >> "$GITHUB_ENV"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "Final image tag: ${tag}"
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f #v7.1.0
+        with:
+          context: labradoor/.
+          platforms: linux/amd64
+          file: labradoor/Dockerfile
+          push: true
+          tags: |
+            europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-lab-docker/dapla-ctrl-labradoor:${{ steps.set-tag.outputs.tag }}

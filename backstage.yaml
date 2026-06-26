@@ -90,3 +90,23 @@ spec:
   system: kuben
   consumesApis:
     - api:dapla-api-internal
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: labradoor
+  title: Labradoor
+  description: |
+    Service for receiving commands from the reconciler and handling them appropriately in Dapla Lab
+  tags:
+    - go
+    - dapla
+  annotations:
+    github.com/project-slug: statisticsnorway/dapla-ctrl
+spec:
+  type: service
+  owner: dapla-skyinfra-developers
+  lifecycle: production
+  system: kuben
+  dependsOn:
+    - system:nais
