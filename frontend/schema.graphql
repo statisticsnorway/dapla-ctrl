@@ -592,6 +592,55 @@ enum GroupOrderField {
   TEAM
 }
 
+type Message implements Node {
+  """Who sent the message"""
+  actor: String!
+
+  """The globally unique ID of the message."""
+  id: ID!
+
+  """Message ID"""
+  messageId: String!
+
+  """Who the message was sent to"""
+  recipient: User!
+
+  """Message status"""
+  status: String!
+}
+
+type MessageConnection {
+  """List of edges."""
+  edges: [MessageEdge!]!
+
+  """List of nodes."""
+  nodes: [Message!]!
+
+  """Pagination information."""
+  pageInfo: PageInfo!
+}
+
+type MessageEdge {
+  """Cursor for this edge that can be used for pagination."""
+  cursor: Cursor!
+
+  """The team."""
+  node: Message!
+}
+
+input MessageFilter {
+  """Filter by message actor"""
+  actor: String
+
+  """Filter by message recipient"""
+  recipient: String
+
+  """
+  Filter by message status, e.g PENDING, PUBLISHED, SUCCESSFUL and FAILED
+  """
+  status: String
+}
+
 """The mutation root for the Dapla GraphQL API."""
 type Mutation {
   """
@@ -814,6 +863,31 @@ type Query {
   """The currently authenticated user."""
   me: AuthenticatedUser!
 
+  """Get a message by messageId"""
+  message(messageId: String!): Message
+
+  """Get a list messages"""
+  messages(
+    """Get items after this cursor."""
+    after: Cursor
+
+    """Get items before this cursor."""
+    before: Cursor
+
+    """Filter"""
+    filter: MessageFilter
+
+    """
+    Get the first n items in the connection. This can be used in combination with the after parameter.
+    """
+    first: Int
+
+    """
+    Get the last n items in the connection. This can be used in combination with the before parameter.
+    """
+    last: Int
+  ): MessageConnection!
+
   """Fetch an object using its globally unique ID."""
   node(
     """The ID of the object to fetch."""
@@ -942,6 +1016,9 @@ type Query {
 
     """Get items before this cursor."""
     before: Cursor
+
+    """Filter the results"""
+    filter: SharedBucketFilter
 
     """
     Get the first n items in the connection. This can be used in combination with the after parameter.
@@ -2141,6 +2218,14 @@ type SharedBucketEdge {
   node: SharedBucket!
 }
 
+input SharedBucketFilter {
+  """Filter by the envs the buckets belong to"""
+  envs: [String!]
+
+  """Filter by kinds (e.g. standard/delomaten)"""
+  kinds: [String!]
+}
+
 """Ordering options when fetching SharedBucket."""
 input SharedBucketOrder {
   """The direction to order items by."""
@@ -2245,6 +2330,9 @@ type Team implements ActivityLogger & Node {
     orderBy: GroupOrder
   ): GroupConnection!
 
+  """If manual editing from team dapla-ffunk is enabled for the team"""
+  hasManualEditing: Boolean!
+
   """The globally unique ID of the team."""
   id: ID!
 
@@ -2284,6 +2372,9 @@ type Team implements ActivityLogger & Node {
 
     """Get items before this cursor."""
     before: Cursor
+
+    """Filter the results"""
+    filter: SharedBucketFilter
 
     """
     Get the first n items in the connection. This can be used in combination with the after parameter.
@@ -2606,6 +2697,12 @@ input UpdateTeamInput {
   When omitted the existing value will not be updated.
   """
   displayName: String
+
+  """
+  If manual editing (service from team dapla-ffunk) should be enabled for the team
+  When omitted, the existing value will not be updated.
+  """
+  hasManualEditing: Boolean
 
   """
   An optional new section code for the team.

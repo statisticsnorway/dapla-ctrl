@@ -4,6 +4,7 @@ query TeamOverview($team: Slug!) @cache(policy: NetworkOnly) {
 		displayName
 		slug
 		isManaged
+		hasManualEditing
 		section {
 			id
 			code

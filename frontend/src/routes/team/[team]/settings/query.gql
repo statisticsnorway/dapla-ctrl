@@ -3,6 +3,6 @@ query TeamSettings($team: Slug!) {
 		id
 		slug
 		lastSuccessfulSync
-		displayName
+		hasManualEditing
 	}
 }
