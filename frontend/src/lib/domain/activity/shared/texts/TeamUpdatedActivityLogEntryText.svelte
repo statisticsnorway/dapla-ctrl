@@ -13,6 +13,10 @@
 		switch (fieldName) {
 			case 'displayName':
 				return 'Visningsnavn';
+			case 'sectionCode':
+				return 'Seksjonskode';
+			case 'hasManualEditing':
+				return 'Parquedit';
 			default:
 				return fieldName;
 		}
