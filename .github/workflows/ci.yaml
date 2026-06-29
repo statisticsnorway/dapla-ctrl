@@ -457,5 +457,7 @@ jobs:
           platforms: linux/amd64
           file: labradoor/Dockerfile
           push: true
+          provenance: mode=max
+          sbom: true
           tags: |
             europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-lab-docker/dapla-ctrl-labradoor:${{ steps.set-tag.outputs.tag }}
