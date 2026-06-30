@@ -8,12 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/papaparse':
-        specifier: ^5.5.2
-        version: 5.5.2
-      eslint-plugin-unicorn:
-        specifier: ^64.0.0
-        version: 64.0.0(eslint@10.2.0(jiti@2.6.1))
       graphql:
         specifier: ^16.13.2
         version: 16.13.2
@@ -57,6 +51,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.2.2
         version: 4.2.2(vite@7.3.1(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(yaml@2.8.3))
+      '@types/papaparse':
+        specifier: ^5.5.2
+        version: 5.5.2
       '@types/sortablejs':
         specifier: ^1.15.9
         version: 1.15.9
@@ -72,6 +69,9 @@ importers:
       eslint-plugin-svelte:
         specifier: ^3.17.0
         version: 3.17.0(eslint@10.2.0(jiti@2.6.1))(svelte@5.55.4(@typescript-eslint/types@8.58.2))
+      eslint-plugin-unicorn:
+        specifier: ^64.0.0
+        version: 64.0.0(eslint@10.2.0(jiti@2.6.1))
       globals:
         specifier: ^17.5.0
         version: 17.5.0
