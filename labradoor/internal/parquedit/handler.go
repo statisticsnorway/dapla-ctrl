@@ -124,6 +124,15 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Info("granted privileges on all tables in schema", "result", result.String())
 
+	log.Info("setting search_path of user to correct schema")
+	result, err = c.db.Exec(req.Context(), "ALTER USER \""+saMember+"\" SET SEARCH_PATH = "+schema+"")
+	if err != nil {
+		httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Info("set search_path of user to correct schema", "result", result.String())
+
 	log.Info("enabled parquedit for team")
 	w.WriteHeader(http.StatusOK)
 }
