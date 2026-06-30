@@ -147,6 +147,99 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 	return items, nil
 }
 
+const listAccessToForGroup = `-- name: ListAccessToForGroup :many
+SELECT
+	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env,
+	COUNT(*) OVER () AS total_count
+FROM
+	shared_buckets_stopgap
+	JOIN shared_buckets_access_stopgap ON shared_buckets_access_stopgap.bucket_name = shared_buckets_stopgap.name
+WHERE
+	shared_buckets_access_stopgap.group_name = $1
+GROUP BY
+	shared_buckets_stopgap.name
+ORDER BY
+	CASE
+		WHEN $2::TEXT = 'name:asc' THEN shared_buckets_stopgap.name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'team:asc' THEN shared_buckets_stopgap.team_slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'team:desc' THEN shared_buckets_stopgap.team_slug
+	END DESC,
+	short_name ASC
+LIMIT
+	$4
+OFFSET
+	$3
+`
+
+type ListAccessToForGroupParams struct {
+	GroupName string
+	OrderBy   string
+	Offset    int32
+	Limit     int32
+}
+
+type ListAccessToForGroupRow struct {
+	SharedBucketsStopgap SharedBucketsStopgap
+	TotalCount           int64
+}
+
+func (q *Queries) ListAccessToForGroup(ctx context.Context, arg ListAccessToForGroupParams) ([]*ListAccessToForGroupRow, error) {
+	rows, err := q.db.Query(ctx, listAccessToForGroup,
+		arg.GroupName,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListAccessToForGroupRow{}
+	for rows.Next() {
+		var i ListAccessToForGroupRow
+		if err := rows.Scan(
+			&i.SharedBucketsStopgap.Name,
+			&i.SharedBucketsStopgap.TeamSlug,
+			&i.SharedBucketsStopgap.ShortName,
+			&i.SharedBucketsStopgap.Kind,
+			&i.SharedBucketsStopgap.Env,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listAccessToForTeam = `-- name: ListAccessToForTeam :many
 SELECT
 	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env,
