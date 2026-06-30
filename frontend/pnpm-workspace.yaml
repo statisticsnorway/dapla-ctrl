@@ -7,3 +7,5 @@ minimumReleaseAge: 10080 # 7 days, 60min*24 hour * 7days
 saveExact: false
 strictSsl: true
 engineStrict: true
+minimumReleaseAgeExclude:
+  - '@sveltejs/kit@2.68.0'

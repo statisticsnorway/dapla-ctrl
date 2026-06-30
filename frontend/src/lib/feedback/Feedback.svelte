@@ -125,8 +125,7 @@
 						{maxlength}
 						style="resize: vertical; min-height: 16rem; "
 						placeholder="Skriv tilbakemeldingen din her..."
-						disabled={feedbackSent}
-					></textarea>
+						disabled={feedbackSent}></textarea>
 					<span id="charCount">{maxlength - details.length} tegn gjenstår</span>
 				</div>
 				<div
