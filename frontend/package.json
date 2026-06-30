@@ -45,7 +45,7 @@
 		"prettier-plugin-svelte": "^3.5.2",
 		"prettier-plugin-tailwindcss": "^0.7.4",
 		"svelte": "5.55.4",
-		"svelte-check": "^4.4.6",
+		"svelte-check": "4.6.0",
 		"tailwindcss": "^4.3.1",
 		"typescript": "6.0.2",
 		"typescript-eslint": "8.58.2",
