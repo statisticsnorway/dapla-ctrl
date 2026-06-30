@@ -28,10 +28,10 @@
 		"@sveltejs/kit": "2.57.1",
 		"@sveltejs/vite-plugin-svelte": "6.2.4",
 		"@tailwindcss/vite": "^4.2.2",
+		"@types/sortablejs": "^1.15.9",
 		"date-fns": "^4.1.0",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-storybook": "10.3.5",
 		"eslint-plugin-svelte": "^3.17.0",
 		"globals": "^17.5.0",
 		"houdini": "2.0.0-next.11",
@@ -42,7 +42,6 @@
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
-		"storybook": "^10.3.5",
 		"svelte": "5.55.4",
 		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.2.2",
@@ -58,7 +57,8 @@
 		"graphql": "^16.13.2",
 		"graphql-sse": "^2.6.0",
 		"papaparse": "^5.5.3",
-		"pino": "^10.3.1"
+		"pino": "^10.3.1",
+		"sortablejs": "^1.15.7"
 	},
 	"overrides": {
 		"@sveltejs/kit": {
