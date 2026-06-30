@@ -19,7 +19,7 @@
 		"unused": "node find-unused-gql.mjs && echo '---' && node find-missing-css-vars.mjs"
 	},
 	"devDependencies": {
-		"@eslint/compat": "^2.0.5",
+		"@eslint/compat": "^2.1.0",
 		"@eslint/js": "^10.0.1",
 		"@nais/ds-svelte-community": "2.0.0-next.8",
 		"@navikt/ds-css": "8.9.1",
@@ -31,9 +31,9 @@
 		"@types/papaparse": "^5.5.2",
 		"@types/sortablejs": "^1.15.9",
 		"date-fns": "^4.4.0",
-		"eslint": "^10.2.0",
+		"eslint": "^10.5.0",
 		"eslint-config-prettier": "^10.1.8",
-		"eslint-plugin-svelte": "^3.17.0",
+		"eslint-plugin-svelte": "^3.19.0",
 		"eslint-plugin-unicorn": "^64.0.0",
 		"globals": "^17.7.0",
 		"houdini": "2.0.0-next.11",
