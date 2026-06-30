@@ -2,8 +2,9 @@
 	"name": "console-frontend",
 	"version": "0.0.1",
 	"private": true,
+	"packageManager": "pnpm@11.7.0",
 	"scripts": {
-		"prepare": "husky && svelte-kit sync || echo ''",
+		"prepare": "cd .. && husky frontend/.husky && cd frontend && svelte-kit sync || echo ''",
 		"dev": "vite dev",
 		"dev-live-share": "vite dev --host ::",
 		"build": "vite build",
@@ -14,33 +15,19 @@
 		"eslint": "eslint .",
 		"format": "prettier --write .",
 		"test": "vitest",
-		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build",
 		"lint-staged": "lint-staged",
 		"unused": "node find-unused-gql.mjs && echo '---' && node find-missing-css-vars.mjs"
 	},
 	"devDependencies": {
-		"@chromatic-com/storybook": "^5.1.2",
 		"@eslint/compat": "^2.0.5",
 		"@eslint/js": "^10.0.1",
-		"@layerstack/utils": "2.0.0-next.18",
 		"@nais/ds-svelte-community": "2.0.0-next.8",
 		"@navikt/ds-css": "8.9.1",
 		"@navikt/ds-tokens": "8.9.1",
-		"@storybook/addon-docs": "^10.3.5",
-		"@storybook/addon-svelte-csf": "^5.1.2",
-		"@storybook/addon-themes": "^10.3.5",
-		"@storybook/sveltekit": "^10.3.5",
 		"@sveltejs/adapter-node": "^5.5.4",
 		"@sveltejs/kit": "2.57.1",
 		"@sveltejs/vite-plugin-svelte": "6.2.4",
 		"@tailwindcss/vite": "^4.2.2",
-		"@testing-library/dom": "^10.4.1",
-		"@types/d3-array": "^3.2.2",
-		"@types/d3-time": "^3.0.4",
-		"@types/luxon": "^3.7.1",
-		"@types/react": "^19.2.14",
-		"@types/sortablejs": "^1.15.9",
 		"date-fns": "^4.1.0",
 		"eslint": "^10.2.0",
 		"eslint-config-prettier": "^10.1.8",
@@ -66,24 +53,12 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@codemirror/language": "^6.12.3",
-		"@codemirror/state": "^6.6.0",
-		"@codemirror/theme-one-dark": "^6.1.3",
-		"@codemirror/view": "^6.41.0",
-		"@slack/types": "^2.20.1",
-		"@slack/web-api": "^7.15.1",
 		"@types/papaparse": "^5.5.2",
-		"cron-parser": "^5.5.0",
-		"cronstrue": "^3.14.0",
 		"eslint-plugin-unicorn": "^64.0.0",
 		"graphql": "^16.13.2",
 		"graphql-sse": "^2.6.0",
-		"luxon": "^3.7.2",
 		"papaparse": "^5.5.3",
-		"pino": "^10.3.1",
-		"pretty-bytes": "^7.1.0",
-		"sortablejs": "^1.15.7",
-		"svelte-highlight": "^7.9.0"
+		"pino": "^10.3.1"
 	},
 	"overrides": {
 		"@sveltejs/kit": {
@@ -104,8 +79,6 @@
 	"peerDependencies": {
 		"@nais/ds-svelte-community": "^2.0.0-next.8",
 		"@navikt/ds-css": "8.9.1",
-		"@navikt/ds-tokens": "8.9.1",
-		"@testing-library/dom": "^10.4.1",
-		"@types/react": "^19.2.7"
+		"@navikt/ds-tokens": "8.9.1"
 	}
 }
