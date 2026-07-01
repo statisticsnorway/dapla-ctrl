@@ -24,6 +24,18 @@
 	let selectedBuckets: string[] = $state([]);
 	let serviceName = $derived(`${group} (${service})`);
 
+	const availableServices: { displayName: string; name: string }[] = [
+		{ displayName: 'Visual Studio Code (Python)', name: 'vscode-python' },
+		{ displayName: 'Jupyter', name: 'jupyter' },
+		{ displayName: 'RStudio', name: 'rstudio' },
+		{ displayName: 'Marimo', name: 'marimo' },
+		{ displayName: 'Datadoc Editor', name: 'datadoc-editor' },
+		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning' },
+		{ displayName: 'Jupyter Playground', name: 'jupyter-playground' },
+		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark' },
+		{ displayName: 'JDemetra', name: 'jdemetra' }
+	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
+
 	let availableBuckets: NonNullable<
 		LaunchLab$result['team']['viewerTeamMember']
 	>['groups'][0]['sharedBucketsAccess']['nodes'] = $derived.by(() => {
@@ -87,12 +99,13 @@
 				{/each}
 			</RadioGroup>
 			<br />
-			<Select bind:value={service} style="max-width: 10em;">
+			<Select bind:value={service} style="max-width: 20em;">
 				{#snippet label()}
 					Tjenestetype
 				{/snippet}
-				<option value="vscode-python">VS Code</option>
-				<option value="jupyter">Jupyter</option>
+				{#each availableServices as service (service.name)}
+					<option value={service.name}>{service.displayName}</option>
+				{/each}
 			</Select>
 			<br />
 			<RadioGroup bind:value={env}>
