@@ -339,6 +339,44 @@ Test.gql("List group members", function(t)
 	}
 end)
 
+Test.gql("List team groups for authenticated user", function(t)
+	t.addHeader("x-user-email", member:email())
+
+	t.query(string.format([[
+		query {
+			team(slug: "%s") {
+				viewerTeamMember {
+					user {
+						email
+						name
+					}
+					groups {
+						name
+					}
+				}
+			}
+		}
+	]], team:slug()))
+
+	t.check {
+		data = {
+			team = {
+				viewerTeamMember = {
+					user = {
+						email = member:email(),
+						name = member:name(),
+					},
+					groups = {
+						{
+							name = groupName,
+						},
+					},
+				},
+			},
+		},
+	}
+end)
+
 Test.gql("Admin can remove group member", function(t)
 	t.addHeader("x-user-email", admin:email())
 
