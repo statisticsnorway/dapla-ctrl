@@ -132,3 +132,22 @@ SELECT
 		)
 	)::BOOLEAN
 ;
+
+-- name: GetTeamMember :one
+SELECT
+	users.id,
+	groups.team_slug,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups
+FROM
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
+WHERE
+	groups.team_slug = @team_slug::slug
+	AND group_members.user_id = @user_id
+GROUP BY
+	users.id,
+	groups.team_slug
+ORDER BY
+	users.name ASC
+;

@@ -679,6 +679,7 @@ type ComplexityRoot struct {
 		ViewerCanManageMembers func(childComplexity int) int
 		ViewerIsMember         func(childComplexity int) int
 		ViewerIsOwner          func(childComplexity int) int
+		ViewerTeamMember       func(childComplexity int) int
 	}
 
 	TeamAccessManager struct {
@@ -985,6 +986,7 @@ type TeamResolver interface {
 	ViewerIsOwner(ctx context.Context, obj *team.Team) (bool, error)
 	ViewerIsMember(ctx context.Context, obj *team.Team) (bool, error)
 	ViewerCanManageMembers(ctx context.Context, obj *team.Team) (bool, error)
+	ViewerTeamMember(ctx context.Context, obj *team.Team) (*team.TeamMember, error)
 	AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error)
 	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 }
@@ -3553,6 +3555,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.ViewerIsOwner(childComplexity), true
+	case "Team.viewerTeamMember":
+		if e.ComplexityRoot.Team.ViewerTeamMember == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Team.ViewerTeamMember(childComplexity), true
 
 	case "TeamAccessManager.team":
 		if e.ComplexityRoot.TeamAccessManager.Team == nil {
@@ -7499,6 +7507,9 @@ type Team implements Node {
 	"Whether or not the viewer can manage members of the team."
 	viewerCanManageMembers: Boolean!
 
+	"The TeamMember object for the viewer if they are a member of the team."
+	viewerTeamMember: TeamMember
+
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
 }
@@ -10154,6 +10165,8 @@ func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_team(_ cont
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -10546,6 +10559,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -14660,6 +14675,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -16574,6 +16591,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -16936,6 +16955,8 @@ func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_team(_ c
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -19018,6 +19039,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -21591,6 +21614,8 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -21903,6 +21928,8 @@ func (ec *executionContext) fieldContext_SharedBucketAccess_team(_ context.Conte
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -22880,6 +22907,43 @@ func (ec *executionContext) fieldContext_Team_viewerCanManageMembers(_ context.C
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_viewerTeamMember(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_viewerTeamMember,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Team().ViewerTeamMember(ctx, obj)
+		},
+		nil,
+		ec.marshalOTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_viewerTeamMember(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_TeamMember_team(ctx, field)
+			case "user":
+				return ec.fieldContext_TeamMember_user(ctx, field)
+			case "groups":
+				return ec.fieldContext_TeamMember_groups(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamMember", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_accessManagers(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -23018,6 +23082,8 @@ func (ec *executionContext) fieldContext_TeamAccessManager_team(_ context.Contex
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -23187,6 +23253,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -23519,6 +23587,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -23584,6 +23654,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -25093,6 +25165,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerIsMember(ctx, field)
 			case "viewerCanManageMembers":
 				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
@@ -36153,6 +36227,39 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "viewerTeamMember":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Team_viewerTeamMember(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "accessManagers":
 			field := field
 
@@ -40829,6 +40936,13 @@ func (ec *executionContext) marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 		return graphql.Null
 	}
 	return ec._Team(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember(ctx context.Context, sel ast.SelectionSet, v *team.TeamMember) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TeamMember(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder(ctx context.Context, v any) (*team.TeamOrder, error) {

@@ -198,6 +198,9 @@ type Team implements Node {
 	"Whether or not the viewer can manage members of the team."
 	viewerCanManageMembers: Boolean!
 
+	"The TeamMember object for the viewer if they are a member of the team."
+	viewerTeamMember: TeamMember
+
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
 }

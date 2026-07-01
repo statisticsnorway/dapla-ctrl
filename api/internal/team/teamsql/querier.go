@@ -18,6 +18,7 @@ type Querier interface {
 	Get(ctx context.Context, argSlug slug.Slug) (*Team, error)
 	GetAccessManagers(ctx context.Context, teamSlug slug.Slug) ([]uuid.UUID, error)
 	GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*TeamDeleteKey, error)
+	GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (*GetTeamMemberRow, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)
 	ListAllSlugs(ctx context.Context) ([]slug.Slug, error)

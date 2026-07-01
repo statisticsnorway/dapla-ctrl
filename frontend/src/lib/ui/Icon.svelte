@@ -5,6 +5,7 @@
 		HexagonGridIcon,
 		PersonGroupIcon,
 		QuestionmarkIcon,
+		RocketIcon,
 		ShieldLockIcon
 	} from '@nais/ds-svelte-community/icons';
 
@@ -28,6 +29,8 @@
 				return FloppydiskIcon;
 			case 'innstillinger':
 				return CogIcon;
+			case 'dapla lab':
+				return RocketIcon;
 			default:
 				return QuestionmarkIcon;
 		}
