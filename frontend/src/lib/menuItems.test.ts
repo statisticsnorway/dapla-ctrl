@@ -14,6 +14,7 @@ describe('menuItems', () => {
 				[
 					{ label: 'Medlemmer', href: '/team/devteam/members' },
 					{ label: 'Datadeling', href: '/team/devteam/shared-data' },
+					{ label: 'Dapla Lab', href: '/team/devteam/launch-lab' },
 					{ label: 'Aktivitetslogg', href: '/team/devteam/activity-log' }
 				]
 			]);
