@@ -20,21 +20,23 @@
 	);
 
 	let env: string = $state('prod');
-	let service: string = $state('jupyter');
+	let serviceType: string = $state('jupyter');
 	let selectedBuckets: string[] = $state([]);
-	let serviceName = $derived(`${group} (${service})`);
+	let serviceName = $derived(`${group} (${serviceType})`);
 
-	const availableServices: { displayName: string; name: string }[] = [
-		{ displayName: 'Visual Studio Code (Python)', name: 'vscode-python' },
-		{ displayName: 'Jupyter', name: 'jupyter' },
-		{ displayName: 'RStudio', name: 'rstudio' },
-		{ displayName: 'Marimo', name: 'marimo' },
-		{ displayName: 'Datadoc Editor', name: 'datadoc-editor' },
-		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning' },
-		{ displayName: 'Jupyter Playground', name: 'jupyter-playground' },
-		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark' },
-		{ displayName: 'JDemetra', name: 'jdemetra' }
+	const availableServices: { displayName: string; name: string; supportsBuckets: boolean }[] = [
+		{ displayName: 'Visual Studio Code (Python)', name: 'vscode-python', supportsBuckets: true },
+		{ displayName: 'Jupyter', name: 'jupyter', supportsBuckets: true },
+		{ displayName: 'RStudio', name: 'rstudio', supportsBuckets: true },
+		{ displayName: 'Marimo', name: 'marimo', supportsBuckets: true },
+		{ displayName: 'Datadoc Editor', name: 'datadoc-editor', supportsBuckets: false },
+		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning', supportsBuckets: false },
+		{ displayName: 'Jupyter Playground', name: 'jupyter-playground', supportsBuckets: true },
+		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark', supportsBuckets: true },
+		{ displayName: 'JDemetra', name: 'jdemetra', supportsBuckets: false }
 	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
+
+	let currentService = $derived(availableServices.find((s) => s.name === serviceType));
 
 	type BucketNode = NonNullable<
 		LaunchLab$result['team']['viewerTeamMember']
@@ -50,8 +52,13 @@
 		);
 	});
 
+	let shouldShowBuckets = $derived(
+		currentService?.supportsBuckets && availableBuckets.length !== 0
+	);
+
 	const launchServiceWindow = () => {
-		const baseUrl = `https://lab.dapla${env === 'prod' ? '' : `-${env}`}.ssb.no/launcher/dapla-lab-standard/${service}`;
+		if (!currentService) return;
+		const baseUrl = `https://lab.dapla${env === 'prod' ? '' : `-${env}`}.ssb.no/launcher/dapla-lab-standard/${currentService.name}`;
 
 		let parameters: { key: string; value: string }[] = [{ key: 'name', value: serviceName }];
 
@@ -59,7 +66,9 @@
 
 		parameters.push({ key: 'dapla.group', value: guillemetify(group) });
 
-		const buckets = availableBuckets.filter((b) => selectedBuckets.includes(b.id));
+		const buckets = currentService.supportsBuckets
+			? availableBuckets.filter((b) => selectedBuckets.includes(b.id))
+			: [];
 		for (let i = 0; i < buckets.length; i++) {
 			const bucket = buckets[i];
 			parameters.push({
@@ -152,7 +161,7 @@
 		<div>
 			<div style="display: flex; flex-direction: row; align-items: top; justify-content: start;">
 				<Select
-					bind:value={service}
+					bind:value={serviceType}
 					style="margin-top: 0px; margin-right: 2em; max-width: 90%; max-height: 3em;"
 				>
 					{#snippet label()}
@@ -181,7 +190,7 @@
 				</Select>
 			</div>
 			<br />
-			{#if availableBuckets.length !== 0}
+			{#if shouldShowBuckets}
 				<Label>Velg deltbøtter som skal vises under /buckets</Label>
 
 				<DaplaTable
@@ -211,12 +220,20 @@
 				/>
 			{/if}
 		</div>
+		<br />
+		{#if shouldShowBuckets}
+			<div class="button">
+				<Button size="small" onclick={launchServiceWindow} icon={RocketIcon}>Start Dapla Lab</Button
+				>
+			</div>
+		{/if}
 	</div>
 {/if}
 
 <style>
 	.button {
 		display: flex;
+		float: right;
 		margin-bottom: var(--ax-space-24, --a-spacing-6);
 	}
 	.description {

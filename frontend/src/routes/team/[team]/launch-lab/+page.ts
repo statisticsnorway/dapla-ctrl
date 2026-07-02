@@ -25,7 +25,8 @@ export async function load(event) {
 			event,
 			variables: {
 				team: event.params.team
-			}
+			},
+			blocking: true
 		}))
 	};
 }
