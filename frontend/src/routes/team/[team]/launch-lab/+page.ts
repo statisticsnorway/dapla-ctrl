@@ -13,7 +13,14 @@ export async function _houdini_beforeLoad({ parent }: BeforeLoadEvent) {
 
 export async function load(event) {
 	return {
-		...(await addPageMeta(event, { title: 'Dapla Lab' })),
+		...(await addPageMeta(event, {
+			title: 'Dapla Lab',
+			tag: {
+				label: 'Eksperimentell',
+				variant: 'warning-moderate',
+				tooltip: 'Denne siden er eksperimentell og kan bli fjernet. Gi gjerne tilbakemelding!'
+			}
+		})),
 		...(await load_LaunchLab({
 			event,
 			variables: {

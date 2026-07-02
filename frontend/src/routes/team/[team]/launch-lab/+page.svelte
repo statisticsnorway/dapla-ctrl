@@ -1,26 +1,26 @@
 <script lang="ts">
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
-	import {
-		Checkbox,
-		Radio,
-		RadioGroup,
-		Select,
-		Label,
-		BodyShort,
-		Button
-	} from '@nais/ds-svelte-community';
+	import { Checkbox, Select, Label, BodyShort, Button } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import { type LaunchLab$result } from '$houdini';
 	import { RocketIcon } from '@nais/ds-svelte-community/icons';
+	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 
 	let { data }: PageProps = $props();
 	let { LaunchLab, teamSlug } = $derived(data);
 
 	// svelte-ignore state_referenced_locally
-	let group: string = $state(`${teamSlug}-developers`);
+	const developers = `${teamSlug}-developers`;
+	let groups = $derived($LaunchLab.data?.team.viewerTeamMember?.groups);
+
+	// svelte-ignore state_referenced_locally
+	let group: string = $state(
+		(groups?.map((g) => g.name).includes(developers) ? developers : groups?.at(0)?.name) ??
+			'unreachable'
+	);
 
 	let env: string = $state('prod');
-	let service: string = $state('vscode-python');
+	let service: string = $state('jupyter');
 	let selectedBuckets: string[] = $state([]);
 	let serviceName = $derived(`${group} (${service})`);
 
@@ -36,9 +36,11 @@
 		{ displayName: 'JDemetra', name: 'jdemetra' }
 	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
 
-	let availableBuckets: NonNullable<
+	type BucketNode = NonNullable<
 		LaunchLab$result['team']['viewerTeamMember']
-	>['groups'][0]['sharedBucketsAccess']['nodes'] = $derived.by(() => {
+	>['groups'][0]['sharedBucketsAccess']['nodes'][0];
+
+	let availableBuckets: BucketNode[] = $derived.by(() => {
 		if (group === '' || env === '') return [];
 		return (
 			$LaunchLab.data?.team.viewerTeamMember?.groups
@@ -74,7 +76,65 @@
 
 		window.open(`${baseUrl}?${queryParams}`, '_blank');
 	};
+
+	type BucketData = {
+		id: string;
+		team: {
+			slug: string;
+			displayName: string;
+		};
+		name: string;
+		shortName: string;
+	};
+
+	function transformBucketdata(bucketNode: BucketNode): BucketData {
+		return {
+			id: bucketNode.id,
+			name: bucketNode.name,
+			team: bucketNode.team,
+			shortName: bucketNode.shortName
+		};
+	}
 </script>
+
+{#snippet checkHeading()}
+	<Checkbox
+		value="parent"
+		indeterminate={selectedBuckets.length !== 0 &&
+			selectedBuckets.length !== availableBuckets.length}
+		checked={selectedBuckets.length === availableBuckets.length}
+		onchange={(e) => {
+			selectedBuckets = e.currentTarget.checked ? availableBuckets.map((b) => b.id) : [];
+		}}
+		hideLabel={true}
+		>.
+	</Checkbox>
+{/snippet}
+{#snippet checkCell(bucket: BucketData)}
+	<Checkbox
+		value={bucket.id}
+		bind:checked={
+			() => selectedBuckets.includes(bucket.id),
+			(v) =>
+				v
+					? selectedBuckets.push(bucket.id)
+					: (selectedBuckets = selectedBuckets.filter((s) => s !== bucket.id))
+		}
+		hideLabel={true}>.</Checkbox
+	>
+{/snippet}
+{#snippet nameCell(bucket: BucketData)}
+	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}>
+		<b>{bucket.shortName}</b>
+	</a>
+	<br />
+	{bucket.name}
+{/snippet}
+{#snippet teamCell(bucket: BucketData)}<a href={`/team/${bucket.team.slug}/`}>
+		<b>{bucket.team.displayName}</b>
+	</a>
+	<br />
+	{bucket.team.slug}{/snippet}
 
 <GraphErrors errors={$LaunchLab.errors} />
 
@@ -90,61 +150,65 @@
 			<Button size="small" onclick={launchServiceWindow} icon={RocketIcon}>Start Dapla Lab</Button>
 		</div>
 		<div>
-			<RadioGroup bind:value={group}>
-				{#snippet legend()}
-					Gruppe
-				{/snippet}
-				{#each $LaunchLab.data?.team.viewerTeamMember.groups as group (group.id)}
-					<Radio value={group.name}>{group.name.substring(teamSlug.length + 1)}</Radio>
-				{/each}
-			</RadioGroup>
-			<br />
-			<Select bind:value={service} style="max-width: 20em;">
-				{#snippet label()}
-					Tjenestetype
-				{/snippet}
-				{#each availableServices as service (service.name)}
-					<option value={service.name}>{service.displayName}</option>
-				{/each}
-			</Select>
-			<br />
-			<RadioGroup bind:value={env}>
-				{#snippet legend()}
-					Miljø
-				{/snippet}
-				<Radio value="prod">Prod</Radio>
-				<Radio value="test">Test</Radio>
-			</RadioGroup>
+			<div style="display: flex; flex-direction: row; align-items: top; justify-content: start;">
+				<Select
+					bind:value={service}
+					style="margin-top: 0px; margin-right: 2em; max-width: 90%; max-height: 3em;"
+				>
+					{#snippet label()}
+						Tjenestetype
+					{/snippet}
+					{#each availableServices as service (service.name)}
+						<option value={service.name}>{service.displayName}</option>
+					{/each}
+				</Select>
+				<br />
+				<Select
+					bind:value={group}
+					style="display: flex; flex-direction: justify-content: start; margin-right: 2em; max-width: 90%; max-height: 3em"
+				>
+					{#snippet label()}
+						Gruppe
+					{/snippet}
+					{#each $LaunchLab.data?.team.viewerTeamMember.groups as group (group.id)}
+						<option value={group.name}>{group.name.substring(teamSlug.length + 1)}</option>
+					{/each}
+				</Select>
+				<br />
+				<Select label="Miljø" bind:value={env}>
+					<option value="prod">Prod</option>
+					<option value="test">Test</option>
+				</Select>
+			</div>
 			<br />
 			{#if availableBuckets.length !== 0}
-				<div>
-					<Label>Deltbøtter</Label>
-					<Checkbox
-						value="parent"
-						indeterminate={selectedBuckets.length !== 0 &&
-							selectedBuckets.length !== availableBuckets.length}
-						checked={selectedBuckets.length === availableBuckets.length}
-						onchange={(e) => {
-							selectedBuckets = e.currentTarget.checked ? availableBuckets.map((b) => b.id) : [];
-						}}
-					>
-						<b>Alle</b>
-					</Checkbox>
-					<div class="children">
-						{#each availableBuckets as bucket (bucket)}
-							<Checkbox
-								value={bucket.id}
-								bind:checked={
-									() => selectedBuckets.includes(bucket.id),
-									(v) =>
-										v
-											? selectedBuckets.push(bucket.id)
-											: (selectedBuckets = selectedBuckets.filter((s) => s !== bucket.id))
-								}>{bucket.team.displayName} ({bucket.team.slug}) / {bucket.shortName}</Checkbox
-							>
-						{/each}
-					</div>
-				</div>
+				<Label>Deltbøtter</Label>
+
+				<DaplaTable
+					data={availableBuckets.map(transformBucketdata)}
+					selected={['CHECK', 'NAME', 'TEAM']}
+					columns={[
+						{
+							id: 'CHECK',
+							name: 'Check',
+							heading: checkHeading,
+							show: 'ALWAYS',
+							cell: checkCell
+						},
+						{
+							id: 'NAME',
+							name: 'Navn',
+							show: 'ALWAYS',
+							cell: nameCell
+						},
+						{
+							id: 'TEAM',
+							name: 'Team',
+							show: 'ALWAYS',
+							cell: teamCell
+						}
+					]}
+				/>
 			{/if}
 		</div>
 	</div>

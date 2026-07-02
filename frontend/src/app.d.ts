@@ -20,6 +20,7 @@ declare global {
 				tag?: {
 					label: string;
 					variant: TagProps['variant'];
+					tooltip?: string;
 				};
 			};
 		}
@@ -30,6 +31,7 @@ declare global {
 				tag?: {
 					label: string;
 					variant: TagProps['variant'];
+					tooltip?: string;
 				};
 			};
 		}
