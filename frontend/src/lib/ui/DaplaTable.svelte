@@ -207,7 +207,11 @@
 					sortable={column.sortKey !== undefined}
 					sortKey={column.sortKey}
 					colspan={(column.colspan ?? typeof column.cell !== 'function') ? column.cell.length : 1}
-					align={column.align ?? 'left'}>{column.heading ?? column.name}</Th
+					align={column.align ?? 'left'}
+					>{#if column.heading && typeof column.heading === 'function'}
+						{@render column.heading()}
+					{:else}
+						{column.heading ?? column.name}{/if}</Th
 				>
 			{/each}
 		</Tr>

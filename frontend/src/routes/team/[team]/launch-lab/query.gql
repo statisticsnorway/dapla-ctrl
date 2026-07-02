@@ -13,6 +13,7 @@ query LaunchLab($team: Slug!) {
 							slug
 							displayName
 						}
+						name
 						shortName
 						env
 						kind

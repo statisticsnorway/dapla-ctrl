@@ -2,7 +2,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import type { RouteId } from '$app/types';
-	import { Heading, Tag } from '@nais/ds-svelte-community';
+	import { Heading, Tag, Tooltip } from '@nais/ds-svelte-community';
 	import AddToFavorites from '$lib/ui/AddToFavorites.svelte';
 
 	interface Props {
@@ -42,7 +42,11 @@
 		<div class="heading-wrapper">
 			<Heading level="1" size="xlarge">{heading}</Heading>
 			{#if tag}
-				<Tag variant={tag.variant}>{tag.label}</Tag>
+				{#if tag.tooltip}
+					<Tooltip content={tag.tooltip}><Tag variant={tag.variant}>{tag.label}</Tag></Tooltip>
+				{:else}
+					<Tag variant={tag.variant}>{tag.label}</Tag>
+				{/if}
 			{/if}
 			{#if actions}
 				{@render actions()}
