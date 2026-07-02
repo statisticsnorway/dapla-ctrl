@@ -156,7 +156,7 @@
 					style="margin-top: 0px; margin-right: 2em; max-width: 90%; max-height: 3em;"
 				>
 					{#snippet label()}
-						Tjenestetype
+						Velg tjeneste
 					{/snippet}
 					{#each availableServices as service (service.name)}
 						<option value={service.name}>{service.displayName}</option>
@@ -168,21 +168,21 @@
 					style="display: flex; flex-direction: justify-content: start; margin-right: 2em; max-width: 90%; max-height: 3em"
 				>
 					{#snippet label()}
-						Gruppe
+						Velg gruppe
 					{/snippet}
 					{#each $LaunchLab.data?.team.viewerTeamMember.groups as group (group.id)}
 						<option value={group.name}>{group.name.substring(teamSlug.length + 1)}</option>
 					{/each}
 				</Select>
 				<br />
-				<Select label="Miljø" bind:value={env}>
+				<Select label="Velg miljø" bind:value={env}>
 					<option value="prod">Prod</option>
 					<option value="test">Test</option>
 				</Select>
 			</div>
 			<br />
 			{#if availableBuckets.length !== 0}
-				<Label>Deltbøtter</Label>
+				<Label>Velg deltbøtter som skal vises under /buckets</Label>
 
 				<DaplaTable
 					data={availableBuckets.map(transformBucketdata)}
