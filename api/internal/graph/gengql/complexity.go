@@ -23,6 +23,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Group.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Group.SharedBucketsAccess = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Query.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}

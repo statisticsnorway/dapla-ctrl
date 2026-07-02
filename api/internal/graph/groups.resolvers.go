@@ -8,6 +8,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
@@ -18,6 +19,14 @@ func (r *groupResolver) Members(ctx context.Context, obj *group.Group, first *in
 	}
 
 	return group.ListMembers(ctx, obj.Name, page, orderBy)
+}
+
+func (r *groupResolver) SharedBucketsAccess(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+	return sharedbucketsstopgap.ListAccessToForGroup(ctx, obj.Name, page, orderBy)
 }
 
 func (r *groupMemberResolver) Group(ctx context.Context, obj *group.GroupMember) (*group.Group, error) {

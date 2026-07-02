@@ -383,3 +383,52 @@ LIMIT
 OFFSET
 	sqlc.arg('offset')
 ;
+
+-- name: ListAccessToForGroup :many
+SELECT
+	sqlc.embed(shared_buckets_stopgap),
+	COUNT(*) OVER () AS total_count
+FROM
+	shared_buckets_stopgap
+	JOIN shared_buckets_access_stopgap ON shared_buckets_access_stopgap.bucket_name = shared_buckets_stopgap.name
+WHERE
+	shared_buckets_access_stopgap.group_name = @group_name
+GROUP BY
+	shared_buckets_stopgap.name
+ORDER BY
+	CASE
+		WHEN @order_by::TEXT = 'name:asc' THEN shared_buckets_stopgap.name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'name:desc' THEN shared_buckets_stopgap.name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:asc' THEN kind
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'kind:desc' THEN kind
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:asc' THEN short_name
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'short_name:desc' THEN short_name
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'env:asc' THEN env
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'env:desc' THEN env
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'team:asc' THEN shared_buckets_stopgap.team_slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'team:desc' THEN shared_buckets_stopgap.team_slug
+	END DESC,
+	short_name ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;

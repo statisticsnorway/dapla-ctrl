@@ -235,6 +235,10 @@ func (r *teamResolver) ViewerCanManageMembers(ctx context.Context, obj *team.Tea
 	return true, nil
 }
 
+func (r *teamResolver) ViewerTeamMember(ctx context.Context, obj *team.Team) (*team.TeamMember, error) {
+	return team.GetMember(ctx, obj.Slug, authz.ActorFromContext(ctx).User.GetID())
+}
+
 func (r *teamResolver) AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error) {
 	return team.GetAccessManagers(ctx, obj.Slug)
 }

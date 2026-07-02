@@ -127,11 +127,11 @@ func toGraphTeam(m *teamsql.Team) *Team {
 	return ret
 }
 
-func toGraphTeamMember(m *teamsql.ListMembersRow) *TeamMember {
+func toGraphTeamMember(teamSlug slug.Slug, userId uuid.UUID, groups []string) *TeamMember {
 	return &TeamMember{
-		TeamSlug: m.TeamSlug,
-		UserID:   m.ID,
-		Groups:   m.Groups,
+		TeamSlug: teamSlug,
+		UserID:   userId,
+		Groups:   groups,
 	}
 }
 

@@ -232,3 +232,26 @@ func ListAccessToForTeam(ctx context.Context, teamSlug slug.Slug, page *paginati
 		return toGraphBucket(&from.SharedBucketsStopgap)
 	}), nil
 }
+
+func ListAccessToForGroup(ctx context.Context, groupName string, page *pagination.Pagination, orderBy *SharedBucketOrder) (*SharedBucketConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListAccessToForGroup(ctx, sharedbucketsstopgapsql.ListAccessToForGroupParams{
+		GroupName: groupName,
+		Offset:    page.Offset(),
+		Limit:     page.Limit(),
+		OrderBy:   orderBy.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	total := 0
+	if len(ret) > 0 {
+		total = int(ret[0].TotalCount)
+	}
+
+	return pagination.NewConvertConnection(ret, page, total, func(from *sharedbucketsstopgapsql.ListAccessToForGroupRow) *SharedBucket {
+		return toGraphBucket(&from.SharedBucketsStopgap)
+	}), nil
+}

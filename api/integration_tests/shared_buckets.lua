@@ -190,6 +190,34 @@ Test.gql("shared-with-a has access to 2 buckets", function(t)
 	}
 end)
 
+Test.gql("shared-with-a-developers has access to 2 buckets", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+		query {
+			group(name: "shared-with-a-developers") {
+				sharedBucketsAccess {
+					pageInfo {
+						totalCount
+					}
+				}
+			}
+		}
+		]], bucketName))
+
+	t.check {
+		data = {
+			group = {
+				sharedBucketsAccess = {
+					pageInfo = {
+						totalCount = 2,
+					},
+				},
+			},
+		},
+	}
+end)
+
 -- Add sharedUser1 to shared-with-b-developers to make API response "bigger"
 Helper.SQLExec([[
 	INSERT INTO

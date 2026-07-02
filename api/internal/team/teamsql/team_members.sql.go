@@ -10,6 +10,43 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
+const getTeamMember = `-- name: GetTeamMember :one
+SELECT
+	users.id,
+	groups.team_slug,
+	ARRAY_AGG(groups.name)::TEXT[] AS groups
+FROM
+	group_members
+	JOIN groups ON groups.name = group_members.group_name
+	JOIN users ON users.id = group_members.user_id
+WHERE
+	groups.team_slug = $1::slug
+	AND group_members.user_id = $2
+GROUP BY
+	users.id,
+	groups.team_slug
+ORDER BY
+	users.name ASC
+`
+
+type GetTeamMemberParams struct {
+	TeamSlug slug.Slug
+	UserID   uuid.UUID
+}
+
+type GetTeamMemberRow struct {
+	ID       uuid.UUID
+	TeamSlug slug.Slug
+	Groups   []string
+}
+
+func (q *Queries) GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (*GetTeamMemberRow, error) {
+	row := q.db.QueryRow(ctx, getTeamMember, arg.TeamSlug, arg.UserID)
+	var i GetTeamMemberRow
+	err := row.Scan(&i.ID, &i.TeamSlug, &i.Groups)
+	return &i, err
+}
+
 const listForUser = `-- name: ListForUser :many
 SELECT
 	teams.slug,

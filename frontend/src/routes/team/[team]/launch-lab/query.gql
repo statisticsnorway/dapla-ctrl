@@ -1,0 +1,24 @@
+query LaunchLab($team: Slug!) {
+	team(slug: $team) {
+		id
+		viewerTeamMember {
+			groups {
+				id
+				name
+				sharedBucketsAccess {
+					nodes {
+						id
+						team {
+							id
+							slug
+							displayName
+						}
+						shortName
+						env
+						kind
+					}
+				}
+			}
+		}
+	}
+}

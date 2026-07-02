@@ -214,7 +214,25 @@ func ListMembers(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	if len(ret) > 0 {
 		total = ret[0].TotalCount
 	}
-	return pagination.NewConvertConnection(ret, page, total, toGraphTeamMember), nil
+	return pagination.NewConvertConnection(ret, page, total, func(row *teamsql.ListMembersRow) *TeamMember {
+		return toGraphTeamMember(row.TeamSlug, row.ID, row.Groups)
+	}), nil
+}
+
+func GetMember(ctx context.Context, teamSlug slug.Slug, userId uuid.UUID) (*TeamMember, error) {
+	q := db(ctx)
+
+	ret, err := q.GetTeamMember(ctx, teamsql.GetTeamMemberParams{
+		TeamSlug: teamSlug,
+		UserID:   userId,
+	})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	return toGraphTeamMember(ret.TeamSlug, ret.ID, ret.Groups), nil
 }
 
 func GetDeleteKey(ctx context.Context, teamSlug slug.Slug, key uuid.UUID) (*TeamDeleteKey, error) {
