@@ -5,7 +5,7 @@ query LaunchLab($team: Slug!) {
 			groups {
 				id
 				name
-				sharedBucketsAccess {
+				sharedBucketsAccess(first: 1000) {
 					nodes {
 						id
 						team {
