@@ -25,6 +25,7 @@
             protobuf-language-server
             protoc-gen-go
             protoc-gen-go-grpc
+            svelte-language-service
             yaml-language-server
           ];
         };
