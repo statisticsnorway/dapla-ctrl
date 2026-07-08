@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Teams_Get_FullMethodName    = "/dapla.api.protobuf.Teams/Get"
-	Teams_List_FullMethodName   = "/dapla.api.protobuf.Teams/List"
-	Teams_Groups_FullMethodName = "/dapla.api.protobuf.Teams/Groups"
-	Teams_Delete_FullMethodName = "/dapla.api.protobuf.Teams/Delete"
+	Teams_Get_FullMethodName         = "/dapla.api.protobuf.Teams/Get"
+	Teams_List_FullMethodName        = "/dapla.api.protobuf.Teams/List"
+	Teams_Groups_FullMethodName      = "/dapla.api.protobuf.Teams/Groups"
+	Teams_Delete_FullMethodName      = "/dapla.api.protobuf.Teams/Delete"
+	Teams_GetFeatures_FullMethodName = "/dapla.api.protobuf.Teams/GetFeatures"
 )
 
 // TeamsClient is the client API for Teams service.
@@ -33,6 +34,7 @@ type TeamsClient interface {
 	List(ctx context.Context, in *ListTeamsRequest, opts ...grpc.CallOption) (*ListTeamsResponse, error)
 	Groups(ctx context.Context, in *ListTeamGroupsRequest, opts ...grpc.CallOption) (*ListTeamGroupsResponse, error)
 	Delete(ctx context.Context, in *DeleteTeamRequest, opts ...grpc.CallOption) (*DeleteTeamResponse, error)
+	GetFeatures(ctx context.Context, in *GetFeaturesRequest, opts ...grpc.CallOption) (*GetFeaturesResponse, error)
 }
 
 type teamsClient struct {
@@ -83,6 +85,16 @@ func (c *teamsClient) Delete(ctx context.Context, in *DeleteTeamRequest, opts ..
 	return out, nil
 }
 
+func (c *teamsClient) GetFeatures(ctx context.Context, in *GetFeaturesRequest, opts ...grpc.CallOption) (*GetFeaturesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFeaturesResponse)
+	err := c.cc.Invoke(ctx, Teams_GetFeatures_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TeamsServer is the server API for Teams service.
 // All implementations must embed UnimplementedTeamsServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type TeamsServer interface {
 	List(context.Context, *ListTeamsRequest) (*ListTeamsResponse, error)
 	Groups(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)
 	Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error)
+	GetFeatures(context.Context, *GetFeaturesRequest) (*GetFeaturesResponse, error)
 	mustEmbedUnimplementedTeamsServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedTeamsServer) Groups(context.Context, *ListTeamGroupsRequest) 
 }
 func (UnimplementedTeamsServer) Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedTeamsServer) GetFeatures(context.Context, *GetFeaturesRequest) (*GetFeaturesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFeatures not implemented")
 }
 func (UnimplementedTeamsServer) mustEmbedUnimplementedTeamsServer() {}
 func (UnimplementedTeamsServer) testEmbeddedByValue()               {}
@@ -206,6 +222,24 @@ func _Teams_Delete_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Teams_GetFeatures_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFeaturesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeamsServer).GetFeatures(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Teams_GetFeatures_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeamsServer).GetFeatures(ctx, req.(*GetFeaturesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Teams_ServiceDesc is the grpc.ServiceDesc for Teams service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var Teams_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _Teams_Delete_Handler,
+		},
+		{
+			MethodName: "GetFeatures",
+			Handler:    _Teams_GetFeatures_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

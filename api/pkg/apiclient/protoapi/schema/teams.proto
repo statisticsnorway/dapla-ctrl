@@ -14,11 +14,17 @@ message Team {
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
 }
 
+message Feature {
+  string name = 1;
+  string env = 2;
+}
+
 service Teams {
   rpc Get(GetTeamRequest) returns (GetTeamResponse) {}
   rpc List(ListTeamsRequest) returns (ListTeamsResponse) {}
   rpc Groups(ListTeamGroupsRequest) returns (ListTeamGroupsResponse) {}
   rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
+  rpc GetFeatures(GetFeaturesRequest) returns (GetFeaturesResponse) {}
 }
 
 message DeleteTeamRequest {
@@ -54,6 +60,14 @@ message ListTeamGroupsRequest {
 message ListTeamGroupsResponse {
   repeated TeamGroup nodes = 1;
   PageInfo page_info = 2;
+}
+
+message GetFeaturesRequest {
+  string slug = 1;
+}
+
+message GetFeaturesResponse {
+  repeated Feature features = 1;
 }
 
 message TeamGroup {

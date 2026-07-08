@@ -104,6 +104,24 @@ func (t *Server) Groups(ctx context.Context, req *protoapi.ListTeamGroupsRequest
 	return resp, nil
 }
 
+func (t *Server) GetFeatures(ctx context.Context, team *protoapi.GetFeaturesRequest) (*protoapi.GetFeaturesResponse, error) {
+	features, err := t.querier.GetFeaturesForTeam(ctx, slug.Slug(team.Slug))
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &protoapi.GetFeaturesResponse{
+		Features: make([]*protoapi.Feature, len(features)),
+	}
+	for i, feature := range features {
+		resp.Features[i] = &protoapi.Feature{
+			Name: feature.TeamFeature.Name,
+			Env:  feature.TeamFeature.Env,
+		}
+	}
+	return resp, nil
+}
+
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
 		Slug:         team.Slug.String(),

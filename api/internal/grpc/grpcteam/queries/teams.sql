@@ -67,3 +67,14 @@ FROM
 WHERE
 	team_slug = @team_slug::slug
 ;
+
+-- name: GetFeaturesForTeam :many
+SELECT
+    sqlc.embed(team_features)
+FROM
+    team_features
+WHERE
+    team_slug = @team_slug
+ORDER BY
+    name ASC
+;
