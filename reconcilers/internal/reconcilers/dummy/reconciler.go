@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -42,9 +41,13 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("create team file: %w", err)
 	}
 
-	formattedDate := time.Now().Format("15:04:05 02 01 2006")
-	if _, err := f.Write([]byte(formattedDate)); err != nil {
+	resp, err := client.Teams().GetFeatures(ctx, &protoapi.GetFeaturesRequest{Slug: daplaTeam.Slug})
+	if err != nil {
 		return err
+	}
+
+	for _, feat := range resp.Features {
+		fmt.Fprintf(f, "%s\t%s\n", feat.Name, feat.Env)
 	}
 
 	return nil
