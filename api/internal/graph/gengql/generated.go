@@ -49,6 +49,8 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 type ResolverRoot interface {
 	AddTeamAccessManagerPayload() AddTeamAccessManagerPayloadResolver
 	ArtifactRegistryAllowedGithubRepos() ArtifactRegistryAllowedGithubReposResolver
+	DisableTeamFeaturePayload() DisableTeamFeaturePayloadResolver
+	EnableTeamFeaturePayload() EnableTeamFeaturePayloadResolver
 	Group() GroupResolver
 	GroupMember() GroupMemberResolver
 	Message() MessageResolver
@@ -160,6 +162,18 @@ type ComplexityRoot struct {
 	DeleteServiceAccountTokenPayload struct {
 		ServiceAccount             func(childComplexity int) int
 		ServiceAccountTokenDeleted func(childComplexity int) int
+	}
+
+	DisableTeamFeaturePayload struct {
+		Env     func(childComplexity int) int
+		Feature func(childComplexity int) int
+		Team    func(childComplexity int) int
+	}
+
+	EnableTeamFeaturePayload struct {
+		Env     func(childComplexity int) int
+		Feature func(childComplexity int) int
+		Team    func(childComplexity int) int
 	}
 
 	Features struct {
@@ -281,7 +295,9 @@ type ComplexityRoot struct {
 		DeleteServiceAccount                           func(childComplexity int, input serviceaccount.DeleteServiceAccountInput) int
 		DeleteServiceAccountToken                      func(childComplexity int, input serviceaccount.DeleteServiceAccountTokenInput) int
 		DisableReconciler                              func(childComplexity int, input reconciler.DisableReconcilerInput) int
+		DisableTeamFeature                             func(childComplexity int, input team.DisableTeamFeatureInput) int
 		EnableReconciler                               func(childComplexity int, input reconciler.EnableReconcilerInput) int
+		EnableTeamFeature                              func(childComplexity int, input team.EnableTeamFeatureInput) int
 		GrantGithubRepoAccessToTeamArtifactRegistry    func(childComplexity int, input artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput) int
 		RemoveGroupMember                              func(childComplexity int, input group.RemoveGroupMemberInput) int
 		RemoveTeamAccessManager                        func(childComplexity int, input team.RemoveTeamAccessManagerInput) int
@@ -716,6 +732,7 @@ type ComplexityRoot struct {
 		ArtifactRegistryAllowedGithubRepos func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
 		DeletionInProgress                 func(childComplexity int) int
 		DisplayName                        func(childComplexity int) int
+		Features                           func(childComplexity int) int
 		Groups                             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		HasManualEditing                   func(childComplexity int) int
 		ID                                 func(childComplexity int) int
@@ -756,6 +773,11 @@ type ComplexityRoot struct {
 	TeamEdge struct {
 		Cursor func(childComplexity int) int
 		Node   func(childComplexity int) int
+	}
+
+	TeamFeature struct {
+		Env  func(childComplexity int) int
+		Name func(childComplexity int) int
 	}
 
 	TeamMember struct {
@@ -930,6 +952,12 @@ type AddTeamAccessManagerPayloadResolver interface {
 type ArtifactRegistryAllowedGithubReposResolver interface {
 	Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryAllowedGithubRepos) (*team.Team, error)
 }
+type DisableTeamFeaturePayloadResolver interface {
+	Team(ctx context.Context, obj *team.DisableTeamFeaturePayload) (*team.Team, error)
+}
+type EnableTeamFeaturePayloadResolver interface {
+	Team(ctx context.Context, obj *team.EnableTeamFeaturePayload) (*team.Team, error)
+}
 type GroupResolver interface {
 	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error)
 	SharedBucketsAccess(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
@@ -966,6 +994,8 @@ type MutationResolver interface {
 	UpdateTeam(ctx context.Context, input team.UpdateTeamInput) (*team.UpdateTeamPayload, error)
 	AddTeamAccessManager(ctx context.Context, input team.AddTeamAccessManagerInput) (*team.AddTeamAccessManagerPayload, error)
 	RemoveTeamAccessManager(ctx context.Context, input team.RemoveTeamAccessManagerInput) (*team.RemoveTeamAccessManagerPayload, error)
+	EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error)
+	DisableTeamFeature(ctx context.Context, input team.DisableTeamFeatureInput) (*team.DisableTeamFeaturePayload, error)
 }
 type QueryResolver interface {
 	Node(ctx context.Context, id ident.Ident) (model.Node, error)
@@ -1043,6 +1073,7 @@ type TeamResolver interface {
 	ViewerCanManageMembers(ctx context.Context, obj *team.Team) (bool, error)
 	ViewerTeamMember(ctx context.Context, obj *team.Team) (*team.TeamMember, error)
 	AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error)
+	Features(ctx context.Context, obj *team.Team) ([]*team.TeamFeature, error)
 	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 	ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error)
 }
@@ -1343,6 +1374,44 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.DeleteServiceAccountTokenPayload.ServiceAccountTokenDeleted(childComplexity), true
+
+	case "DisableTeamFeaturePayload.env":
+		if e.ComplexityRoot.DisableTeamFeaturePayload.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DisableTeamFeaturePayload.Env(childComplexity), true
+	case "DisableTeamFeaturePayload.feature":
+		if e.ComplexityRoot.DisableTeamFeaturePayload.Feature == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DisableTeamFeaturePayload.Feature(childComplexity), true
+	case "DisableTeamFeaturePayload.team":
+		if e.ComplexityRoot.DisableTeamFeaturePayload.Team == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DisableTeamFeaturePayload.Team(childComplexity), true
+
+	case "EnableTeamFeaturePayload.env":
+		if e.ComplexityRoot.EnableTeamFeaturePayload.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.EnableTeamFeaturePayload.Env(childComplexity), true
+	case "EnableTeamFeaturePayload.feature":
+		if e.ComplexityRoot.EnableTeamFeaturePayload.Feature == nil {
+			break
+		}
+
+		return e.ComplexityRoot.EnableTeamFeaturePayload.Feature(childComplexity), true
+	case "EnableTeamFeaturePayload.team":
+		if e.ComplexityRoot.EnableTeamFeaturePayload.Team == nil {
+			break
+		}
+
+		return e.ComplexityRoot.EnableTeamFeaturePayload.Team(childComplexity), true
 
 	case "Features.id":
 		if e.ComplexityRoot.Features.ID == nil {
@@ -1850,6 +1919,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DisableReconciler(childComplexity, args["input"].(reconciler.DisableReconcilerInput)), true
+	case "Mutation.disableTeamFeature":
+		if e.ComplexityRoot.Mutation.DisableTeamFeature == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_disableTeamFeature_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DisableTeamFeature(childComplexity, args["input"].(team.DisableTeamFeatureInput)), true
 	case "Mutation.enableReconciler":
 		if e.ComplexityRoot.Mutation.EnableReconciler == nil {
 			break
@@ -1861,6 +1941,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.EnableReconciler(childComplexity, args["input"].(reconciler.EnableReconcilerInput)), true
+	case "Mutation.enableTeamFeature":
+		if e.ComplexityRoot.Mutation.EnableTeamFeature == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_enableTeamFeature_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.EnableTeamFeature(childComplexity, args["input"].(team.EnableTeamFeatureInput)), true
 	case "Mutation.grantGithubRepoAccessToTeamArtifactRegistry":
 		if e.ComplexityRoot.Mutation.GrantGithubRepoAccessToTeamArtifactRegistry == nil {
 			break
@@ -3697,6 +3788,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.DisplayName(childComplexity), true
+	case "Team.features":
+		if e.ComplexityRoot.Team.Features == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Team.Features(childComplexity), true
 	case "Team.groups":
 		if e.ComplexityRoot.Team.Groups == nil {
 			break
@@ -3889,6 +3986,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TeamEdge.Node(childComplexity), true
+
+	case "TeamFeature.env":
+		if e.ComplexityRoot.TeamFeature.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeature.Env(childComplexity), true
+	case "TeamFeature.name":
+		if e.ComplexityRoot.TeamFeature.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeature.Name(childComplexity), true
 
 	case "TeamMember.groups":
 		if e.ComplexityRoot.TeamMember.Groups == nil {
@@ -4524,7 +4634,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputDeleteServiceAccountInput,
 		ec.unmarshalInputDeleteServiceAccountTokenInput,
 		ec.unmarshalInputDisableReconcilerInput,
+		ec.unmarshalInputDisableTeamFeatureInput,
 		ec.unmarshalInputEnableReconcilerInput,
+		ec.unmarshalInputEnableTeamFeatureInput,
 		ec.unmarshalInputGrantGithubRepoAccessToTeamArtifactRegistryInput,
 		ec.unmarshalInputGroupFilter,
 		ec.unmarshalInputGroupOrder,
@@ -7762,6 +7874,10 @@ extend type Mutation {
 	This lets section managers delegate access management to up to two other people.
 	"""
 	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
+
+	enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
+
+	disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
 }
 
 """
@@ -7898,6 +8014,14 @@ type Team implements Node {
 
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
+
+	features: [TeamFeature!]!
+}
+
+type TeamFeature {
+	name: String!
+
+	env: String!
 }
 
 type TeamMember {
@@ -7943,6 +8067,24 @@ type RemoveTeamAccessManagerPayload {
 
 	"The user who has been removed as access manager."
 	user: User!
+}
+
+type EnableTeamFeaturePayload {
+	team: Team!
+
+	""
+	feature: String!
+
+	env: String!
+}
+
+type DisableTeamFeaturePayload {
+	team: Team!
+
+	""
+	feature: String!
+
+	env: String!
 }
 
 type TeamConnection {
@@ -8058,6 +8200,36 @@ input RemoveTeamAccessManagerInput {
 	Emails of the users who should be made access managers.
 	"""
 	userEmail: String!
+}
+
+input EnableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: String!
+
+	"""
+	Environment
+	"""
+	env: String!
+}
+
+input DisableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: String!
+
+	"""
+	Environment
+	"""
+	env: String!
 }
 
 "Ordering options when fetching teams."
@@ -9131,10 +9303,32 @@ func (ec *executionContext) field_Mutation_disableReconciler_args(ctx context.Co
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_disableTeamFeature_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDisableTeamFeatureInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐDisableTeamFeatureInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_enableReconciler_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐEnableReconcilerInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_enableTeamFeature_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNEnableTeamFeatureInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐEnableTeamFeatureInput)
 	if err != nil {
 		return nil, err
 	}
@@ -10603,6 +10797,8 @@ func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_team(_ cont
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -10789,6 +10985,8 @@ func (ec *executionContext) fieldContext_ArtifactRegistryAllowedGithubRepos_team
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -11715,6 +11913,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -11828,6 +12028,264 @@ func (ec *executionContext) fieldContext_DeleteServiceAccountTokenPayload_servic
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DisableTeamFeaturePayload_team(ctx context.Context, field graphql.CollectedField, obj *team.DisableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DisableTeamFeaturePayload_team,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.DisableTeamFeaturePayload().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DisableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "hasManualEditing":
+				return ec.fieldContext_Team_hasManualEditing(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "viewerCanManageMembers":
+				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			case "artifactRegistryAllowedGithubRepos":
+				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DisableTeamFeaturePayload_feature(ctx context.Context, field graphql.CollectedField, obj *team.DisableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DisableTeamFeaturePayload_feature,
+		func(ctx context.Context) (any, error) {
+			return obj.Feature, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_feature(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DisableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DisableTeamFeaturePayload_env(ctx context.Context, field graphql.CollectedField, obj *team.DisableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_DisableTeamFeaturePayload_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DisableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnableTeamFeaturePayload_team(ctx context.Context, field graphql.CollectedField, obj *team.EnableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_EnableTeamFeaturePayload_team,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.EnableTeamFeaturePayload().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "hasManualEditing":
+				return ec.fieldContext_Team_hasManualEditing(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "viewerCanManageMembers":
+				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			case "artifactRegistryAllowedGithubRepos":
+				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnableTeamFeaturePayload_feature(ctx context.Context, field graphql.CollectedField, obj *team.EnableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_EnableTeamFeaturePayload_feature,
+		func(ctx context.Context) (any, error) {
+			return obj.Feature, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_feature(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EnableTeamFeaturePayload_env(ctx context.Context, field graphql.CollectedField, obj *team.EnableTeamFeaturePayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_EnableTeamFeaturePayload_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EnableTeamFeaturePayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -14847,6 +15305,104 @@ func (ec *executionContext) fieldContext_Mutation_removeTeamAccessManager(ctx co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_enableTeamFeature(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_enableTeamFeature,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().EnableTeamFeature(ctx, fc.Args["input"].(team.EnableTeamFeatureInput))
+		},
+		nil,
+		ec.marshalNEnableTeamFeaturePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐEnableTeamFeaturePayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_enableTeamFeature(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_EnableTeamFeaturePayload_team(ctx, field)
+			case "feature":
+				return ec.fieldContext_EnableTeamFeaturePayload_feature(ctx, field)
+			case "env":
+				return ec.fieldContext_EnableTeamFeaturePayload_env(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type EnableTeamFeaturePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_enableTeamFeature_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_disableTeamFeature(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_disableTeamFeature,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DisableTeamFeature(ctx, fc.Args["input"].(team.DisableTeamFeatureInput))
+		},
+		nil,
+		ec.marshalNDisableTeamFeaturePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐDisableTeamFeaturePayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_disableTeamFeature(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "team":
+				return ec.fieldContext_DisableTeamFeaturePayload_team(ctx, field)
+			case "feature":
+				return ec.fieldContext_DisableTeamFeaturePayload_feature(ctx, field)
+			case "env":
+				return ec.fieldContext_DisableTeamFeaturePayload_env(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type DisableTeamFeaturePayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_disableTeamFeature_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *pagination.PageInfo) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -15960,6 +16516,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -17878,6 +18436,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -18244,6 +18804,8 @@ func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_team(_ c
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -20359,6 +20921,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -22936,6 +23500,8 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -23252,6 +23818,8 @@ func (ec *executionContext) fieldContext_SharedBucketAccess_team(_ context.Conte
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -24301,6 +24869,41 @@ func (ec *executionContext) fieldContext_Team_accessManagers(_ context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_features(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_features,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Team().Features(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeamFeature2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_features(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_TeamFeature_name(ctx, field)
+			case "env":
+				return ec.fieldContext_TeamFeature_env(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamFeature", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_activityLog(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -24457,6 +25060,8 @@ func (ec *executionContext) fieldContext_TeamAccessManager_team(_ context.Contex
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -24630,6 +25235,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -24966,12 +25573,72 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeature_name(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeature) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeature_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeature_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeature",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeature_env(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeature) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeature_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeature_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeature",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -25035,6 +25702,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -26548,6 +27217,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
 			case "accessManagers":
 				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
 			case "artifactRegistryAllowedGithubRepos":
@@ -30207,6 +30878,50 @@ func (ec *executionContext) unmarshalInputDisableReconcilerInput(ctx context.Con
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputDisableTeamFeatureInput(ctx context.Context, obj any) (team.DisableTeamFeatureInput, error) {
+	var it team.DisableTeamFeatureInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "feature", "env"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "feature":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Feature = data
+		case "env":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Env = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputEnableReconcilerInput(ctx context.Context, obj any) (reconciler.EnableReconcilerInput, error) {
 	var it reconciler.EnableReconcilerInput
 	if obj == nil {
@@ -30232,6 +30947,50 @@ func (ec *executionContext) unmarshalInputEnableReconcilerInput(ctx context.Cont
 				return it, err
 			}
 			it.Name = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEnableTeamFeatureInput(ctx context.Context, obj any) (team.EnableTeamFeatureInput, error) {
+	var it team.EnableTeamFeatureInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "feature", "env"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "feature":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Feature = data
+		case "env":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Env = data
 		}
 	}
 	return it, nil
@@ -32380,6 +33139,166 @@ func (ec *executionContext) _DeleteServiceAccountTokenPayload(ctx context.Contex
 	return out
 }
 
+var disableTeamFeaturePayloadImplementors = []string{"DisableTeamFeaturePayload"}
+
+func (ec *executionContext) _DisableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, obj *team.DisableTeamFeaturePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, disableTeamFeaturePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DisableTeamFeaturePayload")
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DisableTeamFeaturePayload_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "feature":
+			out.Values[i] = ec._DisableTeamFeaturePayload_feature(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "env":
+			out.Values[i] = ec._DisableTeamFeaturePayload_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var enableTeamFeaturePayloadImplementors = []string{"EnableTeamFeaturePayload"}
+
+func (ec *executionContext) _EnableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, obj *team.EnableTeamFeaturePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, enableTeamFeaturePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EnableTeamFeaturePayload")
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._EnableTeamFeaturePayload_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "feature":
+			out.Values[i] = ec._EnableTeamFeaturePayload_feature(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "env":
+			out.Values[i] = ec._EnableTeamFeaturePayload_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var featuresImplementors = []string{"Features", "Node"}
 
 func (ec *executionContext) _Features(ctx context.Context, sel ast.SelectionSet, obj *feature.Features) graphql.Marshaler {
@@ -33592,6 +34511,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "removeTeamAccessManager":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_removeTeamAccessManager(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "enableTeamFeature":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_enableTeamFeature(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "disableTeamFeature":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_disableTeamFeature(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -38179,6 +39112,42 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "features":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Team_features(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "activityLog":
 			field := field
 
@@ -38516,6 +39485,50 @@ func (ec *executionContext) _TeamEdge(ctx context.Context, sel ast.SelectionSet,
 			}
 		case "node":
 			out.Values[i] = ec._TeamEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamFeatureImplementors = []string{"TeamFeature"}
+
+func (ec *executionContext) _TeamFeature(ctx context.Context, sel ast.SelectionSet, obj *team.TeamFeature) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamFeatureImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamFeature")
+		case "name":
+			out.Values[i] = ec._TeamFeature_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "env":
+			out.Values[i] = ec._TeamFeature_env(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -40856,9 +41869,47 @@ func (ec *executionContext) unmarshalNDisableReconcilerInput2githubᚗcomᚋstat
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNDisableTeamFeatureInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐDisableTeamFeatureInput(ctx context.Context, v any) (team.DisableTeamFeatureInput, error) {
+	res, err := ec.unmarshalInputDisableTeamFeatureInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDisableTeamFeaturePayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐDisableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, v team.DisableTeamFeaturePayload) graphql.Marshaler {
+	return ec._DisableTeamFeaturePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNDisableTeamFeaturePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐDisableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, v *team.DisableTeamFeaturePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._DisableTeamFeaturePayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNEnableReconcilerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋreconcilerᚐEnableReconcilerInput(ctx context.Context, v any) (reconciler.EnableReconcilerInput, error) {
 	res, err := ec.unmarshalInputEnableReconcilerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNEnableTeamFeatureInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐEnableTeamFeatureInput(ctx context.Context, v any) (team.EnableTeamFeatureInput, error) {
+	res, err := ec.unmarshalInputEnableTeamFeatureInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNEnableTeamFeaturePayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐEnableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, v team.EnableTeamFeaturePayload) graphql.Marshaler {
+	return ec._EnableTeamFeaturePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEnableTeamFeaturePayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐEnableTeamFeaturePayload(ctx context.Context, sel ast.SelectionSet, v *team.EnableTeamFeaturePayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._EnableTeamFeaturePayload(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNFeatures2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋfeatureᚐFeatures(ctx context.Context, sel ast.SelectionSet, v feature.Features) graphql.Marshaler {
@@ -42152,6 +43203,32 @@ func (ec *executionContext) marshalNTeamEdge2ᚕgithubᚗcomᚋstatisticsnorway�
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalNTeamFeature2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamFeature) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamFeature2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeature(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTeamFeature2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeature(ctx context.Context, sel ast.SelectionSet, v *team.TeamFeature) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamFeature(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamMember) graphql.Marshaler {

@@ -9,11 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/dummy"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
@@ -121,6 +120,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
 
+	parqueditReconciler, err := parquedit.New(ctx)
+	if err != nil {
+		return fmt.Errorf("create parquedit reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(parqueditReconciler)
+
 	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
 		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
@@ -130,16 +135,6 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(gcpResourcesReconciler)
 
-	saClient, err := serviceaccounts.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("error creating service account client: %w", err)
-	}
-	arTeam, err := artifactregistry.New(ctx, saClient)
-	if err != nil {
-		return fmt.Errorf("create artifact registry reconciler: %w", err)
-	}
-	reconcilerManager.AddReconciler(arTeam)
-
 	if cfg.GitHub.Enabled {
 		githubTeam, err := team.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
 		if err != nil {
@@ -148,11 +143,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		reconcilerManager.AddReconciler(githubTeam)
 	}
 
-	parqueditReconciler, err := parquedit.New(ctx)
-	if err != nil {
-		return fmt.Errorf("create parquedit reconciler: %w", err)
-	}
-	reconcilerManager.AddReconciler(parqueditReconciler)
+	reconcilerManager.AddReconciler(dummy.New())
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 

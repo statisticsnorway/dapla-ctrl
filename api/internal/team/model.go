@@ -265,6 +265,18 @@ type RemoveTeamAccessManagerInput struct {
 	UserId    uuid.UUID `json:"-"`
 }
 
+type EnableTeamFeatureInput struct {
+	TeamSlug slug.Slug `json:"teamSlug"`
+	Feature  string    `json:"feature"`
+	Env      string    `json:"env"`
+}
+
+type DisableTeamFeatureInput struct {
+	TeamSlug slug.Slug `json:"teamSlug"`
+	Feature  string    `json:"feature"`
+	Env      string    `json:"env"`
+}
+
 type CreateTeamPayload struct {
 	Team *Team `json:"team"`
 }
@@ -289,6 +301,23 @@ type RequestTeamDeletionInput struct {
 
 type RequestTeamDeletionPayload struct {
 	Key *TeamDeleteKey `json:"key"`
+}
+
+type EnableTeamFeaturePayload struct {
+	TeamSlug slug.Slug `json:"teamSlug"`
+	Feature  string    `json:"feature"`
+	Env      string    `json:"env"`
+}
+
+type DisableTeamFeaturePayload struct {
+	TeamSlug slug.Slug `json:"teamSlug"`
+	Feature  string    `json:"feature"`
+	Env      string    `json:"env"`
+}
+
+type TeamFeature struct {
+	Name string `json:"name"`
+	Env  string `json:"env"`
 }
 
 type TeamDeleteKey struct {

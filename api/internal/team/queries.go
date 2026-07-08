@@ -296,6 +296,39 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 	})
 }
 
+func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string) error {
+	return db(ctx).EnableTeamFeature(ctx, teamsql.EnableTeamFeatureParams{
+		TeamSlug: teamSlug,
+		Name:     featureName,
+		Env:      envName,
+	})
+}
+
+func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string) error {
+	return db(ctx).DisableTeamFeature(ctx, teamsql.DisableTeamFeatureParams{
+		TeamSlug: teamSlug,
+		Name:     featureName,
+		Env:      envName,
+	})
+}
+
+func GetTeamFeatures(ctx context.Context, teamSlug slug.Slug) ([]*TeamFeature, error) {
+	fs, err := db(ctx).GetFeaturesForTeam(ctx, teamSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	features := make([]*TeamFeature, 0, len(fs))
+	for _, row := range fs {
+		features = append(features, &TeamFeature{
+			Name: row.TeamFeature.Name,
+			Env:  row.TeamFeature.Env,
+		})
+	}
+
+	return features, nil
+}
+
 func UserIsOwner(ctx context.Context, teamSlug slug.Slug, userID uuid.UUID) (bool, error) {
 	return db(ctx).UserIsOwner(ctx, teamsql.UserIsOwnerParams{
 		UserID:   userID,

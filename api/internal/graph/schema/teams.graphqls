@@ -67,6 +67,10 @@ extend type Mutation {
 	This lets section managers delegate access management to up to two other people.
 	"""
 	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
+
+	enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
+
+	disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
 }
 
 """
@@ -203,6 +207,14 @@ type Team implements Node {
 
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
+
+	features: [TeamFeature!]!
+}
+
+type TeamFeature {
+	name: String!
+
+	env: String!
 }
 
 type TeamMember {
@@ -248,6 +260,24 @@ type RemoveTeamAccessManagerPayload {
 
 	"The user who has been removed as access manager."
 	user: User!
+}
+
+type EnableTeamFeaturePayload {
+	team: Team!
+
+	""
+	feature: String!
+
+	env: String!
+}
+
+type DisableTeamFeaturePayload {
+	team: Team!
+
+	""
+	feature: String!
+
+	env: String!
 }
 
 type TeamConnection {
@@ -363,6 +393,36 @@ input RemoveTeamAccessManagerInput {
 	Emails of the users who should be made access managers.
 	"""
 	userEmail: String!
+}
+
+input EnableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: String!
+
+	"""
+	Environment
+	"""
+	env: String!
+}
+
+input DisableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: String!
+
+	"""
+	Environment
+	"""
+	env: String!
 }
 
 "Ordering options when fetching teams."
