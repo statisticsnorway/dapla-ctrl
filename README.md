@@ -49,5 +49,6 @@ In short summary, the applications have separate tooling and setup requirements:
 
 - Go services use `mise`, `make`, and local environment files.
 - The frontend uses `pnpm` and Vite/SvelteKit tooling.
+- This repository also provides a global `flake.nix` development environment with all necessary tooling
 
 See the README for each component for more details.
