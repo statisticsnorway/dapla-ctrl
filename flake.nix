@@ -15,13 +15,16 @@
           name = "dapla devenv";
 
           packages = with pkgs; [
-            pnpm
-            protobuf-language-server
-            nixd
-            nodejs
-            mise
             go
             gopls
+            mise
+            nixd
+            nodejs
+            pnpm
+            protobuf
+            protobuf-language-server
+            protoc-gen-go
+            protoc-gen-go-grpc
             yaml-language-server
           ];
         };
