@@ -26,6 +26,14 @@ func (r *addTeamAccessManagerPayloadResolver) User(ctx context.Context, obj *tea
 	return user.Get(ctx, obj.UserId)
 }
 
+func (r *disableTeamFeaturePayloadResolver) Team(ctx context.Context, obj *team.DisableTeamFeaturePayload) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *enableTeamFeaturePayloadResolver) Team(ctx context.Context, obj *team.EnableTeamFeaturePayload) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
 func (r *mutationResolver) CreateTeam(ctx context.Context, input team.CreateTeamInput) (*team.CreateTeamPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
@@ -159,6 +167,30 @@ func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input te
 	}, nil
 }
 
+func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error) {
+	if err := team.EnableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env); err != nil {
+		return nil, err
+	}
+
+	return &team.EnableTeamFeaturePayload{
+		TeamSlug: input.TeamSlug,
+		Feature:  input.Feature,
+		Env:      input.Env,
+	}, nil
+}
+
+func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.DisableTeamFeatureInput) (*team.DisableTeamFeaturePayload, error) {
+	if err := team.DisableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env); err != nil {
+		return nil, err
+	}
+
+	return &team.DisableTeamFeaturePayload{
+		TeamSlug: input.TeamSlug,
+		Feature:  input.Feature,
+		Env:      input.Env,
+	}, nil
+}
+
 func (r *queryResolver) Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
@@ -243,6 +275,10 @@ func (r *teamResolver) AccessManagers(ctx context.Context, obj *team.Team) ([]*t
 	return team.GetAccessManagers(ctx, obj.Slug)
 }
 
+func (r *teamResolver) Features(ctx context.Context, obj *team.Team) ([]*team.TeamFeature, error) {
+	return team.GetTeamFeatures(ctx, obj.Slug)
+}
+
 func (r *teamAccessManagerResolver) Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
 }
@@ -275,6 +311,14 @@ func (r *Resolver) AddTeamAccessManagerPayload() gengql.AddTeamAccessManagerPayl
 	return &addTeamAccessManagerPayloadResolver{r}
 }
 
+func (r *Resolver) DisableTeamFeaturePayload() gengql.DisableTeamFeaturePayloadResolver {
+	return &disableTeamFeaturePayloadResolver{r}
+}
+
+func (r *Resolver) EnableTeamFeaturePayload() gengql.EnableTeamFeaturePayloadResolver {
+	return &enableTeamFeaturePayloadResolver{r}
+}
+
 func (r *Resolver) RemoveTeamAccessManagerPayload() gengql.RemoveTeamAccessManagerPayloadResolver {
 	return &removeTeamAccessManagerPayloadResolver{r}
 }
@@ -297,6 +341,8 @@ func (r *Resolver) TeamRoleRevokedActivityLogEntryData() gengql.TeamRoleRevokedA
 
 type (
 	addTeamAccessManagerPayloadResolver          struct{ *Resolver }
+	disableTeamFeaturePayloadResolver            struct{ *Resolver }
+	enableTeamFeaturePayloadResolver             struct{ *Resolver }
 	removeTeamAccessManagerPayloadResolver       struct{ *Resolver }
 	teamResolver                                 struct{ *Resolver }
 	teamAccessManagerResolver                    struct{ *Resolver }
