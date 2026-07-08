@@ -13,6 +13,7 @@ type Querier interface {
 	CountGroups(ctx context.Context, teamSlug slug.Slug) (int64, error)
 	Delete(ctx context.Context, argSlug slug.Slug) error
 	Get(ctx context.Context, argSlug slug.Slug) (*Team, error)
+	GetFeaturesForTeam(ctx context.Context, teamSlug slug.Slug) ([]*GetFeaturesForTeamRow, error)
 	List(ctx context.Context, arg ListParams) ([]*Team, error)
 	ListGroups(ctx context.Context, arg ListGroupsParams) ([]*ListGroupsRow, error)
 	SetLastSuccessfulSync(ctx context.Context, argSlug slug.Slug) error

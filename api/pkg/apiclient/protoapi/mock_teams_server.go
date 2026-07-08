@@ -174,6 +174,74 @@ func (_c *MockTeamsServer_Get_Call) RunAndReturn(run func(context1 context.Conte
 	return _c
 }
 
+// GetFeatures provides a mock function for the type MockTeamsServer
+func (_mock *MockTeamsServer) GetFeatures(context1 context.Context, getFeaturesRequest *GetFeaturesRequest) (*GetFeaturesResponse, error) {
+	ret := _mock.Called(context1, getFeaturesRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFeatures")
+	}
+
+	var r0 *GetFeaturesResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetFeaturesRequest) (*GetFeaturesResponse, error)); ok {
+		return returnFunc(context1, getFeaturesRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetFeaturesRequest) *GetFeaturesResponse); ok {
+		r0 = returnFunc(context1, getFeaturesRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*GetFeaturesResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *GetFeaturesRequest) error); ok {
+		r1 = returnFunc(context1, getFeaturesRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTeamsServer_GetFeatures_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFeatures'
+type MockTeamsServer_GetFeatures_Call struct {
+	*mock.Call
+}
+
+// GetFeatures is a helper method to define mock.On call
+//   - context1 context.Context
+//   - getFeaturesRequest *GetFeaturesRequest
+func (_e *MockTeamsServer_Expecter) GetFeatures(context1 interface{}, getFeaturesRequest interface{}) *MockTeamsServer_GetFeatures_Call {
+	return &MockTeamsServer_GetFeatures_Call{Call: _e.mock.On("GetFeatures", context1, getFeaturesRequest)}
+}
+
+func (_c *MockTeamsServer_GetFeatures_Call) Run(run func(context1 context.Context, getFeaturesRequest *GetFeaturesRequest)) *MockTeamsServer_GetFeatures_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *GetFeaturesRequest
+		if args[1] != nil {
+			arg1 = args[1].(*GetFeaturesRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTeamsServer_GetFeatures_Call) Return(getFeaturesResponse *GetFeaturesResponse, err error) *MockTeamsServer_GetFeatures_Call {
+	_c.Call.Return(getFeaturesResponse, err)
+	return _c
+}
+
+func (_c *MockTeamsServer_GetFeatures_Call) RunAndReturn(run func(context1 context.Context, getFeaturesRequest *GetFeaturesRequest) (*GetFeaturesResponse, error)) *MockTeamsServer_GetFeatures_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Groups provides a mock function for the type MockTeamsServer
 func (_mock *MockTeamsServer) Groups(context1 context.Context, listTeamGroupsRequest *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error) {
 	ret := _mock.Called(context1, listTeamGroupsRequest)
