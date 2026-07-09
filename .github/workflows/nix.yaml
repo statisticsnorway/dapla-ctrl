@@ -1,0 +1,36 @@
+name: Nix Flake Checks
+
+on:
+  pull_request:
+    paths:
+      - flake.nix
+      - flake.lock
+      - .github/workflows/nix.yaml
+  push:
+    branches:
+      - main
+    paths:
+      - flake.nix
+      - flake.lock
+      - .github/workflows/nix.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check flake
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Install Lix
+        uses: canidae-solutions/lix-quick-install-action@cdb5d0931be2223edbb9bad884341fcacdac298f # v4.0.1
+
+      - name: Check flake formatting
+        run: nix fmt -- --check flake.nix
+
+      - name: Check flake evaluation
+        run: nix flake check --no-build
