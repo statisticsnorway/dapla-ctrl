@@ -13,7 +13,7 @@
 
 	let { SharedData, teamSlug, displayName } = $derived(data);
 
-	type BucketItem = SharedData$result['team']['sharedBuckets']['nodes'][0];
+	type BucketItem = SharedData$result['team']['sharedBuckets']['edges'][0]['node'];
 </script>
 
 {#snippet nameCell(bucket: BucketItem)}
@@ -57,7 +57,7 @@
 			/>
 		</Tabs>
 		<DaplaTable
-			data={$SharedData.data.team.sharedBuckets.nodes}
+			data={$SharedData.data.team.sharedBuckets.edges.map((e) => e.node)}
 			fieldsCookie={{ path: '/team', key: 'sharedBucketsFields/team' }}
 			selected={data.bucketTableFields}
 			columns={[

@@ -19,24 +19,26 @@ query TeamSharedBucketAccessTeams($bucket: String!) {
 				endCursor
 				totalCount
 			}
-			nodes {
-				id
-				slug
-				displayName
-				isManaged
-				members {
-					pageInfo {
-						totalCount
-					}
-				}
-				section {
+			edges {
+				node {
 					id
-					name
-					code
-					manager {
+					slug
+					displayName
+					isManaged
+					members {
+						pageInfo {
+							totalCount
+						}
+					}
+					section {
 						id
 						name
-						email
+						code
+						manager {
+							id
+							name
+							email
+						}
 					}
 				}
 			}

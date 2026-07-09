@@ -12,21 +12,23 @@ query Groups($team: Slug!, $orderBy: UserOrder) {
 				startCursor
 				endCursor
 			}
-			nodes {
-				groups {
-					id
-					name
-					category
-					suffix
-				}
-				user {
-					id
-					name
-					email
-					section {
+			edges {
+				node {
+					groups {
 						id
 						name
-						code
+						category
+						suffix
+					}
+					user {
+						id
+						name
+						email
+						section {
+							id
+							name
+							code
+						}
 					}
 				}
 			}

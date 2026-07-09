@@ -18,15 +18,15 @@
 		return me?.isAdmin || me?.isSectionManager;
 	});
 
-	type TeamNode = Extract<UserTeams$result['me'], { __typename: 'User' }>['teams']['nodes'][0];
+	type TeamEdge = Extract<UserTeams$result['me'], { __typename: 'User' }>['teams']['edges'][0];
 
 	let userTeamsCount = $derived(
-		($UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.nodes.length) || 0
+		($UserTeams.data?.me.__typename == 'User' && $UserTeams.data.me.teams?.pageInfo.totalCount) || 0
 	);
 
 	let allTeamsCount = $derived($UserTeams.data?.teams?.pageInfo.totalCount || 0);
 
-	function transformTeamData(teamNode: TeamNode): TeamsData {
+	function transformTeamData({ node: teamNode }: TeamEdge): TeamsData {
 		const team = teamNode;
 		const manager = team.team.section.manager;
 		return {
@@ -49,7 +49,7 @@
 	}
 	let teamsData = $derived.by(() => {
 		if ($UserTeams.data && $UserTeams.data.me.__typename == 'User') {
-			return $UserTeams.data?.me.teams.nodes.map(transformTeamData) ?? [];
+			return $UserTeams.data?.me.teams.edges.map(transformTeamData) ?? [];
 		}
 		return [];
 	});

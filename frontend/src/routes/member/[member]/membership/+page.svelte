@@ -13,7 +13,7 @@
 
 	let { UserMemberships, userDisplayName } = $derived(data);
 
-	type TeamNode = UserMemberships$result['user']['teams']['nodes'][0];
+	type TeamNode = UserMemberships$result['user']['teams']['edges'][0]['node'];
 
 	type TeamItem = TeamNode & { id: string };
 
@@ -111,7 +111,7 @@
 	>
 </div>
 
-{#if $UserMemberships.data?.user?.teams?.nodes}
+{#if $UserMemberships.data?.user?.teams?.edges}
 	<div class="container">
 		<div>
 			<div class="section-header">
@@ -129,7 +129,7 @@
 							}
 						})
 						.then((result) => transformToExportable(result.data?.user.teams.nodes ?? []))}
-				data={$UserMemberships.data.user.teams.nodes.map((n) => {
+				data={$UserMemberships.data.user.teams.edges.map(({ node: n }) => {
 					return { id: n.team.id, ...n };
 				})}
 				fieldsCookie={{ path: '/member' }}

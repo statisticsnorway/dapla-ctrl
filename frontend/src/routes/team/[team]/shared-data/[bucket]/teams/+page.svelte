@@ -13,7 +13,7 @@
 
 	let { TeamSharedBucketAccessTeams } = $derived(data);
 
-	type TeamItem = TeamSharedBucketAccessTeams$result['sharedBucket']['teams']['nodes'][0];
+	type TeamItem = TeamSharedBucketAccessTeams$result['sharedBucket']['teams']['edges'][0]['node'];
 </script>
 
 {#snippet nameCell(item: TeamItem)}
@@ -76,7 +76,7 @@
 			/>
 		</Tabs>
 		<DaplaTable
-			data={$TeamSharedBucketAccessTeams.data.sharedBucket.teams.nodes}
+			data={$TeamSharedBucketAccessTeams.data.sharedBucket.teams.edges.map((e) => e.node)}
 			fieldsCookie={{
 				path: '/team',
 				key: 'sharedBucketUsersFieldsTeams/team'

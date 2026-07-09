@@ -12,32 +12,34 @@ query UserTeams($orderBy: TeamOrder) @cache(policy: CacheAndNetwork) {
 					endCursor
 					totalCount
 				}
-				nodes {
-					groups {
-						id
-						name
-					}
-					team {
-						id
-						slug
-						displayName
-						isManaged
-						section {
-							code
+				edges {
+					node {
+						groups {
+							id
 							name
-							manager {
+						}
+						team {
+							id
+							slug
+							displayName
+							isManaged
+							section {
+								code
 								name
-								email
+								manager {
+									name
+									email
+								}
 							}
-						}
-						members {
-							pageInfo {
-								totalCount
+							members {
+								pageInfo {
+									totalCount
+								}
 							}
-						}
-						accessManagers {
-							user {
-								email
+							accessManagers {
+								user {
+									email
+								}
 							}
 						}
 					}

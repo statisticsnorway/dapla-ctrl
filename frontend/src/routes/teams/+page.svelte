@@ -18,10 +18,10 @@
 		($AllTeams.data?.me.__typename == 'User' && $AllTeams.data.me.teams?.pageInfo.totalCount) || 0
 	);
 
-	type TeamNode = AllTeams$result['teams']['nodes'][0];
+	type TeamEdge = AllTeams$result['teams']['edges'][0];
 
 	let allTeamsCount = $derived($AllTeams.data?.teams?.pageInfo.totalCount || 0);
-	function transformTeamData(teamNode: TeamNode): TeamsData {
+	function transformTeamData({ node: teamNode }: TeamEdge): TeamsData {
 		const team = teamNode;
 		const manager = team.section.manager;
 
@@ -51,7 +51,7 @@
 		{canCreateTeam}
 		{userTeamsCount}
 		{allTeamsCount}
-		teamsData={$AllTeams.data?.teams.nodes.map(transformTeamData) ?? []}
+		teamsData={$AllTeams.data?.teams.edges.map(transformTeamData) ?? []}
 		teamTableDefaultFields={data.teamTableFields}
 		pageInfo={$AllTeams.data?.teams.pageInfo ?? undefined}
 		loaders={{

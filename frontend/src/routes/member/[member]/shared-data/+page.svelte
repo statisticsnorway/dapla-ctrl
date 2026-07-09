@@ -10,7 +10,8 @@
 
 	let { UserSharedBucketAccess, userDisplayName } = $derived(data);
 
-	type UserAccessNode = UserSharedBucketAccess$result['user']['sharedBucketsAccess']['nodes'][0];
+	type UserAccessNode =
+		UserSharedBucketAccess$result['user']['sharedBucketsAccess']['edges'][0]['node'];
 
 	type BucketAccessItem = UserAccessNode & { id: string };
 
@@ -56,7 +57,9 @@
 {#if $UserSharedBucketAccess.data}
 	<div class="container">
 		<DaplaTable
-			data={addIdToItems($UserSharedBucketAccess.data.user.sharedBucketsAccess.nodes ?? [])}
+			data={addIdToItems(
+				$UserSharedBucketAccess.data.user.sharedBucketsAccess.edges.map((e) => e.node) ?? []
+			)}
 			fieldsCookie={{
 				path: '/member',
 				key: 'sharedBucketsTableFields/member'

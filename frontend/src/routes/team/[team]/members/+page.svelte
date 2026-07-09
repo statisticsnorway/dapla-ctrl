@@ -26,7 +26,7 @@
 
 	let currentGroups: string[] = $state([]);
 
-	type GroupMemberNode = Groups$result['team']['members']['nodes'][0];
+	type GroupMemberEdge = Groups$result['team']['members']['edges'][0];
 
 	type GroupMembersData = {
 		id: string;
@@ -49,7 +49,7 @@
 		});
 	};
 
-	function transformGroupMembersData(groupMemberNode: GroupMemberNode): GroupMembersData {
+	function transformGroupMembersData({ node: groupMemberNode }: GroupMemberEdge): GroupMembersData {
 		return {
 			id: groupMemberNode.user.id,
 			name: groupMemberNode.user.name,
@@ -129,7 +129,7 @@
 		{/if}
 
 		<DaplaTable
-			data={$Groups.data?.team?.members.nodes.map(transformGroupMembersData) ?? []}
+			data={$Groups.data?.team?.members.edges.map(transformGroupMembersData) ?? []}
 			fieldsCookie={{
 				path: '/team',
 				key: 'teamMembersTableFields'

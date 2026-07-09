@@ -24,7 +24,7 @@
 			</Tr>
 		</Thead>
 		<Tbody>
-			{#each $ActivityLogs.data.activityLog.nodes || [] as entry (entry.id)}
+			{#each $ActivityLogs.data.activityLog.edges || [] as { node: entry } (entry.id)}
 				<Tr>
 					<Td>
 						{#if entry.actor !== ''}
