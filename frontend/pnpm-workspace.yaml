@@ -1,5 +1,7 @@
 allowBuilds:
   esbuild: true
+  houdini-core: true
+  houdini-svelte: true
 autoInstallPeers: false
 lockfile: true
 # https://pnpm.io/settings
@@ -9,3 +11,20 @@ strictSsl: true
 engineStrict: true
 minimumReleaseAgeExclude:
   - '@sveltejs/kit@2.68.0'
+  - houdini-core-darwin-arm64@2.0.4
+  - houdini-core-darwin-x64@2.0.4
+  - houdini-core-linux-arm64@2.0.4
+  - houdini-core-linux-x64@2.0.4
+  - houdini-core-wasm@2.0.4
+  - houdini-core-win32-arm64@2.0.4
+  - houdini-core-win32-x64@2.0.4
+  - houdini-core@2.0.4
+  - houdini-svelte-darwin-arm64@3.0.2
+  - houdini-svelte-darwin-x64@3.0.2
+  - houdini-svelte-linux-arm64@3.0.2
+  - houdini-svelte-linux-x64@3.0.2
+  - houdini-svelte-wasm@3.0.2
+  - houdini-svelte-win32-arm64@3.0.2
+  - houdini-svelte-win32-x64@3.0.2
+  - houdini-svelte@3.0.2
+  - houdini@2.0.5
