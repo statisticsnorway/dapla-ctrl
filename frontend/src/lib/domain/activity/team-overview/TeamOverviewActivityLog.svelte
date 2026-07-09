@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ActivityLogActivityType, graphql, type ActivityLogFilter } from '$houdini';
+	import { ActivityLogActivityType, graphql } from '$houdini';
 	import { Heading, Loader, Tooltip } from '@nais/ds-svelte-community';
 	import { RocketIcon } from '@nais/ds-svelte-community/icons';
 	import type { Component } from 'svelte';
@@ -15,6 +15,8 @@
 	import TeamUpdatedActivityLogEntryText from '../shared/texts/TeamUpdatedActivityLogEntryText.svelte';
 	import TeamRoleAssignedActivityLogEntryText from '../shared/texts/TeamRoleAssignedActivityLogEntryText.svelte';
 	import TeamRoleRevokedActivityLogEntryText from '../shared/texts/TeamRoleRevokedActivityLogEntryText.svelte';
+	import type { ActivityLogFilter } from '$houdini/graphql/inputs';
+	import { exhaustive } from '$lib/utils/houdini';
 
 	interface Props {
 		teamSlug: string;
@@ -151,7 +153,7 @@
 			<Loader size="3xlarge" />
 		</div>
 	{:else}
-		{#each $activityLogQuery.data?.team?.activityLog.edges || [] as { node: entry }, i (entry.id)}
+		{#each exhaustive(($activityLogQuery.data?.team?.activityLog.edges || []).map((e) => e.node)) as entry, i (entry.id)}
 			{@const Icon = icons[entry.__typename] || RocketIcon}
 			{@const TextComponent = textComponent(entry.__typename)}
 			{@const isLast = i === ($activityLogQuery.data?.team?.activityLog.edges?.length ?? 0) - 1}
