@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { graphql, type CreateGroupInput } from '$houdini';
+	import { graphql } from '$houdini';
+	import type { CreateGroupInput } from '$houdini/graphql/inputs';
 	import { Alert, Button, Heading, Modal, Select, TextField } from '@nais/ds-svelte-community';
 	import { PlusIcon } from '@nais/ds-svelte-community/icons';
 
