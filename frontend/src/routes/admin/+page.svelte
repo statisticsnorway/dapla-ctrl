@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import { Heading, Table, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
@@ -20,7 +20,7 @@
 			</Tr>
 		</Thead>
 		<Tbody>
-			{#each $AdminUsers.data.users.nodes || [] as user (user.id)}
+			{#each $AdminUsers.data.users.edges || [] as { node: user } (user.id)}
 				<Tr>
 					<Td>{user.name}</Td>
 					<Td>{user.email}</Td>

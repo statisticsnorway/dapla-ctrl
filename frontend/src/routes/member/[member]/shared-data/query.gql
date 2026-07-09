@@ -10,25 +10,27 @@ query UserSharedBucketAccess($user: String!) {
 				endCursor
 				totalCount
 			}
-			nodes {
-				team {
-					id
-					slug
-					displayName
-				}
-				groups {
-					name
-				}
-				bucket {
-					id
-					name
-					shortName
-					kind
-					env
+			edges {
+				node {
 					team {
 						id
 						slug
 						displayName
+					}
+					groups {
+						name
+					}
+					bucket {
+						id
+						name
+						shortName
+						kind
+						env
+						team {
+							id
+							slug
+							displayName
+						}
 					}
 				}
 			}

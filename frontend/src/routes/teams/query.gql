@@ -19,29 +19,31 @@ query AllTeams($orderBy: TeamOrder) @cache(policy: CacheAndNetwork) {
 			endCursor
 			totalCount
 		}
-		nodes {
-			id
-			slug
-			displayName
-			isManaged
-			section {
+		edges {
+			node {
 				id
-				code
-				name
-				manager {
+				slug
+				displayName
+				isManaged
+				section {
 					id
+					code
 					name
-					email
+					manager {
+						id
+						name
+						email
+					}
 				}
-			}
-			members(first: 1) {
-				pageInfo {
-					totalCount
+				members(first: 1) {
+					pageInfo {
+						totalCount
+					}
 				}
-			}
-			accessManagers {
-				user {
-					email
+				accessManagers {
+					user {
+						email
+					}
 				}
 			}
 		}

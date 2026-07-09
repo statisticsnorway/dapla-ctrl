@@ -17,20 +17,22 @@ query SharedData($team: Slug!, $orderBy: SharedBucketOrder) {
 				endCursor
 				totalCount
 			}
-			nodes {
-				id
-				name
-				shortName
-				kind
-				env
-				uniqueUsers {
-					pageInfo {
-						totalCount
+			edges {
+				node {
+					id
+					name
+					shortName
+					kind
+					env
+					uniqueUsers {
+						pageInfo {
+							totalCount
+						}
 					}
-				}
-				teams {
-					pageInfo {
-						totalCount
+					teams {
+						pageInfo {
+							totalCount
+						}
 					}
 				}
 			}

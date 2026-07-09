@@ -3,7 +3,7 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import Time from '$lib/ui/Time.svelte';
 	import { Heading, Table, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 	let { ActivityLogs } = $derived(data);
@@ -24,7 +24,7 @@
 			</Tr>
 		</Thead>
 		<Tbody>
-			{#each $ActivityLogs.data.activityLog.nodes || [] as entry (entry.id)}
+			{#each $ActivityLogs.data.activityLog.edges || [] as { node: entry } (entry.id)}
 				<Tr>
 					<Td>
 						{#if entry.actor !== ''}

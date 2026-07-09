@@ -13,7 +13,7 @@
 
 	let { ConsumesSharedData, displayName } = $derived(data);
 
-	type BucketItem = ConsumesSharedData$result['team']['sharedBucketsAccess']['nodes'][0];
+	type BucketItem = ConsumesSharedData$result['team']['sharedBucketsAccess']['edges'][0]['node'];
 </script>
 
 {#snippet nameCell(bucket: BucketItem)}
@@ -74,7 +74,7 @@
 			/>
 		</Tabs>
 		<DaplaTable
-			data={$ConsumesSharedData.data.team.sharedBucketsAccess.nodes}
+			data={$ConsumesSharedData.data.team.sharedBucketsAccess.edges.map((e) => e.node)}
 			fieldsCookie={{ path: '/team', key: 'consumesSharedBucketsFields/team' }}
 			selected={data.bucketTableFields}
 			columns={[

@@ -1,21 +1,35 @@
 query UserSyncLogs {
 	userSyncLog(first: 20) @paginate(mode: SinglePage) {
-		nodes {
-			id
-			__typename
-			createdAt
-			message
-			userName
-			userEmail
-			... on UserUpdatedUserSyncLogEntry {
-				oldUserName
-				oldUserEmail
-			}
-			... on RoleAssignedUserSyncLogEntry {
-				roleName
-			}
-			... on RoleRevokedUserSyncLogEntry {
-				roleName
+		edges {
+			node {
+				... on UserUpdatedUserSyncLogEntry {
+					id
+					__typename
+					createdAt
+					message
+					userName
+					userEmail
+					oldUserName
+					oldUserEmail
+				}
+				... on RoleAssignedUserSyncLogEntry {
+					id
+					__typename
+					createdAt
+					message
+					userName
+					userEmail
+					roleName
+				}
+				... on RoleRevokedUserSyncLogEntry {
+					id
+					__typename
+					createdAt
+					message
+					userName
+					userEmail
+					roleName
+				}
 			}
 		}
 		pageInfo {

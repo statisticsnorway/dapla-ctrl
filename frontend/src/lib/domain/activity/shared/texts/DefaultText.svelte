@@ -1,12 +1,11 @@
 <script lang="ts">
 	import Time from '$lib/ui/Time.svelte';
 	import { BodyShort } from '@nais/ds-svelte-community';
-	import type { ActivityLogEntry } from './types';
-
+	import type { ActivityLogEntryFragment$data } from '$houdini';
 	let {
 		data
 	}: {
-		data: ActivityLogEntry<string>;
+		data: ActivityLogEntryFragment$data;
 	} = $props();
 </script>
 

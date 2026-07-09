@@ -11,29 +11,31 @@ query UserMemberships($user: String!) {
 				endCursor
 				totalCount
 			}
-			nodes {
-				groups {
-					id
-					name
-				}
-				team {
-					id
-					slug
-					displayName
-					isManaged
-					section {
+			edges {
+				node {
+					groups {
 						id
-						code
 						name
-						manager {
-							id
-							name
-							email
-						}
 					}
-					members(first: 1) {
-						pageInfo {
-							totalCount
+					team {
+						id
+						slug
+						displayName
+						isManaged
+						section {
+							id
+							code
+							name
+							manager {
+								id
+								name
+								email
+							}
+						}
+						members(first: 1) {
+							pageInfo {
+								totalCount
+							}
 						}
 					}
 				}

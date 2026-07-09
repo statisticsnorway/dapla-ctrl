@@ -144,7 +144,7 @@
 							{/each}
 						</ActionMenu>
 					{/snippet}
-					{#each ae.nodes || [] as item (item.id)}
+					{#each ae.edges || [] as { node: item } (item.id)}
 						<ActivityLogItem {item} />
 					{/each}
 				</List>

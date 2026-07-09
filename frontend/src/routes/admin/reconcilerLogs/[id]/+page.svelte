@@ -2,7 +2,7 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import Time from '$lib/ui/Time.svelte';
 	import { Heading, Table, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 
@@ -21,7 +21,7 @@
 		</Thead>
 		<Tbody>
 			{#if $ReconcilerLogs.data}
-				{#each $ReconcilerLogs.data.node.errors.nodes as error (error.id)}
+				{#each $ReconcilerLogs.data.node.errors.edges as { node: error } (error.id)}
 					<Tr>
 						<Td><span class="message">{error.message}</span></Td>
 						<Td><a href="/team/{error.team.slug}">{error.team.slug}</a></Td>

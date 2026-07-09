@@ -3,7 +3,8 @@
 	import Pagination from '$lib/ui/Pagination.svelte';
 	import Time from '$lib/ui/Time.svelte';
 	import { Heading, Table, Tbody, Td, Th, Thead, Tr } from '@nais/ds-svelte-community';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
+	import { exhaustive } from '$lib/utils/houdini';
 
 	let { data }: PageProps = $props();
 	let { UserSyncLogs } = $derived(data);
@@ -22,7 +23,7 @@
 			</Tr>
 		</Thead>
 		<Tbody>
-			{#each $UserSyncLogs.data.userSyncLog.nodes || [] as entry (entry.id)}
+			{#each exhaustive(($UserSyncLogs.data.userSyncLog.edges || []).map((e) => e.node)) as entry (entry.id)}
 				<Tr>
 					<Td>
 						{#if entry.__typename === 'RoleAssignedUserSyncLogEntry'}

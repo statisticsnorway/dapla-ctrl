@@ -3,6 +3,8 @@
 /** @type {import('houdini').ConfigFile} */
 
 const config = {
+	schemaPath: './schema.graphql',
+	url: '/graphql',
 	runtimeDir: '.houdini',
 	defaultPaginateMode: 'SinglePage',
 	watchSchema: {
@@ -14,9 +16,7 @@ const config = {
 	},
 	defaultCachePolicy: 'CacheAndNetwork',
 	plugins: {
-		'houdini-svelte': {
-			forceRunesMode: true
-		}
+		'houdini-svelte': {}
 	},
 	scalars: {
 		Slug: { type: 'string' },

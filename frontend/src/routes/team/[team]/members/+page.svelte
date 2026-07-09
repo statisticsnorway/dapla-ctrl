@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 	import { UserOrderField, type Groups$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { BodyShort, Button } from '@nais/ds-svelte-community';
@@ -26,7 +26,7 @@
 
 	let currentGroups: string[] = $state([]);
 
-	type GroupMemberNode = Groups$result['team']['members']['nodes'][0];
+	type GroupMemberEdge = Groups$result['team']['members']['edges'][0];
 
 	type GroupMembersData = {
 		id: string;
@@ -49,7 +49,7 @@
 		});
 	};
 
-	function transformGroupMembersData(groupMemberNode: GroupMemberNode): GroupMembersData {
+	function transformGroupMembersData({ node: groupMemberNode }: GroupMemberEdge): GroupMembersData {
 		return {
 			id: groupMemberNode.user.id,
 			name: groupMemberNode.user.name,
@@ -129,7 +129,7 @@
 		{/if}
 
 		<DaplaTable
-			data={$Groups.data?.team?.members.nodes.map(transformGroupMembersData) ?? []}
+			data={$Groups.data?.team?.members.edges.map(transformGroupMembersData) ?? []}
 			fieldsCookie={{
 				path: '/team',
 				key: 'teamMembersTableFields'

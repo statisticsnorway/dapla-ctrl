@@ -10,7 +10,7 @@
 
 	let { AllSharedData } = $derived(data);
 
-	type BucketNode = AllSharedData$result['sharedBuckets']['nodes'][0];
+	type BucketEdge = AllSharedData$result['sharedBuckets']['edges'][0];
 
 	type BucketData = {
 		id: string;
@@ -27,7 +27,7 @@
 		sectionCode: string;
 	};
 
-	function transformBucketdata(bucketNode: BucketNode): BucketData {
+	function transformBucketdata({ node: bucketNode }: BucketEdge): BucketData {
 		return {
 			id: bucketNode.id,
 			name: bucketNode.name,
@@ -74,7 +74,7 @@
 	</div>
 	<div class="container">
 		<DaplaTable
-			data={$AllSharedData.data?.sharedBuckets.nodes.map(transformBucketdata) ?? []}
+			data={$AllSharedData.data?.sharedBuckets.edges.map(transformBucketdata) ?? []}
 			selected={data.bucketTableFields}
 			columns={[
 				{

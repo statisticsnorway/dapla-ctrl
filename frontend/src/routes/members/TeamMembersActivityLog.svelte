@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ActivityLogActivityType, graphql, type ActivityLogFilter } from '$houdini';
+	import { ActivityLogActivityType, graphql } from '$houdini';
 	import { Heading, Loader, Tooltip } from '@nais/ds-svelte-community';
 	import { RocketIcon } from '@nais/ds-svelte-community/icons';
 	import type { Component } from 'svelte';
@@ -9,6 +9,8 @@
 	import '$lib/domain/activity/activity-log.css';
 	import DefaultText from '$lib/domain/activity/shared/texts/DefaultText.svelte';
 	import GroupMemberAddedActivityLogEntryText from '$lib/domain/activity/shared/texts/GroupMemberAddedActivityLogEntryText.svelte';
+	import type { ActivityLogFilter } from '$houdini/graphql/inputs';
+	import { exhaustive } from '$lib/utils/houdini';
 
 	interface Props {
 		teamMembers: Array<{
@@ -32,13 +34,13 @@
 			activityLog(first: 15, filter: $filter) {
 				edges {
 					node {
-						id
-						actor
-						createdAt
-						resourceName
-						teamSlug
 						... on GroupMemberAddedActivityLogEntry {
 							__typename
+							id
+							actor
+							createdAt
+							resourceName
+							teamSlug
 							groupMemberAdded: data {
 								userEmail
 							}
@@ -68,7 +70,7 @@
 					if (entry.__typename !== 'GroupMemberAddedActivityLogEntry') {
 						return false;
 					}
-					const userEmail = entry.groupMemberAdded?.userEmail;
+					const userEmail = entry.data.userEmail;
 					if (!userEmail || !memberEmails.has(userEmail)) {
 						return false;
 					}
@@ -108,7 +110,7 @@
 			<Loader size="3xlarge" />
 		</div>
 	{:else}
-		{#each filteredActivities as entry, i (entry.id)}
+		{#each exhaustive(filteredActivities) as entry, i (entry.id)}
 			{@const Icon = icons[entry.__typename] || RocketIcon}
 			{@const TextComponent = textComponent(entry.__typename)}
 			{@const isLast = i === filteredActivities.length - 1}

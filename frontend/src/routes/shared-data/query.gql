@@ -9,29 +9,31 @@ query AllSharedData($orderBy: SharedBucketOrder) {
 			endCursor
 			totalCount
 		}
-		nodes {
-			id
-			name
-			shortName
-			kind
-			env
-			team {
+		edges {
+			node {
 				id
-				slug
-				displayName
-				section {
+				name
+				shortName
+				kind
+				env
+				team {
 					id
-					code
+					slug
+					displayName
+					section {
+						id
+						code
+					}
 				}
-			}
-			uniqueUsers {
-				pageInfo {
-					totalCount
+				uniqueUsers {
+					pageInfo {
+						totalCount
+					}
 				}
-			}
-			teams {
-				pageInfo {
-					totalCount
+				teams {
+					pageInfo {
+						totalCount
+					}
 				}
 			}
 		}

@@ -13,9 +13,10 @@
 
 	let { TeamSharedBucketAccess } = $derived(data);
 
-	type TeamMemberItem = TeamSharedBucketAccess$result['sharedBucket']['users']['nodes'][0] & {
-		id: string;
-	};
+	type TeamMemberItem =
+		TeamSharedBucketAccess$result['sharedBucket']['users']['edges'][0]['node'] & {
+			id: string;
+		};
 </script>
 
 {#snippet nameCell(teamMember: TeamMemberItem)}
@@ -76,7 +77,7 @@
 			/>
 		</Tabs>
 		<DaplaTable
-			data={$TeamSharedBucketAccess.data.sharedBucket.users.nodes.map((tm) => {
+			data={$TeamSharedBucketAccess.data.sharedBucket.users.edges.map(({ node: tm }) => {
 				return { id: `${tm.team.id}:${tm.user.id}`, ...tm };
 			})}
 			fieldsCookie={{
