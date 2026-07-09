@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
 	import Pagination from '$lib/ui/Pagination.svelte';
-	import type { PageProps } from './$houdini';
+	import type { PageProps } from './$types';
 	import { UserOrderField, type Groups$result } from '$houdini';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
 	import { BodyShort, Button } from '@nais/ds-svelte-community';

@@ -14,7 +14,7 @@
 	import '../styles/colors.css';
 	import '../styles/ssb-colors.css';
 	import '../styles/aksel-token-overrides.css';
-	import type { LayoutProps } from './$houdini';
+	import type { LayoutProps } from './$types';
 	import Login from './Login.svelte';
 	import PageHeader from './PageHeader.svelte';
 
