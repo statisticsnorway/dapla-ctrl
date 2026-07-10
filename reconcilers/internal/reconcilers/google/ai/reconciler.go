@@ -75,8 +75,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	// TODO: Set or remove IAM permissions:
-	// - Give ssb.aiplatform.user to dapla SA
 	if aiFeatureIsEnabled && !vertexAIEnabled {
 		if err := setVertexAIEnabled(serviceUsageService, *testProjectID, true); err != nil {
 			return err
