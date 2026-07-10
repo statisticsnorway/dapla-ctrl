@@ -5,6 +5,7 @@ package ai
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -14,7 +15,10 @@ import (
 )
 
 const (
-	reconcilerName = "stat:ai"
+	reconcilerName     = "google:ai"
+	aiPlatformUserRole = "ssb.aiplatform.user"
+	// For SAs in the test environment
+	groupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
 )
 
 type reconciler struct{}
@@ -72,15 +76,90 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	// TODO: Set or remove IAM permissions:
-	// - Give ssb.aiplatform.user to $TEAM_NAME-developers group
 	// - Give ssb.aiplatform.user to dapla SA
 	if aiFeatureIsEnabled && !vertexAIEnabled {
-		setVertexAIEnabled(serviceUsageService, *testProjectID, true)
+		if err := setVertexAIEnabled(serviceUsageService, *testProjectID, true); err != nil {
+			return err
+		}
+
+		if err := reconcileAIPlatformUserBinding(ctx, resourceManagerService, client, daplaTeam.Slug, *testProjectID); err != nil {
+			return err
+		}
+
 	} else if !aiFeatureIsEnabled && vertexAIEnabled {
-		setVertexAIEnabled(serviceUsageService, *testProjectID, false)
+		if err := setVertexAIEnabled(serviceUsageService, *testProjectID, false); err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+// Get the Dapla teams' developers group name if it exists
+func getDevelopersGroup(ctx context.Context, client *apiclient.APIClient, daplaTeamSlug string) (*string, error) {
+	teamDevelopersGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
+		Name: daplaTeamSlug + "-developers",
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &teamDevelopersGroup.Group.Name, nil
+}
+
+// Ensures a dapla team's developers group and corresponding SA has the AI Platform user role on the project.
+func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanager.Service, client *apiclient.APIClient, daplaTeamSlug, projectID string) error {
+	// TODO: Perhaps we can assume these standard dapla groups will always exist
+	// so we don't need to query google cloud?
+	daplaDevelopersGroup_, err := getDevelopersGroup(ctx, client, daplaTeamSlug)
+	if err != nil {
+		return fmt.Errorf("get developers group: %w", err)
+	}
+
+	daplaDevelopersGroup := fmt.Sprintf("group:%s", *daplaDevelopersGroup_)
+	// This SA is always guaranteed to exist as long as we run this reconciler **after**
+	// the groupSA reconciler
+	daplaDevelopersGroupSA := fmt.Sprintf("serviceAccount:%s-%s", daplaTeamSlug, groupSANameTemplate)
+	members := []string{daplaDevelopersGroup, daplaDevelopersGroupSA}
+	policy, err := svc.Projects.GetIamPolicy(projectID, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
+	if err != nil {
+		return fmt.Errorf("get IAM policy for project %q: %w", projectID, err)
+	}
+
+	bindingIndex := slices.IndexFunc(policy.Bindings, func(binding *cloudresourcemanager.Binding) bool {
+		return binding.Role == aiPlatformUserRole
+	})
+
+	if bindingIndex != -1 {
+		binding := policy.Bindings[bindingIndex]
+		missingMembers := slices.DeleteFunc(slices.Clone(members), func(member string) bool {
+			return slices.Contains(binding.Members, member)
+		})
+
+		if len(missingMembers) == 0 {
+			return nil
+		}
+
+		binding.Members = append(binding.Members, missingMembers...)
+		_, err = svc.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Context(ctx).Do()
+		if err != nil {
+			return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
+		}
+		return nil
+	} else {
+		// If the binding doesn't exist, create it.
+		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
+			Role:    aiPlatformUserRole,
+			Members: members,
+		})
+
+		_, err = svc.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Context(ctx).Do()
+		if err != nil {
+			return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
+		}
+		return nil
+	}
 }
 
 // Check if the AI feature is enabled in the API database for a given team.
