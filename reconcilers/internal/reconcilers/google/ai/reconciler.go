@@ -85,9 +85,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		}
 
 	} else if !aiFeatureIsEnabled && vertexAIEnabled {
-		if err := setVertexAIEnabled(serviceUsageService, *testProjectID, false); err != nil {
-			return err
-		}
+		setVertexAIEnabled(serviceUsageService, *testProjectID, false)
 	}
 
 	return nil
