@@ -120,6 +120,7 @@ func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanag
 	// the groupSA reconciler
 	daplaDevelopersGroupSA := fmt.Sprintf("serviceAccount:%s-%s", daplaTeamSlug, groupSANameTemplate)
 	members := []string{daplaDevelopersGroup, daplaDevelopersGroupSA}
+
 	policy, err := svc.Projects.GetIamPolicy(projectID, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
 		return fmt.Errorf("get IAM policy for project %q: %w", projectID, err)
