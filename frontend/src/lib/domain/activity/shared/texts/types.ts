@@ -5,17 +5,17 @@ import type { ActivityLogEntryFragment$data, TeamOverviewActivityLog$result } fr
  * This allows components to work with both list view and team overview data.
  */
 type TypeKeyedPropsActivityLog = {
-	[K in keyof ActivityLogEntryFragment$data as K extends `${string}ActivityLogEntry`
-		? K
-		: never]: ActivityLogEntryFragment$data[K];
+	[
+		K in keyof ActivityLogEntryFragment$data as K extends `${string}ActivityLogEntry` ? K : never
+	]: ActivityLogEntryFragment$data[K];
 };
 
 type TeamOverviewActivityLogEntry =
 	TeamOverviewActivityLog$result['team']['activityLog']['edges'][number]['node'];
 type TypeKeyedPropsTeamOverviewLog = {
-	[K in keyof TeamOverviewActivityLogEntry as K extends `${string}ActivityLogEntry`
-		? K
-		: never]: TeamOverviewActivityLogEntry[K];
+	[
+		K in keyof TeamOverviewActivityLogEntry as K extends `${string}ActivityLogEntry` ? K : never
+	]: TeamOverviewActivityLogEntry[K];
 };
 
 type TypeKeys = keyof TypeKeyedPropsActivityLog | keyof TypeKeyedPropsTeamOverviewLog;
