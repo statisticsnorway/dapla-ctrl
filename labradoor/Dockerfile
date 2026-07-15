@@ -6,7 +6,7 @@ RUN go mod download
 COPY . /src
 RUN go build -o bin/labradoor ./cmd
 
-FROM gcr.io/distroless/base
+FROM gcr.io/distroless/cc
 WORKDIR /app
 COPY --from=builder /src/bin/labradoor /app/labradoor
 ENTRYPOINT ["/app/labradoor"]
