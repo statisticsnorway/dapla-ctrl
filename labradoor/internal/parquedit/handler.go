@@ -2,10 +2,13 @@ package parquedit
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
+
+	_ "github.com/duckdb/duckdb-go/v2"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/httplog/v3"
@@ -23,6 +26,7 @@ type Client struct {
 	db                 *pgxpool.Pool
 	crm                CloudResourceManager
 	sqlManager         SqlManager
+	databaseUrl        string
 	cloudSqlProject    string
 	cloudSqlInstance   string
 	cloudSqlUserSuffix string
@@ -57,6 +61,7 @@ func New(ctx context.Context, config config.ParqueditConfig, crm CloudResourceMa
 		db:                 pool,
 		crm:                crm,
 		sqlManager:         sqlClient,
+		databaseUrl:        config.DatabaseUrl,
 		cloudSqlProject:    config.CloudSQLProject,
 		cloudSqlInstance:   config.CloudSQLInstance,
 		cloudSqlUserSuffix: config.CloudSqlUserSuffix,
@@ -69,7 +74,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	team := strings.ToLower(chi.URLParam(req, "team"))
 	schema, err := toSchemaName(team)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -77,7 +82,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 
 	err = c.crm.AddBindings(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -90,26 +95,42 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 		Type: "CLOUD_IAM_SERVICE_ACCOUNT",
 	})
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	log.Info("Added user to sql instance")
 
-	log.Info("create schema", "schema", schema)
-	result, err := c.db.Exec(req.Context(), "CREATE SCHEMA IF NOT EXISTS "+schema)
+	log.Info("initialize ducklake schema", "schema", schema)
+
+	duckdb, err := sql.Open("duckdb", "")
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	log.Info("created schema", "schema", schema, "result", result.String())
+
+	//#nosec G701 -- We have sanitized the inputs, and query placeholders don't seem to work.
+	if _, err := duckdb.ExecContext(req.Context(), fmt.Sprintf(`
+		INSTALL ducklake; LOAD ducklake;
+		INSTALL postgres; LOAD postgres;
+		ATTACH 'ducklake:postgres:%s' AS %[2]s
+            (DATA_PATH '/tmp/%[2]s',
+            METADATA_SCHEMA %[2]s,
+            DATA_INLINING_ROW_LIMIT 300,
+            AUTOMATIC_MIGRATION TRUE);
+		`, c.databaseUrl, schema)); err != nil {
+		_ = httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Info("initialized ducklake schema")
 
 	log.Info("grant on schema", "user", saMember)
 
-	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
+	result, err := c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -118,7 +139,7 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	log.Info("grant on all tables in schema")
 	result, err = c.db.Exec(req.Context(), "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -132,7 +153,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	team := strings.ToLower(chi.URLParam(req, "team"))
 	schema, err := toSchemaName(team)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -141,7 +162,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	log.Info("drop schema for team", "schema", schema)
 	result, err := c.db.Exec(req.Context(), "DROP SCHEMA IF EXISTS "+schema+" CASCADE")
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -150,7 +171,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	log.Info("remove bindings for cloudsql on project")
 	err = c.crm.RemoveMember(req.Context(), c.cloudSqlProject, saDevelopersEmail(team, c.cloudSqlUserSuffix), cloudSQLClientRole, cloudSQLInstanceUserRole)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -160,7 +181,7 @@ func (c *Client) DisableForTeam(w http.ResponseWriter, req *http.Request) {
 	saMember := saDevelopersCloudSqlMember(team, c.cloudSqlUserSuffix)
 	err = c.sqlManager.RemoveUser(req.Context(), c.cloudSqlProject, c.cloudSqlInstance, saMember)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -174,7 +195,7 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	team := strings.ToLower(chi.URLParam(req, "team"))
 	schema, err := toSchemaName(team)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -187,7 +208,7 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 			WHERE schema_name = $1
 		)`, schema).Scan(&exists)
 	if err != nil {
-		httplog.SetError(req.Context(), err)
+		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
