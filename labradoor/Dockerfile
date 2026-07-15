@@ -1,5 +1,5 @@
-ARG GO_VERSION=""
-FROM golang:${GO_VERSION}alpine AS builder
+ARG GO_VERSION="1.26.5"
+FROM golang:${GO_VERSION} AS builder
 WORKDIR /src
 COPY go.* /src/
 RUN go mod download
@@ -10,5 +10,3 @@ FROM gcr.io/distroless/base
 WORKDIR /app
 COPY --from=builder /src/bin/labradoor /app/labradoor
 ENTRYPOINT ["/app/labradoor"]
-
-
