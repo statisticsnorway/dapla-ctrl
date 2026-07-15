@@ -96,18 +96,34 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Info("Added user to sql instance")
 
-	log.Info("create schema", "schema", schema)
-	result, err := c.db.Exec(req.Context(), "CREATE SCHEMA IF NOT EXISTS "+schema)
+	log.Info("initialize ducklake schema", "schema", schema)
+
+	duckdb, err := sql.Open("duckdb", "")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	log.Info("created schema", "schema", schema, "result", result.String())
+
+	//#nosec G701 -- We have sanitized the inputs, and query placeholders don't seem to work.
+	if _, err := duckdb.ExecContext(req.Context(), fmt.Sprintf(`
+		INSTALL ducklake; LOAD ducklake;
+		INSTALL postgres; LOAD postgres;
+		ATTACH 'ducklake:postgres:%s' AS %[2]s
+            (DATA_PATH '/tmp/%[2]s',
+            METADATA_SCHEMA %[2]s,
+            DATA_INLINING_ROW_LIMIT 300,
+            AUTOMATIC_MIGRATION TRUE);
+		`, c.databaseUrl, schema)); err != nil {
+		_ = httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Info("initialized ducklake schema")
 
 	log.Info("grant on schema", "user", saMember)
 
-	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
+	result, err := c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
 		httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
