@@ -1,6 +1,6 @@
 module github.com/statisticsnorway/dapla-ctrl/labradoor
 
-go 1.26.4
+go 1.26.5
 
 tool (
 	github.com/securego/gosec/v2/cmd/gosec
@@ -12,6 +12,7 @@ tool (
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
+	github.com/duckdb/duckdb-go/v2 v2.10504.0
 	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/httplog/v3 v3.4.0
 	github.com/jackc/pgx/v5 v5.10.0
@@ -53,7 +54,6 @@ require (
 	github.com/duckdb/duckdb-go-bindings/lib/linux-amd64 v0.10504.0 // indirect
 	github.com/duckdb/duckdb-go-bindings/lib/linux-arm64 v0.10504.0 // indirect
 	github.com/duckdb/duckdb-go-bindings/lib/windows-amd64 v0.10504.0 // indirect
-	github.com/duckdb/duckdb-go/v2 v2.10504.0 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
