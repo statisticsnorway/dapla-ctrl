@@ -112,23 +112,33 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 
 	//#nosec G701 -- We have sanitized the inputs, and query placeholders don't seem to work.
 	if _, err := duckdb.ExecContext(req.Context(), fmt.Sprintf(`
+		SET home_directory='/tmp';
 		INSTALL ducklake; LOAD ducklake;
 		INSTALL postgres; LOAD postgres;
 		ATTACH 'ducklake:postgres:%s' AS %[2]s
             (DATA_PATH '/tmp/%[2]s',
             METADATA_SCHEMA %[2]s,
             DATA_INLINING_ROW_LIMIT 300,
-            AUTOMATIC_MIGRATION TRUE);
-		`, c.databaseUrl, schema)); err != nil {
+            AUTOMATIC_MIGRATION TRUE,
+            OVERRIDE_DATA_PATH TRUE);
+		`, c.databaseUrl, schema, team)); err != nil {
 		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	log.Info("initialized ducklake schema")
+	log.Info("overriding ducklake data_path")
+	result, err := c.db.Exec(req.Context(), "UPDATE "+schema+".ducklake_metadata SET value = 'gs://ssb-"+team+"-data-produkt-prod/.parquedit_data/' WHERE key = 'data_path'")
+	if err != nil {
+		_ = httplog.SetError(req.Context(), err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	log.Info("overrode ducklake data_path", "result", result)
 
 	log.Info("grant on schema", "user", saMember)
 
-	result, err := c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
+	result, err = c.db.Exec(req.Context(), "GRANT CREATE, USAGE ON SCHEMA "+schema+" TO \""+saMember+"\"")
 	if err != nil {
 		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
