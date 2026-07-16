@@ -20,10 +20,10 @@
 			'unreachable'
 	);
 
-	type ServiceFeatureTypes = 'buckets' | 'database';
-	type ServiceFeatureTypeKeys = `supports${Capitalize<ServiceFeatureTypes>}`;
+	type ServiceFeatures = 'buckets' | 'database';
+	type ServiceFeatureKeys = `supports${Capitalize<ServiceFeatures>}`;
 	type Service = {
-		[key in ServiceFeatureTypeKeys]?: boolean;
+		[key in ServiceFeatureKeys]?: boolean;
 	} & {
 		displayName: string;
 		name: string;
