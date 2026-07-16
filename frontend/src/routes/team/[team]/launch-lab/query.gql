@@ -1,6 +1,7 @@
 query LaunchLab($team: Slug!) {
 	team(slug: $team) {
 		id
+		hasManualEditing
 		viewerTeamMember {
 			groups {
 				id

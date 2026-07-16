@@ -1,10 +1,11 @@
 <script lang="ts">
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
-	import { Checkbox, Select, Label, BodyShort, Button } from '@nais/ds-svelte-community';
+	import { Checkbox, Select, Label, BodyShort, Button, Switch } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import { type LaunchLab$result } from '$houdini';
 	import { RocketIcon } from '@nais/ds-svelte-community/icons';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
+	import { env } from '$env/dynamic/public';
 
 	let { data }: PageProps = $props();
 	let { LaunchLab, teamSlug } = $derived(data);
@@ -19,36 +20,61 @@
 			'unreachable'
 	);
 
-	let env: string = $state('prod');
+	type ServiceFeatures = 'buckets' | 'database';
+	type ServiceFeatureKeys = `supports${Capitalize<ServiceFeatures>}`;
+	type Service = {
+		[key in ServiceFeatureKeys]?: boolean;
+	} & {
+		displayName: string;
+		name: string;
+	};
+
+	const availableServices: Service[] = [
+		{
+			displayName: 'VS Code (Python)',
+			name: 'vscode-python',
+			supportsBuckets: true,
+			supportsDatabase: true
+		},
+		{ displayName: 'Jupyter', name: 'jupyter', supportsBuckets: true },
+		{ displayName: 'RStudio', name: 'rstudio', supportsBuckets: true },
+		{ displayName: 'Marimo', name: 'marimo', supportsBuckets: true },
+		{ displayName: 'Datadoc Editor', name: 'datadoc-editor' },
+		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning' },
+		{ displayName: 'Jupyter Playground', name: 'jupyter-playground', supportsBuckets: true },
+		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark', supportsBuckets: true },
+		{ displayName: 'JDemetra', name: 'jdemetra' }
+	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
+
+	let serviceEnv: string = $state('prod');
 	let serviceType: string = $state('jupyter');
 	let selectedBuckets: string[] = $state([]);
 	let serviceName = $derived(`${group} (${serviceType})`);
 
-	const availableServices: { displayName: string; name: string; supportsBuckets: boolean }[] = [
-		{ displayName: 'Visual Studio Code (Python)', name: 'vscode-python', supportsBuckets: true },
-		{ displayName: 'Jupyter', name: 'jupyter', supportsBuckets: true },
-		{ displayName: 'RStudio', name: 'rstudio', supportsBuckets: true },
-		{ displayName: 'Marimo', name: 'marimo', supportsBuckets: true },
-		{ displayName: 'Datadoc Editor', name: 'datadoc-editor', supportsBuckets: false },
-		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning', supportsBuckets: false },
-		{ displayName: 'Jupyter Playground', name: 'jupyter-playground', supportsBuckets: true },
-		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark', supportsBuckets: true },
-		{ displayName: 'JDemetra', name: 'jdemetra', supportsBuckets: false }
-	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
-
 	let currentService = $derived(availableServices.find((s) => s.name === serviceType));
 
-	type BucketNode = NonNullable<
-		LaunchLab$result['team']['viewerTeamMember']
-	>['groups'][0]['sharedBucketsAccess']['nodes'][0];
+	let parqueditSelected = $state(false);
+	let hasManualEditing = $derived($LaunchLab.data?.team.hasManualEditing);
+	const parqueditDatabaseUrl = env.PUBLIC_PARQUEDIT_DATABASE_URL;
+	let shouldShowParquedit = $derived(
+		serviceEnv === 'prod' &&
+			parqueditDatabaseUrl !== undefined &&
+			hasManualEditing &&
+			currentService?.supportsDatabase
+	);
+	let shouldAddParquedit = $derived(shouldShowParquedit && parqueditSelected);
 
-	let availableBuckets: BucketNode[] = $derived.by(() => {
-		if (group === '' || env === '') return [];
+	type Bucket = NonNullable<
+		LaunchLab$result['team']['viewerTeamMember']
+	>['groups'][number]['sharedBucketsAccess']['nodes'][number];
+
+	let availableBuckets: Bucket[] = $derived.by(() => {
+		if (group === '' || serviceEnv === '') return [];
 		return (
 			$LaunchLab.data?.team.viewerTeamMember?.groups
 				.filter((g) => g.name === group)
 				.flatMap((g) => g.sharedBucketsAccess.nodes)
-				.filter((b) => b.env === env) ?? []
+				.filter((b) => b.env === serviceEnv) ?? []
 		);
 	});
 
@@ -58,13 +84,20 @@
 
 	const launchServiceWindow = () => {
 		if (!currentService) return;
-		const baseUrl = `https://lab.dapla${env === 'prod' ? '' : `-${env}`}.ssb.no/launcher/dapla-lab-standard/${currentService.name}`;
+		const baseUrl = `https://lab.dapla${serviceEnv === 'prod' ? '' : `-${serviceEnv}`}.ssb.no/launcher/dapla-lab-standard/${currentService.name}`;
 
 		let parameters: { key: string; value: string }[] = [{ key: 'name', value: serviceName }];
 
 		const guillemetify = (s: string) => `«${s}»`;
 
 		parameters.push({ key: 'dapla.group', value: guillemetify(group) });
+
+		if (shouldAddParquedit && parqueditDatabaseUrl !== undefined) {
+			parameters.push({
+				key: 'avansertdb.database.instance',
+				value: guillemetify(parqueditDatabaseUrl)
+			});
+		}
 
 		const buckets = currentService.supportsBuckets
 			? availableBuckets.filter((b) => selectedBuckets.includes(b.id))
@@ -85,25 +118,6 @@
 
 		window.open(`${baseUrl}?${queryParams}`, '_blank');
 	};
-
-	type BucketData = {
-		id: string;
-		team: {
-			slug: string;
-			displayName: string;
-		};
-		name: string;
-		shortName: string;
-	};
-
-	function transformBucketdata(bucketNode: BucketNode): BucketData {
-		return {
-			id: bucketNode.id,
-			name: bucketNode.name,
-			team: bucketNode.team,
-			shortName: bucketNode.shortName
-		};
-	}
 </script>
 
 {#snippet checkHeading()}
@@ -119,7 +133,7 @@
 		>.
 	</Checkbox>
 {/snippet}
-{#snippet checkCell(bucket: BucketData)}
+{#snippet checkCell(bucket: Bucket)}
 	<Checkbox
 		value={bucket.id}
 		bind:checked={
@@ -132,14 +146,14 @@
 		hideLabel={true}>.</Checkbox
 	>
 {/snippet}
-{#snippet nameCell(bucket: BucketData)}
+{#snippet nameCell(bucket: Bucket)}
 	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}>
 		<b>{bucket.shortName}</b>
 	</a>
 	<br />
 	{bucket.name}
 {/snippet}
-{#snippet teamCell(bucket: BucketData)}<a href={`/team/${bucket.team.slug}/`}>
+{#snippet teamCell(bucket: Bucket)}<a href={`/team/${bucket.team.slug}/`}>
 		<b>{bucket.team.displayName}</b>
 	</a>
 	<br />
@@ -155,46 +169,40 @@
 
 {#if $LaunchLab.data?.team.viewerTeamMember}
 	<div class="container">
-		<div class="button">
-			<Button size="small" onclick={launchServiceWindow} icon={RocketIcon}>Start Dapla Lab</Button>
-		</div>
 		<div>
-			<div style="display: flex; flex-direction: row; align-items: top; justify-content: start;">
-				<Select
-					bind:value={serviceType}
-					style="margin-top: 0px; margin-right: 2em; max-width: 90%; max-height: 3em;"
-				>
-					{#snippet label()}
-						Velg tjeneste
-					{/snippet}
+			<div style="display: flex; gap: var(--ax-space-16)">
+				<Select bind:value={serviceType} style="width: 13em;" label="Velg tjeneste">
 					{#each availableServices as service (service.name)}
 						<option value={service.name}>{service.displayName}</option>
 					{/each}
 				</Select>
-				<br />
-				<Select
-					bind:value={group}
-					style="display: flex; flex-direction: justify-content: start; margin-right: 2em; max-width: 90%; max-height: 3em"
-				>
-					{#snippet label()}
-						Velg gruppe
-					{/snippet}
+				<Select label="Velg gruppe" bind:value={group} style="width: 10em;">
 					{#each $LaunchLab.data?.team.viewerTeamMember.groups as group (group.id)}
 						<option value={group.name}>{group.name.substring(teamSlug.length + 1)}</option>
 					{/each}
 				</Select>
-				<br />
-				<Select label="Velg miljø" bind:value={env}>
+				<Select label="Velg miljø" bind:value={serviceEnv} style="width: 10em;">
 					<option value="prod">Prod</option>
 					<option value="test">Test</option>
 				</Select>
+				{#if shouldShowParquedit}
+					<div style="display: grid; gap: var(--ax-space-8)">
+						<Label>Parquedit</Label>
+						<Switch bind:checked={parqueditSelected} hideLabel={true}>Parquedit</Switch>
+					</div>
+				{/if}
+				<div class="button">
+					<Button size="small" onclick={launchServiceWindow} icon={RocketIcon}
+						>Start Dapla Lab</Button
+					>
+				</div>
 			</div>
 			<br />
 			{#if shouldShowBuckets}
 				<Label>Velg deltbøtter som skal vises under /buckets</Label>
 
 				<DaplaTable
-					data={availableBuckets.map(transformBucketdata)}
+					data={availableBuckets}
 					selected={['CHECK', 'NAME', 'TEAM']}
 					columns={[
 						{
@@ -235,6 +243,9 @@
 		display: flex;
 		float: right;
 		margin-bottom: var(--ax-space-24, --a-spacing-6);
+		height: 2em;
+		margin-left: auto;
+		text-wrap: nowrap;
 	}
 	.description {
 		margin-top: calc(-1 * var(--spacing-layout));
