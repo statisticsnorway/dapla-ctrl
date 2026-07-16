@@ -64,11 +64,11 @@
 	);
 	let shouldAddParquedit = $derived(shouldShowParquedit && parqueditSelected);
 
-	type BucketNode = NonNullable<
+	type Bucket = NonNullable<
 		LaunchLab$result['team']['viewerTeamMember']
 	>['groups'][number]['sharedBucketsAccess']['nodes'][number];
 
-	let availableBuckets: BucketNode[] = $derived.by(() => {
+	let availableBuckets: Bucket[] = $derived.by(() => {
 		if (group === '' || serviceEnv === '') return [];
 		return (
 			$LaunchLab.data?.team.viewerTeamMember?.groups
@@ -118,25 +118,6 @@
 
 		window.open(`${baseUrl}?${queryParams}`, '_blank');
 	};
-
-	type BucketData = {
-		id: string;
-		team: {
-			slug: string;
-			displayName: string;
-		};
-		name: string;
-		shortName: string;
-	};
-
-	function transformBucketdata(bucketNode: BucketNode): BucketData {
-		return {
-			id: bucketNode.id,
-			name: bucketNode.name,
-			team: bucketNode.team,
-			shortName: bucketNode.shortName
-		};
-	}
 </script>
 
 {#snippet checkHeading()}
@@ -152,7 +133,7 @@
 		>.
 	</Checkbox>
 {/snippet}
-{#snippet checkCell(bucket: BucketData)}
+{#snippet checkCell(bucket: Bucket)}
 	<Checkbox
 		value={bucket.id}
 		bind:checked={
@@ -165,14 +146,14 @@
 		hideLabel={true}>.</Checkbox
 	>
 {/snippet}
-{#snippet nameCell(bucket: BucketData)}
+{#snippet nameCell(bucket: Bucket)}
 	<a href={`/team/${bucket.team.slug}/shared-data/${bucket.name}`}>
 		<b>{bucket.shortName}</b>
 	</a>
 	<br />
 	{bucket.name}
 {/snippet}
-{#snippet teamCell(bucket: BucketData)}<a href={`/team/${bucket.team.slug}/`}>
+{#snippet teamCell(bucket: Bucket)}<a href={`/team/${bucket.team.slug}/`}>
 		<b>{bucket.team.displayName}</b>
 	</a>
 	<br />
@@ -221,7 +202,7 @@
 				<Label>Velg deltbøtter som skal vises under /buckets</Label>
 
 				<DaplaTable
-					data={availableBuckets.map(transformBucketdata)}
+					data={availableBuckets}
 					selected={['CHECK', 'NAME', 'TEAM']}
 					columns={[
 						{
