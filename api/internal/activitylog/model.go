@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
@@ -27,17 +26,16 @@ const (
 	ActivityLogEntryActionUpdated ActivityLogEntryAction = "UPDATED"
 )
 
+//mgo:gen model
+//mgo:impl paginated
 type ActivityLogEntry interface {
 	model.Node
 	GetUUID() uuid.UUID
 	ID() ident.Ident
 }
 
-type (
-	ActivityLogEntryConnection = pagination.Connection[ActivityLogEntry]
-	ActivityLogEntryEdge       = pagination.Edge[ActivityLogEntry]
-)
-
+//mgo:gen model
+//mgo:impl node
 type GenericActivityLogEntry struct {
 	Actor        string                       `json:"actor"`
 	CreatedAt    time.Time                    `json:"createdAt"`
@@ -49,8 +47,6 @@ type GenericActivityLogEntry struct {
 	UUID         uuid.UUID                    `json:"-"`
 	Data         []byte                       `json:"-"`
 }
-
-func (GenericActivityLogEntry) IsNode() {}
 
 func (a GenericActivityLogEntry) ID() ident.Ident {
 	return newIdent(a.UUID)

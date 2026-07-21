@@ -2,28 +2,19 @@ package group
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/group/groupsql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 )
 
-type (
-	GroupConnection       = pagination.Connection[*Group]
-	GroupEdge             = pagination.Edge[*Group]
-	GroupMemberConnection = pagination.Connection[*GroupMember]
-	GroupMemberEdge       = pagination.Edge[*GroupMember]
-)
-
+//mgo:gen model
+//mgo:gen order NAME TEAM CATEGORY
+//mgo:impl node searchnode activitylogger paginated
 type Group struct {
 	Name     string    `json:"name"`
 	TeamSlug slug.Slug `json:"slug"`
@@ -33,64 +24,8 @@ type Group struct {
 
 type ExternalReferences struct{}
 
-func (Group) IsNode()           {}
-func (Group) IsSearchNode()     {}
-func (Group) IsActivityLogger() {}
-
 func (g Group) ID() ident.Ident {
 	return NewIdent(g.Name)
-}
-
-type GroupOrder struct {
-	Field     GroupOrderField      `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
-}
-
-func (o *GroupOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type GroupOrderField string
-
-const (
-	GroupOrderFieldName     GroupOrderField = "NAME"
-	GroupOrderFieldSlug     GroupOrderField = "TEAM"
-	GroupOrderFieldCategory GroupOrderField = "CATEGORY"
-)
-
-var AllGroupOrderField = []GroupOrderField{
-	GroupOrderFieldName,
-	GroupOrderFieldSlug,
-	GroupOrderFieldCategory,
-}
-
-func (e GroupOrderField) IsValid() bool {
-	return slices.Contains(AllGroupOrderField, e)
-}
-
-func (e GroupOrderField) String() string {
-	return string(e)
-}
-
-func (e *GroupOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = GroupOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid GroupOrderField", str)
-	}
-	return nil
-}
-
-func (e GroupOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func toGraphGroup(m *groupsql.Group) *Group {
@@ -117,6 +52,8 @@ func toGraphUserGroup(m *groupsql.ListForUserRow) *GroupMember {
 	}
 }
 
+//mgo:gen model
+//mgo:impl paginated
 type GroupMember struct {
 	GroupName string    `json:"-"`
 	UserID    uuid.UUID `json:"-"`

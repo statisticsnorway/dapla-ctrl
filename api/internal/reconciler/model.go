@@ -5,27 +5,18 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/reconciler/reconcilersql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-type (
-	ReconcilerConnection      = pagination.Connection[*Reconciler]
-	ReconcilerEdge            = pagination.Edge[*Reconciler]
-	ReconcilerErrorConnection = pagination.Connection[*ReconcilerError]
-	ReconcilerErrorEdge       = pagination.Edge[*ReconcilerError]
-)
-
+//mgo:gen model
+//mgo:impl node activitylogger paginated
 type Reconciler struct {
 	Name        string `json:"name"`
 	DisplayName string `json:"displayName"`
 	Description string `json:"description"`
 	Enabled     bool   `json:"enabled"`
 }
-
-func (Reconciler) IsNode()           {}
-func (Reconciler) IsActivityLogger() {}
 
 func (r Reconciler) ID() ident.Ident {
 	return newReconcilerIdent(r.Name)
@@ -67,6 +58,8 @@ type ReconcilerConfigInput struct {
 	Value string `json:"value"`
 }
 
+//mgo:gen model
+//mgo:impl node paginated
 type ReconcilerError struct {
 	CorrelationID string    `json:"correlationID"`
 	CreatedAt     time.Time `json:"createdAt"`
@@ -75,7 +68,6 @@ type ReconcilerError struct {
 	UUID          uuid.UUID `json:"-"`
 }
 
-func (ReconcilerError) IsNode() {}
 func (e *ReconcilerError) ID() ident.Ident {
 	return newReconcilerErrorIdent(e.UUID)
 }
