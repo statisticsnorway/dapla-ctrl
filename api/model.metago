@@ -1,0 +1,83 @@
+{{ define "model" }}
+
+{{ if (propHas . "impl" "paginated") }}
+{{ imports "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination" }}
+type (
+    {{ name . }}Connection = pagination.Connection[{{ if ne .Kind "interface"}}*{{ end }}{{ name . }}]
+    {{ name . }}Edge = pagination.Edge[{{ if ne .Kind "interface"}}*{{ end }}{{ name . }}]
+)
+{{ end }}
+
+{{- if (propHas . "impl" "node") }}
+func ({{ name . }}) IsNode() {}
+{{- end }}
+
+{{- if (propHas . "impl" "searchnode") }}
+func ({{ name . }}) IsSearchNode() {}
+{{- end }}
+
+{{- if (propHas . "impl" "activitylogger") }}
+func ({{ name . }}) IsActivityLogger() {}
+{{- end }}
+
+{{ end }}
+
+{{ define "order" }}
+{{ imports "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model" }}
+{{ imports "strings" }}
+{{ imports "fmt" }}
+{{ imports "strconv" }}
+{{ imports "slices" }}
+{{ imports "io" }}
+type {{ name . }}Order struct {
+	Field {{ name . }}OrderField `json:"field"`
+	Direction model.OrderDirection `json:"direction"`
+}
+
+func (o *{{ name . }}Order) String() string {
+	if o == nil {
+		return ""
+	}
+
+	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
+}
+
+type {{ name . }}OrderField string
+
+const (
+{{- range .Argv }}
+	{{ name $ }}OrderField{{ pascal . }}        {{ name $ }}OrderField = "{{ . }}"
+{{- end }}
+)
+
+var All{{ name . }}OrderFields = []{{ name . }}OrderField{
+{{- range .Argv }}
+	{{ name $ }}OrderField{{ pascal . }},
+{{- end }}
+}
+
+func (e {{ name . }}OrderField) IsValid() bool {
+	return slices.Contains(All{{ name . }}OrderFields, e)
+}
+
+func (e {{ name . }}OrderField) String() string {
+	return string(e)
+}
+
+func (e *{{ name . }}OrderField) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = {{ name . }}OrderField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid {{ name . }}OrderField", str)
+	}
+	return nil
+}
+
+func (e {{ name . }}OrderField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+{{ end }}
