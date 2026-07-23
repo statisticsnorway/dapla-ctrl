@@ -1,6 +1,8 @@
-type HoudiniConfig = import('houdini').ConfigFile;
+/// <references types="houdini-svelte">
 
-const config: HoudiniConfig = {
+/** @type {import('houdini').ConfigFile} */
+
+const config = {
 	schemaPath: './schema.graphql',
 	url: '/graphql',
 	runtimeDir: '.houdini',
