@@ -1,6 +1,6 @@
 type HoudiniConfig = import('houdini').ConfigFile;
 
-const config : HoudiniConfig = {
+const config: HoudiniConfig = {
 	schemaPath: './schema.graphql',
 	url: '/graphql',
 	runtimeDir: '.houdini',
