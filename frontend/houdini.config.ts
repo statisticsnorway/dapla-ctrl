@@ -1,16 +1,8 @@
-/// <references types="houdini-svelte">
+type HoudiniConfig = import('houdini').ConfigFile;
 
-/** @type {import('houdini').ConfigFile} */
-
-const graphqlEndpoint = import.meta.env.VITE_GRAPHQL_ENDPOINT;
-if (!graphqlEndpoint) {
-	console.log(`env variable 'VITE_GRAPHQL_ENDPOINT' must be set`);
-	process.exit(1);
-}
-
-const config = {
+const config : HoudiniConfig = {
 	schemaPath: './schema.graphql',
-	url: graphqlEndpoint,
+	url: '/graphql',
 	runtimeDir: '.houdini',
 	defaultPaginateMode: 'SinglePage',
 	watchSchema: {
