@@ -13,7 +13,7 @@ jobs:
     name: API
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build and push API image and SBOM to NAIS OCI registry
         uses: nais/docker-build-push@f8bc7437f7549c2b08197152d781b98f8727a08a # v0
@@ -27,7 +27,7 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build and push frontend image and SBOM to NAIS OCI registry
         uses: nais/docker-build-push@f8bc7437f7549c2b08197152d781b98f8727a08a # v0
@@ -41,7 +41,7 @@ jobs:
     name: Reconcilers
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Build and push reconcilers image and SBOM to NAIS OCI registry
         uses: nais/docker-build-push@f8bc7437f7549c2b08197152d781b98f8727a08a # v0
@@ -58,7 +58,7 @@ jobs:
         contents: read
         id-token: write
       steps:
-        - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
           with:
             cache_key_prefix: mise-labradoor-build-push
