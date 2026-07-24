@@ -5,19 +5,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/scalar"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/serviceaccount/serviceaccountsql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-type (
-	ServiceAccountConnection      = pagination.Connection[*ServiceAccount]
-	ServiceAccountEdge            = pagination.Edge[*ServiceAccount]
-	ServiceAccountTokenConnection = pagination.Connection[*ServiceAccountToken]
-	ServiceAccountTokenEdge       = pagination.Edge[*ServiceAccountToken]
-)
-
+//mgo:gen model
+//mgo:impl node paginated
 type ServiceAccount struct {
 	Name        string     `json:"name"`
 	Description string     `json:"description"`
@@ -27,7 +21,6 @@ type ServiceAccount struct {
 	TeamSlug    *slug.Slug `json:"-"`
 }
 
-func (ServiceAccount) IsNode()                   {}
 func (s *ServiceAccount) GetID() uuid.UUID       { return s.UUID }
 func (s *ServiceAccount) Identity() string       { return s.Name }
 func (s *ServiceAccount) IsServiceAccount() bool { return true }
@@ -94,6 +87,8 @@ type RevokeRoleFromServiceAccountPayload struct {
 	ServiceAccount *ServiceAccount `json:"serviceAccount,omitempty"`
 }
 
+//mgo:gen model
+//mgo:impl node paginated
 type ServiceAccountToken struct {
 	Name             string       `json:"name"`
 	Description      string       `json:"description"`
@@ -105,7 +100,6 @@ type ServiceAccountToken struct {
 	ServiceAccountID uuid.UUID    `json:"-"`
 }
 
-func (ServiceAccountToken) IsNode() {}
 func (t *ServiceAccountToken) ID() ident.Ident {
 	return newTokenIdent(t.UUID)
 }

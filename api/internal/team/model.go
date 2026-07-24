@@ -12,21 +12,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team/teamsql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 )
 
-type (
-	TeamConnection       = pagination.Connection[*Team]
-	TeamEdge             = pagination.Edge[*Team]
-	TeamMemberConnection = pagination.Connection[*TeamMember]
-	TeamMemberEdge       = pagination.Edge[*TeamMember]
-	TeamGroupConnection  = pagination.Connection[*TeamGroup]
-	TeamGroupEdge        = pagination.Edge[*TeamGroup]
-)
-
+//mgo:gen model
+//mgo:gen order SLUG SECTION_CODE
+//mgo:impl paginated node searchnode activitylogger
 type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
 	DisplayName          string     `json:"displayName"`
@@ -38,10 +31,6 @@ type Team struct {
 }
 
 type ExternalReferences struct{}
-
-func (Team) IsNode()           {}
-func (Team) IsSearchNode()     {}
-func (Team) IsActivityLogger() {}
 
 func (t Team) DeletionInProgress() bool {
 	return t.DeleteKeyConfirmedAt != nil
@@ -55,56 +44,6 @@ func (t *Team) ExternalResources() *TeamExternalResources {
 	return &TeamExternalResources{
 		team: t,
 	}
-}
-
-type TeamOrder struct {
-	Field     TeamOrderField       `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
-}
-
-func (o *TeamOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type TeamOrderField string
-
-const (
-	TeamOrderFieldSlug        TeamOrderField = "SLUG"
-	TeamOrderFieldSectionCode TeamOrderField = "SECTION_CODE"
-)
-
-var AllTeamOrderField = []TeamOrderField{
-	TeamOrderFieldSlug,
-	TeamOrderFieldSectionCode,
-}
-
-func (e TeamOrderField) IsValid() bool {
-	return slices.Contains(AllTeamOrderField, e)
-}
-
-func (e TeamOrderField) String() string {
-	return string(e)
-}
-
-func (e *TeamOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TeamOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TeamOrderField", str)
-	}
-	return nil
-}
-
-func (e TeamOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func toGraphTeam(m *teamsql.Team) *Team {
@@ -143,6 +82,9 @@ func toGraphUserTeam(m *teamsql.ListForUserRow) *TeamMember {
 	}
 }
 
+//mgo:gen model
+//mgo:gen order NAME EMAIL
+//mgo:impl paginated
 type TeamMember struct {
 	TeamSlug slug.Slug `json:"-"`
 	UserID   uuid.UUID `json:"-"`
@@ -187,55 +129,6 @@ func (e *TeamMemberRole) UnmarshalGQL(v interface{}) error {
 }
 
 func (e TeamMemberRole) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-type TeamMemberOrder struct {
-	Field     TeamMemberOrderField `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
-}
-
-func (o *TeamMemberOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type TeamMemberOrderField string
-
-const (
-	TeamMemberOrderFieldName  TeamMemberOrderField = "NAME"
-	TeamMemberOrderFieldEmail TeamMemberOrderField = "EMAIL"
-)
-
-func (e TeamMemberOrderField) IsValid() bool {
-	switch e {
-	case TeamMemberOrderFieldName, TeamMemberOrderFieldEmail:
-		return true
-	}
-	return false
-}
-
-func (e TeamMemberOrderField) String() string {
-	return string(e)
-}
-
-func (e *TeamMemberOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = TeamMemberOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid TeamMemberOrderField", str)
-	}
-	return nil
-}
-
-func (e TeamMemberOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -468,6 +361,8 @@ type TeamExternalResources struct {
 	team *Team
 }
 
+//mgo:gen model
+//mgo:impl paginated
 type TeamGroup struct {
 	TeamSlug  slug.Slug `json:"teamSlug"`
 	GroupName string    `json:"groupName"`

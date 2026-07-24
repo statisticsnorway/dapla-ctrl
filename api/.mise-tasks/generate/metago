@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+#MISE description="Generate metago code"
+
+set -e
+
+go tool	github.com/guillemus/metago .
+
+mise run fmt:go

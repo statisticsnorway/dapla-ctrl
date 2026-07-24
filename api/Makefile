@@ -18,6 +18,9 @@ generate-mocks:
 generate-proto:
 	mise run -j 1 generate:proto ::: fmt:go
 
+generate-metago:
+	mise run -j 1 generate:metago ::: fmt:go
+
 build:
 	mise run build
 

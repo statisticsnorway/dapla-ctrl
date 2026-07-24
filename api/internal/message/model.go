@@ -5,16 +5,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/message/messagesql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 )
 
-type (
-	MessageConnection = pagination.Connection[*Message]
-	MessageEdge       = pagination.Edge[*Message]
-)
-
+//mgo:gen model
+//mgo:impl node paginated
 type Message struct {
 	UUID      uuid.UUID `json:"id"`
 	Actor     string    `json:"actor"`
@@ -23,8 +19,6 @@ type Message struct {
 	Message   string    `json:"message"`
 	Status    string    `json:"status"`
 }
-
-func (Message) IsNode() {}
 
 func (m Message) ID() ident.Ident {
 	return newMessageIdent(m.UUID)

@@ -1,24 +1,14 @@
 package user
 
 import (
-	"fmt"
-	"io"
-	"slices"
-	"strconv"
-	"strings"
-
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user/usersql"
 )
 
-type (
-	UserConnection = pagination.Connection[*User]
-	UserEdge       = pagination.Edge[*User]
-)
-
+//mgo:gen model
+//mgo:gen order NAME EMAIL SECTION_CODE
+//mgo:impl node searchnode paginated
 type User struct {
 	UUID           uuid.UUID `json:"-"`
 	Email          string    `json:"email"`
@@ -30,13 +20,10 @@ type User struct {
 	EmploymentType string    `json:"employmentType"`
 }
 
-func (User) IsNode() {}
-
 func (u *User) GetID() uuid.UUID       { return u.UUID }
 func (u *User) Identity() string       { return u.Email }
 func (u *User) IsServiceAccount() bool { return false }
 func (u *User) IsAdmin() bool          { return u.Admin }
-func (u *User) IsSearchNode()          {}
 
 func (u User) ID() ident.Ident {
 	return NewIdent(u.UUID)
@@ -53,58 +40,6 @@ func toGraphUser(u *usersql.User) *User {
 		SectionCode:    u.SectionCode,
 		EmploymentType: u.EmploymentType,
 	}
-}
-
-type UserOrder struct {
-	Field     UserOrderField       `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
-}
-
-func (o *UserOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type UserOrderField string
-
-const (
-	UserOrderFieldName        UserOrderField = "NAME"
-	UserOrderFieldEmail       UserOrderField = "EMAIL"
-	UserOrderFieldSectionCode UserOrderField = "SECTION_CODE"
-)
-
-var AllUserOrderFields = []UserOrderField{
-	UserOrderFieldName,
-	UserOrderFieldEmail,
-	UserOrderFieldSectionCode,
-}
-
-func (e UserOrderField) IsValid() bool {
-	return slices.Contains(AllUserOrderFields, e)
-}
-
-func (e UserOrderField) String() string {
-	return string(e)
-}
-
-func (e *UserOrderField) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = UserOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid UserOrderField", str)
-	}
-	return nil
-}
-
-func (e UserOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AuthenticatedUser interface {
