@@ -2,8 +2,8 @@
 pin = true
 
 [tools]
-go = "1.26.3"
+go = "1.26.5"
 node = "lts"
-protoc = "29.3"
-protoc-gen-go = "1.36.4"
-protoc-gen-go-grpc = "1.5.1"
+protoc = "35.1"
+protoc-gen-go = "1.36.11"
+protoc-gen-go-grpc = "1.6.2"
