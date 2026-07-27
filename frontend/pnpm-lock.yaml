@@ -79,11 +79,11 @@ importers:
         specifier: ^17.7.0
         version: 17.7.0
       houdini:
-        specifier: ^2.0.5
-        version: 2.0.5(graphql@16.14.2)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
+        specifier: ^2.0.8
+        version: 2.0.8(graphql@16.14.2)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
       houdini-svelte:
-        specifier: ^3.0.2
-        version: 3.0.2(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4(@typescript-eslint/types@8.62.0))(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)))(@types/node@26.1.0)(@typescript-eslint/types@8.62.0)(esbuild@0.28.1)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)
+        specifier: ^3.0.4
+        version: 3.0.4(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4(@typescript-eslint/types@8.62.0))(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)))(@types/node@26.1.0)(@typescript-eslint/types@8.62.0)(esbuild@0.28.1)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -1787,100 +1787,100 @@ packages:
   help-me@5.0.0:
     resolution: {integrity: sha512-7xgomUX6ADmcYzFik0HzAxh/73YlKR9bmFzf51CZwR+b6YtzU2m0u49hQCqV6SvlqIqsaxovfwdvbnsw3b/zpg==}
 
-  houdini-core-darwin-arm64@2.0.4:
-    resolution: {integrity: sha512-4a5ifINhGIs/RaB7vo4dMG/bvSMM6W0zT9fr0NoX0HACKUBK4OtL6IlheKtSlTIETnbtbqAoJ8Jg2yD6u9C9TQ==}
+  houdini-core-darwin-arm64@2.0.6:
+    resolution: {integrity: sha512-Wk3+lUqheB0JW3ZpLg+dQcaIKUQtS8y4XFsAzgmKwTXSITsp0TZIoSHgDuRhaem0iAgkFSLQLzioIr/tZMzYNg==}
     cpu: [arm64]
     os: [darwin]
     hasBin: true
 
-  houdini-core-darwin-x64@2.0.4:
-    resolution: {integrity: sha512-Pc4y6OaVkzsWeAHxvoR783GQTMJwTlGO1jhubxWZ0eLJvQxrE88eeFIFmBv/1+h705mb8oNXCZ8FyI5FHw+wzg==}
+  houdini-core-darwin-x64@2.0.6:
+    resolution: {integrity: sha512-ofw/hkbwH2AM6Hh9W69BfueGgbtbWoPUF7ZwU+XmrdKhZGDhwCi7gq5XxO2+tfGCECHDNgrHYrjtk12bPThC4w==}
     cpu: [x64]
     os: [darwin]
     hasBin: true
 
-  houdini-core-linux-arm64@2.0.4:
-    resolution: {integrity: sha512-89NKMP7ugO2adZPjt+frSjrVU9ihb4gCtV8yjS5wzwdMj51CBWADijVCjlUXMdZEMukP5PQ2+OKnKqbp2pyHGA==}
+  houdini-core-linux-arm64@2.0.6:
+    resolution: {integrity: sha512-bBZnIhImcpxN4GzATfjz18OivohhLg+Ux2gzibQGZVUNcQmwc6azQu05Hc/gXvPJGtCl6a2DbcFS+OX9uZt3Lg==}
     cpu: [arm64]
     os: [linux]
     hasBin: true
 
-  houdini-core-linux-x64@2.0.4:
-    resolution: {integrity: sha512-irlIP3Zep0snMfKFd89TGQ5JCrrKg5rx48tXvBBCXH2MlYgNq5e2hTp989XbW1k3QhomiibXEFlSY1F7ClwQUA==}
+  houdini-core-linux-x64@2.0.6:
+    resolution: {integrity: sha512-oDAv6aoTC9zieClZ/zdhxft4l/XRyZ0cMgOLN8e2+mPqhURFKBpsckqyJeUqdeJQkNeoJeyRzovloriejFST9w==}
     cpu: [x64]
     os: [linux]
     hasBin: true
 
-  houdini-core-wasm@2.0.4:
-    resolution: {integrity: sha512-XEC+Y59c+8BzDoTIunSRAK7ZYtxP1wB9vYXrAKAZ2w1UuNT0dvImVRB/A+kUKv0fWrGN5Z88WArasMmhHPaAdQ==}
+  houdini-core-wasm@2.0.6:
+    resolution: {integrity: sha512-hNXSjbr9ey/aCQTU24n+Ii8HxgXMhzH11+eQnotb46WAHxzM22P9JtdTX/4umrOB8F5xq2Y54llR7qc53by7/w==}
     cpu: [wasm32]
     os: [wasi]
     hasBin: true
 
-  houdini-core-win32-arm64@2.0.4:
-    resolution: {integrity: sha512-YN9ZZkSHNKbruOvH9dmORaHcxKV+r/qhj8WyyCPzRkx+EtidCEcfteyCHfWn0s0vRInvfM8FCXu3y+qYBtAC7Q==}
+  houdini-core-win32-arm64@2.0.6:
+    resolution: {integrity: sha512-J1JxJdWzvkP2YbMDVxUF9H0l9pZSA7O4o/Ca5EeMQx282DbsZQGTW8ViEOdA7YshPSdcoqdkuAr7PYB8Mym7zg==}
     cpu: [arm64]
     os: [win32]
     hasBin: true
 
-  houdini-core-win32-x64@2.0.4:
-    resolution: {integrity: sha512-lC7BebYp9/U5O18MxN/31tKnANfiiiQcfBL/ARE1kqzFlFdFJm7ByXmX7qF8Zitv+LrfItlk8oSuzgnSvSBl4Q==}
+  houdini-core-win32-x64@2.0.6:
+    resolution: {integrity: sha512-3MKYn8Vsq/vqDN6ICX8rN++VvwjOTfhEK6gqj5UyXOlv7ROfcOfjOkbo/EHR4A00W25XbhMOYyuE13v5n9e+pA==}
     cpu: [x64]
     os: [win32]
     hasBin: true
 
-  houdini-core@2.0.4:
-    resolution: {integrity: sha512-Y8QCi7WVoyKKOVtF1DgJefro141ZUaOGkiyxsnmTyulvzD/qVBlwfrqhgaJB5LxUTI7WnKqB0v6mW3fgRSmGbA==}
+  houdini-core@2.0.6:
+    resolution: {integrity: sha512-Auy0HQpUQBPmlP1CYl6+Tbfm5K0JCFfVPD95sQR8O7aQ02wWKn73nXZBgUNyeWCUTanb8J9vY89tObs4QTd2eA==}
     hasBin: true
 
-  houdini-svelte-darwin-arm64@3.0.2:
-    resolution: {integrity: sha512-hegT58s5Vch8tzC46f6jJM9GM9iMryeGXJgoCKTDG02MJpZLldzq5zIvxFrzf/ricVji6t2pa4RDf7jAAnSxrA==}
+  houdini-svelte-darwin-arm64@3.0.4:
+    resolution: {integrity: sha512-qjnl1jzyJem4+4V5T9Nihptho19sm0o/PjxJsf4mVelzvPVQttEQsh2JwyRtyzLC3pu1V86s1eCdtl+mbd3o5A==}
     cpu: [arm64]
     os: [darwin]
     hasBin: true
 
-  houdini-svelte-darwin-x64@3.0.2:
-    resolution: {integrity: sha512-yrdL+gdV+jQvWpfmccDPmJvSGELWSTezs+UOpIQLOQJ3frxizSqWCjqOEDbQnM1LN5uK/2bhcZbblvBqyMrm+Q==}
+  houdini-svelte-darwin-x64@3.0.4:
+    resolution: {integrity: sha512-5kOJpGkpI04QwgOyTfM4OzPLrRUcCdpYijjys+nwfjoeN/zbvSUItzNAoxrP7D0/fb9c2JUDJmzeIdr0qDq3kg==}
     cpu: [x64]
     os: [darwin]
     hasBin: true
 
-  houdini-svelte-linux-arm64@3.0.2:
-    resolution: {integrity: sha512-TjyAvAbcyf1JzftIci4aEGGdOZWyd1Mx76qkHR6V4mFZl1FaSyaw0v4ew5+HLv4JQO5XLhYvqgwJj41G+kbLyA==}
+  houdini-svelte-linux-arm64@3.0.4:
+    resolution: {integrity: sha512-oFaDcm15BCQq0Nt6GAvMD/4A8A6QYuTFdbsKwsYyTMzu6by4BEB3TO/9isriSAMFu6DIj7uCVPc+J5IvynDyOA==}
     cpu: [arm64]
     os: [linux]
     hasBin: true
 
-  houdini-svelte-linux-x64@3.0.2:
-    resolution: {integrity: sha512-ek9pqajGuV8YlX32IpEQfEjw1M0SYsaWG/kW8KnTYMYOFzSfoxwVS8Ej0kwfhf9iA5rFghUFUDRJz5PwGP0qTA==}
+  houdini-svelte-linux-x64@3.0.4:
+    resolution: {integrity: sha512-WhxO3A+1Q0tUT4+VDZslAaxDkkKEIwjoIwImQscIqhTpOoSGlqjutLu4g0ZoNKOo7lbUR6f/JdF5+22xyKR2Ng==}
     cpu: [x64]
     os: [linux]
     hasBin: true
 
-  houdini-svelte-wasm@3.0.2:
-    resolution: {integrity: sha512-Ci05SGQ+ha7VqysnK8vsP3TM5whSuFGHuNS79eSxl7FABo68utCilgLwa9G+REy9V2px8H9txjfadooMMG8TsA==}
+  houdini-svelte-wasm@3.0.4:
+    resolution: {integrity: sha512-6PitgEuAGZ3Ey1IOrMoCwnufbe8MBVfQZLltRqZ/57n/1cc8S/WJIYdGxWMe4tpiul54ZmrP8+i1yau0t1I5Kg==}
     cpu: [wasm32]
     os: [wasi]
     hasBin: true
 
-  houdini-svelte-win32-arm64@3.0.2:
-    resolution: {integrity: sha512-TaTSpjZfFqyENa5pX7cVGTb3GGrPfho2h9abcIpuA/a57RJyTZ1cRc/UJ6uS9reohWK61FYDnxMVMt/DFRwUfQ==}
+  houdini-svelte-win32-arm64@3.0.4:
+    resolution: {integrity: sha512-hWIPOzIUapjEXiMNy9rJnQyETDGje+SnbeH4eVaMJEUVHYinLJq7RuFZwBPI6xIVI+OSk57ohjFDkCSI323qag==}
     cpu: [arm64]
     os: [win32]
     hasBin: true
 
-  houdini-svelte-win32-x64@3.0.2:
-    resolution: {integrity: sha512-/eZR4czbnatoUi3o9RCIqZgIZgAwZEPisZkX0tiULnnMfwIZTLB97Oe8aZEDp/vBi0YWWmJidWNnnFb48CqPiw==}
+  houdini-svelte-win32-x64@3.0.4:
+    resolution: {integrity: sha512-xPDp2QqI8PnxKBq8WjJ5eZC0ETOj/fwGQq0ZlyfmqbG4kFVeM9+uly242dFFjPYGXzFTsSpDu5qwP7FYhCIIQA==}
     cpu: [x64]
     os: [win32]
     hasBin: true
 
-  houdini-svelte@3.0.2:
-    resolution: {integrity: sha512-qwEBSTFY8Hy/6OCYEY4RykjysGPwBog1fnXqf8ycB7V+PBYAxErlKBDRz+bOjJxhoeCWj9NEJiFI8hQQ/6Hj/A==}
+  houdini-svelte@3.0.4:
+    resolution: {integrity: sha512-ECVioqsjnzmUMXs5ZFTkDThtSNfZqMjHgu+UhS/yNR/HSam6rgRIQn4+jWs8Smhd6ozoto2+DgrP6l8Ws/P19g==}
     hasBin: true
 
-  houdini@2.0.5:
-    resolution: {integrity: sha512-tbalhxL9jHx4qATjvqLJ8Iz+zvsLUAdSvziscUDqo+93SU+raShgaGwbjAMF2nD3Kc1okpqYp8lGcVzwWy3rGg==}
+  houdini@2.0.8:
+    resolution: {integrity: sha512-wu+Gbq757FsEvSnxKlJkxKseh1GV3q+6FsGpjOvej527NbKY7SDb2QAldZzLRRqE9JziylQMKGIhPstsEmxRAQ==}
     hasBin: true
     peerDependencies:
       graphql: '>=16'
@@ -4247,65 +4247,65 @@ snapshots:
 
   help-me@5.0.0: {}
 
-  houdini-core-darwin-arm64@2.0.4:
+  houdini-core-darwin-arm64@2.0.6:
     optional: true
 
-  houdini-core-darwin-x64@2.0.4:
+  houdini-core-darwin-x64@2.0.6:
     optional: true
 
-  houdini-core-linux-arm64@2.0.4:
+  houdini-core-linux-arm64@2.0.6:
     optional: true
 
-  houdini-core-linux-x64@2.0.4:
+  houdini-core-linux-x64@2.0.6:
     optional: true
 
-  houdini-core-wasm@2.0.4:
+  houdini-core-wasm@2.0.6:
     optional: true
 
-  houdini-core-win32-arm64@2.0.4:
+  houdini-core-win32-arm64@2.0.6:
     optional: true
 
-  houdini-core-win32-x64@2.0.4:
+  houdini-core-win32-x64@2.0.6:
     optional: true
 
-  houdini-core@2.0.4(graphql@16.14.2):
+  houdini-core@2.0.6(graphql@16.14.2):
     dependencies:
       '@whatwg-node/server': 0.11.0
       graphql-yoga: 5.21.2(graphql@16.14.2)
       minimatch: 10.2.5
     optionalDependencies:
-      houdini-core-darwin-arm64: 2.0.4
-      houdini-core-darwin-x64: 2.0.4
-      houdini-core-linux-arm64: 2.0.4
-      houdini-core-linux-x64: 2.0.4
-      houdini-core-wasm: 2.0.4
-      houdini-core-win32-arm64: 2.0.4
-      houdini-core-win32-x64: 2.0.4
+      houdini-core-darwin-arm64: 2.0.6
+      houdini-core-darwin-x64: 2.0.6
+      houdini-core-linux-arm64: 2.0.6
+      houdini-core-linux-x64: 2.0.6
+      houdini-core-wasm: 2.0.6
+      houdini-core-win32-arm64: 2.0.6
+      houdini-core-win32-x64: 2.0.6
     transitivePeerDependencies:
       - graphql
 
-  houdini-svelte-darwin-arm64@3.0.2:
+  houdini-svelte-darwin-arm64@3.0.4:
     optional: true
 
-  houdini-svelte-darwin-x64@3.0.2:
+  houdini-svelte-darwin-x64@3.0.4:
     optional: true
 
-  houdini-svelte-linux-arm64@3.0.2:
+  houdini-svelte-linux-arm64@3.0.4:
     optional: true
 
-  houdini-svelte-linux-x64@3.0.2:
+  houdini-svelte-linux-x64@3.0.4:
     optional: true
 
-  houdini-svelte-wasm@3.0.2:
+  houdini-svelte-wasm@3.0.4:
     optional: true
 
-  houdini-svelte-win32-arm64@3.0.2:
+  houdini-svelte-win32-arm64@3.0.4:
     optional: true
 
-  houdini-svelte-win32-x64@3.0.2:
+  houdini-svelte-win32-x64@3.0.4:
     optional: true
 
-  houdini-svelte@3.0.2(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4(@typescript-eslint/types@8.62.0))(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)))(@types/node@26.1.0)(@typescript-eslint/types@8.62.0)(esbuild@0.28.1)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0):
+  houdini-svelte@3.0.4(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4(@typescript-eslint/types@8.62.0))(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)))(@types/node@26.1.0)(@typescript-eslint/types@8.62.0)(esbuild@0.28.1)(jiti@2.7.0)(typescript@6.0.3)(yaml@2.9.0):
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.5
       '@sveltejs/kit': 2.68.0(@sveltejs/vite-plugin-svelte@7.1.2(svelte@5.56.4(@typescript-eslint/types@8.62.0))(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)))(svelte@5.56.4(@typescript-eslint/types@8.62.0))(typescript@6.0.3)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0))
@@ -4314,13 +4314,13 @@ snapshots:
       svelte: 5.56.4(@typescript-eslint/types@8.62.0)
       vite: 8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)
     optionalDependencies:
-      houdini-svelte-darwin-arm64: 3.0.2
-      houdini-svelte-darwin-x64: 3.0.2
-      houdini-svelte-linux-arm64: 3.0.2
-      houdini-svelte-linux-x64: 3.0.2
-      houdini-svelte-wasm: 3.0.2
-      houdini-svelte-win32-arm64: 3.0.2
-      houdini-svelte-win32-x64: 3.0.2
+      houdini-svelte-darwin-arm64: 3.0.4
+      houdini-svelte-darwin-x64: 3.0.4
+      houdini-svelte-linux-arm64: 3.0.4
+      houdini-svelte-linux-x64: 3.0.4
+      houdini-svelte-wasm: 3.0.4
+      houdini-svelte-win32-arm64: 3.0.4
+      houdini-svelte-win32-x64: 3.0.4
     transitivePeerDependencies:
       - '@opentelemetry/api'
       - '@sveltejs/vite-plugin-svelte'
@@ -4339,7 +4339,7 @@ snapshots:
       - typescript
       - yaml
 
-  houdini@2.0.5(graphql@16.14.2)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)):
+  houdini@2.0.8(graphql@16.14.2)(vite@8.1.0(@types/node@26.1.0)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.0)):
     dependencies:
       '@babel/parser': 7.29.7
       '@clack/prompts': 1.7.0
@@ -4358,7 +4358,7 @@ snapshots:
       glob: 13.0.6
       graphql: 16.14.2
       graphql-yoga: 5.21.2(graphql@16.14.2)
-      houdini-core: 2.0.4(graphql@16.14.2)
+      houdini-core: 2.0.6(graphql@16.14.2)
       kleur: 4.1.5
       memfs: 4.60.0
       minimatch: 10.2.5
