@@ -60,7 +60,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if testProjectID == nil {
-		return fmt.Errorf("No test project found for team %s", daplaTeam.Slug)
+		return fmt.Errorf("no test project found for team %s", daplaTeam.Slug)
 	}
 
 	aiFeatureIsEnabled, err := isAIFeatureEnabled(ctx, client, daplaTeam.Slug)
