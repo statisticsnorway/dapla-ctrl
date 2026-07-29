@@ -75,49 +75,78 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	if aiFeatureIsEnabled && !vertexAIEnabled {
-		if err := setVertexAIEnabled(serviceUsageService, *testProjectID, true); err != nil {
-			return err
+	membersHaveIAM, err := membersHaveAIPlatformUserBinding(ctx, resourceManagerService, daplaTeam.Slug, *testProjectID)
+
+	if err != nil {
+		return err
+	}
+
+	if aiFeatureIsEnabled {
+		if !vertexAIEnabled {
+			if err := setVertexAIEnabled(serviceUsageService, *testProjectID, true); err != nil {
+				return err
+			}
 		}
 
-		if err := reconcileAIPlatformUserBinding(ctx, resourceManagerService, client, daplaTeam.Slug, *testProjectID); err != nil {
-			return err
+		if !membersHaveIAM {
+			if err := reconcileAIPlatformUserBinding(ctx, resourceManagerService, daplaTeam.Slug, *testProjectID, true); err != nil {
+				return err
+			}
 		}
 
-	} else if !aiFeatureIsEnabled && vertexAIEnabled {
-		setVertexAIEnabled(serviceUsageService, *testProjectID, false)
+	} else {
+		if vertexAIEnabled {
+			if err := setVertexAIEnabled(serviceUsageService, *testProjectID, false); err != nil {
+				return err
+			}
+		}
+
+		if membersHaveIAM {
+			if err := reconcileAIPlatformUserBinding(ctx, resourceManagerService, daplaTeam.Slug, *testProjectID, false); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
-// Get the Dapla teams' developers group name if it exists
-func getDevelopersGroup(ctx context.Context, client *apiclient.APIClient, daplaTeamSlug string) (*string, error) {
-	teamDevelopersGroup, err := client.Groups().Get(ctx, &protoapi.GetGroupRequest{
-		Name: daplaTeamSlug + "-developers",
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &teamDevelopersGroup.Group.Name, nil
-}
-
-// Ensures a dapla team's developers group and corresponding SA has the AI Platform user role on the project.
-func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanager.Service, client *apiclient.APIClient, daplaTeamSlug, projectID string) error {
-	// TODO: Perhaps we can assume these standard dapla groups will always exist
-	// so we don't need to query google cloud?
-	daplaDevelopersGroup_, err := getDevelopersGroup(ctx, client, daplaTeamSlug)
-	if err != nil {
-		return fmt.Errorf("get developers group: %w", err)
-	}
-
-	daplaDevelopersGroup := fmt.Sprintf("group:%s", *daplaDevelopersGroup_)
+// Get principals that should be have the AIPlatform user role
+func getIAMMembers(daplaTeamSlug string) []string {
+	// We assume the developers group will exist
+	daplaDevelopersGroup := fmt.Sprintf("group:%s-developers", daplaTeamSlug)
 	// This SA is always guaranteed to exist as long as we run this reconciler **after**
 	// the groupSA reconciler
 	daplaDevelopersGroupSA := fmt.Sprintf("serviceAccount:%s-%s", daplaTeamSlug, groupSANameTemplate)
-	members := []string{daplaDevelopersGroup, daplaDevelopersGroupSA}
+	return []string{daplaDevelopersGroup, daplaDevelopersGroupSA}
+}
+
+// Return true if all members are part of an IAM binding for the `aiPlatformUserRole`, otherwise return false
+func membersHaveAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanager.Service, daplaTeamSlug, projectID string) (bool, error) {
+	policy, err := svc.Projects.GetIamPolicy(projectID, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
+	if err != nil {
+		return false, fmt.Errorf("get IAM policy for project %q: %w", projectID, err)
+	}
+
+	members := getIAMMembers(daplaTeamSlug)
+
+	bindingIndex := slices.IndexFunc(policy.Bindings, func(binding *cloudresourcemanager.Binding) bool {
+		return binding.Role == aiPlatformUserRole
+	})
+	if bindingIndex == -1 {
+		return false, nil
+	}
+
+	binding := policy.Bindings[bindingIndex]
+	return !slices.ContainsFunc(members, func(member string) bool {
+		return !slices.Contains(binding.Members, member)
+	}), nil
+}
+
+// Ensures a dapla team's developers group and corresponding SA has the AI Platform user role on the project.
+func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanager.Service, daplaTeamSlug, projectID string, enabled bool) error {
+
+	members := getIAMMembers(daplaTeamSlug)
 
 	policy, err := svc.Projects.GetIamPolicy(projectID, &cloudresourcemanager.GetIamPolicyRequest{}).Context(ctx).Do()
 	if err != nil {
@@ -128,7 +157,9 @@ func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanag
 		return binding.Role == aiPlatformUserRole
 	})
 
-	if bindingIndex != -1 {
+	switch {
+	case enabled && bindingIndex != -1:
+		// Binding exists: add any missing AI Platform user members.
 		binding := policy.Bindings[bindingIndex]
 		missingMembers := slices.DeleteFunc(slices.Clone(members), func(member string) bool {
 			return slices.Contains(binding.Members, member)
@@ -139,24 +170,35 @@ func reconcileAIPlatformUserBinding(ctx context.Context, svc *cloudresourcemanag
 		}
 
 		binding.Members = append(binding.Members, missingMembers...)
-		_, err = svc.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Context(ctx).Do()
-		if err != nil {
-			return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
-		}
-		return nil
-	} else {
-		// If the binding doesn't exist, create it.
+
+	case enabled && bindingIndex == -1:
+		// Binding is missing: create it with the required AI Platform user members.
 		policy.Bindings = append(policy.Bindings, &cloudresourcemanager.Binding{
 			Role:    aiPlatformUserRole,
 			Members: members,
 		})
 
-		_, err = svc.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Context(ctx).Do()
-		if err != nil {
-			return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
+	case !enabled && bindingIndex != -1:
+		// Binding exists: remove this team's AI Platform user members.
+		binding := policy.Bindings[bindingIndex]
+		binding.Members = slices.DeleteFunc(binding.Members, func(member string) bool {
+			return slices.Contains(members, member)
+		})
+
+		if len(binding.Members) == 0 {
+			policy.Bindings = slices.Delete(policy.Bindings, bindingIndex, bindingIndex+1)
 		}
+
+	case !enabled && bindingIndex == -1:
+		// Binding is already missing: there is nothing to remove.
 		return nil
 	}
+
+	_, err = svc.Projects.SetIamPolicy(projectID, &cloudresourcemanager.SetIamPolicyRequest{Policy: policy}).Context(ctx).Do()
+	if err != nil {
+		return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
+	}
+	return nil
 }
 
 // Check if the AI feature is enabled in the API database for a given team.
