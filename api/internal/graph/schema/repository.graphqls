@@ -128,9 +128,6 @@ type RepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
 
 	"The team slug that the entry belongs to."
 	teamSlug: Slug!
-
-	"The environment name that the entry belongs to."
-	environmentName: String
 }
 
 type RepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
@@ -154,9 +151,6 @@ type RepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
 
 	"The team slug that the entry belongs to."
 	teamSlug: Slug!
-
-	"The environment name that the entry belongs to."
-	environmentName: String
 }
 
 extend enum ActivityLogActivityType {

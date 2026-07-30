@@ -27,8 +27,10 @@ omit_root_models: true
 autobind:
   - "github.com/99designs/gqlgen/graphql/introspection" # Without this line in the beginning, a `prelude.resolver.go` is generated
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/feature"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/github/repository"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/group"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/message"
