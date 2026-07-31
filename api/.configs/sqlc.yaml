@@ -206,15 +206,6 @@ sql:
         out: "../internal/message/messagesql"
 
   - <<: *default_domain
-    name: "Github Repository SQL"
-    queries: "../internal/github/repository/queries"
-    gen:
-      go:
-        <<: *default_go
-        package: "repositorysql"
-        out: "../internal/github/repository/repositorysql"
-
-  - <<: *default_domain
     name: "Artifact Registry Repository SQL"
     queries: "../internal/artifactregistry/queries"
     gen:
