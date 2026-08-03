@@ -9,6 +9,17 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
+const deleteTeamFolders = `-- name: DeleteTeamFolders :exec
+DELETE FROM gcp_team_folders
+WHERE
+	team_slug = $1
+`
+
+func (q *Queries) DeleteTeamFolders(ctx context.Context, teamSlug slug.Slug) error {
+	_, err := q.db.Exec(ctx, deleteTeamFolders, teamSlug)
+	return err
+}
+
 const getTeamFolder = `-- name: GetTeamFolder :one
 SELECT
 	team_slug,
