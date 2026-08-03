@@ -123,6 +123,7 @@ spec:
 
   envFrom:
     - secret: dapla-api
+    - secret: reconcilers-gcpresources
 
   # Sql DB set up outside of nais manifest
 
