@@ -38,6 +38,74 @@ func (_m *MockGcpTeamResourcesServer) EXPECT() *MockGcpTeamResourcesServer_Expec
 	return &MockGcpTeamResourcesServer_Expecter{mock: &_m.Mock}
 }
 
+// DeleteTeamFolders provides a mock function for the type MockGcpTeamResourcesServer
+func (_mock *MockGcpTeamResourcesServer) DeleteTeamFolders(context1 context.Context, deleteGcpTeamFoldersRequest *DeleteGcpTeamFoldersRequest) (*DeleteGcpTeamFoldersResponse, error) {
+	ret := _mock.Called(context1, deleteGcpTeamFoldersRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteTeamFolders")
+	}
+
+	var r0 *DeleteGcpTeamFoldersResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *DeleteGcpTeamFoldersRequest) (*DeleteGcpTeamFoldersResponse, error)); ok {
+		return returnFunc(context1, deleteGcpTeamFoldersRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *DeleteGcpTeamFoldersRequest) *DeleteGcpTeamFoldersResponse); ok {
+		r0 = returnFunc(context1, deleteGcpTeamFoldersRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*DeleteGcpTeamFoldersResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *DeleteGcpTeamFoldersRequest) error); ok {
+		r1 = returnFunc(context1, deleteGcpTeamFoldersRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGcpTeamResourcesServer_DeleteTeamFolders_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteTeamFolders'
+type MockGcpTeamResourcesServer_DeleteTeamFolders_Call struct {
+	*mock.Call
+}
+
+// DeleteTeamFolders is a helper method to define mock.On call
+//   - context1 context.Context
+//   - deleteGcpTeamFoldersRequest *DeleteGcpTeamFoldersRequest
+func (_e *MockGcpTeamResourcesServer_Expecter) DeleteTeamFolders(context1 interface{}, deleteGcpTeamFoldersRequest interface{}) *MockGcpTeamResourcesServer_DeleteTeamFolders_Call {
+	return &MockGcpTeamResourcesServer_DeleteTeamFolders_Call{Call: _e.mock.On("DeleteTeamFolders", context1, deleteGcpTeamFoldersRequest)}
+}
+
+func (_c *MockGcpTeamResourcesServer_DeleteTeamFolders_Call) Run(run func(context1 context.Context, deleteGcpTeamFoldersRequest *DeleteGcpTeamFoldersRequest)) *MockGcpTeamResourcesServer_DeleteTeamFolders_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *DeleteGcpTeamFoldersRequest
+		if args[1] != nil {
+			arg1 = args[1].(*DeleteGcpTeamFoldersRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGcpTeamResourcesServer_DeleteTeamFolders_Call) Return(deleteGcpTeamFoldersResponse *DeleteGcpTeamFoldersResponse, err error) *MockGcpTeamResourcesServer_DeleteTeamFolders_Call {
+	_c.Call.Return(deleteGcpTeamFoldersResponse, err)
+	return _c
+}
+
+func (_c *MockGcpTeamResourcesServer_DeleteTeamFolders_Call) RunAndReturn(run func(context1 context.Context, deleteGcpTeamFoldersRequest *DeleteGcpTeamFoldersRequest) (*DeleteGcpTeamFoldersResponse, error)) *MockGcpTeamResourcesServer_DeleteTeamFolders_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetTeamFolder provides a mock function for the type MockGcpTeamResourcesServer
 func (_mock *MockGcpTeamResourcesServer) GetTeamFolder(context1 context.Context, getGcpTeamFolderRequest *GetGcpTeamFolderRequest) (*GetGcpTeamFolderResponse, error) {
 	ret := _mock.Called(context1, getGcpTeamFolderRequest)

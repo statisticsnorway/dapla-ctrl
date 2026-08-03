@@ -2,7 +2,7 @@
 INSERT INTO
 	gcp_team_folders (team_slug, env, folder_id)
 VALUES
-	(@team_slug, @env, @folder_id)
+	($1, $2, $3)
 ON CONFLICT (team_slug, env) DO UPDATE SET folder_id = EXCLUDED.folder_id
 ;
 
@@ -12,6 +12,12 @@ SELECT
 FROM
 	gcp_team_folders
 WHERE
-	team_slug = @team_slug
-	AND env = @env
+	team_slug = $1
+	AND env = $2
+;
+
+-- name: DeleteTeamFolders :exec
+DELETE FROM gcp_team_folders
+WHERE
+	team_slug = $1
 ;
