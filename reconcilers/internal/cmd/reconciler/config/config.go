@@ -7,6 +7,11 @@ import (
 )
 
 type Config struct {
+	GCP struct {
+		TeamKeyNamespacedName string `env:"GCP_TEAM_TAG_KEY_NAMESPACED_NAME"`
+		TeamsFolderNumbers    map[string]string `env:"GCP_TEAMS_FOLDER_NUMBERS"`
+		}
+
 	GRPC struct {
 		// Target The target address for the gRPC server.
 		Target string `env:"GRPC_TARGET,default=127.0.0.1:3001"`
