@@ -1,8 +1,10 @@
 -- name: Get :one
 SELECT
-    sqlc.embed(team_artifact_registry_repositories)
+    sqlc.embed(ar),
+    ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
 FROM
-    team_artifact_registry_repositories
+    team_artifact_registry_repositories ar
+    JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
     team_slug = @team_slug::slug AND
     format = @format
@@ -10,9 +12,10 @@ WHERE
 
 -- name: List :many
 SELECT
-    sqlc.embed(team_artifact_registry_repositories)
+    sqlc.embed(ar)
 FROM
-    team_artifact_registry_repositories
+    team_artifact_registry_repositories ar
+    JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
     team_slug = @team_slug::slug
 ORDER BY
@@ -30,4 +33,14 @@ FROM
     team_artifact_registry_repositories
 WHERE
    team_slug = @team_slug::slug
+;
+
+-- name: SetSizeBytes :exec
+UPDATE
+    team_artifact_registry_repositories
+SET
+    size_bytes = @size_bytes
+WHERE
+    team_slug = @team_slug::slug AND
+    format = @format
 ;

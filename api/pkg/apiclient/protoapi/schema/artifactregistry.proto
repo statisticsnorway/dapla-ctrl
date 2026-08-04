@@ -1,3 +1,4 @@
+
 syntax = "proto3";
 
 package dapla.api.protobuf;
@@ -9,11 +10,14 @@ option go_package = "./pkg/apiclient/protoapi";
 message ArtifactRegistryRepo {
   string team_slug = 1;
   string format = 2;
+  int64 size_bytes = 3;
 }
 
 service ArtifactRegistry {
   rpc GetArtifactRegistryRepo(GetArtifactRegistryRepoRequest) returns (GetArtifactRegistryRepoResponse) {}
   rpc ListArtifactRegistryReposForTeam(ListArtifactRegistryReposForTeamRequest) returns (ListArtifactRegistryReposForTeamResponse) {}
+  rpc SetArtifactRegistryRepoSizeBytes(SetArtifactRegistryRepoSizeBytesRequest) returns (SetArtifactRegistryRepoSizeBytesResponse) {}
+  rpc GetArtifactRegistryGithubAllowlist(GetArtifactRegistryGithubAllowlistRequest) returns (GetArtifactRegistryGithubAllowlistResponse) {}
 }
 
 message GetArtifactRegistryRepoResponse {
@@ -35,4 +39,23 @@ message ListArtifactRegistryReposForTeamResponse {
   string team = 1;
   repeated ArtifactRegistryRepo nodes = 2;
   PageInfo page_info = 3;
+}
+
+
+message SetArtifactRegistryRepoSizeBytesResponse {}
+message SetArtifactRegistryRepoSizeBytesRequest {
+    string team_slug = 1;
+    string format = 2;
+    int64 size_bytes = 3;
+}
+
+message GetArtifactRegistryGithubAllowlistRequest {
+    string team_slug = 1;
+    int64 limit = 2;
+    int64 offset = 3;
+}
+
+message GetArtifactRegistryGithubAllowlistResponse {
+    repeated string nodes = 1;
+    PageInfo page_info = 2;
 }

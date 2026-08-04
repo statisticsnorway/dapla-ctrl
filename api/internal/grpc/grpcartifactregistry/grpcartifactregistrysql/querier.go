@@ -12,6 +12,7 @@ type Querier interface {
 	CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64, error)
 	Get(ctx context.Context, arg GetParams) (*GetRow, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
+	SetSizeBytes(ctx context.Context, arg SetSizeBytesParams) error
 }
 
 var _ Querier = (*Queries)(nil)

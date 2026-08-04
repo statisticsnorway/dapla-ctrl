@@ -23,11 +23,12 @@ const (
 )
 
 type ArtifactRegistryRepo struct {
-	state               protoimpl.MessageState `protogen:"opaque.v1"`
-	xxx_hidden_TeamSlug string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
-	xxx_hidden_Format   string                 `protobuf:"bytes,2,opt,name=format,proto3"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TeamSlug  string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
+	xxx_hidden_Format    string                 `protobuf:"bytes,2,opt,name=format,proto3"`
+	xxx_hidden_SizeBytes int64                  `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *ArtifactRegistryRepo) Reset() {
@@ -69,6 +70,13 @@ func (x *ArtifactRegistryRepo) GetFormat() string {
 	return ""
 }
 
+func (x *ArtifactRegistryRepo) GetSizeBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_SizeBytes
+	}
+	return 0
+}
+
 func (x *ArtifactRegistryRepo) SetTeamSlug(v string) {
 	x.xxx_hidden_TeamSlug = v
 }
@@ -77,11 +85,16 @@ func (x *ArtifactRegistryRepo) SetFormat(v string) {
 	x.xxx_hidden_Format = v
 }
 
+func (x *ArtifactRegistryRepo) SetSizeBytes(v int64) {
+	x.xxx_hidden_SizeBytes = v
+}
+
 type ArtifactRegistryRepo_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	TeamSlug string
-	Format   string
+	TeamSlug  string
+	Format    string
+	SizeBytes int64
 }
 
 func (b0 ArtifactRegistryRepo_builder) Build() *ArtifactRegistryRepo {
@@ -90,6 +103,7 @@ func (b0 ArtifactRegistryRepo_builder) Build() *ArtifactRegistryRepo {
 	_, _ = b, x
 	x.xxx_hidden_TeamSlug = b.TeamSlug
 	x.xxx_hidden_Format = b.Format
+	x.xxx_hidden_SizeBytes = b.SizeBytes
 	return m0
 }
 
@@ -415,14 +429,311 @@ func (b0 ListArtifactRegistryReposForTeamResponse_builder) Build() *ListArtifact
 	return m0
 }
 
+type SetArtifactRegistryRepoSizeBytesResponse struct {
+	state         protoimpl.MessageState `protogen:"opaque.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesResponse) Reset() {
+	*x = SetArtifactRegistryRepoSizeBytesResponse{}
+	mi := &file_artifactregistry_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetArtifactRegistryRepoSizeBytesResponse) ProtoMessage() {}
+
+func (x *SetArtifactRegistryRepoSizeBytesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_artifactregistry_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetArtifactRegistryRepoSizeBytesResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetArtifactRegistryRepoSizeBytesResponse_builder) Build() *SetArtifactRegistryRepoSizeBytesResponse {
+	m0 := &SetArtifactRegistryRepoSizeBytesResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
+type SetArtifactRegistryRepoSizeBytesRequest struct {
+	state                protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TeamSlug  string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
+	xxx_hidden_Format    string                 `protobuf:"bytes,2,opt,name=format,proto3"`
+	xxx_hidden_SizeBytes int64                  `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) Reset() {
+	*x = SetArtifactRegistryRepoSizeBytesRequest{}
+	mi := &file_artifactregistry_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetArtifactRegistryRepoSizeBytesRequest) ProtoMessage() {}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_artifactregistry_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) GetTeamSlug() string {
+	if x != nil {
+		return x.xxx_hidden_TeamSlug
+	}
+	return ""
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) GetFormat() string {
+	if x != nil {
+		return x.xxx_hidden_Format
+	}
+	return ""
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) GetSizeBytes() int64 {
+	if x != nil {
+		return x.xxx_hidden_SizeBytes
+	}
+	return 0
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) SetTeamSlug(v string) {
+	x.xxx_hidden_TeamSlug = v
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) SetFormat(v string) {
+	x.xxx_hidden_Format = v
+}
+
+func (x *SetArtifactRegistryRepoSizeBytesRequest) SetSizeBytes(v int64) {
+	x.xxx_hidden_SizeBytes = v
+}
+
+type SetArtifactRegistryRepoSizeBytesRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TeamSlug  string
+	Format    string
+	SizeBytes int64
+}
+
+func (b0 SetArtifactRegistryRepoSizeBytesRequest_builder) Build() *SetArtifactRegistryRepoSizeBytesRequest {
+	m0 := &SetArtifactRegistryRepoSizeBytesRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TeamSlug = b.TeamSlug
+	x.xxx_hidden_Format = b.Format
+	x.xxx_hidden_SizeBytes = b.SizeBytes
+	return m0
+}
+
+type GetArtifactRegistryGithubAllowlistRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TeamSlug string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
+	xxx_hidden_Limit    int64                  `protobuf:"varint,2,opt,name=limit,proto3"`
+	xxx_hidden_Offset   int64                  `protobuf:"varint,3,opt,name=offset,proto3"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) Reset() {
+	*x = GetArtifactRegistryGithubAllowlistRequest{}
+	mi := &file_artifactregistry_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetArtifactRegistryGithubAllowlistRequest) ProtoMessage() {}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_artifactregistry_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) GetTeamSlug() string {
+	if x != nil {
+		return x.xxx_hidden_TeamSlug
+	}
+	return ""
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) GetLimit() int64 {
+	if x != nil {
+		return x.xxx_hidden_Limit
+	}
+	return 0
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) GetOffset() int64 {
+	if x != nil {
+		return x.xxx_hidden_Offset
+	}
+	return 0
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) SetTeamSlug(v string) {
+	x.xxx_hidden_TeamSlug = v
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) SetLimit(v int64) {
+	x.xxx_hidden_Limit = v
+}
+
+func (x *GetArtifactRegistryGithubAllowlistRequest) SetOffset(v int64) {
+	x.xxx_hidden_Offset = v
+}
+
+type GetArtifactRegistryGithubAllowlistRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TeamSlug string
+	Limit    int64
+	Offset   int64
+}
+
+func (b0 GetArtifactRegistryGithubAllowlistRequest_builder) Build() *GetArtifactRegistryGithubAllowlistRequest {
+	m0 := &GetArtifactRegistryGithubAllowlistRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TeamSlug = b.TeamSlug
+	x.xxx_hidden_Limit = b.Limit
+	x.xxx_hidden_Offset = b.Offset
+	return m0
+}
+
+type GetArtifactRegistryGithubAllowlistResponse struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Nodes    []string               `protobuf:"bytes,1,rep,name=nodes,proto3"`
+	xxx_hidden_PageInfo *PageInfo              `protobuf:"bytes,2,opt,name=page_info,json=pageInfo,proto3"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) Reset() {
+	*x = GetArtifactRegistryGithubAllowlistResponse{}
+	mi := &file_artifactregistry_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetArtifactRegistryGithubAllowlistResponse) ProtoMessage() {}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_artifactregistry_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) GetNodes() []string {
+	if x != nil {
+		return x.xxx_hidden_Nodes
+	}
+	return nil
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) GetPageInfo() *PageInfo {
+	if x != nil {
+		return x.xxx_hidden_PageInfo
+	}
+	return nil
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) SetNodes(v []string) {
+	x.xxx_hidden_Nodes = v
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) SetPageInfo(v *PageInfo) {
+	x.xxx_hidden_PageInfo = v
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) HasPageInfo() bool {
+	if x == nil {
+		return false
+	}
+	return x.xxx_hidden_PageInfo != nil
+}
+
+func (x *GetArtifactRegistryGithubAllowlistResponse) ClearPageInfo() {
+	x.xxx_hidden_PageInfo = nil
+}
+
+type GetArtifactRegistryGithubAllowlistResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Nodes    []string
+	PageInfo *PageInfo
+}
+
+func (b0 GetArtifactRegistryGithubAllowlistResponse_builder) Build() *GetArtifactRegistryGithubAllowlistResponse {
+	m0 := &GetArtifactRegistryGithubAllowlistResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Nodes = b.Nodes
+	x.xxx_hidden_PageInfo = b.PageInfo
+	return m0
+}
+
 var File_artifactregistry_proto protoreflect.FileDescriptor
 
 const file_artifactregistry_proto_rawDesc = "" +
 	"\n" +
-	"\x16artifactregistry.proto\x12\x12dapla.api.protobuf\x1a\x10pagination.proto\"K\n" +
+	"\x16artifactregistry.proto\x12\x12dapla.api.protobuf\x1a\x10pagination.proto\"j\n" +
 	"\x14ArtifactRegistryRepo\x12\x1b\n" +
 	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12\x16\n" +
-	"\x06format\x18\x02 \x01(\tR\x06format\"_\n" +
+	"\x06format\x18\x02 \x01(\tR\x06format\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x03R\tsizeBytes\"_\n" +
 	"\x1fGetArtifactRegistryRepoResponse\x12<\n" +
 	"\x04repo\x18\x01 \x01(\v2(.dapla.api.protobuf.ArtifactRegistryRepoR\x04repo\"U\n" +
 	"\x1eGetArtifactRegistryRepoRequest\x12\x1b\n" +
@@ -435,33 +746,57 @@ const file_artifactregistry_proto_rawDesc = "" +
 	"(ListArtifactRegistryReposForTeamResponse\x12\x12\n" +
 	"\x04team\x18\x01 \x01(\tR\x04team\x12>\n" +
 	"\x05nodes\x18\x02 \x03(\v2(.dapla.api.protobuf.ArtifactRegistryRepoR\x05nodes\x129\n" +
-	"\tpage_info\x18\x03 \x01(\v2\x1c.dapla.api.protobuf.PageInfoR\bpageInfo2\xbb\x02\n" +
+	"\tpage_info\x18\x03 \x01(\v2\x1c.dapla.api.protobuf.PageInfoR\bpageInfo\"*\n" +
+	"(SetArtifactRegistryRepoSizeBytesResponse\"}\n" +
+	"'SetArtifactRegistryRepoSizeBytesRequest\x12\x1b\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12\x16\n" +
+	"\x06format\x18\x02 \x01(\tR\x06format\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x03R\tsizeBytes\"v\n" +
+	")GetArtifactRegistryGithubAllowlistRequest\x12\x1b\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x03R\x05limit\x12\x16\n" +
+	"\x06offset\x18\x03 \x01(\x03R\x06offset\"}\n" +
+	"*GetArtifactRegistryGithubAllowlistResponse\x12\x14\n" +
+	"\x05nodes\x18\x01 \x03(\tR\x05nodes\x129\n" +
+	"\tpage_info\x18\x02 \x01(\v2\x1c.dapla.api.protobuf.PageInfoR\bpageInfo2\x85\x05\n" +
 	"\x10ArtifactRegistry\x12\x84\x01\n" +
 	"\x17GetArtifactRegistryRepo\x122.dapla.api.protobuf.GetArtifactRegistryRepoRequest\x1a3.dapla.api.protobuf.GetArtifactRegistryRepoResponse\"\x00\x12\x9f\x01\n" +
-	" ListArtifactRegistryReposForTeam\x12;.dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest\x1a<.dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	" ListArtifactRegistryReposForTeam\x12;.dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest\x1a<.dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse\"\x00\x12\x9f\x01\n" +
+	" SetArtifactRegistryRepoSizeBytes\x12;.dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesRequest\x1a<.dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesResponse\"\x00\x12\xa5\x01\n" +
+	"\"GetArtifactRegistryGithubAllowlist\x12=.dapla.api.protobuf.GetArtifactRegistryGithubAllowlistRequest\x1a>.dapla.api.protobuf.GetArtifactRegistryGithubAllowlistResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_artifactregistry_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_artifactregistry_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_artifactregistry_proto_goTypes = []any{
-	(*ArtifactRegistryRepo)(nil),                     // 0: dapla.api.protobuf.ArtifactRegistryRepo
-	(*GetArtifactRegistryRepoResponse)(nil),          // 1: dapla.api.protobuf.GetArtifactRegistryRepoResponse
-	(*GetArtifactRegistryRepoRequest)(nil),           // 2: dapla.api.protobuf.GetArtifactRegistryRepoRequest
-	(*ListArtifactRegistryReposForTeamRequest)(nil),  // 3: dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest
-	(*ListArtifactRegistryReposForTeamResponse)(nil), // 4: dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse
-	(*PageInfo)(nil),                                 // 5: dapla.api.protobuf.PageInfo
+	(*ArtifactRegistryRepo)(nil),                       // 0: dapla.api.protobuf.ArtifactRegistryRepo
+	(*GetArtifactRegistryRepoResponse)(nil),            // 1: dapla.api.protobuf.GetArtifactRegistryRepoResponse
+	(*GetArtifactRegistryRepoRequest)(nil),             // 2: dapla.api.protobuf.GetArtifactRegistryRepoRequest
+	(*ListArtifactRegistryReposForTeamRequest)(nil),    // 3: dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest
+	(*ListArtifactRegistryReposForTeamResponse)(nil),   // 4: dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse
+	(*SetArtifactRegistryRepoSizeBytesResponse)(nil),   // 5: dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesResponse
+	(*SetArtifactRegistryRepoSizeBytesRequest)(nil),    // 6: dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesRequest
+	(*GetArtifactRegistryGithubAllowlistRequest)(nil),  // 7: dapla.api.protobuf.GetArtifactRegistryGithubAllowlistRequest
+	(*GetArtifactRegistryGithubAllowlistResponse)(nil), // 8: dapla.api.protobuf.GetArtifactRegistryGithubAllowlistResponse
+	(*PageInfo)(nil), // 9: dapla.api.protobuf.PageInfo
 }
 var file_artifactregistry_proto_depIdxs = []int32{
 	0, // 0: dapla.api.protobuf.GetArtifactRegistryRepoResponse.repo:type_name -> dapla.api.protobuf.ArtifactRegistryRepo
 	0, // 1: dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse.nodes:type_name -> dapla.api.protobuf.ArtifactRegistryRepo
-	5, // 2: dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
-	2, // 3: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryRepo:input_type -> dapla.api.protobuf.GetArtifactRegistryRepoRequest
-	3, // 4: dapla.api.protobuf.ArtifactRegistry.ListArtifactRegistryReposForTeam:input_type -> dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest
-	1, // 5: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryRepo:output_type -> dapla.api.protobuf.GetArtifactRegistryRepoResponse
-	4, // 6: dapla.api.protobuf.ArtifactRegistry.ListArtifactRegistryReposForTeam:output_type -> dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse
-	5, // [5:7] is the sub-list for method output_type
-	3, // [3:5] is the sub-list for method input_type
-	3, // [3:3] is the sub-list for extension type_name
-	3, // [3:3] is the sub-list for extension extendee
-	0, // [0:3] is the sub-list for field type_name
+	9, // 2: dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	9, // 3: dapla.api.protobuf.GetArtifactRegistryGithubAllowlistResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	2, // 4: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryRepo:input_type -> dapla.api.protobuf.GetArtifactRegistryRepoRequest
+	3, // 5: dapla.api.protobuf.ArtifactRegistry.ListArtifactRegistryReposForTeam:input_type -> dapla.api.protobuf.ListArtifactRegistryReposForTeamRequest
+	6, // 6: dapla.api.protobuf.ArtifactRegistry.SetArtifactRegistryRepoSizeBytes:input_type -> dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesRequest
+	7, // 7: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryGithubAllowlist:input_type -> dapla.api.protobuf.GetArtifactRegistryGithubAllowlistRequest
+	1, // 8: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryRepo:output_type -> dapla.api.protobuf.GetArtifactRegistryRepoResponse
+	4, // 9: dapla.api.protobuf.ArtifactRegistry.ListArtifactRegistryReposForTeam:output_type -> dapla.api.protobuf.ListArtifactRegistryReposForTeamResponse
+	5, // 10: dapla.api.protobuf.ArtifactRegistry.SetArtifactRegistryRepoSizeBytes:output_type -> dapla.api.protobuf.SetArtifactRegistryRepoSizeBytesResponse
+	8, // 11: dapla.api.protobuf.ArtifactRegistry.GetArtifactRegistryGithubAllowlist:output_type -> dapla.api.protobuf.GetArtifactRegistryGithubAllowlistResponse
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_artifactregistry_proto_init() }
@@ -476,7 +811,7 @@ func file_artifactregistry_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_artifactregistry_proto_rawDesc), len(file_artifactregistry_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

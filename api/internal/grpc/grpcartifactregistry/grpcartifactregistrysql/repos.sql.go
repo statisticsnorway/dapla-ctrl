@@ -27,9 +27,11 @@ func (q *Queries) CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64
 
 const get = `-- name: Get :one
 SELECT
-    team_artifact_registry_repositories.team_slug, team_artifact_registry_repositories.format, team_artifact_registry_repositories.size_bytes
+    ar.team_slug, ar.format, ar.size_bytes,
+    ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
 FROM
-    team_artifact_registry_repositories
+    team_artifact_registry_repositories ar
+    JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
     team_slug = $1::slug AND
     format = $2
@@ -42,12 +44,18 @@ type GetParams struct {
 
 type GetRow struct {
 	TeamArtifactRegistryRepository TeamArtifactRegistryRepository
+	GithubRepos                    []string
 }
 
 func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 	row := q.db.QueryRow(ctx, get, arg.TeamSlug, arg.Format)
 	var i GetRow
-	err := row.Scan(&i.TeamArtifactRegistryRepository.TeamSlug, &i.TeamArtifactRegistryRepository.Format, &i.TeamArtifactRegistryRepository.SizeBytes)
+	err := row.Scan(
+		&i.TeamArtifactRegistryRepository.TeamSlug,
+		&i.TeamArtifactRegistryRepository.Format,
+		&i.TeamArtifactRegistryRepository.SizeBytes,
+		&i.GithubRepos,
+	)
 	return &i, err
 }
 
@@ -94,4 +102,25 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 		return nil, err
 	}
 	return items, nil
+}
+
+const setSizeBytes = `-- name: SetSizeBytes :exec
+UPDATE
+    team_artifact_registry_repositories
+SET
+    size_bytes = $1
+WHERE
+    team_slug = $2::slug AND
+    format = $3
+`
+
+type SetSizeBytesParams struct {
+	SizeBytes int64
+	TeamSlug  slug.Slug
+	Format    string
+}
+
+func (q *Queries) SetSizeBytes(ctx context.Context, arg SetSizeBytesParams) error {
+	_, err := q.db.Exec(ctx, setSizeBytes, arg.SizeBytes, arg.TeamSlug, arg.Format)
+	return err
 }

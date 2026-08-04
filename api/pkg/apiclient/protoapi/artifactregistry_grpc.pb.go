@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ArtifactRegistry_GetArtifactRegistryRepo_FullMethodName          = "/dapla.api.protobuf.ArtifactRegistry/GetArtifactRegistryRepo"
-	ArtifactRegistry_ListArtifactRegistryReposForTeam_FullMethodName = "/dapla.api.protobuf.ArtifactRegistry/ListArtifactRegistryReposForTeam"
+	ArtifactRegistry_GetArtifactRegistryRepo_FullMethodName            = "/dapla.api.protobuf.ArtifactRegistry/GetArtifactRegistryRepo"
+	ArtifactRegistry_ListArtifactRegistryReposForTeam_FullMethodName   = "/dapla.api.protobuf.ArtifactRegistry/ListArtifactRegistryReposForTeam"
+	ArtifactRegistry_SetArtifactRegistryRepoSizeBytes_FullMethodName   = "/dapla.api.protobuf.ArtifactRegistry/SetArtifactRegistryRepoSizeBytes"
+	ArtifactRegistry_GetArtifactRegistryGithubAllowlist_FullMethodName = "/dapla.api.protobuf.ArtifactRegistry/GetArtifactRegistryGithubAllowlist"
 )
 
 // ArtifactRegistryClient is the client API for ArtifactRegistry service.
@@ -29,6 +31,8 @@ const (
 type ArtifactRegistryClient interface {
 	GetArtifactRegistryRepo(ctx context.Context, in *GetArtifactRegistryRepoRequest, opts ...grpc.CallOption) (*GetArtifactRegistryRepoResponse, error)
 	ListArtifactRegistryReposForTeam(ctx context.Context, in *ListArtifactRegistryReposForTeamRequest, opts ...grpc.CallOption) (*ListArtifactRegistryReposForTeamResponse, error)
+	SetArtifactRegistryRepoSizeBytes(ctx context.Context, in *SetArtifactRegistryRepoSizeBytesRequest, opts ...grpc.CallOption) (*SetArtifactRegistryRepoSizeBytesResponse, error)
+	GetArtifactRegistryGithubAllowlist(ctx context.Context, in *GetArtifactRegistryGithubAllowlistRequest, opts ...grpc.CallOption) (*GetArtifactRegistryGithubAllowlistResponse, error)
 }
 
 type artifactRegistryClient struct {
@@ -59,12 +63,34 @@ func (c *artifactRegistryClient) ListArtifactRegistryReposForTeam(ctx context.Co
 	return out, nil
 }
 
+func (c *artifactRegistryClient) SetArtifactRegistryRepoSizeBytes(ctx context.Context, in *SetArtifactRegistryRepoSizeBytesRequest, opts ...grpc.CallOption) (*SetArtifactRegistryRepoSizeBytesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetArtifactRegistryRepoSizeBytesResponse)
+	err := c.cc.Invoke(ctx, ArtifactRegistry_SetArtifactRegistryRepoSizeBytes_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *artifactRegistryClient) GetArtifactRegistryGithubAllowlist(ctx context.Context, in *GetArtifactRegistryGithubAllowlistRequest, opts ...grpc.CallOption) (*GetArtifactRegistryGithubAllowlistResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetArtifactRegistryGithubAllowlistResponse)
+	err := c.cc.Invoke(ctx, ArtifactRegistry_GetArtifactRegistryGithubAllowlist_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ArtifactRegistryServer is the server API for ArtifactRegistry service.
 // All implementations must embed UnimplementedArtifactRegistryServer
 // for forward compatibility.
 type ArtifactRegistryServer interface {
 	GetArtifactRegistryRepo(context.Context, *GetArtifactRegistryRepoRequest) (*GetArtifactRegistryRepoResponse, error)
 	ListArtifactRegistryReposForTeam(context.Context, *ListArtifactRegistryReposForTeamRequest) (*ListArtifactRegistryReposForTeamResponse, error)
+	SetArtifactRegistryRepoSizeBytes(context.Context, *SetArtifactRegistryRepoSizeBytesRequest) (*SetArtifactRegistryRepoSizeBytesResponse, error)
+	GetArtifactRegistryGithubAllowlist(context.Context, *GetArtifactRegistryGithubAllowlistRequest) (*GetArtifactRegistryGithubAllowlistResponse, error)
 	mustEmbedUnimplementedArtifactRegistryServer()
 }
 
@@ -80,6 +106,12 @@ func (UnimplementedArtifactRegistryServer) GetArtifactRegistryRepo(context.Conte
 }
 func (UnimplementedArtifactRegistryServer) ListArtifactRegistryReposForTeam(context.Context, *ListArtifactRegistryReposForTeamRequest) (*ListArtifactRegistryReposForTeamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListArtifactRegistryReposForTeam not implemented")
+}
+func (UnimplementedArtifactRegistryServer) SetArtifactRegistryRepoSizeBytes(context.Context, *SetArtifactRegistryRepoSizeBytesRequest) (*SetArtifactRegistryRepoSizeBytesResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetArtifactRegistryRepoSizeBytes not implemented")
+}
+func (UnimplementedArtifactRegistryServer) GetArtifactRegistryGithubAllowlist(context.Context, *GetArtifactRegistryGithubAllowlistRequest) (*GetArtifactRegistryGithubAllowlistResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetArtifactRegistryGithubAllowlist not implemented")
 }
 func (UnimplementedArtifactRegistryServer) mustEmbedUnimplementedArtifactRegistryServer() {}
 func (UnimplementedArtifactRegistryServer) testEmbeddedByValue()                          {}
@@ -138,6 +170,42 @@ func _ArtifactRegistry_ListArtifactRegistryReposForTeam_Handler(srv interface{},
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ArtifactRegistry_SetArtifactRegistryRepoSizeBytes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetArtifactRegistryRepoSizeBytesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtifactRegistryServer).SetArtifactRegistryRepoSizeBytes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtifactRegistry_SetArtifactRegistryRepoSizeBytes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtifactRegistryServer).SetArtifactRegistryRepoSizeBytes(ctx, req.(*SetArtifactRegistryRepoSizeBytesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ArtifactRegistry_GetArtifactRegistryGithubAllowlist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetArtifactRegistryGithubAllowlistRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArtifactRegistryServer).GetArtifactRegistryGithubAllowlist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ArtifactRegistry_GetArtifactRegistryGithubAllowlist_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArtifactRegistryServer).GetArtifactRegistryGithubAllowlist(ctx, req.(*GetArtifactRegistryGithubAllowlistRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ArtifactRegistry_ServiceDesc is the grpc.ServiceDesc for ArtifactRegistry service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +220,14 @@ var ArtifactRegistry_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListArtifactRegistryReposForTeam",
 			Handler:    _ArtifactRegistry_ListArtifactRegistryReposForTeam_Handler,
+		},
+		{
+			MethodName: "SetArtifactRegistryRepoSizeBytes",
+			Handler:    _ArtifactRegistry_SetArtifactRegistryRepoSizeBytes_Handler,
+		},
+		{
+			MethodName: "GetArtifactRegistryGithubAllowlist",
+			Handler:    _ArtifactRegistry_GetArtifactRegistryGithubAllowlist_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

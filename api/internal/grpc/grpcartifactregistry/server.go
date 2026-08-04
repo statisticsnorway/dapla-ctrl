@@ -34,11 +34,24 @@ func (t *Server) GetArtifactRegistryRepo(ctx context.Context, req *protoapi.GetA
 
 	resp := &protoapi.GetArtifactRegistryRepoResponse{
 		Repo: &protoapi.ArtifactRegistryRepo{
-			TeamSlug: repo.TeamArtifactRegistryRepository.TeamSlug.String(),
-			Format:   repo.TeamArtifactRegistryRepository.Format,
+			TeamSlug:    repo.TeamArtifactRegistryRepository.TeamSlug.String(),
+			Format:      repo.TeamArtifactRegistryRepository.Format,
+			SizeBytes:   repo.TeamArtifactRegistryRepository.SizeBytes,
+			GithubRepos: repo.GithubRepos,
 		},
 	}
 	return resp, nil
+}
+
+func (t *Server) SetArtifactRegistryRepoSizeBytes(ctx context.Context, req *protoapi.SetArtifactRegistryRepoSizeBytesRequest) (*protoapi.SetArtifactRegistryRepoSizeBytesResponse, error) {
+	if err := t.querier.SetSizeBytes(ctx, grpcartifactregistrysql.SetSizeBytesParams{
+		TeamSlug:  slug.Slug(req.TeamSlug),
+		Format:    req.Format,
+		SizeBytes: req.SizeBytes,
+	}); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to set repo size: %s", err)
+	}
+	return &protoapi.SetArtifactRegistryRepoSizeBytesResponse{}, nil
 }
 
 func (t *Server) ListArtifactRegistryReposForTeam(ctx context.Context, req *protoapi.ListArtifactRegistryReposForTeamRequest) (*protoapi.ListArtifactRegistryReposForTeamResponse, error) {
@@ -69,8 +82,9 @@ func (t *Server) ListArtifactRegistryReposForTeam(ctx context.Context, req *prot
 
 func toProtoRepo(repo *grpcartifactregistrysql.TeamArtifactRegistryRepository) *protoapi.ArtifactRegistryRepo {
 	r := &protoapi.ArtifactRegistryRepo{
-		TeamSlug: repo.TeamSlug.String(),
-		Format:   repo.Format,
+		TeamSlug:  repo.TeamSlug.String(),
+		Format:    repo.Format,
+		SizeBytes: repo.SizeBytes,
 	}
 
 	return r
