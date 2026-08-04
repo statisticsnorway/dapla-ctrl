@@ -26,13 +26,13 @@ type Config struct {
 }
 
 type reconciler struct {
-	client GcpClient
+	client ResourceManager
 	cfg    Config
 }
 
 type optFunc func(*reconciler)
 
-func WithGcpClient(c GcpClient) optFunc {
+func WithResourceManager(c ResourceManager) optFunc {
 	return func(r *reconciler) {
 		r.client = c
 	}
@@ -46,7 +46,7 @@ func New(ctx context.Context, cfg Config, opts ...optFunc) (reconcilers.Reconcil
 	}
 
 	if r.client == nil {
-		c, err := NewGoogleGcpClient(ctx)
+		c, err := NewGoogleResourceManager(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("create GCP client: %w", err)
 		}
