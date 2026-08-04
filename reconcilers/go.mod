@@ -14,8 +14,12 @@ tool (
 
 require (
 	cloud.google.com/go/auth v0.22.0
+	cloud.google.com/go/billing v1.26.0
+	cloud.google.com/go/iam v1.11.0
+	cloud.google.com/go/monitoring v1.30.0
 	cloud.google.com/go/pubsub/v2 v2.6.0
 	cloud.google.com/go/resourcemanager v1.16.0
+	cloud.google.com/go/serviceusage v1.15.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.13.1
 	github.com/bradleyfalzon/ghinstallation/v2 v2.18.0
 	github.com/go-chi/chi/v5 v5.3.0
@@ -36,10 +40,13 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.44.0
 	golang.org/x/sync v0.22.0
 	google.golang.org/api v0.291.0
+	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7
 	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
 	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
 )
+
+require github.com/stretchr/testify v1.11.1 // indirect
 
 require (
 	cloud.google.com/go v0.123.0 // indirect
@@ -47,7 +54,6 @@ require (
 	cloud.google.com/go/artifactregistry v1.26.0
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
-	cloud.google.com/go/iam v1.11.0 // indirect
 	cloud.google.com/go/longrunning v1.2.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.21.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
@@ -122,7 +128,6 @@ require (
 	github.com/spf13/viper v1.20.0 // indirect
 	github.com/std-uritemplate/std-uritemplate/go/v2 v2.0.10 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/vektra/mockery/v2 v2.53.3 // indirect
 	github.com/vektra/mockery/v3 v3.5.4 // indirect
@@ -148,7 +153,6 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.47.0 // indirect
 	golang.org/x/vuln v1.1.4 // indirect
-	google.golang.org/genproto v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260630182238-925bb5da69e7 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260724162435-b2f20204f0df // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
