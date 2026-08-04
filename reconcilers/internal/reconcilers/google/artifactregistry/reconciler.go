@@ -20,7 +20,8 @@ import (
 const (
 	reconcilerName = "google:artifactregistry"
 
-	configParentKey = "parent"
+	configProjectIdKey = "project_id"
+	configLocationKey  = "location"
 
 	saNamePrefix = "gh-actions-"
 	wiUserRole   = "roles/iam.workloadIdentityUser"
@@ -78,9 +79,15 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
-				Key:         configParentKey,
-				DisplayName: "Artifact Registry parent ID",
-				Description: "Parent string for AR repos. E.q. `projects/project-id/locations/europe-north1",
+				Key:         configProjectIdKey,
+				DisplayName: "Artifact Registry project ID",
+				Description: "Project id of the project the AR repos will be placed. E.g. `my-project-id-22",
+				Secret:      false,
+			},
+			{
+				Key:         configLocationKey,
+				DisplayName: "Artifact Registry location",
+				Description: "The location where AR repos will be created. E.g. `europe-north1",
 				Secret:      false,
 			},
 		},
@@ -102,22 +109,22 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	// Give workload identity role binding to the specifiec GitHub repos
 	githubReposAllowlist, err := r.getLocalGithubRepos(ctx, client, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
 
+	// Give workload identity role binding to the specifiec GitHub repos
 	if err := r.reconcileGithubRepoAllowlist(ctx, sa.Name, githubReposAllowlist); err != nil {
 		return err
 	}
 
-	remoteRepos, err := r.getRemoteRepositories(ctx, daplaTeam.Slug)
+	remoteRepos, err := r.getRemoteArtifactRegistryRepositories(ctx, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
 
-	localRepos, err := r.getLocalRepositories(ctx, client, daplaTeam.Slug)
+	localRepos, err := r.getLocalArtifactRegistryRepositories(ctx, client, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
@@ -196,7 +203,7 @@ func (r *reconciler) reconcileGithubRepoAllowlist(ctx context.Context, saName st
 	})
 }
 
-func (r *reconciler) getLocalRepositories(ctx context.Context, client *apiclient.APIClient, team string) ([]Repository, error) {
+func (r *reconciler) getLocalArtifactRegistryRepositories(ctx context.Context, client *apiclient.APIClient, team string) ([]Repository, error) {
 	reposIt := iterator.New(ctx, 100, func(limit, offset int64) (*protoapi.ListArtifactRegistryReposForTeamResponse, error) {
 		return client.ArtifactRegistry().ListArtifactRegistryReposForTeam(ctx, &protoapi.ListArtifactRegistryReposForTeamRequest{
 			TeamSlug: team,
@@ -219,10 +226,9 @@ func (r *reconciler) getLocalRepositories(ctx context.Context, client *apiclient
 	}
 
 	return repos, nil
-
 }
 
-func (r *reconciler) getRemoteRepositories(ctx context.Context, team string) ([]Repository, error) {
+func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, team string) ([]Repository, error) {
 	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectId, r.config.Location)
 	resp := r.arClient.ListRepositories(ctx, &artifactregistrypb.ListRepositoriesRequest{
 		Parent: parent,
@@ -281,8 +287,10 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configParentKey:
-			gac.Parent = c.Value
+		case configProjectIdKey:
+			gac.ProjectId = c.Value
+		case configLocationKey:
+			gac.Location = c.Value
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
