@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/dummy"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/ai"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
@@ -143,7 +143,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		reconcilerManager.AddReconciler(githubTeam)
 	}
 
-	reconcilerManager.AddReconciler(dummy.New())
+	reconcilerManager.AddReconciler(ai.New())
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 
