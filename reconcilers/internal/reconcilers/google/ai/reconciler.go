@@ -126,37 +126,41 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	// TODO: Replace with 'client.Teams.GetTeamFolder(...)' when you've
-	testProjectID, err := projectExists(ctx, services.Project, daplaTeam.Slug)
+	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
+		TeamSlug: daplaTeam.Slug,
+		Env:      "test",
+	})
 
 	if err != nil {
 		return err
 	}
 
-	if testProjectID == nil {
-		return fmt.Errorf("no test project found for team %s", daplaTeam.Slug)
+	teamTestFolder := resp.GetFolder()
+	testProjectID, err := getProjectID(ctx, services.Project, teamTestFolder.FolderId, teamTestFolder.Env)
+	if err != nil {
+		return err
 	}
 
 	aiFeatureIsEnabled, err1 := isAIFeatureEnabled(ctx, client, daplaTeam.Slug)
-	vertexAIEnabled, err2 := isVertexAIEnabled(ctx, services.ServiceUsage, *testProjectID)
-	membersHaveIAM, err3 := membersHaveAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, *testProjectID)
+	vertexAIEnabled, err2 := isVertexAIEnabled(ctx, services.ServiceUsage, testProjectID)
+	membersHaveIAM, err3 := membersHaveAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, testProjectID)
 	budget, err4 := getExistingAIBudget(ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
 
 	var budgetNotificationEmails []string
-	notificationChannels, err5 := getExistingAIBudgetNotificationChannel(ctx, services.NotificationChannel, "projects/"+*testProjectID, budgetNotificationEmails)
+	notificationChannels, err5 := getExistingAIBudgetNotificationChannel(ctx, services.NotificationChannel, "projects/"+testProjectID, budgetNotificationEmails)
 
 	if err := cmp.Or(err1, err2, err3, err4, err5); err != nil {
 		return err
 	}
 
 	if vertexAIEnabled != aiFeatureIsEnabled {
-		if err := reconcileVertexAIAPI(ctx, services.ServiceUsage, *testProjectID, aiFeatureIsEnabled); err != nil {
+		if err := reconcileVertexAIAPI(ctx, services.ServiceUsage, testProjectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
 
 	if membersHaveIAM != aiFeatureIsEnabled {
-		if err := reconcileAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, *testProjectID, aiFeatureIsEnabled); err != nil {
+		if err := reconcileAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, testProjectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -166,7 +170,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	allNotificationChannelsExist := len(notificationChannels) == len(budgetNotificationEmails)
 
 	if !(budgetExists == aiFeatureIsEnabled && allNotificationChannelsExist == aiFeatureIsEnabled) {
-		if err := reconcileAIBudget(ctx, client, services, daplaTeam.Slug, *testProjectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
+		if err := reconcileAIBudget(ctx, client, services, daplaTeam.Slug, testProjectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -522,23 +526,30 @@ func reconcileVertexAIAPI(ctx context.Context, client *serviceusage.Client, proj
 	return nil
 }
 
-// Check if a dapla test project exists for a given dapla team
-func projectExists(ctx context.Context, client *resourcemanager.ProjectsClient, daplaTeamSlug string) (*string, error) {
+func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, folderID, env string) (string, error) {
 	it := client.SearchProjects(ctx, &resourcemanagerpb.SearchProjectsRequest{
-		Query: fmt.Sprintf("projectId:%s", daplaTeamSlug),
+		Query: fmt.Sprintf("parent:folders/%s", folderID),
 	})
+
+	var projectID string
 	for {
 		project, err := it.Next()
 		if err == iterator.Done {
-			return nil, nil
+			break
 		}
 		if err != nil {
-			return nil, err
+			return "", fmt.Errorf("search projects in folder %q for environment %q: %w", folderID, env, err)
 		}
-		if testProjectID := daplaTeamSlug + "-t"; project.ProjectId == testProjectID {
-			return &testProjectID, nil
+		if projectID != "" {
+			return "", fmt.Errorf("multiple projects found in folder %q for environment %q", folderID, env)
 		}
+		projectID = project.ProjectId
 	}
+
+	if projectID == "" {
+		return "", fmt.Errorf("no project found in folder %q for environment %q", folderID, env)
+	}
+	return projectID, nil
 }
 
 // Delete implements [reconcilers.Reconciler].
