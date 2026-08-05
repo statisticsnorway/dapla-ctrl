@@ -20,7 +20,19 @@ type fakeGcpTeamResourcesServer struct {
 	protoapi.UnimplementedGcpTeamResourcesServer
 	folders map[string]*protoapi.GcpTeamFolder // "teamSlug/env" -> folder
 }
-
+type FakeResourceManager struct {
+	TagValues map[string]string // tagKey+teamSlug -> tagValueName
+	Folders   map[string]string // "parent/displayName" -> folderID
+	Tags      map[string]string // folderID -> tagValueName
+	Deleted   []string          // deleted folderIDs
+}
+func NewFakeResourceManager() *FakeResourceManager {
+	return &FakeResourceManager{
+		TagValues: make(map[string]string),
+		Folders:   make(map[string]string),
+		Tags:      make(map[string]string),
+	}
+}
 func newFakeGcpTeamResourcesServer() *fakeGcpTeamResourcesServer {
 	return &fakeGcpTeamResourcesServer{
 		folders: make(map[string]*protoapi.GcpTeamFolder),
