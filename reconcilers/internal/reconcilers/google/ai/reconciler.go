@@ -7,6 +7,7 @@ package ai
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -90,11 +91,13 @@ type googleServices struct {
 	NotificationChannel *monitoring.NotificationChannelClient
 }
 
-func (services googleServices) close() {
-	services.Project.Close()
-	services.ServiceUsage.Close()
-	services.CloudBudget.Close()
-	services.NotificationChannel.Close()
+func (services googleServices) close() error {
+	return errors.Join(
+		services.Project.Close(),
+		services.ServiceUsage.Close(),
+		services.CloudBudget.Close(),
+		services.NotificationChannel.Close(),
+	)
 }
 
 func createGoogleClients(ctx context.Context) (*googleServices, error) {
@@ -119,12 +122,14 @@ func createGoogleClients(ctx context.Context) (*googleServices, error) {
 // Reconcile implements [reconcilers.Reconciler].
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	services, err := createGoogleClients(ctx)
-
-	defer services.close()
-
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if err := services.close(); err != nil {
+			log.WithError(err).Error("close Google clients")
+		}
+	}()
 
 	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 		TeamSlug: daplaTeam.Slug,
