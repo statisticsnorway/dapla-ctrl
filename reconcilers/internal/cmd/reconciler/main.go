@@ -143,7 +143,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		reconcilerManager.AddReconciler(githubTeam)
 	}
 
-	reconcilerManager.AddReconciler(ai.New())
+	aiReconciler, err := ai.New(ctx, ai.WithDaplaStatBudgetNotifications())
+	if err != nil {
+		return fmt.Errorf("create ai reconciler: %w", err)
+	}
+
+	reconcilerManager.AddReconciler(aiReconciler)
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 
