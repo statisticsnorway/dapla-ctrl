@@ -14,13 +14,8 @@ import (
 
 const reconcilerName = "google:gcpresources"
 
-// Config holds the environment-variable-based configuration for the GCP resources reconciler.
 type Config struct {
-	// TagKeyNamespacedName is the namespaced name of the GCP tag key used to tag team
-	// folders (e.g. "organizations/123456/tagKeys/team" or "123456/team").
 	TagKeyNamespacedName string
-	// EnvParentFolders maps each environment name (dev, test, prod) to the parent
-	// folder number under which team folders are created (e.g. {"dev": "45678"}).
 	EnvParentFolders map[string]string
 }
 
@@ -70,7 +65,7 @@ func (r *reconciler) Name() string {
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	teamSlug := daplaTeam.Slug
-	gcpAPI := client.GcpTeamResources()
+	teamFoldersClient := client.GcpTeamResources()
 
 	tagValueName, err := r.client.GetOrCreateTagValue(ctx, r.cfg.TagKeyNamespacedName, teamSlug)
 	if err != nil {
@@ -79,7 +74,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	log.WithField("tag_value_name", tagValueName).Debug("resolved GCP tag value")
 
 	for env, parentFolderNumber := range r.cfg.EnvParentFolders {
-		if err := r.reconcileEnvFolder(ctx, gcpAPI, teamSlug, env, parentFolderNumber, tagValueName, log); err != nil {
+		if err := r.reconcileEnvFolder(ctx, teamFoldersClient, teamSlug, env, parentFolderNumber, tagValueName, log); err != nil {
 			return err
 		}
 	}
@@ -89,13 +84,13 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 func (r *reconciler) reconcileEnvFolder(
 	ctx context.Context,
-	gcpAPI protoapi.GcpTeamResourcesClient,
+	teamFoldersClient protoapi.GcpTeamResourcesClient,
 	teamSlug, env, parentFolderNumber, tagValueName string,
 	log logrus.FieldLogger,
 ) error {
 	log = log.WithField("env", env)
 
-	resp, err := gcpAPI.GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
+	resp, err := teamFoldersClient.GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 		TeamSlug: teamSlug,
 		Env:      env,
 	})
@@ -115,7 +110,7 @@ func (r *reconciler) reconcileEnvFolder(
 		}
 		log.WithField("folder_id", fID).Info("created GCP folder")
 
-		if _, err := gcpAPI.UpsertTeamFolder(ctx, &protoapi.UpsertGcpTeamFolderRequest{
+		if _, err := teamFoldersClient.UpsertTeamFolder(ctx, &protoapi.UpsertGcpTeamFolderRequest{
 			Folder: &protoapi.GcpTeamFolder{
 				TeamSlug: teamSlug,
 				Env:      env,
@@ -134,33 +129,7 @@ func (r *reconciler) reconcileEnvFolder(
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	teamSlug := daplaTeam.Slug
-	gcpAPI := client.GcpTeamResources()
-
-	for env := range r.cfg.EnvParentFolders {
-		log := log.WithField("env", env)
-		resp, err := gcpAPI.GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
-			TeamSlug: teamSlug,
-			Env:      env,
-		})
-		if err != nil {
-			if status.Code(err) == codes.NotFound {
-				continue
-			}
-			return fmt.Errorf("get folder for env %q: %w", env, err)
-		}
-
-		if err := r.client.DeleteFolder(ctx, resp.Folder.FolderId); err != nil {
-			return fmt.Errorf("delete GCP folder %q for env %q: %w", resp.Folder.FolderId, env, err)
-		}
-		log.WithField("folder_id", resp.Folder.FolderId).Info("deleted GCP folder")
-	}
-
-	if _, err := gcpAPI.DeleteTeamFolders(ctx, &protoapi.DeleteGcpTeamFoldersRequest{
-		TeamSlug: teamSlug,
-	}); err != nil {
-		return fmt.Errorf("delete stored team folders: %w", err)
-	}
+	log.Debug("Executing some action to delete the resource owned by this reconciler")
 
 	return nil
 }
