@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/googleapi"
@@ -14,7 +15,6 @@ type ResourceManager interface {
 	GetOrCreateFolder(ctx context.Context, displayName, parent string) (folderID string, err error)
 	GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (tagValueName string, err error)
 	TagFolder(ctx context.Context, folderID, tagValueName string) error
-	DeleteFolder(ctx context.Context, folderID string) error
 }
 
 type GoogleResourceManager struct {
@@ -45,7 +45,8 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 	}).Context(ctx).Do(); err != nil {
 		return "", fmt.Errorf("create folder %q under %q: %w", displayName, parent, err)
 	}
-	return "", nil
+	var folder cloudresourcemanager.Folder
+	return folderID(folder.Name), nil
 }
 
 func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
@@ -64,7 +65,8 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 	}).Context(ctx).Do(); err != nil {
 		return "", fmt.Errorf("create tag value %q under %q: %w", teamSlug, tagKeyNamespacedName, err)
 	}
-	return "", nil
+	var tagValue cloudresourcemanager.TagValue
+	return tagValue.NamespacedName, nil
 }
 
 func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName string) error {
@@ -79,28 +81,11 @@ func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName
     return err
 }
 
-func (g *GoogleResourceManager) DeleteFolder(ctx context.Context, fID string) error {
-    _, err := g.client.Folders.Delete(fmt.Sprintf("folders/%s", fID)).Context(ctx).Do()
-    if isNotFound(err) {
-        return nil
-    }
-    return err
-}
-
-func isNotFound(err error) bool {
-	var gErr *googleapi.Error
-	return errors.As(err, &gErr) && gErr.Code == http.StatusNotFound
-}
-
 func isAlreadyExists(err error) bool {
 	var gErr *googleapi.Error
 	return errors.As(err, &gErr) && gErr.Code == http.StatusConflict
 }
 
 func folderID(name string) string {
-	const prefix = "folders/"
-	if len(name) > len(prefix) {
-		return name[len(prefix):]
-	}
-	return name
+	return strings.TrimPrefix(name, "folders/")
 }
