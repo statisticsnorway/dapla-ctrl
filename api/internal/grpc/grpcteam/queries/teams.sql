@@ -70,11 +70,11 @@ WHERE
 
 -- name: GetFeaturesForTeam :many
 SELECT
-    sqlc.embed(team_features)
+	sqlc.embed(team_features)
 FROM
-    team_features
+	team_features
 WHERE
-    team_slug = @team_slug
+	team_slug = @team_slug
 ORDER BY
-    name ASC
+	name ASC
 ;
