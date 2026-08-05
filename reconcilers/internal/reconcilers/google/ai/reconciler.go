@@ -194,6 +194,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		TeamSlug: daplaTeam.Slug,
 		Env:      environment,
 	})
+
 	if err != nil {
 		return err
 	}
