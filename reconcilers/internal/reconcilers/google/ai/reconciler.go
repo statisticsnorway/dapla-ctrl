@@ -1,5 +1,7 @@
-// Reconciler which enables Google's Vertex AI (Gemini Enterprise Agent Platform)
-// and sets the right IAM permissions for Dapla teams.
+// Reconciles these resources for a Dapla Team:
+// - Google's Vertex AI (Gemini Enterprise Agent Platform)
+// - IAM permissions for Dapla teams
+// - CloudBilling budget and notification channels
 package ai
 
 import (
@@ -117,6 +119,8 @@ func createGoogleClients(ctx context.Context) (*googleServices, error) {
 // Reconcile implements [reconcilers.Reconciler].
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	clients, err := createGoogleClients(ctx)
+
+	defer clients.close()
 
 	if err != nil {
 		return err
