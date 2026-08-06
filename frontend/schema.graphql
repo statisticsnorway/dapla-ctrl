@@ -327,6 +327,12 @@ input DeleteServiceAccountTokenInput {
   serviceAccountTokenID: ID!
 }
 
+input DisableTeamFeatureInput {
+  teamSlug: Slug!
+  feature: String!
+  env: String!
+}
+
 type DeleteServiceAccountTokenPayload {
   """The service account that the token belonged to."""
   serviceAccount: ServiceAccount
@@ -345,6 +351,12 @@ input DisableReconcilerInput {
 input EnableReconcilerInput {
   """The name of the reconciler to enable."""
   name: String!
+}
+
+input EnableTeamFeatureInput {
+  teamSlug: Slug!
+  feature: String!
+  env: String!
 }
 
 """
@@ -725,12 +737,16 @@ type Mutation {
   """
   disableReconciler(input: DisableReconcilerInput!): Reconciler!
 
+  disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
+
   """
   Enable a reconciler
   
   A reconciler must be fully configured before it can be enabled.
   """
   enableReconciler(input: EnableReconcilerInput!): Reconciler!
+
+  enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
 
   """
   Remove a team member
@@ -2301,6 +2317,8 @@ type Team implements ActivityLogger & Node {
   """The access managers for the team."""
   accessManagers: [TeamAccessManager!]!
 
+  features: [TeamFeature!]!
+
   """Activity log associated with the team."""
   activityLog(
     """Get items after this cursor."""
@@ -2467,6 +2485,23 @@ type TeamConnection {
 
   """Pagination information."""
   pageInfo: PageInfo!
+}
+
+type TeamFeature {
+  name: String!
+  env: String!
+}
+
+type DisableTeamFeaturePayload {
+  team: Team!
+  feature: String!
+  env: String!
+}
+
+type EnableTeamFeaturePayload {
+  team: Team!
+  feature: String!
+  env: String!
 }
 
 type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {

@@ -460,19 +460,6 @@ input TeamOrder {
 	direction: OrderDirection!
 }
 
-input RequestTeamDeletionInput {
-	"Slug of the team to request a team deletion key for."
-	slug: Slug!
-}
-
-input ConfirmTeamDeletionInput {
-	"Slug of the team to confirm deletion for."
-	slug: Slug!
-
-	"Deletion key, acquired using the requestTeamDeletion mutation."
-	key: String!
-}
-
 "Possible fields to order teams by."
 enum TeamOrderField {
 	"The unique slug of the team."

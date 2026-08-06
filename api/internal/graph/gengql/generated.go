@@ -4746,7 +4746,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputAddTeamAccessManagerInput,
 		ec.unmarshalInputAssignRoleToServiceAccountInput,
 		ec.unmarshalInputConfigureReconcilerInput,
-		ec.unmarshalInputConfirmTeamDeletionInput,
 		ec.unmarshalInputCreateGroupInput,
 		ec.unmarshalInputCreateServiceAccountInput,
 		ec.unmarshalInputCreateServiceAccountTokenInput,
@@ -4764,7 +4763,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputReconcilerConfigInput,
 		ec.unmarshalInputRemoveGroupMemberInput,
 		ec.unmarshalInputRemoveTeamAccessManagerInput,
-		ec.unmarshalInputRequestTeamDeletionInput,
 		ec.unmarshalInputRevokeGithubRepoAccessFromTeamArtifactRegistryInput,
 		ec.unmarshalInputRevokeRoleFromServiceAccountInput,
 		ec.unmarshalInputSearchFilter,
@@ -5849,6 +5847,7 @@ type Message implements Node {
 	"""
 	Message ID
 	"""
+	# eslint-disable-next-line @graphql-eslint/no-typename-prefix
 	messageId: String!
 
 	"""
@@ -8385,19 +8384,6 @@ input TeamOrder {
 
 	"The direction to order items by."
 	direction: OrderDirection!
-}
-
-input RequestTeamDeletionInput {
-	"Slug of the team to request a team deletion key for."
-	slug: Slug!
-}
-
-input ConfirmTeamDeletionInput {
-	"Slug of the team to confirm deletion for."
-	slug: Slug!
-
-	"Deletion key, acquired using the requestTeamDeletion mutation."
-	key: String!
 }
 
 "Possible fields to order teams by."
@@ -31230,43 +31216,6 @@ func (ec *executionContext) unmarshalInputConfigureReconcilerInput(ctx context.C
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputConfirmTeamDeletionInput(ctx context.Context, obj any) (team.ConfirmTeamDeletionInput, error) {
-	var it team.ConfirmTeamDeletionInput
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"slug", "key"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "slug":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Slug = data
-		case "key":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Key = data
-		}
-	}
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputCreateGroupInput(ctx context.Context, obj any) (group.CreateGroupInput, error) {
 	var it group.CreateGroupInput
 	if obj == nil {
@@ -31919,36 +31868,6 @@ func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx conte
 				return it, err
 			}
 			it.UserEmail = data
-		}
-	}
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRequestTeamDeletionInput(ctx context.Context, obj any) (team.RequestTeamDeletionInput, error) {
-	var it team.RequestTeamDeletionInput
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"slug"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "slug":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("slug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Slug = data
 		}
 	}
 	return it, nil

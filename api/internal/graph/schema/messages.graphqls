@@ -94,6 +94,7 @@ type Message implements Node {
 	"""
 	Message ID
 	"""
+	# eslint-disable-next-line @graphql-eslint/no-typename-prefix
 	messageId: String!
 
 	"""
