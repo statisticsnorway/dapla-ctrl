@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	arapiv1 "cloud.google.com/go/artifactregistry/apiv1"
@@ -152,7 +153,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	log = log.WithField("parent", parent)
 	createErrs := createArtifactRegistryRepository(ctx, r.arClient, parent, localOnly, log)
 
-	deleteDryRun := strings.ToLower(r.config.DeleteDryRun) == "true"
+	deleteDryRun, err := strconv.ParseBool(r.config.DeleteDryRun)
+	if err != nil {
+		log.Error("could not parse DeleteDryRun config - defaulting to dry run = true")
+		deleteDryRun = true
+	}
 	deleteErrs := deleteArtifactRegistryRepository(ctx, deleteDryRun, r.arClient, parent, remoteOnly, log)
 
 	// We want to try to reconcile all resources rather than fail fast. Thus joining errors later.
