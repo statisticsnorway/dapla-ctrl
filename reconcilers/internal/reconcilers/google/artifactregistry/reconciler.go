@@ -7,8 +7,6 @@ import (
 	"slices"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
 	arapiv1 "cloud.google.com/go/artifactregistry/apiv1"
 	"cloud.google.com/go/artifactregistry/apiv1/artifactregistrypb"
 	"github.com/sirupsen/logrus"
@@ -23,9 +21,10 @@ import (
 const (
 	reconcilerName = "google:artifactregistry"
 
-	configProjectIdKey    = "project_id"
-	configLocationKey     = "location"
-	configDeleteDryRunKey = "delete_dry_run"
+	configProjectIdKey              = "project_id"
+	configLocationKey               = "location"
+	configWorkloadIdentityPoolIdKey = "workload_identity_pool_id"
+	configDeleteDryRunKey           = "delete_dry_run"
 
 	saNamePrefix = "gh-actions-"
 	wiUserRole   = "roles/iam.workloadIdentityUser"
@@ -97,6 +96,12 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Secret:      false,
 			},
 			{
+				Key:         configWorkloadIdentityPoolIdKey,
+				DisplayName: "Workload Identity pool id",
+				Description: "The ID of the Workload Identity Pool that will be granted access to AR repositories. E.g. 'gh-actions'.",
+				Secret:      false,
+			},
+			{
 				Key:         configDeleteDryRunKey,
 				DisplayName: "Artifact Registry repostiory deletion dry run",
 				Description: "Should deletion of AR repositories be dry run. 'true' will result in dry run.",
@@ -144,10 +149,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	localOnly, remoteOnly := localAndRemoteOnly(localRepos, remoteRepos)
 
 	parent := "projects/" + r.config.ProjectId + "/locations/" + r.config.Location
-	createErrs := createArtifactRegistryRepository(ctx, r.arClient, parent, localOnly)
+	log = log.WithField("parent", parent)
+	createErrs := createArtifactRegistryRepository(ctx, r.arClient, parent, localOnly, log)
 
 	deleteDryRun := strings.ToLower(r.config.DeleteDryRun) == "true"
-	deleteErrs := deleteArtifactRegistryRepository(ctx, deleteDryRun, r.arClient, parent, remoteOnly)
+	deleteErrs := deleteArtifactRegistryRepository(ctx, deleteDryRun, r.arClient, parent, remoteOnly, log)
 
 	// We want to try to reconcile all resources rather than fail fast. Thus joining errors later.
 	return errors.Join(createErrs, deleteErrs)
@@ -294,12 +300,12 @@ func localAndRemoteOnly(localRepos, remoteRepos []Repository) (localOnly []Repos
 	return localOnly, remoteOnly
 }
 
-func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Client, parent string, repos []Repository) error {
+func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Client, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)
 		format := artifactregistrypb.Repository_Format_value[strings.ToUpper(repo.Format)]
-		log.Info("Create artifact registry repository", "parent", parent, "repo", repoId)
+		log.WithField("repo", repoId).Info("Create artifact registry repository")
 		op, err := client.CreateRepository(ctx, &artifactregistrypb.CreateRepositoryRequest{
 			Parent:       parent,
 			RepositoryId: repoId,
@@ -309,6 +315,7 @@ func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Clien
 		})
 		if err != nil {
 			allErrors = append(allErrors, err)
+			continue
 		}
 
 		_, err = op.Wait(ctx)
@@ -319,11 +326,14 @@ func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Clien
 	return errors.Join(allErrors...)
 }
 
-func deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, client *arapiv1.Client, parent string, repos []Repository) error {
+func deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, client *arapiv1.Client, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)
-		log.Info("delete artifact registry repository", "parent", parent, "repo", repoId, "dryrun", dryRun)
+		log.WithFields(logrus.Fields{
+			"repo":   repoId,
+			"dryrun": dryRun,
+		}).Info("delete artifact registry repository")
 		if dryRun {
 			continue
 		}
@@ -332,6 +342,7 @@ func deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, client *
 		})
 		if err != nil {
 			allErrors = append(allErrors, err)
+			continue
 		}
 		err = op.Wait(ctx)
 		if err != nil {
