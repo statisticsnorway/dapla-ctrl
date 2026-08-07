@@ -21,7 +21,7 @@ import (
 const (
 	reconcilerName = "google:artifactregistry"
 
-	configProjectIdKey              = "project_id"
+	configProjectIDKey              = "project_id"
 	configLocationKey               = "location"
 	configWorkloadIdentityPoolIdKey = "workload_identity_pool_id"
 	configDeleteDryRunKey           = "delete_dry_run"
@@ -38,7 +38,7 @@ type reconciler struct {
 
 type Config struct {
 	// Project ID
-	ProjectId string
+	ProjectID string
 
 	// Location
 	Location string
@@ -84,7 +84,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
-				Key:         configProjectIdKey,
+				Key:         configProjectIDKey,
 				DisplayName: "Artifact Registry project ID",
 				Description: "Project id of the project the AR repos will be placed. E.g. `my-project-id-22",
 				Secret:      false,
@@ -148,7 +148,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	localOnly, remoteOnly := localAndRemoteOnly(localRepos, remoteRepos)
 
-	parent := "projects/" + r.config.ProjectId + "/locations/" + r.config.Location
+	parent := "projects/" + r.config.ProjectID + "/locations/" + r.config.Location
 	log = log.WithField("parent", parent)
 	createErrs := createArtifactRegistryRepository(ctx, r.arClient, parent, localOnly, log)
 
@@ -186,7 +186,7 @@ func (r *reconciler) reconcileServiceAccount(ctx context.Context, team string) (
 	sa, err := r.serviceAccounts.GetOrCreate(ctx,
 		saName,
 		saDescription,
-		r.config.ProjectId,
+		r.config.ProjectID,
 	)
 	if err != nil {
 		return nil, err
@@ -254,7 +254,7 @@ func (r *reconciler) getLocalArtifactRegistryRepositories(ctx context.Context, c
 }
 
 func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, team string) ([]Repository, error) {
-	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectId, r.config.Location)
+	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectID, r.config.Location)
 	resp := r.arClient.ListRepositories(ctx, &artifactregistrypb.ListRepositoriesRequest{
 		Parent: parent,
 		Filter: fmt.Sprintf("%s/repositories/%s-*", parent, team),
@@ -364,8 +364,8 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 	for _, c := range config.Nodes {
 		switch c.Key {
-		case configProjectIdKey:
-			gac.ProjectId = c.Value
+		case configProjectIDKey:
+			gac.ProjectID = c.Value
 		case configLocationKey:
 			gac.Location = c.Value
 		case configDeleteDryRunKey:
