@@ -10,6 +10,7 @@ import (
 
 	arapiv1 "cloud.google.com/go/artifactregistry/apiv1"
 	"cloud.google.com/go/artifactregistry/apiv1/artifactregistrypb"
+	"github.com/googleapis/gax-go/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
@@ -31,9 +32,16 @@ const (
 	wiUserRole   = "roles/iam.workloadIdentityUser"
 )
 
+type ArtifactRegistryClient interface {
+	ListRepositories(ctx context.Context, req *artifactregistrypb.ListRepositoriesRequest, opts ...gax.CallOption) *arapiv1.RepositoryIterator
+	CreateRepository(ctx context.Context, req *artifactregistrypb.CreateRepositoryRequest, opts ...gax.CallOption) (*arapiv1.CreateRepositoryOperation, error)
+	DeleteRepository(ctx context.Context, req *artifactregistrypb.DeleteRepositoryRequest, opts ...gax.CallOption) (*arapiv1.DeleteRepositoryOperation, error)
+}
+type ServiceAccounts interface{}
+
 type reconciler struct {
 	config          Config
-	arClient        *arapiv1.Client
+	arClient        ArtifactRegistryClient
 	serviceAccounts *serviceaccounts.Client
 }
 
@@ -137,7 +145,10 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	remoteRepos, err := r.getRemoteArtifactRegistryRepositories(ctx, daplaTeam.Slug)
+	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectID, r.config.Location)
+	log = log.WithField("parent", parent)
+
+	remoteRepos, err := r.getRemoteArtifactRegistryRepositories(ctx, parent, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
@@ -149,16 +160,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	localOnly, remoteOnly := localAndRemoteOnly(localRepos, remoteRepos)
 
-	parent := "projects/" + r.config.ProjectID + "/locations/" + r.config.Location
-	log = log.WithField("parent", parent)
-	createErrs := createArtifactRegistryRepository(ctx, r.arClient, parent, localOnly, log)
+	createErrs := r.createArtifactRegistryRepository(ctx, parent, localOnly, log)
 
 	deleteDryRun, err := strconv.ParseBool(r.config.DeleteDryRun)
 	if err != nil {
 		log.Error("could not parse DeleteDryRun config - defaulting to dry run = true")
 		deleteDryRun = true
 	}
-	deleteErrs := deleteArtifactRegistryRepository(ctx, deleteDryRun, r.arClient, parent, remoteOnly, log)
+	deleteErrs := r.deleteArtifactRegistryRepository(ctx, deleteDryRun, parent, remoteOnly, log)
 
 	// We want to try to reconcile all resources rather than fail fast. Thus joining errors later.
 	return errors.Join(createErrs, deleteErrs)
@@ -258,8 +267,7 @@ func (r *reconciler) getLocalArtifactRegistryRepositories(ctx context.Context, c
 	return repos, nil
 }
 
-func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, team string) ([]Repository, error) {
-	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectID, r.config.Location)
+func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, parent, team string) ([]Repository, error) {
 	resp := r.arClient.ListRepositories(ctx, &artifactregistrypb.ListRepositoriesRequest{
 		Parent: parent,
 		Filter: fmt.Sprintf("%s/repositories/%s-*", parent, team),
@@ -305,13 +313,13 @@ func localAndRemoteOnly(localRepos, remoteRepos []Repository) (localOnly []Repos
 	return localOnly, remoteOnly
 }
 
-func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Client, parent string, repos []Repository, log logrus.FieldLogger) error {
+func (r *reconciler) createArtifactRegistryRepository(ctx context.Context, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)
 		format := artifactregistrypb.Repository_Format_value[strings.ToUpper(repo.Format)]
 		log.WithField("repo", repoId).Info("Create artifact registry repository")
-		op, err := client.CreateRepository(ctx, &artifactregistrypb.CreateRepositoryRequest{
+		op, err := r.arClient.CreateRepository(ctx, &artifactregistrypb.CreateRepositoryRequest{
 			Parent:       parent,
 			RepositoryId: repoId,
 			Repository: &artifactregistrypb.Repository{
@@ -331,7 +339,7 @@ func createArtifactRegistryRepository(ctx context.Context, client *arapiv1.Clien
 	return errors.Join(allErrors...)
 }
 
-func deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, client *arapiv1.Client, parent string, repos []Repository, log logrus.FieldLogger) error {
+func (r *reconciler) deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)
@@ -342,7 +350,7 @@ func deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, client *
 		if dryRun {
 			continue
 		}
-		op, err := client.DeleteRepository(ctx, &artifactregistrypb.DeleteRepositoryRequest{
+		op, err := r.arClient.DeleteRepository(ctx, &artifactregistrypb.DeleteRepositoryRequest{
 			Name: parent + "/repositories/" + repoId,
 		})
 		if err != nil {
