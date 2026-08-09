@@ -279,22 +279,33 @@ func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, 
 			return nil, err
 		}
 
-		repoNameParts := strings.Split(repo.Name, "/")
-		repoName := repoNameParts[len(repoNameParts)-1]
-		format := strings.TrimPrefix(repoName, team+"-")
-		// Filter out e.g. play-team-b from play-team
-		if strings.Contains(format, "-") {
+		parsedRepo, belongsToTeam := repositoryFromArtifactRegistry(team, repo)
+		if !belongsToTeam {
 			continue
 		}
-
-		repos = append(repos, Repository{
-			Team:      team,
-			Format:    format,
-			SizeBytes: repo.SizeBytes,
-		})
+		repos = append(repos, parsedRepo)
 	}
 
 	return repos, nil
+}
+
+func repositoryFromArtifactRegistry(team string, repo *artifactregistrypb.Repository) (Repository, bool) {
+	format := strings.ToLower(repo.GetFormat().String())
+	expectedRepoName := team + "-" + format
+
+	repoNameParts := strings.Split(repo.GetName(), "/")
+	repoName := repoNameParts[len(repoNameParts)-1]
+
+	// Filter out e.g. play-team-b when reconciling play-team.
+	if repoName != expectedRepoName {
+		return Repository{}, false
+	}
+
+	return Repository{
+		Team:      team,
+		Format:    format,
+		SizeBytes: repo.GetSizeBytes(),
+	}, true
 }
 
 func localAndRemoteOnly(localRepos, remoteRepos []Repository) (localOnly []Repository, remoteOnly []Repository) {
