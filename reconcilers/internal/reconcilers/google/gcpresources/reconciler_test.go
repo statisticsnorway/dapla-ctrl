@@ -42,16 +42,6 @@ func (s *fakeGcpTeamResourcesServer) GetTeamFolder(_ context.Context, req *proto
 	return &protoapi.GetGcpTeamFolderResponse{Folder: f}, nil
 }
 
-func (s *fakeGcpTeamResourcesServer) DeleteTeamFolders(_ context.Context, req *protoapi.DeleteGcpTeamFoldersRequest) (*protoapi.DeleteGcpTeamFoldersResponse, error) {
-	prefix := req.TeamSlug + "/"
-	for key := range s.folders {
-		if len(key) > len(prefix) && key[:len(prefix)] == prefix {
-			delete(s.folders, key)
-		}
-	}
-	return &protoapi.DeleteGcpTeamFoldersResponse{}, nil
-}
-
 // startFakeGrpcServer starts an in-process gRPC server and returns a connected APIClient.
 func startFakeGrpcServer(t *testing.T, srv *fakeGcpTeamResourcesServer) *apiclient.APIClient {
 	t.Helper()
