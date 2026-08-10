@@ -53,10 +53,3 @@ func (s *Server) GetTeamFolder(ctx context.Context, req *protoapi.GetGcpTeamFold
 		},
 	}, nil
 }
-
-func (s *Server) DeleteTeamFolders(ctx context.Context, req *protoapi.DeleteGcpTeamFoldersRequest) (*protoapi.DeleteGcpTeamFoldersResponse, error) {
-	if err := s.querier.DeleteTeamFolders(ctx, slug.Slug(req.TeamSlug)); err != nil {
-		return nil, status.Errorf(codes.Internal, "delete team folders: %s", err)
-	}
-	return &protoapi.DeleteGcpTeamFoldersResponse{}, nil
-}
