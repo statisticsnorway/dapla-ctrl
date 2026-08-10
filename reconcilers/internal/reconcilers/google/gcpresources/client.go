@@ -7,7 +7,6 @@ import (
 
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
-	"google.golang.org/api/iterator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -49,16 +48,12 @@ func NewGoogleResourceManager(ctx context.Context) (ResourceManager, error) {
 
 func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayName, parent string) (string, error) {
 	it := g.folders.ListFolders(ctx, &resourcemanagerpb.ListFoldersRequest{Parent: parent})
-	for {
-		f, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
+	for folder, err := range it.All() {
 		if err != nil {
 			return "", fmt.Errorf("list folders under %q: %w", parent, err)
 		}
-		if f.DisplayName == displayName {
-			return folderID(f.Name), nil
+		if folder.DisplayName == displayName {
+			return folderID(folder.Name), nil
 		}
 	}
 
@@ -72,39 +67,25 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 	}
 
 	it = g.folders.ListFolders(ctx, &resourcemanagerpb.ListFoldersRequest{Parent: parent})
-	for {
-		f, err := it.Next()
-		if err == iterator.Done {
-			return "", fmt.Errorf("folder %q not found after creation — will retry next cycle", displayName)
-		}
+	for folder, err := range it.All() {
 		if err != nil {
 			return "", fmt.Errorf("list folders under %q: %w", parent, err)
 		}
-		if f.DisplayName == displayName {
-			return folderID(f.Name), nil
+		if folder.DisplayName == displayName {
+			return folderID(folder.Name), nil
 		}
 	}
 }
 
 func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
-	findTagValue := func() (string, bool, error) {
-		it := g.tagValues.ListTagValues(ctx, &resourcemanagerpb.ListTagValuesRequest{Parent: tagKeyNamespacedName})
-		for {
-			tv, err := it.Next()
-			if err == iterator.Done {
-				return "", false, nil
-			}
-			if err != nil {
-				return "", false, fmt.Errorf("list tag values for key %q: %w", tagKeyNamespacedName, err)
-			}
-			if tv.ShortName == teamSlug {
-				return tv.NamespacedName, true, nil
-			}
+	it := g.tagValues.ListTagValues(ctx, &resourcemanagerpb.ListTagValuesRequest{Parent: tagKeyNamespacedName})
+	for tagValue, err := range it.All() {
+		if err != nil {
+			return "", fmt.Errorf("list tag values for key %q: %w", tagKeyNamespacedName, err)
 		}
-	}
-
-	if name, found, err := findTagValue(); err != nil || found {
-		return name, err
+		if tagValue.ShortName == teamSlug {
+			return tagValue.NamespacedName, nil
+		}
 	}
 
 	if _, err := g.tagValues.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
@@ -116,14 +97,14 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 		return "", fmt.Errorf("create tag value %q under %q: %w", teamSlug, tagKeyNamespacedName, err)
 	}
 
-	name, found, err := findTagValue()
-	if err != nil {
-		return "", err
+	it = g.tagValues.ListTagValues(ctx, &resourcemanagerpb.ListTagValuesRequest{Parent: tagKeyNamespacedName})
+	for tagValue, err := range it.All() {
+		if err != nil {
+			return "", fmt.Errorf("list tag values for key %q: %w", tagKeyNamespacedName, err)
+		}
+		if tagValue.ShortName == teamSlug {
+			return tagValue.NamespacedName, nil
 	}
-	if !found {
-		return "", fmt.Errorf("tag value %q not found after creation — will retry next cycle", teamSlug)
-	}
-	return name, nil
 }
 
 func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName string) error {
