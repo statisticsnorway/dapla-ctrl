@@ -142,7 +142,6 @@ func TestRepositoryFromArtifactRegistry(t *testing.T) {
 	}
 }
 
-
 func TestDeleteArtifactRegistryRepositoryDryRun(t *testing.T) {
 	client := &fakeArtifactRegistryClient{}
 	r := &reconciler{arClient: client}
@@ -155,7 +154,6 @@ func TestDeleteArtifactRegistryRepositoryDryRun(t *testing.T) {
 		[]Repository{{Team: "play-team", Format: "docker"}},
 		logrus.New(),
 	)
-
 	if err != nil {
 		t.Fatalf("dry-run deletion returned an error: %v", err)
 	}

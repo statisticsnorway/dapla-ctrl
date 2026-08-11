@@ -134,6 +134,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
+	log.WithField("sa", sa).Debug("reconcilled service account")
 
 	githubReposAllowlist, err := r.getLocalGithubRepos(ctx, client, daplaTeam.Slug)
 	if err != nil {
@@ -144,6 +145,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err := r.reconcileGithubRepoAllowlist(ctx, sa.Name, githubReposAllowlist); err != nil {
 		return err
 	}
+	log.WithField("sa", sa).Debug("reconciled github allow list")
 
 	parent := fmt.Sprintf("projects/%s/locations/%s", r.config.ProjectID, r.config.Location)
 	log = log.WithField("parent", parent)
@@ -152,11 +154,13 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
+	log.Debugf("fetched %s remote repos from artifact registry", len(remoteRepos))
 
 	localRepos, err := r.getLocalArtifactRegistryRepositories(ctx, client, daplaTeam.Slug)
 	if err != nil {
 		return err
 	}
+	log.Debugf("fetched %s local repos", len(remoteRepos))
 
 	localOnly, remoteOnly := localAndRemoteOnly(localRepos, remoteRepos)
 
