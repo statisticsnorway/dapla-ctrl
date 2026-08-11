@@ -4,12 +4,9 @@ package grpcgcpresourcessql
 
 import (
 	"context"
-
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Querier interface {
-	DeleteTeamFolders(ctx context.Context, teamSlug slug.Slug) error
 	GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*GcpTeamFolder, error)
 	UpsertTeamFolder(ctx context.Context, arg UpsertTeamFolderParams) error
 }
