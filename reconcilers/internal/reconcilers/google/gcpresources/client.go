@@ -57,25 +57,16 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 		}
 	}
 
-	if _, err := g.folders.CreateFolder(ctx, &resourcemanagerpb.CreateFolderRequest{
+	folder, err := g.folders.CreateFolder(ctx, &resourcemanagerpb.CreateFolderRequest{
 		Folder: &resourcemanagerpb.Folder{
 			DisplayName: displayName,
 			Parent:      parent,
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return "", fmt.Errorf("create folder %q under %q: %w", displayName, parent, err)
 	}
-
-	it = g.folders.ListFolders(ctx, &resourcemanagerpb.ListFoldersRequest{Parent: parent})
-	for folder, err := range it.All() {
-		if err != nil {
-			return "", fmt.Errorf("list folders under %q: %w", parent, err)
-		}
-		if folder.DisplayName == displayName {
-			return folderID(folder.Name), nil
-		}
-	}
-	return "", fmt.Errorf("folder %q not found after creation — will retry next cycle", displayName)
+	return folderID(folder.Name), nil
 }
 
 func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
@@ -89,25 +80,16 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 		}
 	}
 
-	if _, err := g.tagValues.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
+	tagValue, err := g.tagValues.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
 		TagValue: &resourcemanagerpb.TagValue{
 			Parent:    tagKeyNamespacedName,
 			ShortName: teamSlug,
 		},
-	}); err != nil {
+	})
+	if err != nil {
 		return "", fmt.Errorf("create tag value %q under %q: %w", teamSlug, tagKeyNamespacedName, err)
 	}
-
-	it = g.tagValues.ListTagValues(ctx, &resourcemanagerpb.ListTagValuesRequest{Parent: tagKeyNamespacedName})
-	for tagValue, err := range it.All() {
-		if err != nil {
-			return "", fmt.Errorf("list tag values for key %q: %w", tagKeyNamespacedName, err)
-		}
-		if tagValue.ShortName == teamSlug {
-			return tagValue.NamespacedName, nil
-		}
-	}
-	return "", fmt.Errorf("tag value %q not found after creation — will retry next cycle", teamSlug)
+    return tagValue.NamespacedName, nil
 }
 
 func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName string) error {
