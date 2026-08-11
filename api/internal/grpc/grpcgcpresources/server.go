@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcgcpresources/grpcgcpresourcessql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
@@ -30,6 +31,10 @@ func (s *Server) UpsertTeamFolder(ctx context.Context, req *protoapi.UpsertGcpTe
 		Env:      req.Folder.Env,
 		FolderID: req.Folder.FolderId,
 	}); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" && pgErr.ConstraintName == "gcp_team_folders_folder_id_key" {
+			return nil, status.Errorf(codes.AlreadyExists, "folder_id already in use")
+		}
 		return nil, status.Errorf(codes.Internal, "upsert team folder: %s", err)
 	}
 	return &protoapi.UpsertGcpTeamFolderResponse{}, nil
