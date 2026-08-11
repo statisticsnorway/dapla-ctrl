@@ -75,6 +75,7 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 			return folderID(folder.Name), nil
 		}
 	}
+	return "", fmt.Errorf("folder %q not found after creation — will retry next cycle", displayName)
 }
 
 func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
@@ -104,7 +105,9 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 		}
 		if tagValue.ShortName == teamSlug {
 			return tagValue.NamespacedName, nil
+		}
 	}
+	return "", fmt.Errorf("tag value %q not found after creation — will retry next cycle", teamSlug)
 }
 
 func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName string) error {
