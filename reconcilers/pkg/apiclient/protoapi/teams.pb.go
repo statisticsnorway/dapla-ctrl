@@ -849,6 +849,145 @@ func (b0 GetFeaturesResponse_builder) Build() *GetFeaturesResponse {
 	return m0
 }
 
+type HasFeatureRequest struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	Feature       *Feature               `protobuf:"bytes,2,opt,name=feature,proto3" json:"feature,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HasFeatureRequest) Reset() {
+	*x = HasFeatureRequest{}
+	mi := &file_teams_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HasFeatureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HasFeatureRequest) ProtoMessage() {}
+
+func (x *HasFeatureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_teams_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *HasFeatureRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *HasFeatureRequest) GetFeature() *Feature {
+	if x != nil {
+		return x.Feature
+	}
+	return nil
+}
+
+func (x *HasFeatureRequest) SetSlug(v string) {
+	x.Slug = v
+}
+
+func (x *HasFeatureRequest) SetFeature(v *Feature) {
+	x.Feature = v
+}
+
+func (x *HasFeatureRequest) HasFeature() bool {
+	if x == nil {
+		return false
+	}
+	return x.Feature != nil
+}
+
+func (x *HasFeatureRequest) ClearFeature() {
+	x.Feature = nil
+}
+
+type HasFeatureRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Slug    string
+	Feature *Feature
+}
+
+func (b0 HasFeatureRequest_builder) Build() *HasFeatureRequest {
+	m0 := &HasFeatureRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.Slug = b.Slug
+	x.Feature = b.Feature
+	return m0
+}
+
+type HasFeatureResponse struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	HasFeature    bool                   `protobuf:"varint,1,opt,name=has_feature,json=hasFeature,proto3" json:"has_feature,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HasFeatureResponse) Reset() {
+	*x = HasFeatureResponse{}
+	mi := &file_teams_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HasFeatureResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HasFeatureResponse) ProtoMessage() {}
+
+func (x *HasFeatureResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_teams_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *HasFeatureResponse) GetHasFeature() bool {
+	if x != nil {
+		return x.HasFeature
+	}
+	return false
+}
+
+func (x *HasFeatureResponse) SetHasFeature(v bool) {
+	x.HasFeature = v
+}
+
+type HasFeatureResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	HasFeature bool
+}
+
+func (b0 HasFeatureResponse_builder) Build() *HasFeatureResponse {
+	m0 := &HasFeatureResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.HasFeature = b.HasFeature
+	return m0
+}
+
 type TeamGroup struct {
 	state         protoimpl.MessageState `protogen:"hybrid.v1"`
 	Group         *Group                 `protobuf:"bytes,1,opt,name=group,proto3" json:"group,omitempty"`
@@ -858,7 +997,7 @@ type TeamGroup struct {
 
 func (x *TeamGroup) Reset() {
 	*x = TeamGroup{}
-	mi := &file_teams_proto_msgTypes[12]
+	mi := &file_teams_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -870,7 +1009,7 @@ func (x *TeamGroup) String() string {
 func (*TeamGroup) ProtoMessage() {}
 
 func (x *TeamGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[12]
+	mi := &file_teams_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -953,17 +1092,25 @@ const file_teams_proto_rawDesc = "" +
 	"\x12GetFeaturesRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"N\n" +
 	"\x13GetFeaturesResponse\x127\n" +
-	"\bfeatures\x18\x01 \x03(\v2\x1b.dapla.api.protobuf.FeatureR\bfeatures\"<\n" +
+	"\bfeatures\x18\x01 \x03(\v2\x1b.dapla.api.protobuf.FeatureR\bfeatures\"^\n" +
+	"\x11HasFeatureRequest\x12\x12\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\x125\n" +
+	"\afeature\x18\x02 \x01(\v2\x1b.dapla.api.protobuf.FeatureR\afeature\"5\n" +
+	"\x12HasFeatureResponse\x12\x1f\n" +
+	"\vhas_feature\x18\x01 \x01(\bR\n" +
+	"hasFeature\"<\n" +
 	"\tTeamGroup\x12/\n" +
-	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xd0\x03\n" +
+	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xaf\x04\n" +
 	"\x05Teams\x12P\n" +
 	"\x03Get\x12\".dapla.api.protobuf.GetTeamRequest\x1a#.dapla.api.protobuf.GetTeamResponse\"\x00\x12U\n" +
 	"\x04List\x12$.dapla.api.protobuf.ListTeamsRequest\x1a%.dapla.api.protobuf.ListTeamsResponse\"\x00\x12a\n" +
 	"\x06Groups\x12).dapla.api.protobuf.ListTeamGroupsRequest\x1a*.dapla.api.protobuf.ListTeamGroupsResponse\"\x00\x12Y\n" +
 	"\x06Delete\x12%.dapla.api.protobuf.DeleteTeamRequest\x1a&.dapla.api.protobuf.DeleteTeamResponse\"\x00\x12`\n" +
-	"\vGetFeatures\x12&.dapla.api.protobuf.GetFeaturesRequest\x1a'.dapla.api.protobuf.GetFeaturesResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	"\vGetFeatures\x12&.dapla.api.protobuf.GetFeaturesRequest\x1a'.dapla.api.protobuf.GetFeaturesResponse\"\x00\x12]\n" +
+	"\n" +
+	"HasFeature\x12%.dapla.api.protobuf.HasFeatureRequest\x1a&.dapla.api.protobuf.HasFeatureResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_teams_proto_goTypes = []any{
 	(*Team)(nil),                   // 0: dapla.api.protobuf.Team
 	(*Feature)(nil),                // 1: dapla.api.protobuf.Feature
@@ -977,35 +1124,40 @@ var file_teams_proto_goTypes = []any{
 	(*ListTeamGroupsResponse)(nil), // 9: dapla.api.protobuf.ListTeamGroupsResponse
 	(*GetFeaturesRequest)(nil),     // 10: dapla.api.protobuf.GetFeaturesRequest
 	(*GetFeaturesResponse)(nil),    // 11: dapla.api.protobuf.GetFeaturesResponse
-	(*TeamGroup)(nil),              // 12: dapla.api.protobuf.TeamGroup
-	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
-	(*PageInfo)(nil),               // 14: dapla.api.protobuf.PageInfo
-	(*Group)(nil),                  // 15: dapla.api.protobuf.Group
+	(*HasFeatureRequest)(nil),      // 12: dapla.api.protobuf.HasFeatureRequest
+	(*HasFeatureResponse)(nil),     // 13: dapla.api.protobuf.HasFeatureResponse
+	(*TeamGroup)(nil),              // 14: dapla.api.protobuf.TeamGroup
+	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
+	(*PageInfo)(nil),               // 16: dapla.api.protobuf.PageInfo
+	(*Group)(nil),                  // 17: dapla.api.protobuf.Group
 }
 var file_teams_proto_depIdxs = []int32{
-	13, // 0: dapla.api.protobuf.Team.delete_key_confirmed_at:type_name -> google.protobuf.Timestamp
+	15, // 0: dapla.api.protobuf.Team.delete_key_confirmed_at:type_name -> google.protobuf.Timestamp
 	0,  // 1: dapla.api.protobuf.GetTeamResponse.team:type_name -> dapla.api.protobuf.Team
 	0,  // 2: dapla.api.protobuf.ListTeamsResponse.nodes:type_name -> dapla.api.protobuf.Team
-	14, // 3: dapla.api.protobuf.ListTeamsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
-	12, // 4: dapla.api.protobuf.ListTeamGroupsResponse.nodes:type_name -> dapla.api.protobuf.TeamGroup
-	14, // 5: dapla.api.protobuf.ListTeamGroupsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	16, // 3: dapla.api.protobuf.ListTeamsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	14, // 4: dapla.api.protobuf.ListTeamGroupsResponse.nodes:type_name -> dapla.api.protobuf.TeamGroup
+	16, // 5: dapla.api.protobuf.ListTeamGroupsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
 	1,  // 6: dapla.api.protobuf.GetFeaturesResponse.features:type_name -> dapla.api.protobuf.Feature
-	15, // 7: dapla.api.protobuf.TeamGroup.group:type_name -> dapla.api.protobuf.Group
-	5,  // 8: dapla.api.protobuf.Teams.Get:input_type -> dapla.api.protobuf.GetTeamRequest
-	6,  // 9: dapla.api.protobuf.Teams.List:input_type -> dapla.api.protobuf.ListTeamsRequest
-	8,  // 10: dapla.api.protobuf.Teams.Groups:input_type -> dapla.api.protobuf.ListTeamGroupsRequest
-	2,  // 11: dapla.api.protobuf.Teams.Delete:input_type -> dapla.api.protobuf.DeleteTeamRequest
-	10, // 12: dapla.api.protobuf.Teams.GetFeatures:input_type -> dapla.api.protobuf.GetFeaturesRequest
-	4,  // 13: dapla.api.protobuf.Teams.Get:output_type -> dapla.api.protobuf.GetTeamResponse
-	7,  // 14: dapla.api.protobuf.Teams.List:output_type -> dapla.api.protobuf.ListTeamsResponse
-	9,  // 15: dapla.api.protobuf.Teams.Groups:output_type -> dapla.api.protobuf.ListTeamGroupsResponse
-	3,  // 16: dapla.api.protobuf.Teams.Delete:output_type -> dapla.api.protobuf.DeleteTeamResponse
-	11, // 17: dapla.api.protobuf.Teams.GetFeatures:output_type -> dapla.api.protobuf.GetFeaturesResponse
-	13, // [13:18] is the sub-list for method output_type
-	8,  // [8:13] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	1,  // 7: dapla.api.protobuf.HasFeatureRequest.feature:type_name -> dapla.api.protobuf.Feature
+	17, // 8: dapla.api.protobuf.TeamGroup.group:type_name -> dapla.api.protobuf.Group
+	5,  // 9: dapla.api.protobuf.Teams.Get:input_type -> dapla.api.protobuf.GetTeamRequest
+	6,  // 10: dapla.api.protobuf.Teams.List:input_type -> dapla.api.protobuf.ListTeamsRequest
+	8,  // 11: dapla.api.protobuf.Teams.Groups:input_type -> dapla.api.protobuf.ListTeamGroupsRequest
+	2,  // 12: dapla.api.protobuf.Teams.Delete:input_type -> dapla.api.protobuf.DeleteTeamRequest
+	10, // 13: dapla.api.protobuf.Teams.GetFeatures:input_type -> dapla.api.protobuf.GetFeaturesRequest
+	12, // 14: dapla.api.protobuf.Teams.HasFeature:input_type -> dapla.api.protobuf.HasFeatureRequest
+	4,  // 15: dapla.api.protobuf.Teams.Get:output_type -> dapla.api.protobuf.GetTeamResponse
+	7,  // 16: dapla.api.protobuf.Teams.List:output_type -> dapla.api.protobuf.ListTeamsResponse
+	9,  // 17: dapla.api.protobuf.Teams.Groups:output_type -> dapla.api.protobuf.ListTeamGroupsResponse
+	3,  // 18: dapla.api.protobuf.Teams.Delete:output_type -> dapla.api.protobuf.DeleteTeamResponse
+	11, // 19: dapla.api.protobuf.Teams.GetFeatures:output_type -> dapla.api.protobuf.GetFeaturesResponse
+	13, // 20: dapla.api.protobuf.Teams.HasFeature:output_type -> dapla.api.protobuf.HasFeatureResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_teams_proto_init() }
@@ -1022,7 +1174,7 @@ func file_teams_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_teams_proto_rawDesc), len(file_teams_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

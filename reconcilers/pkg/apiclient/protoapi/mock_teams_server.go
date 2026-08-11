@@ -310,6 +310,74 @@ func (_c *MockTeamsServer_Groups_Call) RunAndReturn(run func(context1 context.Co
 	return _c
 }
 
+// HasFeature provides a mock function for the type MockTeamsServer
+func (_mock *MockTeamsServer) HasFeature(context1 context.Context, hasFeatureRequest *HasFeatureRequest) (*HasFeatureResponse, error) {
+	ret := _mock.Called(context1, hasFeatureRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for HasFeature")
+	}
+
+	var r0 *HasFeatureResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *HasFeatureRequest) (*HasFeatureResponse, error)); ok {
+		return returnFunc(context1, hasFeatureRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *HasFeatureRequest) *HasFeatureResponse); ok {
+		r0 = returnFunc(context1, hasFeatureRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*HasFeatureResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *HasFeatureRequest) error); ok {
+		r1 = returnFunc(context1, hasFeatureRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTeamsServer_HasFeature_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'HasFeature'
+type MockTeamsServer_HasFeature_Call struct {
+	*mock.Call
+}
+
+// HasFeature is a helper method to define mock.On call
+//   - context1 context.Context
+//   - hasFeatureRequest *HasFeatureRequest
+func (_e *MockTeamsServer_Expecter) HasFeature(context1 interface{}, hasFeatureRequest interface{}) *MockTeamsServer_HasFeature_Call {
+	return &MockTeamsServer_HasFeature_Call{Call: _e.mock.On("HasFeature", context1, hasFeatureRequest)}
+}
+
+func (_c *MockTeamsServer_HasFeature_Call) Run(run func(context1 context.Context, hasFeatureRequest *HasFeatureRequest)) *MockTeamsServer_HasFeature_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *HasFeatureRequest
+		if args[1] != nil {
+			arg1 = args[1].(*HasFeatureRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTeamsServer_HasFeature_Call) Return(hasFeatureResponse *HasFeatureResponse, err error) *MockTeamsServer_HasFeature_Call {
+	_c.Call.Return(hasFeatureResponse, err)
+	return _c
+}
+
+func (_c *MockTeamsServer_HasFeature_Call) RunAndReturn(run func(context1 context.Context, hasFeatureRequest *HasFeatureRequest) (*HasFeatureResponse, error)) *MockTeamsServer_HasFeature_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // List provides a mock function for the type MockTeamsServer
 func (_mock *MockTeamsServer) List(context1 context.Context, listTeamsRequest *ListTeamsRequest) (*ListTeamsResponse, error) {
 	ret := _mock.Called(context1, listTeamsRequest)
