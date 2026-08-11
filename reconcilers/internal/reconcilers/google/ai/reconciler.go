@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/serviceusage/apiv1/serviceusagepb"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
+	iter "github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 
@@ -141,12 +142,19 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	teamTestFolder := resp.GetFolder()
-	testProjectID, err := getProjectID(ctx, services.Project, teamTestFolder.FolderId, teamTestFolder.Env)
+	testProjectID, err := getProjectID(ctx, services.Project, teamTestFolder.FolderId, daplaTeam.Slug, teamTestFolder.Env)
 	if err != nil {
 		return err
 	}
 
-	aiFeatureIsEnabled, err1 := isAIFeatureEnabled(ctx, client, daplaTeam.Slug)
+	aiFeature, err1 := client.Teams().HasFeature(ctx, &protoapi.HasFeatureRequest{
+		Slug: daplaTeam.Slug,
+		Feature: &protoapi.Feature{
+			Name: "ai",
+			Env:  "test",
+		},
+	})
+	aiFeatureIsEnabled := aiFeature.HasFeature
 	vertexAIEnabled, err2 := isVertexAIEnabled(ctx, services.ServiceUsage, testProjectID)
 	membersHaveIAM, err3 := membersHaveAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, testProjectID)
 	budget, err4 := getExistingAIBudget(ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
@@ -186,7 +194,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 // Get principals that should be have the AIPlatform user role
 func getIAMMembers(daplaTeamSlug string) []string {
 	// We assume the developers group will exist
-	daplaDevelopersGroup := fmt.Sprintf("group:%s-developers", daplaTeamSlug)
+	daplaDevelopersGroup := fmt.Sprintf("group:%s-developers@groups.ssb.no", daplaTeamSlug)
 	// This SA is always guaranteed to exist as long as we run this reconciler **after**
 	// the groupSA reconciler
 	daplaDevelopersGroupSA := fmt.Sprintf("serviceAccount:%s-%s", daplaTeamSlug, groupSANameTemplate)
@@ -288,9 +296,15 @@ func reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, service
 		return err
 	}
 
-	budgetNotificationEmail, err := getDaplaTeamDevelopers(ctx, client, daplaTeamSlug, 1)
+	budgetNotificationUsers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 1)
 	if err != nil {
 		return err
+	}
+
+	budgetNotificationEmail := make([]string, len(budgetNotificationUsers))
+
+	for idx, user := range budgetNotificationUsers {
+		budgetNotificationEmail[idx] = user.User.Email
 	}
 
 	budgetNotificationEmails := slices.Concat(budgetNotificationEmail, daplaStatNotificationEmails)
@@ -334,11 +348,7 @@ func reconcileAIBudgetNotificationChannels(ctx context.Context, ncClient *monito
 		filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, aiBudgetNotificationName, aiBudgetNotificationType)
 		var channelNames []string
 		it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
-		for {
-			channel, err := it.Next()
-			if err == iterator.Done {
-				break
-			}
+		for channel, err := range it.All() {
 			if err != nil {
 				return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 			}
@@ -409,11 +419,7 @@ func getExistingAIBudgetNotificationChannel(ctx context.Context, ncClient *monit
 
 func getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, displayName string) (*budgetspb.Budget, error) {
 	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: aiBudgetBillingAccount})
-	for {
-		budget, err := it.Next()
-		if err == iterator.Done {
-			return nil, nil
-		}
+	for budget, err := range it.All() {
 		if err != nil {
 			return nil, fmt.Errorf("list AI budgets: %w", err)
 		}
@@ -421,6 +427,7 @@ func getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient
 			return budget, nil
 		}
 	}
+	return nil, nil
 }
 
 func getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
@@ -454,47 +461,20 @@ func getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUni
 	}
 }
 
-func getDaplaTeamDevelopers(ctx context.Context, client *apiclient.APIClient, daplaTeamSlug string, limit uint) ([]string, error) {
-	developersGroup := fmt.Sprintf("%s-developers", daplaTeamSlug)
-	resp, err := client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
-		Name:  developersGroup,
-		Limit: int64(limit),
+func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group string, limit uint) ([]*protoapi.GroupMember, error) {
+	dbMembersIt := iter.New(ctx, int64(limit), func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
+		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
+			Name:   group,
+			Limit:  limit,
+			Offset: offset,
+		})
 	})
-	if err != nil {
-		return []string{}, fmt.Errorf("get members for group %q: %w", developersGroup, err)
+
+	var dbMembers []*protoapi.GroupMember
+	for dbMembersIt.Next() {
+		dbMembers = append(dbMembers, dbMembersIt.Value())
 	}
-
-	if len(resp.Nodes) == 0 {
-		return []string{}, fmt.Errorf("no user found in the group %q", developersGroup)
-	}
-
-	emails := make([]string, len(resp.Nodes))
-
-	for n := range resp.Nodes {
-		emails[n] = resp.Nodes[n].GetUser().GetEmail()
-	}
-
-	return emails, nil
-}
-
-// Check if the AI feature is enabled in the API database for a given team.
-func isAIFeatureEnabled(ctx context.Context, client *apiclient.APIClient, daplaTeamSlug string) (bool, error) {
-
-	resp, err := client.Teams().GetFeatures(ctx, &protoapi.GetFeaturesRequest{Slug: daplaTeamSlug})
-	if err != nil {
-		return false, err
-	}
-
-	var aiFeatureIsEnabled bool
-
-	for _, feat := range resp.Features {
-		// For now we only check if it's enabled in the test environment
-		if feat.Name == "ai" && feat.Env == "test" {
-			aiFeatureIsEnabled = true
-		}
-	}
-
-	return aiFeatureIsEnabled, nil
+	return dbMembers, dbMembersIt.Err()
 }
 
 // Check if the vertexai API is enabled in a given Google project
@@ -531,28 +511,24 @@ func reconcileVertexAIAPI(ctx context.Context, client *serviceusage.Client, proj
 	return nil
 }
 
-func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, folderID, env string) (string, error) {
+func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, folderID, daplaTeamSlug, env string) (string, error) {
 	it := client.SearchProjects(ctx, &resourcemanagerpb.SearchProjectsRequest{
 		Query: fmt.Sprintf("parent:folders/%s", folderID),
 	})
 
-	var projectID string
-	for {
-		project, err := it.Next()
-		if err == iterator.Done {
-			break
-		}
+	projectID := ""
+	for project, err := range it.All() {
 		if err != nil {
-			return "", fmt.Errorf("search projects in folder %q for environment %q: %w", folderID, env, err)
+			return "", err
 		}
-		if projectID != "" {
-			return "", fmt.Errorf("multiple projects found in folder %q for environment %q", folderID, env)
+
+		if strings.HasPrefix(project.ProjectId, fmt.Sprintf("%s-t", daplaTeamSlug)) {
+			projectID = project.ProjectId
 		}
-		projectID = project.ProjectId
 	}
 
 	if projectID == "" {
-		return "", fmt.Errorf("no project found in folder %q for environment %q", folderID, env)
+		return "", fmt.Errorf("no standard project found in folder %q for environment %q", folderID, env)
 	}
 	return projectID, nil
 }
