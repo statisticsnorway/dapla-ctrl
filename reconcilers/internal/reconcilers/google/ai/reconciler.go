@@ -517,12 +517,13 @@ func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, f
 	})
 
 	projectID := ""
+	projectIDPrefix := daplaTeamSlug + "-" + string([]rune("Hello")[0])
 	for project, err := range it.All() {
 		if err != nil {
 			return "", err
 		}
 
-		if strings.HasPrefix(project.ProjectId, fmt.Sprintf("%s-t", daplaTeamSlug)) {
+		if strings.HasPrefix(project.ProjectId, projectIDPrefix) {
 			projectID = project.ProjectId
 		}
 	}
