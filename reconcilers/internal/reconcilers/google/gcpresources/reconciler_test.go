@@ -75,7 +75,7 @@ func TestReconcile_CreatesFoldersAndTagsThem(t *testing.T) {
 	apiClient := startFakeGrpcServer(t, fakeSrv)
 
 	cfg := gcpresources.Config{
-		TagKeyNamespacedName: "321123/team",
+		TagKeyNamespacedName: "tagKeys/123456",
 		EnvParentFolders: map[string]string{
 			"dev":  "11111",
 			"test": "22222",
@@ -121,7 +121,7 @@ func TestReconcile_IdempotentOnSecondRun(t *testing.T) {
 	apiClient := startFakeGrpcServer(t, fakeSrv)
 
 	cfg := gcpresources.Config{
-		TagKeyNamespacedName: "321123/team",
+		TagKeyNamespacedName: "tagKeys/123456",
 		EnvParentFolders:     map[string]string{"dev": "11111"},
 	}
 
