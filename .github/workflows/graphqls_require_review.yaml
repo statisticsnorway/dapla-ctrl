@@ -5,8 +5,14 @@ name: GraphQL Schema Review Check
 run-name: "GraphQL Schema Review Check"
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types:
+      - opened
+      - synchronize
+      - reopened
   pull_request_review:
+
+permissions:
+  contents: read
 
 jobs:
   check-graphql-review:
