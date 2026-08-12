@@ -102,7 +102,7 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 
 func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName string) error {
 	folderResource := fmt.Sprintf("//cloudresourcemanager.googleapis.com/folders/%s", fID)
-	_, err := g.tagBindings.CreateTagBinding(ctx, &resourcemanagerpb.CreateTagBindingRequest{
+	op, err := g.tagBindings.CreateTagBinding(ctx, &resourcemanagerpb.CreateTagBindingRequest{
 		TagBinding: &resourcemanagerpb.TagBinding{
 			Parent:                 folderResource,
 			TagValueNamespacedName: tagValueName,
@@ -111,6 +111,11 @@ func (g *GoogleResourceManager) TagFolder(ctx context.Context, fID, tagValueName
 	if status.Code(err) == codes.AlreadyExists {
 		return nil
 	}
+	if err != nil {
+		return err
+	}
+
+	_, err = op.Wait(ctx)
 	return err
 }
 
