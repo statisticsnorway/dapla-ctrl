@@ -51,20 +51,37 @@ type reconciler struct {
 	BudgetNotificationEmails []string
 }
 
-type optFunc func(*reconciler)
+type optFunc func(*reconciler) error
 
 func WithDefaultSettings() optFunc {
-	return func(r *reconciler) {
+	return func(r *reconciler) error {
 		r.AIPlatformUserRole = "ssb.aiplatform.user"
 		r.AIBudgetBillingAccount = "billingAccounts/018A21-E69CB3-A95FA4"
 		// For SAs in the test environment
 		r.GroupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
+
+		return nil
 	}
 }
 
-func WithDaplaStatBudgetNotifications() optFunc {
-	return func(r *reconciler) {
-		r.BudgetNotificationEmails = []string{}
+func WithDaplaStatBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
+	return func(r *reconciler) error {
+		var limit uint = 4
+		members, err := getGroupMembers(ctx, apiclient, "group:dapla-stat-developers@groups.ssb.no", limit)
+
+		if err != nil {
+			return err
+		}
+
+		developerEmails := make([]string, limit)
+
+		for i, member := range members {
+			developerEmails[i] = member.User.Email
+		}
+
+		r.BudgetNotificationEmails = developerEmails
+
+		return nil
 	}
 }
 
@@ -72,7 +89,10 @@ func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
 
 	for _, opt := range opts {
-		opt(r)
+		err := opt(r)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return r, nil
