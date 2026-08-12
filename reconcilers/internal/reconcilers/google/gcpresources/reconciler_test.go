@@ -3,6 +3,7 @@ package gcpresources_test
 import (
 	"context"
 	"net"
+	"strings"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -63,6 +64,45 @@ func startFakeGrpcServer(t *testing.T, srv *fakeGcpTeamResourcesServer) *apiclie
 	t.Cleanup(func() { _ = client.Close() })
 
 	return client
+}
+
+func TestValidateConfig(t *testing.T) {
+	tests := map[string]struct {
+		cfg     gcpresources.Config
+		wantErr string
+	}{
+		"missing tag key": {
+			cfg: gcpresources.Config{
+				EnvParentFolders: map[string]string{"dev": "11111"},
+			},
+			wantErr: "tag key name is required",
+		},
+		"invalid tag key format": {
+			cfg: gcpresources.Config{
+				TagKeyNamespacedName: "123456/team",
+				EnvParentFolders:     map[string]string{"dev": "11111"},
+			},
+			wantErr: "tag key name must be in format tagKeys/{id}",
+		},
+		"missing env folders": {
+			cfg: gcpresources.Config{
+				TagKeyNamespacedName: "tagKeys/123456",
+			},
+			wantErr: "at least one environment parent folder must be configured",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			_, err := gcpresources.New(context.Background(), tt.cfg)
+			if err == nil {
+				t.Fatal("expected error")
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("expected error containing %q, got %q", tt.wantErr, err.Error())
+			}
+		})
+	}
 }
 
 func TestReconcile_CreatesFoldersAndTagsThem(t *testing.T) {
