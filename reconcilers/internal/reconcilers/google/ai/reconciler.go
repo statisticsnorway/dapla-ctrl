@@ -142,7 +142,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	teamTestFolder := resp.GetFolder()
-	testProjectID, err := getProjectID(ctx, services.Project, teamTestFolder.FolderId, daplaTeam.Slug, teamTestFolder.Env)
+	testProjectID, err := getStandardProjectID(ctx, services.Project, teamTestFolder.FolderId, daplaTeam.Slug, teamTestFolder.Env)
 	if err != nil {
 		return err
 	}
@@ -511,7 +511,8 @@ func reconcileVertexAIAPI(ctx context.Context, client *serviceusage.Client, proj
 	return nil
 }
 
-func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, folderID, daplaTeamSlug, env string) (string, error) {
+// Get the project ID of the standard project given a folderID, team slug and environment
+func getStandardProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, folderID, daplaTeamSlug, env string) (string, error) {
 	it := client.SearchProjects(ctx, &resourcemanagerpb.SearchProjectsRequest{
 		Query: fmt.Sprintf("parent:folders/%s", folderID),
 	})
