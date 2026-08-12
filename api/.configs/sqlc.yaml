@@ -188,6 +188,15 @@ sql:
         out: "../internal/grpc/grpcsharedbucketsstopgap/grpcsharedbucketsstopgapsql"
 
   - <<: *default_domain
+    name: "GCP Team Resources GRPC SQL"
+    queries: "../internal/grpc/grpcgcpresources/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "grpcgcpresourcessql"
+        out: "../internal/grpc/grpcgcpresources/grpcgcpresourcessql"
+
+  - <<: *default_domain
     name: "Message SQL"
     queries: "../internal/message/queries"
     gen:

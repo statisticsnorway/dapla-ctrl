@@ -40,6 +40,10 @@ func (a *APIClient) SharedBucketsStopgap() protoapi.SharedBucketsStopgapClient {
 	return protoapi.NewSharedBucketsStopgapClient(a.conn)
 }
 
+func (a *APIClient) GcpTeamResources() protoapi.GcpTeamResourcesClient {
+	return protoapi.NewGcpTeamResourcesClient(a.conn)
+}
+
 func (a *APIClient) Close() error {
 	return a.conn.Close()
 }

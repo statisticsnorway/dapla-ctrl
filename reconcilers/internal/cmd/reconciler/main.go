@@ -12,6 +12,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
 
@@ -123,6 +124,15 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return fmt.Errorf("create parquedit reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(parqueditReconciler)
+
+	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
+		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
+		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
+	})
+	if err != nil {
+		return fmt.Errorf("create GCP resources reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(gcpResourcesReconciler)
 
 	if cfg.GitHub.Enabled {
 		githubTeam, err := team.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)

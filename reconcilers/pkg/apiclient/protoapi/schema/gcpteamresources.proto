@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+option go_package = "./pkg/apiclient/protoapi";
+
+message GcpTeamFolder {
+  string team_slug = 1;
+  string env = 2;
+  string folder_id = 3;
+}
+
+service GcpTeamResources {
+  rpc UpsertTeamFolder(UpsertGcpTeamFolderRequest) returns (UpsertGcpTeamFolderResponse) {}
+  rpc GetTeamFolder(GetGcpTeamFolderRequest) returns (GetGcpTeamFolderResponse) {}
+}
+
+message UpsertGcpTeamFolderRequest {
+  GcpTeamFolder folder = 1;
+}
+
+message UpsertGcpTeamFolderResponse {}
+
+message GetGcpTeamFolderRequest {
+  string team_slug = 1;
+  string env = 2;
+}
+
+message GetGcpTeamFolderResponse {
+  GcpTeamFolder folder = 1;
+}

@@ -30027,6 +30027,8 @@ func (ec *executionContext) _SearchNode(ctx context.Context, sel ast.SelectionSe
 			return graphql.Null
 		}
 		return ec._Group(ctx, sel, obj)
+	case user.User:
+		return ec._User(ctx, sel, &obj)
 	case *user.User:
 		if obj == nil {
 			return graphql.Null
