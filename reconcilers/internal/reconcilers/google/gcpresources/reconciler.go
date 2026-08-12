@@ -3,6 +3,7 @@ package gcpresources
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -33,6 +34,11 @@ func WithResourceManager(c ResourceManager) optFunc {
 }
 
 func New(ctx context.Context, cfg Config, opts ...optFunc) (reconcilers.Reconciler, error) {
+	err := validateConfig(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("invalid config: %w", err)
+	}
+
 	r := &reconciler{cfg: cfg}
 
 	for _, opt := range opts {
@@ -48,6 +54,23 @@ func New(ctx context.Context, cfg Config, opts ...optFunc) (reconcilers.Reconcil
 	}
 
 	return r, nil
+}
+
+func validateConfig(cfg Config) error {
+	cfg.TagKeyNamespacedName = strings.TrimSpace(cfg.TagKeyNamespacedName)
+	if cfg.TagKeyNamespacedName == "" {
+		return fmt.Errorf("tag key name is required")
+	}
+
+	tagKeyID := strings.TrimPrefix(cfg.TagKeyNamespacedName, "tagKeys/")
+	if tagKeyID == cfg.TagKeyNamespacedName || tagKeyID == "" {
+		return fmt.Errorf("tag key name must be in format tagKeys/{id}")
+	}
+
+	if len(cfg.EnvParentFolders) == 0 {
+		return fmt.Errorf("at least one environment parent folder must be configured")
+	}
+	return nil
 }
 
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
