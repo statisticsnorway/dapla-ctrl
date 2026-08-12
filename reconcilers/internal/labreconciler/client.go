@@ -55,7 +55,7 @@ func (c *client) EnableParquedit(ctx context.Context, team string) error {
 	if err != nil {
 		return err
 	}
-	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	correlationID := ctx.Value(reconcilers.CtxCorrelationID).(string)
 	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)
@@ -76,7 +76,7 @@ func (c *client) HasParquedit(ctx context.Context, team string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	correlationID := ctx.Value(reconcilers.CtxCorrelationID).(string)
 	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)
@@ -95,12 +95,13 @@ func (c *client) HasParquedit(ctx context.Context, team string) (bool, error) {
 
 	return false, fmt.Errorf("unexpected response code %d: %s", resp.StatusCode, resp.Status)
 }
+
 func (c *client) DisableParquedit(ctx context.Context, team string) error {
 	req, err := http.NewRequestWithContext(ctx, "DELETE", fmt.Sprintf("%s/parquedit/%s", c.endpoint, team), nil)
 	if err != nil {
 		return err
 	}
-	correlationID  := ctx.Value(reconcilers.CtxCorrelationID).(string)
+	correlationID := ctx.Value(reconcilers.CtxCorrelationID).(string)
 	req.Header.Add(traceHeaderName, correlationID)
 
 	resp, err := c.do(req)

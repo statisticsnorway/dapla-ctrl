@@ -16,7 +16,7 @@ const reconcilerName = "google:gcpresources"
 
 type Config struct {
 	TagKeyNamespacedName string
-	EnvParentFolders map[string]string
+	EnvParentFolders     map[string]string
 }
 
 type reconciler struct {

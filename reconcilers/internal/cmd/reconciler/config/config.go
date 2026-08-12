@@ -8,9 +8,9 @@ import (
 
 type Config struct {
 	GCP struct {
-		TeamKeyNamespacedName string `env:"GCP_TEAM_TAG_KEY_NAMESPACED_NAME"`
+		TeamKeyNamespacedName string            `env:"GCP_TEAM_TAG_KEY_NAMESPACED_NAME"`
 		TeamsFolderNumbers    map[string]string `env:"GCP_TEAMS_FOLDER_NUMBERS"`
-		}
+	}
 
 	GRPC struct {
 		// Target The target address for the gRPC server.
