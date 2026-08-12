@@ -517,7 +517,7 @@ func getProjectID(ctx context.Context, client *resourcemanager.ProjectsClient, f
 	})
 
 	projectID := ""
-	projectIDPrefix := daplaTeamSlug + "-" + string([]rune("Hello")[0])
+	projectIDPrefix := daplaTeamSlug + "-" + string([]rune(env)[0])
 	for project, err := range it.All() {
 		if err != nil {
 			return "", err
