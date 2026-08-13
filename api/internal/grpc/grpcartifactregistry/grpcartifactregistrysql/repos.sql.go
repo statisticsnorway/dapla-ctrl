@@ -27,11 +27,9 @@ func (q *Queries) CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64
 
 const get = `-- name: Get :one
 SELECT
-	ar.team_slug, ar.format, ar.size_bytes,
-	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+	ar.team_slug, ar.format, ar.size_bytes
 FROM
 	team_artifact_registry_repositories ar
-	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
 	team_slug = $1::slug
 	AND format = $2
@@ -44,18 +42,12 @@ type GetParams struct {
 
 type GetRow struct {
 	TeamArtifactRegistryRepository TeamArtifactRegistryRepository
-	GithubRepos                    []string
 }
 
 func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 	row := q.db.QueryRow(ctx, get, arg.TeamSlug, arg.Format)
 	var i GetRow
-	err := row.Scan(
-		&i.TeamArtifactRegistryRepository.TeamSlug,
-		&i.TeamArtifactRegistryRepository.Format,
-		&i.TeamArtifactRegistryRepository.SizeBytes,
-		&i.GithubRepos,
-	)
+	err := row.Scan(&i.TeamArtifactRegistryRepository.TeamSlug, &i.TeamArtifactRegistryRepository.Format, &i.TeamArtifactRegistryRepository.SizeBytes)
 	return &i, err
 }
 
@@ -67,6 +59,8 @@ FROM
 	team_artifact_registry_github_repositories gr
 WHERE
 	team_slug = $1::slug
+GROUP BY
+	team_slug
 LIMIT
 	$3
 OFFSET
@@ -98,7 +92,7 @@ FROM
 	team_artifact_registry_repositories ar
 	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
-	team_slug = $1::slug
+	ar.team_slug = $1::slug
 ORDER BY
 	format ASC
 LIMIT
