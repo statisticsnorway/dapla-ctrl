@@ -1,7 +1,3 @@
-// Reconciles these resources for a Dapla Team:
-// - Google's Vertex AI (Gemini Enterprise Agent Platform)
-// - IAM permissions for Dapla teams
-// - CloudBilling budget and notification channels
 package ai
 
 import (
@@ -68,7 +64,6 @@ func WithDaplaStatBudgetNotifications(ctx context.Context, apiclient *apiclient.
 	return func(r *reconciler) error {
 		var limit uint = 4
 		members, err := getGroupMembers(ctx, apiclient, "group:dapla-stat-developers@groups.ssb.no", limit)
-
 		if err != nil {
 			return err
 		}
@@ -144,7 +139,6 @@ func createGoogleClients(ctx context.Context) (*googleServices, error) {
 		CloudBudget:         budgetService,
 		NotificationChannel: ncService,
 	}, nil
-
 }
 
 // Reconcile implements [reconcilers.Reconciler].
@@ -163,7 +157,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		TeamSlug: daplaTeam.Slug,
 		Env:      "test",
 	})
-
 	if err != nil {
 		return err
 	}
@@ -252,7 +245,6 @@ func membersHaveAIPlatformUserBinding(r *reconciler, ctx context.Context, projec
 
 // Ensures a dapla team's developers group and corresponding SA has the AI Platform user role on the project.
 func reconcileAIPlatformUserBinding(r *reconciler, ctx context.Context, projectsClient *resourcemanager.ProjectsClient, daplaTeamSlug, projectID string, enabled bool) error {
-
 	members := getIAMMembers(r, daplaTeamSlug)
 
 	projectName := "projects/" + projectID
