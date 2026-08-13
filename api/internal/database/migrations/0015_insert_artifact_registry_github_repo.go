@@ -798,5 +798,6 @@ func getTeamsAndArtifactRegistryGithubRepos() map[string][]string {
 		},
 		"vof": {
 			"vof-iac",
-		}}
+		},
+	}
 }

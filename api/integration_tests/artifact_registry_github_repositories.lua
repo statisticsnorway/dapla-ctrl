@@ -144,7 +144,7 @@ Test.gql("List artifact registry Github repositories for a team", function(t)
 								slug = team:slug(),
 							},
 						},
-					}
+					},
 				},
 			},
 		},
