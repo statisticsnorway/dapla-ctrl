@@ -4,7 +4,6 @@ package gengql
 
 import (
 	activitylog "github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
-	artifactregistry "github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	pagination "github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	group "github.com/statisticsnorway/dapla-ctrl/api/internal/group"
 	message "github.com/statisticsnorway/dapla-ctrl/api/internal/message"
@@ -93,13 +92,13 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.ActivityLog = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Team.ArtifactRegistryGithubRepository = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Team.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.Members = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
-		return cursorComplexity(first, last) * childComplexity
-	}
-	c.Team.Repositories = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *artifactregistry.RepositoryOrder, filter *artifactregistry.TeamRepositoryFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.SharedBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int {

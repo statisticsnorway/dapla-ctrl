@@ -6,8 +6,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-type TeamArtifactRegistryRepository struct {
-	TeamSlug  slug.Slug
-	Format    string
-	SizeBytes int64
+type TeamArtifactRegistryGithubRepository struct {
+	TeamSlug         slug.Slug
+	GithubRepository string
 }

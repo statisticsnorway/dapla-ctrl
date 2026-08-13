@@ -9,48 +9,64 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-const listForTeam = `-- name: ListForTeam :many
+const addGithubRepositoryToTeam = `-- name: AddGithubRepositoryToTeam :one
+INSERT INTO
+	team_artifact_registry_github_repositories (team_slug, github_repository)
+VALUES
+	($1, $2)
+RETURNING
+	team_slug, github_repository
+`
+
+type AddGithubRepositoryToTeamParams struct {
+	TeamSlug         slug.Slug
+	GithubRepository string
+}
+
+func (q *Queries) AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGithubRepository, error) {
+	row := q.db.QueryRow(ctx, addGithubRepositoryToTeam, arg.TeamSlug, arg.GithubRepository)
+	var i TeamArtifactRegistryGithubRepository
+	err := row.Scan(&i.TeamSlug, &i.GithubRepository)
+	return &i, err
+}
+
+const listGithubReposForTeam = `-- name: ListGithubReposForTeam :many
 SELECT
-	team_artifact_registry_repositories.team_slug, team_artifact_registry_repositories.format, team_artifact_registry_repositories.size_bytes,
+	team_artifact_registry_github_repositories.team_slug, team_artifact_registry_github_repositories.github_repository,
 	COUNT(*) OVER () AS total_count
 FROM
-	team_artifact_registry_repositories
+	team_artifact_registry_github_repositories
 WHERE
 	team_slug = $1
 ORDER BY
-	format ASC
+	github_repository ASC
 LIMIT
 	$3
 OFFSET
 	$2
 `
 
-type ListForTeamParams struct {
+type ListGithubReposForTeamParams struct {
 	TeamSlug slug.Slug
 	Offset   int32
 	Limit    int32
 }
 
-type ListForTeamRow struct {
-	TeamArtifactRegistryRepository TeamArtifactRegistryRepository
-	TotalCount                     int64
+type ListGithubReposForTeamRow struct {
+	TeamArtifactRegistryGithubRepository TeamArtifactRegistryGithubRepository
+	TotalCount                           int64
 }
 
-func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error) {
-	rows, err := q.db.Query(ctx, listForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
+func (q *Queries) ListGithubReposForTeam(ctx context.Context, arg ListGithubReposForTeamParams) ([]*ListGithubReposForTeamRow, error) {
+	rows, err := q.db.Query(ctx, listGithubReposForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []*ListForTeamRow{}
+	items := []*ListGithubReposForTeamRow{}
 	for rows.Next() {
-		var i ListForTeamRow
-		if err := rows.Scan(
-			&i.TeamArtifactRegistryRepository.TeamSlug,
-			&i.TeamArtifactRegistryRepository.Format,
-			&i.TeamArtifactRegistryRepository.SizeBytes,
-			&i.TotalCount,
-		); err != nil {
+		var i ListGithubReposForTeamRow
+		if err := rows.Scan(&i.TeamArtifactRegistryGithubRepository.TeamSlug, &i.TeamArtifactRegistryGithubRepository.GithubRepository, &i.TotalCount); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -59,4 +75,21 @@ func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*Li
 		return nil, err
 	}
 	return items, nil
+}
+
+const removeGithubRepositoryFromTeam = `-- name: RemoveGithubRepositoryFromTeam :exec
+DELETE FROM team_artifact_registry_github_repositories
+WHERE
+	team_slug = $1
+	AND github_repository = $2
+`
+
+type RemoveGithubRepositoryFromTeamParams struct {
+	TeamSlug         slug.Slug
+	GithubRepository string
+}
+
+func (q *Queries) RemoveGithubRepositoryFromTeam(ctx context.Context, arg RemoveGithubRepositoryFromTeamParams) error {
+	_, err := q.db.Exec(ctx, removeGithubRepositoryFromTeam, arg.TeamSlug, arg.GithubRepository)
+	return err
 }

@@ -11,11 +11,11 @@ import (
 
 const countTeamRepos = `-- name: CountTeamRepos :one
 SELECT
-    COUNT(*) as total
+	COUNT(*) AS total
 FROM
-    team_artifact_registry_repositories
+	team_artifact_registry_repositories
 WHERE
-   team_slug = $1::slug
+	team_slug = $1::slug
 `
 
 func (q *Queries) CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64, error) {
@@ -27,14 +27,14 @@ func (q *Queries) CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64
 
 const get = `-- name: Get :one
 SELECT
-    ar.team_slug, ar.format, ar.size_bytes,
-    ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+	ar.team_slug, ar.format, ar.size_bytes,
+	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
 FROM
-    team_artifact_registry_repositories ar
-    JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
+	team_artifact_registry_repositories ar
+	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
-    team_slug = $1::slug AND
-    format = $2
+	team_slug = $1::slug
+	AND format = $2
 `
 
 type GetParams struct {
@@ -61,17 +61,18 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 
 const list = `-- name: List :many
 SELECT
-    team_artifact_registry_repositories.team_slug, team_artifact_registry_repositories.format, team_artifact_registry_repositories.size_bytes
+	ar.team_slug, ar.format, ar.size_bytes
 FROM
-    team_artifact_registry_repositories
+	team_artifact_registry_repositories ar
+	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
-    team_slug = $1::slug
+	team_slug = $1::slug
 ORDER BY
-    format ASC
+	format ASC
 LIMIT
-    $3
+	$3
 OFFSET
-    $2
+	$2
 `
 
 type ListParams struct {
@@ -105,13 +106,12 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 }
 
 const setSizeBytes = `-- name: SetSizeBytes :exec
-UPDATE
-    team_artifact_registry_repositories
+UPDATE team_artifact_registry_repositories
 SET
-    size_bytes = $1
+	size_bytes = $1
 WHERE
-    team_slug = $2::slug AND
-    format = $3
+	team_slug = $2::slug
+	AND format = $3
 `
 
 type SetSizeBytesParams struct {

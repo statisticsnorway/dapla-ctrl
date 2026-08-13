@@ -13,18 +13,18 @@ import (
 )
 
 type (
-	RepositoryConnection = pagination.Connection[*Repository]
-	RepositoryEdge       = pagination.Edge[*Repository]
+	ArtifactRegistryGithubRepositoryConnection = pagination.Connection[*ArtifactRegistryGithubRepository]
+	ArtifactRegistryGithubRepositoryEdge       = pagination.Edge[*ArtifactRegistryGithubRepository]
 )
 
-func (Repository) IsNode() {}
+func (ArtifactRegistryGithubRepository) IsNode() {}
 
-type RepositoryOrder struct {
-	Field     RepositoryOrderField `json:"field"`
-	Direction model.OrderDirection `json:"direction"`
+type ArtifactRegistryGithubRepositoryOrder struct {
+	Field     ArtifactRegistryGithubRepositoryOrderField `json:"field"`
+	Direction model.OrderDirection                       `json:"direction"`
 }
 
-func (o *RepositoryOrder) String() string {
+func (o *ArtifactRegistryGithubRepositoryOrder) String() string {
 	if o == nil {
 		return ""
 	}
@@ -32,37 +32,37 @@ func (o *RepositoryOrder) String() string {
 	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
 }
 
-type RepositoryOrderField string
+type ArtifactRegistryGithubRepositoryOrderField string
 
 const (
-	RepositoryOrderFieldName RepositoryOrderField = "NAME"
+	ArtifactRegistryGithubRepositoryOrderFieldName ArtifactRegistryGithubRepositoryOrderField = "NAME"
 )
 
-var AllRepositoryOrderFields = []RepositoryOrderField{
-	RepositoryOrderFieldName,
+var AllArtifactRegistryGithubRepositoryOrderFields = []ArtifactRegistryGithubRepositoryOrderField{
+	ArtifactRegistryGithubRepositoryOrderFieldName,
 }
 
-func (e RepositoryOrderField) IsValid() bool {
-	return slices.Contains(AllRepositoryOrderFields, e)
+func (e ArtifactRegistryGithubRepositoryOrderField) IsValid() bool {
+	return slices.Contains(AllArtifactRegistryGithubRepositoryOrderFields, e)
 }
 
-func (e RepositoryOrderField) String() string {
+func (e ArtifactRegistryGithubRepositoryOrderField) String() string {
 	return string(e)
 }
 
-func (e *RepositoryOrderField) UnmarshalGQL(v any) error {
+func (e *ArtifactRegistryGithubRepositoryOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = RepositoryOrderField(str)
+	*e = ArtifactRegistryGithubRepositoryOrderField(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid RepositoryOrderField", str)
+		return fmt.Errorf("%s is not a valid ArtifactRegistryGithubRepositoryOrderField", str)
 	}
 	return nil
 }
 
-func (e RepositoryOrderField) MarshalGQL(w io.Writer) {
+func (e ArtifactRegistryGithubRepositoryOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

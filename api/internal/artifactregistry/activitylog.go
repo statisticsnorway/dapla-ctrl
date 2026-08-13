@@ -7,19 +7,19 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeArtifactRegistryRepository activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_REPOSITORY"
+	activityLogEntryResourceTypeArtifactRegistryGithubRepository activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY"
 )
 
 func init() {
-	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryRepository, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
+	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryGithubRepository, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
 		switch entry.Action {
 		case activitylog.ActivityLogEntryActionAdded:
-			return TeamArtifactRegistryRepositoryAddedActivityLogEntry{
-				GenericActivityLogEntry: entry.WithMessage("Added repository to team"),
+			return ArtifactRegistryGithubRepositoryAddedActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Added artifact registry github repository to team"),
 			}, nil
 		case activitylog.ActivityLogEntryActionRemoved:
-			return TeamArtifactRegistryRepositoryRemovedActivityLogEntry{
-				GenericActivityLogEntry: entry.WithMessage("Removed repository from team"),
+			return ArtifactRegistryGithubRepositoryRemovedActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Removed artifact registry github repository from team"),
 			}, nil
 
 		default:
@@ -27,14 +27,14 @@ func init() {
 		}
 	})
 
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_REPOSITORY_ADDED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryRepository)
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_REPOSITORY_REMOVED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryRepository)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ADDED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryGithubRepository)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_REMOVED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryGithubRepository)
 }
 
-type TeamArtifactRegistryRepositoryAddedActivityLogEntry struct {
+type ArtifactRegistryGithubRepositoryAddedActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
 }
 
-type TeamArtifactRegistryRepositoryRemovedActivityLogEntry struct {
+type ArtifactRegistryGithubRepositoryRemovedActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
 }

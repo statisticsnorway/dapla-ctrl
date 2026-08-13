@@ -7,7 +7,9 @@ import (
 )
 
 type Querier interface {
-	ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error)
+	AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGithubRepository, error)
+	ListGithubReposForTeam(ctx context.Context, arg ListGithubReposForTeamParams) ([]*ListGithubReposForTeamRow, error)
+	RemoveGithubRepositoryFromTeam(ctx context.Context, arg RemoveGithubRepositoryFromTeamParams) error
 }
 
 var _ Querier = (*Queries)(nil)

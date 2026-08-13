@@ -17,7 +17,6 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/feature"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/github/repository"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
@@ -49,6 +48,7 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	AddTeamAccessManagerPayload() AddTeamAccessManagerPayloadResolver
+	ArtifactRegistryGithubRepository() ArtifactRegistryGithubRepositoryResolver
 	Group() GroupResolver
 	GroupMember() GroupMemberResolver
 	Message() MessageResolver
@@ -58,7 +58,6 @@ type ResolverRoot interface {
 	ReconcilerError() ReconcilerErrorResolver
 	RemoveGroupMemberPayload() RemoveGroupMemberPayloadResolver
 	RemoveTeamAccessManagerPayload() RemoveTeamAccessManagerPayloadResolver
-	Repository() RepositoryResolver
 	Section() SectionResolver
 	ServiceAccount() ServiceAccountResolver
 	SharedBucket() SharedBucketResolver
@@ -86,17 +85,54 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
-	AddGroupMemberPayload struct {
-		Member func(childComplexity int) int
+	AddArtifactRegistryGithubRepositoryToTeamPayload struct {
+		Repository func(childComplexity int) int
 	}
 
-	AddRepositoryToTeamPayload struct {
-		Repository func(childComplexity int) int
+	AddGroupMemberPayload struct {
+		Member func(childComplexity int) int
 	}
 
 	AddTeamAccessManagerPayload struct {
 		Team func(childComplexity int) int
 		User func(childComplexity int) int
+	}
+
+	ArtifactRegistryGithubRepository struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+		Team func(childComplexity int) int
+	}
+
+	ArtifactRegistryGithubRepositoryAddedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	ArtifactRegistryGithubRepositoryConnection struct {
+		Edges    func(childComplexity int) int
+		Nodes    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	ArtifactRegistryGithubRepositoryEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	ArtifactRegistryGithubRepositoryRemovedActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
 	}
 
 	AssignRoleToServiceAccountPayload struct {
@@ -234,27 +270,27 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddGroupMember               func(childComplexity int, input group.AddGroupMemberInput) int
-		AddRepositoryToTeam          func(childComplexity int, input artifactregistry.AddRepositoryToTeamInput) int
-		AddTeamAccessManager         func(childComplexity int, input team.AddTeamAccessManagerInput) int
-		AssignRoleToServiceAccount   func(childComplexity int, input serviceaccount.AssignRoleToServiceAccountInput) int
-		ConfigureReconciler          func(childComplexity int, input reconciler.ConfigureReconcilerInput) int
-		CreateGroup                  func(childComplexity int, input group.CreateGroupInput) int
-		CreateServiceAccount         func(childComplexity int, input serviceaccount.CreateServiceAccountInput) int
-		CreateServiceAccountToken    func(childComplexity int, input serviceaccount.CreateServiceAccountTokenInput) int
-		CreateTeam                   func(childComplexity int, input team.CreateTeamInput) int
-		DeleteServiceAccount         func(childComplexity int, input serviceaccount.DeleteServiceAccountInput) int
-		DeleteServiceAccountToken    func(childComplexity int, input serviceaccount.DeleteServiceAccountTokenInput) int
-		DisableReconciler            func(childComplexity int, input reconciler.DisableReconcilerInput) int
-		EnableReconciler             func(childComplexity int, input reconciler.EnableReconcilerInput) int
-		RemoveGroupMember            func(childComplexity int, input group.RemoveGroupMemberInput) int
-		RemoveRepositoryFromTeam     func(childComplexity int, input artifactregistry.RemoveRepositoryFromTeamInput) int
-		RemoveTeamAccessManager      func(childComplexity int, input team.RemoveTeamAccessManagerInput) int
-		RevokeRoleFromServiceAccount func(childComplexity int, input serviceaccount.RevokeRoleFromServiceAccountInput) int
-		SendMessage                  func(childComplexity int, input message.SendMessageInput) int
-		UpdateServiceAccount         func(childComplexity int, input serviceaccount.UpdateServiceAccountInput) int
-		UpdateServiceAccountToken    func(childComplexity int, input serviceaccount.UpdateServiceAccountTokenInput) int
-		UpdateTeam                   func(childComplexity int, input team.UpdateTeamInput) int
+		AddArtifactRegistryGithubRepositoryToTeam      func(childComplexity int, input artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput) int
+		AddGroupMember                                 func(childComplexity int, input group.AddGroupMemberInput) int
+		AddTeamAccessManager                           func(childComplexity int, input team.AddTeamAccessManagerInput) int
+		AssignRoleToServiceAccount                     func(childComplexity int, input serviceaccount.AssignRoleToServiceAccountInput) int
+		ConfigureReconciler                            func(childComplexity int, input reconciler.ConfigureReconcilerInput) int
+		CreateGroup                                    func(childComplexity int, input group.CreateGroupInput) int
+		CreateServiceAccount                           func(childComplexity int, input serviceaccount.CreateServiceAccountInput) int
+		CreateServiceAccountToken                      func(childComplexity int, input serviceaccount.CreateServiceAccountTokenInput) int
+		CreateTeam                                     func(childComplexity int, input team.CreateTeamInput) int
+		DeleteServiceAccount                           func(childComplexity int, input serviceaccount.DeleteServiceAccountInput) int
+		DeleteServiceAccountToken                      func(childComplexity int, input serviceaccount.DeleteServiceAccountTokenInput) int
+		DisableReconciler                              func(childComplexity int, input reconciler.DisableReconcilerInput) int
+		EnableReconciler                               func(childComplexity int, input reconciler.EnableReconcilerInput) int
+		RemoveArtifactRegistryGithubRepositoryFromTeam func(childComplexity int, input artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput) int
+		RemoveGroupMember                              func(childComplexity int, input group.RemoveGroupMemberInput) int
+		RemoveTeamAccessManager                        func(childComplexity int, input team.RemoveTeamAccessManagerInput) int
+		RevokeRoleFromServiceAccount                   func(childComplexity int, input serviceaccount.RevokeRoleFromServiceAccountInput) int
+		SendMessage                                    func(childComplexity int, input message.SendMessageInput) int
+		UpdateServiceAccount                           func(childComplexity int, input serviceaccount.UpdateServiceAccountInput) int
+		UpdateServiceAccountToken                      func(childComplexity int, input serviceaccount.UpdateServiceAccountTokenInput) int
+		UpdateTeam                                     func(childComplexity int, input team.UpdateTeamInput) int
 	}
 
 	PageInfo struct {
@@ -379,55 +415,18 @@ type ComplexityRoot struct {
 		Node   func(childComplexity int) int
 	}
 
+	RemoveArtifactRegistryGithubRepositoryFromTeamPayload struct {
+		Success func(childComplexity int) int
+	}
+
 	RemoveGroupMemberPayload struct {
 		Group func(childComplexity int) int
 		User  func(childComplexity int) int
 	}
 
-	RemoveRepositoryFromTeamPayload struct {
-		Success func(childComplexity int) int
-	}
-
 	RemoveTeamAccessManagerPayload struct {
 		Team func(childComplexity int) int
 		User func(childComplexity int) int
-	}
-
-	Repository struct {
-		ID   func(childComplexity int) int
-		Name func(childComplexity int) int
-		Team func(childComplexity int) int
-	}
-
-	RepositoryAddedActivityLogEntry struct {
-		Actor        func(childComplexity int) int
-		CreatedAt    func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Message      func(childComplexity int) int
-		ResourceName func(childComplexity int) int
-		ResourceType func(childComplexity int) int
-		TeamSlug     func(childComplexity int) int
-	}
-
-	RepositoryConnection struct {
-		Edges    func(childComplexity int) int
-		Nodes    func(childComplexity int) int
-		PageInfo func(childComplexity int) int
-	}
-
-	RepositoryEdge struct {
-		Cursor func(childComplexity int) int
-		Node   func(childComplexity int) int
-	}
-
-	RepositoryRemovedActivityLogEntry struct {
-		Actor        func(childComplexity int) int
-		CreatedAt    func(childComplexity int) int
-		ID           func(childComplexity int) int
-		Message      func(childComplexity int) int
-		ResourceName func(childComplexity int) int
-		ResourceType func(childComplexity int) int
-		TeamSlug     func(childComplexity int) int
 	}
 
 	RevokeRoleFromServiceAccountPayload struct {
@@ -712,25 +711,25 @@ type ComplexityRoot struct {
 	}
 
 	Team struct {
-		AccessManagers         func(childComplexity int) int
-		ActivityLog            func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
-		DeletionInProgress     func(childComplexity int) int
-		DisplayName            func(childComplexity int) int
-		Groups                 func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
-		HasManualEditing       func(childComplexity int) int
-		ID                     func(childComplexity int) int
-		IsManaged              func(childComplexity int) int
-		LastSuccessfulSync     func(childComplexity int) int
-		Members                func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
-		Repositories           func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *artifactregistry.RepositoryOrder, filter *artifactregistry.TeamRepositoryFilter) int
-		Section                func(childComplexity int) int
-		SharedBuckets          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
-		SharedBucketsAccess    func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
-		Slug                   func(childComplexity int) int
-		ViewerCanManageMembers func(childComplexity int) int
-		ViewerIsMember         func(childComplexity int) int
-		ViewerIsOwner          func(childComplexity int) int
-		ViewerTeamMember       func(childComplexity int) int
+		AccessManagers                   func(childComplexity int) int
+		ActivityLog                      func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) int
+		ArtifactRegistryGithubRepository func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		DeletionInProgress               func(childComplexity int) int
+		DisplayName                      func(childComplexity int) int
+		Groups                           func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
+		HasManualEditing                 func(childComplexity int) int
+		ID                               func(childComplexity int) int
+		IsManaged                        func(childComplexity int) int
+		LastSuccessfulSync               func(childComplexity int) int
+		Members                          func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
+		Section                          func(childComplexity int) int
+		SharedBuckets                    func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
+		SharedBucketsAccess              func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
+		Slug                             func(childComplexity int) int
+		ViewerCanManageMembers           func(childComplexity int) int
+		ViewerIsMember                   func(childComplexity int) int
+		ViewerIsOwner                    func(childComplexity int) int
+		ViewerTeamMember                 func(childComplexity int) int
 	}
 
 	TeamAccessManager struct {
@@ -928,6 +927,9 @@ type AddTeamAccessManagerPayloadResolver interface {
 	Team(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*team.Team, error)
 	User(ctx context.Context, obj *team.AddTeamAccessManagerPayload) (*user.User, error)
 }
+type ArtifactRegistryGithubRepositoryResolver interface {
+	Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryGithubRepository) (*team.Team, error)
+}
 type GroupResolver interface {
 	Members(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*group.GroupMember], error)
 	SharedBucketsAccess(ctx context.Context, obj *group.Group, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
@@ -943,6 +945,8 @@ type MessageResolver interface {
 	Recipient(ctx context.Context, obj *message.Message) (*user.User, error)
 }
 type MutationResolver interface {
+	AddArtifactRegistryGithubRepositoryToTeam(ctx context.Context, input artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput) (*artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload, error)
+	RemoveArtifactRegistryGithubRepositoryFromTeam(ctx context.Context, input artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput) (*artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload, error)
 	CreateGroup(ctx context.Context, input group.CreateGroupInput) (*group.CreateGroupPayload, error)
 	AddGroupMember(ctx context.Context, input group.AddGroupMemberInput) (*group.AddGroupMemberPayload, error)
 	RemoveGroupMember(ctx context.Context, input group.RemoveGroupMemberInput) (*group.RemoveGroupMemberPayload, error)
@@ -950,8 +954,6 @@ type MutationResolver interface {
 	EnableReconciler(ctx context.Context, input reconciler.EnableReconcilerInput) (*reconciler.Reconciler, error)
 	DisableReconciler(ctx context.Context, input reconciler.DisableReconcilerInput) (*reconciler.Reconciler, error)
 	ConfigureReconciler(ctx context.Context, input reconciler.ConfigureReconcilerInput) (*reconciler.Reconciler, error)
-	AddRepositoryToTeam(ctx context.Context, input artifactregistry.AddRepositoryToTeamInput) (*artifactregistry.AddRepositoryToTeamPayload, error)
-	RemoveRepositoryFromTeam(ctx context.Context, input artifactregistry.RemoveRepositoryFromTeamInput) (*artifactregistry.RemoveRepositoryFromTeamPayload, error)
 	CreateServiceAccount(ctx context.Context, input serviceaccount.CreateServiceAccountInput) (*serviceaccount.CreateServiceAccountPayload, error)
 	UpdateServiceAccount(ctx context.Context, input serviceaccount.UpdateServiceAccountInput) (*serviceaccount.UpdateServiceAccountPayload, error)
 	DeleteServiceAccount(ctx context.Context, input serviceaccount.DeleteServiceAccountInput) (*serviceaccount.DeleteServiceAccountPayload, error)
@@ -1007,10 +1009,6 @@ type RemoveTeamAccessManagerPayloadResolver interface {
 	Team(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*team.Team, error)
 	User(ctx context.Context, obj *team.RemoveTeamAccessManagerPayload) (*user.User, error)
 }
-type RepositoryResolver interface {
-	Name(ctx context.Context, obj *artifactregistry.Repository) (string, error)
-	Team(ctx context.Context, obj *artifactregistry.Repository) (*team.Team, error)
-}
 type SectionResolver interface {
 	Manager(ctx context.Context, obj *section.Section) (*user.User, error)
 }
@@ -1046,7 +1044,7 @@ type TeamResolver interface {
 	ViewerTeamMember(ctx context.Context, obj *team.Team) (*team.TeamMember, error)
 	AccessManagers(ctx context.Context, obj *team.Team) ([]*team.TeamAccessManager, error)
 	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
-	Repositories(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *artifactregistry.RepositoryOrder, filter *artifactregistry.TeamRepositoryFilter) (*pagination.Connection[*artifactregistry.Repository], error)
+	ArtifactRegistryGithubRepository(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository], error)
 }
 type TeamAccessManagerResolver interface {
 	Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error)
@@ -1122,19 +1120,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.ActivityLogEntryEdge.Node(childComplexity), true
 
+	case "AddArtifactRegistryGithubRepositoryToTeamPayload.repository":
+		if e.ComplexityRoot.AddArtifactRegistryGithubRepositoryToTeamPayload.Repository == nil {
+			break
+		}
+
+		return e.ComplexityRoot.AddArtifactRegistryGithubRepositoryToTeamPayload.Repository(childComplexity), true
+
 	case "AddGroupMemberPayload.member":
 		if e.ComplexityRoot.AddGroupMemberPayload.Member == nil {
 			break
 		}
 
 		return e.ComplexityRoot.AddGroupMemberPayload.Member(childComplexity), true
-
-	case "AddRepositoryToTeamPayload.repository":
-		if e.ComplexityRoot.AddRepositoryToTeamPayload.Repository == nil {
-			break
-		}
-
-		return e.ComplexityRoot.AddRepositoryToTeamPayload.Repository(childComplexity), true
 
 	case "AddTeamAccessManagerPayload.team":
 		if e.ComplexityRoot.AddTeamAccessManagerPayload.Team == nil {
@@ -1148,6 +1146,143 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.AddTeamAccessManagerPayload.User(childComplexity), true
+
+	case "ArtifactRegistryGithubRepository.id":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepository.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepository.ID(childComplexity), true
+	case "ArtifactRegistryGithubRepository.name":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepository.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepository.Name(childComplexity), true
+	case "ArtifactRegistryGithubRepository.team":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepository.Team == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepository.Team(childComplexity), true
+
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.actor":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.Actor(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.createdAt":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.CreatedAt(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.id":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ID(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.message":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.Message(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.resourceName":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ResourceName(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.resourceType":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.ResourceType(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryAddedActivityLogEntry.teamSlug":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryAddedActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "ArtifactRegistryGithubRepositoryConnection.edges":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.Edges(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryConnection.nodes":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.Nodes(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryConnection.pageInfo":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryConnection.PageInfo(childComplexity), true
+
+	case "ArtifactRegistryGithubRepositoryEdge.cursor":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryEdge.Cursor(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryEdge.node":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryEdge.Node(childComplexity), true
+
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.actor":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.Actor(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.createdAt":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.CreatedAt(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.id":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ID(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.message":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.Message(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.resourceName":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ResourceName(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.resourceType":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.ResourceType(childComplexity), true
+	case "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.teamSlug":
+		if e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "AssignRoleToServiceAccountPayload.serviceAccount":
 		if e.ComplexityRoot.AssignRoleToServiceAccountPayload.ServiceAccount == nil {
@@ -1594,6 +1729,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.MessageEdge.Node(childComplexity), true
 
+	case "Mutation.addArtifactRegistryGithubRepositoryToTeam":
+		if e.ComplexityRoot.Mutation.AddArtifactRegistryGithubRepositoryToTeam == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addArtifactRegistryGithubRepositoryToTeam_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.AddArtifactRegistryGithubRepositoryToTeam(childComplexity, args["input"].(artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput)), true
 	case "Mutation.addGroupMember":
 		if e.ComplexityRoot.Mutation.AddGroupMember == nil {
 			break
@@ -1605,17 +1751,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.AddGroupMember(childComplexity, args["input"].(group.AddGroupMemberInput)), true
-	case "Mutation.addRepositoryToTeam":
-		if e.ComplexityRoot.Mutation.AddRepositoryToTeam == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_addRepositoryToTeam_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Mutation.AddRepositoryToTeam(childComplexity, args["input"].(artifactregistry.AddRepositoryToTeamInput)), true
 	case "Mutation.addTeamAccessManager":
 		if e.ComplexityRoot.Mutation.AddTeamAccessManager == nil {
 			break
@@ -1737,6 +1872,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.EnableReconciler(childComplexity, args["input"].(reconciler.EnableReconcilerInput)), true
+	case "Mutation.removeArtifactRegistryGithubRepositoryFromTeam":
+		if e.ComplexityRoot.Mutation.RemoveArtifactRegistryGithubRepositoryFromTeam == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeArtifactRegistryGithubRepositoryFromTeam_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.RemoveArtifactRegistryGithubRepositoryFromTeam(childComplexity, args["input"].(artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput)), true
 	case "Mutation.removeGroupMember":
 		if e.ComplexityRoot.Mutation.RemoveGroupMember == nil {
 			break
@@ -1748,17 +1894,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.RemoveGroupMember(childComplexity, args["input"].(group.RemoveGroupMemberInput)), true
-	case "Mutation.removeRepositoryFromTeam":
-		if e.ComplexityRoot.Mutation.RemoveRepositoryFromTeam == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_removeRepositoryFromTeam_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Mutation.RemoveRepositoryFromTeam(childComplexity, args["input"].(artifactregistry.RemoveRepositoryFromTeamInput)), true
 	case "Mutation.removeTeamAccessManager":
 		if e.ComplexityRoot.Mutation.RemoveTeamAccessManager == nil {
 			break
@@ -2453,6 +2588,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.ReconcilerErrorEdge.Node(childComplexity), true
 
+	case "RemoveArtifactRegistryGithubRepositoryFromTeamPayload.success":
+		if e.ComplexityRoot.RemoveArtifactRegistryGithubRepositoryFromTeamPayload.Success == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RemoveArtifactRegistryGithubRepositoryFromTeamPayload.Success(childComplexity), true
+
 	case "RemoveGroupMemberPayload.group":
 		if e.ComplexityRoot.RemoveGroupMemberPayload.Group == nil {
 			break
@@ -2466,13 +2608,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.RemoveGroupMemberPayload.User(childComplexity), true
 
-	case "RemoveRepositoryFromTeamPayload.success":
-		if e.ComplexityRoot.RemoveRepositoryFromTeamPayload.Success == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RemoveRepositoryFromTeamPayload.Success(childComplexity), true
-
 	case "RemoveTeamAccessManagerPayload.team":
 		if e.ComplexityRoot.RemoveTeamAccessManagerPayload.Team == nil {
 			break
@@ -2485,143 +2620,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.RemoveTeamAccessManagerPayload.User(childComplexity), true
-
-	case "Repository.id":
-		if e.ComplexityRoot.Repository.ID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Repository.ID(childComplexity), true
-	case "Repository.name":
-		if e.ComplexityRoot.Repository.Name == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Repository.Name(childComplexity), true
-	case "Repository.team":
-		if e.ComplexityRoot.Repository.Team == nil {
-			break
-		}
-
-		return e.ComplexityRoot.Repository.Team(childComplexity), true
-
-	case "RepositoryAddedActivityLogEntry.actor":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.Actor == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.Actor(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.createdAt":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.CreatedAt == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.CreatedAt(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.id":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.ID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.ID(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.message":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.Message == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.Message(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.resourceName":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.ResourceName == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.ResourceName(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.resourceType":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.ResourceType == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.ResourceType(childComplexity), true
-	case "RepositoryAddedActivityLogEntry.teamSlug":
-		if e.ComplexityRoot.RepositoryAddedActivityLogEntry.TeamSlug == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryAddedActivityLogEntry.TeamSlug(childComplexity), true
-
-	case "RepositoryConnection.edges":
-		if e.ComplexityRoot.RepositoryConnection.Edges == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryConnection.Edges(childComplexity), true
-	case "RepositoryConnection.nodes":
-		if e.ComplexityRoot.RepositoryConnection.Nodes == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryConnection.Nodes(childComplexity), true
-	case "RepositoryConnection.pageInfo":
-		if e.ComplexityRoot.RepositoryConnection.PageInfo == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryConnection.PageInfo(childComplexity), true
-
-	case "RepositoryEdge.cursor":
-		if e.ComplexityRoot.RepositoryEdge.Cursor == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryEdge.Cursor(childComplexity), true
-	case "RepositoryEdge.node":
-		if e.ComplexityRoot.RepositoryEdge.Node == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryEdge.Node(childComplexity), true
-
-	case "RepositoryRemovedActivityLogEntry.actor":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.Actor == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.Actor(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.createdAt":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.CreatedAt == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.CreatedAt(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.id":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ID == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ID(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.message":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.Message == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.Message(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.resourceName":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ResourceName == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ResourceName(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.resourceType":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ResourceType == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.ResourceType(childComplexity), true
-	case "RepositoryRemovedActivityLogEntry.teamSlug":
-		if e.ComplexityRoot.RepositoryRemovedActivityLogEntry.TeamSlug == nil {
-			break
-		}
-
-		return e.ComplexityRoot.RepositoryRemovedActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "RevokeRoleFromServiceAccountPayload.serviceAccount":
 		if e.ComplexityRoot.RevokeRoleFromServiceAccountPayload.ServiceAccount == nil {
@@ -3676,6 +3674,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.ActivityLog(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*activitylog.ActivityLogFilter)), true
+	case "Team.artifactRegistryGithubRepository":
+		if e.ComplexityRoot.Team.ArtifactRegistryGithubRepository == nil {
+			break
+		}
+
+		args, err := ec.field_Team_artifactRegistryGithubRepository_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Team.ArtifactRegistryGithubRepository(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
 	case "Team.deletionInProgress":
 		if e.ComplexityRoot.Team.DeletionInProgress == nil {
 			break
@@ -3734,17 +3743,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.Members(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*user.UserOrder)), true
-	case "Team.repositories":
-		if e.ComplexityRoot.Team.Repositories == nil {
-			break
-		}
-
-		args, err := ec.field_Team_repositories_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Team.Repositories(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*artifactregistry.RepositoryOrder), args["filter"].(*artifactregistry.TeamRepositoryFilter)), true
 	case "Team.section":
 		if e.ComplexityRoot.Team.Section == nil {
 			break
@@ -4514,8 +4512,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputActivityLogFilter,
+		ec.unmarshalInputAddArtifactRegistryGithubRepositoryToTeamInput,
 		ec.unmarshalInputAddGroupMemberInput,
-		ec.unmarshalInputAddRepositoryToTeamInput,
 		ec.unmarshalInputAddTeamAccessManagerInput,
 		ec.unmarshalInputAssignRoleToServiceAccountInput,
 		ec.unmarshalInputConfigureReconcilerInput,
@@ -4532,10 +4530,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputGroupOrder,
 		ec.unmarshalInputMessageFilter,
 		ec.unmarshalInputReconcilerConfigInput,
+		ec.unmarshalInputRemoveArtifactRegistryGithubRepositoryFromTeamInput,
 		ec.unmarshalInputRemoveGroupMemberInput,
-		ec.unmarshalInputRemoveRepositoryFromTeamInput,
 		ec.unmarshalInputRemoveTeamAccessManagerInput,
-		ec.unmarshalInputRepositoryOrder,
 		ec.unmarshalInputRequestTeamDeletionInput,
 		ec.unmarshalInputRevokeRoleFromServiceAccountInput,
 		ec.unmarshalInputSearchFilter,
@@ -4544,7 +4541,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSharedBucketFilter,
 		ec.unmarshalInputSharedBucketOrder,
 		ec.unmarshalInputTeamOrder,
-		ec.unmarshalInputTeamRepositoryFilter,
 		ec.unmarshalInputUpdateServiceAccountInput,
 		ec.unmarshalInputUpdateServiceAccountTokenInput,
 		ec.unmarshalInputUpdateTeamInput,
@@ -4873,6 +4869,149 @@ type ActivityLogEntryEdge {
 	The log entry.
 	"""
 	node: ActivityLogEntry!
+}
+`, BuiltIn: false},
+	{Name: "../schema/artifactregistrygithubrepository.graphqls", Input: `extend type Team {
+	artifactRegistryGithubRepository(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+		# Artifact registry github repositories allow list
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+	): ArtifactRegistryGithubRepositoryConnection!
+}
+
+extend type Mutation {
+	"Add a team artifact registry repository."
+	addArtifactRegistryGithubRepositoryToTeam(
+		input: AddArtifactRegistryGithubRepositoryToTeamInput!
+	): AddArtifactRegistryGithubRepositoryToTeamPayload!
+
+	"Remove a team artifact registry repository."
+	removeArtifactRegistryGithubRepositoryFromTeam(
+		input: RemoveArtifactRegistryGithubRepositoryFromTeamInput!
+	): RemoveArtifactRegistryGithubRepositoryFromTeamPayload!
+}
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to artifact registry repositories will use this resource type."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY
+}
+
+input AddArtifactRegistryGithubRepositoryToTeamInput {
+	"Slug of the team to add the repository to."
+	teamSlug: Slug!
+
+	"Name of the repository, without the org prefix, for instance 'repo'."
+	repositoryName: String!
+}
+
+type AddArtifactRegistryGithubRepositoryToTeamPayload {
+	"Repository that was added to the team."
+	repository: ArtifactRegistryGithubRepository
+}
+
+input RemoveArtifactRegistryGithubRepositoryFromTeamInput {
+	"Slug of the team to remove the repository from."
+	teamSlug: Slug!
+
+	"Name of the repository, without the org prefix, for instance 'repo'."
+	repositoryName: String!
+}
+
+type RemoveArtifactRegistryGithubRepositoryFromTeamPayload {
+	"Whether or not the repository was removed from the team."
+	success: Boolean
+}
+
+type ArtifactRegistryGithubRepositoryConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [ArtifactRegistryGithubRepository!]!
+
+	"List of edges."
+	edges: [ArtifactRegistryGithubRepositoryEdge!]!
+}
+
+type ArtifactRegistryGithubRepositoryEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The GitHub repository."
+	node: ArtifactRegistryGithubRepository!
+}
+
+type ArtifactRegistryGithubRepository implements Node {
+	"ID of the repository."
+	id: ID!
+
+	"Name of the repository, with the organization prefix."
+	name: String!
+
+	"Team this repository is connected to."
+	team: Team!
+}
+
+type ArtifactRegistryGithubRepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug
+}
+
+type ArtifactRegistryGithubRepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug
+}
+
+extend enum ActivityLogActivityType {
+	"Repository was added to a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ADDED
+
+	"Repository was removed from a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_REMOVED
 }
 `, BuiltIn: false},
 	{Name: "../schema/authz.graphqls", Input: `"""
@@ -5969,169 +6108,6 @@ extend enum ActivityLogActivityType {
 
 	"Reconciler configured activity log entry."
 	RECONCILER_CONFIGURED
-}
-`, BuiltIn: false},
-	{Name: "../schema/repository.graphqls", Input: `extend type Team {
-	repositories(
-		"Get the first n items in the connection. This can be used in combination with the after parameter."
-		first: Int
-
-		"Get items after this cursor."
-		after: Cursor
-
-		"Get the last n items in the connection. This can be used in combination with the before parameter."
-		last: Int
-
-		"Get items before this cursor."
-		before: Cursor
-
-		"Ordering options for items returned from the connection."
-		orderBy: RepositoryOrder
-
-		filter: TeamRepositoryFilter
-	): RepositoryConnection!
-}
-
-extend type Mutation {
-	"Add a team repository."
-	addRepositoryToTeam(input: AddRepositoryToTeamInput!): AddRepositoryToTeamPayload!
-
-	"Remove a team repository."
-	removeRepositoryFromTeam(input: RemoveRepositoryFromTeamInput!): RemoveRepositoryFromTeamPayload!
-}
-
-extend enum ActivityLogEntryResourceType {
-	"All activity log entries related to repositories will use this resource type."
-	REPOSITORY
-}
-
-input AddRepositoryToTeamInput {
-	"Slug of the team to add the repository to."
-	teamSlug: Slug!
-
-	"Name of the repository, with the org prefix, for instance 'org/repo'."
-	repositoryName: String!
-}
-
-type AddRepositoryToTeamPayload {
-	"Repository that was added to the team."
-	repository: Repository
-}
-
-input RemoveRepositoryFromTeamInput {
-	"Slug of the team to remove the repository from."
-	teamSlug: Slug!
-
-	"Name of the repository, with the org prefix, for instance 'org/repo'."
-	repositoryName: String!
-}
-
-type RemoveRepositoryFromTeamPayload {
-	"Whether or not the repository was removed from the team."
-	success: Boolean
-}
-
-type RepositoryConnection {
-	"Pagination information."
-	pageInfo: PageInfo!
-
-	"List of nodes."
-	nodes: [Repository!]!
-
-	"List of edges."
-	edges: [RepositoryEdge!]!
-}
-
-type RepositoryEdge {
-	"Cursor for this edge that can be used for pagination."
-	cursor: Cursor!
-
-	"The GitHub repository."
-	node: Repository!
-}
-
-type Repository implements Node {
-	"ID of the repository."
-	id: ID!
-
-	"Name of the repository, with the organization prefix."
-	name: String!
-
-	"Team this repository is connected to."
-	team: Team!
-}
-
-input TeamRepositoryFilter {
-	"Filter by repository name containing the phrase."
-	name: String
-}
-
-"Ordering options when fetching repositories."
-input RepositoryOrder {
-	"The field to order items by."
-	field: RepositoryOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
-enum RepositoryOrderField {
-	"Order repositories by name."
-	NAME
-}
-
-type RepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-}
-
-type RepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
-	"ID of the entry."
-	id: ID!
-
-	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
-	actor: String!
-
-	"Creation time of the entry."
-	createdAt: Time!
-
-	"Message that summarizes the entry."
-	message: String!
-
-	"Type of the resource that was affected by the action."
-	resourceType: ActivityLogEntryResourceType!
-
-	"Name of the resource that was affected by the action."
-	resourceName: String!
-
-	"The team slug that the entry belongs to."
-	teamSlug: Slug!
-}
-
-extend enum ActivityLogActivityType {
-	"Repository was added to a team."
-	REPOSITORY_ADDED
-
-	"Repository was removed from a team."
-	REPOSITORY_REMOVED
 }
 `, BuiltIn: false},
 	{Name: "../schema/scalars.graphqls", Input: `"""
@@ -9033,10 +9009,10 @@ func (ec *executionContext) field_Group_sharedBucketsAccess_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_addArtifactRegistryGithubRepositoryToTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddArtifactRegistryGithubRepositoryToTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddArtifactRegistryGithubRepositoryToTeamInput)
 	if err != nil {
 		return nil, err
 	}
@@ -9044,10 +9020,10 @@ func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_addRepositoryToTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_addGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddRepositoryToTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddRepositoryToTeamInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberInput)
 	if err != nil {
 		return nil, err
 	}
@@ -9176,10 +9152,10 @@ func (ec *executionContext) field_Mutation_enableReconciler_args(ctx context.Con
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_removeArtifactRegistryGithubRepositoryFromTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveArtifactRegistryGithubRepositoryFromTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveArtifactRegistryGithubRepositoryFromTeamInput)
 	if err != nil {
 		return nil, err
 	}
@@ -9187,10 +9163,10 @@ func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Co
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_removeRepositoryFromTeam_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Mutation_removeGroupMember_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveRepositoryFromTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveRepositoryFromTeamInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberInput)
 	if err != nil {
 		return nil, err
 	}
@@ -10025,6 +10001,32 @@ func (ec *executionContext) field_Team_activityLog_args(ctx context.Context, raw
 	return args, nil
 }
 
+func (ec *executionContext) field_Team_artifactRegistryGithubRepository_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	return args, nil
+}
+
 func (ec *executionContext) field_Team_groups_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -10089,42 +10091,6 @@ func (ec *executionContext) field_Team_members_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["orderBy"] = arg4
-	return args, nil
-}
-
-func (ec *executionContext) field_Team_repositories_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
-	if err != nil {
-		return nil, err
-	}
-	args["first"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
-	if err != nil {
-		return nil, err
-	}
-	args["after"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
-	if err != nil {
-		return nil, err
-	}
-	args["last"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
-	if err != nil {
-		return nil, err
-	}
-	args["before"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalORepositoryOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryOrder)
-	if err != nil {
-		return nil, err
-	}
-	args["orderBy"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOTeamRepositoryFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐTeamRepositoryFilter)
-	if err != nil {
-		return nil, err
-	}
-	args["filter"] = arg5
 	return args, nil
 }
 
@@ -10543,6 +10509,43 @@ func (ec *executionContext) fieldContext_ActivityLogEntryEdge_node(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _AddArtifactRegistryGithubRepositoryToTeamPayload_repository(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_AddArtifactRegistryGithubRepositoryToTeamPayload_repository,
+		func(ctx context.Context) (any, error) {
+			return obj.Repository, nil
+		},
+		nil,
+		ec.marshalOArtifactRegistryGithubRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepository,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_AddArtifactRegistryGithubRepositoryToTeamPayload_repository(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AddArtifactRegistryGithubRepositoryToTeamPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_name(ctx, field)
+			case "team":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactRegistryGithubRepository", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _AddGroupMemberPayload_member(ctx context.Context, field graphql.CollectedField, obj *group.AddGroupMemberPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -10573,43 +10576,6 @@ func (ec *executionContext) fieldContext_AddGroupMemberPayload_member(_ context.
 				return ec.fieldContext_GroupMember_user(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type GroupMember", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _AddRepositoryToTeamPayload_repository(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.AddRepositoryToTeamPayload) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_AddRepositoryToTeamPayload_repository,
-		func(ctx context.Context) (any, error) {
-			return obj.Repository, nil
-		},
-		nil,
-		ec.marshalORepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepository,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_AddRepositoryToTeamPayload_repository(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AddRepositoryToTeamPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Repository_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Repository_name(ctx, field)
-			case "team":
-				return ec.fieldContext_Repository_team(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Repository", field.Name)
 		},
 	}
 	return fc, nil
@@ -10675,8 +10641,8 @@ func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_team(_ cont
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -10738,6 +10704,722 @@ func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_user(_ cont
 				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepository_id(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepository) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepository_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepository_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepository",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepository_name(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepository) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepository_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepository_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepository",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepository_team(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepository) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepository_team,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ArtifactRegistryGithubRepository().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepository_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepository",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "hasManualEditing":
+				return ec.fieldContext_Team_hasManualEditing(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "viewerCanManageMembers":
+				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryAddedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_pageInfo,
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+			case "pageStart":
+				return ec.fieldContext_PageInfo_pageStart(ctx, field)
+			case "pageEnd":
+				return ec.fieldContext_PageInfo_pageEnd(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_nodes,
+		func(ctx context.Context) (any, error) {
+			return obj.Nodes(), nil
+		},
+		nil,
+		ec.marshalNArtifactRegistryGithubRepository2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepositoryᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryConnection_nodes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryConnection",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_name(ctx, field)
+			case "team":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactRegistryGithubRepository", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_edges,
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		ec.marshalNArtifactRegistryGithubRepositoryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_ArtifactRegistryGithubRepositoryEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_ArtifactRegistryGithubRepositoryEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactRegistryGithubRepositoryEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*artifactregistry.ArtifactRegistryGithubRepository]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryEdge_cursor,
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryEdge_node(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*artifactregistry.ArtifactRegistryGithubRepository]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryEdge_node,
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		ec.marshalNArtifactRegistryGithubRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepository,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_id(ctx, field)
+			case "name":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_name(ctx, field)
+			case "team":
+				return ec.fieldContext_ArtifactRegistryGithubRepository_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactRegistryGithubRepository", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalOSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11071,8 +11753,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -13157,6 +13839,96 @@ func (ec *executionContext) fieldContext_MessageEdge_node(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_addArtifactRegistryGithubRepositoryToTeam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_addArtifactRegistryGithubRepositoryToTeam,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().AddArtifactRegistryGithubRepositoryToTeam(ctx, fc.Args["input"].(artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput))
+		},
+		nil,
+		ec.marshalNAddArtifactRegistryGithubRepositoryToTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddArtifactRegistryGithubRepositoryToTeamPayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addArtifactRegistryGithubRepositoryToTeam(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "repository":
+				return ec.fieldContext_AddArtifactRegistryGithubRepositoryToTeamPayload_repository(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AddArtifactRegistryGithubRepositoryToTeamPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addArtifactRegistryGithubRepositoryToTeam_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeArtifactRegistryGithubRepositoryFromTeam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_removeArtifactRegistryGithubRepositoryFromTeam,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().RemoveArtifactRegistryGithubRepositoryFromTeam(ctx, fc.Args["input"].(artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput))
+		},
+		nil,
+		ec.marshalNRemoveArtifactRegistryGithubRepositoryFromTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveArtifactRegistryGithubRepositoryFromTeamPayload,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeArtifactRegistryGithubRepositoryFromTeam(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "success":
+				return ec.fieldContext_RemoveArtifactRegistryGithubRepositoryFromTeamPayload_success(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RemoveArtifactRegistryGithubRepositoryFromTeamPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeArtifactRegistryGithubRepositoryFromTeam_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createGroup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -13516,96 +14288,6 @@ func (ec *executionContext) fieldContext_Mutation_configureReconciler(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_configureReconciler_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_addRepositoryToTeam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_addRepositoryToTeam,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().AddRepositoryToTeam(ctx, fc.Args["input"].(artifactregistry.AddRepositoryToTeamInput))
-		},
-		nil,
-		ec.marshalNAddRepositoryToTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddRepositoryToTeamPayload,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_addRepositoryToTeam(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "repository":
-				return ec.fieldContext_AddRepositoryToTeamPayload_repository(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type AddRepositoryToTeamPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addRepositoryToTeam_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_removeRepositoryFromTeam(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Mutation_removeRepositoryFromTeam,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Mutation().RemoveRepositoryFromTeam(ctx, fc.Args["input"].(artifactregistry.RemoveRepositoryFromTeamInput))
-		},
-		nil,
-		ec.marshalNRemoveRepositoryFromTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveRepositoryFromTeamPayload,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Mutation_removeRepositoryFromTeam(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "success":
-				return ec.fieldContext_RemoveRepositoryFromTeamPayload_success(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RemoveRepositoryFromTeamPayload", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_removeRepositoryFromTeam_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -15279,8 +15961,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -17197,8 +17879,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -17397,6 +18079,35 @@ func (ec *executionContext) fieldContext_ReconcilerErrorEdge_node(_ context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _RemoveArtifactRegistryGithubRepositoryFromTeamPayload_success(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_RemoveArtifactRegistryGithubRepositoryFromTeamPayload_success,
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
+		nil,
+		ec.marshalOBoolean2ᚖbool,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_RemoveArtifactRegistryGithubRepositoryFromTeamPayload_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RemoveArtifactRegistryGithubRepositoryFromTeamPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _RemoveGroupMemberPayload_user(ctx context.Context, field graphql.CollectedField, obj *group.RemoveGroupMemberPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17503,35 +18214,6 @@ func (ec *executionContext) fieldContext_RemoveGroupMemberPayload_group(_ contex
 	return fc, nil
 }
 
-func (ec *executionContext) _RemoveRepositoryFromTeamPayload_success(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.RemoveRepositoryFromTeamPayload) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RemoveRepositoryFromTeamPayload_success,
-		func(ctx context.Context) (any, error) {
-			return obj.Success, nil
-		},
-		nil,
-		ec.marshalOBoolean2bool,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_RemoveRepositoryFromTeamPayload_success(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RemoveRepositoryFromTeamPayload",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _RemoveTeamAccessManagerPayload_team(ctx context.Context, field graphql.CollectedField, obj *team.RemoveTeamAccessManagerPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17592,8 +18274,8 @@ func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_team(_ c
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -17655,722 +18337,6 @@ func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_user(_ c
 				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Repository_id(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.Repository) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Repository_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID(), nil
-		},
-		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Repository_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Repository",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Repository_name(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.Repository) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Repository_name,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Repository().Name(ctx, obj)
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Repository_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Repository",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Repository_team(ctx context.Context, field graphql.CollectedField, obj *artifactregistry.Repository) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Repository_team,
-		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.Repository().Team(ctx, obj)
-		},
-		nil,
-		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Repository_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Repository",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Team_id(ctx, field)
-			case "slug":
-				return ec.fieldContext_Team_slug(ctx, field)
-			case "displayName":
-				return ec.fieldContext_Team_displayName(ctx, field)
-			case "section":
-				return ec.fieldContext_Team_section(ctx, field)
-			case "isManaged":
-				return ec.fieldContext_Team_isManaged(ctx, field)
-			case "hasManualEditing":
-				return ec.fieldContext_Team_hasManualEditing(ctx, field)
-			case "members":
-				return ec.fieldContext_Team_members(ctx, field)
-			case "groups":
-				return ec.fieldContext_Team_groups(ctx, field)
-			case "sharedBuckets":
-				return ec.fieldContext_Team_sharedBuckets(ctx, field)
-			case "sharedBucketsAccess":
-				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
-			case "lastSuccessfulSync":
-				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
-			case "deletionInProgress":
-				return ec.fieldContext_Team_deletionInProgress(ctx, field)
-			case "viewerIsOwner":
-				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
-			case "viewerIsMember":
-				return ec.fieldContext_Team_viewerIsMember(ctx, field)
-			case "viewerCanManageMembers":
-				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
-			case "viewerTeamMember":
-				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
-			case "accessManagers":
-				return ec.fieldContext_Team_accessManagers(ctx, field)
-			case "activityLog":
-				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID(), nil
-		},
-		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_actor,
-		func(ctx context.Context) (any, error) {
-			return obj.Actor, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalNTime2timeᚐTime,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_message,
-		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_resourceType,
-		func(ctx context.Context) (any, error) {
-			return obj.ResourceType, nil
-		},
-		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_resourceName,
-		func(ctx context.Context) (any, error) {
-			return obj.ResourceName, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryAddedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryAddedActivityLogEntry_teamSlug,
-		func(ctx context.Context) (any, error) {
-			return obj.TeamSlug, nil
-		},
-		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryAddedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryAddedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Slug does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.Repository]) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryConnection_pageInfo,
-		func(ctx context.Context) (any, error) {
-			return obj.PageInfo, nil
-		},
-		nil,
-		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "hasNextPage":
-				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
-			case "endCursor":
-				return ec.fieldContext_PageInfo_endCursor(ctx, field)
-			case "hasPreviousPage":
-				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
-			case "startCursor":
-				return ec.fieldContext_PageInfo_startCursor(ctx, field)
-			case "totalCount":
-				return ec.fieldContext_PageInfo_totalCount(ctx, field)
-			case "pageStart":
-				return ec.fieldContext_PageInfo_pageStart(ctx, field)
-			case "pageEnd":
-				return ec.fieldContext_PageInfo_pageEnd(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.Repository]) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryConnection_nodes,
-		func(ctx context.Context) (any, error) {
-			return obj.Nodes(), nil
-		},
-		nil,
-		ec.marshalNRepository2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryConnection_nodes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryConnection",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Repository_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Repository_name(ctx, field)
-			case "team":
-				return ec.fieldContext_Repository_team(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Repository", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryConnection_edges(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*artifactregistry.Repository]) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryConnection_edges,
-		func(ctx context.Context) (any, error) {
-			return obj.Edges, nil
-		},
-		nil,
-		ec.marshalNRepositoryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryConnection",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "cursor":
-				return ec.fieldContext_RepositoryEdge_cursor(ctx, field)
-			case "node":
-				return ec.fieldContext_RepositoryEdge_node(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RepositoryEdge", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*artifactregistry.Repository]) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryEdge_cursor,
-		func(ctx context.Context) (any, error) {
-			return obj.Cursor, nil
-		},
-		nil,
-		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryEdge",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Cursor does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryEdge_node(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*artifactregistry.Repository]) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryEdge_node,
-		func(ctx context.Context) (any, error) {
-			return obj.Node, nil
-		},
-		nil,
-		ec.marshalNRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepository,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryEdge",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Repository_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Repository_name(ctx, field)
-			case "team":
-				return ec.fieldContext_Repository_team(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Repository", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_id,
-		func(ctx context.Context) (any, error) {
-			return obj.ID(), nil
-		},
-		nil,
-		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_actor,
-		func(ctx context.Context) (any, error) {
-			return obj.Actor, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_createdAt,
-		func(ctx context.Context) (any, error) {
-			return obj.CreatedAt, nil
-		},
-		nil,
-		ec.marshalNTime2timeᚐTime,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_message,
-		func(ctx context.Context) (any, error) {
-			return obj.Message, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_resourceType,
-		func(ctx context.Context) (any, error) {
-			return obj.ResourceType, nil
-		},
-		nil,
-		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_resourceName,
-		func(ctx context.Context) (any, error) {
-			return obj.ResourceName, nil
-		},
-		nil,
-		ec.marshalNString2string,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *repository.RepositoryRemovedActivityLogEntry) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_RepositoryRemovedActivityLogEntry_teamSlug,
-		func(ctx context.Context) (any, error) {
-			return obj.TeamSlug, nil
-		},
-		nil,
-		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_RepositoryRemovedActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "RepositoryRemovedActivityLogEntry",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Slug does not have child fields")
 		},
 	}
 	return fc, nil
@@ -20394,8 +20360,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -22971,8 +22937,8 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -23287,8 +23253,8 @@ func (ec *executionContext) fieldContext_SharedBucketAccess_team(_ context.Conte
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -24383,24 +24349,24 @@ func (ec *executionContext) fieldContext_Team_activityLog(ctx context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Team_repositories(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+func (ec *executionContext) _Team_artifactRegistryGithubRepository(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Team_repositories,
+		ec.fieldContext_Team_artifactRegistryGithubRepository,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Team().Repositories(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*artifactregistry.RepositoryOrder), fc.Args["filter"].(*artifactregistry.TeamRepositoryFilter))
+			return ec.Resolvers.Team().ArtifactRegistryGithubRepository(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
 		},
 		nil,
-		ec.marshalNRepositoryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		ec.marshalNArtifactRegistryGithubRepositoryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
 		true,
 		true,
 	)
 }
 
-func (ec *executionContext) fieldContext_Team_repositories(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Team_artifactRegistryGithubRepository(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Team",
 		Field:      field,
@@ -24409,13 +24375,13 @@ func (ec *executionContext) fieldContext_Team_repositories(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "pageInfo":
-				return ec.fieldContext_RepositoryConnection_pageInfo(ctx, field)
+				return ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_pageInfo(ctx, field)
 			case "nodes":
-				return ec.fieldContext_RepositoryConnection_nodes(ctx, field)
+				return ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_nodes(ctx, field)
 			case "edges":
-				return ec.fieldContext_RepositoryConnection_edges(ctx, field)
+				return ec.fieldContext_ArtifactRegistryGithubRepositoryConnection_edges(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type RepositoryConnection", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ArtifactRegistryGithubRepositoryConnection", field.Name)
 		},
 	}
 	defer func() {
@@ -24425,7 +24391,7 @@ func (ec *executionContext) fieldContext_Team_repositories(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Team_repositories_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Team_artifactRegistryGithubRepository_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -24492,8 +24458,8 @@ func (ec *executionContext) fieldContext_TeamAccessManager_team(_ context.Contex
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -24665,8 +24631,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -25001,8 +24967,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -25070,8 +25036,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -26583,8 +26549,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_accessManagers(ctx, field)
 			case "activityLog":
 				return ec.fieldContext_Team_activityLog(ctx, field)
-			case "repositories":
-				return ec.fieldContext_Team_repositories(ctx, field)
+			case "artifactRegistryGithubRepository":
+				return ec.fieldContext_Team_artifactRegistryGithubRepository(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -29775,6 +29741,43 @@ func (ec *executionContext) unmarshalInputActivityLogFilter(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputAddArtifactRegistryGithubRepositoryToTeamInput(ctx context.Context, obj any) (artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput, error) {
+	var it artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "repositoryName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "repositoryName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repositoryName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RepositoryName = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Context, obj any) (group.AddGroupMemberInput, error) {
 	var it group.AddGroupMemberInput
 	if obj == nil {
@@ -29807,43 +29810,6 @@ func (ec *executionContext) unmarshalInputAddGroupMemberInput(ctx context.Contex
 				return it, err
 			}
 			it.UserEmail = data
-		}
-	}
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputAddRepositoryToTeamInput(ctx context.Context, obj any) (artifactregistry.AddRepositoryToTeamInput, error) {
-	var it artifactregistry.AddRepositoryToTeamInput
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"teamSlug", "repositoryName"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "teamSlug":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TeamSlug = data
-		case "repositoryName":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repositoryName"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.RepositoryName = data
 		}
 	}
 	return it, nil
@@ -30455,6 +30421,43 @@ func (ec *executionContext) unmarshalInputReconcilerConfigInput(ctx context.Cont
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputRemoveArtifactRegistryGithubRepositoryFromTeamInput(ctx context.Context, obj any) (artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput, error) {
+	var it artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"teamSlug", "repositoryName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "teamSlug":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
+			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.TeamSlug = data
+		case "repositoryName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repositoryName"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RepositoryName = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputRemoveGroupMemberInput(ctx context.Context, obj any) (group.RemoveGroupMemberInput, error) {
 	var it group.RemoveGroupMemberInput
 	if obj == nil {
@@ -30492,43 +30495,6 @@ func (ec *executionContext) unmarshalInputRemoveGroupMemberInput(ctx context.Con
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRemoveRepositoryFromTeamInput(ctx context.Context, obj any) (artifactregistry.RemoveRepositoryFromTeamInput, error) {
-	var it artifactregistry.RemoveRepositoryFromTeamInput
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"teamSlug", "repositoryName"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "teamSlug":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("teamSlug"))
-			data, err := ec.unmarshalNSlug2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.TeamSlug = data
-		case "repositoryName":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("repositoryName"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.RepositoryName = data
-		}
-	}
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx context.Context, obj any) (team.RemoveTeamAccessManagerInput, error) {
 	var it team.RemoveTeamAccessManagerInput
 	if obj == nil {
@@ -30561,43 +30527,6 @@ func (ec *executionContext) unmarshalInputRemoveTeamAccessManagerInput(ctx conte
 				return it, err
 			}
 			it.UserEmail = data
-		}
-	}
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputRepositoryOrder(ctx context.Context, obj any) (artifactregistry.RepositoryOrder, error) {
-	var it artifactregistry.RepositoryOrder
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"field", "direction"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNRepositoryOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryOrderField(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Field = data
-		case "direction":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
-			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Direction = data
 		}
 	}
 	return it, nil
@@ -30899,36 +30828,6 @@ func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputTeamRepositoryFilter(ctx context.Context, obj any) (artifactregistry.TeamRepositoryFilter, error) {
-	var it artifactregistry.TeamRepositoryFilter
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputUpdateServiceAccountInput(ctx context.Context, obj any) (serviceaccount.UpdateServiceAccountInput, error) {
 	var it serviceaccount.UpdateServiceAccountInput
 	if obj == nil {
@@ -31190,20 +31089,6 @@ func (ec *executionContext) _ActivityLogEntry(ctx context.Context, sel ast.Selec
 			return graphql.Null
 		}
 		return ec._RoleAssignedToServiceAccountActivityLogEntry(ctx, sel, obj)
-	case repository.RepositoryRemovedActivityLogEntry:
-		return ec._RepositoryRemovedActivityLogEntry(ctx, sel, &obj)
-	case *repository.RepositoryRemovedActivityLogEntry:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._RepositoryRemovedActivityLogEntry(ctx, sel, obj)
-	case repository.RepositoryAddedActivityLogEntry:
-		return ec._RepositoryAddedActivityLogEntry(ctx, sel, &obj)
-	case *repository.RepositoryAddedActivityLogEntry:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._RepositoryAddedActivityLogEntry(ctx, sel, obj)
 	case reconciler.ReconcilerEnabledActivityLogEntry:
 		return ec._ReconcilerEnabledActivityLogEntry(ctx, sel, &obj)
 	case *reconciler.ReconcilerEnabledActivityLogEntry:
@@ -31246,6 +31131,20 @@ func (ec *executionContext) _ActivityLogEntry(ctx context.Context, sel ast.Selec
 			return graphql.Null
 		}
 		return ec._GroupCreatedActivityLogEntry(ctx, sel, obj)
+	case artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry:
+		return ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry(ctx, sel, &obj)
+	case *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry(ctx, sel, obj)
+	case artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry:
+		return ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry(ctx, sel, &obj)
+	case *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry(ctx, sel, obj)
 	default:
 		if typedObj, ok := obj.(graphql.Marshaler); ok {
 			return typedObj
@@ -31442,20 +31341,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._RoleAssignedToServiceAccountActivityLogEntry(ctx, sel, obj)
-	case repository.RepositoryRemovedActivityLogEntry:
-		return ec._RepositoryRemovedActivityLogEntry(ctx, sel, &obj)
-	case *repository.RepositoryRemovedActivityLogEntry:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._RepositoryRemovedActivityLogEntry(ctx, sel, obj)
-	case repository.RepositoryAddedActivityLogEntry:
-		return ec._RepositoryAddedActivityLogEntry(ctx, sel, &obj)
-	case *repository.RepositoryAddedActivityLogEntry:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._RepositoryAddedActivityLogEntry(ctx, sel, obj)
 	case reconciler.ReconcilerEnabledActivityLogEntry:
 		return ec._ReconcilerEnabledActivityLogEntry(ctx, sel, &obj)
 	case *reconciler.ReconcilerEnabledActivityLogEntry:
@@ -31512,6 +31397,20 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Group(ctx, sel, obj)
+	case artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry:
+		return ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry(ctx, sel, &obj)
+	case *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry(ctx, sel, obj)
+	case artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry:
+		return ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry(ctx, sel, &obj)
+	case *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry(ctx, sel, obj)
 	case usersync.UserSyncLogEntry:
 		if obj == nil {
 			return graphql.Null
@@ -31557,13 +31456,6 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Role(ctx, sel, obj)
-	case artifactregistry.Repository:
-		return ec._Repository(ctx, sel, &obj)
-	case *artifactregistry.Repository:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Repository(ctx, sel, obj)
 	case reconciler.ReconcilerError:
 		return ec._ReconcilerError(ctx, sel, &obj)
 	case *reconciler.ReconcilerError:
@@ -31585,6 +31477,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._Features(ctx, sel, obj)
+	case artifactregistry.ArtifactRegistryGithubRepository:
+		return ec._ArtifactRegistryGithubRepository(ctx, sel, &obj)
+	case *artifactregistry.ArtifactRegistryGithubRepository:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ArtifactRegistryGithubRepository(ctx, sel, obj)
 	case activitylog.ActivityLogEntry:
 		if obj == nil {
 			return graphql.Null
@@ -31775,19 +31674,19 @@ func (ec *executionContext) _ActivityLogEntryEdge(ctx context.Context, sel ast.S
 	return out
 }
 
-var addGroupMemberPayloadImplementors = []string{"AddGroupMemberPayload"}
+var addArtifactRegistryGithubRepositoryToTeamPayloadImplementors = []string{"AddArtifactRegistryGithubRepositoryToTeamPayload"}
 
-func (ec *executionContext) _AddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, obj *group.AddGroupMemberPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, addGroupMemberPayloadImplementors)
+func (ec *executionContext) _AddArtifactRegistryGithubRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addArtifactRegistryGithubRepositoryToTeamPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AddGroupMemberPayload")
-		case "member":
-			out.Values[i] = ec._AddGroupMemberPayload_member(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("AddArtifactRegistryGithubRepositoryToTeamPayload")
+		case "repository":
+			out.Values[i] = ec._AddArtifactRegistryGithubRepositoryToTeamPayload_repository(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -31811,19 +31710,19 @@ func (ec *executionContext) _AddGroupMemberPayload(ctx context.Context, sel ast.
 	return out
 }
 
-var addRepositoryToTeamPayloadImplementors = []string{"AddRepositoryToTeamPayload"}
+var addGroupMemberPayloadImplementors = []string{"AddGroupMemberPayload"}
 
-func (ec *executionContext) _AddRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.AddRepositoryToTeamPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, addRepositoryToTeamPayloadImplementors)
+func (ec *executionContext) _AddGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, obj *group.AddGroupMemberPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, addGroupMemberPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("AddRepositoryToTeamPayload")
-		case "repository":
-			out.Values[i] = ec._AddRepositoryToTeamPayload_repository(ctx, field, obj)
+			out.Values[i] = graphql.MarshalString("AddGroupMemberPayload")
+		case "member":
+			out.Values[i] = ec._AddGroupMemberPayload_member(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -31930,6 +31829,311 @@ func (ec *executionContext) _AddTeamAccessManagerPayload(ctx context.Context, se
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactRegistryGithubRepositoryImplementors = []string{"ArtifactRegistryGithubRepository", "Node"}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepository(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.ArtifactRegistryGithubRepository) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactRegistryGithubRepositoryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactRegistryGithubRepository")
+		case "id":
+			out.Values[i] = ec._ArtifactRegistryGithubRepository_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "name":
+			out.Values[i] = ec._ArtifactRegistryGithubRepository_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ArtifactRegistryGithubRepository_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactRegistryGithubRepositoryAddedActivityLogEntryImplementors = []string{"ArtifactRegistryGithubRepositoryAddedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryAddedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.ArtifactRegistryGithubRepositoryAddedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactRegistryGithubRepositoryAddedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactRegistryGithubRepositoryAddedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryAddedActivityLogEntry_teamSlug(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactRegistryGithubRepositoryConnectionImplementors = []string{"ArtifactRegistryGithubRepositoryConnection"}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactRegistryGithubRepositoryConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactRegistryGithubRepositoryConnection")
+		case "pageInfo":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nodes":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactRegistryGithubRepositoryEdgeImplementors = []string{"ArtifactRegistryGithubRepositoryEdge"}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryEdge(ctx context.Context, sel ast.SelectionSet, obj *pagination.Edge[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactRegistryGithubRepositoryEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactRegistryGithubRepositoryEdge")
+		case "cursor":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var artifactRegistryGithubRepositoryRemovedActivityLogEntryImplementors = []string{"ArtifactRegistryGithubRepositoryRemovedActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _ArtifactRegistryGithubRepositoryRemovedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.ArtifactRegistryGithubRepositoryRemovedActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, artifactRegistryGithubRepositoryRemovedActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ArtifactRegistryGithubRepositoryRemovedActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._ArtifactRegistryGithubRepositoryRemovedActivityLogEntry_teamSlug(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -33244,6 +33448,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "addArtifactRegistryGithubRepositoryToTeam":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addArtifactRegistryGithubRepositoryToTeam(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeArtifactRegistryGithubRepositoryFromTeam":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeArtifactRegistryGithubRepositoryFromTeam(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createGroup":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createGroup(ctx, field)
@@ -33289,20 +33507,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "configureReconciler":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_configureReconciler(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "addRepositoryToTeam":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addRepositoryToTeam(ctx, field)
-			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "removeRepositoryFromTeam":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_removeRepositoryFromTeam(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -34818,6 +35022,42 @@ func (ec *executionContext) _ReconcilerErrorEdge(ctx context.Context, sel ast.Se
 	return out
 }
 
+var removeArtifactRegistryGithubRepositoryFromTeamPayloadImplementors = []string{"RemoveArtifactRegistryGithubRepositoryFromTeamPayload"}
+
+func (ec *executionContext) _RemoveArtifactRegistryGithubRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, removeArtifactRegistryGithubRepositoryFromTeamPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RemoveArtifactRegistryGithubRepositoryFromTeamPayload")
+		case "success":
+			out.Values[i] = ec._RemoveArtifactRegistryGithubRepositoryFromTeamPayload_success(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var removeGroupMemberPayloadImplementors = []string{"RemoveGroupMemberPayload"}
 
 func (ec *executionContext) _RemoveGroupMemberPayload(ctx context.Context, sel ast.SelectionSet, obj *group.RemoveGroupMemberPayload) graphql.Marshaler {
@@ -34895,42 +35135,6 @@ func (ec *executionContext) _RemoveGroupMemberPayload(ctx context.Context, sel a
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var removeRepositoryFromTeamPayloadImplementors = []string{"RemoveRepositoryFromTeamPayload"}
-
-func (ec *executionContext) _RemoveRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.RemoveRepositoryFromTeamPayload) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, removeRepositoryFromTeamPayloadImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RemoveRepositoryFromTeamPayload")
-		case "success":
-			out.Values[i] = ec._RemoveRepositoryFromTeamPayload_success(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -35037,348 +35241,6 @@ func (ec *executionContext) _RemoveTeamAccessManagerPayload(ctx context.Context,
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var repositoryImplementors = []string{"Repository", "Node"}
-
-func (ec *executionContext) _Repository(ctx context.Context, sel ast.SelectionSet, obj *artifactregistry.Repository) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Repository")
-		case "id":
-			out.Values[i] = ec._Repository_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "name":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repository_name(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "team":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Repository_team(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var repositoryAddedActivityLogEntryImplementors = []string{"RepositoryAddedActivityLogEntry", "ActivityLogEntry", "Node"}
-
-func (ec *executionContext) _RepositoryAddedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *repository.RepositoryAddedActivityLogEntry) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryAddedActivityLogEntryImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RepositoryAddedActivityLogEntry")
-		case "id":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "actor":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_actor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdAt":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resourceType":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_resourceType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resourceName":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_resourceName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "teamSlug":
-			out.Values[i] = ec._RepositoryAddedActivityLogEntry_teamSlug(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var repositoryConnectionImplementors = []string{"RepositoryConnection"}
-
-func (ec *executionContext) _RepositoryConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*artifactregistry.Repository]) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryConnectionImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RepositoryConnection")
-		case "pageInfo":
-			out.Values[i] = ec._RepositoryConnection_pageInfo(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "nodes":
-			out.Values[i] = ec._RepositoryConnection_nodes(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "edges":
-			out.Values[i] = ec._RepositoryConnection_edges(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var repositoryEdgeImplementors = []string{"RepositoryEdge"}
-
-func (ec *executionContext) _RepositoryEdge(ctx context.Context, sel ast.SelectionSet, obj *pagination.Edge[*artifactregistry.Repository]) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryEdgeImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RepositoryEdge")
-		case "cursor":
-			out.Values[i] = ec._RepositoryEdge_cursor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "node":
-			out.Values[i] = ec._RepositoryEdge_node(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.ProcessDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var repositoryRemovedActivityLogEntryImplementors = []string{"RepositoryRemovedActivityLogEntry", "ActivityLogEntry", "Node"}
-
-func (ec *executionContext) _RepositoryRemovedActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *repository.RepositoryRemovedActivityLogEntry) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, repositoryRemovedActivityLogEntryImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RepositoryRemovedActivityLogEntry")
-		case "id":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "actor":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_actor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdAt":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "message":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_message(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resourceType":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_resourceType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "resourceName":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_resourceName(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "teamSlug":
-			out.Values[i] = ec._RepositoryRemovedActivityLogEntry_teamSlug(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -38352,7 +38214,7 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "repositories":
+		case "artifactRegistryGithubRepository":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -38361,7 +38223,7 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Team_repositories(ctx, field, obj)
+				res = ec._Team_artifactRegistryGithubRepository(ctx, field, obj)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -40716,6 +40578,25 @@ func (ec *executionContext) marshalNActivityLogEntryResourceType2githubᚗcomᚋ
 	return res
 }
 
+func (ec *executionContext) unmarshalNAddArtifactRegistryGithubRepositoryToTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddArtifactRegistryGithubRepositoryToTeamInput(ctx context.Context, v any) (artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput, error) {
+	res, err := ec.unmarshalInputAddArtifactRegistryGithubRepositoryToTeamInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAddArtifactRegistryGithubRepositoryToTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddArtifactRegistryGithubRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, v artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload) graphql.Marshaler {
+	return ec._AddArtifactRegistryGithubRepositoryToTeamPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNAddArtifactRegistryGithubRepositoryToTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddArtifactRegistryGithubRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AddArtifactRegistryGithubRepositoryToTeamPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAddGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐAddGroupMemberInput(ctx context.Context, v any) (group.AddGroupMemberInput, error) {
 	res, err := ec.unmarshalInputAddGroupMemberInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -40735,25 +40616,6 @@ func (ec *executionContext) marshalNAddGroupMemberPayload2ᚖgithubᚗcomᚋstat
 	return ec._AddGroupMemberPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNAddRepositoryToTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddRepositoryToTeamInput(ctx context.Context, v any) (artifactregistry.AddRepositoryToTeamInput, error) {
-	res, err := ec.unmarshalInputAddRepositoryToTeamInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNAddRepositoryToTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, v artifactregistry.AddRepositoryToTeamPayload) graphql.Marshaler {
-	return ec._AddRepositoryToTeamPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNAddRepositoryToTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐAddRepositoryToTeamPayload(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.AddRepositoryToTeamPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._AddRepositoryToTeamPayload(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNAddTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐAddTeamAccessManagerInput(ctx context.Context, v any) (team.AddTeamAccessManagerInput, error) {
 	res, err := ec.unmarshalInputAddTeamAccessManagerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -40771,6 +40633,66 @@ func (ec *executionContext) marshalNAddTeamAccessManagerPayload2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return ec._AddTeamAccessManagerPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepository2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*artifactregistry.ArtifactRegistryGithubRepository) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNArtifactRegistryGithubRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepository(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepository(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.ArtifactRegistryGithubRepository) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ArtifactRegistryGithubRepository(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepositoryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	return ec._ArtifactRegistryGithubRepositoryConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepositoryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ArtifactRegistryGithubRepositoryConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepositoryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	return ec._ArtifactRegistryGithubRepositoryEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryGithubRepositoryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*artifactregistry.ArtifactRegistryGithubRepository]) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNArtifactRegistryGithubRepositoryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalNAssignRoleToServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐAssignRoleToServiceAccountInput(ctx context.Context, v any) (serviceaccount.AssignRoleToServiceAccountInput, error) {
@@ -41405,6 +41327,25 @@ func (ec *executionContext) marshalNReconcilerErrorEdge2ᚕgithubᚗcomᚋstatis
 	return ret
 }
 
+func (ec *executionContext) unmarshalNRemoveArtifactRegistryGithubRepositoryFromTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveArtifactRegistryGithubRepositoryFromTeamInput(ctx context.Context, v any) (artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput, error) {
+	res, err := ec.unmarshalInputRemoveArtifactRegistryGithubRepositoryFromTeamInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRemoveArtifactRegistryGithubRepositoryFromTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveArtifactRegistryGithubRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, v artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload) graphql.Marshaler {
+	return ec._RemoveArtifactRegistryGithubRepositoryFromTeamPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRemoveArtifactRegistryGithubRepositoryFromTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveArtifactRegistryGithubRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RemoveArtifactRegistryGithubRepositoryFromTeamPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNRemoveGroupMemberInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgroupᚐRemoveGroupMemberInput(ctx context.Context, v any) (group.RemoveGroupMemberInput, error) {
 	res, err := ec.unmarshalInputRemoveGroupMemberInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -41424,25 +41365,6 @@ func (ec *executionContext) marshalNRemoveGroupMemberPayload2ᚖgithubᚗcomᚋs
 	return ec._RemoveGroupMemberPayload(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRemoveRepositoryFromTeamInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveRepositoryFromTeamInput(ctx context.Context, v any) (artifactregistry.RemoveRepositoryFromTeamInput, error) {
-	res, err := ec.unmarshalInputRemoveRepositoryFromTeamInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNRemoveRepositoryFromTeamPayload2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, v artifactregistry.RemoveRepositoryFromTeamPayload) graphql.Marshaler {
-	return ec._RemoveRepositoryFromTeamPayload(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNRemoveRepositoryFromTeamPayload2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRemoveRepositoryFromTeamPayload(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.RemoveRepositoryFromTeamPayload) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._RemoveRepositoryFromTeamPayload(ctx, sel, v)
-}
-
 func (ec *executionContext) unmarshalNRemoveTeamAccessManagerInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐRemoveTeamAccessManagerInput(ctx context.Context, v any) (team.RemoveTeamAccessManagerInput, error) {
 	res, err := ec.unmarshalInputRemoveTeamAccessManagerInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -41460,76 +41382,6 @@ func (ec *executionContext) marshalNRemoveTeamAccessManagerPayload2ᚖgithubᚗc
 		return graphql.Null
 	}
 	return ec._RemoveTeamAccessManagerPayload(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNRepository2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*artifactregistry.Repository) graphql.Marshaler {
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalNRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepository(ctx, sel, v[i])
-	})
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepository(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.Repository) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Repository(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNRepositoryConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*artifactregistry.Repository]) graphql.Marshaler {
-	return ec._RepositoryConnection(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNRepositoryConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*artifactregistry.Repository]) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._RepositoryConnection(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNRepositoryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*artifactregistry.Repository]) graphql.Marshaler {
-	return ec._RepositoryEdge(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNRepositoryEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*artifactregistry.Repository]) graphql.Marshaler {
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return ec.marshalNRepositoryEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
-	})
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) unmarshalNRepositoryOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryOrderField(ctx context.Context, v any) (artifactregistry.RepositoryOrderField, error) {
-	var res artifactregistry.RepositoryOrderField
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNRepositoryOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryOrderField(ctx context.Context, sel ast.SelectionSet, v artifactregistry.RepositoryOrderField) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalNRevokeRoleFromServiceAccountInput2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋserviceaccountᚐRevokeRoleFromServiceAccountInput(ctx context.Context, v any) (serviceaccount.RevokeRoleFromServiceAccountInput, error) {
@@ -42820,6 +42672,13 @@ func (ec *executionContext) unmarshalOActivityLogFilter2ᚖgithubᚗcomᚋstatis
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalOArtifactRegistryGithubRepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryGithubRepository(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.ArtifactRegistryGithubRepository) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ArtifactRegistryGithubRepository(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -42950,21 +42809,6 @@ func (ec *executionContext) marshalONode2githubᚗcomᚋstatisticsnorwayᚋdapla
 		return graphql.Null
 	}
 	return ec._Node(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalORepository2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepository(ctx context.Context, sel ast.SelectionSet, v *artifactregistry.Repository) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._Repository(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalORepositoryOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐRepositoryOrder(ctx context.Context, v any) (*artifactregistry.RepositoryOrder, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputRepositoryOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOSearchType2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋsearchᚐSearchType(ctx context.Context, v any) (*search.SearchType, error) {
@@ -43129,14 +42973,6 @@ func (ec *executionContext) unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorw
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputTeamOrder(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalOTeamRepositoryFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐTeamRepositoryFilter(ctx context.Context, v any) (*artifactregistry.TeamRepositoryFilter, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputTeamRepositoryFilter(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

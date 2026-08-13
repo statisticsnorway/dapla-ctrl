@@ -14,11 +14,11 @@ const (
 )
 
 func init() {
-	ident.RegisterIdentType(identKey, "AR", getByIdent)
+	ident.RegisterIdentType(identKey, "ARGHR", getByIdent)
 }
 
-func newIdent(teamSlug slug.Slug, format string) ident.Ident {
-	return ident.NewIdent(identKey, teamSlug.String(), format)
+func newIdent(teamSlug slug.Slug, githubRepositoryName string) ident.Ident {
+	return ident.NewIdent(identKey, teamSlug.String(), githubRepositoryName)
 }
 
 func parseIdent(id ident.Ident) (slug.Slug, string, error) {

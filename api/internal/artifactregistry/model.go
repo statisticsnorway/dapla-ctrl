@@ -9,42 +9,44 @@ import (
 //mgo:gen model
 //mgo:gen order NAME
 //mgo:impl node paginated
-type Repository struct {
-	Format    string    `json:"format"`
-	SizeBytes int64     `json:"sizeBytes"`
-	TeamSlug  slug.Slug `json:"-"`
+type ArtifactRegistryGithubRepository struct {
+	// Name of the repository, with the organization prefix.
+	Name string `json:"name"`
+	// Team this repository is connected to.
+	TeamSlug slug.Slug `json:"teamSlug"`
 }
 
-func (r Repository) ID() ident.Ident {
-	return newIdent(r.TeamSlug, r.Format)
+func (r ArtifactRegistryGithubRepository) ID() ident.Ident {
+	return newIdent(r.TeamSlug, r.Name)
 }
 
-func toGraphRepository(r *artifactregistrysql.TeamArtifactRegistryRepository) *Repository {
-	return &Repository{
-		TeamSlug:  r.TeamSlug,
-		Format:    r.Format,
-		SizeBytes: r.SizeBytes,
+func toGraphArtifactRegistryGithubRepository(r *artifactregistrysql.TeamArtifactRegistryGithubRepository) *ArtifactRegistryGithubRepository {
+	return &ArtifactRegistryGithubRepository{
+		TeamSlug: r.TeamSlug,
+		Name:     r.GithubRepository,
 	}
 }
 
-type AddRepositoryToTeamInput struct {
-	TeamSlug       slug.Slug `json:"teamSlug"`
-	RepositoryName string    `json:"repositoryName"`
+type AddArtifactRegistryGithubRepositoryToTeamInput struct {
+	// Slug of the team to add the repository to.
+	TeamSlug slug.Slug `json:"teamSlug"`
+	// Name of the repository, without the org prefix, for instance 'repo'.
+	RepositoryName string `json:"repositoryName"`
 }
 
-type AddRepositoryToTeamPayload struct {
-	Repository *Repository `json:"repository"`
+type AddArtifactRegistryGithubRepositoryToTeamPayload struct {
+	// Repository that was added to the team.
+	Repository *ArtifactRegistryGithubRepository `json:"repository,omitempty"`
 }
 
-type RemoveRepositoryFromTeamInput struct {
-	TeamSlug       slug.Slug `json:"teamSlug"`
-	RepositoryName string    `json:"repositoryName"`
+type RemoveArtifactRegistryGithubRepositoryFromTeamInput struct {
+	// Slug of the team to remove the repository from.
+	TeamSlug slug.Slug `json:"teamSlug"`
+	// Name of the repository, without the org prefix, for instance 'repo'.
+	RepositoryName string `json:"repositoryName"`
 }
 
-type RemoveRepositoryFromTeamPayload struct {
-	Success bool `json:"success"`
-}
-
-type TeamRepositoryFilter struct {
-	Name *string `json:"name"`
+type RemoveArtifactRegistryGithubRepositoryFromTeamPayload struct {
+	// Whether or not the repository was removed from the team.
+	Success *bool `json:"success,omitempty"`
 }

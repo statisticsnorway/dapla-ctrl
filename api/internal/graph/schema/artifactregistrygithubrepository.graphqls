@@ -1,8 +1,8 @@
 extend type Team {
-	repositories(
+	artifactRegistryGithubRepository(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
 		first: Int
-
+		# Artifact registry github repositories allow list
 		"Get items after this cursor."
 		after: Cursor
 
@@ -11,73 +11,72 @@ extend type Team {
 
 		"Get items before this cursor."
 		before: Cursor
-
-		"Ordering options for items returned from the connection."
-		orderBy: RepositoryOrder
-
-		filter: TeamRepositoryFilter
-	): RepositoryConnection!
+	): ArtifactRegistryGithubRepositoryConnection!
 }
 
 extend type Mutation {
-	"Add a team repository."
-	addRepositoryToTeam(input: AddRepositoryToTeamInput!): AddRepositoryToTeamPayload!
+	"Add a team artifact registry repository."
+	addArtifactRegistryGithubRepositoryToTeam(
+		input: AddArtifactRegistryGithubRepositoryToTeamInput!
+	): AddArtifactRegistryGithubRepositoryToTeamPayload!
 
-	"Remove a team repository."
-	removeRepositoryFromTeam(input: RemoveRepositoryFromTeamInput!): RemoveRepositoryFromTeamPayload!
+	"Remove a team artifact registry repository."
+	removeArtifactRegistryGithubRepositoryFromTeam(
+		input: RemoveArtifactRegistryGithubRepositoryFromTeamInput!
+	): RemoveArtifactRegistryGithubRepositoryFromTeamPayload!
 }
 
 extend enum ActivityLogEntryResourceType {
-	"All activity log entries related to repositories will use this resource type."
-	REPOSITORY
+	"All activity log entries related to artifact registry repositories will use this resource type."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY
 }
 
-input AddRepositoryToTeamInput {
+input AddArtifactRegistryGithubRepositoryToTeamInput {
 	"Slug of the team to add the repository to."
 	teamSlug: Slug!
 
-	"Name of the repository, with the org prefix, for instance 'org/repo'."
+	"Name of the repository, without the org prefix, for instance 'repo'."
 	repositoryName: String!
 }
 
-type AddRepositoryToTeamPayload {
+type AddArtifactRegistryGithubRepositoryToTeamPayload {
 	"Repository that was added to the team."
-	repository: Repository
+	repository: ArtifactRegistryGithubRepository
 }
 
-input RemoveRepositoryFromTeamInput {
+input RemoveArtifactRegistryGithubRepositoryFromTeamInput {
 	"Slug of the team to remove the repository from."
 	teamSlug: Slug!
 
-	"Name of the repository, with the org prefix, for instance 'org/repo'."
+	"Name of the repository, without the org prefix, for instance 'repo'."
 	repositoryName: String!
 }
 
-type RemoveRepositoryFromTeamPayload {
+type RemoveArtifactRegistryGithubRepositoryFromTeamPayload {
 	"Whether or not the repository was removed from the team."
 	success: Boolean
 }
 
-type RepositoryConnection {
+type ArtifactRegistryGithubRepositoryConnection {
 	"Pagination information."
 	pageInfo: PageInfo!
 
 	"List of nodes."
-	nodes: [Repository!]!
+	nodes: [ArtifactRegistryGithubRepository!]!
 
 	"List of edges."
-	edges: [RepositoryEdge!]!
+	edges: [ArtifactRegistryGithubRepositoryEdge!]!
 }
 
-type RepositoryEdge {
+type ArtifactRegistryGithubRepositoryEdge {
 	"Cursor for this edge that can be used for pagination."
 	cursor: Cursor!
 
 	"The GitHub repository."
-	node: Repository!
+	node: ArtifactRegistryGithubRepository!
 }
 
-type Repository implements Node {
+type ArtifactRegistryGithubRepository implements Node {
 	"ID of the repository."
 	id: ID!
 
@@ -88,26 +87,7 @@ type Repository implements Node {
 	team: Team!
 }
 
-input TeamRepositoryFilter {
-	"Filter by repository name containing the phrase."
-	name: String
-}
-
-"Ordering options when fetching repositories."
-input RepositoryOrder {
-	"The field to order items by."
-	field: RepositoryOrderField!
-
-	"The direction to order items by."
-	direction: OrderDirection!
-}
-
-enum RepositoryOrderField {
-	"Order repositories by name."
-	NAME
-}
-
-type RepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 
@@ -127,10 +107,10 @@ type RepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
 	resourceName: String!
 
 	"The team slug that the entry belongs to."
-	teamSlug: Slug!
+	teamSlug: Slug
 }
 
-type RepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 
@@ -150,13 +130,13 @@ type RepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
 	resourceName: String!
 
 	"The team slug that the entry belongs to."
-	teamSlug: Slug!
+	teamSlug: Slug
 }
 
 extend enum ActivityLogActivityType {
 	"Repository was added to a team."
-	REPOSITORY_ADDED
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ADDED
 
 	"Repository was removed from a team."
-	REPOSITORY_REMOVED
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_REMOVED
 }
