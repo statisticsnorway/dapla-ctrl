@@ -59,6 +59,38 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 	return &i, err
 }
 
+const getGithubRepositoriesForTeam = `-- name: GetGithubRepositoriesForTeam :one
+SELECT
+	team_slug,
+	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+FROM
+	team_artifact_registry_github_repositories gr
+WHERE
+	team_slug = $1::slug
+LIMIT
+	$3
+OFFSET
+	$2
+`
+
+type GetGithubRepositoriesForTeamParams struct {
+	TeamSlug slug.Slug
+	Offset   int32
+	Limit    int32
+}
+
+type GetGithubRepositoriesForTeamRow struct {
+	TeamSlug    slug.Slug
+	GithubRepos []string
+}
+
+func (q *Queries) GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithubRepositoriesForTeamParams) (*GetGithubRepositoriesForTeamRow, error) {
+	row := q.db.QueryRow(ctx, getGithubRepositoriesForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
+	var i GetGithubRepositoriesForTeamRow
+	err := row.Scan(&i.TeamSlug, &i.GithubRepos)
+	return &i, err
+}
+
 const list = `-- name: List :many
 SELECT
 	ar.team_slug, ar.format, ar.size_bytes

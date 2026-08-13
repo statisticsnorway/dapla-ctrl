@@ -10,6 +10,20 @@ WHERE
 	AND format = @format
 ;
 
+-- name: GetGithubRepositoriesForTeam :one
+SELECT
+	team_slug,
+	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+FROM
+	team_artifact_registry_github_repositories gr
+WHERE
+	team_slug = @team_slug::slug
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;
+
 -- name: List :many
 SELECT
 	sqlc.embed(ar)

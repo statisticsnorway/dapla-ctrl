@@ -34,10 +34,9 @@ func (t *Server) GetArtifactRegistryRepo(ctx context.Context, req *protoapi.GetA
 
 	resp := &protoapi.GetArtifactRegistryRepoResponse{
 		Repo: &protoapi.ArtifactRegistryRepo{
-			TeamSlug:    repo.TeamArtifactRegistryRepository.TeamSlug.String(),
-			Format:      repo.TeamArtifactRegistryRepository.Format,
-			SizeBytes:   repo.TeamArtifactRegistryRepository.SizeBytes,
-			GithubRepos: repo.GithubRepos,
+			TeamSlug:  repo.TeamArtifactRegistryRepository.TeamSlug.String(),
+			Format:    repo.TeamArtifactRegistryRepository.Format,
+			SizeBytes: repo.TeamArtifactRegistryRepository.SizeBytes,
 		},
 	}
 	return resp, nil
@@ -57,8 +56,9 @@ func (t *Server) SetArtifactRegistryRepoSizeBytes(ctx context.Context, req *prot
 func (t *Server) ListArtifactRegistryReposForTeam(ctx context.Context, req *protoapi.ListArtifactRegistryReposForTeamRequest) (*protoapi.ListArtifactRegistryReposForTeamResponse, error) {
 	limit, offset := grpcpagination.Pagination(req)
 	repos, err := t.querier.List(ctx, grpcartifactregistrysql.ListParams{
-		Offset: offset,
-		Limit:  limit,
+		TeamSlug: slug.Slug(req.TeamSlug),
+		Offset:   offset,
+		Limit:    limit,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list repos for team: %s", err)
@@ -78,6 +78,23 @@ func (t *Server) ListArtifactRegistryReposForTeam(ctx context.Context, req *prot
 	}
 
 	return resp, nil
+}
+
+func (t *Server) GetArtifactRegistryGithubAllowlist(ctx context.Context, req *protoapi.GetArtifactRegistryGithubAllowlistRequest) (*protoapi.GetArtifactRegistryGithubAllowlistResponse, error) {
+	limit, offset := grpcpagination.Pagination(req)
+	res, err := t.querier.GetGithubRepositoriesForTeam(ctx, grpcartifactregistrysql.GetGithubRepositoriesForTeamParams{
+		TeamSlug: slug.Slug(req.TeamSlug),
+		Limit:    limit,
+		Offset:   offset,
+	})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to get artifact registry github repositories for team %s: %s", req.TeamSlug, err)
+	}
+
+	return &protoapi.GetArtifactRegistryGithubAllowlistResponse{
+		Nodes:    res.GithubRepos,
+		PageInfo: &protoapi.PageInfo{},
+	}, nil
 }
 
 func toProtoRepo(repo *grpcartifactregistrysql.TeamArtifactRegistryRepository) *protoapi.ArtifactRegistryRepo {
