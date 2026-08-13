@@ -17,20 +17,30 @@ func NewFakeResourceManager() *FakeResourceManager {
 	}
 }
 
-func (f *FakeResourceManager) GetOrCreateTagValue(_ context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
-	key := tagKeyNamespacedName + "/" + teamSlug
+func (f *FakeResourceManager) GetTagValue(_ context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
+	key := tagKeyNamespacedName
 	if v, ok := f.TagValues[key]; ok {
 		return v, nil
 	}
-	f.TagValues[key] = key
+	return "", ErrNotFound
+}
+
+func (f *FakeResourceManager) CreateTagValue(_ context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
+	key := tagKeyNamespacedName
+	f.TagValues[key] = teamSlug
 	return key, nil
 }
 
-func (f *FakeResourceManager) GetOrCreateFolder(_ context.Context, displayName, parent string) (string, error) {
+func (f *FakeResourceManager) GetFolder(_ context.Context, displayName, parent string) (string, error) {
 	key := parent + "/" + displayName
 	if id, ok := f.Folders[key]; ok {
 		return id, nil
 	}
+	return "", ErrNotFound
+}
+
+func (f *FakeResourceManager) CreateFolder(_ context.Context, displayName, parent string) (string, error) {
+	key := parent + "/" + displayName
 	id := "fake-folder-" + displayName
 	f.Folders[key] = id
 	return id, nil
