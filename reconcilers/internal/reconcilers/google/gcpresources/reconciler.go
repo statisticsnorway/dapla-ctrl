@@ -2,6 +2,7 @@ package gcpresources
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -90,11 +91,18 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	teamSlug := daplaTeam.Slug
 	teamFoldersClient := client.GcpTeamResources()
 
-	tagValueName, err := r.client.GetOrCreateTagValue(ctx, r.cfg.TagKeyNamespacedName, teamSlug)
-	if err != nil {
-		return fmt.Errorf("get or create tag value for team %q: %w", teamSlug, err)
+	tagValueName, err := r.client.GetTagValue(ctx, r.cfg.TagKeyNamespacedName, teamSlug)
+	if errors.Is(err, ErrNotFound) {
+		tagValueName, err = r.client.CreateTagValue(ctx, r.cfg.TagKeyNamespacedName, teamSlug)
+		if err != nil {
+			return fmt.Errorf("create tag value for team %q: %w", teamSlug, err)
+		}
+		log.WithField("tag_value_name", tagValueName).Info("created tag value")
+	} else if err != nil {
+		return fmt.Errorf("get tag value for team %q: %w", teamSlug, err)
+	} else {
+		log.WithField("tag_value_name", tagValueName).Debug("resolved GCP tag value")
 	}
-	log.WithField("tag_value_name", tagValueName).Debug("resolved GCP tag value")
 
 	for env, parentFolderNumber := range r.cfg.EnvParentFolders {
 		if err := r.reconcileEnvFolder(ctx, teamFoldersClient, teamSlug, env, parentFolderNumber, tagValueName, log); err != nil {
@@ -124,14 +132,22 @@ func (r *reconciler) reconcileEnvFolder(
 	var fID string
 	if err == nil {
 		fID = resp.Folder.FolderId
-		log.WithField("folder_id", fID).Debug("folder already stored")
+		log.WithField("folder_id", fID).Debug("folder already exist in db")
 	} else {
 		parent := fmt.Sprintf("folders/%s", parentFolderNumber)
-		fID, err = r.client.GetOrCreateFolder(ctx, teamSlug, parent)
-		if err != nil {
-			return fmt.Errorf("get or create GCP folder for team %q in env %q: %w", teamSlug, env, err)
+		fID, err = r.client.GetFolder(ctx, teamSlug, parent)
+
+		if errors.Is(err, ErrNotFound) {
+			fID, err = r.client.CreateFolder(ctx, teamSlug, parent)
+			if err != nil {
+				return fmt.Errorf("create GCP folder for team %q in env %q: %w", teamSlug, env, err)
+			}
+			log.WithField("folder_id", fID).Info("created GCP folder")
+		} else if err != nil {
+			return fmt.Errorf("get GCP folder for team %q in env %q: %w", teamSlug, env, err)
+		} else {
+			log.WithField("folder_id", fID).Debug("resolved GCP folder id")
 		}
-		log.WithField("folder_id", fID).Info("created GCP folder")
 
 		if _, err := teamFoldersClient.UpsertTeamFolder(ctx, &protoapi.UpsertGcpTeamFolderRequest{
 			Folder: &protoapi.GcpTeamFolder{

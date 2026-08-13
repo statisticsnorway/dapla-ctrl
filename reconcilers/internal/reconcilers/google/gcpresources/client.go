@@ -2,6 +2,7 @@ package gcpresources
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,8 +13,10 @@ import (
 )
 
 type ResourceManager interface {
-	GetOrCreateFolder(ctx context.Context, displayName, parent string) (folderID string, err error)
-	GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (tagValueName string, err error)
+	GetFolder(ctx context.Context, displayName, parent string) (folderID string, err error)
+	CreateFolder(ctx context.Context, displayName, parent string) (folderID string, err error)
+	GetTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (tagValueName string, err error)
+	CreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (tagValueName string, err error)
 	TagFolder(ctx context.Context, folderID, tagValueName string) error
 }
 
@@ -22,6 +25,8 @@ type GoogleResourceManager struct {
 	tagValues   *resourcemanager.TagValuesClient
 	tagBindings *resourcemanager.TagBindingsClient
 }
+
+var ErrNotFound = errors.New("element not found")
 
 func NewGoogleResourceManager(ctx context.Context) (ResourceManager, error) {
 	folders, err := resourcemanager.NewFoldersClient(ctx)
@@ -46,7 +51,7 @@ func NewGoogleResourceManager(ctx context.Context) (ResourceManager, error) {
 	}, nil
 }
 
-func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayName, parent string) (string, error) {
+func (g *GoogleResourceManager) GetFolder(ctx context.Context, displayName, parent string) (string, error) {
 	it := g.folders.ListFolders(ctx, &resourcemanagerpb.ListFoldersRequest{Parent: parent})
 	for folder, err := range it.All() {
 		if err != nil {
@@ -56,7 +61,10 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 			return folderID(folder.Name), nil
 		}
 	}
+	return "", ErrNotFound
+}
 
+func (g *GoogleResourceManager) CreateFolder(ctx context.Context, displayName, parent string) (string, error) {
 	op, err := g.folders.CreateFolder(ctx, &resourcemanagerpb.CreateFolderRequest{
 		Folder: &resourcemanagerpb.Folder{
 			DisplayName: displayName,
@@ -73,7 +81,7 @@ func (g *GoogleResourceManager) GetOrCreateFolder(ctx context.Context, displayNa
 	return folderID(createdFolder.Name), nil
 }
 
-func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
+func (g *GoogleResourceManager) GetTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
 	it := g.tagValues.ListTagValues(ctx, &resourcemanagerpb.ListTagValuesRequest{Parent: tagKeyNamespacedName})
 	for tagValue, err := range it.All() {
 		if err != nil {
@@ -84,6 +92,10 @@ func (g *GoogleResourceManager) GetOrCreateTagValue(ctx context.Context, tagKeyN
 		}
 	}
 
+	return "", ErrNotFound
+}
+
+func (g *GoogleResourceManager) CreateTagValue(ctx context.Context, tagKeyNamespacedName, teamSlug string) (string, error) {
 	op, err := g.tagValues.CreateTagValue(ctx, &resourcemanagerpb.CreateTagValueRequest{
 		TagValue: &resourcemanagerpb.TagValue{
 			Parent:    tagKeyNamespacedName,
