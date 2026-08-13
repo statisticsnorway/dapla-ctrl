@@ -10,12 +10,11 @@ import (
 )
 
 const disableTeamFeature = `-- name: DisableTeamFeature :exec
-DELETE FROM
-    team_features
+DELETE FROM team_features
 WHERE
-    team_slug = $1
-    AND name = $2
-    AND env = $3
+	team_slug = $1
+	AND name = $2
+	AND env = $3
 `
 
 type DisableTeamFeatureParams struct {
@@ -31,9 +30,9 @@ func (q *Queries) DisableTeamFeature(ctx context.Context, arg DisableTeamFeature
 
 const enableTeamFeature = `-- name: EnableTeamFeature :exec
 INSERT INTO
-    team_features (team_slug, name, env)
+	team_features (team_slug, name, env)
 VALUES
-    ($1, $2, $3)
+	($1, $2, $3)
 `
 
 type EnableTeamFeatureParams struct {
@@ -49,13 +48,13 @@ func (q *Queries) EnableTeamFeature(ctx context.Context, arg EnableTeamFeaturePa
 
 const getFeaturesForTeam = `-- name: GetFeaturesForTeam :many
 SELECT
-    team_features.team_slug, team_features.name, team_features.env
+	team_features.team_slug, team_features.name, team_features.env
 FROM
-    team_features
+	team_features
 WHERE
-    team_slug = $1
+	team_slug = $1
 ORDER BY
-    name ASC
+	name ASC
 `
 
 type GetFeaturesForTeamRow struct {

@@ -77,13 +77,13 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 
 const getFeaturesForTeam = `-- name: GetFeaturesForTeam :many
 SELECT
-    team_features.team_slug, team_features.name, team_features.env
+	team_features.team_slug, team_features.name, team_features.env
 FROM
-    team_features
+	team_features
 WHERE
-    team_slug = $1
+	team_slug = $1
 ORDER BY
-    name ASC
+	name ASC
 `
 
 type GetFeaturesForTeamRow struct {
