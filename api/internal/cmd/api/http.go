@@ -14,6 +14,7 @@ import (
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authn"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/middleware"
@@ -165,6 +166,7 @@ func ConfigureGraph(
 
 	setupContext := func(ctx context.Context) context.Context {
 		ctx = database.NewLoaderContext(ctx, pool)
+		ctx = artifactregistry.NewLoaderContext(ctx, pool)
 		ctx = team.NewLoaderContext(ctx, pool, log)
 		ctx = user.NewLoaderContext(ctx, pool)
 		ctx = usersync.NewLoaderContext(ctx, pool)
