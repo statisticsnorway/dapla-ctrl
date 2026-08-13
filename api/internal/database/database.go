@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pressly/goose/v3"
 	"github.com/sirupsen/logrus"
+	_ "github.com/statisticsnorway/dapla-ctrl/api/internal/database/migrations"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
