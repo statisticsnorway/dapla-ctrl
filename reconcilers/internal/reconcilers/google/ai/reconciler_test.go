@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"fmt"
 	"slices"
 	"testing"
 
@@ -98,17 +99,24 @@ func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T)
 }
 
 func TestGetAIBudget(t *testing.T) {
-	budget := getAIBudget("my-team", "12345", 100, []string{"channels/one"})
+	threshholds := []float64{0.5, 0.9, 1.0}
+	r := &reconciler{
+		AIBudgetThresholds: map[string]float64{"first": threshholds[0], "second": threshholds[1], "third": threshholds[2]},
+	}
+	budgetLimit := int64(100)
+	notificationChannels := []string{"channels/one"}
+	projectNumber := "12345"
+	budget := getAIBudget(r, "my-team", projectNumber, budgetLimit, notificationChannels)
 
 	if budget.DisplayName != "my-team AI budget" ||
-		!slices.Equal(budget.BudgetFilter.Projects, []string{"projects/12345"}) ||
+		!slices.Equal(budget.BudgetFilter.Projects, []string{fmt.Sprintf("projects/%s", projectNumber)}) ||
 		!slices.Equal(budget.BudgetFilter.Services, []string{vertexAIServiceName}) ||
 		budget.BudgetFilter.GetCalendarPeriod() != budgetspb.CalendarPeriod_MONTH ||
 		budget.Amount.GetSpecifiedAmount().CurrencyCode != aiBudgetCurrencyCode ||
-		budget.Amount.GetSpecifiedAmount().Units != 100 ||
-		!slices.EqualFunc(budget.ThresholdRules, []float64{0.5, 0.9, 1}, func(rule *budgetspb.ThresholdRule, threshold float64) bool { return rule.ThresholdPercent == threshold }) ||
+		budget.Amount.GetSpecifiedAmount().Units != budgetLimit ||
+		!slices.EqualFunc(budget.ThresholdRules, threshholds, func(rule *budgetspb.ThresholdRule, threshold float64) bool { return rule.ThresholdPercent == threshold }) ||
 		!budget.NotificationsRule.DisableDefaultIamRecipients ||
-		!slices.Equal(budget.NotificationsRule.MonitoringNotificationChannels, []string{"channels/one"}) {
+		!slices.Equal(budget.NotificationsRule.MonitoringNotificationChannels, notificationChannels) {
 		t.Fatalf("unexpected budget: %v", budget)
 	}
 }

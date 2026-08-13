@@ -28,22 +28,20 @@ import (
 )
 
 const (
-	reconcilerName                 = "google:ai"
-	aiBudgetDisplayNameSuffix      = "AI budget"
-	aiBudgetCurrencyCode           = "EUR"
-	aiBudgetNotificationType       = "email"
-	aiBudgetNotificationLabel      = "email_address"
-	aiBudgetNotificationName       = "Vertex AI budget notification channel"
-	aiBudgetThresholdHalf          = 0.5
-	aiBudgetThresholdNinetyPercent = 0.9
-	aiBudgetThresholdFull          = 1.0
-	vertexAIServiceName            = "services/C7E2-9256-1C43"
+	reconcilerName            = "google:ai"
+	aiBudgetDisplayNameSuffix = "AI budget"
+	aiBudgetCurrencyCode      = "EUR"
+	aiBudgetNotificationType  = "email"
+	aiBudgetNotificationLabel = "email_address"
+	aiBudgetNotificationName  = "Vertex AI budget notification channel"
+	vertexAIServiceName       = "services/C7E2-9256-1C43"
 )
 
 type reconciler struct {
 	AIPlatformUserRole       string
 	GroupSANameTemplate      string
 	AIBudgetBillingAccount   string
+	AIBudgetThresholds       map[string]float64
 	BudgetNotificationEmails []string
 }
 
@@ -51,6 +49,7 @@ type optFunc func(*reconciler) error
 
 func WithDefaultSettings() optFunc {
 	return func(r *reconciler) error {
+		r.AIBudgetThresholds = map[string]float64{"first": 0.5, "second": 0.9, "third": 1.0}
 		r.AIPlatformUserRole = "ssb.aiplatform.user"
 		r.AIBudgetBillingAccount = "billingAccounts/018A21-E69CB3-A95FA4"
 		// For SAs in the test environment
@@ -315,18 +314,13 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return err
 	}
 
-	budgetNotificationUsers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 1)
+	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 100)
 	if err != nil {
 		return err
 	}
 
-	budgetNotificationEmail := make([]string, len(budgetNotificationUsers))
-
-	for idx, user := range budgetNotificationUsers {
-		budgetNotificationEmail[idx] = user.User.Email
-	}
-
-	budgetNotificationEmails := slices.Concat(budgetNotificationEmail, daplaStatNotificationEmails)
+	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
+	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, daplaStatNotificationEmails)
 
 	project, err := services.Project.GetProject(ctx, &resourcemanagerpb.GetProjectRequest{Name: "projects/" + projectID})
 	if err != nil {
@@ -338,7 +332,10 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return err
 	}
 
-	budget := getAIBudget(daplaTeamSlug, strings.TrimPrefix(project.Name, "projects/"), 0, notificationChannelNames)
+	// (developers * 10) EUR per month
+	monthlyBudgetLimit := int64(len(teamDevelopers)) * 10
+
+	budget := getAIBudget(r, daplaTeamSlug, strings.TrimPrefix(project.Name, "projects/"), monthlyBudgetLimit, notificationChannelNames)
 	if existingBudget == nil {
 		_, err = services.CloudBudget.CreateBudget(ctx, &budgetspb.CreateBudgetRequest{Parent: r.AIBudgetBillingAccount, Budget: budget})
 		if err != nil {
@@ -449,7 +446,7 @@ func getExistingAIBudget(r *reconciler, ctx context.Context, budgetClient *budge
 	return nil, nil
 }
 
-func getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
+func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
 	return &budgetspb.Budget{
 		DisplayName: fmt.Sprintf("%s %s", daplaTeamSlug, aiBudgetDisplayNameSuffix),
 		BudgetFilter: &budgetspb.Filter{
@@ -469,9 +466,9 @@ func getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUni
 			},
 		},
 		ThresholdRules: []*budgetspb.ThresholdRule{
-			{ThresholdPercent: aiBudgetThresholdHalf},
-			{ThresholdPercent: aiBudgetThresholdNinetyPercent},
-			{ThresholdPercent: aiBudgetThresholdFull},
+			{ThresholdPercent: r.AIBudgetThresholds["first"]},
+			{ThresholdPercent: r.AIBudgetThresholds["second"]},
+			{ThresholdPercent: r.AIBudgetThresholds["third"]},
 		},
 		NotificationsRule: &budgetspb.NotificationsRule{
 			MonitoringNotificationChannels: notificationChannelNames,
