@@ -296,7 +296,16 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 	})
 }
 
-func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string) error {
+func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
+	if err := activitylog.Create(ctx, activitylog.CreateInput{
+		Action:       activitylog.ActivityLogEntryActionCreated,
+		Actor:        actor.User,
+		ResourceType: activityLogEntryResourceTypeTeam,
+		ResourceName: teamSlug.String(),
+		TeamSlug:     new(teamSlug),
+	}); err != nil {
+		return err
+	}
 	return db(ctx).EnableTeamFeature(ctx, teamsql.EnableTeamFeatureParams{
 		TeamSlug: teamSlug,
 		Name:     featureName,
@@ -304,7 +313,16 @@ func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName stri
 	})
 }
 
-func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string) error {
+func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
+	if err := activitylog.Create(ctx, activitylog.CreateInput{
+		Action:       activitylog.ActivityLogEntryActionDeleted,
+		Actor:        actor.User,
+		ResourceType: activityLogEntryResourceTypeTeam,
+		ResourceName: teamSlug.String(),
+		TeamSlug:     new(teamSlug),
+	}); err != nil {
+		return err
+	}
 	return db(ctx).DisableTeamFeature(ctx, teamsql.DisableTeamFeatureParams{
 		TeamSlug: teamSlug,
 		Name:     featureName,

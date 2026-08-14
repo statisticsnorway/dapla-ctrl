@@ -169,11 +169,13 @@ func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input te
 
 func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error) {
 
+	actor := authz.ActorFromContext(ctx)
+
 	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
 		return nil, err
 	}
 
-	if err := team.EnableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env); err != nil {
+	if err := team.EnableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env, actor); err != nil {
 		return nil, err
 	}
 
@@ -186,11 +188,13 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 
 func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.DisableTeamFeatureInput) (*team.DisableTeamFeaturePayload, error) {
 
+	actor := authz.ActorFromContext(ctx)
+
 	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
 		return nil, err
 	}
 
-	if err := team.DisableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env); err != nil {
+	if err := team.DisableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env, actor); err != nil {
 		return nil, err
 	}
 
