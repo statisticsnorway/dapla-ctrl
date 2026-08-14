@@ -9,6 +9,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
+	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -22,7 +23,10 @@ type reconciler struct {
 	tfstateProjects map[string]string
 	storageClient   *storage.Client
 	serviceAccounts *serviceaccounts.Client
+	memberships     *cloudidentity.GroupsMembershipsService
 	atlantisProject string
+	memberGroups    []string
+	managerGroups   []string
 }
 
 type optFunc func(*reconciler)
@@ -48,6 +52,12 @@ func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
 	}
 	r.serviceAccounts = serviceAccounts
 
+	ci, err := cloudidentity.NewService(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.memberships = ci.Groups.Memberships
+
 	return r, nil
 }
 
@@ -66,6 +76,15 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
+	if err := r.reconcileServiceAccount(ctx, client, daplaTeam, log); err != nil {
+		return err
+	}
+	if err := r.reconcileBuckets(ctx, daplaTeam.Slug, log); err != nil {
+		return err
+	}
+	return nil
+}
+func (r *reconciler) reconcileServiceAccount(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+daplaTeam.Slug, "Atlantis for team "+daplaTeam.Slug, r.atlantisProject)
 	if err != nil {
@@ -81,9 +100,39 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return true
 	})
 
-	if err := r.reconcileBuckets(ctx, daplaTeam.Slug, log); err != nil {
+	return nil
+}
+
+func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail string, groupId string, manager bool) error {
+	// Check if membership exists
+	resp, err := r.memberships.Lookup(groupId).MemberKeyId(saEmail).Context(ctx).Do()
+	// Does exist (2xx response)
+	if err == nil {
+		return nil
+	}
+
+	// Unknown error (not 2xx and not 404)
+	if status.Code(err) != codes.NotFound {
 		return err
 	}
+
+	roles := []*cloudidentity.MembershipRole{
+		{
+			Name: "MEMBER",
+		},
+	}
+	if manager {
+		roles = append(roles, &cloudidentity.MembershipRole{
+			Name: "MANAGER",
+		})
+	}
+
+	r.memberships.Create(groupId, &cloudidentity.Membership{
+		PreferredMemberKey: &cloudidentity.EntityKey{
+			Id: saEmail,
+		},
+		Roles: roles,
+	}).Do()
 
 	return nil
 }
