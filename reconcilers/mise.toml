@@ -1,7 +1,7 @@
 [settings]
 pin = true
 
-[task]
+[settings.task]
 output = "prefix"
 
 [tools]

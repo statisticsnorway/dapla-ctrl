@@ -29,6 +29,9 @@ func Up0015(ctx context.Context, tx *sql.Tx) error {
 		}
 
 		_, err = tx.ExecContext(ctx, fmt.Sprintf(`INSERT INTO team_artifact_registry_repositories(team_slug, format, size_bytes) VALUES ('%s', 'docker', 0);`, team))
+		if err != nil {
+			return err
+		}
 
 		ghReposValues := make([]string, len(repos))
 		for i, repo := range repos {
