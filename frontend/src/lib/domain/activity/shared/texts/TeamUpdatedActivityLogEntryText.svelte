@@ -21,15 +21,24 @@
 				return fieldName;
 		}
 	};
+	const updatedFieldToDisplayText = (fieldName: string, value: string | null | undefined) => {
+		if (fieldName === 'hasManualEditing') {
+			return value === 'true' ? 'Parquedit ble skrudd på' : 'Parquedit ble skrudd av';
+		}
+		return value;
+	};
 </script>
 
 <div>
-	{#if data.teamUpdated?.updatedFields.length}
-		{#each data.teamUpdated?.updatedFields as field (field)}
-			{fieldNameToDisplayName(field.field)} endret fra <i>{field.oldValue}</i> til
-			<i>{field.newValue}</i>
-		{/each}
-	{/if}
+	{#each data.teamUpdated?.updatedFields as field (field)}
+		{#if updatedFieldToDisplayText(field.field, field.newValue)}
+			{updatedFieldToDisplayText(field.field, field.newValue)}
+		{:else}
+			{fieldNameToDisplayName(field.field)} endret fra <i>(field.oldValue</i> til<i
+				>field.newValue</i
+			>
+		{/if}
+	{/each}
 
 	<BodyShort textColor="subtle" size="small">
 		av {data.actor} for
