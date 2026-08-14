@@ -31,8 +31,8 @@
 
 	const availableServices: Service[] = [
 		{
-			displayName: 'VS Code (Python)',
-			name: 'vscode-python',
+			displayName: 'VS Code',
+			name: 'vscode',
 			supportsBuckets: true,
 			supportsDatabase: true
 		},
