@@ -68,8 +68,14 @@ extend type Mutation {
 	"""
 	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
 
+	"""
+	Enable a feature for a team.
+	"""
 	enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
 
+	"""
+	Disable a feature for a team.
+	"""
 	disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
 }
 
