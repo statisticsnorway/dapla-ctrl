@@ -534,7 +534,7 @@ func getStandardProjectID(ctx context.Context, client *resourcemanager.ProjectsC
 	})
 
 	projectID := ""
-	projectIDPrefix := fmt.Sprintf("%s-%s", daplaTeamSlug, string([]rune(env)[0]))
+	projectIDPrefix := fmt.Sprintf("%s-%s-", daplaTeamSlug, string([]rune(env)[0]))
 	for project, err := range it.All() {
 		if err != nil {
 			return "", err
@@ -542,6 +542,7 @@ func getStandardProjectID(ctx context.Context, client *resourcemanager.ProjectsC
 
 		if strings.HasPrefix(project.ProjectId, projectIDPrefix) {
 			projectID = project.ProjectId
+			break
 		}
 	}
 

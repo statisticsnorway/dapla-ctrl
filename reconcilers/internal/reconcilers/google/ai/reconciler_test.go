@@ -124,7 +124,10 @@ func TestGetAIBudget(t *testing.T) {
 func TestGetStandardProjectID(t *testing.T) {
 	server := &fakeGoogleServer{projects: []*resourcemanagerpb.Project{
 		{ProjectId: "unrelated-t-123"},
+		{ProjectId: "my-team-troika-t-231"},
+		{ProjectId: "my-teaser-team-t-398"},
 		{ProjectId: "my-team-t-456"},
+		{ProjectId: "my-team-trace-t-fu"},
 	}}
 	projects, _ := fakeGoogleClients(t, server)
 
