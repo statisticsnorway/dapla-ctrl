@@ -226,7 +226,7 @@ func insertArtifactRegistryRepo(t *testing.T, ctx context.Context, pool *pgxpool
 func insertGithubRepository(t *testing.T, ctx context.Context, pool *pgxpool.Pool, teamSlug, githubRepository string) {
 	t.Helper()
 
-	if _, err := pool.Exec(ctx, "INSERT INTO team_artifact_registry_github_repositories (team_slug, github_repository) VALUES ($1, $2)", teamSlug, githubRepository); err != nil {
+	if _, err := pool.Exec(ctx, "INSERT INTO team_artifact_registry_gh_repos_allow_list (team_slug, repository_name) VALUES ($1, $2)", teamSlug, githubRepository); err != nil {
 		t.Fatalf("failed to insert github repository: %v", err)
 	}
 }

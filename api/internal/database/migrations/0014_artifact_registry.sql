@@ -7,9 +7,9 @@ CREATE TABLE team_artifact_registry_repositories (
 )
 ;
 
-CREATE TABLE team_artifact_registry_github_repositories (
+CREATE TABLE team_artifact_registry_gh_repos_allow_list (
 	team_slug slug NOT NULL REFERENCES teams (slug) ON DELETE CASCADE,
-	github_repository TEXT NOT NULL,
-	UNIQUE (team_slug, github_repository)
+	repository_name TEXT NOT NULL,
+	UNIQUE (team_slug, repository_name)
 )
 ;

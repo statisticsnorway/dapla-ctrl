@@ -26,19 +26,19 @@ func getByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryGithubRepos
 	}, nil
 }
 
-func AddGithubRepositoryToTeam(ctx context.Context, input AddArtifactRegistryGithubRepositoryToTeamInput, actor *authz.Actor) (*ArtifactRegistryGithubRepository, error) {
+func AddGithubRepositoryToTeam(ctx context.Context, input GrantGithubRepoAccessToTeamArtifactRegistryInput, actor *authz.Actor) (*ArtifactRegistryGithubRepository, error) {
 	containsOrg := strings.Contains(input.RepositoryName, "/")
 	if containsOrg {
 		return nil, apierror.Errorf("Repository name should not contain organisation. E.g. `myrepo` (instead of `statisticsnorway/myrepo`)")
 	}
 
 	q := db(ctx)
-	var repo *artifactregistrysql.TeamArtifactRegistryGithubRepository
+	var repo *artifactregistrysql.TeamArtifactRegistryGhReposAllowList
 	err := database.Transaction(ctx, func(ctx context.Context) error {
 		var err error
 		repo, err = q.AddGithubRepositoryToTeam(ctx, artifactregistrysql.AddGithubRepositoryToTeamParams{
-			TeamSlug:         input.TeamSlug,
-			GithubRepository: input.RepositoryName,
+			TeamSlug:       input.TeamSlug,
+			RepositoryName: input.RepositoryName,
 		})
 		if err != nil {
 			return err
@@ -59,12 +59,12 @@ func AddGithubRepositoryToTeam(ctx context.Context, input AddArtifactRegistryGit
 	return toGraphArtifactRegistryGithubRepository(repo), nil
 }
 
-func RemoveGithubRepositoryFromTeam(ctx context.Context, input RemoveArtifactRegistryGithubRepositoryFromTeamInput, actor *authz.Actor) error {
+func RemoveGithubRepositoryFromTeam(ctx context.Context, input RevokeGithubRepoAccessFromTeamArtifactRegistryInput, actor *authz.Actor) error {
 	q := db(ctx)
 	return database.Transaction(ctx, func(ctx context.Context) error {
 		err := q.RemoveGithubRepositoryFromTeam(ctx, artifactregistrysql.RemoveGithubRepositoryFromTeamParams{
-			TeamSlug:         input.TeamSlug,
-			GithubRepository: input.RepositoryName,
+			TeamSlug:       input.TeamSlug,
+			RepositoryName: input.RepositoryName,
 		})
 		if err != nil {
 			return err
@@ -96,6 +96,6 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 		total = ret[0].TotalCount
 	}
 	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListGithubReposForTeamRow) *ArtifactRegistryGithubRepository {
-		return toGraphArtifactRegistryGithubRepository(&from.TeamArtifactRegistryGithubRepository)
+		return toGraphArtifactRegistryGithubRepository(&from.TeamArtifactRegistryGhReposAllowList)
 	}), nil
 }

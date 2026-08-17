@@ -15,44 +15,44 @@ extend type Team {
 }
 
 extend type Mutation {
-	"Add a team artifact registry repository."
-	addArtifactRegistryGithubRepositoryToTeam(
-		input: AddArtifactRegistryGithubRepositoryToTeamInput!
-	): AddArtifactRegistryGithubRepositoryToTeamPayload!
+	"Grant a Github Repository access to push to the team artifact registry repository."
+	grantGithubRepoAccessToTeamArtifactRegistry(
+		input: GrantGithubRepoAccessToTeamArtifactRegistryInput!
+	): GrantGithubRepoAccessToTeamArtifactRegistryPayload!
 
-	"Remove a team artifact registry repository."
-	removeArtifactRegistryGithubRepositoryFromTeam(
-		input: RemoveArtifactRegistryGithubRepositoryFromTeamInput!
-	): RemoveArtifactRegistryGithubRepositoryFromTeamPayload!
+	"Revoke the Github Repository access to push from the team artifact registry repository."
+	revokeGithubRepoAccessFromTeamArtifactRegistry(
+		input: RevokeGithubRepoAccessFromTeamArtifactRegistryInput!
+	): RevokeGithubRepoAccessFromTeamArtifactRegistryPayload!
 }
 
 extend enum ActivityLogEntryResourceType {
 	"All activity log entries related to artifact registry repositories will use this resource type."
-	ARTIFACT_REGISTRY_GITHUB_REPOSITORY
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS
 }
 
-input AddArtifactRegistryGithubRepositoryToTeamInput {
-	"Slug of the team to add the repository to."
+input GrantGithubRepoAccessToTeamArtifactRegistryInput {
+	"Slug of the team."
 	teamSlug: Slug!
 
-	"Name of the repository, without the org prefix, for instance 'repo'."
+	"Name of the Github Repository which will be granted access. Without the org prefix, for instance 'repo'."
 	repositoryName: String!
 }
 
-type AddArtifactRegistryGithubRepositoryToTeamPayload {
-	"Repository that was added to the team."
+type GrantGithubRepoAccessToTeamArtifactRegistryPayload {
+	"Repository that was granted access to the team artifact registry."
 	repository: ArtifactRegistryGithubRepository
 }
 
-input RemoveArtifactRegistryGithubRepositoryFromTeamInput {
-	"Slug of the team to remove the repository from."
+input RevokeGithubRepoAccessFromTeamArtifactRegistryInput {
+	"Slug of the team."
 	teamSlug: Slug!
 
-	"Name of the repository, without the org prefix, for instance 'repo'."
+	"Name of the Github Repository where access should be revoked. Without the org prefix, for instance 'repo'."
 	repositoryName: String!
 }
 
-type RemoveArtifactRegistryGithubRepositoryFromTeamPayload {
+type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload {
 	"Whether or not the repository was removed from the team."
 	success: Boolean
 }
@@ -87,7 +87,7 @@ type ArtifactRegistryGithubRepository implements Node {
 	team: Team!
 }
 
-type ArtifactRegistryGithubRepositoryAddedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 
@@ -110,7 +110,7 @@ type ArtifactRegistryGithubRepositoryAddedActivityLogEntry implements ActivityLo
 	teamSlug: Slug
 }
 
-type ArtifactRegistryGithubRepositoryRemovedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 
@@ -134,9 +134,9 @@ type ArtifactRegistryGithubRepositoryRemovedActivityLogEntry implements Activity
 }
 
 extend enum ActivityLogActivityType {
-	"Repository was added to a team."
-	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ADDED
+	"Repository was granted access to a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED
 
-	"Repository was removed from a team."
-	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_REMOVED
+	"Repository access was revoked from a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED
 }

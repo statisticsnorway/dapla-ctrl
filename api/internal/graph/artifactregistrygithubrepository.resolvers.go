@@ -14,7 +14,7 @@ func (r *artifactRegistryGithubRepositoryResolver) Team(ctx context.Context, obj
 	return team.Get(ctx, obj.TeamSlug)
 }
 
-func (r *mutationResolver) AddArtifactRegistryGithubRepositoryToTeam(ctx context.Context, input artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput) (*artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload, error) {
+func (r *mutationResolver) GrantGithubRepoAccessToTeamArtifactRegistry(ctx context.Context, input artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput) (*artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 	isAdmin := actor.User.IsAdmin()
 	isMember, err := team.UserIsMember(ctx, input.TeamSlug, actor.User.GetID())
@@ -44,12 +44,12 @@ func (r *mutationResolver) AddArtifactRegistryGithubRepositoryToTeam(ctx context
 
 	// TODO: Trigger event for reconcile
 
-	return &artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload{
+	return &artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryPayload{
 		Repository: argr,
 	}, nil
 }
 
-func (r *mutationResolver) RemoveArtifactRegistryGithubRepositoryFromTeam(ctx context.Context, input artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput) (*artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload, error) {
+func (r *mutationResolver) RevokeGithubRepoAccessFromTeamArtifactRegistry(ctx context.Context, input artifactregistry.RevokeGithubRepoAccessFromTeamArtifactRegistryInput) (*artifactregistry.RevokeGithubRepoAccessFromTeamArtifactRegistryPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 	isAdmin := actor.User.IsAdmin()
 	isMember, err := team.UserIsMember(ctx, input.TeamSlug, actor.User.GetID())
@@ -78,7 +78,7 @@ func (r *mutationResolver) RemoveArtifactRegistryGithubRepositoryFromTeam(ctx co
 
 	// TODO: Trigger event for reconcile
 
-	return &artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload{
+	return &artifactregistry.RevokeGithubRepoAccessFromTeamArtifactRegistryPayload{
 		Success: new(true),
 	}, nil
 }

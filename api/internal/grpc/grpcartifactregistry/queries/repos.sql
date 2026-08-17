@@ -10,13 +10,13 @@ WHERE
 
 -- name: GetGithubRepositoriesForTeam :many
 SELECT
-	github_repository
+	repository_name
 FROM
-	team_artifact_registry_github_repositories
+	team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = @team_slug::slug
 ORDER BY
-	github_repository ASC
+	repository_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET

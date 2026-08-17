@@ -11,35 +11,35 @@ import (
 
 const addGithubRepositoryToTeam = `-- name: AddGithubRepositoryToTeam :one
 INSERT INTO
-	team_artifact_registry_github_repositories (team_slug, github_repository)
+	team_artifact_registry_gh_repos_allow_list (team_slug, repository_name)
 VALUES
 	($1, $2)
 RETURNING
-	team_slug, github_repository
+	team_slug, repository_name
 `
 
 type AddGithubRepositoryToTeamParams struct {
-	TeamSlug         slug.Slug
-	GithubRepository string
+	TeamSlug       slug.Slug
+	RepositoryName string
 }
 
-func (q *Queries) AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGithubRepository, error) {
-	row := q.db.QueryRow(ctx, addGithubRepositoryToTeam, arg.TeamSlug, arg.GithubRepository)
-	var i TeamArtifactRegistryGithubRepository
-	err := row.Scan(&i.TeamSlug, &i.GithubRepository)
+func (q *Queries) AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGhReposAllowList, error) {
+	row := q.db.QueryRow(ctx, addGithubRepositoryToTeam, arg.TeamSlug, arg.RepositoryName)
+	var i TeamArtifactRegistryGhReposAllowList
+	err := row.Scan(&i.TeamSlug, &i.RepositoryName)
 	return &i, err
 }
 
 const listGithubReposForTeam = `-- name: ListGithubReposForTeam :many
 SELECT
-	team_artifact_registry_github_repositories.team_slug, team_artifact_registry_github_repositories.github_repository,
+	team_artifact_registry_gh_repos_allow_list.team_slug, team_artifact_registry_gh_repos_allow_list.repository_name,
 	COUNT(*) OVER () AS total_count
 FROM
-	team_artifact_registry_github_repositories
+	team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = $1
 ORDER BY
-	github_repository ASC
+	repository_name ASC
 LIMIT
 	$3
 OFFSET
@@ -53,7 +53,7 @@ type ListGithubReposForTeamParams struct {
 }
 
 type ListGithubReposForTeamRow struct {
-	TeamArtifactRegistryGithubRepository TeamArtifactRegistryGithubRepository
+	TeamArtifactRegistryGhReposAllowList TeamArtifactRegistryGhReposAllowList
 	TotalCount                           int64
 }
 
@@ -66,7 +66,7 @@ func (q *Queries) ListGithubReposForTeam(ctx context.Context, arg ListGithubRepo
 	items := []*ListGithubReposForTeamRow{}
 	for rows.Next() {
 		var i ListGithubReposForTeamRow
-		if err := rows.Scan(&i.TeamArtifactRegistryGithubRepository.TeamSlug, &i.TeamArtifactRegistryGithubRepository.GithubRepository, &i.TotalCount); err != nil {
+		if err := rows.Scan(&i.TeamArtifactRegistryGhReposAllowList.TeamSlug, &i.TeamArtifactRegistryGhReposAllowList.RepositoryName, &i.TotalCount); err != nil {
 			return nil, err
 		}
 		items = append(items, &i)
@@ -78,18 +78,18 @@ func (q *Queries) ListGithubReposForTeam(ctx context.Context, arg ListGithubRepo
 }
 
 const removeGithubRepositoryFromTeam = `-- name: RemoveGithubRepositoryFromTeam :exec
-DELETE FROM team_artifact_registry_github_repositories
+DELETE FROM team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = $1
-	AND github_repository = $2
+	AND repository_name = $2
 `
 
 type RemoveGithubRepositoryFromTeamParams struct {
-	TeamSlug         slug.Slug
-	GithubRepository string
+	TeamSlug       slug.Slug
+	RepositoryName string
 }
 
 func (q *Queries) RemoveGithubRepositoryFromTeam(ctx context.Context, arg RemoveGithubRepositoryFromTeamParams) error {
-	_, err := q.db.Exec(ctx, removeGithubRepositoryFromTeam, arg.TeamSlug, arg.GithubRepository)
+	_, err := q.db.Exec(ctx, removeGithubRepositoryFromTeam, arg.TeamSlug, arg.RepositoryName)
 	return err
 }

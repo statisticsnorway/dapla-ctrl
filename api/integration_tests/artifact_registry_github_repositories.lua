@@ -22,7 +22,7 @@ Test.gql("Non members cannot add artifact registry Github repositories", functio
 
 	t.query(string.format([[
 		mutation {
-			addArtifactRegistryGithubRepositoryToTeam(
+			grantGithubRepoAccessToTeamArtifactRegistry(
 				input: {teamSlug: "%s", repositoryName: "%s"}
 			) {
 				repository {
@@ -38,7 +38,7 @@ Test.gql("Non members cannot add artifact registry Github repositories", functio
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
 				path = {
-					"addArtifactRegistryGithubRepositoryToTeam",
+					"grantGithubRepoAccessToTeamArtifactRegistry",
 				},
 			},
 		},
@@ -50,7 +50,7 @@ Test.gql("Repository name with organization cannot be added", function(t)
 
 	t.query(string.format([[
 		mutation {
-			addArtifactRegistryGithubRepositoryToTeam(
+			grantGithubRepoAccessToTeamArtifactRegistry(
 				input: {teamSlug: "%s", repositoryName: "statisticsnorway/%s"}
 			) {
 				repository {
@@ -66,19 +66,19 @@ Test.gql("Repository name with organization cannot be added", function(t)
 			{
 				message = "Repository name should not contain organisation. E.g. `myrepo` (instead of `statisticsnorway/myrepo`)",
 				path = {
-					"addArtifactRegistryGithubRepositoryToTeam",
+					"grantGithubRepoAccessToTeamArtifactRegistry",
 				},
 			},
 		},
 	}
 end)
 
-Test.gql("Team members can add artifact registry Github repositories", function(t)
+Test.gql("Team members can gice access to artifact registry for Github repositories", function(t)
 	t.addHeader("x-user-email", member:email())
 
 	t.query(string.format([[
 		mutation {
-			addArtifactRegistryGithubRepositoryToTeam(
+			grantGithubRepoAccessToTeamArtifactRegistry(
 				input: {teamSlug: "%s", repositoryName: "%s"}
 			) {
 				repository {
@@ -94,7 +94,7 @@ Test.gql("Team members can add artifact registry Github repositories", function(
 
 	t.check {
 		data = {
-			addArtifactRegistryGithubRepositoryToTeam = {
+			grantGithubRepoAccessToTeamArtifactRegistry = {
 				repository = {
 					id = NotNull(),
 					name = repositoryName,
@@ -107,7 +107,7 @@ Test.gql("Team members can add artifact registry Github repositories", function(
 	}
 end)
 
-Test.gql("List artifact registry Github repositories for a team", function(t)
+Test.gql("List artifact registry Github repositories access for a team", function(t)
 	t.addHeader("x-user-email", member:email())
 
 	t.query(string.format([[
@@ -151,12 +151,12 @@ Test.gql("List artifact registry Github repositories for a team", function(t)
 	}
 end)
 
-Test.gql("Team members can remove artifact registry Github repositories", function(t)
+Test.gql("Team members can revoke artifact registry Github repositories access", function(t)
 	t.addHeader("x-user-email", member:email())
 
 	t.query(string.format([[
 		mutation {
-			removeArtifactRegistryGithubRepositoryFromTeam(
+			revokeGithubRepoAccessFromTeamArtifactRegistry(
 				input: {teamSlug: "%s", repositoryName: "%s"}
 			) {
 				success
@@ -166,7 +166,7 @@ Test.gql("Team members can remove artifact registry Github repositories", functi
 
 	t.check {
 		data = {
-			removeArtifactRegistryGithubRepositoryFromTeam = {
+			revokeGithubRepoAccessFromTeamArtifactRegistry = {
 				success = true,
 			},
 		},
@@ -205,7 +205,7 @@ Test.gql("Removed artifact registry Github repositories are not listed", functio
 	}
 end)
 
-Test.gql("Artifact registry Github repository changes appear in activity log", function(t)
+Test.gql("Artifact registry Github repository access changes appear in activity log", function(t)
 	t.addHeader("x-user-email", member:email())
 
 	t.query(string.format([[
@@ -215,8 +215,8 @@ Test.gql("Artifact registry Github repository changes appear in activity log", f
 					first: 20
 					filter: {
 						activityTypes: [
-							ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ADDED
-							ARTIFACT_REGISTRY_GITHUB_REPOSITORY_REMOVED
+							ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED
+							ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED
 						]
 					}
 				) {
@@ -240,20 +240,20 @@ Test.gql("Artifact registry Github repository changes appear in activity log", f
 				activityLog = {
 					nodes = {
 						{
-							__typename = "ArtifactRegistryGithubRepositoryRemovedActivityLogEntry",
-							message = "Removed artifact registry github repository from team",
+							__typename = "ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry",
+							message = "Revoked github repository access to artifact registry from team",
 							actor = member:email(),
 							createdAt = NotNull(),
-							resourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY",
+							resourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS",
 							resourceName = repositoryName,
 							teamSlug = team:slug(),
 						},
 						{
-							__typename = "ArtifactRegistryGithubRepositoryAddedActivityLogEntry",
-							message = "Added artifact registry github repository to team",
+							__typename = "ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry",
+							message = "Granted github repository access to artifact registry for the team",
 							actor = member:email(),
 							createdAt = NotNull(),
-							resourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY",
+							resourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS",
 							resourceName = repositoryName,
 							teamSlug = team:slug(),
 						},

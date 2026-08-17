@@ -20,33 +20,33 @@ func (r ArtifactRegistryGithubRepository) ID() ident.Ident {
 	return newIdent(r.TeamSlug, r.Name)
 }
 
-func toGraphArtifactRegistryGithubRepository(r *artifactregistrysql.TeamArtifactRegistryGithubRepository) *ArtifactRegistryGithubRepository {
+func toGraphArtifactRegistryGithubRepository(r *artifactregistrysql.TeamArtifactRegistryGhReposAllowList) *ArtifactRegistryGithubRepository {
 	return &ArtifactRegistryGithubRepository{
 		TeamSlug: r.TeamSlug,
-		Name:     r.GithubRepository,
+		Name:     r.RepositoryName,
 	}
 }
 
-type AddArtifactRegistryGithubRepositoryToTeamInput struct {
-	// Slug of the team to add the repository to.
+type GrantGithubRepoAccessToTeamArtifactRegistryInput struct {
+	// Slug of the team.
 	TeamSlug slug.Slug `json:"teamSlug"`
-	// Name of the repository, without the org prefix, for instance 'repo'.
+	// Name of the Github Repository which will be granted access. Without the org prefix, for instance 'repo'.
 	RepositoryName string `json:"repositoryName"`
 }
 
-type AddArtifactRegistryGithubRepositoryToTeamPayload struct {
-	// Repository that was added to the team.
+type GrantGithubRepoAccessToTeamArtifactRegistryPayload struct {
+	// Repository that was granted access to the team artifact registry.
 	Repository *ArtifactRegistryGithubRepository `json:"repository,omitempty"`
 }
 
-type RemoveArtifactRegistryGithubRepositoryFromTeamInput struct {
-	// Slug of the team to remove the repository from.
+type RevokeGithubRepoAccessFromTeamArtifactRegistryInput struct {
+	// Slug of the team.
 	TeamSlug slug.Slug `json:"teamSlug"`
-	// Name of the repository, without the org prefix, for instance 'repo'.
+	// Name of the Github Repository where access should be revoked. Without the org prefix, for instance 'repo'.
 	RepositoryName string `json:"repositoryName"`
 }
 
-type RemoveArtifactRegistryGithubRepositoryFromTeamPayload struct {
+type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload struct {
 	// Whether or not the repository was removed from the team.
 	Success *bool `json:"success,omitempty"`
 }

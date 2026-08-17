@@ -53,13 +53,13 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 
 const getGithubRepositoriesForTeam = `-- name: GetGithubRepositoriesForTeam :many
 SELECT
-	github_repository
+	repository_name
 FROM
-	team_artifact_registry_github_repositories
+	team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = $1::slug
 ORDER BY
-	github_repository ASC
+	repository_name ASC
 LIMIT
 	$3
 OFFSET
@@ -80,11 +80,11 @@ func (q *Queries) GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithu
 	defer rows.Close()
 	items := []string{}
 	for rows.Next() {
-		var github_repository string
-		if err := rows.Scan(&github_repository); err != nil {
+		var repository_name string
+		if err := rows.Scan(&repository_name); err != nil {
 			return nil, err
 		}
-		items = append(items, github_repository)
+		items = append(items, repository_name)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

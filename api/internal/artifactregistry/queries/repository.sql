@@ -1,13 +1,13 @@
 -- name: ListGithubReposForTeam :many
 SELECT
-	sqlc.embed(team_artifact_registry_github_repositories),
+	sqlc.embed(team_artifact_registry_gh_repos_allow_list),
 	COUNT(*) OVER () AS total_count
 FROM
-	team_artifact_registry_github_repositories
+	team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = @team_slug
 ORDER BY
-	github_repository ASC
+	repository_name ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -16,16 +16,16 @@ OFFSET
 
 -- name: AddGithubRepositoryToTeam :one
 INSERT INTO
-	team_artifact_registry_github_repositories (team_slug, github_repository)
+	team_artifact_registry_gh_repos_allow_list (team_slug, repository_name)
 VALUES
-	(@team_slug, @github_repository)
+	(@team_slug, @repository_name)
 RETURNING
 	*
 ;
 
 -- name: RemoveGithubRepositoryFromTeam :exec
-DELETE FROM team_artifact_registry_github_repositories
+DELETE FROM team_artifact_registry_gh_repos_allow_list
 WHERE
 	team_slug = @team_slug
-	AND github_repository = @github_repository
+	AND repository_name = @repository_name
 ;
