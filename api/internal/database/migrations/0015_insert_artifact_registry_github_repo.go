@@ -304,6 +304,9 @@ func getTeamsAndArtifactRegistryGithubRepos() map[string][]string {
 		"energi-industri": {
 			"energi-industri-iac",
 		},
+		"energi-kostra": {
+			"energi-kostra-iac",
+		},
 		"energi-petrole": {
 			"energi-petrole-iac",
 		},
