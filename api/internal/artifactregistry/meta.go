@@ -13,18 +13,18 @@ import (
 )
 
 type (
-	ArtifactRegistryGithubRepoAccessConnection = pagination.Connection[*ArtifactRegistryGithubRepoAccess]
-	ArtifactRegistryGithubRepoAccessEdge       = pagination.Edge[*ArtifactRegistryGithubRepoAccess]
+	ArtifactRegistryAllowedGithubReposConnection = pagination.Connection[*ArtifactRegistryAllowedGithubRepos]
+	ArtifactRegistryAllowedGithubReposEdge       = pagination.Edge[*ArtifactRegistryAllowedGithubRepos]
 )
 
-func (ArtifactRegistryGithubRepoAccess) IsNode() {}
+func (ArtifactRegistryAllowedGithubRepos) IsNode() {}
 
-type ArtifactRegistryGithubRepoAccessOrder struct {
-	Field     ArtifactRegistryGithubRepoAccessOrderField `json:"field"`
-	Direction model.OrderDirection                       `json:"direction"`
+type ArtifactRegistryAllowedGithubReposOrder struct {
+	Field     ArtifactRegistryAllowedGithubReposOrderField `json:"field"`
+	Direction model.OrderDirection                         `json:"direction"`
 }
 
-func (o *ArtifactRegistryGithubRepoAccessOrder) String() string {
+func (o *ArtifactRegistryAllowedGithubReposOrder) String() string {
 	if o == nil {
 		return ""
 	}
@@ -32,37 +32,37 @@ func (o *ArtifactRegistryGithubRepoAccessOrder) String() string {
 	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
 }
 
-type ArtifactRegistryGithubRepoAccessOrderField string
+type ArtifactRegistryAllowedGithubReposOrderField string
 
 const (
-	ArtifactRegistryGithubRepoAccessOrderFieldName ArtifactRegistryGithubRepoAccessOrderField = "NAME"
+	ArtifactRegistryAllowedGithubReposOrderFieldName ArtifactRegistryAllowedGithubReposOrderField = "NAME"
 )
 
-var AllArtifactRegistryGithubRepoAccessOrderFields = []ArtifactRegistryGithubRepoAccessOrderField{
-	ArtifactRegistryGithubRepoAccessOrderFieldName,
+var AllArtifactRegistryAllowedGithubReposOrderFields = []ArtifactRegistryAllowedGithubReposOrderField{
+	ArtifactRegistryAllowedGithubReposOrderFieldName,
 }
 
-func (e ArtifactRegistryGithubRepoAccessOrderField) IsValid() bool {
-	return slices.Contains(AllArtifactRegistryGithubRepoAccessOrderFields, e)
+func (e ArtifactRegistryAllowedGithubReposOrderField) IsValid() bool {
+	return slices.Contains(AllArtifactRegistryAllowedGithubReposOrderFields, e)
 }
 
-func (e ArtifactRegistryGithubRepoAccessOrderField) String() string {
+func (e ArtifactRegistryAllowedGithubReposOrderField) String() string {
 	return string(e)
 }
 
-func (e *ArtifactRegistryGithubRepoAccessOrderField) UnmarshalGQL(v any) error {
+func (e *ArtifactRegistryAllowedGithubReposOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	*e = ArtifactRegistryGithubRepoAccessOrderField(str)
+	*e = ArtifactRegistryAllowedGithubReposOrderField(str)
 	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ArtifactRegistryGithubRepoAccessOrderField", str)
+		return fmt.Errorf("%s is not a valid ArtifactRegistryAllowedGithubReposOrderField", str)
 	}
 	return nil
 }
 
-func (e ArtifactRegistryGithubRepoAccessOrderField) MarshalGQL(w io.Writer) {
+func (e ArtifactRegistryAllowedGithubReposOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

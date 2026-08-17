@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS"
+	activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS"
 )
 
 func init() {
-	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
+	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
 		switch entry.Action {
 		case activitylog.ActivityLogEntryActionAdded:
 			return ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry{
@@ -27,8 +27,8 @@ func init() {
 		}
 	})
 
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess)
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos)
 }
 
 type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry struct {

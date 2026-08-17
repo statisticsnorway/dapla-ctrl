@@ -11,7 +11,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 )
 
-func (r *artifactRegistryGithubRepoAccessResolver) Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryGithubRepoAccess) (*team.Team, error) {
+func (r *artifactRegistryAllowedGithubReposResolver) Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryAllowedGithubRepos) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
 }
 
@@ -86,7 +86,7 @@ func (r *mutationResolver) RevokeGithubRepoAccessFromTeamArtifactRegistry(ctx co
 	}, nil
 }
 
-func (r *teamResolver) ArtifactRegistryGithubReposAccess(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryGithubRepoAccess], error) {
+func (r *teamResolver) ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
@@ -95,8 +95,8 @@ func (r *teamResolver) ArtifactRegistryGithubReposAccess(ctx context.Context, ob
 	return artifactregistry.ListForTeam(ctx, obj.Slug, page)
 }
 
-func (r *Resolver) ArtifactRegistryGithubRepoAccess() gengql.ArtifactRegistryGithubRepoAccessResolver {
-	return &artifactRegistryGithubRepoAccessResolver{r}
+func (r *Resolver) ArtifactRegistryAllowedGithubRepos() gengql.ArtifactRegistryAllowedGithubReposResolver {
+	return &artifactRegistryAllowedGithubReposResolver{r}
 }
 
-type artifactRegistryGithubRepoAccessResolver struct{ *Resolver }
+type artifactRegistryAllowedGithubReposResolver struct{ *Resolver }

@@ -1,5 +1,6 @@
 extend type Team {
-	artifactRegistryGithubReposAccess(
+	"Github repositories that are allowed to write to artifact registry for the team."
+	artifactRegistryAllowedGithubRepos(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
 		first: Int
 		# Artifact registry github repositories allow list
@@ -11,7 +12,7 @@ extend type Team {
 
 		"Get items before this cursor."
 		before: Cursor
-	): ArtifactRegistryGithubRepoAccessConnection!
+	): ArtifactRegistryAllowedGithubReposConnection!
 }
 
 extend type Mutation {
@@ -41,7 +42,7 @@ input GrantGithubRepoAccessToTeamArtifactRegistryInput {
 
 type GrantGithubRepoAccessToTeamArtifactRegistryPayload {
 	"Repository that was granted access to the team artifact registry."
-	repository: ArtifactRegistryGithubRepoAccess
+	repository: ArtifactRegistryAllowedGithubRepos
 }
 
 input RevokeGithubRepoAccessFromTeamArtifactRegistryInput {
@@ -57,26 +58,26 @@ type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload {
 	success: Boolean
 }
 
-type ArtifactRegistryGithubRepoAccessConnection {
+type ArtifactRegistryAllowedGithubReposConnection {
 	"Pagination information."
 	pageInfo: PageInfo!
 
 	"List of nodes."
-	nodes: [ArtifactRegistryGithubRepoAccess!]!
+	nodes: [ArtifactRegistryAllowedGithubRepos!]!
 
 	"List of edges."
-	edges: [ArtifactRegistryGithubRepoAccessEdge!]!
+	edges: [ArtifactRegistryAllowedGithubReposEdge!]!
 }
 
-type ArtifactRegistryGithubRepoAccessEdge {
+type ArtifactRegistryAllowedGithubReposEdge {
 	"Cursor for this edge that can be used for pagination."
 	cursor: Cursor!
 
 	"The GitHub repository."
-	node: ArtifactRegistryGithubRepoAccess!
+	node: ArtifactRegistryAllowedGithubRepos!
 }
 
-type ArtifactRegistryGithubRepoAccess implements Node {
+type ArtifactRegistryAllowedGithubRepos implements Node {
 	"ID of the repository."
 	id: ID!
 

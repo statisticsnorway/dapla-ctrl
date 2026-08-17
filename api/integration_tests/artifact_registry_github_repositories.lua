@@ -113,7 +113,7 @@ Test.gql("List artifact registry Github repositories access for a team", functio
 	t.query(string.format([[
 		query {
 			team(slug: "%s") {
-				artifactRegistryGithubReposAccess(first: 10) {
+				artifactRegistryAllowedGithubRepos(first: 10) {
 					pageInfo {
 						totalCount
 					}
@@ -132,7 +132,7 @@ Test.gql("List artifact registry Github repositories access for a team", functio
 	t.check {
 		data = {
 			team = {
-				artifactRegistryGithubReposAccess = {
+				artifactRegistryAllowedGithubRepos = {
 					pageInfo = {
 						totalCount = 1,
 					},
@@ -179,7 +179,7 @@ Test.gql("Removed artifact registry Github repositories are not listed", functio
 	t.query(string.format([[
 		query {
 			team(slug: "%s") {
-				artifactRegistryGithubReposAccess(first: 10) {
+				artifactRegistryAllowedGithubRepos(first: 10) {
 					pageInfo {
 						totalCount
 					}
@@ -194,7 +194,7 @@ Test.gql("Removed artifact registry Github repositories are not listed", functio
 	t.check {
 		data = {
 			team = {
-				artifactRegistryGithubReposAccess = {
+				artifactRegistryAllowedGithubRepos = {
 					pageInfo = {
 						totalCount = 0,
 					},

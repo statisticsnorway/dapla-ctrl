@@ -14,19 +14,19 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-func getByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryGithubRepoAccess, error) {
+func getByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryAllowedGithubRepos, error) {
 	ts, githubRepositoryName, err := parseIdent(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &ArtifactRegistryGithubRepoAccess{
+	return &ArtifactRegistryAllowedGithubRepos{
 		TeamSlug: ts,
 		Name:     githubRepositoryName,
 	}, nil
 }
 
-func AddGithubRepositoryToTeam(ctx context.Context, input GrantGithubRepoAccessToTeamArtifactRegistryInput, actor *authz.Actor) (*ArtifactRegistryGithubRepoAccess, error) {
+func AddGithubRepositoryToTeam(ctx context.Context, input GrantGithubRepoAccessToTeamArtifactRegistryInput, actor *authz.Actor) (*ArtifactRegistryAllowedGithubRepos, error) {
 	containsOrg := strings.Contains(input.RepositoryName, "/")
 	if containsOrg {
 		return nil, apierror.Errorf("Repository name should not contain organisation. E.g. `myrepo` (instead of `statisticsnorway/myrepo`)")
@@ -47,7 +47,7 @@ func AddGithubRepositoryToTeam(ctx context.Context, input GrantGithubRepoAccessT
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionAdded,
 			Actor:        actor.User,
-			ResourceType: activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess,
+			ResourceType: activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos,
 			ResourceName: input.RepositoryName,
 			TeamSlug:     new(input.TeamSlug),
 		})
@@ -56,7 +56,7 @@ func AddGithubRepositoryToTeam(ctx context.Context, input GrantGithubRepoAccessT
 		return nil, err
 	}
 
-	return toGraphArtifactRegistryGithubRepoAccess(repo), nil
+	return toGraphArtifactRegistryAllowedGithubRepos(repo), nil
 }
 
 func RemoveGithubRepositoryFromTeam(ctx context.Context, input RevokeGithubRepoAccessFromTeamArtifactRegistryInput, actor *authz.Actor) error {
@@ -73,14 +73,14 @@ func RemoveGithubRepositoryFromTeam(ctx context.Context, input RevokeGithubRepoA
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionRemoved,
 			Actor:        actor.User,
-			ResourceType: activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess,
+			ResourceType: activityLogEntryResourceTypeArtifactRegistryAllowedGithubRepos,
 			ResourceName: input.RepositoryName,
 			TeamSlug:     new(input.TeamSlug),
 		})
 	})
 }
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryGithubRepoAccessConnection, error) {
+func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryAllowedGithubReposConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListGithubReposForTeam(ctx, artifactregistrysql.ListGithubReposForTeamParams{
@@ -95,7 +95,7 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	if len(ret) > 0 {
 		total = ret[0].TotalCount
 	}
-	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListGithubReposForTeamRow) *ArtifactRegistryGithubRepoAccess {
-		return toGraphArtifactRegistryGithubRepoAccess(&from.TeamArtifactRegistryGhReposAllowList)
+	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListGithubReposForTeamRow) *ArtifactRegistryAllowedGithubRepos {
+		return toGraphArtifactRegistryAllowedGithubRepos(&from.TeamArtifactRegistryGhReposAllowList)
 	}), nil
 }
