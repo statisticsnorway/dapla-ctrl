@@ -2,6 +2,7 @@ package atlantis
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"cloud.google.com/go/storage"
@@ -40,23 +41,29 @@ func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
 		opt(r)
 	}
 
-	storageClient, err := storage.NewClient(ctx)
-	if err != nil {
-		return nil, err
+	if r.storageClient == nil {
+		storageClient, err := storage.NewClient(ctx)
+		if err != nil {
+			return nil, err
+		}
+		r.storageClient = storageClient
 	}
-	r.storageClient = storageClient
 
-	serviceAccounts, err := serviceaccounts.NewClient(ctx)
-	if err != nil {
-		return nil, err
+	if r.serviceAccounts == nil {
+		serviceAccounts, err := serviceaccounts.NewClient(ctx)
+		if err != nil {
+			return nil, err
+		}
+		r.serviceAccounts = serviceAccounts
 	}
-	r.serviceAccounts = serviceAccounts
 
-	ci, err := cloudidentity.NewService(ctx)
-	if err != nil {
-		return nil, err
+	if r.memberships == nil {
+		ci, err := cloudidentity.NewService(ctx)
+		if err != nil {
+			return nil, err
+		}
+		r.memberships = ci.Groups.Memberships
 	}
-	r.memberships = ci.Groups.Memberships
 
 	return r, nil
 }
@@ -76,23 +83,22 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	if err := r.reconcileServiceAccount(ctx, client, daplaTeam, log); err != nil {
+	if err := r.reconcileServiceAccount(ctx, daplaTeam.Slug); err != nil {
 		return err
 	}
-	if err := r.reconcileBuckets(ctx, daplaTeam.Slug, log); err != nil {
+	if err := r.reconcileBuckets(ctx, daplaTeam.Slug); err != nil {
 		return err
 	}
 	return nil
 }
-func (r *reconciler) reconcileServiceAccount(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-
-	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+daplaTeam.Slug, "Atlantis for team "+daplaTeam.Slug, r.atlantisProject)
+func (r *reconciler) reconcileServiceAccount(ctx context.Context, teamName string) error {
+	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+teamName, "Atlantis for team "+teamName, r.atlantisProject)
 	if err != nil {
 		return err
 	}
 
 	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
-		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[default/atlantis-%s]", r.atlantisProject, daplaTeam.Slug)
+		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[default/atlantis-%s]", r.atlantisProject, teamName)
 		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
 			return false
 		}
@@ -100,14 +106,29 @@ func (r *reconciler) reconcileServiceAccount(ctx context.Context, client *apicli
 		return true
 	})
 
+	for _, memberGroup := range r.memberGroups {
+		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, false); err != nil {
+			err = errors.Join(err, currentErr)
+		}
+	}
+	for _, managerGroup := range r.managerGroups {
+		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, true); err != nil {
+			err = errors.Join(err, currentErr)
+		}
+	}
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail string, groupId string, manager bool) error {
 	// Check if membership exists
-	resp, err := r.memberships.Lookup(groupId).MemberKeyId(saEmail).Context(ctx).Do()
+	_, err := r.memberships.Lookup(groupId).MemberKeyId(saEmail).Context(ctx).Do()
 	// Does exist (2xx response)
 	if err == nil {
+		// TODO: Check if roles are correct
 		return nil
 	}
 
@@ -127,17 +148,19 @@ func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail string, 
 		})
 	}
 
-	r.memberships.Create(groupId, &cloudidentity.Membership{
+	if _, err := r.memberships.Create(groupId, &cloudidentity.Membership{
 		PreferredMemberKey: &cloudidentity.EntityKey{
 			Id: saEmail,
 		},
 		Roles: roles,
-	}).Do()
+	}).Context(ctx).Do(); err != nil {
+		return err
+	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string, log logrus.FieldLogger) error {
+func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) error {
 	defaultAttrs := &storage.BucketAttrs{
 		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{Enabled: true},
 		Location:                 "EUROPE-NORTH1",
