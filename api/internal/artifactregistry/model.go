@@ -9,19 +9,19 @@ import (
 //mgo:gen model
 //mgo:gen order NAME
 //mgo:impl node paginated
-type ArtifactRegistryGithubRepository struct {
+type ArtifactRegistryGithubRepoAccess struct {
 	// Name of the repository, with the organization prefix.
 	Name string `json:"name"`
 	// Team this repository is connected to.
 	TeamSlug slug.Slug `json:"teamSlug"`
 }
 
-func (r ArtifactRegistryGithubRepository) ID() ident.Ident {
+func (r ArtifactRegistryGithubRepoAccess) ID() ident.Ident {
 	return newIdent(r.TeamSlug, r.Name)
 }
 
-func toGraphArtifactRegistryGithubRepository(r *artifactregistrysql.TeamArtifactRegistryGhReposAllowList) *ArtifactRegistryGithubRepository {
-	return &ArtifactRegistryGithubRepository{
+func toGraphArtifactRegistryGithubRepoAccess(r *artifactregistrysql.TeamArtifactRegistryGhReposAllowList) *ArtifactRegistryGithubRepoAccess {
+	return &ArtifactRegistryGithubRepoAccess{
 		TeamSlug: r.TeamSlug,
 		Name:     r.RepositoryName,
 	}
@@ -36,7 +36,7 @@ type GrantGithubRepoAccessToTeamArtifactRegistryInput struct {
 
 type GrantGithubRepoAccessToTeamArtifactRegistryPayload struct {
 	// Repository that was granted access to the team artifact registry.
-	Repository *ArtifactRegistryGithubRepository `json:"repository,omitempty"`
+	Repository *ArtifactRegistryGithubRepoAccess `json:"repository,omitempty"`
 }
 
 type RevokeGithubRepoAccessFromTeamArtifactRegistryInput struct {

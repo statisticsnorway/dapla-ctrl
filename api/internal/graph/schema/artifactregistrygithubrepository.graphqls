@@ -1,5 +1,5 @@
 extend type Team {
-	artifactRegistryGithubRepository(
+	artifactRegistryGithubReposAccess(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
 		first: Int
 		# Artifact registry github repositories allow list
@@ -11,7 +11,7 @@ extend type Team {
 
 		"Get items before this cursor."
 		before: Cursor
-	): ArtifactRegistryGithubRepositoryConnection!
+	): ArtifactRegistryGithubRepoAccessConnection!
 }
 
 extend type Mutation {
@@ -41,7 +41,7 @@ input GrantGithubRepoAccessToTeamArtifactRegistryInput {
 
 type GrantGithubRepoAccessToTeamArtifactRegistryPayload {
 	"Repository that was granted access to the team artifact registry."
-	repository: ArtifactRegistryGithubRepository
+	repository: ArtifactRegistryGithubRepoAccess
 }
 
 input RevokeGithubRepoAccessFromTeamArtifactRegistryInput {
@@ -57,26 +57,26 @@ type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload {
 	success: Boolean
 }
 
-type ArtifactRegistryGithubRepositoryConnection {
+type ArtifactRegistryGithubRepoAccessConnection {
 	"Pagination information."
 	pageInfo: PageInfo!
 
 	"List of nodes."
-	nodes: [ArtifactRegistryGithubRepository!]!
+	nodes: [ArtifactRegistryGithubRepoAccess!]!
 
 	"List of edges."
-	edges: [ArtifactRegistryGithubRepositoryEdge!]!
+	edges: [ArtifactRegistryGithubRepoAccessEdge!]!
 }
 
-type ArtifactRegistryGithubRepositoryEdge {
+type ArtifactRegistryGithubRepoAccessEdge {
 	"Cursor for this edge that can be used for pagination."
 	cursor: Cursor!
 
 	"The GitHub repository."
-	node: ArtifactRegistryGithubRepository!
+	node: ArtifactRegistryGithubRepoAccess!
 }
 
-type ArtifactRegistryGithubRepository implements Node {
+type ArtifactRegistryGithubRepoAccess implements Node {
 	"ID of the repository."
 	id: ID!
 
@@ -87,7 +87,7 @@ type ArtifactRegistryGithubRepository implements Node {
 	team: Team!
 }
 
-type ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 
@@ -110,7 +110,7 @@ type ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry implements Ac
 	teamSlug: Slug
 }
 
-type ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry implements ActivityLogEntry & Node {
+type ArtifactRegistryGithubRepoAccessRevokedActivityLogEntry implements ActivityLogEntry & Node {
 	"ID of the entry."
 	id: ID!
 

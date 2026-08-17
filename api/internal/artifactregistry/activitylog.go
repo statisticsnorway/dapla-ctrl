@@ -7,19 +7,19 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeArtifactRegistryGithubRepository activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS"
+	activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess activitylog.ActivityLogEntryResourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS"
 )
 
 func init() {
-	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryGithubRepository, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
+	activitylog.RegisterTransformer(activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
 		switch entry.Action {
 		case activitylog.ActivityLogEntryActionAdded:
-			return ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry{
+			return ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry{
 				GenericActivityLogEntry: entry.WithMessage("Granted github repository access to artifact registry for the team"),
 			}, nil
 		case activitylog.ActivityLogEntryActionRemoved:
-			return ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry{
-				GenericActivityLogEntry: entry.WithMessage("Revoked github repository access to artifact registry from team"),
+			return ArtifactRegistryGithubRepoAccessRevokedActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Revoked github repository access from artifact registry for the team"),
 			}, nil
 
 		default:
@@ -27,14 +27,14 @@ func init() {
 		}
 	})
 
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryGithubRepository)
-	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryGithubRepository)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess)
+	activitylog.RegisterFilter("ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeArtifactRegistryGithubRepoAccess)
 }
 
-type ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry struct {
+type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
 }
 
-type ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry struct {
+type ArtifactRegistryGithubRepoAccessRevokedActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
 }

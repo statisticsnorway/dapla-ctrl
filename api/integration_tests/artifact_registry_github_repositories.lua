@@ -113,7 +113,7 @@ Test.gql("List artifact registry Github repositories access for a team", functio
 	t.query(string.format([[
 		query {
 			team(slug: "%s") {
-				artifactRegistryGithubRepository(first: 10) {
+				artifactRegistryGithubReposAccess(first: 10) {
 					pageInfo {
 						totalCount
 					}
@@ -132,7 +132,7 @@ Test.gql("List artifact registry Github repositories access for a team", functio
 	t.check {
 		data = {
 			team = {
-				artifactRegistryGithubRepository = {
+				artifactRegistryGithubReposAccess = {
 					pageInfo = {
 						totalCount = 1,
 					},
@@ -179,7 +179,7 @@ Test.gql("Removed artifact registry Github repositories are not listed", functio
 	t.query(string.format([[
 		query {
 			team(slug: "%s") {
-				artifactRegistryGithubRepository(first: 10) {
+				artifactRegistryGithubReposAccess(first: 10) {
 					pageInfo {
 						totalCount
 					}
@@ -194,7 +194,7 @@ Test.gql("Removed artifact registry Github repositories are not listed", functio
 	t.check {
 		data = {
 			team = {
-				artifactRegistryGithubRepository = {
+				artifactRegistryGithubReposAccess = {
 					pageInfo = {
 						totalCount = 0,
 					},
@@ -240,8 +240,8 @@ Test.gql("Artifact registry Github repository access changes appear in activity 
 				activityLog = {
 					nodes = {
 						{
-							__typename = "ArtifactRegistryGithubRepositoryAccessRevokedActivityLogEntry",
-							message = "Revoked github repository access to artifact registry from team",
+							__typename = "ArtifactRegistryGithubRepoAccessRevokedActivityLogEntry",
+							message = "Revoked github repository access from artifact registry for the team",
 							actor = member:email(),
 							createdAt = NotNull(),
 							resourceType = "ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS",
@@ -249,7 +249,7 @@ Test.gql("Artifact registry Github repository access changes appear in activity 
 							teamSlug = team:slug(),
 						},
 						{
-							__typename = "ArtifactRegistryGithubRepositoryAccessGrantedActivityLogEntry",
+							__typename = "ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry",
 							message = "Granted github repository access to artifact registry for the team",
 							actor = member:email(),
 							createdAt = NotNull(),
