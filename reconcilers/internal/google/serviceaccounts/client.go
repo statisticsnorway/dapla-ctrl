@@ -30,7 +30,6 @@ func (g *Client) GetOrCreate(ctx context.Context, name, description, projectId s
 	saName := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", projectId, name, projectId)
 	sa, err := g.client.Projects.ServiceAccounts.Get(saName).Context(ctx).Do()
 
-	// TODO: replace with
 	if gErr, ok := errors.AsType[*googleapi.Error](err); ok && gErr.Code == http.StatusNotFound {
 		return g.createServiceAccount(ctx, name, description, projectId)
 	} else if err != nil {
