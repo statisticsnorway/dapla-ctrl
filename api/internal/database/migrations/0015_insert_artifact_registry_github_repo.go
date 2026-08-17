@@ -39,7 +39,7 @@ func Up0015(ctx context.Context, tx *sql.Tx) error {
 		}
 
 		_, err = tx.ExecContext(ctx, `
-			INSERT INTO team_artifact_registry_github_repositories (team_slug, github_repository)
+			INSERT INTO team_artifact_registry_gh_repos_allow_list (team_slug, repository_name)
 			VALUES
 				`+strings.Join(ghReposValues, ",")+`
 		 ;`)
