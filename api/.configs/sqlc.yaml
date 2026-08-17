@@ -222,3 +222,12 @@ sql:
         <<: *default_go
         package: "grpcartifactregistrysql"
         out: "../internal/grpc/grpcartifactregistry/grpcartifactregistrysql"
+
+  - <<: *default_domain
+    name: "Atlantis GRPC SQL"
+    queries: "../internal/grpc/grpcatlantis/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "grpcatlantissql"
+        out: "../internal/grpc/grpcatlantis/grpcatlantissql"

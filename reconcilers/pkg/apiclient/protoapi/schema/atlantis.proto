@@ -1,0 +1,24 @@
+
+syntax = "proto3";
+
+package dapla.api.protobuf;
+
+
+option go_package = "./pkg/apiclient/protoapi";
+
+message AtlantisConfig {
+    string team_slug = 1;
+    optional string webhook_secret = 2;
+}
+
+service Atlantis {
+    rpc GetTeamAtlantis(GetTeamAtlantisRequest) returns (GetTeamAtlantisResponse) {}
+}
+
+message GetTeamAtlantisRequest {
+    string team_slug = 1;
+}
+
+message GetTeamAtlantisResponse {
+    AtlantisConfig config = 1;
+}

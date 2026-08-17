@@ -20,6 +20,10 @@ func New(target string, opts ...grpc.DialOption) (*APIClient, error) {
 	}, nil
 }
 
+func (a *APIClient) Atlantis() protoapi.AtlantisClient {
+	return protoapi.NewAtlantisClient(a.conn)
+}
+
 func (a *APIClient) ArtifactRegistry() protoapi.ArtifactRegistryClient {
 	return protoapi.NewArtifactRegistryClient(a.conn)
 }
