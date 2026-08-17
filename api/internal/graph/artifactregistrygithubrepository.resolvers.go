@@ -17,9 +17,6 @@ func (r *artifactRegistryGithubRepositoryResolver) Team(ctx context.Context, obj
 func (r *mutationResolver) AddArtifactRegistryGithubRepositoryToTeam(ctx context.Context, input artifactregistry.AddArtifactRegistryGithubRepositoryToTeamInput) (*artifactregistry.AddArtifactRegistryGithubRepositoryToTeamPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 	isAdmin := actor.User.IsAdmin()
-	if isAdmin {
-		return nil, nil
-	}
 	isMember, err := team.UserIsMember(ctx, input.TeamSlug, actor.User.GetID())
 	if err != nil {
 		return nil, err
@@ -55,9 +52,6 @@ func (r *mutationResolver) AddArtifactRegistryGithubRepositoryToTeam(ctx context
 func (r *mutationResolver) RemoveArtifactRegistryGithubRepositoryFromTeam(ctx context.Context, input artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamInput) (*artifactregistry.RemoveArtifactRegistryGithubRepositoryFromTeamPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 	isAdmin := actor.User.IsAdmin()
-	if isAdmin {
-		return nil, nil
-	}
 	isMember, err := team.UserIsMember(ctx, input.TeamSlug, actor.User.GetID())
 	if err != nil {
 		return nil, err

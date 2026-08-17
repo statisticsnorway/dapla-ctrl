@@ -51,16 +51,15 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 	return &i, err
 }
 
-const getGithubRepositoriesForTeam = `-- name: GetGithubRepositoriesForTeam :one
+const getGithubRepositoriesForTeam = `-- name: GetGithubRepositoriesForTeam :many
 SELECT
-	team_slug,
-	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+	github_repository
 FROM
-	team_artifact_registry_github_repositories gr
+	team_artifact_registry_github_repositories
 WHERE
 	team_slug = $1::slug
-GROUP BY
-	team_slug
+ORDER BY
+	github_repository ASC
 LIMIT
 	$3
 OFFSET
@@ -73,16 +72,24 @@ type GetGithubRepositoriesForTeamParams struct {
 	Limit    int32
 }
 
-type GetGithubRepositoriesForTeamRow struct {
-	TeamSlug    slug.Slug
-	GithubRepos []string
-}
-
-func (q *Queries) GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithubRepositoriesForTeamParams) (*GetGithubRepositoriesForTeamRow, error) {
-	row := q.db.QueryRow(ctx, getGithubRepositoriesForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
-	var i GetGithubRepositoriesForTeamRow
-	err := row.Scan(&i.TeamSlug, &i.GithubRepos)
-	return &i, err
+func (q *Queries) GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithubRepositoriesForTeamParams) ([]string, error) {
+	rows, err := q.db.Query(ctx, getGithubRepositoriesForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var github_repository string
+		if err := rows.Scan(&github_repository); err != nil {
+			return nil, err
+		}
+		items = append(items, github_repository)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const list = `-- name: List :many
@@ -90,7 +97,6 @@ SELECT
 	ar.team_slug, ar.format, ar.size_bytes
 FROM
 	team_artifact_registry_repositories ar
-	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
 	ar.team_slug = $1::slug
 ORDER BY

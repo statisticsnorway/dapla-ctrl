@@ -162,9 +162,9 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 	log.Debugf("fetched %s local repos", len(remoteRepos))
 
-	localOnly, remoteOnly := localAndRemoteOnly(localRepos, remoteRepos)
+	localOnly, remoteOnly := diffRepositoriesByFormat(localRepos, remoteRepos)
 
-	createErrs := r.createArtifactRegistryRepository(ctx, parent, localOnly, log)
+	createErrs := r.createArtifactRegistryRepositories(ctx, parent, localOnly, log)
 
 	deleteDryRun, err := strconv.ParseBool(r.config.DeleteDryRun)
 	if err != nil {
@@ -312,7 +312,7 @@ func repositoryFromArtifactRegistry(team string, repo *artifactregistrypb.Reposi
 	}, true
 }
 
-func localAndRemoteOnly(localRepos, remoteRepos []Repository) (localOnly []Repository, remoteOnly []Repository) {
+func diffRepositoriesByFormat(localRepos, remoteRepos []Repository) (localOnly []Repository, remoteOnly []Repository) {
 	localOnly = slices.DeleteFunc(slices.Clone(localRepos), func(local Repository) bool {
 		return slices.ContainsFunc(remoteRepos, func(remote Repository) bool {
 			return local.Format == remote.Format
@@ -328,7 +328,7 @@ func localAndRemoteOnly(localRepos, remoteRepos []Repository) (localOnly []Repos
 	return localOnly, remoteOnly
 }
 
-func (r *reconciler) createArtifactRegistryRepository(ctx context.Context, parent string, repos []Repository, log logrus.FieldLogger) error {
+func (r *reconciler) createArtifactRegistryRepositories(ctx context.Context, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)

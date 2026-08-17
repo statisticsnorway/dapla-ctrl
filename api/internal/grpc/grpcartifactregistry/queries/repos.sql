@@ -8,16 +8,15 @@ WHERE
 	AND format = @format
 ;
 
--- name: GetGithubRepositoriesForTeam :one
+-- name: GetGithubRepositoriesForTeam :many
 SELECT
-	team_slug,
-	ARRAY_AGG(gr.github_repository)::TEXT[] AS github_repos
+	github_repository
 FROM
-	team_artifact_registry_github_repositories gr
+	team_artifact_registry_github_repositories
 WHERE
 	team_slug = @team_slug::slug
-GROUP BY
-	team_slug
+ORDER BY
+	github_repository ASC
 LIMIT
 	sqlc.arg('limit')
 OFFSET
@@ -29,7 +28,6 @@ SELECT
 	sqlc.embed(ar)
 FROM
 	team_artifact_registry_repositories ar
-	JOIN team_artifact_registry_github_repositories gr ON ar.team_slug = gr.team_slug
 WHERE
 	ar.team_slug = @team_slug::slug
 ORDER BY

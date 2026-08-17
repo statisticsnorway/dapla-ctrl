@@ -11,7 +11,7 @@ import (
 type Querier interface {
 	CountTeamRepos(ctx context.Context, teamSlug slug.Slug) (int64, error)
 	Get(ctx context.Context, arg GetParams) (*GetRow, error)
-	GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithubRepositoriesForTeamParams) (*GetGithubRepositoriesForTeamRow, error)
+	GetGithubRepositoriesForTeam(ctx context.Context, arg GetGithubRepositoriesForTeamParams) ([]string, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	SetSizeBytes(ctx context.Context, arg SetSizeBytesParams) error
 }

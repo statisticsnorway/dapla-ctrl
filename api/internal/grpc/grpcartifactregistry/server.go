@@ -82,7 +82,7 @@ func (t *Server) ListArtifactRegistryReposForTeam(ctx context.Context, req *prot
 
 func (t *Server) GetArtifactRegistryGithubAllowlist(ctx context.Context, req *protoapi.GetArtifactRegistryGithubAllowlistRequest) (*protoapi.GetArtifactRegistryGithubAllowlistResponse, error) {
 	limit, offset := grpcpagination.Pagination(req)
-	res, err := t.querier.GetGithubRepositoriesForTeam(ctx, grpcartifactregistrysql.GetGithubRepositoriesForTeamParams{
+	githubRepos, err := t.querier.GetGithubRepositoriesForTeam(ctx, grpcartifactregistrysql.GetGithubRepositoriesForTeamParams{
 		TeamSlug: slug.Slug(req.TeamSlug),
 		Limit:    limit,
 		Offset:   offset,
@@ -92,7 +92,7 @@ func (t *Server) GetArtifactRegistryGithubAllowlist(ctx context.Context, req *pr
 	}
 
 	return &protoapi.GetArtifactRegistryGithubAllowlistResponse{
-		Nodes:    res.GithubRepos,
+		Nodes:    githubRepos,
 		PageInfo: &protoapi.PageInfo{},
 	}, nil
 }

@@ -75,7 +75,7 @@ func TestLocalAndRemoteOnly(t *testing.T) {
 			originalLocal := append([]Repository(nil), tt.local...)
 			originalRemote := append([]Repository(nil), tt.remote...)
 
-			gotLocal, gotRemote := localAndRemoteOnly(tt.local, tt.remote)
+			gotLocal, gotRemote := diffRepositoriesByFormat(tt.local, tt.remote)
 
 			if !reflect.DeepEqual(gotLocal, tt.wantLocal) {
 				t.Errorf("local-only repositories = %#v, want %#v", gotLocal, tt.wantLocal)
