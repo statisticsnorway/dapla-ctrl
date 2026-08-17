@@ -8,6 +8,7 @@ import (
 
 	arapiv1 "cloud.google.com/go/artifactregistry/apiv1"
 	"cloud.google.com/go/artifactregistry/apiv1/artifactregistrypb"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -31,6 +32,14 @@ func (f *fakeArtifactRegistryClient) CreateRepository(_ context.Context, request
 func (f *fakeArtifactRegistryClient) DeleteRepository(_ context.Context, request *artifactregistrypb.DeleteRepositoryRequest, _ ...gax.CallOption) (*arapiv1.DeleteRepositoryOperation, error) {
 	f.deleteRequests = append(f.deleteRequests, request)
 	return nil, f.deleteErr
+}
+
+func (f *fakeArtifactRegistryClient) GetIamPolicy(_ context.Context, request *iampb.GetIamPolicyRequest, _ ...gax.CallOption) (*iampb.Policy, error) {
+	return &iampb.Policy{}, nil
+}
+
+func (f *fakeArtifactRegistryClient) SetIamPolicy(_ context.Context, request *iampb.SetIamPolicyRequest, _ ...gax.CallOption) (*iampb.Policy, error) {
+	return &iampb.Policy{}, nil
 }
 
 func TestLocalAndRemoteOnly(t *testing.T) {

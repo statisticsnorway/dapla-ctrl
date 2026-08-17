@@ -10,6 +10,7 @@ import (
 
 	arapiv1 "cloud.google.com/go/artifactregistry/apiv1"
 	"cloud.google.com/go/artifactregistry/apiv1/artifactregistrypb"
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"github.com/googleapis/gax-go/v2"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -30,12 +31,15 @@ const (
 
 	saNamePrefix = "gh-actions-"
 	wiUserRole   = "roles/iam.workloadIdentityUser"
+	arWriterRole = "roles/artifactregistry.writer"
 )
 
 type ArtifactRegistryClient interface {
 	ListRepositories(ctx context.Context, req *artifactregistrypb.ListRepositoriesRequest, opts ...gax.CallOption) *arapiv1.RepositoryIterator
 	CreateRepository(ctx context.Context, req *artifactregistrypb.CreateRepositoryRequest, opts ...gax.CallOption) (*arapiv1.CreateRepositoryOperation, error)
 	DeleteRepository(ctx context.Context, req *artifactregistrypb.DeleteRepositoryRequest, opts ...gax.CallOption) (*arapiv1.DeleteRepositoryOperation, error)
+	GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error)
+	SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error)
 }
 type ServiceAccounts interface{}
 
@@ -164,7 +168,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	localOnly, remoteOnly := diffRepositoriesByFormat(localRepos, remoteRepos)
 
-	createErrs := r.createArtifactRegistryRepositories(ctx, parent, localOnly, log)
+	createErrs := r.createArtifactRegistryRepositories(ctx, sa.Email, parent, localOnly, log)
 
 	deleteDryRun, err := strconv.ParseBool(r.config.DeleteDryRun)
 	if err != nil {
@@ -328,12 +332,12 @@ func diffRepositoriesByFormat(localRepos, remoteRepos []Repository) (localOnly [
 	return localOnly, remoteOnly
 }
 
-func (r *reconciler) createArtifactRegistryRepositories(ctx context.Context, parent string, repos []Repository, log logrus.FieldLogger) error {
+func (r *reconciler) createArtifactRegistryRepositories(ctx context.Context, saEmail, parent string, repos []Repository, log logrus.FieldLogger) error {
 	allErrors := make([]error, 0)
 	for _, repo := range repos {
 		repoId := strings.ToLower(repo.Team + "-" + repo.Format)
 		format := artifactregistrypb.Repository_Format_value[strings.ToUpper(repo.Format)]
-		log.WithField("repo", repoId).Info("Create artifact registry repository")
+		log.WithField("repo", repoId).Info("Create artifact registry repository and assigning IAM")
 		op, err := r.arClient.CreateRepository(ctx, &artifactregistrypb.CreateRepositoryRequest{
 			Parent:       parent,
 			RepositoryId: repoId,
@@ -346,12 +350,37 @@ func (r *reconciler) createArtifactRegistryRepositories(ctx context.Context, par
 			continue
 		}
 
-		_, err = op.Wait(ctx)
+		arRepo, err := op.Wait(ctx)
 		if err != nil {
+			allErrors = append(allErrors, err)
+			continue
+		}
+
+		if err := assignArtifactRegistryWriterRole(ctx, r.arClient, arRepo.Name, saEmail); err != nil {
 			allErrors = append(allErrors, err)
 		}
 	}
 	return errors.Join(allErrors...)
+}
+
+func assignArtifactRegistryWriterRole(ctx context.Context, client ArtifactRegistryClient, repositoryName, saEmail string) error {
+	policy, err := client.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{
+		Resource: repositoryName,
+	})
+	if err != nil {
+		return err
+	}
+
+	policy.Bindings = append(policy.Bindings, &iampb.Binding{
+		Members: []string{"serviceAccount:" + saEmail},
+		Role:    arWriterRole,
+	})
+
+	_, err = client.SetIamPolicy(ctx, &iampb.SetIamPolicyRequest{
+		Resource: repositoryName,
+		Policy:   policy,
+	})
+	return err
 }
 
 func (r *reconciler) deleteArtifactRegistryRepository(ctx context.Context, dryRun bool, parent string, repos []Repository, log logrus.FieldLogger) error {
@@ -365,6 +394,7 @@ func (r *reconciler) deleteArtifactRegistryRepository(ctx context.Context, dryRu
 		if dryRun {
 			continue
 		}
+		// Will also delete IAM related to repository
 		op, err := r.arClient.DeleteRepository(ctx, &artifactregistrypb.DeleteRepositoryRequest{
 			Name: parent + "/repositories/" + repoId,
 		})
