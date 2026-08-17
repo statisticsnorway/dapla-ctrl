@@ -9,6 +9,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 )
 
@@ -45,7 +46,7 @@ func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	}
 
 	if r.client == nil {
-		client, err := NewGoogleServiceAccounts(ctx)
+		client, err := serviceaccounts.NewClient(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +102,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 }
 
 func (r *reconciler) reconcileEnv(ctx context.Context, envProjectId, groupName string) error {
-	sa, err := r.client.GetOrCreate(ctx, groupName, envProjectId)
+	sa, err := r.client.GetOrCreate(ctx, groupName, saDescription, envProjectId)
 	if err != nil {
 		return err
 	}
@@ -110,7 +111,7 @@ func (r *reconciler) reconcileEnv(ctx context.Context, envProjectId, groupName s
 		return nil
 	}
 
-	if err := r.client.UpdateDescription(ctx, groupName, saDescription, envProjectId); err != nil {
+	if err := r.client.UpdateDescription(ctx, sa.Name, saDescription); err != nil {
 		return err
 	}
 

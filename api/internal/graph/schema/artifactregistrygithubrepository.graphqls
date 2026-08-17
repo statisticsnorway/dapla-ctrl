@@ -1,0 +1,143 @@
+extend type Team {
+	"Github repositories that are allowed to write to artifact registry for the team."
+	artifactRegistryAllowedGithubRepos(
+		"Get the first n items in the connection. This can be used in combination with the after parameter."
+		first: Int
+		# Artifact registry github repositories allow list
+		"Get items after this cursor."
+		after: Cursor
+
+		"Get the last n items in the connection. This can be used in combination with the before parameter."
+		last: Int
+
+		"Get items before this cursor."
+		before: Cursor
+	): ArtifactRegistryAllowedGithubReposConnection!
+}
+
+extend type Mutation {
+	"Grant a Github Repository access to push to the team artifact registry repository."
+	grantGithubRepoAccessToTeamArtifactRegistry(
+		input: GrantGithubRepoAccessToTeamArtifactRegistryInput!
+	): GrantGithubRepoAccessToTeamArtifactRegistryPayload!
+
+	"Revoke the Github Repository access to push from the team artifact registry repository."
+	revokeGithubRepoAccessFromTeamArtifactRegistry(
+		input: RevokeGithubRepoAccessFromTeamArtifactRegistryInput!
+	): RevokeGithubRepoAccessFromTeamArtifactRegistryPayload!
+}
+
+extend enum ActivityLogEntryResourceType {
+	"All activity log entries related to artifact registry repositories will use this resource type."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS
+}
+
+input GrantGithubRepoAccessToTeamArtifactRegistryInput {
+	"Slug of the team."
+	teamSlug: Slug!
+
+	"Name of the Github Repository which will be granted access. Without the org prefix, for instance 'repo'."
+	repositoryName: String!
+}
+
+type GrantGithubRepoAccessToTeamArtifactRegistryPayload {
+	"Repository that was granted access to the team artifact registry."
+	repository: ArtifactRegistryAllowedGithubRepos
+}
+
+input RevokeGithubRepoAccessFromTeamArtifactRegistryInput {
+	"Slug of the team."
+	teamSlug: Slug!
+
+	"Name of the Github Repository where access should be revoked. Without the org prefix, for instance 'repo'."
+	repositoryName: String!
+}
+
+type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload {
+	"Whether or not the repository was removed from the team."
+	success: Boolean
+}
+
+type ArtifactRegistryAllowedGithubReposConnection {
+	"Pagination information."
+	pageInfo: PageInfo!
+
+	"List of nodes."
+	nodes: [ArtifactRegistryAllowedGithubRepos!]!
+
+	"List of edges."
+	edges: [ArtifactRegistryAllowedGithubReposEdge!]!
+}
+
+type ArtifactRegistryAllowedGithubReposEdge {
+	"Cursor for this edge that can be used for pagination."
+	cursor: Cursor!
+
+	"The GitHub repository."
+	node: ArtifactRegistryAllowedGithubRepos!
+}
+
+type ArtifactRegistryAllowedGithubRepos implements Node {
+	"ID of the repository."
+	id: ID!
+
+	"Name of the repository, with the organization prefix."
+	name: String!
+
+	"Team this repository is connected to."
+	team: Team!
+}
+
+type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug
+}
+
+type ArtifactRegistryGithubRepoAccessRevokedActivityLogEntry implements ActivityLogEntry & Node {
+	"ID of the entry."
+	id: ID!
+
+	"The identity of the actor who performed the action. The value is either the name of a service account, or the email address of a user."
+	actor: String!
+
+	"Creation time of the entry."
+	createdAt: Time!
+
+	"Message that summarizes the entry."
+	message: String!
+
+	"Type of the resource that was affected by the action."
+	resourceType: ActivityLogEntryResourceType!
+
+	"Name of the resource that was affected by the action."
+	resourceName: String!
+
+	"The team slug that the entry belongs to."
+	teamSlug: Slug
+}
+
+extend enum ActivityLogActivityType {
+	"Repository was granted access to a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_GRANTED
+
+	"Repository access was revoked from a team."
+	ARTIFACT_REGISTRY_GITHUB_REPOSITORY_ACCESS_REVOKED
+}

@@ -204,3 +204,21 @@ sql:
         <<: *default_go
         package: "messagesql"
         out: "../internal/message/messagesql"
+
+  - <<: *default_domain
+    name: "Artifact Registry Repository SQL"
+    queries: "../internal/artifactregistry/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "artifactregistrysql"
+        out: "../internal/artifactregistry/artifactregistrysql"
+
+  - <<: *default_domain
+    name: "Artifact Registry Repository GRPC SQL"
+    queries: "../internal/grpc/grpcartifactregistry/queries"
+    gen:
+      go:
+        <<: *default_go
+        package: "grpcartifactregistrysql"
+        out: "../internal/grpc/grpcartifactregistry/grpcartifactregistrysql"
