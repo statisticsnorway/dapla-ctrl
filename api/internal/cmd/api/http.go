@@ -34,7 +34,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.41.0"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/sync/errgroup"
 )
