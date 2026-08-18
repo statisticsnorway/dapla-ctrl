@@ -75,41 +75,6 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	return &i, err
 }
 
-const getFeaturesForTeam = `-- name: GetFeaturesForTeam :many
-SELECT
-	team_features.team_slug, team_features.name, team_features.env
-FROM
-	team_features
-WHERE
-	team_slug = $1
-ORDER BY
-	name ASC
-`
-
-type GetFeaturesForTeamRow struct {
-	TeamFeature TeamFeature
-}
-
-func (q *Queries) GetFeaturesForTeam(ctx context.Context, teamSlug slug.Slug) ([]*GetFeaturesForTeamRow, error) {
-	rows, err := q.db.Query(ctx, getFeaturesForTeam, teamSlug)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []*GetFeaturesForTeamRow{}
-	for rows.Next() {
-		var i GetFeaturesForTeamRow
-		if err := rows.Scan(&i.TeamFeature.TeamSlug, &i.TeamFeature.Name, &i.TeamFeature.Env); err != nil {
-			return nil, err
-		}
-		items = append(items, &i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const list = `-- name: List :many
 SELECT
 	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
@@ -216,4 +181,34 @@ WHERE
 func (q *Queries) SetLastSuccessfulSync(ctx context.Context, argSlug slug.Slug) error {
 	_, err := q.db.Exec(ctx, setLastSuccessfulSync, argSlug)
 	return err
+}
+
+const teamHasFeature = `-- name: TeamHasFeature :one
+SELECT
+	team_features.team_slug, team_features.name, team_features.env
+FROM
+	team_features
+WHERE
+	team_slug = $1
+AND
+	name = $2
+AND
+	env = $3
+`
+
+type TeamHasFeatureParams struct {
+	TeamSlug slug.Slug
+	Name     string
+	Env      string
+}
+
+type TeamHasFeatureRow struct {
+	TeamFeature TeamFeature
+}
+
+func (q *Queries) TeamHasFeature(ctx context.Context, arg TeamHasFeatureParams) (*TeamHasFeatureRow, error) {
+	row := q.db.QueryRow(ctx, teamHasFeature, arg.TeamSlug, arg.Name, arg.Env)
+	var i TeamHasFeatureRow
+	err := row.Scan(&i.TeamFeature.TeamSlug, &i.TeamFeature.Name, &i.TeamFeature.Env)
+	return &i, err
 }

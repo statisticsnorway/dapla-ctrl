@@ -75,6 +75,8 @@ FROM
 	team_features
 WHERE
 	team_slug = @team_slug
+AND
 	name = @name
+AND
 	env = @env
 ;
