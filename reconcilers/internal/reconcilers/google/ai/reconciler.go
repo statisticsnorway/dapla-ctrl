@@ -34,6 +34,7 @@ const (
 	aiBudgetNotificationType  = "email"
 	aiBudgetNotificationLabel = "email_address"
 	vertexAIServiceName       = "services/C7E2-9256-1C43"
+	environment               = "test"
 )
 
 type reconciler struct {
@@ -193,7 +194,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 		TeamSlug: daplaTeam.Slug,
-		Env:      "test",
+		Env:      environment,
 	})
 	if err != nil {
 		return err
@@ -209,7 +210,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		Slug: daplaTeam.Slug,
 		Feature: &protoapi.Feature{
 			Name: "ai",
-			Env:  "test",
+			Env:  environment,
 		},
 	})
 	if err != nil {
