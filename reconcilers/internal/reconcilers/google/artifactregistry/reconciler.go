@@ -280,7 +280,7 @@ func (r *reconciler) getLocalArtifactRegistryRepositories(ctx context.Context, c
 func (r *reconciler) getRemoteArtifactRegistryRepositories(ctx context.Context, parent, team string) ([]Repository, error) {
 	resp := r.arClient.ListRepositories(ctx, &artifactregistrypb.ListRepositoriesRequest{
 		Parent: parent,
-		Filter: fmt.Sprintf("%s/repositories/%s-*", parent, team),
+		Filter: "name=" + fmt.Sprintf("\"%s/repositories/%s-*\"", parent, team),
 	})
 
 	var repos []Repository
