@@ -229,6 +229,120 @@ func (b0 GetTeamAtlantisResponse_builder) Build() *GetTeamAtlantisResponse {
 	return m0
 }
 
+type SetTeamAtlantisWebhookSecretRequest struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	TeamSlug      string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3" json:"team_slug,omitempty"`
+	WebhookSecret string                 `protobuf:"bytes,2,opt,name=webhook_secret,json=webhookSecret,proto3" json:"webhook_secret,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) Reset() {
+	*x = SetTeamAtlantisWebhookSecretRequest{}
+	mi := &file_atlantis_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetTeamAtlantisWebhookSecretRequest) ProtoMessage() {}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_atlantis_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) GetTeamSlug() string {
+	if x != nil {
+		return x.TeamSlug
+	}
+	return ""
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) GetWebhookSecret() string {
+	if x != nil {
+		return x.WebhookSecret
+	}
+	return ""
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) SetTeamSlug(v string) {
+	x.TeamSlug = v
+}
+
+func (x *SetTeamAtlantisWebhookSecretRequest) SetWebhookSecret(v string) {
+	x.WebhookSecret = v
+}
+
+type SetTeamAtlantisWebhookSecretRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TeamSlug      string
+	WebhookSecret string
+}
+
+func (b0 SetTeamAtlantisWebhookSecretRequest_builder) Build() *SetTeamAtlantisWebhookSecretRequest {
+	m0 := &SetTeamAtlantisWebhookSecretRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.TeamSlug = b.TeamSlug
+	x.WebhookSecret = b.WebhookSecret
+	return m0
+}
+
+type SetTeamAtlantisWebhookSecretResponse struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetTeamAtlantisWebhookSecretResponse) Reset() {
+	*x = SetTeamAtlantisWebhookSecretResponse{}
+	mi := &file_atlantis_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetTeamAtlantisWebhookSecretResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetTeamAtlantisWebhookSecretResponse) ProtoMessage() {}
+
+func (x *SetTeamAtlantisWebhookSecretResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_atlantis_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type SetTeamAtlantisWebhookSecretResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 SetTeamAtlantisWebhookSecretResponse_builder) Build() *SetTeamAtlantisWebhookSecretResponse {
+	m0 := &SetTeamAtlantisWebhookSecretResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 var File_atlantis_proto protoreflect.FileDescriptor
 
 const file_atlantis_proto_rawDesc = "" +
@@ -241,22 +355,31 @@ const file_atlantis_proto_rawDesc = "" +
 	"\x16GetTeamAtlantisRequest\x12\x1b\n" +
 	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\"U\n" +
 	"\x17GetTeamAtlantisResponse\x12:\n" +
-	"\x06config\x18\x01 \x01(\v2\".dapla.api.protobuf.AtlantisConfigR\x06config2x\n" +
+	"\x06config\x18\x01 \x01(\v2\".dapla.api.protobuf.AtlantisConfigR\x06config\"i\n" +
+	"#SetTeamAtlantisWebhookSecretRequest\x12\x1b\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12%\n" +
+	"\x0ewebhook_secret\x18\x02 \x01(\tR\rwebhookSecret\"&\n" +
+	"$SetTeamAtlantisWebhookSecretResponse2\x8e\x02\n" +
 	"\bAtlantis\x12l\n" +
-	"\x0fGetTeamAtlantis\x12*.dapla.api.protobuf.GetTeamAtlantisRequest\x1a+.dapla.api.protobuf.GetTeamAtlantisResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	"\x0fGetTeamAtlantis\x12*.dapla.api.protobuf.GetTeamAtlantisRequest\x1a+.dapla.api.protobuf.GetTeamAtlantisResponse\"\x00\x12\x93\x01\n" +
+	"\x1cSetTeamAtlantisWebhookSecret\x127.dapla.api.protobuf.SetTeamAtlantisWebhookSecretRequest\x1a8.dapla.api.protobuf.SetTeamAtlantisWebhookSecretResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_atlantis_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_atlantis_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_atlantis_proto_goTypes = []any{
-	(*AtlantisConfig)(nil),          // 0: dapla.api.protobuf.AtlantisConfig
-	(*GetTeamAtlantisRequest)(nil),  // 1: dapla.api.protobuf.GetTeamAtlantisRequest
-	(*GetTeamAtlantisResponse)(nil), // 2: dapla.api.protobuf.GetTeamAtlantisResponse
+	(*AtlantisConfig)(nil),                       // 0: dapla.api.protobuf.AtlantisConfig
+	(*GetTeamAtlantisRequest)(nil),               // 1: dapla.api.protobuf.GetTeamAtlantisRequest
+	(*GetTeamAtlantisResponse)(nil),              // 2: dapla.api.protobuf.GetTeamAtlantisResponse
+	(*SetTeamAtlantisWebhookSecretRequest)(nil),  // 3: dapla.api.protobuf.SetTeamAtlantisWebhookSecretRequest
+	(*SetTeamAtlantisWebhookSecretResponse)(nil), // 4: dapla.api.protobuf.SetTeamAtlantisWebhookSecretResponse
 }
 var file_atlantis_proto_depIdxs = []int32{
 	0, // 0: dapla.api.protobuf.GetTeamAtlantisResponse.config:type_name -> dapla.api.protobuf.AtlantisConfig
 	1, // 1: dapla.api.protobuf.Atlantis.GetTeamAtlantis:input_type -> dapla.api.protobuf.GetTeamAtlantisRequest
-	2, // 2: dapla.api.protobuf.Atlantis.GetTeamAtlantis:output_type -> dapla.api.protobuf.GetTeamAtlantisResponse
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
+	3, // 2: dapla.api.protobuf.Atlantis.SetTeamAtlantisWebhookSecret:input_type -> dapla.api.protobuf.SetTeamAtlantisWebhookSecretRequest
+	2, // 3: dapla.api.protobuf.Atlantis.GetTeamAtlantis:output_type -> dapla.api.protobuf.GetTeamAtlantisResponse
+	4, // 4: dapla.api.protobuf.Atlantis.SetTeamAtlantisWebhookSecret:output_type -> dapla.api.protobuf.SetTeamAtlantisWebhookSecretResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name
 	1, // [1:1] is the sub-list for extension extendee
 	0, // [0:1] is the sub-list for field type_name
@@ -274,7 +397,7 @@ func file_atlantis_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_atlantis_proto_rawDesc), len(file_atlantis_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

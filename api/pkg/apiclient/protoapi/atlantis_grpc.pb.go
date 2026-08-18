@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Atlantis_GetTeamAtlantis_FullMethodName = "/dapla.api.protobuf.Atlantis/GetTeamAtlantis"
+	Atlantis_GetTeamAtlantis_FullMethodName              = "/dapla.api.protobuf.Atlantis/GetTeamAtlantis"
+	Atlantis_SetTeamAtlantisWebhookSecret_FullMethodName = "/dapla.api.protobuf.Atlantis/SetTeamAtlantisWebhookSecret"
 )
 
 // AtlantisClient is the client API for Atlantis service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AtlantisClient interface {
 	GetTeamAtlantis(ctx context.Context, in *GetTeamAtlantisRequest, opts ...grpc.CallOption) (*GetTeamAtlantisResponse, error)
+	SetTeamAtlantisWebhookSecret(ctx context.Context, in *SetTeamAtlantisWebhookSecretRequest, opts ...grpc.CallOption) (*SetTeamAtlantisWebhookSecretResponse, error)
 }
 
 type atlantisClient struct {
@@ -47,11 +49,22 @@ func (c *atlantisClient) GetTeamAtlantis(ctx context.Context, in *GetTeamAtlanti
 	return out, nil
 }
 
+func (c *atlantisClient) SetTeamAtlantisWebhookSecret(ctx context.Context, in *SetTeamAtlantisWebhookSecretRequest, opts ...grpc.CallOption) (*SetTeamAtlantisWebhookSecretResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetTeamAtlantisWebhookSecretResponse)
+	err := c.cc.Invoke(ctx, Atlantis_SetTeamAtlantisWebhookSecret_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AtlantisServer is the server API for Atlantis service.
 // All implementations must embed UnimplementedAtlantisServer
 // for forward compatibility.
 type AtlantisServer interface {
 	GetTeamAtlantis(context.Context, *GetTeamAtlantisRequest) (*GetTeamAtlantisResponse, error)
+	SetTeamAtlantisWebhookSecret(context.Context, *SetTeamAtlantisWebhookSecretRequest) (*SetTeamAtlantisWebhookSecretResponse, error)
 	mustEmbedUnimplementedAtlantisServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedAtlantisServer struct{}
 
 func (UnimplementedAtlantisServer) GetTeamAtlantis(context.Context, *GetTeamAtlantisRequest) (*GetTeamAtlantisResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTeamAtlantis not implemented")
+}
+func (UnimplementedAtlantisServer) SetTeamAtlantisWebhookSecret(context.Context, *SetTeamAtlantisWebhookSecretRequest) (*SetTeamAtlantisWebhookSecretResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetTeamAtlantisWebhookSecret not implemented")
 }
 func (UnimplementedAtlantisServer) mustEmbedUnimplementedAtlantisServer() {}
 func (UnimplementedAtlantisServer) testEmbeddedByValue()                  {}
@@ -104,6 +120,24 @@ func _Atlantis_GetTeamAtlantis_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Atlantis_SetTeamAtlantisWebhookSecret_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetTeamAtlantisWebhookSecretRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AtlantisServer).SetTeamAtlantisWebhookSecret(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Atlantis_SetTeamAtlantisWebhookSecret_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AtlantisServer).SetTeamAtlantisWebhookSecret(ctx, req.(*SetTeamAtlantisWebhookSecretRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Atlantis_ServiceDesc is the grpc.ServiceDesc for Atlantis service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var Atlantis_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTeamAtlantis",
 			Handler:    _Atlantis_GetTeamAtlantis_Handler,
+		},
+		{
+			MethodName: "SetTeamAtlantisWebhookSecret",
+			Handler:    _Atlantis_SetTeamAtlantisWebhookSecret_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

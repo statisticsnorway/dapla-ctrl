@@ -1,11 +1,11 @@
--- name: Set :one
-UPDATE team_atlantis_config
+-- name: UpsertWebhookSecret :exec
+INSERT INTO
+    team_atlantis_config (team_slug, webhook_secret)
+VALUES
+    (@team_slug, @webhook_secret)
+ON CONFLICT (team_slug) DO UPDATE
 SET
-    webhook_secret = @webhook_secret
-WHERE
-    team_slug = @team_slug::slug
-RETURNING
-    *
+    webhook_secret = EXCLUDED.webhook_secret
 ;
 
 -- name: Get :one

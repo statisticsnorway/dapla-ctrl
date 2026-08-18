@@ -2,6 +2,8 @@ package atlantis
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 
@@ -89,8 +91,40 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err := r.reconcileBuckets(ctx, daplaTeam.Slug); err != nil {
 		return err
 	}
+
+	webhookSecret, err := r.getOrGenerateWebhookSecret(ctx, client, daplaTeam.Slug)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
+
+func (r *reconciler) getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
+	cfg, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: teamName})
+	if err != nil && status.Code(err) != codes.NotFound {
+		return "", err
+	} else if err == nil && cfg.Config.WebhookSecret != nil {
+		return *cfg.Config.WebhookSecret, nil
+	}
+
+	randBytes := make([]byte, 128)
+	_, err = rand.Read(randBytes)
+	if err != nil {
+		return "", err
+	}
+	secretToken := fmt.Sprintf("%x", sha256.Sum256(randBytes))
+
+	if _, err := client.Atlantis().SetTeamAtlantisWebhookSecret(ctx, &protoapi.SetTeamAtlantisWebhookSecretRequest{
+		TeamSlug:      teamName,
+		WebhookSecret: secretToken,
+	}); err != nil {
+		return "", err
+	}
+
+	return secretToken, nil
+}
+
 func (r *reconciler) reconcileServiceAccount(ctx context.Context, teamName string) error {
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+teamName, "Atlantis for team "+teamName, r.atlantisProject)
 	if err != nil {

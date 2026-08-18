@@ -28,24 +28,22 @@ func (q *Queries) Get(ctx context.Context, teamSlug slug.Slug) (*GetRow, error) 
 	return &i, err
 }
 
-const set = `-- name: Set :one
-UPDATE team_atlantis_config
+const upsertWebhookSecret = `-- name: UpsertWebhookSecret :exec
+INSERT INTO
+    team_atlantis_config (team_slug, webhook_secret)
+VALUES
+    ($1, $2)
+ON CONFLICT (team_slug) DO UPDATE
 SET
-    webhook_secret = $1
-WHERE
-    team_slug = $2::slug
-RETURNING
-    sql.embed(team_atlantis_config)
+    webhook_secret = EXCLUDED.webhook_secret
 `
 
-type SetParams struct {
-	WebhookSecret *string
+type UpsertWebhookSecretParams struct {
 	TeamSlug      slug.Slug
+	WebhookSecret *string
 }
 
-func (q *Queries) Set(ctx context.Context, arg SetParams) (interface{}, error) {
-	row := q.db.QueryRow(ctx, set, arg.WebhookSecret, arg.TeamSlug)
-	var embed interface{}
-	err := row.Scan(&embed)
-	return embed, err
+func (q *Queries) UpsertWebhookSecret(ctx context.Context, arg UpsertWebhookSecretParams) error {
+	_, err := q.db.Exec(ctx, upsertWebhookSecret, arg.TeamSlug, arg.WebhookSecret)
+	return err
 }
