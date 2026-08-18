@@ -41,6 +41,10 @@ func Run(ctx context.Context, listenAddress string, pool *pgxpool.Pool, log logr
 	protoapi.RegisterGcpTeamResourcesServer(s, grpcgcpresources.NewServer(pool))
 	protoapi.RegisterArtifactRegistryServer(s, grpcartifactregistry.NewServer(pool))
 
+	for service := range s.GetServiceInfo() {
+		log.WithField("service", service).Info("registered grpc protoapi server")
+	}
+
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return s.Serve(lis) })
 	g.Go(func() error {
