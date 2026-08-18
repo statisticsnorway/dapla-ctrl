@@ -50,15 +50,17 @@ type reconciler struct {
 }
 
 type Config struct {
-	// Project ID
-	ProjectID string
-
-	// Location
-	Location string
-
+	ProjectID              string
+	Location               string
 	WorkloadIdentityPoolId string
+	DeleteDryRun           string
+}
 
-	DeleteDryRun string
+func (c Config) validate() error {
+	if c.ProjectID == "" || c.Location == "" || c.WorkloadIdentityPoolId == "" || c.DeleteDryRun == "" {
+		return errors.New("all configuration parameters for artifact registry reconciler must be set")
+	}
+	return nil
 }
 
 type Repository struct {
@@ -99,13 +101,13 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 			{
 				Key:         configProjectIDKey,
 				DisplayName: "Artifact Registry project ID",
-				Description: "Project id of the project the AR repos will be placed. E.g. `my-project-id-22",
+				Description: "Project id of the project the AR repos will be placed. E.g. `my-project-id-22`",
 				Secret:      false,
 			},
 			{
 				Key:         configLocationKey,
 				DisplayName: "Artifact Registry location",
-				Description: "The location where AR repos will be created. E.g. `europe-north1",
+				Description: "The location where AR repos will be created. E.g. `europe-north1`",
 				Secret:      false,
 			},
 			{
@@ -428,9 +430,15 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			gac.Location = c.Value
 		case configDeleteDryRunKey:
 			gac.DeleteDryRun = c.Value
+		case configWorkloadIdentityPoolIdKey:
+			gac.WorkloadIdentityPoolId = c.Value
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
+	}
+
+	if err := gac.validate(); err != nil {
+		return fmt.Errorf("validate reconciler config: %w", err)
 	}
 
 	r.config = gac

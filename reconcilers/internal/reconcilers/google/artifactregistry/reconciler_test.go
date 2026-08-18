@@ -170,3 +170,32 @@ func TestDeleteArtifactRegistryRepositoryDryRun(t *testing.T) {
 		t.Errorf("delete requests = %d, want 0 in dry-run mode", len(client.deleteRequests))
 	}
 }
+
+func TestConfigValidate(t *testing.T) {
+	valid := Config{
+		ProjectID:              "project",
+		Location:               "europe-north1",
+		WorkloadIdentityPoolId: "pool",
+		DeleteDryRun:           "false",
+	}
+
+	tests := []struct {
+		name    string
+		config  Config
+		wantErr bool
+	}{
+		{name: "valid configuration", config: valid},
+		{name: "missing project ID", config: Config{Location: valid.Location, WorkloadIdentityPoolId: valid.WorkloadIdentityPoolId, DeleteDryRun: valid.DeleteDryRun}, wantErr: true},
+		{name: "missing location", config: Config{ProjectID: valid.ProjectID, WorkloadIdentityPoolId: valid.WorkloadIdentityPoolId, DeleteDryRun: valid.DeleteDryRun}, wantErr: true},
+		{name: "missing workload identity pool ID", config: Config{ProjectID: valid.ProjectID, Location: valid.Location, DeleteDryRun: valid.DeleteDryRun}, wantErr: true},
+		{name: "missing delete dry run", config: Config{ProjectID: valid.ProjectID, Location: valid.Location, WorkloadIdentityPoolId: valid.WorkloadIdentityPoolId}, wantErr: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.config.validate(); (err != nil) != tt.wantErr {
+				t.Errorf("validate() error = %v, want error = %t", err, tt.wantErr)
+			}
+		})
+	}
+}
