@@ -19,12 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Teams_Get_FullMethodName         = "/dapla.api.protobuf.Teams/Get"
-	Teams_List_FullMethodName        = "/dapla.api.protobuf.Teams/List"
-	Teams_Groups_FullMethodName      = "/dapla.api.protobuf.Teams/Groups"
-	Teams_Delete_FullMethodName      = "/dapla.api.protobuf.Teams/Delete"
-	Teams_GetFeatures_FullMethodName = "/dapla.api.protobuf.Teams/GetFeatures"
-	Teams_HasFeature_FullMethodName  = "/dapla.api.protobuf.Teams/HasFeature"
+	Teams_Get_FullMethodName        = "/dapla.api.protobuf.Teams/Get"
+	Teams_List_FullMethodName       = "/dapla.api.protobuf.Teams/List"
+	Teams_Groups_FullMethodName     = "/dapla.api.protobuf.Teams/Groups"
+	Teams_Delete_FullMethodName     = "/dapla.api.protobuf.Teams/Delete"
+	Teams_HasFeature_FullMethodName = "/dapla.api.protobuf.Teams/HasFeature"
 )
 
 // TeamsClient is the client API for Teams service.
@@ -35,7 +34,6 @@ type TeamsClient interface {
 	List(ctx context.Context, in *ListTeamsRequest, opts ...grpc.CallOption) (*ListTeamsResponse, error)
 	Groups(ctx context.Context, in *ListTeamGroupsRequest, opts ...grpc.CallOption) (*ListTeamGroupsResponse, error)
 	Delete(ctx context.Context, in *DeleteTeamRequest, opts ...grpc.CallOption) (*DeleteTeamResponse, error)
-	GetFeatures(ctx context.Context, in *GetFeaturesRequest, opts ...grpc.CallOption) (*GetFeaturesResponse, error)
 	HasFeature(ctx context.Context, in *HasFeatureRequest, opts ...grpc.CallOption) (*HasFeatureResponse, error)
 }
 
@@ -87,16 +85,6 @@ func (c *teamsClient) Delete(ctx context.Context, in *DeleteTeamRequest, opts ..
 	return out, nil
 }
 
-func (c *teamsClient) GetFeatures(ctx context.Context, in *GetFeaturesRequest, opts ...grpc.CallOption) (*GetFeaturesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetFeaturesResponse)
-	err := c.cc.Invoke(ctx, Teams_GetFeatures_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *teamsClient) HasFeature(ctx context.Context, in *HasFeatureRequest, opts ...grpc.CallOption) (*HasFeatureResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HasFeatureResponse)
@@ -115,7 +103,6 @@ type TeamsServer interface {
 	List(context.Context, *ListTeamsRequest) (*ListTeamsResponse, error)
 	Groups(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)
 	Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error)
-	GetFeatures(context.Context, *GetFeaturesRequest) (*GetFeaturesResponse, error)
 	HasFeature(context.Context, *HasFeatureRequest) (*HasFeatureResponse, error)
 	mustEmbedUnimplementedTeamsServer()
 }
@@ -138,9 +125,6 @@ func (UnimplementedTeamsServer) Groups(context.Context, *ListTeamGroupsRequest) 
 }
 func (UnimplementedTeamsServer) Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
-}
-func (UnimplementedTeamsServer) GetFeatures(context.Context, *GetFeaturesRequest) (*GetFeaturesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetFeatures not implemented")
 }
 func (UnimplementedTeamsServer) HasFeature(context.Context, *HasFeatureRequest) (*HasFeatureResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HasFeature not implemented")
@@ -238,24 +222,6 @@ func _Teams_Delete_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Teams_GetFeatures_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetFeaturesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TeamsServer).GetFeatures(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Teams_GetFeatures_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TeamsServer).GetFeatures(ctx, req.(*GetFeaturesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Teams_HasFeature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(HasFeatureRequest)
 	if err := dec(in); err != nil {
@@ -296,10 +262,6 @@ var Teams_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _Teams_Delete_Handler,
-		},
-		{
-			MethodName: "GetFeatures",
-			Handler:    _Teams_GetFeatures_Handler,
 		},
 		{
 			MethodName: "HasFeature",
