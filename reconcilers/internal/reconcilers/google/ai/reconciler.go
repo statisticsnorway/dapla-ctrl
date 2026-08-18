@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strconv"
 	"strings"
 
 	"cloud.google.com/go/billing/budgets/apiv1"
@@ -35,6 +36,12 @@ const (
 	aiBudgetNotificationLabel = "email_address"
 	vertexAIServiceName       = "services/C7E2-9256-1C43"
 	environment               = "test"
+
+	aiPlatformUserRoleKey              = "ai_platform_user_role"
+	aiBudgetThresholdsKey              = "ai_budget_thresholds"
+	aiBudgetBillingAccountKey          = "ai_budget_billing_account"
+	aiBudgetNotificationChannelNameKey = "ai_budget_notification_channel_name"
+	groupSANameTemplateKey             = "group_sa_name_template"
 )
 
 type reconciler struct {
@@ -99,32 +106,32 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		Description: "Enables Vertex AI (Gemini Enterprise Agent Platform) in Dapla Teams",
 		Config: []*protoapi.ReconcilerConfigSpec{
 			&protoapi.ReconcilerConfigSpec{
-				Key:         "AIBudgetThresholds",
+				Key:         aiBudgetThresholdsKey,
 				DisplayName: "AI Budget Notification Thresholds",
 				Description: "The threshhold values for when to notify users about exceeded budget limits.",
 				Secret:      false,
 			},
 			&protoapi.ReconcilerConfigSpec{
-				Key:         "AIPlatformUserRole",
+				Key:         aiPlatformUserRoleKey,
 				DisplayName: "AI Platform User Role",
 				Description: "The name of the custom user role for Vertex AI.",
 				Secret:      false,
 			},
 			&protoapi.ReconcilerConfigSpec{
-				Key:         "AIBudgetBillingAccount",
+				Key:         aiBudgetBillingAccountKey,
 				DisplayName: "AI Budget Billing Account",
 				Description: "The ID of the SSB org billing account.",
 				Secret:      false,
 			},
 			&protoapi.ReconcilerConfigSpec{
-				Key:         "AIBudgetNotificationChannelName",
+				Key:         aiBudgetNotificationChannelNameKey,
 				DisplayName: "AI Budget Notification Channel Name",
 				Description: "The name of the budget notificaiton channel resource.",
 				Secret:      false,
 			},
 
 			&protoapi.ReconcilerConfigSpec{
-				Key:         "GroupSANameTemplate",
+				Key:         groupSANameTemplateKey,
 				DisplayName: "Group Service Account Name Template",
 				Description: "Template for the name of the Group Service Account.",
 				Secret:      false,
@@ -182,6 +189,10 @@ func createGoogleClients(ctx context.Context) (*googleServices, error) {
 
 // Reconcile implements [reconcilers.Reconciler].
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
+	if err := r.updateConfig(ctx, client); err != nil {
+		return fmt.Errorf("error getting reconciler config: %w", err)
+	}
+
 	services, err := createGoogleClients(ctx)
 	if err != nil {
 		return err
@@ -348,6 +359,46 @@ func reconcileAIPlatformUserBinding(r *reconciler, ctx context.Context, projects
 		return fmt.Errorf("set IAM policy for project %q: %w", projectID, err)
 	}
 	return nil
+}
+
+func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
+	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
+		ReconcilerName: r.Name(),
+	})
+	if err != nil {
+		return fmt.Errorf("get reconciler config: %w", err)
+	}
+
+	for _, c := range config.Nodes {
+		switch c.Key {
+		case aiPlatformUserRoleKey:
+			r.AIPlatformUserRole = c.Value
+		case aiBudgetThresholdsKey:
+			parts := strings.Split(c.Value, ",")
+			values := make([]float64, len(parts))
+
+			for i, part := range parts {
+				var err error
+				values[i], err = strconv.ParseFloat(strings.TrimSpace(part), 64)
+				if err != nil {
+					return fmt.Errorf("invalid float %q: %w", part, err)
+				}
+			}
+			r.AIBudgetThresholds = values
+		case aiBudgetNotificationChannelNameKey:
+			r.AIBudgetNotificationName = c.Value
+		case aiBudgetBillingAccountKey:
+			r.AIBudgetBillingAccount = c.Value
+		case groupSANameTemplateKey:
+			r.GroupSANameTemplate = c.Value
+		default:
+			return fmt.Errorf("unknown config key %q", c.Key)
+
+		}
+	}
+
+	return nil
+
 }
 
 func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, daplaStatNotificationEmails []string, enabled bool) error {
