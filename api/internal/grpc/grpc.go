@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcartifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcgcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcgroup"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/grpc/grpcreconciler"
@@ -38,6 +39,11 @@ func Run(ctx context.Context, listenAddress string, pool *pgxpool.Pool, log logr
 	protoapi.RegisterReconcilersServer(s, grpcreconciler.NewServer(pool))
 	protoapi.RegisterSharedBucketsStopgapServer(s, grpcsharedbucketsstopgap.NewServer(pool))
 	protoapi.RegisterGcpTeamResourcesServer(s, grpcgcpresources.NewServer(pool))
+	protoapi.RegisterArtifactRegistryServer(s, grpcartifactregistry.NewServer(pool))
+
+	for service := range s.GetServiceInfo() {
+		log.WithField("service", service).Info("registered grpc protoapi server")
+	}
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error { return s.Serve(lis) })
