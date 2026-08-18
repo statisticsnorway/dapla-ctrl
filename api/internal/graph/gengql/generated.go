@@ -7875,8 +7875,14 @@ extend type Mutation {
 	"""
 	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
 
+	"""
+	Enable a feature for a team.
+	"""
 	enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
 
+	"""
+	Disable a feature for a team.
+	"""
 	disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
 }
 
@@ -8015,6 +8021,7 @@ type Team implements Node {
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
 
+	" The features enabled for the team."
 	features: [TeamFeature!]!
 }
 
@@ -8070,20 +8077,24 @@ type RemoveTeamAccessManagerPayload {
 }
 
 type EnableTeamFeaturePayload {
+	"The team for which the feature should be enabled in."
 	team: Team!
 
-	""
+	"The name of the feature to enable."
 	feature: String!
 
+	"The environment to enable the feature in."
 	env: String!
 }
 
 type DisableTeamFeaturePayload {
+	"The team for which the feature should be disabled in."
 	team: Team!
 
-	""
+	"The name of the feature to disable."
 	feature: String!
 
+	"The environment to disable the feature in."
 	env: String!
 }
 

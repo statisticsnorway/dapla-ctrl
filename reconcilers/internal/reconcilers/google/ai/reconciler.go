@@ -33,36 +33,25 @@ const (
 	aiBudgetCurrencyCode      = "EUR"
 	aiBudgetNotificationType  = "email"
 	aiBudgetNotificationLabel = "email_address"
-	aiBudgetNotificationName  = "Vertex AI budget notification channel"
 	vertexAIServiceName       = "services/C7E2-9256-1C43"
 )
 
 type reconciler struct {
-	AIPlatformUserRole       string
-	GroupSANameTemplate      string
-	AIBudgetBillingAccount   string
-	AIBudgetThresholds       map[string]float64
-	BudgetNotificationEmails []string
+	AIPlatformUserRole            string
+	GroupSANameTemplate           string
+	AIBudgetBillingAccount        string
+	AIBudgetThresholds            []float64
+	AIBudgetNotificationName      string
+	BudgetNotificationEmails      []string
+	AIBudgetDeveloperBillingGroup string
 }
 
 type optFunc func(*reconciler) error
 
-func WithDefaultSettings() optFunc {
-	return func(r *reconciler) error {
-		r.AIBudgetThresholds = map[string]float64{"first": 0.5, "second": 0.9, "third": 1.0}
-		r.AIPlatformUserRole = "ssb.aiplatform.user"
-		r.AIBudgetBillingAccount = "billingAccounts/018A21-E69CB3-A95FA4"
-		// For SAs in the test environment
-		r.GroupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
-
-		return nil
-	}
-}
-
 func WithDaplaStatBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
 	return func(r *reconciler) error {
 		var limit uint = 4
-		members, err := getGroupMembers(ctx, apiclient, "group:dapla-stat-developers@groups.ssb.no", limit)
+		members, err := getGroupMembers(ctx, apiclient, r.AIBudgetDeveloperBillingGroup, limit)
 		if err != nil {
 			return err
 		}
@@ -82,6 +71,15 @@ func WithDaplaStatBudgetNotifications(ctx context.Context, apiclient *apiclient.
 func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
 
+	r.AIBudgetThresholds = []float64{0.5, 0.9, 1}
+	r.AIPlatformUserRole = "ssb.aiplatform.user"
+	r.AIBudgetBillingAccount = "billingAccounts/018A21-E69CB3-A95FA4"
+
+	r.AIBudgetNotificationName = "Vertex AI budget notification channel"
+	r.AIBudgetDeveloperBillingGroup = "group:dapla-stat-developers@groups.ssb.no"
+	// For SAs in the test environment
+	r.GroupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
+
 	for _, opt := range opts {
 		err := opt(r)
 		if err != nil {
@@ -98,6 +96,39 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		Name:        r.Name(),
 		DisplayName: "Vertex AI reconciler",
 		Description: "Enables Vertex AI (Gemini Enterprise Agent Platform) in Dapla Teams",
+		Config: []*protoapi.ReconcilerConfigSpec{
+			&protoapi.ReconcilerConfigSpec{
+				Key:         "AIBudgetThresholds",
+				DisplayName: "AI Budget Notification Thresholds",
+				Description: "The threshhold values for when to notify users about exceeded budget limits.",
+				Secret:      false,
+			},
+			&protoapi.ReconcilerConfigSpec{
+				Key:         "AIPlatformUserRole",
+				DisplayName: "AI Platform User Role",
+				Description: "The name of the custom user role for Vertex AI.",
+				Secret:      false,
+			},
+			&protoapi.ReconcilerConfigSpec{
+				Key:         "AIBudgetBillingAccount",
+				DisplayName: "AI Budget Billing Account",
+				Description: "The ID of the SSB org billing account.",
+				Secret:      false,
+			},
+			&protoapi.ReconcilerConfigSpec{
+				Key:         "AIBudgetNotificationChannelName",
+				DisplayName: "AI Budget Notification Channel Name",
+				Description: "The name of the budget notificaiton channel resource.",
+				Secret:      false,
+			},
+
+			&protoapi.ReconcilerConfigSpec{
+				Key:         "GroupSANameTemplate",
+				DisplayName: "Group Service Account Name Template",
+				Description: "Template for the name of the Group Service Account.",
+				Secret:      false,
+			},
+		},
 	}
 }
 
@@ -123,12 +154,20 @@ func (services googleServices) close() error {
 }
 
 func createGoogleClients(ctx context.Context) (*googleServices, error) {
-	resourceManagerService, err1 := resourcemanager.NewProjectsClient(ctx)
-	serviceUsageService, err2 := serviceusage.NewClient(ctx)
-	budgetService, err3 := budgets.NewBudgetClient(ctx)
-	ncService, err4 := monitoring.NewNotificationChannelClient(ctx)
-
-	if err := errors.Join(err1, err2, err3, err4); err != nil {
+	resourceManagerService, err := resourcemanager.NewProjectsClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	serviceUsageService, err := serviceusage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	budgetService, err := budgets.NewBudgetClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ncService, err := monitoring.NewNotificationChannelClient(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -166,22 +205,32 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	aiFeature, err1 := client.Teams().HasFeature(ctx, &protoapi.HasFeatureRequest{
+	aiFeature, err := client.Teams().HasFeature(ctx, &protoapi.HasFeatureRequest{
 		Slug: daplaTeam.Slug,
 		Feature: &protoapi.Feature{
 			Name: "ai",
 			Env:  "test",
 		},
 	})
+	if err != nil {
+		return err
+	}
 	aiFeatureIsEnabled := aiFeature.HasFeature
-	vertexAIEnabled, err2 := isVertexAIEnabled(ctx, services.ServiceUsage, projectID)
-	membersHaveIAM, err3 := membersHaveAIPlatformUserBinding(r, ctx, services.Project, daplaTeam.Slug, projectID)
-	budget, err4 := getExistingAIBudget(r, ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
-
+	vertexAIEnabled, err := isVertexAIEnabled(ctx, services.ServiceUsage, projectID)
+	if err != nil {
+		return err
+	}
+	membersHaveIAM, err := membersHaveAIPlatformUserBinding(r, ctx, services.Project, daplaTeam.Slug, projectID)
+	if err != nil {
+		return err
+	}
+	budget, err := getExistingAIBudget(r, ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
+	if err != nil {
+		return err
+	}
 	var budgetNotificationEmails []string
-	notificationChannels, err5 := getExistingAIBudgetNotificationChannel(ctx, services.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
-
-	if err := errors.Join(err1, err2, err3, err4, err5); err != nil {
+	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, services.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
+	if err != nil {
 		return err
 	}
 
@@ -197,11 +246,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		}
 	}
 
-	// Run the reconciler if the values of 'budgetExists', 'allNotificationChannelsExist' and 'aiFeatureIsEnabled' aren't all equal
 	budgetExists := budget != nil
 	allNotificationChannelsExist := len(notificationChannels) == len(budgetNotificationEmails)
-
-	if !(budgetExists == aiFeatureIsEnabled && allNotificationChannelsExist == aiFeatureIsEnabled) {
+	// Run the reconciler if 'budgetExists', 'allNotificationChannelsExist' and 'aiFeatureIsEnabled' aren't all equal
+	needToBeReconciled := !(budgetExists == aiFeatureIsEnabled && allNotificationChannelsExist == aiFeatureIsEnabled)
+	if needToBeReconciled {
 		if err := reconcileAIBudget(r, ctx, client, services, daplaTeam.Slug, projectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
 			return err
 		}
@@ -310,7 +359,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 			}
 		}
 
-		_, err := reconcileAIBudgetNotificationChannels(ctx, services.NotificationChannel, projectID, nil, enabled)
+		_, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, nil, enabled)
 		return err
 	}
 
@@ -327,7 +376,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return fmt.Errorf("get project %q: %w", projectID, err)
 	}
 
-	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(ctx, services.NotificationChannel, projectID, budgetNotificationEmails, enabled)
+	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, budgetNotificationEmails, enabled)
 	if err != nil {
 		return err
 	}
@@ -358,10 +407,10 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 	return nil
 }
 
-func reconcileAIBudgetNotificationChannels(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string, enabled bool) ([]string, error) {
+func reconcileAIBudgetNotificationChannels(r *reconciler, ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string, enabled bool) ([]string, error) {
 	projectName := "projects/" + projectID
 	if !enabled {
-		filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, aiBudgetNotificationName, aiBudgetNotificationType)
+		filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, r.AIBudgetNotificationName, aiBudgetNotificationType)
 		var channelNames []string
 		it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
 		for channel, err := range it.All() {
@@ -390,7 +439,7 @@ func reconcileAIBudgetNotificationChannels(ctx context.Context, ncClient *monito
 			_, err = ncClient.CreateNotificationChannel(ctx, &monitoringpb.CreateNotificationChannelRequest{
 				Name: projectName,
 				NotificationChannel: &monitoringpb.NotificationChannel{
-					DisplayName: aiBudgetNotificationName,
+					DisplayName: r.AIBudgetNotificationName,
 					Type:        aiBudgetNotificationType,
 					Labels: map[string]string{
 						aiBudgetNotificationLabel: budgetNotificationEmail,
@@ -443,7 +492,7 @@ func getExistingAIBudget(r *reconciler, ctx context.Context, budgetClient *budge
 			return budget, nil
 		}
 	}
-	return nil, nil
+	return nil, fmt.Errorf("list AI budgets: none matching name %s", displayName)
 }
 
 func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
@@ -466,9 +515,9 @@ func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotif
 			},
 		},
 		ThresholdRules: []*budgetspb.ThresholdRule{
-			{ThresholdPercent: r.AIBudgetThresholds["first"]},
-			{ThresholdPercent: r.AIBudgetThresholds["second"]},
-			{ThresholdPercent: r.AIBudgetThresholds["third"]},
+			{ThresholdPercent: r.AIBudgetThresholds[0]},
+			{ThresholdPercent: r.AIBudgetThresholds[1]},
+			{ThresholdPercent: r.AIBudgetThresholds[2]},
 		},
 		NotificationsRule: &budgetspb.NotificationsRule{
 			MonitoringNotificationChannels: notificationChannelNames,

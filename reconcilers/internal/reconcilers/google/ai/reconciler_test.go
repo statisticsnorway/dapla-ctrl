@@ -65,14 +65,17 @@ func TestReconcileAIPlatformUserBindingPreservesUnrelatedAccessAndIsIdempotent(t
 // - Disabling channels deletes the appropriate channels
 func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T) {
 	ctx := context.Background()
+	r := &reconciler{
+		AIBudgetNotificationName: "Vertex AI budget notification channel",
+	}
 	server := &fakeGoogleServer{channels: []*monitoringpb.NotificationChannel{
-		{Name: "projects/project-id/notificationChannels/existing", DisplayName: aiBudgetNotificationName, Type: aiBudgetNotificationType, Labels: map[string]string{aiBudgetNotificationLabel: "one@example.com"}},
+		{Name: "projects/project-id/notificationChannels/existing", DisplayName: r.AIBudgetNotificationName, Type: aiBudgetNotificationType, Labels: map[string]string{aiBudgetNotificationLabel: "one@example.com"}},
 		{Name: "projects/project-id/notificationChannels/unrelated", DisplayName: "Unrelated", Type: aiBudgetNotificationType, Labels: map[string]string{aiBudgetNotificationLabel: "other@example.com"}},
 	}}
 	_, channels := fakeGoogleClients(t, server)
 	emails := []string{"one@example.com", "two@example.com"}
 
-	names, err := reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", emails, true)
+	names, err := reconcileAIBudgetNotificationChannels(r, ctx, channels, "project-id", emails, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,14 +83,14 @@ func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T)
 		t.Fatalf("got %d channel names and %d creates, want 2 names and 1 create", len(names), server.createChannelCalls)
 	}
 
-	if _, err := reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", emails, true); err != nil {
+	if _, err := reconcileAIBudgetNotificationChannels(r, ctx, channels, "project-id", emails, true); err != nil {
 		t.Fatal(err)
 	}
 	if server.createChannelCalls != 1 {
 		t.Fatalf("idempotent reconciliation created %d channels, want 1", server.createChannelCalls)
 	}
 
-	if _, err := reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", nil, false); err != nil {
+	if _, err := reconcileAIBudgetNotificationChannels(r, ctx, channels, "project-id", nil, false); err != nil {
 		t.Fatal(err)
 	}
 	if server.deleteChannelCalls != 2 {
@@ -99,9 +102,8 @@ func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T)
 }
 
 func TestGetAIBudget(t *testing.T) {
-	threshholds := []float64{0.5, 0.9, 1.0}
 	r := &reconciler{
-		AIBudgetThresholds: map[string]float64{"first": threshholds[0], "second": threshholds[1], "third": threshholds[2]},
+		AIBudgetThresholds: []float64{0.5, 0.9, 1.0},
 	}
 	budgetLimit := int64(100)
 	notificationChannels := []string{"channels/one"}
@@ -114,7 +116,7 @@ func TestGetAIBudget(t *testing.T) {
 		budget.BudgetFilter.GetCalendarPeriod() != budgetspb.CalendarPeriod_MONTH ||
 		budget.Amount.GetSpecifiedAmount().CurrencyCode != aiBudgetCurrencyCode ||
 		budget.Amount.GetSpecifiedAmount().Units != budgetLimit ||
-		!slices.EqualFunc(budget.ThresholdRules, threshholds, func(rule *budgetspb.ThresholdRule, threshold float64) bool { return rule.ThresholdPercent == threshold }) ||
+		!slices.EqualFunc(budget.ThresholdRules, r.AIBudgetThresholds, func(rule *budgetspb.ThresholdRule, threshold float64) bool { return rule.ThresholdPercent == threshold }) ||
 		!budget.NotificationsRule.DisableDefaultIamRecipients ||
 		!slices.Equal(budget.NotificationsRule.MonitoringNotificationChannels, notificationChannels) {
 		t.Fatalf("unexpected budget: %v", budget)

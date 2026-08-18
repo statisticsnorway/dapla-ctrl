@@ -297,12 +297,15 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 }
 
 func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
-	if err := activitylog.Create(ctx, activitylog.CreateInput{
-		Action:       activitylog.ActivityLogEntryActionCreated,
-		Actor:        actor.User,
-		ResourceType: activityLogEntryResourceTypeTeam,
-		ResourceName: teamSlug.String(),
-		TeamSlug:     new(teamSlug),
+	if err := database.Transaction(ctx, func(ctx context.Context) error {
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionAdded,
+			Actor:        actor.User,
+			ResourceType: "FEATURE",
+			ResourceName: featureName,
+			TeamSlug:     new(teamSlug),
+			Data:         envName,
+		})
 	}); err != nil {
 		return err
 	}
@@ -314,12 +317,15 @@ func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName stri
 }
 
 func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
-	if err := activitylog.Create(ctx, activitylog.CreateInput{
-		Action:       activitylog.ActivityLogEntryActionDeleted,
-		Actor:        actor.User,
-		ResourceType: activityLogEntryResourceTypeTeam,
-		ResourceName: teamSlug.String(),
-		TeamSlug:     new(teamSlug),
+	if err := database.Transaction(ctx, func(ctx context.Context) error {
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionRemoved,
+			Actor:        actor.User,
+			ResourceType: "FEATURE",
+			ResourceName: featureName,
+			TeamSlug:     new(teamSlug),
+			Data:         envName,
+		})
 	}); err != nil {
 		return err
 	}
