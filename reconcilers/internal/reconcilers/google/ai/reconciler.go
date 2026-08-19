@@ -411,7 +411,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 			}
 		}
 
-		_, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, nil, enabled)
+		_, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, nil)
 		return err
 	}
 
@@ -428,7 +428,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return fmt.Errorf("get project %q: %w", projectID, err)
 	}
 
-	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, budgetNotificationEmails, enabled)
+	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
@@ -459,61 +459,64 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 	return nil
 }
 
-func reconcileAIBudgetNotificationChannels(r *reconciler, ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string, enabled bool) ([]string, error) {
+func reconcileAIBudgetNotificationChannels(r *reconciler, ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string) ([]string, error) {
 	projectName := "projects/" + projectID
-	if !enabled {
-		filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, r.AIBudgetNotificationName, aiBudgetNotificationType)
-		var channelNames []string
-		it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
-		for channel, err := range it.All() {
-			if err != nil {
-				return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
-			}
-			channelNames = append(channelNames, channel.Name)
-		}
-
-		for _, channelName := range channelNames {
-			if err := ncClient.DeleteNotificationChannel(ctx, &monitoringpb.DeleteNotificationChannelRequest{Name: channelName}); err != nil {
-				return nil, fmt.Errorf("delete AI budget notification channel %q: %w", channelName, err)
-			}
-		}
-		return nil, nil
-	}
-
-	for _, budgetNotificationEmail := range budgetNotificationEmails {
-		filter := fmt.Sprintf(`type = "%s" AND labels.%s = "%s"`, aiBudgetNotificationType, aiBudgetNotificationLabel, budgetNotificationEmail)
-		_, err := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter}).Next()
-		if err != nil && err != iterator.Done {
+	filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, r.AIBudgetNotificationName, aiBudgetNotificationType)
+	var channels []*monitoringpb.NotificationChannel
+	it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
+	for channel, err := range it.All() {
+		if err != nil {
 			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
+		channels = append(channels, channel)
+	}
 
-		if err == iterator.Done {
-			_, err = ncClient.CreateNotificationChannel(ctx, &monitoringpb.CreateNotificationChannelRequest{
-				Name: projectName,
-				NotificationChannel: &monitoringpb.NotificationChannel{
-					DisplayName: r.AIBudgetNotificationName,
-					Type:        aiBudgetNotificationType,
-					Labels: map[string]string{
-						aiBudgetNotificationLabel: budgetNotificationEmail,
-					},
+	// We want to disable channels which exist in Google, but not locally
+	toDisable := slices.DeleteFunc(slices.Clone(channels), func(c *monitoringpb.NotificationChannel) bool {
+		return slices.Contains(budgetNotificationEmails, c.Labels[aiBudgetNotificationLabel])
+	})
+
+	// We want to enable channels which don't exist in Google, but do exist locally
+	toEnable := slices.DeleteFunc(slices.Clone(budgetNotificationEmails), func(s string) bool {
+		return slices.ContainsFunc(channels, func(c *monitoringpb.NotificationChannel) bool {
+			return c.Labels[aiBudgetNotificationLabel] == s
+		})
+	})
+
+	for _, channel := range toDisable {
+		if err := ncClient.DeleteNotificationChannel(ctx, &monitoringpb.DeleteNotificationChannelRequest{Name: channel.Name}); err != nil {
+			return nil, fmt.Errorf("delete AI budget notification channel %q: %w", channel.Name, err)
+		}
+	}
+	channels = slices.DeleteFunc(channels, func(old *monitoringpb.NotificationChannel) bool {
+		return slices.ContainsFunc(toDisable, func(c *monitoringpb.NotificationChannel) bool {
+			return old.Name == c.Name
+		})
+	})
+
+	for _, email := range toEnable {
+		channel, err := ncClient.CreateNotificationChannel(ctx, &monitoringpb.CreateNotificationChannelRequest{
+			Name: projectName,
+			NotificationChannel: &monitoringpb.NotificationChannel{
+				DisplayName: r.AIBudgetNotificationName,
+				Type:        aiBudgetNotificationType,
+				Labels: map[string]string{
+					aiBudgetNotificationLabel: email,
 				},
-			})
-			if err != nil {
-				return nil, fmt.Errorf("create AI budget notification channel for %q in project %q: %w", budgetNotificationEmail, projectID, err)
-			}
+			}})
+		if err != nil {
+			return nil, fmt.Errorf("create AI budget notification channel for %q in project %q: %w", email, projectID, err)
 		}
 
+		channels = append(channels, channel)
+
 	}
 
-	channels, err := getExistingAIBudgetNotificationChannel(ctx, ncClient, projectName, budgetNotificationEmails)
-	if err != nil {
-		return nil, err
+	channelNames := make([]string, 0, len(channels))
+	for _, channel := range channels {
+		channelNames = append(channelNames, channel.Name)
 	}
 
-	channelNames := make([]string, len(channels))
-	for i, channel := range channels {
-		channelNames[i] = channel.Name
-	}
 	return channelNames, nil
 }
 
