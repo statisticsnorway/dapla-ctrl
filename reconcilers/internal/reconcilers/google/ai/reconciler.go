@@ -411,7 +411,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 			}
 		}
 
-		_, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, nil)
+		_, err := reconcileAIBudgetNotificationChannels(ctx, r, services.NotificationChannel, projectID, nil)
 		return err
 	}
 
@@ -428,7 +428,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return fmt.Errorf("get project %q: %w", projectID, err)
 	}
 
-	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(r, ctx, services.NotificationChannel, projectID, budgetNotificationEmails)
+	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(ctx, r, services.NotificationChannel, projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
@@ -459,7 +459,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 	return nil
 }
 
-func reconcileAIBudgetNotificationChannels(r *reconciler, ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string) ([]string, error) {
+func reconcileAIBudgetNotificationChannels(ctx context.Context, r *reconciler, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string) ([]string, error) {
 	projectName := "projects/" + projectID
 	filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, r.AIBudgetNotificationName, aiBudgetNotificationType)
 	var channels []*monitoringpb.NotificationChannel
