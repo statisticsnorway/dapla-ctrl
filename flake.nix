@@ -18,6 +18,7 @@
             buf
             go
             gopls
+            lua-language-server
             mise
             nixd
             nodejs
