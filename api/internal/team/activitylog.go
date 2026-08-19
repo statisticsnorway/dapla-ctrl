@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeTeam       activitylog.ActivityLogEntryResourceType = "TEAM"
-	activityLogEntryActionCreateDeleteKey  activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
-	activityLogEntryActionConfirmDeleteKey activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
-	activityLogEntryActionSetMemberRole    activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
-	activityLogEntryActionAssignRole       activitylog.ActivityLogEntryAction       = "ASSIGN_ROLE"
-	activityLogEntryActionRevokeRole       activitylog.ActivityLogEntryAction       = "REVOKE_ROLE"
+	activityLogEntryResourceTypeTeam        activitylog.ActivityLogEntryResourceType = "TEAM"
+	activityLogEntryResourceTypeTeamFeature activitylog.ActivityLogEntryResourceType = "FEATURE"
+	activityLogEntryActionCreateDeleteKey   activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
+	activityLogEntryActionConfirmDeleteKey  activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
+	activityLogEntryActionSetMemberRole     activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
+	activityLogEntryActionAssignRole        activitylog.ActivityLogEntryAction       = "ASSIGN_ROLE"
+	activityLogEntryActionRevokeRole        activitylog.ActivityLogEntryAction       = "REVOKE_ROLE"
 )
 
 func init() {

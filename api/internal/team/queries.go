@@ -308,7 +308,7 @@ func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName stri
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionAdded,
 			Actor:        actor.User,
-			ResourceType: "FEATURE",
+			ResourceType: activityLogEntryResourceTypeTeamFeature,
 			ResourceName: featureName,
 			TeamSlug:     new(teamSlug),
 			Data:         envName,
@@ -328,7 +328,7 @@ func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName str
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionRemoved,
 			Actor:        actor.User,
-			ResourceType: "FEATURE",
+			ResourceType: activityLogEntryResourceTypeTeamFeature,
 			ResourceName: featureName,
 			TeamSlug:     new(teamSlug),
 			Data:         envName,
