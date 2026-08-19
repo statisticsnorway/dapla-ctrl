@@ -1,0 +1,28 @@
+repos:
+  - id: /.*/
+    apply_requirements:
+      - approved
+      - mergeable
+    allowed_overrides:
+      - workflow
+    pre_workflow_hooks:
+      - description: Clean up old files
+        commands: plan
+        run: |
+          last_accessed_weeks="2"
+          dir_to_clean="$ATLANTIS_DATA_DIR/plugin-cache/registry.terraform.io"
+          echo "Clean up old files in $dir_to_clean not accessed in the last $last_accessed_weeks weeks"
+          # clean up old files
+          find \
+            "$dir_to_clean" \
+            -type f \
+            -atime +$(($last_accessed_weeks*7)) \
+            -delete \
+            -print
+          # clean up empty dirs
+          find \
+            "$dir_to_clean" \
+            -mindepth 1 \
+            -type d \
+            -empty \
+            -delete
