@@ -551,6 +551,10 @@ func getExistingAIBudget(r *reconciler, ctx context.Context, budgetClient *budge
 }
 
 func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
+	thresholdRules := make([]*budgetspb.ThresholdRule, 0, len(r.AIBudgetThresholds))
+	for _, threshold := range r.AIBudgetThresholds {
+		thresholdRules = append(thresholdRules, &budgetspb.ThresholdRule{ThresholdPercent: threshold})
+	}
 	return &budgetspb.Budget{
 		DisplayName: fmt.Sprintf("%s %s", daplaTeamSlug, aiBudgetDisplayNameSuffix),
 		BudgetFilter: &budgetspb.Filter{
@@ -569,11 +573,7 @@ func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotif
 				},
 			},
 		},
-		ThresholdRules: []*budgetspb.ThresholdRule{
-			{ThresholdPercent: r.AIBudgetThresholds[0]},
-			{ThresholdPercent: r.AIBudgetThresholds[1]},
-			{ThresholdPercent: r.AIBudgetThresholds[2]},
-		},
+		ThresholdRules: thresholdRules,
 		NotificationsRule: &budgetspb.NotificationsRule{
 			MonitoringNotificationChannels: notificationChannelNames,
 			DisableDefaultIamRecipients:    true,
