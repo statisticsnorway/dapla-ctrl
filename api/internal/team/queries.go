@@ -297,7 +297,14 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 }
 
 func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
-	if err := database.Transaction(ctx, func(ctx context.Context) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		if err := db(ctx).EnableTeamFeature(ctx, teamsql.EnableTeamFeatureParams{
+			TeamSlug: teamSlug,
+			Name:     featureName,
+			Env:      envName,
+		}); err != nil {
+			return err
+		}
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionAdded,
 			Actor:        actor.User,
@@ -306,18 +313,18 @@ func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName stri
 			TeamSlug:     new(teamSlug),
 			Data:         envName,
 		})
-	}); err != nil {
-		return err
-	}
-	return db(ctx).EnableTeamFeature(ctx, teamsql.EnableTeamFeatureParams{
-		TeamSlug: teamSlug,
-		Name:     featureName,
-		Env:      envName,
 	})
 }
 
 func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
-	if err := database.Transaction(ctx, func(ctx context.Context) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		if err := db(ctx).DisableTeamFeature(ctx, teamsql.DisableTeamFeatureParams{
+			TeamSlug: teamSlug,
+			Name:     featureName,
+			Env:      envName,
+		}); err != nil {
+			return err
+		}
 		return activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionRemoved,
 			Actor:        actor.User,
@@ -326,14 +333,8 @@ func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName str
 			TeamSlug:     new(teamSlug),
 			Data:         envName,
 		})
-	}); err != nil {
-		return err
-	}
-	return db(ctx).DisableTeamFeature(ctx, teamsql.DisableTeamFeatureParams{
-		TeamSlug: teamSlug,
-		Name:     featureName,
-		Env:      envName,
 	})
+
 }
 
 func GetTeamFeatures(ctx context.Context, teamSlug slug.Slug) ([]*TeamFeature, error) {

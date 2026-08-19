@@ -110,13 +110,12 @@ func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureReques
 		Name:     team.Feature.Name,
 		Env:      team.Feature.Env,
 	})
-
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &protoapi.HasFeatureResponse{
-		HasFeature: team.Slug == hasFeature.TeamFeature.TeamSlug.String() && team.Feature.Env == hasFeature.TeamFeature.Env && team.Feature.Name == hasFeature.TeamFeature.Name,
+		HasFeature: hasFeature,
 	}
 
 	return resp, nil

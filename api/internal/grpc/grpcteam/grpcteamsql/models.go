@@ -16,9 +16,3 @@ type Team struct {
 	IsManaged            bool
 	HasManualEditing     bool
 }
-
-type TeamFeature struct {
-	TeamSlug slug.Slug
-	Name     string
-	Env      string
-}

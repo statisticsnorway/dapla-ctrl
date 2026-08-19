@@ -70,13 +70,16 @@ WHERE
 
 -- name: TeamHasFeature :one
 SELECT
-	sqlc.embed(team_features)
-FROM
-	team_features
-WHERE
-	team_slug = @team_slug
-AND
-	name = @name
-AND
-	env = @env
+	(
+		EXISTS (
+			SELECT
+				1
+			FROM
+				team_features
+			WHERE
+				team_slug = @team_slug
+				AND name = @name
+                AND env = @env
+		)
+	)
 ;
