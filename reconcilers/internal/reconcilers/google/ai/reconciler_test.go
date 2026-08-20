@@ -29,7 +29,7 @@ func TestReconcileAIPlatformUserBindingPreservesUnrelatedAccessAndIsIdempotent(t
 	}}}
 	projects, _ := fakeGoogleClients(t, server)
 
-	if err := reconcileAIPlatformUserBinding(r, ctx, projects, "my-team", "project-id", true); err != nil {
+	if err := r.reconcileAIPlatformUserBinding(ctx, projects, "my-team", "project-id", true); err != nil {
 		t.Fatal(err)
 	}
 	wantMembers := []string{
@@ -44,14 +44,14 @@ func TestReconcileAIPlatformUserBindingPreservesUnrelatedAccessAndIsIdempotent(t
 		t.Fatal("unrelated binding was changed")
 	}
 
-	if err := reconcileAIPlatformUserBinding(r, ctx, projects, "my-team", "project-id", true); err != nil {
+	if err := r.reconcileAIPlatformUserBinding(ctx, projects, "my-team", "project-id", true); err != nil {
 		t.Fatal(err)
 	}
 	if server.setPolicyCalls != 1 {
 		t.Fatalf("idempotent reconciliation set policy %d times, want 1", server.setPolicyCalls)
 	}
 
-	if err := reconcileAIPlatformUserBinding(r, ctx, projects, "my-team", "project-id", false); err != nil {
+	if err := r.reconcileAIPlatformUserBinding(ctx, projects, "my-team", "project-id", false); err != nil {
 		t.Fatal(err)
 	}
 	if diff := cmp.Diff([]string{"user:other@example.com"}, server.policy.Bindings[0].Members); diff != "" {
@@ -75,7 +75,7 @@ func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T)
 	_, channels := fakeGoogleClients(t, server)
 	emails := []string{"one@example.com", "two@example.com"}
 
-	names, err := reconcileAIBudgetNotificationChannels(ctx, r, channels, "project-id", emails)
+	names, err := r.reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", emails)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,14 +83,14 @@ func TestReconcileAIBudgetNotificationChannelsConvergesAndCleansUp(t *testing.T)
 		t.Fatalf("got %d channel names and %d creates, want 2 names and 1 create", len(names), server.createChannelCalls)
 	}
 
-	if _, err := reconcileAIBudgetNotificationChannels(ctx, r, channels, "project-id", emails); err != nil {
+	if _, err := r.reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", emails); err != nil {
 		t.Fatal(err)
 	}
 	if server.createChannelCalls != 1 {
 		t.Fatalf("idempotent reconciliation created %d channels, want 1", server.createChannelCalls)
 	}
 
-	if _, err := reconcileAIBudgetNotificationChannels(ctx, r, channels, "project-id", nil); err != nil {
+	if _, err := r.reconcileAIBudgetNotificationChannels(ctx, channels, "project-id", nil); err != nil {
 		t.Fatal(err)
 	}
 	if server.deleteChannelCalls != 2 {
@@ -108,7 +108,7 @@ func TestGetAIBudget(t *testing.T) {
 	budgetLimit := int64(100)
 	notificationChannels := []string{"channels/one"}
 	projectNumber := "12345"
-	budget := getAIBudget(r, "my-team", projectNumber, budgetLimit, notificationChannels)
+	budget := r.getAIBudget("my-team", projectNumber, budgetLimit, notificationChannels)
 
 	if budget.DisplayName != "my-team AI budget" ||
 		!slices.Equal(budget.BudgetFilter.Projects, []string{fmt.Sprintf("projects/%s", projectNumber)}) ||

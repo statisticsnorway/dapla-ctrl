@@ -232,11 +232,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
-	membersHaveIAM, err := membersHaveAIPlatformUserBinding(r, ctx, services.Project, daplaTeam.Slug, projectID)
+	membersHaveIAM, err := r.membersHaveAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, projectID)
 	if err != nil {
 		return err
 	}
-	budget, err := getExistingAIBudget(r, ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
+	budget, err := r.getExistingAIBudget(ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
 	if err != nil {
 		return err
 	}
@@ -253,7 +253,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if membersHaveIAM != aiFeatureIsEnabled {
-		if err := reconcileAIPlatformUserBinding(r, ctx, services.Project, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
+		if err := r.reconcileAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -263,7 +263,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	// Run the reconciler if 'budgetExists', 'allNotificationChannelsExist' and 'aiFeatureIsEnabled' aren't all equal
 	needToBeReconciled := !(budgetExists == aiFeatureIsEnabled && allNotificationChannelsExist == aiFeatureIsEnabled)
 	if needToBeReconciled {
-		if err := reconcileAIBudget(r, ctx, client, services, daplaTeam.Slug, projectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
+		if err := r.reconcileAIBudget(ctx, client, services, daplaTeam.Slug, projectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -272,7 +272,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 }
 
 // Get principals that should be have the AIPlatform user role
-func getIAMMembers(r *reconciler, daplaTeamSlug string) []string {
+func (r *reconciler) getIAMMembers(daplaTeamSlug string) []string {
 	// We assume the developers group will exist
 	daplaDevelopersGroup := fmt.Sprintf("group:%s-developers@groups.ssb.no", daplaTeamSlug)
 	// This SA is always guaranteed to exist as long as we run this reconciler **after**
@@ -282,13 +282,13 @@ func getIAMMembers(r *reconciler, daplaTeamSlug string) []string {
 }
 
 // Return true if all members are part of an IAM binding for the `AIPlatformUserRole`, otherwise return false
-func membersHaveAIPlatformUserBinding(r *reconciler, ctx context.Context, projectsClient *resourcemanager.ProjectsClient, daplaTeamSlug, projectID string) (bool, error) {
+func (r *reconciler) membersHaveAIPlatformUserBinding(ctx context.Context, projectsClient *resourcemanager.ProjectsClient, daplaTeamSlug, projectID string) (bool, error) {
 	policy, err := projectsClient.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: "projects/" + projectID})
 	if err != nil {
 		return false, fmt.Errorf("get IAM policy for project %q: %w", projectID, err)
 	}
 
-	members := getIAMMembers(r, daplaTeamSlug)
+	members := r.getIAMMembers(daplaTeamSlug)
 
 	bindingIndex := slices.IndexFunc(policy.Bindings, func(binding *iampb.Binding) bool {
 		return binding.Role == r.AIPlatformUserRole
@@ -304,8 +304,8 @@ func membersHaveAIPlatformUserBinding(r *reconciler, ctx context.Context, projec
 }
 
 // Ensures a dapla team's developers group and corresponding SA has the AI Platform user role on the project.
-func reconcileAIPlatformUserBinding(r *reconciler, ctx context.Context, projectsClient *resourcemanager.ProjectsClient, daplaTeamSlug, projectID string, enabled bool) error {
-	members := getIAMMembers(r, daplaTeamSlug)
+func (r *reconciler) reconcileAIPlatformUserBinding(ctx context.Context, projectsClient *resourcemanager.ProjectsClient, daplaTeamSlug, projectID string, enabled bool) error {
+	members := r.getIAMMembers(daplaTeamSlug)
 
 	projectName := "projects/" + projectID
 	policy, err := projectsClient.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: projectName})
@@ -401,7 +401,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 }
 
-func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, daplaStatNotificationEmails []string, enabled bool) error {
+func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, daplaStatNotificationEmails []string, enabled bool) error {
 	if !enabled {
 		if existingBudget != nil {
 			if err := services.CloudBudget.DeleteBudget(ctx, &budgetspb.DeleteBudgetRequest{
@@ -411,7 +411,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 			}
 		}
 
-		_, err := reconcileAIBudgetNotificationChannels(ctx, r, services.NotificationChannel, projectID, nil)
+		_, err := r.reconcileAIBudgetNotificationChannels(ctx, services.NotificationChannel, projectID, nil)
 		return err
 	}
 
@@ -428,7 +428,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 		return fmt.Errorf("get project %q: %w", projectID, err)
 	}
 
-	notificationChannelNames, err := reconcileAIBudgetNotificationChannels(ctx, r, services.NotificationChannel, projectID, budgetNotificationEmails)
+	notificationChannelNames, err := r.reconcileAIBudgetNotificationChannels(ctx, services.NotificationChannel, projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
@@ -436,7 +436,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 	// (developers * 10) EUR per month
 	monthlyBudgetLimit := int64(len(teamDevelopers)) * 10
 
-	budget := getAIBudget(r, daplaTeamSlug, strings.TrimPrefix(project.Name, "projects/"), monthlyBudgetLimit, notificationChannelNames)
+	budget := r.getAIBudget(daplaTeamSlug, strings.TrimPrefix(project.Name, "projects/"), monthlyBudgetLimit, notificationChannelNames)
 	if existingBudget == nil {
 		_, err = services.CloudBudget.CreateBudget(ctx, &budgetspb.CreateBudgetRequest{Parent: r.AIBudgetBillingAccount, Budget: budget})
 		if err != nil {
@@ -459,7 +459,7 @@ func reconcileAIBudget(r *reconciler, ctx context.Context, client *apiclient.API
 	return nil
 }
 
-func reconcileAIBudgetNotificationChannels(ctx context.Context, r *reconciler, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string) ([]string, error) {
+func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectID string, budgetNotificationEmails []string) ([]string, error) {
 	projectName := "projects/" + projectID
 	filter := fmt.Sprintf(`display_name = "%s" AND type = "%s"`, r.AIBudgetNotificationName, aiBudgetNotificationType)
 	var channels []*monitoringpb.NotificationChannel
@@ -537,7 +537,7 @@ func getExistingAIBudgetNotificationChannel(ctx context.Context, ncClient *monit
 	return channels, nil
 }
 
-func getExistingAIBudget(r *reconciler, ctx context.Context, budgetClient *budgets.BudgetClient, displayName string) (*budgetspb.Budget, error) {
+func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, displayName string) (*budgetspb.Budget, error) {
 	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: r.AIBudgetBillingAccount})
 	for budget, err := range it.All() {
 		if err != nil {
@@ -550,7 +550,7 @@ func getExistingAIBudget(r *reconciler, ctx context.Context, budgetClient *budge
 	return nil, fmt.Errorf("list AI budgets: none matching name %s", displayName)
 }
 
-func getAIBudget(r *reconciler, daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
+func (r *reconciler) getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
 	thresholdRules := make([]*budgetspb.ThresholdRule, 0, len(r.AIBudgetThresholds))
 	for _, threshold := range r.AIBudgetThresholds {
 		thresholdRules = append(thresholdRules, &budgetspb.ThresholdRule{ThresholdPercent: threshold})
