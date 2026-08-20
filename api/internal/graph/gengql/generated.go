@@ -780,6 +780,26 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
+	TeamFeatureDisabledActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
+	TeamFeatureEnabledActivityLogEntry struct {
+		Actor        func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Message      func(childComplexity int) int
+		ResourceName func(childComplexity int) int
+		ResourceType func(childComplexity int) int
+		TeamSlug     func(childComplexity int) int
+	}
+
 	TeamMember struct {
 		Groups func(childComplexity int) int
 		Team   func(childComplexity int) int
@@ -3999,6 +4019,92 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TeamFeature.Name(childComplexity), true
+
+	case "TeamFeatureDisabledActivityLogEntry.actor":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Actor(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.createdAt":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.id":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ID(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.message":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Message(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.resourceName":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ResourceName(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.resourceType":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ResourceType(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.teamSlug":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.TeamSlug(childComplexity), true
+
+	case "TeamFeatureEnabledActivityLogEntry.actor":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Actor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Actor(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.createdAt":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.CreatedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.id":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ID(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.message":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Message == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Message(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.resourceName":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ResourceName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ResourceName(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.resourceType":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ResourceType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ResourceType(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.teamSlug":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.TeamSlug == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.TeamSlug(childComplexity), true
 
 	case "TeamMember.groups":
 		if e.ComplexityRoot.TeamMember.Groups == nil {
@@ -8277,6 +8383,7 @@ enum TeamOrderField {
 extend enum ActivityLogEntryResourceType {
 	"All activity log entries related to teams will use this resource type."
 	TEAM
+	FEATURE
 }
 
 type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {
@@ -8342,6 +8449,26 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 
 	"The new value of the field."
 	newValue: String
+}
+
+type TeamFeatureEnabledActivityLogEntry implements ActivityLogEntry & Node {
+	id: ID!
+	actor: String!
+	createdAt: Time!
+	message: String!
+	resourceType: ActivityLogEntryResourceType!
+	resourceName: String!
+	teamSlug: Slug!
+}
+
+type TeamFeatureDisabledActivityLogEntry implements ActivityLogEntry & Node {
+	id: ID!
+	actor: String!
+	createdAt: Time!
+	message: String!
+	resourceType: ActivityLogEntryResourceType!
+	resourceName: String!
+	teamSlug: Slug!
 }
 
 type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
@@ -25655,6 +25782,412 @@ func (ec *executionContext) fieldContext_TeamFeature_env(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_actor(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_actor,
+		func(ctx context.Context) (any, error) {
+			return obj.Actor, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_actor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_createdAt(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNTime2timeᚐTime,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_message(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_message,
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_resourceType(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_resourceType,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceType, nil
+		},
+		nil,
+		ec.marshalNActivityLogEntryResourceType2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋactivitylogᚐActivityLogEntryResourceType,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_resourceType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ActivityLogEntryResourceType does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_resourceName(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_resourceName,
+		func(ctx context.Context) (any, error) {
+			return obj.ResourceName, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_resourceName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_teamSlug(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_teamSlug,
+		func(ctx context.Context) (any, error) {
+			return obj.TeamSlug, nil
+		},
+		nil,
+		ec.marshalNSlug2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋslugᚐSlug,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_teamSlug(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TeamMember_team(ctx context.Context, field graphql.CollectedField, obj *team.TeamMember) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -31797,6 +32330,20 @@ func (ec *executionContext) _ActivityLogEntry(ctx context.Context, sel ast.Selec
 			return graphql.Null
 		}
 		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, obj)
+	case team.TeamFeatureEnabledActivityLogEntry:
+		return ec._TeamFeatureEnabledActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamFeatureEnabledActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamFeatureEnabledActivityLogEntry(ctx, sel, obj)
+	case team.TeamFeatureDisabledActivityLogEntry:
+		return ec._TeamFeatureDisabledActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamFeatureDisabledActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamFeatureDisabledActivityLogEntry(ctx, sel, obj)
 	case team.TeamCreatedActivityLogEntry:
 		return ec._TeamCreatedActivityLogEntry(ctx, sel, &obj)
 	case *team.TeamCreatedActivityLogEntry:
@@ -32028,6 +32575,20 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._TeamRoleAssignedActivityLogEntry(ctx, sel, obj)
+	case team.TeamFeatureEnabledActivityLogEntry:
+		return ec._TeamFeatureEnabledActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamFeatureEnabledActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamFeatureEnabledActivityLogEntry(ctx, sel, obj)
+	case team.TeamFeatureDisabledActivityLogEntry:
+		return ec._TeamFeatureDisabledActivityLogEntry(ctx, sel, &obj)
+	case *team.TeamFeatureDisabledActivityLogEntry:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamFeatureDisabledActivityLogEntry(ctx, sel, obj)
 	case team.TeamCreatedActivityLogEntry:
 		return ec._TeamCreatedActivityLogEntry(ctx, sel, &obj)
 	case *team.TeamCreatedActivityLogEntry:
@@ -39540,6 +40101,144 @@ func (ec *executionContext) _TeamFeature(ctx context.Context, sel ast.SelectionS
 			}
 		case "env":
 			out.Values[i] = ec._TeamFeature_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamFeatureDisabledActivityLogEntryImplementors = []string{"TeamFeatureDisabledActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *team.TeamFeatureDisabledActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamFeatureDisabledActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamFeatureDisabledActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamFeatureEnabledActivityLogEntryImplementors = []string{"TeamFeatureEnabledActivityLogEntry", "ActivityLogEntry", "Node"}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry(ctx context.Context, sel ast.SelectionSet, obj *team.TeamFeatureEnabledActivityLogEntry) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamFeatureEnabledActivityLogEntryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamFeatureEnabledActivityLogEntry")
+		case "id":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actor":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_actor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "message":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceType":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_resourceType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resourceName":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_resourceName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "teamSlug":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_teamSlug(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

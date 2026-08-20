@@ -470,6 +470,7 @@ enum TeamOrderField {
 extend enum ActivityLogEntryResourceType {
 	"All activity log entries related to teams will use this resource type."
 	TEAM
+	FEATURE
 }
 
 type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {
@@ -535,6 +536,26 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 
 	"The new value of the field."
 	newValue: String
+}
+
+type TeamFeatureEnabledActivityLogEntry implements ActivityLogEntry & Node {
+	id: ID!
+	actor: String!
+	createdAt: Time!
+	message: String!
+	resourceType: ActivityLogEntryResourceType!
+	resourceName: String!
+	teamSlug: Slug!
+}
+
+type TeamFeatureDisabledActivityLogEntry implements ActivityLogEntry & Node {
+	id: ID!
+	actor: String!
+	createdAt: Time!
+	message: String!
+	resourceType: ActivityLogEntryResourceType!
+	resourceName: String!
+	teamSlug: Slug!
 }
 
 type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
