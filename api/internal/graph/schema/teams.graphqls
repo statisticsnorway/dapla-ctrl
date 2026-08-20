@@ -413,12 +413,12 @@ input EnableTeamFeatureInput {
 	"""
 	Feature name
 	"""
-	feature: String!
+	feature: TeamFeatureName!
 
 	"""
 	Environment
 	"""
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 input DisableTeamFeatureInput {
@@ -428,12 +428,27 @@ input DisableTeamFeatureInput {
 	"""
 	Feature name
 	"""
-	feature: String!
+	feature: TeamFeatureName!
 
 	"""
 	Environment
 	"""
-	env: String!
+	env: TeamFeatureEnvironment!
+}
+
+"Features that can be enabled or disabled for a team."
+enum TeamFeatureName {
+	"Vertex AI service."
+	ai
+}
+
+"Environments where a team feature can be enabled or disabled."
+enum TeamFeatureEnvironment {
+	"Production environment."
+	prod
+
+	"Test environment."
+	test
 }
 
 "Ordering options when fetching teams."

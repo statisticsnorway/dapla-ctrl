@@ -174,14 +174,14 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 		return nil, err
 	}
 
-	if err := team.EnableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env, actor); err != nil {
+	if err := team.EnableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
 		return nil, err
 	}
 
 	return &team.EnableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,
-		Feature:  input.Feature,
-		Env:      input.Env,
+		Feature:  string(input.Feature),
+		Env:      string(input.Env),
 	}, nil
 }
 
@@ -192,14 +192,14 @@ func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.Di
 		return nil, err
 	}
 
-	if err := team.DisableTeamFeature(ctx, input.TeamSlug, input.Feature, input.Env, actor); err != nil {
+	if err := team.DisableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
 		return nil, err
 	}
 
 	return &team.DisableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,
-		Feature:  input.Feature,
-		Env:      input.Env,
+		Feature:  string(input.Feature),
+		Env:      string(input.Env),
 	}, nil
 }
 

@@ -265,16 +265,53 @@ type RemoveTeamAccessManagerInput struct {
 	UserId    uuid.UUID `json:"-"`
 }
 
+type TeamFeatureName string
+
+const TeamFeatureNameAI TeamFeatureName = "ai"
+
+func (e *TeamFeatureName) UnmarshalGQL(v any) error {
+	value, ok := v.(string)
+	if !ok || value != string(TeamFeatureNameAI) {
+		return fmt.Errorf("%v is not a valid TeamFeatureName", v)
+	}
+	*e = TeamFeatureName(value)
+	return nil
+}
+
+func (e TeamFeatureName) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(string(e)))
+}
+
+type TeamFeatureEnvironment string
+
+const (
+	TeamFeatureEnvironmentProd TeamFeatureEnvironment = "prod"
+	TeamFeatureEnvironmentTest TeamFeatureEnvironment = "test"
+)
+
+func (e *TeamFeatureEnvironment) UnmarshalGQL(v any) error {
+	value, ok := v.(string)
+	if !ok || (value != string(TeamFeatureEnvironmentProd) && value != string(TeamFeatureEnvironmentTest)) {
+		return fmt.Errorf("%v is not a valid TeamFeatureEnvironment", v)
+	}
+	*e = TeamFeatureEnvironment(value)
+	return nil
+}
+
+func (e TeamFeatureEnvironment) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(string(e)))
+}
+
 type EnableTeamFeatureInput struct {
-	TeamSlug slug.Slug `json:"teamSlug"`
-	Feature  string    `json:"feature"`
-	Env      string    `json:"env"`
+	TeamSlug slug.Slug              `json:"teamSlug"`
+	Feature  TeamFeatureName        `json:"feature"`
+	Env      TeamFeatureEnvironment `json:"env"`
 }
 
 type DisableTeamFeatureInput struct {
-	TeamSlug slug.Slug `json:"teamSlug"`
-	Feature  string    `json:"feature"`
-	Env      string    `json:"env"`
+	TeamSlug slug.Slug              `json:"teamSlug"`
+	Feature  TeamFeatureName        `json:"feature"`
+	Env      TeamFeatureEnvironment `json:"env"`
 }
 
 type CreateTeamPayload struct {

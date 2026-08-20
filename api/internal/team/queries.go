@@ -334,7 +334,6 @@ func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName str
 			Data:         envName,
 		})
 	})
-
 }
 
 func GetTeamFeatures(ctx context.Context, teamSlug slug.Slug) ([]*TeamFeature, error) {

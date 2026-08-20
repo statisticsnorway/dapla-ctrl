@@ -8326,12 +8326,12 @@ input EnableTeamFeatureInput {
 	"""
 	Feature name
 	"""
-	feature: String!
+	feature: TeamFeatureName!
 
 	"""
 	Environment
 	"""
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 input DisableTeamFeatureInput {
@@ -8341,12 +8341,27 @@ input DisableTeamFeatureInput {
 	"""
 	Feature name
 	"""
-	feature: String!
+	feature: TeamFeatureName!
 
 	"""
 	Environment
 	"""
-	env: String!
+	env: TeamFeatureEnvironment!
+}
+
+"Features that can be enabled or disabled for a team."
+enum TeamFeatureName {
+	"Artificial intelligence services."
+	ai
+}
+
+"Environments where a team feature can be enabled or disabled."
+enum TeamFeatureEnvironment {
+	"Production environment."
+	prod
+
+	"Test environment."
+	test
 }
 
 "Ordering options when fetching teams."
@@ -31449,14 +31464,14 @@ func (ec *executionContext) unmarshalInputDisableTeamFeatureInput(ctx context.Co
 			it.TeamSlug = data
 		case "feature":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Feature = data
 		case "env":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -31523,14 +31538,14 @@ func (ec *executionContext) unmarshalInputEnableTeamFeatureInput(ctx context.Con
 			it.TeamSlug = data
 		case "feature":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("feature"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Feature = data
 		case "env":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("env"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -43939,6 +43954,26 @@ func (ec *executionContext) marshalNTeamFeature2ᚖgithubᚗcomᚋstatisticsnorw
 		return graphql.Null
 	}
 	return ec._TeamFeature(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment(ctx context.Context, v any) (team.TeamFeatureEnvironment, error) {
+	var res team.TeamFeatureEnvironment
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment(ctx context.Context, sel ast.SelectionSet, v team.TeamFeatureEnvironment) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName(ctx context.Context, v any) (team.TeamFeatureName, error) {
+	var res team.TeamFeatureName
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName(ctx context.Context, sel ast.SelectionSet, v team.TeamFeatureName) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalNTeamMember2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMemberᚄ(ctx context.Context, sel ast.SelectionSet, v []*team.TeamMember) graphql.Marshaler {
