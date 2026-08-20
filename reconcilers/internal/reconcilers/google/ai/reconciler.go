@@ -2,7 +2,6 @@ package ai
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -52,6 +51,7 @@ type reconciler struct {
 	AIBudgetNotificationName      string
 	BudgetNotificationEmails      []string
 	AIBudgetDeveloperBillingGroup string
+	GoogleServices                *googleServices
 }
 
 type optFunc func(*reconciler) error
@@ -88,6 +88,12 @@ func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	// For SAs in the test environment
 	r.GroupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
 
+	services, err := createGoogleClients(ctx)
+	if err != nil {
+		return nil, err
+	}
+	r.GoogleServices = services
+
 	for _, opt := range opts {
 		err := opt(r)
 		if err != nil {
@@ -105,32 +111,32 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		DisplayName: "Vertex AI reconciler",
 		Description: "Enables Vertex AI (Gemini Enterprise Agent Platform) in Dapla Teams",
 		Config: []*protoapi.ReconcilerConfigSpec{
-			&protoapi.ReconcilerConfigSpec{
+			{
 				Key:         aiBudgetThresholdsKey,
 				DisplayName: "AI Budget Notification Thresholds",
 				Description: "The threshhold values for when to notify users about exceeded budget limits.",
 				Secret:      false,
 			},
-			&protoapi.ReconcilerConfigSpec{
+			{
 				Key:         aiPlatformUserRoleKey,
 				DisplayName: "AI Platform User Role",
 				Description: "The name of the custom user role for Vertex AI.",
 				Secret:      false,
 			},
-			&protoapi.ReconcilerConfigSpec{
+			{
 				Key:         aiBudgetBillingAccountKey,
 				DisplayName: "AI Budget Billing Account",
 				Description: "The ID of the SSB org billing account.",
 				Secret:      false,
 			},
-			&protoapi.ReconcilerConfigSpec{
+			{
 				Key:         aiBudgetNotificationChannelNameKey,
 				DisplayName: "AI Budget Notification Channel Name",
 				Description: "The name of the budget notificaiton channel resource.",
 				Secret:      false,
 			},
 
-			&protoapi.ReconcilerConfigSpec{
+			{
 				Key:         groupSANameTemplateKey,
 				DisplayName: "Group Service Account Name Template",
 				Description: "Template for the name of the Group Service Account.",
@@ -150,15 +156,6 @@ type googleServices struct {
 	ServiceUsage        *serviceusage.Client
 	CloudBudget         *budgets.BudgetClient
 	NotificationChannel *monitoring.NotificationChannelClient
-}
-
-func (services googleServices) close() error {
-	return errors.Join(
-		services.Project.Close(),
-		services.ServiceUsage.Close(),
-		services.CloudBudget.Close(),
-		services.NotificationChannel.Close(),
-	)
 }
 
 func createGoogleClients(ctx context.Context) (*googleServices, error) {
@@ -193,16 +190,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	services, err := createGoogleClients(ctx)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err := services.close(); err != nil {
-			log.WithError(err).Error("close Google clients")
-		}
-	}()
-
 	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 		TeamSlug: daplaTeam.Slug,
 		Env:      environment,
@@ -212,7 +199,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	teamFolder := resp.GetFolder()
-	projectID, err := getStandardProjectID(ctx, services.Project, teamFolder.FolderId, daplaTeam.Slug, teamFolder.Env)
+	projectID, err := getStandardProjectID(ctx, r.GoogleServices.Project, teamFolder.FolderId, daplaTeam.Slug, teamFolder.Env)
 	if err != nil {
 		return err
 	}
@@ -228,32 +215,39 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 	aiFeatureIsEnabled := aiFeature.HasFeature
-	vertexAIEnabled, err := isVertexAIEnabled(ctx, services.ServiceUsage, projectID)
+	vertexAIEnabled, err := isVertexAIEnabled(ctx, r.GoogleServices.ServiceUsage, projectID)
 	if err != nil {
 		return err
 	}
-	membersHaveIAM, err := r.membersHaveAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, projectID)
+	membersHaveIAM, err := r.membersHaveAIPlatformUserBinding(ctx, r.GoogleServices.Project, daplaTeam.Slug, projectID)
 	if err != nil {
 		return err
 	}
-	budget, err := r.getExistingAIBudget(ctx, services.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
+	budget, err := r.getExistingAIBudget(ctx, r.GoogleServices.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
 	if err != nil {
 		return err
 	}
-	var budgetNotificationEmails []string
-	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, services.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
+
+	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug), 1)
+	if err != nil {
+		return err
+	}
+
+	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
+	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, r.BudgetNotificationEmails)
+	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
 
 	if vertexAIEnabled != aiFeatureIsEnabled {
-		if err := reconcileVertexAIAPI(ctx, services.ServiceUsage, projectID, aiFeatureIsEnabled); err != nil {
+		if err := reconcileVertexAIAPI(ctx, r.GoogleServices.ServiceUsage, projectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
 
 	if membersHaveIAM != aiFeatureIsEnabled {
-		if err := r.reconcileAIPlatformUserBinding(ctx, services.Project, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
+		if err := r.reconcileAIPlatformUserBinding(ctx, r.GoogleServices.Project, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -263,7 +257,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	// Run the reconciler if 'budgetExists', 'allNotificationChannelsExist' and 'aiFeatureIsEnabled' aren't all equal
 	needToBeReconciled := !(budgetExists == aiFeatureIsEnabled && allNotificationChannelsExist == aiFeatureIsEnabled)
 	if needToBeReconciled {
-		if err := r.reconcileAIBudget(ctx, client, services, daplaTeam.Slug, projectID, budget, r.BudgetNotificationEmails, aiFeatureIsEnabled); err != nil {
+		if err := r.reconcileAIBudget(ctx, client, r.GoogleServices, daplaTeam.Slug, projectID, budget, budgetNotificationEmails, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -401,7 +395,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 }
 
-func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, daplaStatNotificationEmails []string, enabled bool) error {
+func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, budgetNotificationEmails []string, enabled bool) error {
 	if !enabled {
 		if existingBudget != nil {
 			if err := services.CloudBudget.DeleteBudget(ctx, &budgetspb.DeleteBudgetRequest{
@@ -419,9 +413,6 @@ func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.AP
 	if err != nil {
 		return err
 	}
-
-	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
-	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, daplaStatNotificationEmails)
 
 	project, err := services.Project.GetProject(ctx, &resourcemanagerpb.GetProjectRequest{Name: "projects/" + projectID})
 	if err != nil {
