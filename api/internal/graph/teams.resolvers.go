@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"errors"
+	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/google/uuid"
@@ -172,6 +174,12 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 
 	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
 		return nil, err
+	}
+
+	if input.Feature != "ai" {
+		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for feature %q", input.Feature)
+	} else if !slices.Contains([]string{"prod", "test"}, string(input.Env)) {
+		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for env %q", input.Env)
 	}
 
 	if err := team.EnableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
