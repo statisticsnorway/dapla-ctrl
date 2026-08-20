@@ -15,7 +15,7 @@
 
           packages = with pkgs; [
             actionlint
-            buf
+            buf # protobuf LSP server
             go
             gopls
             lua-language-server
@@ -24,7 +24,6 @@
             nodejs
             pnpm
             protobuf
-            protobuf-language-server
             protoc-gen-go
             protoc-gen-go-grpc
             svelte-language-server
