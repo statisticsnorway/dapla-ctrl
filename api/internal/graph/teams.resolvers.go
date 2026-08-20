@@ -200,6 +200,12 @@ func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.Di
 		return nil, err
 	}
 
+	if input.Feature != "ai" {
+		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for feature %q", input.Feature)
+	} else if !slices.Contains([]string{"prod", "test"}, string(input.Env)) {
+		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for env %q", input.Env)
+	}
+
 	if err := team.DisableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
 		return nil, err
 	}
