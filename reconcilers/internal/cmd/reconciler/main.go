@@ -9,10 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/ai"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
