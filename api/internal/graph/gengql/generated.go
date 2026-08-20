@@ -783,6 +783,7 @@ type ComplexityRoot struct {
 	TeamFeatureDisabledActivityLogEntry struct {
 		Actor        func(childComplexity int) int
 		CreatedAt    func(childComplexity int) int
+		Env          func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Message      func(childComplexity int) int
 		ResourceName func(childComplexity int) int
@@ -793,6 +794,7 @@ type ComplexityRoot struct {
 	TeamFeatureEnabledActivityLogEntry struct {
 		Actor        func(childComplexity int) int
 		CreatedAt    func(childComplexity int) int
+		Env          func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Message      func(childComplexity int) int
 		ResourceName func(childComplexity int) int
@@ -4032,6 +4034,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamFeatureDisabledActivityLogEntry.env":
+		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.Env(childComplexity), true
 	case "TeamFeatureDisabledActivityLogEntry.id":
 		if e.ComplexityRoot.TeamFeatureDisabledActivityLogEntry.ID == nil {
 			break
@@ -4075,6 +4083,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.CreatedAt(childComplexity), true
+	case "TeamFeatureEnabledActivityLogEntry.env":
+		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.Env(childComplexity), true
 	case "TeamFeatureEnabledActivityLogEntry.id":
 		if e.ComplexityRoot.TeamFeatureEnabledActivityLogEntry.ID == nil {
 			break
@@ -8351,7 +8365,7 @@ input DisableTeamFeatureInput {
 
 "Features that can be enabled or disabled for a team."
 enum TeamFeatureName {
-	"Artificial intelligence services."
+	"Vertex AI service."
 	ai
 }
 
@@ -8466,24 +8480,58 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	newValue: String
 }
 
+"An activity log entry recording that a feature was enabled for a team."
 type TeamFeatureEnabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
 	id: ID!
+
+	"The identity of the actor who enabled the feature."
 	actor: String!
+
+	"The time when the feature was enabled."
 	createdAt: Time!
+
+	"A message describing the activity."
 	message: String!
+
+	"The type of resource affected by the activity."
 	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was enabled."
 	resourceName: String!
+
+	"The slug of the team for which the feature was enabled."
 	teamSlug: Slug!
+
+	"The environment where the feature was enabled."
+	env: String!
 }
 
+"An activity log entry recording that a feature was disabled for a team."
 type TeamFeatureDisabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
 	id: ID!
+
+	"The identity of the actor who disabled the feature."
 	actor: String!
+
+	"The time when the feature was disabled."
 	createdAt: Time!
+
+	"A message describing the activity."
 	message: String!
+
+	"The type of resource affected by the activity."
 	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was disabled."
 	resourceName: String!
+
+	"The slug of the team for which the feature was disabled."
 	teamSlug: Slug!
+
+	"The environment where the feature was disabled."
+	env: String!
 }
 
 type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
@@ -8555,6 +8603,10 @@ type TeamRoleRevokedActivityLogEntryData {
 }
 
 extend enum ActivityLogActivityType {
+	"A feature was enabled for a team."
+	FEATURE_ENABLED
+	"A feature was disabled for a team."
+	FEATURE_DISABLED
 	"Team was created."
 	TEAM_CREATED
 	"Team was updated."
@@ -26000,6 +26052,35 @@ func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_tea
 	return fc, nil
 }
 
+func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry_env(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureDisabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureDisabledActivityLogEntry_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureDisabledActivityLogEntry_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureDisabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_id(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -26198,6 +26279,35 @@ func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_team
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Slug does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry_env(ctx context.Context, field graphql.CollectedField, obj *team.TeamFeatureEnabledActivityLogEntry) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamFeatureEnabledActivityLogEntry_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamFeatureEnabledActivityLogEntry_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamFeatureEnabledActivityLogEntry",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -40188,6 +40298,11 @@ func (ec *executionContext) _TeamFeatureDisabledActivityLogEntry(ctx context.Con
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "env":
+			out.Values[i] = ec._TeamFeatureDisabledActivityLogEntry_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -40254,6 +40369,11 @@ func (ec *executionContext) _TeamFeatureEnabledActivityLogEntry(ctx context.Cont
 			}
 		case "teamSlug":
 			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_teamSlug(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "env":
+			out.Values[i] = ec._TeamFeatureEnabledActivityLogEntry_env(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

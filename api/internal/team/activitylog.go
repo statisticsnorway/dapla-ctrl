@@ -109,14 +109,21 @@ func init() {
 		}
 	})
 	activitylog.RegisterTransformer(activityLogEntryResourceTypeTeamFeature, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
+		env, err := activitylog.UnmarshalData[string](entry)
+		if err != nil {
+			return nil, err
+		}
+
 		switch entry.Action {
 		case activitylog.ActivityLogEntryActionAdded:
 			return TeamFeatureEnabledActivityLogEntry{
 				GenericActivityLogEntry: entry.WithMessage("Enable feature"),
+				Env:                     *env,
 			}, nil
 		case activitylog.ActivityLogEntryActionRemoved:
 			return TeamFeatureDisabledActivityLogEntry{
 				GenericActivityLogEntry: entry.WithMessage("Disable feature"),
+				Env:                     *env,
 			}, nil
 		default:
 			return nil, fmt.Errorf("unsupported team feature activity log entry action: %q", entry.Action)
@@ -153,10 +160,12 @@ type TeamUpdatedActivityLogEntryDataUpdatedField struct {
 
 type TeamFeatureEnabledActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
+	Env string `json:"env"`
 }
 
 type TeamFeatureDisabledActivityLogEntry struct {
 	activitylog.GenericActivityLogEntry
+	Env string `json:"env"`
 }
 
 type TeamConfirmDeleteKeyActivityLogEntry struct {

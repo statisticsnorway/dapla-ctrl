@@ -553,24 +553,58 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 	newValue: String
 }
 
+"An activity log entry recording that a feature was enabled for a team."
 type TeamFeatureEnabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
 	id: ID!
+
+	"The identity of the actor who enabled the feature."
 	actor: String!
+
+	"The time when the feature was enabled."
 	createdAt: Time!
+
+	"A message describing the activity."
 	message: String!
+
+	"The type of resource affected by the activity."
 	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was enabled."
 	resourceName: String!
+
+	"The slug of the team for which the feature was enabled."
 	teamSlug: Slug!
+
+	"The environment where the feature was enabled."
+	env: String!
 }
 
+"An activity log entry recording that a feature was disabled for a team."
 type TeamFeatureDisabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
 	id: ID!
+
+	"The identity of the actor who disabled the feature."
 	actor: String!
+
+	"The time when the feature was disabled."
 	createdAt: Time!
+
+	"A message describing the activity."
 	message: String!
+
+	"The type of resource affected by the activity."
 	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was disabled."
 	resourceName: String!
+
+	"The slug of the team for which the feature was disabled."
 	teamSlug: Slug!
+
+	"The environment where the feature was disabled."
+	env: String!
 }
 
 type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
@@ -642,6 +676,10 @@ type TeamRoleRevokedActivityLogEntryData {
 }
 
 extend enum ActivityLogActivityType {
+	"A feature was enabled for a team."
+	FEATURE_ENABLED
+	"A feature was disabled for a team."
+	FEATURE_DISABLED
 	"Team was created."
 	TEAM_CREATED
 	"Team was updated."
