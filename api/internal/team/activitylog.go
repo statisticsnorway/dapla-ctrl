@@ -123,6 +123,9 @@ func init() {
 		}
 	})
 
+	activitylog.RegisterFilter("FEATURE_ENABLED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeTeamFeature)
+	activitylog.RegisterFilter("FEATURE_DISABLED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeTeamFeature)
+
 	activitylog.RegisterFilter("TEAM_CREATED", activitylog.ActivityLogEntryActionCreated, activityLogEntryResourceTypeTeam)
 	activitylog.RegisterFilter("TEAM_UPDATED", activitylog.ActivityLogEntryActionUpdated, activityLogEntryResourceTypeTeam)
 	activitylog.RegisterFilter("TEAM_ROLE_ASSIGNED", activityLogEntryActionAssignRole, activityLogEntryResourceTypeTeam)
