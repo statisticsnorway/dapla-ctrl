@@ -4,7 +4,7 @@ admin:admin(true)
 local unauthorized = User.new()
 local team = Team.new("team-features", "724")
 
-local feature = "some-feature"
+local feature = "ai"
 local env = "test"
 
 Test.gql("Unauthorized user cannot enable team feature", function(t)
@@ -14,8 +14,8 @@ Test.gql("Unauthorized user cannot enable team feature", function(t)
 		mutation {
 			enableTeamFeature(input: {
 				teamSlug: "%s"
-				feature: "%s"
-				env: "%s"
+				feature: %s
+				env: %s
 			}) {
 				feature
 			}
@@ -42,8 +42,8 @@ Test.gql("Enable team feature", function(t)
 		mutation {
 			enableTeamFeature(input: {
 				teamSlug: "%s"
-				feature: "%s"
-				env: "%s"
+				feature: %s
+				env: %s
 			}) {
 				team {
 					slug
@@ -84,8 +84,8 @@ Test.gql("Unauthorized user cannot disable team feature", function(t)
 		mutation {
 			disableTeamFeature(input: {
 				teamSlug: "%s"
-				feature: "%s"
-				env: "%s"
+				feature: %s
+				env: %s
 			}) {
 				feature
 			}
@@ -112,8 +112,8 @@ Test.gql("Disable team feature", function(t)
 		mutation {
 			disableTeamFeature(input: {
 				teamSlug: "%s"
-				feature: "%s"
-				env: "%s"
+				feature: %s
+				env: %s
 			}) {
 				team {
 					slug
@@ -137,6 +137,73 @@ Test.gql("Disable team feature", function(t)
 				},
 				feature = feature,
 				env = env,
+			},
+		},
+	}
+end)
+
+Test.gql("Team feature changes appear in activity log", function(t)
+	t.addHeader("x-user-email", admin:email())
+
+	t.query(string.format([[
+		query {
+			team(slug: "%s") {
+				activityLog(
+					first: 20
+					filter: {
+						activityTypes: [
+							FEATURE_ENABLED
+							FEATURE_DISABLED
+						]
+					}
+				) {
+					nodes {
+						__typename
+						message
+						actor
+						createdAt
+						resourceType
+						resourceName
+						teamSlug
+						... on TeamFeatureEnabledActivityLogEntry {
+							env
+						}
+						... on TeamFeatureDisabledActivityLogEntry {
+							env
+						}
+					}
+				}
+			}
+		}
+	]], team:slug()))
+
+	t.check {
+		data = {
+			team = {
+				activityLog = {
+					nodes = {
+						{
+							__typename = "TeamFeatureDisabledActivityLogEntry",
+							message = "Disable feature",
+							actor = admin:email(),
+							createdAt = NotNull(),
+							resourceType = "FEATURE",
+							resourceName = feature,
+							teamSlug = team:slug(),
+							env = env,
+						},
+						{
+							__typename = "TeamFeatureEnabledActivityLogEntry",
+							message = "Enable feature",
+							actor = admin:email(),
+							createdAt = NotNull(),
+							resourceType = "FEATURE",
+							resourceName = feature,
+							teamSlug = team:slug(),
+							env = env,
+						},
+					},
+				},
 			},
 		},
 	}
