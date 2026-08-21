@@ -234,7 +234,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
-	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, r.BudgetNotificationEmails)
+	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, r.BudgetNotificationEmails[:4])
 	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
