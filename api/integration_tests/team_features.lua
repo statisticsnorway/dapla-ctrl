@@ -54,7 +54,7 @@ Test.gql("Cannot enable AI team feature in prod", function(t)
 		data = Null,
 		errors = {
 			{
-				message = 'validateTeamFeatureArgs: Invalid combinations of values feature: "ai" and env: "prod"',
+				message = 'validateTeamFeatureArgs: Invalid combination of values feature: "ai" and env: "prod"',
 				path = {
 					"enableTeamFeature",
 				},

@@ -21,7 +21,7 @@ func validateTeamFeatureArgs(feature string, env string) error {
 		return formatError("env", env, validEnvs)
 	}
 	if feature == "ai" && env != "test" {
-		return fmt.Errorf("validateTeamFeatureArgs: Invalid combinations of values feature: %q and env: %q", feature, env)
+		return fmt.Errorf("validateTeamFeatureArgs: Invalid combination of values feature: %q and env: %q", feature, env)
 	}
 	return nil
 }
