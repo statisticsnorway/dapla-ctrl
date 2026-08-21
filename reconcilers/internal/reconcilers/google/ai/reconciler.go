@@ -56,7 +56,7 @@ type reconciler struct {
 
 type optFunc func(*reconciler) error
 
-func WithDaplaStatBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
+func WithBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
 	return func(r *reconciler) error {
 		var limit uint = 4
 		members, err := getGroupMembers(ctx, apiclient, r.AIBudgetDeveloperBillingGroup, limit)
