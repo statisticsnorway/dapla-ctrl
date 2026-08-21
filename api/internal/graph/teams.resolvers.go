@@ -169,6 +169,26 @@ func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input te
 	}, nil
 }
 
+func validateTeamFeatureArgs(feature string, env string) error {
+	validFeatures := []string{"ai"}
+	validEnvs := []string{"prod", "test"}
+
+	formatError := func(element string, value string, expectedValues []string) error {
+		return fmt.Errorf("validateTeamFeatureArgs: Invalid value for %s %q, must be one of %q", element, value, strings.Join(expectedValues, ","))
+	}
+
+	if !slices.Contains(validFeatures, feature) {
+		return formatError("feature", feature, validFeatures)
+	}
+	if !slices.Contains(validEnvs, env) {
+		return formatError("env", env, validEnvs)
+	}
+	if feature == "ai" && env != "test" {
+		return fmt.Errorf("validateTeamFeatureArgs: Invalid combinations of values feature: %q and env: %q", feature, env)
+	}
+	return nil
+}
+
 func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
@@ -176,10 +196,9 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 		return nil, err
 	}
 
-	if input.Feature != "ai" {
-		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for feature %q", input.Feature)
-	} else if !slices.Contains([]string{"prod", "test"}, string(input.Env)) {
-		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for env %q", input.Env)
+	err := validateTeamFeatureArgs(string(input.Feature), string(input.Env))
+	if err != nil {
+		return nil, err
 	}
 
 	if err := team.EnableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
@@ -200,10 +219,9 @@ func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.Di
 		return nil, err
 	}
 
-	if input.Feature != "ai" {
-		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for feature %q", input.Feature)
-	} else if !slices.Contains([]string{"prod", "test"}, string(input.Env)) {
-		return nil, fmt.Errorf("EnableTeamFeature: Invalid value for env %q", input.Env)
+	err := validateTeamFeatureArgs(string(input.Feature), string(input.Env))
+	if err != nil {
+		return nil, err
 	}
 
 	if err := team.DisableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
