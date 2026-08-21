@@ -329,8 +329,8 @@ input DeleteServiceAccountTokenInput {
 
 input DisableTeamFeatureInput {
   teamSlug: Slug!
-  feature: String!
-  env: String!
+  feature: TeamFeatureName!
+  env: TeamFeatureEnvironment!
 }
 
 type DeleteServiceAccountTokenPayload {
@@ -355,8 +355,8 @@ input EnableReconcilerInput {
 
 input EnableTeamFeatureInput {
   teamSlug: Slug!
-  feature: String!
-  env: String!
+  feature: TeamFeatureName!
+  env: TeamFeatureEnvironment!
 }
 
 """
@@ -2494,14 +2494,29 @@ type TeamFeature {
 
 type DisableTeamFeaturePayload {
   team: Team!
-  feature: String!
-  env: String!
+  feature: TeamFeatureName!
+  env: TeamFeatureEnvironment!
 }
 
 type EnableTeamFeaturePayload {
   team: Team!
-  feature: String!
-  env: String!
+  feature: TeamFeatureName!
+  env: TeamFeatureEnvironment!
+}
+
+"""Environments where a team feature can be enabled or disabled."""
+enum TeamFeatureEnvironment {
+  """Production environment."""
+  prod
+
+  """Test environment."""
+  test
+}
+
+"""Features that can be enabled or disabled for a team."""
+enum TeamFeatureName {
+  """Vertex AI service."""
+  ai
 }
 
 type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {
