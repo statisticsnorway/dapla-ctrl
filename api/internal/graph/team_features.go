@@ -1,9 +1,10 @@
 package graph
 
 import (
-	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/apierror"
 )
 
 func validateTeamFeatureArgs(feature string, env string) error {
@@ -11,7 +12,7 @@ func validateTeamFeatureArgs(feature string, env string) error {
 	validEnvs := []string{"prod", "test"}
 
 	formatError := func(element string, value string, expectedValues []string) error {
-		return fmt.Errorf("validateTeamFeatureArgs: Invalid value for %s %q, must be one of %q", element, value, strings.Join(expectedValues, ","))
+		return apierror.Errorf("validateTeamFeatureArgs: Invalid value for %s %q, must be one of %q", element, value, strings.Join(expectedValues, ","))
 	}
 
 	if !slices.Contains(validFeatures, feature) {
@@ -21,7 +22,7 @@ func validateTeamFeatureArgs(feature string, env string) error {
 		return formatError("env", env, validEnvs)
 	}
 	if feature == "ai" && env != "test" {
-		return fmt.Errorf("validateTeamFeatureArgs: Invalid combination of values feature: %q and env: %q", feature, env)
+		return apierror.Errorf("validateTeamFeatureArgs: Invalid combination of values feature: %q and env: %q", feature, env)
 	}
 	return nil
 }
