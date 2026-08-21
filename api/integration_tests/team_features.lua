@@ -35,6 +35,34 @@ Test.gql("Unauthorized user cannot enable team feature", function(t)
 	}
 end)
 
+Test.gql("Cannot enable AI team feature in prod", function(t)
+	t.addHeader("x-user-email", admin:email())
+
+	t.query(string.format([[
+		mutation {
+			enableTeamFeature(input: {
+				teamSlug: "%s"
+				feature: ai
+				env: prod
+			}) {
+				feature
+			}
+		}
+	]], team:slug()))
+
+	t.check {
+		data = Null,
+		errors = {
+			{
+				message = 'validateTeamFeatureArgs: Invalid combination of values feature: "ai" and env: "prod"',
+				path = {
+					"enableTeamFeature",
+				},
+			},
+		},
+	}
+end)
+
 Test.gql("Enable team feature", function(t)
 	t.addHeader("x-user-email", admin:email())
 

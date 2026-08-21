@@ -3,8 +3,6 @@ package graph
 import (
 	"context"
 	"errors"
-	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/google/uuid"
@@ -169,26 +167,6 @@ func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input te
 	}, nil
 }
 
-func validateTeamFeatureArgs(feature string, env string) error {
-	validFeatures := []string{"ai"}
-	validEnvs := []string{"prod", "test"}
-
-	formatError := func(element string, value string, expectedValues []string) error {
-		return fmt.Errorf("validateTeamFeatureArgs: Invalid value for %s %q, must be one of %q", element, value, strings.Join(expectedValues, ","))
-	}
-
-	if !slices.Contains(validFeatures, feature) {
-		return formatError("feature", feature, validFeatures)
-	}
-	if !slices.Contains(validEnvs, env) {
-		return formatError("env", env, validEnvs)
-	}
-	if feature == "ai" && env != "test" {
-		return fmt.Errorf("validateTeamFeatureArgs: Invalid combinations of values feature: %q and env: %q", feature, env)
-	}
-	return nil
-}
-
 func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
@@ -207,8 +185,8 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 
 	return &team.EnableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,
-		Feature:  string(input.Feature),
-		Env:      string(input.Env),
+		Feature:  input.Feature,
+		Env:      input.Env,
 	}, nil
 }
 
@@ -230,8 +208,8 @@ func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.Di
 
 	return &team.DisableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,
-		Feature:  string(input.Feature),
-		Env:      string(input.Env),
+		Feature:  input.Feature,
+		Env:      input.Env,
 	}, nil
 }
 
