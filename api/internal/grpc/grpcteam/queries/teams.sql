@@ -67,3 +67,19 @@ FROM
 WHERE
 	team_slug = @team_slug::slug
 ;
+
+-- name: TeamHasFeature :one
+SELECT
+	(
+		EXISTS (
+			SELECT
+				1
+			FROM
+				team_features
+			WHERE
+				team_slug = @team_slug
+				AND name = @name
+                AND env = @env
+		)
+	)
+;

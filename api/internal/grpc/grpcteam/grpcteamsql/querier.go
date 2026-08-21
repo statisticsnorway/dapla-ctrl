@@ -16,6 +16,7 @@ type Querier interface {
 	List(ctx context.Context, arg ListParams) ([]*Team, error)
 	ListGroups(ctx context.Context, arg ListGroupsParams) ([]*ListGroupsRow, error)
 	SetLastSuccessfulSync(ctx context.Context, argSlug slug.Slug) error
+	TeamHasFeature(ctx context.Context, arg TeamHasFeatureParams) (bool, error)
 }
 
 var _ Querier = (*Queries)(nil)

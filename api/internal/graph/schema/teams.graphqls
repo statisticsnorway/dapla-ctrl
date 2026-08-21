@@ -67,6 +67,16 @@ extend type Mutation {
 	This lets section managers delegate access management to up to two other people.
 	"""
 	removeTeamAccessManager(input: RemoveTeamAccessManagerInput!): RemoveTeamAccessManagerPayload!
+
+	"""
+	Enable a feature for a team.
+	"""
+	enableTeamFeature(input: EnableTeamFeatureInput!): EnableTeamFeaturePayload!
+
+	"""
+	Disable a feature for a team.
+	"""
+	disableTeamFeature(input: DisableTeamFeatureInput!): DisableTeamFeaturePayload!
 }
 
 """
@@ -203,6 +213,15 @@ type Team implements Node {
 
 	"The access managers for the team."
 	accessManagers: [TeamAccessManager!]!
+
+	" The features enabled for the team."
+	features: [TeamFeature!]!
+}
+
+type TeamFeature {
+	name: String!
+
+	env: String!
 }
 
 type TeamMember {
@@ -248,6 +267,28 @@ type RemoveTeamAccessManagerPayload {
 
 	"The user who has been removed as access manager."
 	user: User!
+}
+
+type EnableTeamFeaturePayload {
+	"The team for which the feature should be enabled in."
+	team: Team!
+
+	"The name of the feature to enable."
+	feature: String!
+
+	"The environment to enable the feature in."
+	env: String!
+}
+
+type DisableTeamFeaturePayload {
+	"The team for which the feature should be disabled in."
+	team: Team!
+
+	"The name of the feature to disable."
+	feature: String!
+
+	"The environment to disable the feature in."
+	env: String!
 }
 
 type TeamConnection {
@@ -365,6 +406,51 @@ input RemoveTeamAccessManagerInput {
 	userEmail: String!
 }
 
+input EnableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: TeamFeatureName!
+
+	"""
+	Environment
+	"""
+	env: TeamFeatureEnvironment!
+}
+
+input DisableTeamFeatureInput {
+	"Slug of the team to set access managers for."
+	teamSlug: Slug!
+
+	"""
+	Feature name
+	"""
+	feature: TeamFeatureName!
+
+	"""
+	Environment
+	"""
+	env: TeamFeatureEnvironment!
+}
+
+"Features that can be enabled or disabled for a team."
+enum TeamFeatureName {
+	"Vertex AI service."
+	ai
+}
+
+"Environments where a team feature can be enabled or disabled."
+enum TeamFeatureEnvironment {
+	"Production environment."
+	prod
+
+	"Test environment."
+	test
+}
+
 "Ordering options when fetching teams."
 input TeamOrder {
 	"The field to order items by."
@@ -399,6 +485,7 @@ enum TeamOrderField {
 extend enum ActivityLogEntryResourceType {
 	"All activity log entries related to teams will use this resource type."
 	TEAM
+	FEATURE
 }
 
 type TeamCreatedActivityLogEntry implements ActivityLogEntry & Node {
@@ -464,6 +551,60 @@ type TeamUpdatedActivityLogEntryDataUpdatedField {
 
 	"The new value of the field."
 	newValue: String
+}
+
+"An activity log entry recording that a feature was enabled for a team."
+type TeamFeatureEnabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
+	id: ID!
+
+	"The identity of the actor who enabled the feature."
+	actor: String!
+
+	"The time when the feature was enabled."
+	createdAt: Time!
+
+	"A message describing the activity."
+	message: String!
+
+	"The type of resource affected by the activity."
+	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was enabled."
+	resourceName: String!
+
+	"The slug of the team for which the feature was enabled."
+	teamSlug: Slug!
+
+	"The environment where the feature was enabled."
+	env: String!
+}
+
+"An activity log entry recording that a feature was disabled for a team."
+type TeamFeatureDisabledActivityLogEntry implements ActivityLogEntry & Node {
+	"The globally unique ID of the activity log entry."
+	id: ID!
+
+	"The identity of the actor who disabled the feature."
+	actor: String!
+
+	"The time when the feature was disabled."
+	createdAt: Time!
+
+	"A message describing the activity."
+	message: String!
+
+	"The type of resource affected by the activity."
+	resourceType: ActivityLogEntryResourceType!
+
+	"The name of the feature that was disabled."
+	resourceName: String!
+
+	"The slug of the team for which the feature was disabled."
+	teamSlug: Slug!
+
+	"The environment where the feature was disabled."
+	env: String!
 }
 
 type TeamRoleAssignedActivityLogEntry implements ActivityLogEntry & Node {
@@ -535,6 +676,10 @@ type TeamRoleRevokedActivityLogEntryData {
 }
 
 extend enum ActivityLogActivityType {
+	"A feature was enabled for a team."
+	FEATURE_ENABLED
+	"A feature was disabled for a team."
+	FEATURE_DISABLED
 	"Team was created."
 	TEAM_CREATED
 	"Team was updated."

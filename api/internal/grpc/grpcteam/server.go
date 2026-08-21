@@ -104,6 +104,23 @@ func (t *Server) Groups(ctx context.Context, req *protoapi.ListTeamGroupsRequest
 	return resp, nil
 }
 
+func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureRequest) (*protoapi.HasFeatureResponse, error) {
+	hasFeature, err := t.querier.TeamHasFeature(ctx, grpcteamsql.TeamHasFeatureParams{
+		TeamSlug: slug.Slug(team.Slug),
+		Name:     team.Feature.Name,
+		Env:      team.Feature.Env,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &protoapi.HasFeatureResponse{
+		HasFeature: hasFeature,
+	}
+
+	return resp, nil
+}
+
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
 		Slug:         team.Slug.String(),

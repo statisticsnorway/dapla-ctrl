@@ -15,14 +15,15 @@
 
           packages = with pkgs; [
             actionlint
+            buf # protobuf LSP server
             go
             gopls
+            lua-language-server
             mise
             nixd
             nodejs
             pnpm
             protobuf
-            protobuf-language-server
             protoc-gen-go
             protoc-gen-go-grpc
             svelte-language-server

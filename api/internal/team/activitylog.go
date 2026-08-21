@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	activityLogEntryResourceTypeTeam       activitylog.ActivityLogEntryResourceType = "TEAM"
-	activityLogEntryActionCreateDeleteKey  activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
-	activityLogEntryActionConfirmDeleteKey activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
-	activityLogEntryActionSetMemberRole    activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
-	activityLogEntryActionAssignRole       activitylog.ActivityLogEntryAction       = "ASSIGN_ROLE"
-	activityLogEntryActionRevokeRole       activitylog.ActivityLogEntryAction       = "REVOKE_ROLE"
+	activityLogEntryResourceTypeTeam        activitylog.ActivityLogEntryResourceType = "TEAM"
+	activityLogEntryResourceTypeTeamFeature activitylog.ActivityLogEntryResourceType = "FEATURE"
+	activityLogEntryActionCreateDeleteKey   activitylog.ActivityLogEntryAction       = "CREATE_DELETE_KEY"
+	activityLogEntryActionConfirmDeleteKey  activitylog.ActivityLogEntryAction       = "CONFIRM_DELETE_KEY"
+	activityLogEntryActionSetMemberRole     activitylog.ActivityLogEntryAction       = "SET_MEMBER_ROLE"
+	activityLogEntryActionAssignRole        activitylog.ActivityLogEntryAction       = "ASSIGN_ROLE"
+	activityLogEntryActionRevokeRole        activitylog.ActivityLogEntryAction       = "REVOKE_ROLE"
 )
 
 func init() {
@@ -107,6 +108,30 @@ func init() {
 			return nil, fmt.Errorf("unsupported team activity log entry action: %q", entry.Action)
 		}
 	})
+	activitylog.RegisterTransformer(activityLogEntryResourceTypeTeamFeature, func(entry activitylog.GenericActivityLogEntry) (activitylog.ActivityLogEntry, error) {
+		env, err := activitylog.UnmarshalData[string](entry)
+		if err != nil {
+			return nil, err
+		}
+
+		switch entry.Action {
+		case activitylog.ActivityLogEntryActionAdded:
+			return TeamFeatureEnabledActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Enable feature"),
+				Env:                     *env,
+			}, nil
+		case activitylog.ActivityLogEntryActionRemoved:
+			return TeamFeatureDisabledActivityLogEntry{
+				GenericActivityLogEntry: entry.WithMessage("Disable feature"),
+				Env:                     *env,
+			}, nil
+		default:
+			return nil, fmt.Errorf("unsupported team feature activity log entry action: %q", entry.Action)
+		}
+	})
+
+	activitylog.RegisterFilter("FEATURE_ENABLED", activitylog.ActivityLogEntryActionAdded, activityLogEntryResourceTypeTeamFeature)
+	activitylog.RegisterFilter("FEATURE_DISABLED", activitylog.ActivityLogEntryActionRemoved, activityLogEntryResourceTypeTeamFeature)
 
 	activitylog.RegisterFilter("TEAM_CREATED", activitylog.ActivityLogEntryActionCreated, activityLogEntryResourceTypeTeam)
 	activitylog.RegisterFilter("TEAM_UPDATED", activitylog.ActivityLogEntryActionUpdated, activityLogEntryResourceTypeTeam)
@@ -131,6 +156,16 @@ type TeamUpdatedActivityLogEntryDataUpdatedField struct {
 	Field    string  `json:"field"`
 	OldValue *string `json:"oldValue"`
 	NewValue *string `json:"newValue"`
+}
+
+type TeamFeatureEnabledActivityLogEntry struct {
+	activitylog.GenericActivityLogEntry
+	Env string `json:"env"`
+}
+
+type TeamFeatureDisabledActivityLogEntry struct {
+	activitylog.GenericActivityLogEntry
+	Env string `json:"env"`
 }
 
 type TeamConfirmDeleteKeyActivityLogEntry struct {

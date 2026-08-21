@@ -182,3 +182,32 @@ func (q *Queries) SetLastSuccessfulSync(ctx context.Context, argSlug slug.Slug) 
 	_, err := q.db.Exec(ctx, setLastSuccessfulSync, argSlug)
 	return err
 }
+
+const teamHasFeature = `-- name: TeamHasFeature :one
+SELECT
+	(
+		EXISTS (
+			SELECT
+				1
+			FROM
+				team_features
+			WHERE
+				team_slug = $1
+				AND name = $2
+                AND env = $3
+		)
+	)
+`
+
+type TeamHasFeatureParams struct {
+	TeamSlug slug.Slug
+	Name     string
+	Env      string
+}
+
+func (q *Queries) TeamHasFeature(ctx context.Context, arg TeamHasFeatureParams) (bool, error) {
+	row := q.db.QueryRow(ctx, teamHasFeature, arg.TeamSlug, arg.Name, arg.Env)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
