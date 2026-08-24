@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/billing/budgets/apiv1"
+	budgets "cloud.google.com/go/billing/budgets/apiv1"
 	"cloud.google.com/go/billing/budgets/apiv1/budgetspb"
 	"cloud.google.com/go/iam/apiv1/iampb"
-	"cloud.google.com/go/monitoring/apiv3/v2"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
-	"cloud.google.com/go/resourcemanager/apiv3"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
-	"cloud.google.com/go/serviceusage/apiv1"
+	serviceusage "cloud.google.com/go/serviceusage/apiv1"
 	"cloud.google.com/go/serviceusage/apiv1/serviceusagepb"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -41,6 +41,7 @@ const (
 	aiBudgetBillingAccountKey          = "ai_budget_billing_account"
 	aiBudgetNotificationChannelNameKey = "ai_budget_notification_channel_name"
 	groupSANameTemplateKey             = "group_sa_name_template"
+	allowlistKey                       = "team_allowlist"
 )
 
 type reconciler struct {
@@ -52,6 +53,7 @@ type reconciler struct {
 	BudgetNotificationEmails      []string
 	AIBudgetDeveloperBillingGroup string
 	GoogleServices                *googleServices
+	TeamAllowList                 []string
 }
 
 type optFunc func(*reconciler) error
@@ -142,6 +144,12 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Template for the name of the Group Service Account.",
 				Secret:      false,
 			},
+			{
+				Key:         allowlistKey,
+				DisplayName: "Team Allowlist",
+				Description: "Comma-separated list of teams to run the reconciler for. Use * for all teams.",
+				Secret:      false,
+			},
 		},
 	}
 }
@@ -188,6 +196,11 @@ func createGoogleClients(ctx context.Context) (*googleServices, error) {
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	if err := r.updateConfig(ctx, client); err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
+	}
+
+	// Only run for allowlisted teams. Skip if no allowlist is set.
+	if len(r.TeamAllowList) == 0 || (r.TeamAllowList[0] != "*" && !slices.Contains(r.TeamAllowList, daplaTeam.Slug)) {
+		return nil
 	}
 
 	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
@@ -385,6 +398,11 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			r.AIBudgetBillingAccount = c.Value
 		case groupSANameTemplateKey:
 			r.GroupSANameTemplate = c.Value
+		case allowlistKey:
+			if c.Value == "" {
+				continue
+			}
+			r.TeamAllowList = strings.Split(c.Value, ",")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 
