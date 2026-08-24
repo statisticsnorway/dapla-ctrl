@@ -236,7 +236,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
-	budget, err := r.getExistingAIBudget(ctx, r.GoogleServices.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
+	budget, err := r.getExistingAIBudget(ctx, r.GoogleServices.CloudBudget, projectID, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
 	if err != nil {
 		return err
 	}
@@ -546,8 +546,8 @@ func getExistingAIBudgetNotificationChannel(ctx context.Context, ncClient *monit
 	return channels, nil
 }
 
-func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, displayName string) (*budgetspb.Budget, error) {
-	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: r.AIBudgetBillingAccount})
+func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, projectId, displayName string) (*budgetspb.Budget, error) {
+	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: r.AIBudgetBillingAccount, Scope: "projects/" + projectId})
 	for budget, err := range it.All() {
 		if err != nil {
 			return nil, fmt.Errorf("list AI budgets: %w", err)
