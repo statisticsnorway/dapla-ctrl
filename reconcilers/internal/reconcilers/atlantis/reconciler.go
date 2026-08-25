@@ -11,11 +11,15 @@ import (
 	"maps"
 	"slices"
 
+	"cloud.google.com/go/iam/apiv1/iampb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/storage"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
+	admindirectory "google.golang.org/api/admin/directory/v1"
 	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/grpc/codes"
@@ -24,8 +28,10 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
+
 	servingv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
 
@@ -38,6 +44,13 @@ const (
 	wiAnnotationKey = "iam.gke.io/gcp-service-account"
 )
 
+type groupRole string
+
+const (
+	member  groupRole = "MEMBER"
+	manager groupRole = "MANAGER"
+)
+
 //go:embed repos.yaml
 var defaultRepoConfig string
 
@@ -47,6 +60,8 @@ type reconciler struct {
 	storageClient   *storage.Client
 	serviceAccounts *serviceaccounts.Client
 	memberships     *cloudidentity.GroupsMembershipsService
+	members         *admindirectory.MembersService
+	folders         *resourcemanager.FoldersClient
 
 	knServices servingv1.ServiceInterface
 	k8sClient  kubernetes.Interface
@@ -109,8 +124,28 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	if err := r.reconcileGcpServiceAccount(ctx, daplaTeam.Slug); err != nil {
+	sa, err := r.reconcileGcpServiceAccount(ctx, daplaTeam.Slug)
+	if err != nil {
 		return err
+	}
+	saMember := "serviceAccount" + sa.Email
+
+	folderResp, err := client.GcpTeamResources().ListTeamFolders(ctx, &protoapi.ListGcpTeamFoldersRequest{
+		TeamSlug: daplaTeam.Slug,
+	})
+	if err != nil {
+		return err
+	}
+	for _, folder := range folderResp.Folders {
+		google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
+			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
+			func(b *iampb.Binding) (modified bool) {
+				if slices.Contains(b.Members, saMember) {
+					return false
+				}
+				b.Members = append(b.Members, saMember)
+				return true
+			})
 	}
 
 	if err := r.reconcileBuckets(ctx, daplaTeam.Slug); err != nil {
@@ -313,7 +348,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path:   "/healthz",
-				Port:   4141,
+				Port:   intstr.FromString("4141"),
 				Scheme: corev1.URISchemeHTTP,
 			},
 		},
@@ -431,10 +466,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 		return err
 	}
 
-	sa.Annotations[wiAnnotationKey] = gcpSaName
-	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
 	return err
-	return nil
 }
 
 func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
@@ -462,10 +494,10 @@ func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient
 	return secretToken, nil
 }
 
-func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName string) error {
+func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName string) (*iam.ServiceAccount, error) {
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+teamName, "Atlantis for team "+teamName, r.atlantisProject)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
@@ -478,57 +510,40 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName st
 	})
 
 	for _, memberGroup := range r.memberGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, false); err != nil {
+		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
 			err = errors.Join(err, currentErr)
 		}
 	}
 	for _, managerGroup := range r.managerGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, true); err != nil {
+		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
 			err = errors.Join(err, currentErr)
 		}
 	}
 	if err != nil {
+		return nil, err
+	}
+
+	return sa, nil
+}
+
+func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId string, role groupRole) error {
+	member, err := r.members.Get(groupId, saEmail).Context(ctx).Do()
+	if status.Code(err) == codes.NotFound {
+		_, err := r.members.Insert(groupId, &admindirectory.Member{
+			Email: saEmail,
+			Role:  string(role),
+		}).Context(ctx).Do()
+		return err
+	} else if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail string, groupId string, manager bool) error {
-	// Check if membership exists
-	_, err := r.memberships.Lookup(groupId).MemberKeyId(saEmail).Context(ctx).Do()
-	// Does exist (2xx response)
-	if err == nil {
-		// TODO: Check if roles are correct
+	if member.Role == string(role) {
 		return nil
 	}
 
-	// Unknown error (not 2xx and not 404)
-	if status.Code(err) != codes.NotFound {
-		return err
-	}
-
-	roles := []*cloudidentity.MembershipRole{
-		{
-			Name: "MEMBER",
-		},
-	}
-	if manager {
-		roles = append(roles, &cloudidentity.MembershipRole{
-			Name: "MANAGER",
-		})
-	}
-
-	if _, err := r.memberships.Create(groupId, &cloudidentity.Membership{
-		PreferredMemberKey: &cloudidentity.EntityKey{
-			Id: saEmail,
-		},
-		Roles: roles,
-	}).Context(ctx).Do(); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = r.members.Patch(groupId, saEmail, &admindirectory.Member{Etag: member.Etag, Role: string(role)}).Context(ctx).Do()
+	return err
 }
 
 func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) error {
