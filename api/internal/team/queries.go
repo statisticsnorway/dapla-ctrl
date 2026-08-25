@@ -296,6 +296,63 @@ func ConfirmDeleteKey(ctx context.Context, teamSlug slug.Slug, deleteKey uuid.UU
 	})
 }
 
+func EnableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		if err := db(ctx).EnableTeamFeature(ctx, teamsql.EnableTeamFeatureParams{
+			TeamSlug: teamSlug,
+			Name:     featureName,
+			Env:      envName,
+		}); err != nil {
+			return err
+		}
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionAdded,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeTeamFeature,
+			ResourceName: featureName,
+			TeamSlug:     new(teamSlug),
+			Data:         envName,
+		})
+	})
+}
+
+func DisableTeamFeature(ctx context.Context, teamSlug slug.Slug, featureName string, envName string, actor *authz.Actor) error {
+	return database.Transaction(ctx, func(ctx context.Context) error {
+		if err := db(ctx).DisableTeamFeature(ctx, teamsql.DisableTeamFeatureParams{
+			TeamSlug: teamSlug,
+			Name:     featureName,
+			Env:      envName,
+		}); err != nil {
+			return err
+		}
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionRemoved,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeTeamFeature,
+			ResourceName: featureName,
+			TeamSlug:     new(teamSlug),
+			Data:         envName,
+		})
+	})
+}
+
+func GetTeamFeatures(ctx context.Context, teamSlug slug.Slug) ([]*TeamFeature, error) {
+	fs, err := db(ctx).GetFeaturesForTeam(ctx, teamSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	features := make([]*TeamFeature, 0, len(fs))
+	for _, row := range fs {
+		features = append(features, &TeamFeature{
+			Name: row.TeamFeature.Name,
+			Env:  row.TeamFeature.Env,
+		})
+	}
+
+	return features, nil
+}
+
 func UserIsOwner(ctx context.Context, teamSlug slug.Slug, userID uuid.UUID) (bool, error) {
 	return db(ctx).UserIsOwner(ctx, teamsql.UserIsOwnerParams{
 		UserID:   userID,

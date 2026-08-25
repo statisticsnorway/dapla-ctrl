@@ -14,10 +14,13 @@ type Querier interface {
 	ConfirmDeleteKey(ctx context.Context, key uuid.UUID) error
 	Create(ctx context.Context, arg CreateParams) (*Team, error)
 	CreateDeleteKey(ctx context.Context, arg CreateDeleteKeyParams) (*TeamDeleteKey, error)
+	DisableTeamFeature(ctx context.Context, arg DisableTeamFeatureParams) error
+	EnableTeamFeature(ctx context.Context, arg EnableTeamFeatureParams) error
 	Exists(ctx context.Context, argSlug slug.Slug) (bool, error)
 	Get(ctx context.Context, argSlug slug.Slug) (*Team, error)
 	GetAccessManagers(ctx context.Context, teamSlug slug.Slug) ([]uuid.UUID, error)
 	GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*TeamDeleteKey, error)
+	GetFeaturesForTeam(ctx context.Context, teamSlug slug.Slug) ([]*GetFeaturesForTeamRow, error)
 	GetTeamMember(ctx context.Context, arg GetTeamMemberParams) (*GetTeamMemberRow, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
 	ListAllForSearch(ctx context.Context) ([]*ListAllForSearchRow, error)

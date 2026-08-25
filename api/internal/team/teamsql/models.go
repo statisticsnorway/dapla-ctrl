@@ -25,3 +25,9 @@ type TeamDeleteKey struct {
 	CreatedBy   uuid.UUID
 	ConfirmedAt pgtype.Timestamptz
 }
+
+type TeamFeature struct {
+	TeamSlug slug.Slug
+	Name     string
+	Env      string
+}

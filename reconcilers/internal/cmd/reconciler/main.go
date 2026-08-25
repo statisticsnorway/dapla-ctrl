@@ -13,6 +13,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/ai"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
@@ -153,6 +154,13 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return fmt.Errorf("create parquedit reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(parqueditReconciler)
+
+	aiReconciler, err := ai.New(ctx, ai.WithBudgetNotifications(ctx, client))
+	if err != nil {
+		return fmt.Errorf("create ai reconciler: %w", err)
+	}
+
+	reconcilerManager.AddReconciler(aiReconciler)
 
 	log.WithField("duration", time.Since(start).String()).Debug("Added reconcilers to manager")
 
