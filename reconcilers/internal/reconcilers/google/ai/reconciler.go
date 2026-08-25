@@ -2,7 +2,6 @@ package ai
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -472,7 +471,7 @@ func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, 
 	it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
 	for channel, err := range it.All() {
 		if err != nil {
-			return nil, fmt.Errorf("list AI budget notification channels for %q: %w, [%T], %v", projectName, err, err, errors.Is(err, iterator.Done))
+			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
 		channels = append(channels, channel)
 	}
@@ -532,12 +531,12 @@ func getExistingAIBudgetNotificationChannels(ctx context.Context, ncClient *moni
 	for _, email := range emails {
 		filter := fmt.Sprintf(`type = "%s" AND labels.%s = "%s"`, aiBudgetNotificationType, aiBudgetNotificationLabel, email)
 		channel, err := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter}).Next()
-		if err != nil {
+		if err == iterator.Done {
+			continue
+		} else if err != nil {
 			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
-		if err != iterator.Done && channel != nil {
-			channels = append(channels, channel)
-		}
+		channels = append(channels, channel)
 	}
 	return channels, nil
 }
