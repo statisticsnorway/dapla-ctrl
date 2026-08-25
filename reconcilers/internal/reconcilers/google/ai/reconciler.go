@@ -2,6 +2,7 @@ package ai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"strconv"
@@ -471,7 +472,7 @@ func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, 
 	it := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter})
 	for channel, err := range it.All() {
 		if err != nil {
-			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
+			return nil, fmt.Errorf("list AI budget notification channels for %q: %w, [%T], %v", projectName, err, err, errors.Is(err, iterator.Done))
 		}
 		channels = append(channels, channel)
 	}
@@ -551,7 +552,7 @@ func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budg
 			return budget, nil
 		}
 	}
-	return nil, fmt.Errorf("list AI budgets: none matching name %s", displayName)
+	return nil, nil
 }
 
 func (r *reconciler) getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
