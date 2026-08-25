@@ -11,9 +11,7 @@ import (
 
 const getTeamFolder = `-- name: GetTeamFolder :one
 SELECT
-	team_slug,
-	env,
-	folder_id
+    gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
 FROM
 	gcp_team_folders
 WHERE
@@ -26,11 +24,50 @@ type GetTeamFolderParams struct {
 	Env      string
 }
 
-func (q *Queries) GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*GcpTeamFolder, error) {
+type GetTeamFolderRow struct {
+	GcpTeamFolder GcpTeamFolder
+}
+
+func (q *Queries) GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*GetTeamFolderRow, error) {
 	row := q.db.QueryRow(ctx, getTeamFolder, arg.TeamSlug, arg.Env)
-	var i GcpTeamFolder
-	err := row.Scan(&i.TeamSlug, &i.Env, &i.FolderID)
+	var i GetTeamFolderRow
+	err := row.Scan(&i.GcpTeamFolder.TeamSlug, &i.GcpTeamFolder.Env, &i.GcpTeamFolder.FolderID)
 	return &i, err
+}
+
+const listTeamFolders = `-- name: ListTeamFolders :many
+SELECT
+    gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
+FROM
+    gcp_team_folders
+WHERE
+    team_slug = $1
+ORDER BY
+    env
+`
+
+type ListTeamFoldersRow struct {
+	GcpTeamFolder GcpTeamFolder
+}
+
+func (q *Queries) ListTeamFolders(ctx context.Context, teamSlug slug.Slug) ([]*ListTeamFoldersRow, error) {
+	rows, err := q.db.Query(ctx, listTeamFolders, teamSlug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListTeamFoldersRow{}
+	for rows.Next() {
+		var i ListTeamFoldersRow
+		if err := rows.Scan(&i.GcpTeamFolder.TeamSlug, &i.GcpTeamFolder.Env, &i.GcpTeamFolder.FolderID); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const upsertTeamFolder = `-- name: UpsertTeamFolder :exec

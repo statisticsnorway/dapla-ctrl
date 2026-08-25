@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	GcpTeamResources_UpsertTeamFolder_FullMethodName = "/dapla.api.protobuf.GcpTeamResources/UpsertTeamFolder"
 	GcpTeamResources_GetTeamFolder_FullMethodName    = "/dapla.api.protobuf.GcpTeamResources/GetTeamFolder"
+	GcpTeamResources_ListTeamFolders_FullMethodName  = "/dapla.api.protobuf.GcpTeamResources/ListTeamFolders"
 )
 
 // GcpTeamResourcesClient is the client API for GcpTeamResources service.
@@ -29,6 +30,7 @@ const (
 type GcpTeamResourcesClient interface {
 	UpsertTeamFolder(ctx context.Context, in *UpsertGcpTeamFolderRequest, opts ...grpc.CallOption) (*UpsertGcpTeamFolderResponse, error)
 	GetTeamFolder(ctx context.Context, in *GetGcpTeamFolderRequest, opts ...grpc.CallOption) (*GetGcpTeamFolderResponse, error)
+	ListTeamFolders(ctx context.Context, in *ListGcpTeamFoldersRequest, opts ...grpc.CallOption) (*ListGcpTeamFoldersResponse, error)
 }
 
 type gcpTeamResourcesClient struct {
@@ -59,12 +61,23 @@ func (c *gcpTeamResourcesClient) GetTeamFolder(ctx context.Context, in *GetGcpTe
 	return out, nil
 }
 
+func (c *gcpTeamResourcesClient) ListTeamFolders(ctx context.Context, in *ListGcpTeamFoldersRequest, opts ...grpc.CallOption) (*ListGcpTeamFoldersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListGcpTeamFoldersResponse)
+	err := c.cc.Invoke(ctx, GcpTeamResources_ListTeamFolders_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GcpTeamResourcesServer is the server API for GcpTeamResources service.
 // All implementations must embed UnimplementedGcpTeamResourcesServer
 // for forward compatibility.
 type GcpTeamResourcesServer interface {
 	UpsertTeamFolder(context.Context, *UpsertGcpTeamFolderRequest) (*UpsertGcpTeamFolderResponse, error)
 	GetTeamFolder(context.Context, *GetGcpTeamFolderRequest) (*GetGcpTeamFolderResponse, error)
+	ListTeamFolders(context.Context, *ListGcpTeamFoldersRequest) (*ListGcpTeamFoldersResponse, error)
 	mustEmbedUnimplementedGcpTeamResourcesServer()
 }
 
@@ -80,6 +93,9 @@ func (UnimplementedGcpTeamResourcesServer) UpsertTeamFolder(context.Context, *Up
 }
 func (UnimplementedGcpTeamResourcesServer) GetTeamFolder(context.Context, *GetGcpTeamFolderRequest) (*GetGcpTeamFolderResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetTeamFolder not implemented")
+}
+func (UnimplementedGcpTeamResourcesServer) ListTeamFolders(context.Context, *ListGcpTeamFoldersRequest) (*ListGcpTeamFoldersResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListTeamFolders not implemented")
 }
 func (UnimplementedGcpTeamResourcesServer) mustEmbedUnimplementedGcpTeamResourcesServer() {}
 func (UnimplementedGcpTeamResourcesServer) testEmbeddedByValue()                          {}
@@ -138,6 +154,24 @@ func _GcpTeamResources_GetTeamFolder_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GcpTeamResources_ListTeamFolders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListGcpTeamFoldersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GcpTeamResourcesServer).ListTeamFolders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GcpTeamResources_ListTeamFolders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GcpTeamResourcesServer).ListTeamFolders(ctx, req.(*ListGcpTeamFoldersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GcpTeamResources_ServiceDesc is the grpc.ServiceDesc for GcpTeamResources service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -152,6 +186,10 @@ var GcpTeamResources_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTeamFolder",
 			Handler:    _GcpTeamResources_GetTeamFolder_Handler,
+		},
+		{
+			MethodName: "ListTeamFolders",
+			Handler:    _GcpTeamResources_ListTeamFolders_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

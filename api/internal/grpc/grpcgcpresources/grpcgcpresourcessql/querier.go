@@ -4,10 +4,13 @@ package grpcgcpresourcessql
 
 import (
 	"context"
+
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Querier interface {
-	GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*GcpTeamFolder, error)
+	GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*GetTeamFolderRow, error)
+	ListTeamFolders(ctx context.Context, teamSlug slug.Slug) ([]*ListTeamFoldersRow, error)
 	UpsertTeamFolder(ctx context.Context, arg UpsertTeamFolderParams) error
 }
 

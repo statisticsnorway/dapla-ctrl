@@ -13,6 +13,7 @@ message GcpTeamFolder {
 service GcpTeamResources {
   rpc UpsertTeamFolder(UpsertGcpTeamFolderRequest) returns (UpsertGcpTeamFolderResponse) {}
   rpc GetTeamFolder(GetGcpTeamFolderRequest) returns (GetGcpTeamFolderResponse) {}
+  rpc ListTeamFolders(ListGcpTeamFoldersRequest) returns (ListGcpTeamFoldersResponse) {}
 }
 
 message UpsertGcpTeamFolderRequest {
@@ -28,4 +29,12 @@ message GetGcpTeamFolderRequest {
 
 message GetGcpTeamFolderResponse {
   GcpTeamFolder folder = 1;
+}
+
+message ListGcpTeamFoldersRequest {
+  string team_slug = 1;
+}
+
+message ListGcpTeamFoldersResponse {
+  repeated GcpTeamFolder folders = 1;
 }

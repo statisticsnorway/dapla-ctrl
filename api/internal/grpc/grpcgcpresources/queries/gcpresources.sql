@@ -10,12 +10,21 @@ SET
 
 -- name: GetTeamFolder :one
 SELECT
-	team_slug,
-	env,
-	folder_id
+    sqlc.embed(gcp_team_folders)
 FROM
 	gcp_team_folders
 WHERE
 	team_slug = @team_slug
 	AND env = @env
+;
+
+-- name: ListTeamFolders :many
+SELECT
+    sqlc.embed(gcp_team_folders)
+FROM
+    gcp_team_folders
+WHERE
+    team_slug = @team_slug
+ORDER BY
+    env
 ;
