@@ -274,10 +274,10 @@ type EnableTeamFeaturePayload {
 	team: Team!
 
 	"The name of the feature to enable."
-	feature: String!
+	feature: TeamFeatureName!
 
 	"The environment to enable the feature in."
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 type DisableTeamFeaturePayload {
@@ -285,10 +285,10 @@ type DisableTeamFeaturePayload {
 	team: Team!
 
 	"The name of the feature to disable."
-	feature: String!
+	feature: TeamFeatureName!
 
 	"The environment to disable the feature in."
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 type TeamConnection {

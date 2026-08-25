@@ -10,6 +10,17 @@ Reconciles these resources for a Dapla team:
 
 These resources are currently only created in the test environment.
 
+Reconciliation flow for a single team:
+
+``` mermaid
+flowchart LR
+    A(User) -->|Enables AI for team| B(Team Features Table)
+    C{Reconciler} -->|Reads table| B
+    C -->|Reconciles| D[Vertex AI API]
+    C -->|Reconciles| E[IAM bindings]
+    C -->|Reconciles| F[Billing Budget]
+```
+
 ## Required IAM permissions
 
 The reconciler's Google service account requires these permissions on each

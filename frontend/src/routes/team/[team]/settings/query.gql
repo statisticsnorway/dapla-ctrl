@@ -4,5 +4,9 @@ query TeamSettings($team: Slug!) {
 		slug
 		lastSuccessfulSync
 		hasManualEditing
+		features {
+			name
+			env
+		}
 	}
 }

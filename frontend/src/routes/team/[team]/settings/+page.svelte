@@ -8,6 +8,7 @@
 	let { data }: PageProps = $props();
 	let { TeamSettings, teamSlug } = $derived(data);
 	let showConfirmModal = $state(false);
+	let aiErrors: { message: string }[] | undefined = $state();
 
 	const updateTeam = graphql(`
 		mutation UpdateTeam($input: UpdateTeamInput!) {
@@ -18,8 +19,35 @@
 			}
 		}
 	`);
+	const enableTeamFeature = graphql(`
+		mutation EnableTeamFeature($input: EnableTeamFeatureInput!) {
+			enableTeamFeature(input: $input) {
+				team {
+					features {
+						name
+						env
+					}
+				}
+			}
+		}
+	`);
+	const disableTeamFeature = graphql(`
+		mutation DisableTeamFeature($input: DisableTeamFeatureInput!) {
+			disableTeamFeature(input: $input) {
+				team {
+					features {
+						name
+						env
+					}
+				}
+			}
+		}
+	`);
 
 	let teamSettings = $derived($TeamSettings.data?.team);
+	let aiEnabled = $derived(
+		teamSettings?.features.some(({ name, env }) => name === 'ai' && env === 'test')
+	);
 
 	let descriptionErrors: { message: string }[] | undefined = $state();
 
@@ -35,6 +63,14 @@
 		if (data.errors) {
 			descriptionErrors = data.errors;
 		}
+	};
+
+	const toggleAi = async () => {
+		aiErrors = undefined;
+		const result = await (aiEnabled ? disableTeamFeature : enableTeamFeature).mutate({
+			input: { teamSlug, feature: 'ai', env: 'test' }
+		});
+		if (result.errors) aiErrors = result.errors;
 	};
 </script>
 
@@ -61,6 +97,14 @@
 				>
 
 				<GraphErrors errors={descriptionErrors} size="small" />
+			</div>
+			<div>
+				<Heading level="2">KI</Heading>
+				Aktiver KI-funksjonalitet for teamet i testmiljøet.
+				<Switch checked={aiEnabled} onclick={toggleAi}>
+					{aiEnabled ? 'Deaktiver KI' : 'Aktiver KI'}
+				</Switch>
+				<GraphErrors errors={aiErrors} size="small" />
 			</div>
 		</div>
 	</div>
