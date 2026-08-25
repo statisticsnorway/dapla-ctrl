@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	"cloud.google.com/go/billing/budgets/apiv1"
+	budgets "cloud.google.com/go/billing/budgets/apiv1"
 	"cloud.google.com/go/billing/budgets/apiv1/budgetspb"
 	"cloud.google.com/go/iam/apiv1/iampb"
-	"cloud.google.com/go/monitoring/apiv3/v2"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
-	"cloud.google.com/go/resourcemanager/apiv3"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
-	"cloud.google.com/go/serviceusage/apiv1"
+	serviceusage "cloud.google.com/go/serviceusage/apiv1"
 	"cloud.google.com/go/serviceusage/apiv1/serviceusagepb"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -40,7 +40,9 @@ const (
 	aiBudgetThresholdsKey              = "ai_budget_thresholds"
 	aiBudgetBillingAccountKey          = "ai_budget_billing_account"
 	aiBudgetNotificationChannelNameKey = "ai_budget_notification_channel_name"
+	aiBudgetDevelopersBillingGroupKey  = "ai_budget_developers_billing_group"
 	groupSANameTemplateKey             = "group_sa_name_template"
+	allowlistKey                       = "team_allowlist"
 )
 
 type reconciler struct {
@@ -49,32 +51,12 @@ type reconciler struct {
 	AIBudgetBillingAccount        string
 	AIBudgetThresholds            []float64
 	AIBudgetNotificationName      string
-	BudgetNotificationEmails      []string
 	AIBudgetDeveloperBillingGroup string
 	GoogleServices                *googleServices
+	TeamAllowList                 []string
 }
 
 type optFunc func(*reconciler) error
-
-func WithBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
-	return func(r *reconciler) error {
-		var limit uint = 4
-		members, err := getGroupMembers(ctx, apiclient, r.AIBudgetDeveloperBillingGroup, limit)
-		if err != nil {
-			return err
-		}
-
-		developerEmails := make([]string, limit)
-
-		for i, member := range members {
-			developerEmails[i] = member.User.Email
-		}
-
-		r.BudgetNotificationEmails = developerEmails
-
-		return nil
-	}
-}
 
 func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
@@ -135,11 +117,22 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "The name of the budget notificaiton channel resource.",
 				Secret:      false,
 			},
-
+			{
+				Key:         aiBudgetDevelopersBillingGroupKey,
+				DisplayName: "AI Budget Developers Billing Group",
+				Description: "Group to send all notifications to (owners of the AI feature)",
+				Secret:      false,
+			},
 			{
 				Key:         groupSANameTemplateKey,
 				DisplayName: "Group Service Account Name Template",
 				Description: "Template for the name of the Group Service Account.",
+				Secret:      false,
+			},
+			{
+				Key:         allowlistKey,
+				DisplayName: "Team Allowlist",
+				Description: "Comma-separated list of teams to run the reconciler for. Use * for all teams.",
 				Secret:      false,
 			},
 		},
@@ -190,6 +183,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
+	// Only run for allowlisted teams. Skip if no allowlist is set.
+	if len(r.TeamAllowList) == 0 || (r.TeamAllowList[0] != "*" && !slices.Contains(r.TeamAllowList, daplaTeam.Slug)) {
+		return nil
+	}
+
 	resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 		TeamSlug: daplaTeam.Slug,
 		Env:      environment,
@@ -223,19 +221,28 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
-	budget, err := r.getExistingAIBudget(ctx, r.GoogleServices.CloudBudget, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
+	budget, err := r.getExistingAIBudget(ctx, r.GoogleServices.CloudBudget, projectID, fmt.Sprintf("%s %s", daplaTeam.Slug, aiBudgetDisplayNameSuffix))
 	if err != nil {
 		return err
 	}
 
-	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug), 1)
+	budgetNotificationEmails := make([]string, 0, 5)
+	teamDevelopersEmails, err := getGroupMemberEmails(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug), 1)
 	if err != nil {
 		return err
 	}
+	budgetNotificationEmails = append(budgetNotificationEmails, teamDevelopersEmails...)
 
 	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
-	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, r.BudgetNotificationEmails[:4])
-	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
+	if r.AIBudgetDeveloperBillingGroup != "" {
+		aiBudgetNotificationEmails, err := getGroupMemberEmails(ctx, client, r.AIBudgetDeveloperBillingGroup, 4)
+		if err != nil {
+			return err
+		}
+		budgetNotificationEmails = append(budgetNotificationEmails, aiBudgetNotificationEmails...)
+	}
+
+	notificationChannels, err := getExistingAIBudgetNotificationChannels(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
@@ -385,6 +392,13 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			r.AIBudgetBillingAccount = c.Value
 		case groupSANameTemplateKey:
 			r.GroupSANameTemplate = c.Value
+		case aiBudgetDevelopersBillingGroupKey:
+			r.AIBudgetDeveloperBillingGroup = c.Value
+		case allowlistKey:
+			if c.Value == "" {
+				continue
+			}
+			r.TeamAllowList = strings.Split(c.Value, ",")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 
@@ -409,7 +423,7 @@ func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.AP
 		return err
 	}
 
-	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 100)
+	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 0)
 	if err != nil {
 		return err
 	}
@@ -511,25 +525,24 @@ func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, 
 	return channelNames, nil
 }
 
-// Get existing notification channels, if any budgetNotificationEmail is missing a channel return an error
-func getExistingAIBudgetNotificationChannel(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectName string, emails []string) ([]*monitoringpb.NotificationChannel, error) {
+// Get existing notification channels for the given emails
+func getExistingAIBudgetNotificationChannels(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectName string, emails []string) ([]*monitoringpb.NotificationChannel, error) {
 	channels := make([]*monitoringpb.NotificationChannel, 0, len(emails))
 	for _, email := range emails {
 		filter := fmt.Sprintf(`type = "%s" AND labels.%s = "%s"`, aiBudgetNotificationType, aiBudgetNotificationLabel, email)
 		channel, err := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter}).Next()
-		if err == iterator.Done {
-			return nil, fmt.Errorf("AI budget notification channel for %q does not exist in %q", email, projectName)
-		}
 		if err != nil {
 			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
-		channels = append(channels, channel)
+		if err != iterator.Done && channel != nil {
+			channels = append(channels, channel)
+		}
 	}
 	return channels, nil
 }
 
-func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, displayName string) (*budgetspb.Budget, error) {
-	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: r.AIBudgetBillingAccount})
+func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budgets.BudgetClient, projectId, displayName string) (*budgetspb.Budget, error) {
+	it := budgetClient.ListBudgets(ctx, &budgetspb.ListBudgetsRequest{Parent: r.AIBudgetBillingAccount, Scope: "projects/" + projectId})
 	for budget, err := range it.All() {
 		if err != nil {
 			return nil, fmt.Errorf("list AI budgets: %w", err)
@@ -572,8 +585,9 @@ func (r *reconciler) getAIBudget(daplaTeamSlug, projectNumber string, budgetNoti
 	}
 }
 
-func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group string, limit uint) ([]*protoapi.GroupMember, error) {
-	dbMembersIt := iter.New(ctx, int64(limit), func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
+// getGroupMembers gets up to `max` members of the given group from the API. If `max=0`, returns all members
+func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group string, max int) ([]*protoapi.GroupMember, error) {
+	dbMembersIt := iter.New(ctx, 20, func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
 		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
 			Name:   group,
 			Limit:  limit,
@@ -584,6 +598,9 @@ func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group str
 	var dbMembers []*protoapi.GroupMember
 	for dbMembersIt.Next() {
 		dbMembers = append(dbMembers, dbMembersIt.Value())
+		if max != 0 && len(dbMembers) == max {
+			break
+		}
 	}
 	return dbMembers, dbMembersIt.Err()
 }
@@ -645,6 +662,20 @@ func getStandardProjectID(ctx context.Context, client *resourcemanager.ProjectsC
 		return "", fmt.Errorf("no standard project found in folder %q for environment %q", folderID, env)
 	}
 	return projectID, nil
+}
+
+func getGroupMemberEmails(ctx context.Context, apiclient *apiclient.APIClient, group string, max int) ([]string, error) {
+	members, err := getGroupMembers(ctx, apiclient, group, max)
+	if err != nil {
+		return nil, err
+	}
+
+	emails := make([]string, 0, len(members))
+	for _, member := range members {
+		emails = append(emails, member.User.Email)
+	}
+
+	return emails, nil
 }
 
 // Delete implements [reconcilers.Reconciler].

@@ -36,13 +36,8 @@ team's standard project:
 - `monitoring.notificationChannels.list`
 - `monitoring.notificationChannels.create`
 - `monitoring.notificationChannels.delete`
-
-It also requires these permissions on the billing account configured by `AIBudgetBillingAccount`:
-
-- `billing.budgets.list`
-- `billing.budgets.create`
-- `billing.budgets.update`
-- `billing.budgets.delete`
+- `billing.resourcebudgets.read`
+- `billing.resourcebudgets.write`
 
 ## Tests
 
