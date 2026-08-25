@@ -61,14 +61,14 @@ type optFunc func(*reconciler) error
 func WithBudgetNotifications(ctx context.Context, apiclient *apiclient.APIClient) optFunc {
 	return func(r *reconciler) error {
 		var limit uint = 4
-		members, err := getGroupMembers(ctx, apiclient, r.AIBudgetDeveloperBillingGroup, limit)
+		members, err := getGroupMembers(ctx, apiclient, r.AIBudgetDeveloperBillingGroup)
 		if err != nil {
 			return err
 		}
 
 		developerEmails := make([]string, limit)
 
-		for i, member := range members {
+		for i, member := range members[:limit] {
 			developerEmails[i] = member.User.Email
 		}
 
@@ -241,14 +241,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug), 1)
+	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug))
 	if err != nil {
 		return err
 	}
 
 	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
 	budgetNotificationEmails := slices.Concat([]string{teamDevelopers[0].User.Email}, r.BudgetNotificationEmails[:4])
-	notificationChannels, err := getExistingAIBudgetNotificationChannel(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
+	notificationChannels, err := getExistingAIBudgetNotificationChannels(ctx, r.GoogleServices.NotificationChannel, "projects/"+projectID, budgetNotificationEmails)
 	if err != nil {
 		return err
 	}
@@ -427,7 +427,7 @@ func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.AP
 		return err
 	}
 
-	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug), 100)
+	teamDevelopers, err := getGroupMembers(ctx, client, fmt.Sprintf("%s-developers", daplaTeamSlug))
 	if err != nil {
 		return err
 	}
@@ -529,19 +529,18 @@ func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, 
 	return channelNames, nil
 }
 
-// Get existing notification channels, if any budgetNotificationEmail is missing a channel return an error
-func getExistingAIBudgetNotificationChannel(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectName string, emails []string) ([]*monitoringpb.NotificationChannel, error) {
+// Get existing notification channels for the given emails
+func getExistingAIBudgetNotificationChannels(ctx context.Context, ncClient *monitoring.NotificationChannelClient, projectName string, emails []string) ([]*monitoringpb.NotificationChannel, error) {
 	channels := make([]*monitoringpb.NotificationChannel, 0, len(emails))
 	for _, email := range emails {
 		filter := fmt.Sprintf(`type = "%s" AND labels.%s = "%s"`, aiBudgetNotificationType, aiBudgetNotificationLabel, email)
 		channel, err := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter}).Next()
-		if err == iterator.Done {
-			return nil, fmt.Errorf("AI budget notification channel for %q does not exist in %q", email, projectName)
-		}
 		if err != nil {
 			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
-		channels = append(channels, channel)
+		if err != iterator.Done && channel != nil {
+			channels = append(channels, channel)
+		}
 	}
 	return channels, nil
 }
@@ -590,8 +589,8 @@ func (r *reconciler) getAIBudget(daplaTeamSlug, projectNumber string, budgetNoti
 	}
 }
 
-func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group string, limit uint) ([]*protoapi.GroupMember, error) {
-	dbMembersIt := iter.New(ctx, int64(limit), func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
+func getGroupMembers(ctx context.Context, client *apiclient.APIClient, group string) ([]*protoapi.GroupMember, error) {
+	dbMembersIt := iter.New(ctx, 20, func(limit, offset int64) (*protoapi.ListGroupMembersResponse, error) {
 		return client.Groups().Members(ctx, &protoapi.ListGroupMembersRequest{
 			Name:   group,
 			Limit:  limit,
