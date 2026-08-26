@@ -2,9 +2,9 @@ package gcpsyncer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
-	"time"
 
 	"cloud.google.com/go/auth/credentials/idtoken"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
@@ -17,7 +17,6 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/queue"
-	"k8s.io/utils/ptr"
 )
 
 const (
@@ -28,7 +27,6 @@ const (
 	configGcpProvisioningResourceId = "gcpProvisioningResourceId"
 	configGcpSyncJobId              = "gcpSyncJobId"
 	configGcpSyncRuleId             = "gcpSyncRuleId"
-	configGcpSyncInterval           = "gcpSyncInterval"
 )
 
 type gcpSyncConfig struct {
@@ -37,7 +35,6 @@ type gcpSyncConfig struct {
 	GoogleSyncProvisioningResourceId uuid.UUID
 	GoogleSyncJobId                  string
 	GoogleSyncRuleId                 string
-	SyncInterval                     time.Duration
 }
 
 type gcpSyncReconciler struct {
@@ -51,7 +48,7 @@ type gcpSyncReconciler struct {
 
 type SyncRequest struct {
 	Group string
-	User  *string
+	Users []string
 }
 
 func New(client *apiclient.APIClient) *gcpSyncReconciler {
@@ -102,12 +99,6 @@ func (s *gcpSyncReconciler) Configuration() *protoapi.NewReconciler {
 				Description: "ID of the Entra ID GCP Sync Job Rule ID",
 				Secret:      false,
 			},
-			{
-				Key:         configGcpSyncInterval,
-				DisplayName: "GCP Sync interval",
-				Description: "Max duration before a sync is triggered after first request, as a Go duration",
-				Secret:      false,
-			},
 		},
 	}
 }
@@ -121,74 +112,39 @@ func (s *gcpSyncReconciler) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		default:
-		}
-		groups, err := s.CollectRequests(ctx)
-		if err != nil {
-			s.log.Errorf("error collecting sync requests: %s", err)
-			continue
-		}
-		if err := s.Sync(ctx, groups); err != nil {
-			s.log.Errorf("error running gcp sync: %s", err)
-		}
-	}
-}
-
-func (s *gcpSyncReconciler) CollectRequests(ctx context.Context) (map[string][]string, error) {
-	syncTimer := &time.Timer{}
-	groupsToSync := make(map[string][]string)
-	for {
-		select {
 		case r := <-s.queueChannel:
-			if syncTimer.C == nil {
-				if err := s.parseConfig(ctx); err != nil {
-					return nil, fmt.Errorf("parse reconciler config: %w", err)
-				}
-				s.log.WithField("interval", s.config.SyncInterval).Info("received first sync request, starting collection")
-				syncTimer = time.NewTimer(s.config.SyncInterval)
+			if err := s.Sync(ctx, r); err != nil {
+				s.log.Errorf("error running gcp sync: %s", err)
 			}
-			if r.User == nil {
-				if _, ok := groupsToSync[r.Group]; !ok {
-					groupsToSync[r.Group] = nil
-				}
-			} else if !slices.Contains(groupsToSync[r.Group], *r.User) {
-				groupsToSync[r.Group] = append(groupsToSync[r.Group], *r.User)
-			}
-			// Remove duplicates, stop if over 4 users in group (5 is limit for sync job)
-			if len(groupsToSync[r.Group]) > 4 {
-				s.log.Info("group has 5 or more member updates, splitting..")
-				return groupsToSync, nil
-			}
-
-		case <-ctx.Done():
-			return nil, context.Canceled
-		case <-syncTimer.C:
-			return groupsToSync, nil
 		}
 	}
 }
 
-func (s *gcpSyncReconciler) Sync(ctx context.Context, groups map[string][]string) error {
-	if len(groups) == 0 {
-		s.log.Info("no groups to sync")
-		return nil
+func (s *gcpSyncReconciler) Sync(ctx context.Context, req SyncRequest) error {
+	if err := s.parseConfig(ctx); err != nil {
+		return err
 	}
+	if len(req.Users) == 0 {
+		return s.syncGroupMembers(ctx, req.Group, nil)
+	}
+	var err error
+	for usersChunk := range slices.Chunk(req.Users, 5) {
+		err = errors.Join(err, s.syncGroupMembers(ctx, req.Group, usersChunk))
+	}
+	return err
+}
 
+func (s *gcpSyncReconciler) syncGroupMembers(ctx context.Context, group string, users []string) error {
 	requestBody := graphserviceprincipals.NewItemSynchronizationJobsItemProvisionOnDemandPostRequestBody()
 
 	var parameters []models.SynchronizationJobApplicationParametersable
-
-	for group, users := range groups {
-		syncParamSet := syncJobParameterSet(s.config.GoogleSyncRuleId, group, users)
-		parameters = append(parameters, syncParamSet)
-	}
-
+	syncParamSet := syncJobParameterSet(s.config.GoogleSyncRuleId, group, users)
+	parameters = append(parameters, syncParamSet)
 	requestBody.SetParameters(parameters)
 
 	_, err := s.entraId.ServicePrincipals().ByServicePrincipalId(s.config.GoogleSyncProvisioningResourceId.String()).
 		Synchronization().Jobs().BySynchronizationJobId(s.config.GoogleSyncJobId).ProvisionOnDemand().
 		Post(ctx, requestBody, nil)
-
 	return err
 }
 
@@ -216,12 +172,6 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 				return fmt.Errorf("parse provisioning resource id: %w", err)
 			}
 			gc.GoogleSyncProvisioningResourceId = id
-		case configGcpSyncInterval:
-			interval, err := time.ParseDuration(c.Value)
-			if err != nil {
-				return fmt.Errorf("could not parse sync interval duration: %w", err)
-			}
-			gc.SyncInterval = interval
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -258,19 +208,22 @@ func (s *gcpSyncReconciler) parseConfig(ctx context.Context) error {
 }
 
 func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *models.SynchronizationJobApplicationParameters {
-	mutatedMembers := make([]models.SynchronizationJobSubjectable, 0, len(userIds))
-	for _, u := range userIds {
-		member := models.NewSynchronizationJobSubject()
-		member.SetObjectId(&u)
-		member.SetObjectTypeName(ptr.To("User"))
-		mutatedMembers = append(mutatedMembers, member)
-	}
 	links := models.NewSynchronizationLinkedObjects()
-	links.SetMembers(mutatedMembers)
+
+	if len(userIds) != 0 {
+		mutatedMembers := make([]models.SynchronizationJobSubjectable, 0, len(userIds))
+		for _, u := range userIds {
+			member := models.NewSynchronizationJobSubject()
+			member.SetObjectId(&u)
+			member.SetObjectTypeName(new("User"))
+			mutatedMembers = append(mutatedMembers, member)
+		}
+		links.SetMembers(mutatedMembers)
+	}
 
 	groupSubject := models.NewSynchronizationJobSubject()
 	groupSubject.SetObjectId(&groupId)
-	groupSubject.SetObjectTypeName(ptr.To("Group"))
+	groupSubject.SetObjectTypeName(new("Group"))
 	groupSubject.SetLinks(links)
 
 	parameters := models.NewSynchronizationJobApplicationParameters()
@@ -280,8 +233,8 @@ func syncJobParameterSet(syncRuleId string, groupId string, userIds []string) *m
 	return parameters
 }
 
-func (s *gcpSyncReconciler) Add(group string, member *string) error {
-	return s.queue.Add(SyncRequest{Group: group, User: member})
+func (s *gcpSyncReconciler) Add(group string, members []string) error {
+	return s.queue.Add(SyncRequest{Group: group, Users: members})
 }
 
 // These methods are no-ops, just there to satisfy the Reconciler interface.

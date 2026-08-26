@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"time"
 
 	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
@@ -39,7 +40,7 @@ const (
 var validMasters = []string{"entraid", "database"}
 
 type syncQueuer interface {
-	Add(group string, member *string) error
+	Add(group string, members []string) error
 }
 
 type entraIdGroupReconciler struct {
@@ -186,6 +187,9 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 		}
 
 		if r.syncQueuer != nil {
+			// Yes, this is terrible, yes we should instead poll and wait for the group to be available.
+			// But hopefully this only happens every so often, and hopefully 5 seconds is enough to start syncing.
+			time.Sleep(5 * time.Second)
 			if err := r.syncQueuer.Add(group.ExternalId, nil); err != nil {
 				return fmt.Errorf("add to sync queue: %w", err)
 			}
@@ -224,16 +228,20 @@ func (r *entraIdGroupReconciler) reconcileGroup(ctx context.Context, entraId *ms
 	}
 
 	if r.syncQueuer != nil && (len(localOnlyUsers) > 0 || len(remoteOnlyUsers) > 0) {
-		var joinedError error
-		for _, u := range slices.Concat(localOnlyUsers, remoteOnlyUsers) {
-			err := r.syncQueuer.Add(group.ExternalId, &u.ExternalId)
-			if err != nil {
-				joinedError = errors.Join(joinedError, err)
-			}
+		// Yes, this is terrible, yes we should instead poll and wait for the members to be visible in Entra ID.
+		// But hopefully this only happens every so often, and hopefully 5 seconds is enough to start syncing.
+		time.Sleep(5 * time.Second)
+		userIds := make([]string, 0, len(localOnlyUsers)+len(remoteOnlyUsers))
+
+		for _, u := range localOnlyUsers {
+			userIds = append(userIds, u.ExternalId)
+		}
+		for _, u := range remoteOnlyUsers {
+			userIds = append(userIds, u.ExternalId)
 		}
 
-		if joinedError != nil {
-			return joinedError
+		if err := r.syncQueuer.Add(group.ExternalId, userIds); err != nil {
+			return err
 		}
 	}
 
