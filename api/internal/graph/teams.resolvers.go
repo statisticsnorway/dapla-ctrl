@@ -183,6 +183,9 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 		return nil, err
 	}
 
+	correlationID := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
+
 	return &team.EnableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,
 		Feature:  input.Feature,
@@ -205,6 +208,9 @@ func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.Di
 	if err := team.DisableTeamFeature(ctx, input.TeamSlug, string(input.Feature), string(input.Env), actor); err != nil {
 		return nil, err
 	}
+
+	correlationID := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
 
 	return &team.DisableTeamFeaturePayload{
 		TeamSlug: input.TeamSlug,

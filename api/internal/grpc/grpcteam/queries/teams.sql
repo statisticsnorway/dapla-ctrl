@@ -79,7 +79,7 @@ SELECT
 			WHERE
 				team_slug = @team_slug
 				AND name = @name
-                AND env = @env
+				AND env = @env
 		)
 	)
 ;
