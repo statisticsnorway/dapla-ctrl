@@ -44,7 +44,6 @@ require (
 	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7
 	google.golang.org/grpc v1.82.1
 	google.golang.org/protobuf v1.36.11
-	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
 )
 
 require github.com/stretchr/testify v1.11.1 // indirect
