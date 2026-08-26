@@ -531,12 +531,12 @@ func getExistingAIBudgetNotificationChannels(ctx context.Context, ncClient *moni
 	for _, email := range emails {
 		filter := fmt.Sprintf(`type = "%s" AND labels.%s = "%s"`, aiBudgetNotificationType, aiBudgetNotificationLabel, email)
 		channel, err := ncClient.ListNotificationChannels(ctx, &monitoringpb.ListNotificationChannelsRequest{Name: projectName, Filter: filter}).Next()
-		if err != nil {
+		if err == iterator.Done {
+			continue
+		} else if err != nil {
 			return nil, fmt.Errorf("list AI budget notification channels for %q: %w", projectName, err)
 		}
-		if err != iterator.Done && channel != nil {
-			channels = append(channels, channel)
-		}
+		channels = append(channels, channel)
 	}
 	return channels, nil
 }
@@ -551,7 +551,7 @@ func (r *reconciler) getExistingAIBudget(ctx context.Context, budgetClient *budg
 			return budget, nil
 		}
 	}
-	return nil, fmt.Errorf("list AI budgets: none matching name %s", displayName)
+	return nil, nil
 }
 
 func (r *reconciler) getAIBudget(daplaTeamSlug, projectNumber string, budgetNotificationLimitUnits int64, notificationChannelNames []string) *budgetspb.Budget {
