@@ -26,6 +26,7 @@
 	import ServiceAccountTokenDeletedActivityLogEntryText from '../activity/shared/texts/ServiceAccountTokenDeletedActivityLogEntryText.svelte';
 	import ServiceAccountTokenUpdatedActivityLogEntryText from '../activity/shared/texts/ServiceAccountTokenUpdatedActivityLogEntryText.svelte';
 	import ServiceAccountUpdatedActivityLogEntryText from '../activity/shared/texts/ServiceAccountUpdatedActivityLogEntryText.svelte';
+	import TeamFeatureToggledActivityLogEntryText from '../activity/shared/texts/TeamFeatureToggledActivityLogEntryText.svelte';
 
 	interface Props {
 		item: ActivityLogEntryFragment;
@@ -155,6 +156,14 @@
 							roleName
 						}
 					}
+					... on TeamFeatureEnabledActivityLogEntry {
+						__typename
+						env
+					}
+					... on TeamFeatureDisabledActivityLogEntry {
+						__typename
+						env
+					}
 				}
 			`)
 		)
@@ -201,6 +210,9 @@
 				return ServiceAccountCreatedActivityLogEntryText as Component<{ data: unknown }>;
 			case 'ServiceAccountTokenCreatedActivityLogEntry':
 				return ServiceAccountTokenCreatedActivityLogText as Component<{ data: unknown }>;
+			case 'TeamFeatureEnabledActivityLogEntry':
+			case 'TeamFeatureDisabledActivityLogEntry':
+				return TeamFeatureToggledActivityLogEntryText as Component<{ data: unknown }>;
 			default:
 				return null;
 		}
