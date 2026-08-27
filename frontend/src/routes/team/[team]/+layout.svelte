@@ -8,8 +8,15 @@
 	import EditTeamDisplayName from '$lib/ui/EditTeamDisplayName.svelte';
 
 	let { data, children }: LayoutProps = $props();
-	let { deletionInProgress, lastSuccessfulSync, UserInfo, viewerIsMember, displayName, teamSlug } =
-		$derived(data);
+	let {
+		deletionInProgress,
+		lastSuccessfulSync,
+		UserInfo,
+		viewerIsMember,
+		displayName,
+		teamSlug,
+		isManaged
+	} = $derived(data);
 
 	const section = $derived(browser ? page.data?.section : undefined);
 
@@ -45,7 +52,7 @@
 	{/if}
 
 	<div class="main">
-		<Menu {teamSlug} member={viewerIsMember} {isAdmin} />
+		<Menu {teamSlug} member={viewerIsMember} {isAdmin} {isManaged} />
 		<div class="container">
 			<EditTeamDisplayName {displayName} {teamSlug} {canEdit} {isTeamOverviewPage} />
 			<div>{@render children?.()}</div>

@@ -6,11 +6,13 @@ type Paginated = {
 
 export const menuItems = ({
 	path,
+	isManaged,
 	member,
 	isAdmin,
 	inventory
 }: {
 	path: string;
+	isManaged: boolean;
 	member: boolean;
 	isAdmin: boolean;
 	inventory?: {
@@ -64,7 +66,7 @@ export const menuItems = ({
 			menuItem('Datadeling', 'shared-data'),
 			(member || isAdmin) && menuItem('Dapla Lab', 'launch-lab'),
 			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log'),
-			isAdmin && menuItem('Innstillinger', 'settings')
+			isManaged && (member || isAdmin) && menuItem('Innstillinger', 'settings')
 		].filter(Boolean) as { label: string; href: string; active?: boolean }[]
 	];
 };
