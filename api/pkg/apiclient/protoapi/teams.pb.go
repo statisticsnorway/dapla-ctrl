@@ -27,8 +27,8 @@ type Team struct {
 	state                protoimpl.MessageState `protogen:"hybrid.v1"`
 	Slug                 string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
 	HasParquedit         bool                   `protobuf:"varint,2,opt,name=has_parquedit,json=hasParquedit,proto3" json:"has_parquedit,omitempty"`
-	IsManaged            bool                   `protobuf:"varint,3,opt,name=is_managed,json=isManaged,proto3" json:"is_managed,omitempty"`
-	DeleteKeyConfirmedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=delete_key_confirmed_at,json=deleteKeyConfirmedAt,proto3,oneof" json:"delete_key_confirmed_at,omitempty"`
+	DeleteKeyConfirmedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=delete_key_confirmed_at,json=deleteKeyConfirmedAt,proto3,oneof" json:"delete_key_confirmed_at,omitempty"`
+	IsManaged            bool                   `protobuf:"varint,4,opt,name=is_managed,json=isManaged,proto3" json:"is_managed,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -72,18 +72,18 @@ func (x *Team) GetHasParquedit() bool {
 	return false
 }
 
-func (x *Team) GetIsManaged() bool {
-	if x != nil {
-		return x.IsManaged
-	}
-	return false
-}
-
 func (x *Team) GetDeleteKeyConfirmedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DeleteKeyConfirmedAt
 	}
 	return nil
+}
+
+func (x *Team) GetIsManaged() bool {
+	if x != nil {
+		return x.IsManaged
+	}
+	return false
 }
 
 func (x *Team) SetSlug(v string) {
@@ -94,12 +94,12 @@ func (x *Team) SetHasParquedit(v bool) {
 	x.HasParquedit = v
 }
 
-func (x *Team) SetIsManaged(v bool) {
-	x.IsManaged = v
-}
-
 func (x *Team) SetDeleteKeyConfirmedAt(v *timestamppb.Timestamp) {
 	x.DeleteKeyConfirmedAt = v
+}
+
+func (x *Team) SetIsManaged(v bool) {
+	x.IsManaged = v
 }
 
 func (x *Team) HasDeleteKeyConfirmedAt() bool {
@@ -118,8 +118,8 @@ type Team_builder struct {
 
 	Slug                 string
 	HasParquedit         bool
-	IsManaged            bool
 	DeleteKeyConfirmedAt *timestamppb.Timestamp
+	IsManaged            bool
 }
 
 func (b0 Team_builder) Build() *Team {
@@ -128,8 +128,8 @@ func (b0 Team_builder) Build() *Team {
 	_, _ = b, x
 	x.Slug = b.Slug
 	x.HasParquedit = b.HasParquedit
-	x.IsManaged = b.IsManaged
 	x.DeleteKeyConfirmedAt = b.DeleteKeyConfirmedAt
+	x.IsManaged = b.IsManaged
 	return m0
 }
 
@@ -963,10 +963,10 @@ const file_teams_proto_rawDesc = "" +
 	"\vteams.proto\x12\x12dapla.api.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\fgroups.proto\x1a\x10pagination.proto\"\xd2\x01\n" +
 	"\x04Team\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\x12#\n" +
-	"\rhas_parquedit\x18\x02 \x01(\bR\fhasParquedit\x12\x1d\n" +
+	"\rhas_parquedit\x18\x02 \x01(\bR\fhasParquedit\x12V\n" +
+	"\x17delete_key_confirmed_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x14deleteKeyConfirmedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"is_managed\x18\x03 \x01(\bR\tisManaged\x12V\n" +
-	"\x17delete_key_confirmed_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x14deleteKeyConfirmedAt\x88\x01\x01B\x1a\n" +
+	"is_managed\x18\x04 \x01(\bR\tisManagedB\x1a\n" +
 	"\x18_delete_key_confirmed_at\"/\n" +
 	"\aFeature\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
