@@ -99,14 +99,13 @@
 				<GraphErrors errors={descriptionErrors} size="small" />
 			</div>
 			<div>
-				<Heading level="2">KI</Heading>
+				<Heading level="2">Kunsting Intelligens</Heading>
 				Aktiver KI-funksjonalitet for teamet i testmiljøet.
 				<Switch checked={aiEnabled} onclick={toggleAi}>
 					{aiEnabled ? 'Deaktiver KI' : 'Aktiver KI'}
 				</Switch>
 				<GraphErrors errors={aiErrors} size="small" />
 			</div>
-			<Heading level="2">Kunsting Intelligens</Heading>
 		</div>
 	</div>
 {/if}

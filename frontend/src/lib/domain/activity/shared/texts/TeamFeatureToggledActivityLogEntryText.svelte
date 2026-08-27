@@ -15,7 +15,7 @@
 	const featureToDisplayName = (feature: string) => {
 		switch (feature) {
 			case 'ai':
-				return 'AI-funksjonalitet';
+				return 'KI-funksjonalitet';
 			default:
 				return capitalizeFirstLetter(feature);
 		}
