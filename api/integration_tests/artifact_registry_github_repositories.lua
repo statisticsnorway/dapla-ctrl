@@ -1,6 +1,6 @@
 local member = User.new()
 local unauthorized = User.new()
-local team = Team.new("artifact-registry", "724")
+local team = Team.new("artifact-registry", "724", false)
 local repositoryName = "github-repo"
 
 Helper.SQLExec([[
