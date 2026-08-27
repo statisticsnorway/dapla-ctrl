@@ -12,6 +12,7 @@ message Team {
   string slug = 1;
   bool has_parquedit = 2;
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
+  bool is_managed = 4;
 }
 
 message Feature {

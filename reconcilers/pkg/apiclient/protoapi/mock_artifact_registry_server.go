@@ -38,6 +38,74 @@ func (_m *MockArtifactRegistryServer) EXPECT() *MockArtifactRegistryServer_Expec
 	return &MockArtifactRegistryServer_Expecter{mock: &_m.Mock}
 }
 
+// GetArtifactRegistryGithubAllowlist provides a mock function for the type MockArtifactRegistryServer
+func (_mock *MockArtifactRegistryServer) GetArtifactRegistryGithubAllowlist(context1 context.Context, getArtifactRegistryGithubAllowlistRequest *GetArtifactRegistryGithubAllowlistRequest) (*GetArtifactRegistryGithubAllowlistResponse, error) {
+	ret := _mock.Called(context1, getArtifactRegistryGithubAllowlistRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetArtifactRegistryGithubAllowlist")
+	}
+
+	var r0 *GetArtifactRegistryGithubAllowlistResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetArtifactRegistryGithubAllowlistRequest) (*GetArtifactRegistryGithubAllowlistResponse, error)); ok {
+		return returnFunc(context1, getArtifactRegistryGithubAllowlistRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetArtifactRegistryGithubAllowlistRequest) *GetArtifactRegistryGithubAllowlistResponse); ok {
+		r0 = returnFunc(context1, getArtifactRegistryGithubAllowlistRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*GetArtifactRegistryGithubAllowlistResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *GetArtifactRegistryGithubAllowlistRequest) error); ok {
+		r1 = returnFunc(context1, getArtifactRegistryGithubAllowlistRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetArtifactRegistryGithubAllowlist'
+type MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call struct {
+	*mock.Call
+}
+
+// GetArtifactRegistryGithubAllowlist is a helper method to define mock.On call
+//   - context1 context.Context
+//   - getArtifactRegistryGithubAllowlistRequest *GetArtifactRegistryGithubAllowlistRequest
+func (_e *MockArtifactRegistryServer_Expecter) GetArtifactRegistryGithubAllowlist(context1 interface{}, getArtifactRegistryGithubAllowlistRequest interface{}) *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call {
+	return &MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call{Call: _e.mock.On("GetArtifactRegistryGithubAllowlist", context1, getArtifactRegistryGithubAllowlistRequest)}
+}
+
+func (_c *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call) Run(run func(context1 context.Context, getArtifactRegistryGithubAllowlistRequest *GetArtifactRegistryGithubAllowlistRequest)) *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *GetArtifactRegistryGithubAllowlistRequest
+		if args[1] != nil {
+			arg1 = args[1].(*GetArtifactRegistryGithubAllowlistRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call) Return(getArtifactRegistryGithubAllowlistResponse *GetArtifactRegistryGithubAllowlistResponse, err error) *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call {
+	_c.Call.Return(getArtifactRegistryGithubAllowlistResponse, err)
+	return _c
+}
+
+func (_c *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call) RunAndReturn(run func(context1 context.Context, getArtifactRegistryGithubAllowlistRequest *GetArtifactRegistryGithubAllowlistRequest) (*GetArtifactRegistryGithubAllowlistResponse, error)) *MockArtifactRegistryServer_GetArtifactRegistryGithubAllowlist_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetArtifactRegistryRepo provides a mock function for the type MockArtifactRegistryServer
 func (_mock *MockArtifactRegistryServer) GetArtifactRegistryRepo(context1 context.Context, getArtifactRegistryRepoRequest *GetArtifactRegistryRepoRequest) (*GetArtifactRegistryRepoResponse, error) {
 	ret := _mock.Called(context1, getArtifactRegistryRepoRequest)
@@ -170,6 +238,74 @@ func (_c *MockArtifactRegistryServer_ListArtifactRegistryReposForTeam_Call) Retu
 }
 
 func (_c *MockArtifactRegistryServer_ListArtifactRegistryReposForTeam_Call) RunAndReturn(run func(context1 context.Context, listArtifactRegistryReposForTeamRequest *ListArtifactRegistryReposForTeamRequest) (*ListArtifactRegistryReposForTeamResponse, error)) *MockArtifactRegistryServer_ListArtifactRegistryReposForTeam_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SetArtifactRegistryRepoSizeBytes provides a mock function for the type MockArtifactRegistryServer
+func (_mock *MockArtifactRegistryServer) SetArtifactRegistryRepoSizeBytes(context1 context.Context, setArtifactRegistryRepoSizeBytesRequest *SetArtifactRegistryRepoSizeBytesRequest) (*SetArtifactRegistryRepoSizeBytesResponse, error) {
+	ret := _mock.Called(context1, setArtifactRegistryRepoSizeBytesRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetArtifactRegistryRepoSizeBytes")
+	}
+
+	var r0 *SetArtifactRegistryRepoSizeBytesResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *SetArtifactRegistryRepoSizeBytesRequest) (*SetArtifactRegistryRepoSizeBytesResponse, error)); ok {
+		return returnFunc(context1, setArtifactRegistryRepoSizeBytesRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *SetArtifactRegistryRepoSizeBytesRequest) *SetArtifactRegistryRepoSizeBytesResponse); ok {
+		r0 = returnFunc(context1, setArtifactRegistryRepoSizeBytesRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*SetArtifactRegistryRepoSizeBytesResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *SetArtifactRegistryRepoSizeBytesRequest) error); ok {
+		r1 = returnFunc(context1, setArtifactRegistryRepoSizeBytesRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetArtifactRegistryRepoSizeBytes'
+type MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call struct {
+	*mock.Call
+}
+
+// SetArtifactRegistryRepoSizeBytes is a helper method to define mock.On call
+//   - context1 context.Context
+//   - setArtifactRegistryRepoSizeBytesRequest *SetArtifactRegistryRepoSizeBytesRequest
+func (_e *MockArtifactRegistryServer_Expecter) SetArtifactRegistryRepoSizeBytes(context1 interface{}, setArtifactRegistryRepoSizeBytesRequest interface{}) *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call {
+	return &MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call{Call: _e.mock.On("SetArtifactRegistryRepoSizeBytes", context1, setArtifactRegistryRepoSizeBytesRequest)}
+}
+
+func (_c *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call) Run(run func(context1 context.Context, setArtifactRegistryRepoSizeBytesRequest *SetArtifactRegistryRepoSizeBytesRequest)) *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *SetArtifactRegistryRepoSizeBytesRequest
+		if args[1] != nil {
+			arg1 = args[1].(*SetArtifactRegistryRepoSizeBytesRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call) Return(setArtifactRegistryRepoSizeBytesResponse *SetArtifactRegistryRepoSizeBytesResponse, err error) *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call {
+	_c.Call.Return(setArtifactRegistryRepoSizeBytesResponse, err)
+	return _c
+}
+
+func (_c *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call) RunAndReturn(run func(context1 context.Context, setArtifactRegistryRepoSizeBytesRequest *SetArtifactRegistryRepoSizeBytesRequest) (*SetArtifactRegistryRepoSizeBytesResponse, error)) *MockArtifactRegistryServer_SetArtifactRegistryRepoSizeBytes_Call {
 	_c.Call.Return(run)
 	return _c
 }

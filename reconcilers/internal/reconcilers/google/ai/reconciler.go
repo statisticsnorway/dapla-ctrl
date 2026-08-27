@@ -183,6 +183,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
+	// Only reconcile managed teams
+	if !daplaTeam.IsManaged {
+		return nil
+	}
+
 	// Only run for allowlisted teams. Skip if no allowlist is set.
 	if len(r.TeamAllowList) == 0 || (r.TeamAllowList[0] != "*" && !slices.Contains(r.TeamAllowList, daplaTeam.Slug)) {
 		return nil
