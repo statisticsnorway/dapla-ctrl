@@ -170,11 +170,20 @@ func (r *mutationResolver) RemoveTeamAccessManager(ctx context.Context, input te
 func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.EnableTeamFeatureInput) (*team.EnableTeamFeaturePayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
+	daplaTeam, err := team.Get(ctx, input.TeamSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	if !daplaTeam.IsManaged && !actor.User.IsAdmin() {
+		return nil, apierror.Errorf("Features are only supported for managed teams.")
+	}
+
 	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
 		return nil, err
 	}
 
-	err := validateTeamFeatureArgs(string(input.Feature), string(input.Env))
+	err = validateTeamFeatureArgs(string(input.Feature), string(input.Env))
 	if err != nil {
 		return nil, err
 	}
@@ -196,11 +205,20 @@ func (r *mutationResolver) EnableTeamFeature(ctx context.Context, input team.Ena
 func (r *mutationResolver) DisableTeamFeature(ctx context.Context, input team.DisableTeamFeatureInput) (*team.DisableTeamFeaturePayload, error) {
 	actor := authz.ActorFromContext(ctx)
 
+	daplaTeam, err := team.Get(ctx, input.TeamSlug)
+	if err != nil {
+		return nil, err
+	}
+
+	if !daplaTeam.IsManaged && !actor.User.IsAdmin() {
+		return nil, apierror.Errorf("Features are only supported for managed teams.")
+	}
+
 	if err := authz.CanManageTeam(ctx, input.TeamSlug); err != nil {
 		return nil, err
 	}
 
-	err := validateTeamFeatureArgs(string(input.Feature), string(input.Env))
+	err = validateTeamFeatureArgs(string(input.Feature), string(input.Env))
 	if err != nil {
 		return nil, err
 	}
