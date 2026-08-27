@@ -13,6 +13,7 @@ const luaTeamTypeName = "Team"
 type Team struct {
 	Slug        slug.Slug
 	SectionCode string
+	IsManaged   bool
 }
 
 func teamMetatable() *spec.Typemetatable {
@@ -30,6 +31,11 @@ func teamMetatable() *spec.Typemetatable {
 					Name: "sectionCode",
 					Type: []spec.ArgumentType{spec.ArgumentTypeString},
 					Doc:  "The code of the section the team belongs to",
+				},
+				{
+					Name: "isManaged?",
+					Type: []spec.ArgumentType{spec.ArgumentTypeBoolean},
+					Doc:  "Whether the team is managed",
 				},
 			},
 			Func: createTeam,
@@ -53,6 +59,7 @@ func createTeam(L *lua.LState) int {
 	team, err := db.Create(L.Context(), teamsql.CreateParams{
 		Slug:        slug.Slug(L.CheckString(1)),
 		SectionCode: L.CheckString(2),
+		IsManaged:   L.OptBool(3, true),
 	})
 	if err != nil {
 		L.RaiseError("failed to create team: %s", err)
@@ -62,6 +69,7 @@ func createTeam(L *lua.LState) int {
 	ret := &Team{
 		Slug:        team.Slug,
 		SectionCode: team.SectionCode,
+		IsManaged:   team.IsManaged,
 	}
 	ud := L.NewUserData()
 	ud.Value = ret

@@ -2,7 +2,15 @@ local admin = User.new()
 admin:admin(true)
 
 local unauthorized = User.new()
-local team = Team.new("team-features", "724")
+
+local sectionCode = "724"
+local manager = User.new()
+
+Helper.SQLExec([[
+    UPDATE sections SET manager_id = $1 WHERE code = $2
+]], manager:id(), sectionCode)
+
+local team = Team.new("team-features", sectionCode)
 
 local feature = "ai"
 local env = "test"
@@ -231,6 +239,88 @@ Test.gql("Team feature changes appear in activity log", function(t)
 							env = env,
 						},
 					},
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("Manager of managed team can enable team feature", function(t)
+	t.addHeader("x-user-email", manager:email())
+
+	t.query(string.format([[
+		mutation {
+			enableTeamFeature(input: {
+				teamSlug: "%s"
+				feature: %s
+				env: %s
+			}) {
+				team {
+					slug
+					features {
+						name
+						env
+					}
+				}
+				feature
+				env
+			}
+		}
+	]], team:slug(), feature, env))
+
+	t.check {
+		data = {
+			enableTeamFeature = {
+				team = {
+					slug = team:slug(),
+					features = {
+						{
+							name = feature,
+							env = env,
+						},
+					},
+				},
+				feature = feature,
+				env = env,
+			},
+		},
+	}
+end)
+
+Helper.SQLExec([[
+	UPDATE teams SET is_managed = FALSE WHERE slug = $1
+	]], team:slug())
+
+Test.gql("Manager of self-managed team cannot disable team feature", function(t)
+	t.addHeader("x-user-email", manager:email())
+
+	t.query(string.format([[
+		mutation {
+			disableTeamFeature(input: {
+				teamSlug: "%s"
+				feature: %s
+				env: %s
+			}) {
+				team {
+					slug
+					features {
+						name
+						env
+					}
+				}
+				feature
+				env
+			}
+		}
+	]], team:slug(), feature, env))
+
+	t.check {
+		data = Null,
+		errors = {
+			{
+				message = "Features are only supported for managed teams.",
+				path = {
+					"disableTeamFeature",
 				},
 			},
 		},
