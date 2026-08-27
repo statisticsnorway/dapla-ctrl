@@ -106,6 +106,7 @@
 				</Switch>
 				<GraphErrors errors={aiErrors} size="small" />
 			</div>
+			<Heading level="2">Kunsting Intelligens</Heading>
 		</div>
 	</div>
 {/if}
