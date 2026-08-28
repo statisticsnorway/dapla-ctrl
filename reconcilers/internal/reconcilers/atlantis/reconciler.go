@@ -1,7 +1,6 @@
 package atlantis
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
@@ -14,6 +13,7 @@ import (
 	"cloud.google.com/go/iam/apiv1/iampb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/storage"
+	"github.com/google/go-cmp/cmp"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
@@ -184,7 +184,10 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, teamName 
 
 func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name string, webhookSecret string) error {
 	secretsClient := r.k8sClient.CoreV1().Secrets("default")
-	secretBytes := []byte(webhookSecret)
+
+	wantedData := map[string][]byte{
+		webhookSecretKey: []byte(webhookSecret),
+	}
 
 	secret, err := secretsClient.Get(ctx, name, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
@@ -193,29 +196,28 @@ func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name string,
 				Name:      name,
 				Namespace: "default",
 			},
-			Data: map[string][]byte{
-				webhookSecretKey: secretBytes,
-			},
+			Data: wantedData,
 		}, metav1.CreateOptions{})
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	kubernetesSecretValue := secret.Data[webhookSecretKey]
-	if len(secret.Data) == 1 && bytes.Equal(kubernetesSecretValue, secretBytes) {
+	if cmp.Equal(secret.Data, wantedData) {
 		return nil
 	}
 
-	secret.Data = map[string][]byte{
-		webhookSecretKey: secretBytes,
-	}
+	secret.Data = wantedData
 	_, err = secretsClient.Update(ctx, secret, metav1.UpdateOptions{})
 	return err
 }
 
 func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name string, repoConfig string) error {
 	configMapsClient := r.k8sClient.CoreV1().ConfigMaps("default")
+
+	wantedData := map[string]string{
+		reposYamlKey: repoConfig,
+	}
 
 	cm, err := configMapsClient.Get(ctx, name, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
@@ -224,23 +226,17 @@ func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name stri
 				Name:      name,
 				Namespace: "default",
 			},
-			Data: map[string]string{
-				reposYamlKey: repoConfig,
-			},
+			Data: wantedData,
 		}, metav1.CreateOptions{})
 		return err
 	} else if err != nil {
 		return err
 	}
 
-	configMapValue := cm.Data[reposYamlKey]
-	if len(cm.Data) == 1 && configMapValue == repoConfig {
+	if cmp.Equal(cm.Data, wantedData) {
 		return nil
 	}
 
-	cm.Data = map[string]string{
-		reposYamlKey: repoConfig,
-	}
 	_, err = configMapsClient.Update(ctx, cm, metav1.UpdateOptions{})
 	return err
 }
@@ -249,15 +245,17 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 	saClient := r.k8sClient.CoreV1().ServiceAccounts("default")
 	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.atlantisProject)
 
+	wantedAnnotations := map[string]string{
+		wiAnnotationKey: gcpSaName,
+	}
+
 	sa, err := saClient.Get(ctx, name, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
 		_, err = saClient.Create(ctx, &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: "default",
-				Annotations: map[string]string{
-					wiAnnotationKey: gcpSaName,
-				},
+				Name:        name,
+				Namespace:   "default",
+				Annotations: wantedAnnotations,
 			},
 		}, metav1.CreateOptions{})
 		return err
@@ -265,11 +263,11 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		return err
 	}
 
-	if sa.Annotations[wiAnnotationKey] == gcpSaName {
+	if cmp.Equal(sa.Annotations, wantedAnnotations) {
 		return nil
 	}
 
-	sa.Annotations[wiAnnotationKey] = gcpSaName
+	sa.Annotations = wantedAnnotations
 	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
 	return err
 }
