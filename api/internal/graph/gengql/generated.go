@@ -8201,10 +8201,10 @@ type EnableTeamFeaturePayload {
 	team: Team!
 
 	"The name of the feature to enable."
-	feature: String!
+	feature: TeamFeatureName!
 
 	"The environment to enable the feature in."
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 type DisableTeamFeaturePayload {
@@ -8212,10 +8212,10 @@ type DisableTeamFeaturePayload {
 	team: Team!
 
 	"The name of the feature to disable."
-	feature: String!
+	feature: TeamFeatureName!
 
 	"The environment to disable the feature in."
-	env: String!
+	env: TeamFeatureEnvironment!
 }
 
 type TeamConnection {
@@ -12319,7 +12319,7 @@ func (ec *executionContext) _DisableTeamFeaturePayload_feature(ctx context.Conte
 			return obj.Feature, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName,
 		true,
 		true,
 	)
@@ -12332,7 +12332,7 @@ func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_feature(_ con
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type TeamFeatureName does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12348,7 +12348,7 @@ func (ec *executionContext) _DisableTeamFeaturePayload_env(ctx context.Context, 
 			return obj.Env, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment,
 		true,
 		true,
 	)
@@ -12361,7 +12361,7 @@ func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_env(_ context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type TeamFeatureEnvironment does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12448,7 +12448,7 @@ func (ec *executionContext) _EnableTeamFeaturePayload_feature(ctx context.Contex
 			return obj.Feature, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNTeamFeatureName2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureName,
 		true,
 		true,
 	)
@@ -12461,7 +12461,7 @@ func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_feature(_ cont
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type TeamFeatureName does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12477,7 +12477,7 @@ func (ec *executionContext) _EnableTeamFeaturePayload_env(ctx context.Context, f
 			return obj.Env, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNTeamFeatureEnvironment2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamFeatureEnvironment,
 		true,
 		true,
 	)
@@ -12490,7 +12490,7 @@ func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_env(_ context.
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type TeamFeatureEnvironment does not have child fields")
 		},
 	}
 	return fc, nil

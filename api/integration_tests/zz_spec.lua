@@ -150,8 +150,9 @@ Team = {}
 --- Create a new team
 ---@param slug string
 ---@param sectionCode string
+---@param isManaged? boolean
 ---@return Team
-function Team.new(slug, sectionCode)
+function Team.new(slug, sectionCode, isManaged)
 	print("new")
 	return {}
 end

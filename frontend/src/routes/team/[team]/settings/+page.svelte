@@ -1,13 +1,22 @@
 <script lang="ts">
 	import { graphql } from '$houdini';
 	import GraphErrors from '$lib/ui/GraphErrors.svelte';
-	import { Heading, Switch } from '@nais/ds-svelte-community';
+	import { BodyShort, Heading, Switch } from '@nais/ds-svelte-community';
 	import type { PageProps } from './$types';
 	import Confirm from '$lib/ui/Confirm.svelte';
 
 	let { data }: PageProps = $props();
-	let { TeamSettings, teamSlug } = $derived(data);
+	let { TeamSettings, UserInfo, teamSlug } = $derived(data);
 	let showConfirmModal = $state(false);
+	let aiErrors: { message: string }[] | undefined = $state();
+
+	let team = $derived($TeamSettings.data?.team);
+	let isAdmin = $derived($UserInfo.data?.me.__typename === 'User' && $UserInfo.data.me.isAdmin);
+	let canManageTeam = $derived.by(() => {
+		let me = $UserInfo.data?.me;
+		if (me?.__typename !== 'User') return false;
+		return me.isAdmin || team?.section.manager?.email === me.email;
+	});
 
 	const updateTeam = graphql(`
 		mutation UpdateTeam($input: UpdateTeamInput!) {
@@ -18,8 +27,35 @@
 			}
 		}
 	`);
+	const enableTeamFeature = graphql(`
+		mutation EnableTeamFeature($input: EnableTeamFeatureInput!) {
+			enableTeamFeature(input: $input) {
+				team {
+					features {
+						name
+						env
+					}
+				}
+			}
+		}
+	`);
+	const disableTeamFeature = graphql(`
+		mutation DisableTeamFeature($input: DisableTeamFeatureInput!) {
+			disableTeamFeature(input: $input) {
+				team {
+					features {
+						name
+						env
+					}
+				}
+			}
+		}
+	`);
 
 	let teamSettings = $derived($TeamSettings.data?.team);
+	let aiEnabled = $derived(
+		teamSettings?.features.some(({ name, env }) => name === 'ai' && env === 'test')
+	);
 
 	let descriptionErrors: { message: string }[] | undefined = $state();
 
@@ -36,31 +72,59 @@
 			descriptionErrors = data.errors;
 		}
 	};
+
+	const toggleAi = async () => {
+		aiErrors = undefined;
+		const result = await (aiEnabled ? disableTeamFeature : enableTeamFeature).mutate({
+			input: { teamSlug, feature: 'ai', env: 'test' }
+		});
+		if (result.errors) aiErrors = result.errors;
+	};
 </script>
 
 <GraphErrors errors={$TeamSettings.errors} />
 
 {#if teamSettings}
+	<div class="description">
+		<BodyShort textColor="subtle" size="medium">
+			{#if canManageTeam}
+				Skru av og på funksjonalitet for {teamSettings.displayName}.
+			{:else}
+				Kun teamansvarlig kan skru av og på funksjonalitet.
+			{/if}
+		</BodyShort>
+	</div>
 	<div class="wrapper">
 		<div style="display: flex; flex-direction: column; gap: var(--spacing-layout)">
+			{#if isAdmin}
+				<div>
+					<Heading level="2">Parquedit</Heading>
+
+					Parquedit er en lagringsløsning for manuell editering, levert av team Dapla
+					Fellesfunksjoner.
+
+					<Switch
+						disabled={!canManageTeam}
+						checked={teamSettings.hasManualEditing}
+						onclick={(e: MouseEvent) => {
+							e.preventDefault();
+							showConfirmModal = true;
+						}}
+						>{teamSettings.hasManualEditing
+							? 'Fjern tilgang til Parquedit'
+							: 'Aktiver tilgang til Parquedit'}</Switch
+					>
+
+					<GraphErrors errors={descriptionErrors} size="small" />
+				</div>
+			{/if}
 			<div>
-				<Heading level="2">Parquedit</Heading>
-
-				Parquedit er en lagringsløsning for manuell editering, levert av team Dapla
-				Fellesfunksjoner.
-
-				<Switch
-					checked={teamSettings.hasManualEditing}
-					onclick={(e: MouseEvent) => {
-						e.preventDefault();
-						showConfirmModal = true;
-					}}
-					>{teamSettings.hasManualEditing
-						? 'Fjern tilgang til Parquedit'
-						: 'Aktiver tilgang til Parquedit'}</Switch
-				>
-
-				<GraphErrors errors={descriptionErrors} size="small" />
+				<Heading level="2">Kunstig Intelligens (KI)</Heading>
+				Aktiver KI-funksjonalitet for teamet i testmiljøet.
+				<Switch disabled={!canManageTeam} checked={aiEnabled} onclick={toggleAi}>
+					{aiEnabled ? 'Deaktiver KI' : 'Aktiver KI'}
+				</Switch>
+				<GraphErrors errors={aiErrors} size="small" />
 			</div>
 		</div>
 	</div>
@@ -83,5 +147,9 @@
 		display: grid;
 		grid-template-columns: 1fr 320px;
 		gap: var(--spacing-layout);
+	}
+	.description {
+		margin-top: calc(-1 * var(--spacing-layout));
+		margin-bottom: var(--ax-space-16);
 	}
 </style>

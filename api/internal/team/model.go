@@ -341,15 +341,15 @@ type RequestTeamDeletionPayload struct {
 }
 
 type EnableTeamFeaturePayload struct {
-	TeamSlug slug.Slug `json:"teamSlug"`
-	Feature  string    `json:"feature"`
-	Env      string    `json:"env"`
+	TeamSlug slug.Slug              `json:"teamSlug"`
+	Feature  TeamFeatureName        `json:"feature"`
+	Env      TeamFeatureEnvironment `json:"env"`
 }
 
 type DisableTeamFeaturePayload struct {
-	TeamSlug slug.Slug `json:"teamSlug"`
-	Feature  string    `json:"feature"`
-	Env      string    `json:"env"`
+	TeamSlug slug.Slug              `json:"teamSlug"`
+	Feature  TeamFeatureName        `json:"feature"`
+	Env      TeamFeatureEnvironment `json:"env"`
 }
 
 type TeamFeature struct {

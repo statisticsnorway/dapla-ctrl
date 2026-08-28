@@ -10,6 +10,17 @@ Reconciles these resources for a Dapla team:
 
 These resources are currently only created in the test environment.
 
+Reconciliation flow for a single team:
+
+``` mermaid
+flowchart LR
+    A(User) -->|Enables AI for team| B(Team Features Table)
+    C{Reconciler} -->|Reads table| B
+    C -->|Reconciles| D[Vertex AI API]
+    C -->|Reconciles| E[IAM bindings]
+    C -->|Reconciles| F[Billing Budget]
+```
+
 ## Required IAM permissions
 
 The reconciler's Google service account requires these permissions on each
@@ -25,13 +36,8 @@ team's standard project:
 - `monitoring.notificationChannels.list`
 - `monitoring.notificationChannels.create`
 - `monitoring.notificationChannels.delete`
-
-It also requires these permissions on the billing account configured by `AIBudgetBillingAccount`:
-
-- `billing.budgets.list`
-- `billing.budgets.create`
-- `billing.budgets.update`
-- `billing.budgets.delete`
+- `billing.resourcebudgets.read`
+- `billing.resourcebudgets.write`
 
 ## Tests
 

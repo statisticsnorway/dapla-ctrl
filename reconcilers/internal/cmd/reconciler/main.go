@@ -155,7 +155,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(parqueditReconciler)
 
-	aiReconciler, err := ai.New(ctx, ai.WithBudgetNotifications(ctx, client))
+	aiReconciler, err := ai.New(ctx)
 	if err != nil {
 		return fmt.Errorf("create ai reconciler: %w", err)
 	}

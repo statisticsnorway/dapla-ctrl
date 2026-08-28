@@ -125,6 +125,7 @@ func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
 		Slug:         team.Slug.String(),
 		HasParquedit: team.HasManualEditing,
+		IsManaged:    team.IsManaged,
 	}
 
 	if team.DeleteKeyConfirmedAt.Valid {

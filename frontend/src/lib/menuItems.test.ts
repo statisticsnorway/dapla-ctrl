@@ -6,6 +6,7 @@ describe('menuItems', () => {
 			expect(
 				menuItems({
 					path: '/team/devteam',
+					isManaged: true,
 					member: true,
 					isAdmin: false
 				})
@@ -15,7 +16,8 @@ describe('menuItems', () => {
 					{ label: 'Medlemmer', href: '/team/devteam/members' },
 					{ label: 'Datadeling', href: '/team/devteam/shared-data' },
 					{ label: 'Dapla Lab', href: '/team/devteam/launch-lab' },
-					{ label: 'Aktivitetslogg', href: '/team/devteam/activity-log' }
+					{ label: 'Aktivitetslogg', href: '/team/devteam/activity-log' },
+					{ label: 'Innstillinger', href: '/team/devteam/settings' }
 				]
 			]);
 		});

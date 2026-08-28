@@ -194,7 +194,7 @@ SELECT
 			WHERE
 				team_slug = $1
 				AND name = $2
-                AND env = $3
+				AND env = $3
 		)
 	)
 `

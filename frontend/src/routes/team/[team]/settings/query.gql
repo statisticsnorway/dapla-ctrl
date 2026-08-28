@@ -2,7 +2,17 @@ query TeamSettings($team: Slug!) {
 	team(slug: $team) {
 		id
 		slug
+		displayName
+		section {
+			manager {
+				email
+			}
+		}
 		lastSuccessfulSync
 		hasManualEditing
+		features {
+			name
+			env
+		}
 	}
 }

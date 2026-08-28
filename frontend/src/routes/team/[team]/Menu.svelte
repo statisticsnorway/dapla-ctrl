@@ -8,11 +8,13 @@
 	const {
 		member,
 		isAdmin,
-		teamSlug
+		teamSlug,
+		isManaged
 	}: {
 		member: boolean;
 		isAdmin: boolean;
 		teamSlug: string;
+		isManaged: boolean;
 	} = $props();
 
 	const Inventory = $derived(
@@ -59,6 +61,7 @@
 <Menu
 	items={menuItems({
 		path: page.url.pathname,
+		isManaged,
 		member,
 		isAdmin,
 		inventory: $Inventory.fetching ? undefined : $Inventory.data?.team
