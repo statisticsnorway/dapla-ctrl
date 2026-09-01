@@ -83,3 +83,17 @@ SELECT
 		)
 	)
 ;
+
+-- name: GetOwner :one
+SELECT
+  users.*
+FROM
+  user_roles
+INNER JOIN users ON users.id = user_roles.user_id
+WHERE
+user_roles.target_team_slug = @team_slug::slug
+AND user_roles.role_name = 'Team owner'
+ORDER BY
+    users.id
+LIMIT 1
+;

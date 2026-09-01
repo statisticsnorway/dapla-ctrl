@@ -204,6 +204,131 @@ func (b0 Feature_builder) Build() *Feature {
 	return m0
 }
 
+type GetOwnerRequest struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOwnerRequest) Reset() {
+	*x = GetOwnerRequest{}
+	mi := &file_teams_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOwnerRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOwnerRequest) ProtoMessage() {}
+
+func (x *GetOwnerRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_teams_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetOwnerRequest) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *GetOwnerRequest) SetSlug(v string) {
+	x.Slug = v
+}
+
+type GetOwnerRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Slug string
+}
+
+func (b0 GetOwnerRequest_builder) Build() *GetOwnerRequest {
+	m0 := &GetOwnerRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.Slug = b.Slug
+	return m0
+}
+
+type GetOwnerResponse struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOwnerResponse) Reset() {
+	*x = GetOwnerResponse{}
+	mi := &file_teams_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOwnerResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOwnerResponse) ProtoMessage() {}
+
+func (x *GetOwnerResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_teams_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *GetOwnerResponse) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *GetOwnerResponse) SetUser(v *User) {
+	x.User = v
+}
+
+func (x *GetOwnerResponse) HasUser() bool {
+	if x == nil {
+		return false
+	}
+	return x.User != nil
+}
+
+func (x *GetOwnerResponse) ClearUser() {
+	x.User = nil
+}
+
+type GetOwnerResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	User *User
+}
+
+func (b0 GetOwnerResponse_builder) Build() *GetOwnerResponse {
+	m0 := &GetOwnerResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.User = b.User
+	return m0
+}
+
 type DeleteTeamRequest struct {
 	state         protoimpl.MessageState `protogen:"hybrid.v1"`
 	Slug          string                 `protobuf:"bytes,1,opt,name=slug,proto3" json:"slug,omitempty"`
@@ -213,7 +338,7 @@ type DeleteTeamRequest struct {
 
 func (x *DeleteTeamRequest) Reset() {
 	*x = DeleteTeamRequest{}
-	mi := &file_teams_proto_msgTypes[2]
+	mi := &file_teams_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -225,7 +350,7 @@ func (x *DeleteTeamRequest) String() string {
 func (*DeleteTeamRequest) ProtoMessage() {}
 
 func (x *DeleteTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[2]
+	mi := &file_teams_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -269,7 +394,7 @@ type DeleteTeamResponse struct {
 
 func (x *DeleteTeamResponse) Reset() {
 	*x = DeleteTeamResponse{}
-	mi := &file_teams_proto_msgTypes[3]
+	mi := &file_teams_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -281,7 +406,7 @@ func (x *DeleteTeamResponse) String() string {
 func (*DeleteTeamResponse) ProtoMessage() {}
 
 func (x *DeleteTeamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[3]
+	mi := &file_teams_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -313,7 +438,7 @@ type GetTeamResponse struct {
 
 func (x *GetTeamResponse) Reset() {
 	*x = GetTeamResponse{}
-	mi := &file_teams_proto_msgTypes[4]
+	mi := &file_teams_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -325,7 +450,7 @@ func (x *GetTeamResponse) String() string {
 func (*GetTeamResponse) ProtoMessage() {}
 
 func (x *GetTeamResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[4]
+	mi := &file_teams_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -381,7 +506,7 @@ type GetTeamRequest struct {
 
 func (x *GetTeamRequest) Reset() {
 	*x = GetTeamRequest{}
-	mi := &file_teams_proto_msgTypes[5]
+	mi := &file_teams_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -393,7 +518,7 @@ func (x *GetTeamRequest) String() string {
 func (*GetTeamRequest) ProtoMessage() {}
 
 func (x *GetTeamRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[5]
+	mi := &file_teams_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -439,7 +564,7 @@ type ListTeamsRequest struct {
 
 func (x *ListTeamsRequest) Reset() {
 	*x = ListTeamsRequest{}
-	mi := &file_teams_proto_msgTypes[6]
+	mi := &file_teams_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +576,7 @@ func (x *ListTeamsRequest) String() string {
 func (*ListTeamsRequest) ProtoMessage() {}
 
 func (x *ListTeamsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[6]
+	mi := &file_teams_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -510,7 +635,7 @@ type ListTeamsResponse struct {
 
 func (x *ListTeamsResponse) Reset() {
 	*x = ListTeamsResponse{}
-	mi := &file_teams_proto_msgTypes[7]
+	mi := &file_teams_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -522,7 +647,7 @@ func (x *ListTeamsResponse) String() string {
 func (*ListTeamsResponse) ProtoMessage() {}
 
 func (x *ListTeamsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[7]
+	mi := &file_teams_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -593,7 +718,7 @@ type ListTeamGroupsRequest struct {
 
 func (x *ListTeamGroupsRequest) Reset() {
 	*x = ListTeamGroupsRequest{}
-	mi := &file_teams_proto_msgTypes[8]
+	mi := &file_teams_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -605,7 +730,7 @@ func (x *ListTeamGroupsRequest) String() string {
 func (*ListTeamGroupsRequest) ProtoMessage() {}
 
 func (x *ListTeamGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[8]
+	mi := &file_teams_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -677,7 +802,7 @@ type ListTeamGroupsResponse struct {
 
 func (x *ListTeamGroupsResponse) Reset() {
 	*x = ListTeamGroupsResponse{}
-	mi := &file_teams_proto_msgTypes[9]
+	mi := &file_teams_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -689,7 +814,7 @@ func (x *ListTeamGroupsResponse) String() string {
 func (*ListTeamGroupsResponse) ProtoMessage() {}
 
 func (x *ListTeamGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[9]
+	mi := &file_teams_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -759,7 +884,7 @@ type HasFeatureRequest struct {
 
 func (x *HasFeatureRequest) Reset() {
 	*x = HasFeatureRequest{}
-	mi := &file_teams_proto_msgTypes[10]
+	mi := &file_teams_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -771,7 +896,7 @@ func (x *HasFeatureRequest) String() string {
 func (*HasFeatureRequest) ProtoMessage() {}
 
 func (x *HasFeatureRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[10]
+	mi := &file_teams_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -840,7 +965,7 @@ type HasFeatureResponse struct {
 
 func (x *HasFeatureResponse) Reset() {
 	*x = HasFeatureResponse{}
-	mi := &file_teams_proto_msgTypes[11]
+	mi := &file_teams_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -852,7 +977,7 @@ func (x *HasFeatureResponse) String() string {
 func (*HasFeatureResponse) ProtoMessage() {}
 
 func (x *HasFeatureResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[11]
+	mi := &file_teams_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -897,7 +1022,7 @@ type TeamGroup struct {
 
 func (x *TeamGroup) Reset() {
 	*x = TeamGroup{}
-	mi := &file_teams_proto_msgTypes[12]
+	mi := &file_teams_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -909,7 +1034,7 @@ func (x *TeamGroup) String() string {
 func (*TeamGroup) ProtoMessage() {}
 
 func (x *TeamGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_teams_proto_msgTypes[12]
+	mi := &file_teams_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -960,7 +1085,7 @@ var File_teams_proto protoreflect.FileDescriptor
 
 const file_teams_proto_rawDesc = "" +
 	"\n" +
-	"\vteams.proto\x12\x12dapla.api.protobuf\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\fgroups.proto\x1a\x10pagination.proto\"\xd2\x01\n" +
+	"\vteams.proto\x12\x12dapla.api.protobuf\x1a\vusers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\fgroups.proto\x1a\x10pagination.proto\"\xd2\x01\n" +
 	"\x04Team\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\x12#\n" +
 	"\rhas_parquedit\x18\x02 \x01(\bR\fhasParquedit\x12V\n" +
@@ -970,7 +1095,11 @@ const file_teams_proto_rawDesc = "" +
 	"\x18_delete_key_confirmed_at\"/\n" +
 	"\aFeature\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
-	"\x03env\x18\x02 \x01(\tR\x03env\"'\n" +
+	"\x03env\x18\x02 \x01(\tR\x03env\"%\n" +
+	"\x0fGetOwnerRequest\x12\x12\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"@\n" +
+	"\x10GetOwnerResponse\x12,\n" +
+	"\x04user\x18\x01 \x01(\v2\x18.dapla.api.protobuf.UserR\x04user\"'\n" +
 	"\x11DeleteTeamRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"\x14\n" +
 	"\x12DeleteTeamResponse\"?\n" +
@@ -998,58 +1127,65 @@ const file_teams_proto_rawDesc = "" +
 	"\vhas_feature\x18\x01 \x01(\bR\n" +
 	"hasFeature\"<\n" +
 	"\tTeamGroup\x12/\n" +
-	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xcd\x03\n" +
+	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xa6\x04\n" +
 	"\x05Teams\x12P\n" +
 	"\x03Get\x12\".dapla.api.protobuf.GetTeamRequest\x1a#.dapla.api.protobuf.GetTeamResponse\"\x00\x12U\n" +
 	"\x04List\x12$.dapla.api.protobuf.ListTeamsRequest\x1a%.dapla.api.protobuf.ListTeamsResponse\"\x00\x12a\n" +
 	"\x06Groups\x12).dapla.api.protobuf.ListTeamGroupsRequest\x1a*.dapla.api.protobuf.ListTeamGroupsResponse\"\x00\x12Y\n" +
 	"\x06Delete\x12%.dapla.api.protobuf.DeleteTeamRequest\x1a&.dapla.api.protobuf.DeleteTeamResponse\"\x00\x12]\n" +
 	"\n" +
-	"HasFeature\x12%.dapla.api.protobuf.HasFeatureRequest\x1a&.dapla.api.protobuf.HasFeatureResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	"HasFeature\x12%.dapla.api.protobuf.HasFeatureRequest\x1a&.dapla.api.protobuf.HasFeatureResponse\"\x00\x12W\n" +
+	"\bGetOwner\x12#.dapla.api.protobuf.GetOwnerRequest\x1a$.dapla.api.protobuf.GetOwnerResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_teams_proto_goTypes = []any{
 	(*Team)(nil),                   // 0: dapla.api.protobuf.Team
 	(*Feature)(nil),                // 1: dapla.api.protobuf.Feature
-	(*DeleteTeamRequest)(nil),      // 2: dapla.api.protobuf.DeleteTeamRequest
-	(*DeleteTeamResponse)(nil),     // 3: dapla.api.protobuf.DeleteTeamResponse
-	(*GetTeamResponse)(nil),        // 4: dapla.api.protobuf.GetTeamResponse
-	(*GetTeamRequest)(nil),         // 5: dapla.api.protobuf.GetTeamRequest
-	(*ListTeamsRequest)(nil),       // 6: dapla.api.protobuf.ListTeamsRequest
-	(*ListTeamsResponse)(nil),      // 7: dapla.api.protobuf.ListTeamsResponse
-	(*ListTeamGroupsRequest)(nil),  // 8: dapla.api.protobuf.ListTeamGroupsRequest
-	(*ListTeamGroupsResponse)(nil), // 9: dapla.api.protobuf.ListTeamGroupsResponse
-	(*HasFeatureRequest)(nil),      // 10: dapla.api.protobuf.HasFeatureRequest
-	(*HasFeatureResponse)(nil),     // 11: dapla.api.protobuf.HasFeatureResponse
-	(*TeamGroup)(nil),              // 12: dapla.api.protobuf.TeamGroup
-	(*timestamppb.Timestamp)(nil),  // 13: google.protobuf.Timestamp
-	(*PageInfo)(nil),               // 14: dapla.api.protobuf.PageInfo
-	(*Group)(nil),                  // 15: dapla.api.protobuf.Group
+	(*GetOwnerRequest)(nil),        // 2: dapla.api.protobuf.GetOwnerRequest
+	(*GetOwnerResponse)(nil),       // 3: dapla.api.protobuf.GetOwnerResponse
+	(*DeleteTeamRequest)(nil),      // 4: dapla.api.protobuf.DeleteTeamRequest
+	(*DeleteTeamResponse)(nil),     // 5: dapla.api.protobuf.DeleteTeamResponse
+	(*GetTeamResponse)(nil),        // 6: dapla.api.protobuf.GetTeamResponse
+	(*GetTeamRequest)(nil),         // 7: dapla.api.protobuf.GetTeamRequest
+	(*ListTeamsRequest)(nil),       // 8: dapla.api.protobuf.ListTeamsRequest
+	(*ListTeamsResponse)(nil),      // 9: dapla.api.protobuf.ListTeamsResponse
+	(*ListTeamGroupsRequest)(nil),  // 10: dapla.api.protobuf.ListTeamGroupsRequest
+	(*ListTeamGroupsResponse)(nil), // 11: dapla.api.protobuf.ListTeamGroupsResponse
+	(*HasFeatureRequest)(nil),      // 12: dapla.api.protobuf.HasFeatureRequest
+	(*HasFeatureResponse)(nil),     // 13: dapla.api.protobuf.HasFeatureResponse
+	(*TeamGroup)(nil),              // 14: dapla.api.protobuf.TeamGroup
+	(*timestamppb.Timestamp)(nil),  // 15: google.protobuf.Timestamp
+	(*User)(nil),                   // 16: dapla.api.protobuf.User
+	(*PageInfo)(nil),               // 17: dapla.api.protobuf.PageInfo
+	(*Group)(nil),                  // 18: dapla.api.protobuf.Group
 }
 var file_teams_proto_depIdxs = []int32{
-	13, // 0: dapla.api.protobuf.Team.delete_key_confirmed_at:type_name -> google.protobuf.Timestamp
-	0,  // 1: dapla.api.protobuf.GetTeamResponse.team:type_name -> dapla.api.protobuf.Team
-	0,  // 2: dapla.api.protobuf.ListTeamsResponse.nodes:type_name -> dapla.api.protobuf.Team
-	14, // 3: dapla.api.protobuf.ListTeamsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
-	12, // 4: dapla.api.protobuf.ListTeamGroupsResponse.nodes:type_name -> dapla.api.protobuf.TeamGroup
-	14, // 5: dapla.api.protobuf.ListTeamGroupsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
-	1,  // 6: dapla.api.protobuf.HasFeatureRequest.feature:type_name -> dapla.api.protobuf.Feature
-	15, // 7: dapla.api.protobuf.TeamGroup.group:type_name -> dapla.api.protobuf.Group
-	5,  // 8: dapla.api.protobuf.Teams.Get:input_type -> dapla.api.protobuf.GetTeamRequest
-	6,  // 9: dapla.api.protobuf.Teams.List:input_type -> dapla.api.protobuf.ListTeamsRequest
-	8,  // 10: dapla.api.protobuf.Teams.Groups:input_type -> dapla.api.protobuf.ListTeamGroupsRequest
-	2,  // 11: dapla.api.protobuf.Teams.Delete:input_type -> dapla.api.protobuf.DeleteTeamRequest
-	10, // 12: dapla.api.protobuf.Teams.HasFeature:input_type -> dapla.api.protobuf.HasFeatureRequest
-	4,  // 13: dapla.api.protobuf.Teams.Get:output_type -> dapla.api.protobuf.GetTeamResponse
-	7,  // 14: dapla.api.protobuf.Teams.List:output_type -> dapla.api.protobuf.ListTeamsResponse
-	9,  // 15: dapla.api.protobuf.Teams.Groups:output_type -> dapla.api.protobuf.ListTeamGroupsResponse
-	3,  // 16: dapla.api.protobuf.Teams.Delete:output_type -> dapla.api.protobuf.DeleteTeamResponse
-	11, // 17: dapla.api.protobuf.Teams.HasFeature:output_type -> dapla.api.protobuf.HasFeatureResponse
-	13, // [13:18] is the sub-list for method output_type
-	8,  // [8:13] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	15, // 0: dapla.api.protobuf.Team.delete_key_confirmed_at:type_name -> google.protobuf.Timestamp
+	16, // 1: dapla.api.protobuf.GetOwnerResponse.user:type_name -> dapla.api.protobuf.User
+	0,  // 2: dapla.api.protobuf.GetTeamResponse.team:type_name -> dapla.api.protobuf.Team
+	0,  // 3: dapla.api.protobuf.ListTeamsResponse.nodes:type_name -> dapla.api.protobuf.Team
+	17, // 4: dapla.api.protobuf.ListTeamsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	14, // 5: dapla.api.protobuf.ListTeamGroupsResponse.nodes:type_name -> dapla.api.protobuf.TeamGroup
+	17, // 6: dapla.api.protobuf.ListTeamGroupsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
+	1,  // 7: dapla.api.protobuf.HasFeatureRequest.feature:type_name -> dapla.api.protobuf.Feature
+	18, // 8: dapla.api.protobuf.TeamGroup.group:type_name -> dapla.api.protobuf.Group
+	7,  // 9: dapla.api.protobuf.Teams.Get:input_type -> dapla.api.protobuf.GetTeamRequest
+	8,  // 10: dapla.api.protobuf.Teams.List:input_type -> dapla.api.protobuf.ListTeamsRequest
+	10, // 11: dapla.api.protobuf.Teams.Groups:input_type -> dapla.api.protobuf.ListTeamGroupsRequest
+	4,  // 12: dapla.api.protobuf.Teams.Delete:input_type -> dapla.api.protobuf.DeleteTeamRequest
+	12, // 13: dapla.api.protobuf.Teams.HasFeature:input_type -> dapla.api.protobuf.HasFeatureRequest
+	2,  // 14: dapla.api.protobuf.Teams.GetOwner:input_type -> dapla.api.protobuf.GetOwnerRequest
+	6,  // 15: dapla.api.protobuf.Teams.Get:output_type -> dapla.api.protobuf.GetTeamResponse
+	9,  // 16: dapla.api.protobuf.Teams.List:output_type -> dapla.api.protobuf.ListTeamsResponse
+	11, // 17: dapla.api.protobuf.Teams.Groups:output_type -> dapla.api.protobuf.ListTeamGroupsResponse
+	5,  // 18: dapla.api.protobuf.Teams.Delete:output_type -> dapla.api.protobuf.DeleteTeamResponse
+	13, // 19: dapla.api.protobuf.Teams.HasFeature:output_type -> dapla.api.protobuf.HasFeatureResponse
+	3,  // 20: dapla.api.protobuf.Teams.GetOwner:output_type -> dapla.api.protobuf.GetOwnerResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_teams_proto_init() }
@@ -1057,6 +1193,7 @@ func file_teams_proto_init() {
 	if File_teams_proto != nil {
 		return
 	}
+	file_users_proto_init()
 	file_groups_proto_init()
 	file_pagination_proto_init()
 	file_teams_proto_msgTypes[0].OneofWrappers = []any{}
@@ -1066,7 +1203,7 @@ func file_teams_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_teams_proto_rawDesc), len(file_teams_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

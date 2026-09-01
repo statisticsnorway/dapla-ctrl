@@ -174,6 +174,74 @@ func (_c *MockTeamsServer_Get_Call) RunAndReturn(run func(context1 context.Conte
 	return _c
 }
 
+// GetOwner provides a mock function for the type MockTeamsServer
+func (_mock *MockTeamsServer) GetOwner(context1 context.Context, getOwnerRequest *GetOwnerRequest) (*GetOwnerResponse, error) {
+	ret := _mock.Called(context1, getOwnerRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOwner")
+	}
+
+	var r0 *GetOwnerResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetOwnerRequest) (*GetOwnerResponse, error)); ok {
+		return returnFunc(context1, getOwnerRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetOwnerRequest) *GetOwnerResponse); ok {
+		r0 = returnFunc(context1, getOwnerRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*GetOwnerResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *GetOwnerRequest) error); ok {
+		r1 = returnFunc(context1, getOwnerRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTeamsServer_GetOwner_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetOwner'
+type MockTeamsServer_GetOwner_Call struct {
+	*mock.Call
+}
+
+// GetOwner is a helper method to define mock.On call
+//   - context1 context.Context
+//   - getOwnerRequest *GetOwnerRequest
+func (_e *MockTeamsServer_Expecter) GetOwner(context1 interface{}, getOwnerRequest interface{}) *MockTeamsServer_GetOwner_Call {
+	return &MockTeamsServer_GetOwner_Call{Call: _e.mock.On("GetOwner", context1, getOwnerRequest)}
+}
+
+func (_c *MockTeamsServer_GetOwner_Call) Run(run func(context1 context.Context, getOwnerRequest *GetOwnerRequest)) *MockTeamsServer_GetOwner_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *GetOwnerRequest
+		if args[1] != nil {
+			arg1 = args[1].(*GetOwnerRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTeamsServer_GetOwner_Call) Return(getOwnerResponse *GetOwnerResponse, err error) *MockTeamsServer_GetOwner_Call {
+	_c.Call.Return(getOwnerResponse, err)
+	return _c
+}
+
+func (_c *MockTeamsServer_GetOwner_Call) RunAndReturn(run func(context1 context.Context, getOwnerRequest *GetOwnerRequest) (*GetOwnerResponse, error)) *MockTeamsServer_GetOwner_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Groups provides a mock function for the type MockTeamsServer
 func (_mock *MockTeamsServer) Groups(context1 context.Context, listTeamGroupsRequest *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error) {
 	ret := _mock.Called(context1, listTeamGroupsRequest)

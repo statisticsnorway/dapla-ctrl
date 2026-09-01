@@ -121,6 +121,24 @@ func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureReques
 	return resp, nil
 }
 
+func (t *Server) GetOwner(ctx context.Context, req *protoapi.GetOwnerRequest) (*protoapi.GetOwnerResponse, error) {
+	teamOwner, err := t.querier.GetOwner(ctx, slug.Slug(req.Slug))
+	if err != nil {
+		return nil, err
+	}
+
+	user := &protoapi.User{
+		Id:         teamOwner.ID.String(),
+		Name:       teamOwner.Name,
+		Email:      teamOwner.Email,
+		ExternalId: teamOwner.ExternalID,
+	}
+
+	return &protoapi.GetOwnerResponse{
+		User: user,
+	}, nil
+}
+
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
 		Slug:         team.Slug.String(),

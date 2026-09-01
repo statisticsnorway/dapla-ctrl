@@ -24,6 +24,7 @@ const (
 	Teams_Groups_FullMethodName     = "/dapla.api.protobuf.Teams/Groups"
 	Teams_Delete_FullMethodName     = "/dapla.api.protobuf.Teams/Delete"
 	Teams_HasFeature_FullMethodName = "/dapla.api.protobuf.Teams/HasFeature"
+	Teams_GetOwner_FullMethodName   = "/dapla.api.protobuf.Teams/GetOwner"
 )
 
 // TeamsClient is the client API for Teams service.
@@ -35,6 +36,7 @@ type TeamsClient interface {
 	Groups(ctx context.Context, in *ListTeamGroupsRequest, opts ...grpc.CallOption) (*ListTeamGroupsResponse, error)
 	Delete(ctx context.Context, in *DeleteTeamRequest, opts ...grpc.CallOption) (*DeleteTeamResponse, error)
 	HasFeature(ctx context.Context, in *HasFeatureRequest, opts ...grpc.CallOption) (*HasFeatureResponse, error)
+	GetOwner(ctx context.Context, in *GetOwnerRequest, opts ...grpc.CallOption) (*GetOwnerResponse, error)
 }
 
 type teamsClient struct {
@@ -95,6 +97,16 @@ func (c *teamsClient) HasFeature(ctx context.Context, in *HasFeatureRequest, opt
 	return out, nil
 }
 
+func (c *teamsClient) GetOwner(ctx context.Context, in *GetOwnerRequest, opts ...grpc.CallOption) (*GetOwnerResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetOwnerResponse)
+	err := c.cc.Invoke(ctx, Teams_GetOwner_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TeamsServer is the server API for Teams service.
 // All implementations must embed UnimplementedTeamsServer
 // for forward compatibility.
@@ -104,6 +116,7 @@ type TeamsServer interface {
 	Groups(context.Context, *ListTeamGroupsRequest) (*ListTeamGroupsResponse, error)
 	Delete(context.Context, *DeleteTeamRequest) (*DeleteTeamResponse, error)
 	HasFeature(context.Context, *HasFeatureRequest) (*HasFeatureResponse, error)
+	GetOwner(context.Context, *GetOwnerRequest) (*GetOwnerResponse, error)
 	mustEmbedUnimplementedTeamsServer()
 }
 
@@ -128,6 +141,9 @@ func (UnimplementedTeamsServer) Delete(context.Context, *DeleteTeamRequest) (*De
 }
 func (UnimplementedTeamsServer) HasFeature(context.Context, *HasFeatureRequest) (*HasFeatureResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method HasFeature not implemented")
+}
+func (UnimplementedTeamsServer) GetOwner(context.Context, *GetOwnerRequest) (*GetOwnerResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetOwner not implemented")
 }
 func (UnimplementedTeamsServer) mustEmbedUnimplementedTeamsServer() {}
 func (UnimplementedTeamsServer) testEmbeddedByValue()               {}
@@ -240,6 +256,24 @@ func _Teams_HasFeature_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Teams_GetOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOwnerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TeamsServer).GetOwner(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Teams_GetOwner_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TeamsServer).GetOwner(ctx, req.(*GetOwnerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Teams_ServiceDesc is the grpc.ServiceDesc for Teams service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -266,6 +300,10 @@ var Teams_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HasFeature",
 			Handler:    _Teams_HasFeature_Handler,
+		},
+		{
+			MethodName: "GetOwner",
+			Handler:    _Teams_GetOwner_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

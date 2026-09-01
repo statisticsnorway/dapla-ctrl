@@ -3,6 +3,7 @@
 package grpcteamsql
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
@@ -15,4 +16,15 @@ type Team struct {
 	SectionCode          string
 	IsManaged            bool
 	HasManualEditing     bool
+}
+
+type User struct {
+	ID             uuid.UUID
+	Email          string
+	Name           string
+	ExternalID     string
+	Admin          bool
+	SectionCode    *string
+	JobTitle       *string
+	EmploymentType string
 }

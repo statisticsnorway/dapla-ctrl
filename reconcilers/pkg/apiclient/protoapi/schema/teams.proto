@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package dapla.api.protobuf;
 
+import "users.proto";
 import "google/protobuf/timestamp.proto";
 import "groups.proto";
 import "pagination.proto";
@@ -26,7 +27,11 @@ service Teams {
   rpc Groups(ListTeamGroupsRequest) returns (ListTeamGroupsResponse) {}
   rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
   rpc HasFeature(HasFeatureRequest) returns (HasFeatureResponse) {}
+  rpc GetOwner(GetOwnerRequest) returns (GetOwnerResponse) {}
 }
+
+message GetOwnerRequest { string slug = 1; }
+message GetOwnerResponse { User user = 1; }
 
 message DeleteTeamRequest { string slug = 1; }
 
