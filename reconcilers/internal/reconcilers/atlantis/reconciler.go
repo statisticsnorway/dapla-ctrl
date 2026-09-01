@@ -28,9 +28,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 
 	servingv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
@@ -42,6 +40,8 @@ const (
 	reposYamlKey     = "repos.yaml"
 
 	wiAnnotationKey = "iam.gke.io/gcp-service-account"
+
+	namespaceConfigKey = "namespace"
 )
 
 type groupRole string
@@ -69,6 +69,10 @@ type reconciler struct {
 	atlantisProject string
 	memberGroups    []string
 	managerGroups   []string
+}
+
+type reconcilerConfig struct {
+	Namespace string
 }
 
 type optFunc func(*reconciler)
@@ -115,7 +119,14 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		DisplayName: "Atlantis",
 		Description: "Create and manage team Atlantis instances",
 		MemberAware: true,
-		Config:      []*protoapi.ReconcilerConfigSpec{},
+		Config: []*protoapi.ReconcilerConfigSpec{
+			{
+				Key:         namespaceConfigKey,
+				DisplayName: "Namespace",
+				Description: "The namespace where the atlantis resources should be deployed",
+				Secret:      false,
+			},
+		},
 	}
 }
 
@@ -241,8 +252,8 @@ func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name stri
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name string) error {
-	saClient := r.k8sClient.CoreV1().ServiceAccounts("default")
+func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
+	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
 	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.atlantisProject)
 
 	wantedAnnotations := map[string]string{
@@ -254,7 +265,6 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		_, err = saClient.Create(ctx, &corev1.ServiceAccount{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:        name,
-				Namespace:   "default",
 				Annotations: wantedAnnotations,
 			},
 		}, metav1.CreateOptions{})
@@ -272,12 +282,11 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name string, diskSize resource.Quantity) error {
-	pvcClient := r.k8sClient.CoreV1().PersistentVolumeClaims("default")
+func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSize resource.Quantity) error {
+	pvcClient := r.k8sClient.CoreV1().PersistentVolumeClaims(namespace)
 	wantedSpec := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: "default",
+			Name: name,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
 			AccessModes: []corev1.PersistentVolumeAccessMode{
@@ -305,165 +314,6 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name string,
 	}
 
 	_, err = pvcClient.Update(ctx, wantedSpec, metav1.UpdateOptions{})
-	return err
-}
-
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) error {
-	env := map[string]string{
-		"ATLANTIS_REPO_ALLOWLIST":                        "local.repo_allowlist",
-		"ATLANTIS_GH_APP_ID":                             "",
-		"ATLANTIS_GH_APP_KEY_FILE":                       "/secret/atlantis-app-key.pem",
-		"ATLANTIS_WRITE_GIT_CREDS":                       "true",
-		"ATLANTIS_DATA_DIR":                              "/atlantis",
-		"ATLANTIS_ATLANTIS_URL":                          "",
-		"ATLANTIS_PORT":                                  "4141",
-		"TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE": "true",
-		"ATLANTIS_GH_ALLOW_MERGEABLE_BYPASS_APPLY":       "true",
-		"ATLANTIS_ENABLE_REGEXP_CMD":                     "true",
-		"ATLANTIS_REPO_CONFIG":                           "/config/repos.yaml",
-	}
-	envVars := make([]corev1.EnvVar, 0, len(env)+1)
-	for key, val := range env {
-		envVars = append(envVars, corev1.EnvVar{
-			Name:  key,
-			Value: val,
-		})
-	}
-	envVars = append(envVars, corev1.EnvVar{
-		Name: "ATLANTIS_GH_WEBHOOK_SECRET",
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
-				Key: webhookSecretKey,
-			},
-		},
-	})
-
-	probe := corev1.Probe{
-		PeriodSeconds: 60,
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/healthz",
-				Port:   intstr.FromString("4141"),
-				Scheme: corev1.URISchemeHTTP,
-			},
-		},
-	}
-
-	knService := &knv1.Service{
-		Spec: knv1.ServiceSpec{
-			ConfigurationSpec: knv1.ConfigurationSpec{
-				Template: knv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"autoscaling.knative.dev/max-scale":                          "1",
-							"autoscaling.knative.dev/scale-to-zero-pod-retention-period": "1h",
-						},
-					},
-					Spec: knv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-							ServiceAccountName: name,
-							SecurityContext: &corev1.PodSecurityContext{
-								FSGroup: new(int64(1000)),
-							},
-							Containers: []corev1.Container{
-								{
-									Image: "sdlkfskldfjsdlkfjds TODO",
-									Env:   envVars,
-									VolumeMounts: []corev1.VolumeMount{
-										{
-											Name:      "atlantis-data",
-											MountPath: "/atlantis",
-										},
-										{
-											Name:      "secret-volume",
-											ReadOnly:  true,
-											MountPath: "/secret",
-										},
-										{
-											Name:      "config-volume",
-											ReadOnly:  true,
-											MountPath: "/config",
-										},
-									},
-									Ports: []corev1.ContainerPort{
-										{
-											ContainerPort: 4141,
-										},
-									},
-									LivenessProbe:  &probe,
-									ReadinessProbe: &probe,
-									Resources: corev1.ResourceRequirements{
-										// TODO: investigage resourceXXX vs resource(requests/liits)XXX
-										Requests: corev1.ResourceList{
-											corev1.ResourceCPU:    resource.MustParse("100m"),
-											corev1.ResourceMemory: resource.MustParse("256Mi"),
-										},
-										Limits: corev1.ResourceList{
-											corev1.ResourceCPU:    resource.MustParse("500m"),
-											corev1.ResourceMemory: resource.MustParse("512Mi"), // TODO: get limit from API
-										},
-									},
-								},
-							},
-							Volumes: []corev1.Volume{
-								{
-									Name: "atlantis-data",
-									VolumeSource: corev1.VolumeSource{
-										PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-											ClaimName: name,
-											ReadOnly:  false,
-										},
-									},
-								},
-								{
-									Name: "secret-volume",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: "dapla-team",
-											Items: []corev1.KeyToPath{
-												{
-													Key:  "gh-key-file",
-													Path: "atlantis-app-key.pem",
-												},
-											},
-										},
-									},
-								},
-								{
-									Name: "config-volume",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: name,
-											},
-											Items: []corev1.KeyToPath{
-												{
-													Key:  "repos.yaml",
-													Path: "repos.yaml",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	kns, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = r.knServices.Create(ctx, &knv1.Service{}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
 	return err
 }
 
@@ -582,22 +432,26 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 	return nil
 }
 
-func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
+func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) (*reconcilerConfig, error) {
 	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
 		ReconcilerName: r.Name(),
 	})
 	if err != nil {
-		return fmt.Errorf("get reconciler config: %w", err)
+		return nil, fmt.Errorf("get reconciler config: %w", err)
 	}
+
+	rc := reconcilerConfig{}
 
 	for _, c := range config.Nodes {
 		switch c.Key {
+		case namespaceConfigKey:
+			rc.Namespace = c.Value
 		default:
-			return fmt.Errorf("unknown config key %q", c.Key)
+			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
-	return nil
+	return &rc, nil
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
