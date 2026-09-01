@@ -88,11 +88,11 @@ SELECT
 SELECT
   users.*
 FROM
-  user_roles
-INNER JOIN users ON users.id = user_roles.user_id
+  sections
+INNER JOIN teams ON sections.code = teams.section_code
+INNER JOIN users ON users.id = sections.manager_id
 WHERE
-user_roles.target_team_slug = @team_slug::slug
-AND user_roles.role_name = 'Team owner'
+teams.slug = @team_slug::slug
 ORDER BY
     users.id
 LIMIT 1
