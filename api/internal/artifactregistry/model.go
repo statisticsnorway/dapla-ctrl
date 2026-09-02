@@ -7,6 +7,20 @@ import (
 )
 
 //mgo:gen model
+//mgo:gen order FORMAT
+//mgo:impl node paginated
+type ArtifactRegistryRepository struct {
+	// Team this repository belongs to.
+	TeamSlug slug.Slug `json:"teamSlug"`
+	// Format of the repository.
+	Format string `json:"format"`
+}
+
+func (r ArtifactRegistryRepository) ID() ident.Ident {
+	return newARIdent(r.TeamSlug, r.Format)
+}
+
+//mgo:gen model
 //mgo:gen order NAME
 //mgo:impl node paginated
 type ArtifactRegistryAllowedGithubRepos struct {
@@ -17,7 +31,7 @@ type ArtifactRegistryAllowedGithubRepos struct {
 }
 
 func (r ArtifactRegistryAllowedGithubRepos) ID() ident.Ident {
-	return newIdent(r.TeamSlug, r.Name)
+	return newGHIdent(r.TeamSlug, r.Name)
 }
 
 func toGraphArtifactRegistryAllowedGithubRepos(r *artifactregistrysql.TeamArtifactRegistryGhReposAllowList) *ArtifactRegistryAllowedGithubRepos {
@@ -49,4 +63,16 @@ type RevokeGithubRepoAccessFromTeamArtifactRegistryInput struct {
 type RevokeGithubRepoAccessFromTeamArtifactRegistryPayload struct {
 	// Whether or not the repository was removed from the team.
 	Success *bool `json:"success,omitempty"`
+}
+
+type CreateArtifactRegistryRepositoryInput struct {
+	// Slug of the team
+	TeamSlug slug.Slug `json:"teamSlug"`
+	// Format of the repo (DOCKER, MAVEN, etc.)
+	Format string
+}
+
+type CreateArtifactRegistryRepositoryPayload struct {
+	// Repository that was created
+	Repository *ArtifactRegistryRepository `json:"repository,omitempty"`
 }

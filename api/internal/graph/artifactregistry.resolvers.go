@@ -2,17 +2,27 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 )
 
 func (r *artifactRegistryAllowedGithubReposResolver) Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryAllowedGithubRepos) (*team.Team, error) {
 	return team.Get(ctx, obj.TeamSlug)
+}
+
+func (r *artifactRegistryRepositoryResolver) ID(ctx context.Context, obj *artifactregistry.ArtifactRegistryRepository) (*ident.Ident, error) {
+	panic(fmt.Errorf("not implemented: ID - id"))
+}
+
+func (r *artifactRegistryRepositoryResolver) Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryRepository) (*team.Team, error) {
+	panic(fmt.Errorf("not implemented: Team - team"))
 }
 
 func (r *mutationResolver) GrantGithubRepoAccessToTeamArtifactRegistry(ctx context.Context, input artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput) (*artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryPayload, error) {
@@ -86,17 +96,32 @@ func (r *mutationResolver) RevokeGithubRepoAccessFromTeamArtifactRegistry(ctx co
 	}, nil
 }
 
+func (r *mutationResolver) CreateArtifactRegistryRepository(ctx context.Context, input artifactregistry.CreateArtifactRegistryRepositoryInput) (*artifactregistry.CreateArtifactRegistryRepositoryPayload, error) {
+	panic(fmt.Errorf("not implemented: CreateArtifactRegistryRepository - createArtifactRegistryRepository"))
+}
+
 func (r *teamResolver) ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return artifactregistry.ListForTeam(ctx, obj.Slug, page)
+	return artifactregistry.ListGithubReposForTeam(ctx, obj.Slug, page)
+}
+
+func (r *teamResolver) ArtifactRegistryRepositories(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryRepository], error) {
+	panic(fmt.Errorf("not implemented: ArtifactRegistryRepositories - artifactRegistryRepositories"))
 }
 
 func (r *Resolver) ArtifactRegistryAllowedGithubRepos() gengql.ArtifactRegistryAllowedGithubReposResolver {
 	return &artifactRegistryAllowedGithubReposResolver{r}
 }
 
-type artifactRegistryAllowedGithubReposResolver struct{ *Resolver }
+func (r *Resolver) ArtifactRegistryRepository() gengql.ArtifactRegistryRepositoryResolver {
+	return &artifactRegistryRepositoryResolver{r}
+}
+
+type (
+	artifactRegistryAllowedGithubReposResolver struct{ *Resolver }
+	artifactRegistryRepositoryResolver         struct{ *Resolver }
+)

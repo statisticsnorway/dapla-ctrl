@@ -95,6 +95,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.ArtifactRegistryAllowedGithubRepos = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Team.ArtifactRegistryRepositories = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.Team.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}

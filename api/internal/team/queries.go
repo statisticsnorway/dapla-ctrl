@@ -13,6 +13,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/message"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team/teamsql"
@@ -38,13 +39,28 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 			return err
 		}
 
-		return activitylog.Create(ctx, activitylog.CreateInput{
+		if err := activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionCreated,
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: input.Slug.String(),
 			TeamSlug:     new(input.Slug),
-		})
+		}); err != nil {
+			return err
+		}
+
+		if team.IsManaged {
+			for _, category := range []string{"developers", "data-admins"} {
+				if _, err := group.Create(ctx, &group.CreateGroupInput{
+					TeamSlug: team.Slug,
+					Category: category,
+				}); err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
 	})
 	if err != nil {
 		return nil, err

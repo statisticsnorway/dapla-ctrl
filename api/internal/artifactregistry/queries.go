@@ -14,8 +14,20 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-func getByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryAllowedGithubRepos, error) {
-	ts, githubRepositoryName, err := parseIdent(id)
+func getARRepoByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryRepository, error) {
+	ts, format, err := parseARIdent(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ArtifactRegistryRepository{
+		TeamSlug: ts,
+		Format:   format,
+	}, nil
+}
+
+func getGHReposByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryAllowedGithubRepos, error) {
+	ts, githubRepositoryName, err := parseGHIdent(id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +92,7 @@ func RemoveGithubRepositoryFromTeam(ctx context.Context, input RevokeGithubRepoA
 	})
 }
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryAllowedGithubReposConnection, error) {
+func ListGithubReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryAllowedGithubReposConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListGithubReposForTeam(ctx, artifactregistrysql.ListGithubReposForTeamParams{
