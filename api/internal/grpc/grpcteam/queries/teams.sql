@@ -84,7 +84,7 @@ SELECT
 	)
 ;
 
--- name: GetOwner :one
+-- name: GetTeamManager :one
 SELECT
   users.*
 FROM

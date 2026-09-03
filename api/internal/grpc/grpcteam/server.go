@@ -121,20 +121,20 @@ func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureReques
 	return resp, nil
 }
 
-func (t *Server) GetOwner(ctx context.Context, req *protoapi.GetOwnerRequest) (*protoapi.GetOwnerResponse, error) {
-	teamOwner, err := t.querier.GetOwner(ctx, slug.Slug(req.Slug))
+func (t *Server) GetTeamManager(ctx context.Context, req *protoapi.GetTeamManagerRequest) (*protoapi.GetTeamManagerResponse, error) {
+	teamManager, err := t.querier.GetTeamManager(ctx, slug.Slug(req.Slug))
 	if err != nil {
 		return nil, err
 	}
 
 	user := &protoapi.User{
-		Id:         teamOwner.ID.String(),
-		Name:       teamOwner.Name,
-		Email:      teamOwner.Email,
-		ExternalId: teamOwner.ExternalID,
+		Id:         teamManager.ID.String(),
+		Name:       teamManager.Name,
+		Email:      teamManager.Email,
+		ExternalId: teamManager.ExternalID,
 	}
 
-	return &protoapi.GetOwnerResponse{
+	return &protoapi.GetTeamManagerResponse{
 		User: user,
 	}, nil
 }

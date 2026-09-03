@@ -204,27 +204,27 @@ func (b0 Feature_builder) Build() *Feature {
 	return m0
 }
 
-type GetOwnerRequest struct {
+type GetTeamManagerRequest struct {
 	state           protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_Slug string                 `protobuf:"bytes,1,opt,name=slug,proto3"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *GetOwnerRequest) Reset() {
-	*x = GetOwnerRequest{}
+func (x *GetTeamManagerRequest) Reset() {
+	*x = GetTeamManagerRequest{}
 	mi := &file_teams_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetOwnerRequest) String() string {
+func (x *GetTeamManagerRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetOwnerRequest) ProtoMessage() {}
+func (*GetTeamManagerRequest) ProtoMessage() {}
 
-func (x *GetOwnerRequest) ProtoReflect() protoreflect.Message {
+func (x *GetTeamManagerRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_teams_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -236,52 +236,52 @@ func (x *GetOwnerRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *GetOwnerRequest) GetSlug() string {
+func (x *GetTeamManagerRequest) GetSlug() string {
 	if x != nil {
 		return x.xxx_hidden_Slug
 	}
 	return ""
 }
 
-func (x *GetOwnerRequest) SetSlug(v string) {
+func (x *GetTeamManagerRequest) SetSlug(v string) {
 	x.xxx_hidden_Slug = v
 }
 
-type GetOwnerRequest_builder struct {
+type GetTeamManagerRequest_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	Slug string
 }
 
-func (b0 GetOwnerRequest_builder) Build() *GetOwnerRequest {
-	m0 := &GetOwnerRequest{}
+func (b0 GetTeamManagerRequest_builder) Build() *GetTeamManagerRequest {
+	m0 := &GetTeamManagerRequest{}
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_Slug = b.Slug
 	return m0
 }
 
-type GetOwnerResponse struct {
+type GetTeamManagerResponse struct {
 	state           protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_User *User                  `protobuf:"bytes,1,opt,name=user,proto3"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *GetOwnerResponse) Reset() {
-	*x = GetOwnerResponse{}
+func (x *GetTeamManagerResponse) Reset() {
+	*x = GetTeamManagerResponse{}
 	mi := &file_teams_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetOwnerResponse) String() string {
+func (x *GetTeamManagerResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetOwnerResponse) ProtoMessage() {}
+func (*GetTeamManagerResponse) ProtoMessage() {}
 
-func (x *GetOwnerResponse) ProtoReflect() protoreflect.Message {
+func (x *GetTeamManagerResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_teams_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -293,36 +293,36 @@ func (x *GetOwnerResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-func (x *GetOwnerResponse) GetUser() *User {
+func (x *GetTeamManagerResponse) GetUser() *User {
 	if x != nil {
 		return x.xxx_hidden_User
 	}
 	return nil
 }
 
-func (x *GetOwnerResponse) SetUser(v *User) {
+func (x *GetTeamManagerResponse) SetUser(v *User) {
 	x.xxx_hidden_User = v
 }
 
-func (x *GetOwnerResponse) HasUser() bool {
+func (x *GetTeamManagerResponse) HasUser() bool {
 	if x == nil {
 		return false
 	}
 	return x.xxx_hidden_User != nil
 }
 
-func (x *GetOwnerResponse) ClearUser() {
+func (x *GetTeamManagerResponse) ClearUser() {
 	x.xxx_hidden_User = nil
 }
 
-type GetOwnerResponse_builder struct {
+type GetTeamManagerResponse_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	User *User
 }
 
-func (b0 GetOwnerResponse_builder) Build() *GetOwnerResponse {
-	m0 := &GetOwnerResponse{}
+func (b0 GetTeamManagerResponse_builder) Build() *GetTeamManagerResponse {
+	m0 := &GetTeamManagerResponse{}
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_User = b.User
@@ -1099,10 +1099,10 @@ const file_teams_proto_rawDesc = "" +
 	"\x18_delete_key_confirmed_at\"/\n" +
 	"\aFeature\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
-	"\x03env\x18\x02 \x01(\tR\x03env\"%\n" +
-	"\x0fGetOwnerRequest\x12\x12\n" +
-	"\x04slug\x18\x01 \x01(\tR\x04slug\"@\n" +
-	"\x10GetOwnerResponse\x12,\n" +
+	"\x03env\x18\x02 \x01(\tR\x03env\"+\n" +
+	"\x15GetTeamManagerRequest\x12\x12\n" +
+	"\x04slug\x18\x01 \x01(\tR\x04slug\"F\n" +
+	"\x16GetTeamManagerResponse\x12,\n" +
 	"\x04user\x18\x01 \x01(\v2\x18.dapla.api.protobuf.UserR\x04user\"'\n" +
 	"\x11DeleteTeamRequest\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\"\x14\n" +
@@ -1131,22 +1131,22 @@ const file_teams_proto_rawDesc = "" +
 	"\vhas_feature\x18\x01 \x01(\bR\n" +
 	"hasFeature\"<\n" +
 	"\tTeamGroup\x12/\n" +
-	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xa6\x04\n" +
+	"\x05group\x18\x01 \x01(\v2\x19.dapla.api.protobuf.GroupR\x05group2\xb8\x04\n" +
 	"\x05Teams\x12P\n" +
 	"\x03Get\x12\".dapla.api.protobuf.GetTeamRequest\x1a#.dapla.api.protobuf.GetTeamResponse\"\x00\x12U\n" +
 	"\x04List\x12$.dapla.api.protobuf.ListTeamsRequest\x1a%.dapla.api.protobuf.ListTeamsResponse\"\x00\x12a\n" +
 	"\x06Groups\x12).dapla.api.protobuf.ListTeamGroupsRequest\x1a*.dapla.api.protobuf.ListTeamGroupsResponse\"\x00\x12Y\n" +
 	"\x06Delete\x12%.dapla.api.protobuf.DeleteTeamRequest\x1a&.dapla.api.protobuf.DeleteTeamResponse\"\x00\x12]\n" +
 	"\n" +
-	"HasFeature\x12%.dapla.api.protobuf.HasFeatureRequest\x1a&.dapla.api.protobuf.HasFeatureResponse\"\x00\x12W\n" +
-	"\bGetOwner\x12#.dapla.api.protobuf.GetOwnerRequest\x1a$.dapla.api.protobuf.GetOwnerResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	"HasFeature\x12%.dapla.api.protobuf.HasFeatureRequest\x1a&.dapla.api.protobuf.HasFeatureResponse\"\x00\x12i\n" +
+	"\x0eGetTeamManager\x12).dapla.api.protobuf.GetTeamManagerRequest\x1a*.dapla.api.protobuf.GetTeamManagerResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
 var file_teams_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_teams_proto_goTypes = []any{
 	(*Team)(nil),                   // 0: dapla.api.protobuf.Team
 	(*Feature)(nil),                // 1: dapla.api.protobuf.Feature
-	(*GetOwnerRequest)(nil),        // 2: dapla.api.protobuf.GetOwnerRequest
-	(*GetOwnerResponse)(nil),       // 3: dapla.api.protobuf.GetOwnerResponse
+	(*GetTeamManagerRequest)(nil),  // 2: dapla.api.protobuf.GetTeamManagerRequest
+	(*GetTeamManagerResponse)(nil), // 3: dapla.api.protobuf.GetTeamManagerResponse
 	(*DeleteTeamRequest)(nil),      // 4: dapla.api.protobuf.DeleteTeamRequest
 	(*DeleteTeamResponse)(nil),     // 5: dapla.api.protobuf.DeleteTeamResponse
 	(*GetTeamResponse)(nil),        // 6: dapla.api.protobuf.GetTeamResponse
@@ -1165,7 +1165,7 @@ var file_teams_proto_goTypes = []any{
 }
 var file_teams_proto_depIdxs = []int32{
 	15, // 0: dapla.api.protobuf.Team.delete_key_confirmed_at:type_name -> google.protobuf.Timestamp
-	16, // 1: dapla.api.protobuf.GetOwnerResponse.user:type_name -> dapla.api.protobuf.User
+	16, // 1: dapla.api.protobuf.GetTeamManagerResponse.user:type_name -> dapla.api.protobuf.User
 	0,  // 2: dapla.api.protobuf.GetTeamResponse.team:type_name -> dapla.api.protobuf.Team
 	0,  // 3: dapla.api.protobuf.ListTeamsResponse.nodes:type_name -> dapla.api.protobuf.Team
 	17, // 4: dapla.api.protobuf.ListTeamsResponse.page_info:type_name -> dapla.api.protobuf.PageInfo
@@ -1178,13 +1178,13 @@ var file_teams_proto_depIdxs = []int32{
 	10, // 11: dapla.api.protobuf.Teams.Groups:input_type -> dapla.api.protobuf.ListTeamGroupsRequest
 	4,  // 12: dapla.api.protobuf.Teams.Delete:input_type -> dapla.api.protobuf.DeleteTeamRequest
 	12, // 13: dapla.api.protobuf.Teams.HasFeature:input_type -> dapla.api.protobuf.HasFeatureRequest
-	2,  // 14: dapla.api.protobuf.Teams.GetOwner:input_type -> dapla.api.protobuf.GetOwnerRequest
+	2,  // 14: dapla.api.protobuf.Teams.GetTeamManager:input_type -> dapla.api.protobuf.GetTeamManagerRequest
 	6,  // 15: dapla.api.protobuf.Teams.Get:output_type -> dapla.api.protobuf.GetTeamResponse
 	9,  // 16: dapla.api.protobuf.Teams.List:output_type -> dapla.api.protobuf.ListTeamsResponse
 	11, // 17: dapla.api.protobuf.Teams.Groups:output_type -> dapla.api.protobuf.ListTeamGroupsResponse
 	5,  // 18: dapla.api.protobuf.Teams.Delete:output_type -> dapla.api.protobuf.DeleteTeamResponse
 	13, // 19: dapla.api.protobuf.Teams.HasFeature:output_type -> dapla.api.protobuf.HasFeatureResponse
-	3,  // 20: dapla.api.protobuf.Teams.GetOwner:output_type -> dapla.api.protobuf.GetOwnerResponse
+	3,  // 20: dapla.api.protobuf.Teams.GetTeamManager:output_type -> dapla.api.protobuf.GetTeamManagerResponse
 	15, // [15:21] is the sub-list for method output_type
 	9,  // [9:15] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name

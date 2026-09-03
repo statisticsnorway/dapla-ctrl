@@ -75,7 +75,7 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	return &i, err
 }
 
-const getOwner = `-- name: GetOwner :one
+const getTeamManager = `-- name: GetTeamManager :one
 SELECT
   users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
 FROM
@@ -89,8 +89,8 @@ ORDER BY
 LIMIT 1
 `
 
-func (q *Queries) GetOwner(ctx context.Context, teamSlug slug.Slug) (*User, error) {
-	row := q.db.QueryRow(ctx, getOwner, teamSlug)
+func (q *Queries) GetTeamManager(ctx context.Context, teamSlug slug.Slug) (*User, error) {
+	row := q.db.QueryRow(ctx, getTeamManager, teamSlug)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -27,11 +27,11 @@ service Teams {
   rpc Groups(ListTeamGroupsRequest) returns (ListTeamGroupsResponse) {}
   rpc Delete(DeleteTeamRequest) returns (DeleteTeamResponse) {}
   rpc HasFeature(HasFeatureRequest) returns (HasFeatureResponse) {}
-  rpc GetOwner(GetOwnerRequest) returns (GetOwnerResponse) {}
+  rpc GetTeamManager(GetTeamManagerRequest) returns (GetTeamManagerResponse) {}
 }
 
-message GetOwnerRequest { string slug = 1; }
-message GetOwnerResponse { User user = 1; }
+message GetTeamManagerRequest { string slug = 1; }
+message GetTeamManagerResponse { User user = 1; }
 
 message DeleteTeamRequest { string slug = 1; }
 
