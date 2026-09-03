@@ -124,24 +124,24 @@ Test.gql("Create managed team", function(t)
 				team = {
 					id = Save("teamID"),
 					slug = "newteam",
-                    isManaged = true,
-                    groups = {
+					isManaged = true,
+					groups = {
 						nodes = {
-                            {
-                            	category = "data-admins",
-	                             suffix = "",
-                            },
-                            {
-                           	category = "developers",
-	                             suffix = "",
+							{
+								category = "data-admins",
+								suffix = "",
+							},
+							{
+								category = "developers",
+								suffix = "",
 							},
 						},
-                    },
-                    artifactRegistryRepositories = {
-                        nodes = {
-                            {
-                            	format = "DOCKER"
-                         },
+					},
+					artifactRegistryRepositories = {
+						nodes = {
+							{
+								format = "DOCKER",
+							},
 						},
 					},
 				},
@@ -186,14 +186,14 @@ Test.gql("Admin can create self-managed team", function(t)
 			createTeam = {
 				team = {
 					slug = "newadminteam",
-                    isManaged = false,
-                    groups = {
-                        pageInfo = {
+					isManaged = false,
+					groups = {
+						pageInfo = {
 							totalCount = 0,
 						},
-                    },
-                    artifactRegistryRepositories = {
-                        pageInfo = {
+					},
+					artifactRegistryRepositories = {
+						pageInfo = {
 							totalCount = 0,
 						},
 					},

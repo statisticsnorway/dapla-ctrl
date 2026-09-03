@@ -32,11 +32,11 @@ WHERE
 
 -- name: CreateArtifactRegistryRepository :one
 INSERT INTO
-    team_artifact_registry_repositories (team_slug, format, size_bytes)
+	team_artifact_registry_repositories (team_slug, format, size_bytes)
 VALUES
-    (@team_slug, @format, 0)
+	(@team_slug, @format, 0)
 RETURNING
-    *
+	*
 ;
 
 -- name: ListArtifactRegistryReposForTeam :many
