@@ -113,7 +113,7 @@ func ListGithubReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagin
 }
 
 func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositoryInput, actor *authz.Actor) (*CreateArtifactRegistryRepositoryPayload, error) {
-	if err := input.Validate(); err != nil {
+	if err := input.Validate(ctx); err != nil {
 		return nil, err
 	}
 
@@ -122,7 +122,7 @@ func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositor
 		var err error
 		repo, err = db(ctx).CreateArtifactRegistryRepository(ctx, artifactregistrysql.CreateArtifactRegistryRepositoryParams{
 			TeamSlug: input.TeamSlug,
-			Format:   input.Format,
+			Format:   input.Format.String(),
 		})
 		if err != nil {
 			return err
@@ -132,7 +132,7 @@ func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositor
 			Action:       activitylog.ActivityLogEntryActionCreated,
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeArtifactRegistryRepository,
-			ResourceName: input.Format,
+			ResourceName: input.Format.String(),
 			TeamSlug:     new(input.TeamSlug),
 		})
 	}); err != nil {
@@ -140,9 +140,26 @@ func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositor
 	}
 
 	return &CreateArtifactRegistryRepositoryPayload{
-		Repository: &ArtifactRegistryRepository{
-			TeamSlug: repo.TeamSlug,
-			Format:   repo.Format,
-		},
+		Repository: toGraphArtifactRegistryRepo(repo),
 	}, nil
+}
+
+func ListArtifactRegistryReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryRepositoryConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListArtifactRegistryReposForTeam(ctx, artifactregistrysql.ListArtifactRegistryReposForTeamParams{
+		TeamSlug: teamSlug,
+		Offset:   page.Offset(),
+		Limit:    page.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	var total int64
+	if len(ret) > 0 {
+		total = ret[0].TotalCount
+	}
+	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListArtifactRegistryReposForTeamRow) *ArtifactRegistryRepository {
+		return toGraphArtifactRegistryRepo(&from.TeamArtifactRegistryRepository)
+	}), nil
 }

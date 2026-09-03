@@ -1,9 +1,12 @@
 package artifactregistry
 
 import (
+	"context"
+
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry/artifactregistrysql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/validate"
 )
 
 //mgo:gen model
@@ -13,15 +16,17 @@ type ArtifactRegistryRepository struct {
 	// Team this repository belongs to.
 	TeamSlug slug.Slug `json:"teamSlug"`
 	// Format of the repository.
-	Format string `json:"format"`
+	Format ArtifactRegistryFormat `json:"format"`
 }
 
 func (r ArtifactRegistryRepository) ID() ident.Ident {
-	return newARIdent(r.TeamSlug, r.Format)
+	return newARIdent(r.TeamSlug, r.Format.String())
 }
 
+//mgo:gen enum DOCKER PYTHON MAVEN NPM GO
+type ArtifactRegistryFormat string
+
 //mgo:gen model
-//mgo:gen order NAME
 //mgo:impl node paginated
 type ArtifactRegistryAllowedGithubRepos struct {
 	// Name of the repository, with the organization prefix.
@@ -69,14 +74,34 @@ type CreateArtifactRegistryRepositoryInput struct {
 	// Slug of the team
 	TeamSlug slug.Slug `json:"teamSlug"`
 	// Format of the repo (DOCKER, MAVEN, etc.)
-	Format string
+	Format ArtifactRegistryFormat
 }
 
-func (i CreateArtifactRegistryRepositoryInput) Validate() error {
-	return nil
+func (i CreateArtifactRegistryRepositoryInput) Validate(ctx context.Context) error {
+	verr := validate.New()
+
+	// check if team exists
+	if exists, err := db(ctx).TeamExists(ctx, i.TeamSlug); err != nil {
+		return err
+	} else if !exists {
+		verr.Add("teamSlug", "Team with the given slug does not exists.")
+	}
+
+	if !i.Format.IsValid() {
+		verr.Add("format", "Invalid or unsupported format.")
+	}
+
+	return verr.NilIfEmpty()
 }
 
 type CreateArtifactRegistryRepositoryPayload struct {
 	// Repository that was created
 	Repository *ArtifactRegistryRepository `json:"repository,omitempty"`
+}
+
+func toGraphArtifactRegistryRepo(r *artifactregistrysql.TeamArtifactRegistryRepository) *ArtifactRegistryRepository {
+	return &ArtifactRegistryRepository{
+		TeamSlug: r.TeamSlug,
+		Format:   ArtifactRegistryFormat(r.Format),
+	}
 }

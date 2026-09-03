@@ -81,3 +81,42 @@ func (e {{ name . }}OrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 {{ end }}
+
+{{ define "enum" }}
+const (
+{{- range .Argv }}
+	{{ name $ }}{{ pascal . }}        {{ name $ }} = "{{ . }}"
+{{- end }}
+)
+
+var All{{ name . }} = []{{ name . }}{
+{{- range .Argv }}
+	{{ name $ }}{{ pascal . }},
+{{- end }}
+}
+
+func (e {{ name . }}) IsValid() bool {
+	return slices.Contains(All{{ name . }}, e)
+}
+
+func (e {{ name . }}) String() string {
+	return string(e)
+}
+
+func (e *{{ name . }}) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = {{ name . }}(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid {{ name . }}", str)
+	}
+	return nil
+}
+
+func (e {{ name . }}) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+{{ end }}

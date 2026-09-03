@@ -1009,7 +1009,6 @@ type ArtifactRegistryAllowedGithubReposResolver interface {
 	Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryAllowedGithubRepos) (*team.Team, error)
 }
 type ArtifactRegistryRepositoryResolver interface {
-	ID(ctx context.Context, obj *artifactregistry.ArtifactRegistryRepository) (*ident.Ident, error)
 	Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryRepository) (*team.Team, error)
 }
 type DisableTeamFeaturePayloadResolver interface {
@@ -5355,7 +5354,7 @@ input CreateArtifactRegistryRepositoryInput {
 	teamSlug: Slug!
 
 	"Which format repository to create."
-	format: String!
+	format: ArtifactRegistryFormat!
 }
 
 type CreateArtifactRegistryRepositoryPayload {
@@ -5420,7 +5419,15 @@ type ArtifactRegistryRepository implements Node {
 	team: Team!
 
 	"Format of the repository."
-	format: String!
+	format: ArtifactRegistryFormat!
+}
+
+enum ArtifactRegistryFormat {
+	DOCKER
+	GO
+	NPM
+	PYTHON
+	MAVEN
 }
 
 type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
@@ -12096,10 +12103,10 @@ func (ec *executionContext) _ArtifactRegistryRepository_id(ctx context.Context, 
 		field,
 		ec.fieldContext_ArtifactRegistryRepository_id,
 		func(ctx context.Context) (any, error) {
-			return ec.Resolvers.ArtifactRegistryRepository().ID(ctx, obj)
+			return obj.ID(), nil
 		},
 		nil,
-		ec.marshalNID2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
 		true,
 		true,
 	)
@@ -12110,7 +12117,7 @@ func (ec *executionContext) fieldContext_ArtifactRegistryRepository_id(_ context
 		Object:     "ArtifactRegistryRepository",
 		Field:      field,
 		IsMethod:   true,
-		IsResolver: true,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
 		},
@@ -12201,7 +12208,7 @@ func (ec *executionContext) _ArtifactRegistryRepository_format(ctx context.Conte
 			return obj.Format, nil
 		},
 		nil,
-		ec.marshalNString2string,
+		ec.marshalNArtifactRegistryFormat2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryFormat,
 		true,
 		true,
 	)
@@ -12214,7 +12221,7 @@ func (ec *executionContext) fieldContext_ArtifactRegistryRepository_format(_ con
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type ArtifactRegistryFormat does not have child fields")
 		},
 	}
 	return fc, nil
@@ -32267,7 +32274,7 @@ func (ec *executionContext) unmarshalInputCreateArtifactRegistryRepositoryInput(
 			it.TeamSlug = data
 		case "format":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("format"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+			data, err := ec.unmarshalNArtifactRegistryFormat2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryFormat(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -34621,41 +34628,10 @@ func (ec *executionContext) _ArtifactRegistryRepository(ctx context.Context, sel
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ArtifactRegistryRepository")
 		case "id":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._ArtifactRegistryRepository_id(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
+			out.Values[i] = ec._ArtifactRegistryRepository_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
 			}
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "team":
 			field := field
 
@@ -43915,6 +43891,16 @@ func (ec *executionContext) marshalNArtifactRegistryAllowedGithubReposEdge2ᚕgi
 	return ret
 }
 
+func (ec *executionContext) unmarshalNArtifactRegistryFormat2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryFormat(ctx context.Context, v any) (artifactregistry.ArtifactRegistryFormat, error) {
+	var res artifactregistry.ArtifactRegistryFormat
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNArtifactRegistryFormat2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryFormat(ctx context.Context, sel ast.SelectionSet, v artifactregistry.ArtifactRegistryFormat) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNArtifactRegistryRepository2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋartifactregistryᚐArtifactRegistryRepositoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*artifactregistry.ArtifactRegistryRepository) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -44410,22 +44396,6 @@ func (ec *executionContext) unmarshalNID2githubᚗcomᚋstatisticsnorwayᚋdapla
 }
 
 func (ec *executionContext) marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, sel ast.SelectionSet, v ident.Ident) graphql.Marshaler {
-	return graphql.WrapContextMarshaler(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNID2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, v any) (*ident.Ident, error) {
-	var res = new(ident.Ident)
-	err := res.UnmarshalGQLContext(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent(ctx context.Context, sel ast.SelectionSet, v *ident.Ident) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
 	return graphql.WrapContextMarshaler(ctx, v)
 }
 

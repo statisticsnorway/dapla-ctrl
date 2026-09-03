@@ -27,13 +27,18 @@ func newGHIdent(teamSlug slug.Slug, githubRepositoryName string) ident.Ident {
 	return ident.NewIdent(identKeyGHRepo, teamSlug.String(), githubRepositoryName)
 }
 
-func parseARIdent(id ident.Ident) (slug.Slug, string, error) {
+func parseARIdent(id ident.Ident) (slug.Slug, ArtifactRegistryFormat, error) {
 	parts := id.Parts()
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf("invalid repository ident")
 	}
 
-	return slug.Slug(parts[0]), parts[1], nil
+	format := ArtifactRegistryFormat(parts[1])
+	if !format.IsValid() {
+		return "", "", fmt.Errorf("invalid AR format %q", format.String())
+	}
+
+	return slug.Slug(parts[0]), format, nil
 }
 
 func parseGHIdent(id ident.Ident) (slug.Slug, string, error) {

@@ -86,7 +86,7 @@ input CreateArtifactRegistryRepositoryInput {
 	teamSlug: Slug!
 
 	"Which format repository to create."
-	format: String!
+	format: ArtifactRegistryFormat!
 }
 
 type CreateArtifactRegistryRepositoryPayload {
@@ -151,7 +151,15 @@ type ArtifactRegistryRepository implements Node {
 	team: Team!
 
 	"Format of the repository."
-	format: String!
+	format: ArtifactRegistryFormat!
+}
+
+enum ArtifactRegistryFormat {
+	DOCKER
+	GO
+	NPM
+	PYTHON
+	MAVEN
 }
 
 type ArtifactRegistryGithubRepoAccessGrantedActivityLogEntry implements ActivityLogEntry & Node {
