@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
@@ -50,16 +51,10 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 		}
 
 		if team.IsManaged {
-			for _, category := range []string{"developers", "data-admins"} {
-				if _, err := group.Create(ctx, &group.CreateGroupInput{
-					TeamSlug: team.Slug,
-					Category: category,
-				}); err != nil {
-					return err
-				}
+			if err := createDefaultManagedResources(ctx, team.Slug, actor); err != nil {
+				return err
 			}
 		}
-
 		return nil
 	})
 	if err != nil {
@@ -67,6 +62,26 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 	}
 
 	return toGraphTeam(team), nil
+}
+
+func createDefaultManagedResources(ctx context.Context, teamSlug slug.Slug, actor *authz.Actor) error {
+	for _, category := range []string{"developers", "data-admins"} {
+		if _, err := group.Create(ctx, &group.CreateGroupInput{
+			TeamSlug: teamSlug,
+			Category: category,
+		}, actor); err != nil {
+			return err
+		}
+	}
+
+	if _, err := artifactregistry.CreateRepository(ctx, artifactregistry.CreateArtifactRegistryRepositoryInput{
+		TeamSlug: teamSlug,
+		Format:   "DOCKER",
+	}, actor); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*Team, error) {
