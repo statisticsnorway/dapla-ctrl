@@ -30,9 +30,11 @@ WHERE
 	AND repository_name = @repository_name
 ;
 
--- name: CreateArtifactRegistryRepository :exec
+-- name: CreateArtifactRegistryRepository :one
 INSERT INTO
     team_artifact_registry_repositories (team_slug, format, size_bytes)
 VALUES
     (@team_slug, @format, 0)
+RETURNING
+    *
 ;

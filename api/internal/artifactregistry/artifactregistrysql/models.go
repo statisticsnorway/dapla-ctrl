@@ -10,3 +10,9 @@ type TeamArtifactRegistryGhReposAllowList struct {
 	TeamSlug       slug.Slug
 	RepositoryName string
 }
+
+type TeamArtifactRegistryRepository struct {
+	TeamSlug  slug.Slug
+	Format    string
+	SizeBytes int64
+}

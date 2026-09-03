@@ -8,7 +8,7 @@ import (
 
 type Querier interface {
 	AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGhReposAllowList, error)
-	CreateArtifactRegistryRepository(ctx context.Context, arg CreateArtifactRegistryRepositoryParams) error
+	CreateArtifactRegistryRepository(ctx context.Context, arg CreateArtifactRegistryRepositoryParams) (*TeamArtifactRegistryRepository, error)
 	ListGithubReposForTeam(ctx context.Context, arg ListGithubReposForTeamParams) ([]*ListGithubReposForTeamRow, error)
 	RemoveGithubRepositoryFromTeam(ctx context.Context, arg RemoveGithubRepositoryFromTeamParams) error
 }

@@ -72,6 +72,10 @@ type CreateArtifactRegistryRepositoryInput struct {
 	Format string
 }
 
+func (i CreateArtifactRegistryRepositoryInput) Validate() error {
+	return nil
+}
+
 type CreateArtifactRegistryRepositoryPayload struct {
 	// Repository that was created
 	Repository *ArtifactRegistryRepository `json:"repository,omitempty"`

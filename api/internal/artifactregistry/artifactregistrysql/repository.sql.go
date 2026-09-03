@@ -30,11 +30,13 @@ func (q *Queries) AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRe
 	return &i, err
 }
 
-const createArtifactRegistryRepository = `-- name: CreateArtifactRegistryRepository :exec
+const createArtifactRegistryRepository = `-- name: CreateArtifactRegistryRepository :one
 INSERT INTO
     team_artifact_registry_repositories (team_slug, format, size_bytes)
 VALUES
     ($1, $2, 0)
+RETURNING
+    team_slug, format, size_bytes
 `
 
 type CreateArtifactRegistryRepositoryParams struct {
@@ -42,9 +44,11 @@ type CreateArtifactRegistryRepositoryParams struct {
 	Format   string
 }
 
-func (q *Queries) CreateArtifactRegistryRepository(ctx context.Context, arg CreateArtifactRegistryRepositoryParams) error {
-	_, err := q.db.Exec(ctx, createArtifactRegistryRepository, arg.TeamSlug, arg.Format)
-	return err
+func (q *Queries) CreateArtifactRegistryRepository(ctx context.Context, arg CreateArtifactRegistryRepositoryParams) (*TeamArtifactRegistryRepository, error) {
+	row := q.db.QueryRow(ctx, createArtifactRegistryRepository, arg.TeamSlug, arg.Format)
+	var i TeamArtifactRegistryRepository
+	err := row.Scan(&i.TeamSlug, &i.Format, &i.SizeBytes)
+	return &i, err
 }
 
 const listGithubReposForTeam = `-- name: ListGithubReposForTeam :many

@@ -111,3 +111,38 @@ func ListGithubReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagin
 		return toGraphArtifactRegistryAllowedGithubRepos(&from.TeamArtifactRegistryGhReposAllowList)
 	}), nil
 }
+
+func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositoryInput, actor *authz.Actor) (*CreateArtifactRegistryRepositoryPayload, error) {
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
+	var repo *artifactregistrysql.TeamArtifactRegistryRepository
+	if err := database.Transaction(ctx, func(ctx context.Context) error {
+		var err error
+		repo, err = db(ctx).CreateArtifactRegistryRepository(ctx, artifactregistrysql.CreateArtifactRegistryRepositoryParams{
+			TeamSlug: input.TeamSlug,
+			Format:   input.Format,
+		})
+		if err != nil {
+			return err
+		}
+
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionCreated,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeArtifactRegistryRepository,
+			ResourceName: input.Format,
+			TeamSlug:     new(input.TeamSlug),
+		})
+	}); err != nil {
+		return nil, err
+	}
+
+	return &CreateArtifactRegistryRepositoryPayload{
+		Repository: &ArtifactRegistryRepository{
+			TeamSlug: repo.TeamSlug,
+			Format:   repo.Format,
+		},
+	}, nil
+}
