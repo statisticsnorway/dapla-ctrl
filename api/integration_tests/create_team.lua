@@ -86,7 +86,7 @@ Test.gql("Create team with slug that is already taken", function(t)
 	}
 end)
 
-Test.gql("Create team", function(t)
+Test.gql("Create managed team", function(t)
 	t.addHeader("x-user-email", user:email())
 
 	t.query [[
@@ -102,6 +102,17 @@ Test.gql("Create team", function(t)
 					id
 					slug
 					isManaged
+					groups {
+						nodes {
+							category
+							suffix
+						}
+					}
+					artifactRegistryRepositories {
+						nodes {
+							format
+						}
+					}
 				}
 			}
 		}
@@ -113,7 +124,26 @@ Test.gql("Create team", function(t)
 				team = {
 					id = Save("teamID"),
 					slug = "newteam",
-					isManaged = true,
+                    isManaged = true,
+                    groups = {
+						nodes = {
+                            {
+                            	category = "data-admins",
+	                             suffix = "",
+                            },
+                            {
+                           	category = "developers",
+	                             suffix = "",
+							},
+						},
+                    },
+                    artifactRegistryRepositories = {
+                        nodes = {
+                            {
+                            	format = "DOCKER"
+                         },
+						},
+					},
 				},
 			},
 		},
@@ -136,6 +166,16 @@ Test.gql("Admin can create self-managed team", function(t)
 				team {
 					slug
 					isManaged
+					groups {
+						pageInfo {
+							totalCount
+						}
+					}
+					artifactRegistryRepositories {
+						pageInfo {
+							totalCount
+						}
+					}
 				}
 			}
 		}
@@ -146,7 +186,17 @@ Test.gql("Admin can create self-managed team", function(t)
 			createTeam = {
 				team = {
 					slug = "newadminteam",
-					isManaged = false,
+                    isManaged = false,
+                    groups = {
+                        pageInfo = {
+							totalCount = 0,
+						},
+                    },
+                    artifactRegistryRepositories = {
+                        pageInfo = {
+							totalCount = 0,
+						},
+					},
 				},
 			},
 		},
