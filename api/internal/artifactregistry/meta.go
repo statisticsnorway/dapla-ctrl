@@ -4,12 +4,10 @@ package artifactregistry
 
 import (
 	"fmt"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"io"
 	"slices"
 	"strconv"
-	"strings"
 )
 
 type (
@@ -18,54 +16,6 @@ type (
 )
 
 func (ArtifactRegistryRepository) IsNode() {}
-
-type ArtifactRegistryRepositoryOrder struct {
-	Field     ArtifactRegistryRepositoryOrderField `json:"field"`
-	Direction model.OrderDirection                 `json:"direction"`
-}
-
-func (o *ArtifactRegistryRepositoryOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type ArtifactRegistryRepositoryOrderField string
-
-const (
-	ArtifactRegistryRepositoryOrderFieldFormat ArtifactRegistryRepositoryOrderField = "FORMAT"
-)
-
-var AllArtifactRegistryRepositoryOrderFields = []ArtifactRegistryRepositoryOrderField{
-	ArtifactRegistryRepositoryOrderFieldFormat,
-}
-
-func (e ArtifactRegistryRepositoryOrderField) IsValid() bool {
-	return slices.Contains(AllArtifactRegistryRepositoryOrderFields, e)
-}
-
-func (e ArtifactRegistryRepositoryOrderField) String() string {
-	return string(e)
-}
-
-func (e *ArtifactRegistryRepositoryOrderField) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ArtifactRegistryRepositoryOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ArtifactRegistryRepositoryOrderField", str)
-	}
-	return nil
-}
-
-func (e ArtifactRegistryRepositoryOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
 
 const (
 	ArtifactRegistryFormatDocker ArtifactRegistryFormat = "DOCKER"

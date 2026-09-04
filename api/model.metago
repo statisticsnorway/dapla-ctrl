@@ -83,6 +83,10 @@ func (e {{ name . }}OrderField) MarshalGQL(w io.Writer) {
 {{ end }}
 
 {{ define "enum" }}
+{{ imports "fmt" }}
+{{ imports "strconv" }}
+{{ imports "slices" }}
+{{ imports "io" }}
 const (
 {{- range .Argv }}
 	{{ name $ }}{{ pascal . }}        {{ name $ }} = "{{ . }}"

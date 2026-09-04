@@ -10,7 +10,6 @@ import (
 )
 
 //mgo:gen model
-//mgo:gen order FORMAT
 //mgo:impl node paginated
 type ArtifactRegistryRepository struct {
 	// Team this repository belongs to.

@@ -32,11 +32,11 @@ func (q *Queries) AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRe
 
 const createArtifactRegistryRepository = `-- name: CreateArtifactRegistryRepository :one
 INSERT INTO
-    team_artifact_registry_repositories (team_slug, format, size_bytes)
+	team_artifact_registry_repositories (team_slug, format, size_bytes)
 VALUES
-    ($1, $2, 0)
+	($1, $2, 0)
 RETURNING
-    team_slug, format, size_bytes
+	team_slug, format, size_bytes
 `
 
 type CreateArtifactRegistryRepositoryParams struct {
