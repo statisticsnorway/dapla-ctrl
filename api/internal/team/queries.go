@@ -9,10 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/group"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/message"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team/teamsql"
@@ -38,19 +40,48 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 			return err
 		}
 
-		return activitylog.Create(ctx, activitylog.CreateInput{
+		if err := activitylog.Create(ctx, activitylog.CreateInput{
 			Action:       activitylog.ActivityLogEntryActionCreated,
 			Actor:        actor.User,
 			ResourceType: activityLogEntryResourceTypeTeam,
 			ResourceName: input.Slug.String(),
 			TeamSlug:     new(input.Slug),
-		})
+		}); err != nil {
+			return err
+		}
+
+		if team.IsManaged {
+			if err := createDefaultManagedResources(ctx, team.Slug, actor); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return toGraphTeam(team), nil
+}
+
+func createDefaultManagedResources(ctx context.Context, teamSlug slug.Slug, actor *authz.Actor) error {
+	for _, category := range []string{"developers", "data-admins"} {
+		if _, err := group.Create(ctx, &group.CreateGroupInput{
+			TeamSlug: teamSlug,
+			Category: category,
+		}, actor); err != nil {
+			return err
+		}
+	}
+
+	if _, err := artifactregistry.CreateRepository(ctx, artifactregistry.CreateArtifactRegistryRepositoryInput{
+		TeamSlug: teamSlug,
+		Format:   "DOCKER",
+	}, actor); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func Update(ctx context.Context, input *UpdateTeamInput, actor *authz.Actor) (*Team, error) {

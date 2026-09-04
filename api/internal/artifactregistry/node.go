@@ -10,18 +10,38 @@ import (
 type identType int
 
 const (
-	identKey identType = iota
+	identKeyGHRepo identType = iota
+	identKeyARRepo
 )
 
 func init() {
-	ident.RegisterIdentType(identKey, "ARGHR", getByIdent)
+	ident.RegisterIdentType(identKeyGHRepo, "ARGHR", getGHReposByIdent)
+	ident.RegisterIdentType(identKeyARRepo, "ARR", getARRepoByIdent)
 }
 
-func newIdent(teamSlug slug.Slug, githubRepositoryName string) ident.Ident {
-	return ident.NewIdent(identKey, teamSlug.String(), githubRepositoryName)
+func newARIdent(teamSlug slug.Slug, format string) ident.Ident {
+	return ident.NewIdent(identKeyARRepo, teamSlug.String(), format)
 }
 
-func parseIdent(id ident.Ident) (slug.Slug, string, error) {
+func newGHIdent(teamSlug slug.Slug, githubRepositoryName string) ident.Ident {
+	return ident.NewIdent(identKeyGHRepo, teamSlug.String(), githubRepositoryName)
+}
+
+func parseARIdent(id ident.Ident) (slug.Slug, ArtifactRegistryFormat, error) {
+	parts := id.Parts()
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("invalid repository ident")
+	}
+
+	format := ArtifactRegistryFormat(parts[1])
+	if !format.IsValid() {
+		return "", "", fmt.Errorf("invalid AR format %q", format.String())
+	}
+
+	return slug.Slug(parts[0]), format, nil
+}
+
+func parseGHIdent(id ident.Ident) (slug.Slug, string, error) {
 	parts := id.Parts()
 	if len(parts) != 2 {
 		return "", "", fmt.Errorf("invalid repository ident")

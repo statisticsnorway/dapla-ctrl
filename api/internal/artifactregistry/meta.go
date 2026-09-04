@@ -4,13 +4,59 @@ package artifactregistry
 
 import (
 	"fmt"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"io"
 	"slices"
 	"strconv"
-	"strings"
 )
+
+type (
+	ArtifactRegistryRepositoryConnection = pagination.Connection[*ArtifactRegistryRepository]
+	ArtifactRegistryRepositoryEdge       = pagination.Edge[*ArtifactRegistryRepository]
+)
+
+func (ArtifactRegistryRepository) IsNode() {}
+
+const (
+	ArtifactRegistryFormatDocker ArtifactRegistryFormat = "DOCKER"
+	ArtifactRegistryFormatPython ArtifactRegistryFormat = "PYTHON"
+	ArtifactRegistryFormatMaven  ArtifactRegistryFormat = "MAVEN"
+	ArtifactRegistryFormatNpm    ArtifactRegistryFormat = "NPM"
+	ArtifactRegistryFormatGo     ArtifactRegistryFormat = "GO"
+)
+
+var AllArtifactRegistryFormat = []ArtifactRegistryFormat{
+	ArtifactRegistryFormatDocker,
+	ArtifactRegistryFormatPython,
+	ArtifactRegistryFormatMaven,
+	ArtifactRegistryFormatNpm,
+	ArtifactRegistryFormatGo,
+}
+
+func (e ArtifactRegistryFormat) IsValid() bool {
+	return slices.Contains(AllArtifactRegistryFormat, e)
+}
+
+func (e ArtifactRegistryFormat) String() string {
+	return string(e)
+}
+
+func (e *ArtifactRegistryFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ArtifactRegistryFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ArtifactRegistryFormat", str)
+	}
+	return nil
+}
+
+func (e ArtifactRegistryFormat) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
 
 type (
 	ArtifactRegistryAllowedGithubReposConnection = pagination.Connection[*ArtifactRegistryAllowedGithubRepos]
@@ -18,51 +64,3 @@ type (
 )
 
 func (ArtifactRegistryAllowedGithubRepos) IsNode() {}
-
-type ArtifactRegistryAllowedGithubReposOrder struct {
-	Field     ArtifactRegistryAllowedGithubReposOrderField `json:"field"`
-	Direction model.OrderDirection                         `json:"direction"`
-}
-
-func (o *ArtifactRegistryAllowedGithubReposOrder) String() string {
-	if o == nil {
-		return ""
-	}
-
-	return strings.ToLower(o.Field.String() + ":" + o.Direction.String())
-}
-
-type ArtifactRegistryAllowedGithubReposOrderField string
-
-const (
-	ArtifactRegistryAllowedGithubReposOrderFieldName ArtifactRegistryAllowedGithubReposOrderField = "NAME"
-)
-
-var AllArtifactRegistryAllowedGithubReposOrderFields = []ArtifactRegistryAllowedGithubReposOrderField{
-	ArtifactRegistryAllowedGithubReposOrderFieldName,
-}
-
-func (e ArtifactRegistryAllowedGithubReposOrderField) IsValid() bool {
-	return slices.Contains(AllArtifactRegistryAllowedGithubReposOrderFields, e)
-}
-
-func (e ArtifactRegistryAllowedGithubReposOrderField) String() string {
-	return string(e)
-}
-
-func (e *ArtifactRegistryAllowedGithubReposOrderField) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = ArtifactRegistryAllowedGithubReposOrderField(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid ArtifactRegistryAllowedGithubReposOrderField", str)
-	}
-	return nil
-}
-
-func (e ArtifactRegistryAllowedGithubReposOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
