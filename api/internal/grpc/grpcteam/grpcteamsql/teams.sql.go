@@ -75,6 +75,36 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 	return &i, err
 }
 
+const getTeamManager = `-- name: GetTeamManager :one
+SELECT
+  users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
+FROM
+  sections
+INNER JOIN teams ON sections.code = teams.section_code
+INNER JOIN users ON users.id = sections.manager_id
+WHERE
+teams.slug = $1::slug
+ORDER BY
+    users.id
+LIMIT 1
+`
+
+func (q *Queries) GetTeamManager(ctx context.Context, teamSlug slug.Slug) (*User, error) {
+	row := q.db.QueryRow(ctx, getTeamManager, teamSlug)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.ExternalID,
+		&i.Admin,
+		&i.SectionCode,
+		&i.JobTitle,
+		&i.EmploymentType,
+	)
+	return &i, err
+}
+
 const list = `-- name: List :many
 SELECT
 	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
