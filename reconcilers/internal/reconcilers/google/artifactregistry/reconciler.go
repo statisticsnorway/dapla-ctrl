@@ -321,13 +321,13 @@ func repositoryFromArtifactRegistry(team string, repo *artifactregistrypb.Reposi
 func diffRepositoriesByFormat(localRepos, remoteRepos []Repository) (localOnly []Repository, remoteOnly []Repository) {
 	localOnly = slices.DeleteFunc(slices.Clone(localRepos), func(local Repository) bool {
 		return slices.ContainsFunc(remoteRepos, func(remote Repository) bool {
-			return local.Format == remote.Format
+			return strings.EqualFold(local.Format, remote.Format)
 		})
 	})
 
 	remoteOnly = slices.DeleteFunc(slices.Clone(remoteRepos), func(remote Repository) bool {
 		return slices.ContainsFunc(localRepos, func(local Repository) bool {
-			return local.Format == remote.Format
+			return strings.EqualFold(local.Format, remote.Format)
 		})
 	})
 
