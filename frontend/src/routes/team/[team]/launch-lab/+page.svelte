@@ -5,7 +5,6 @@
 	import { type LaunchLab$result } from '$houdini';
 	import { RocketIcon } from '@nais/ds-svelte-community/icons';
 	import DaplaTable from '$lib/ui/DaplaTable.svelte';
-	import { env } from '$env/dynamic/public';
 
 	let { data }: PageProps = $props();
 	let { LaunchLab, teamSlug } = $derived(data);
@@ -20,7 +19,7 @@
 			'unreachable'
 	);
 
-	type ServiceFeatures = 'buckets' | 'database';
+	type ServiceFeatures = 'buckets' | 'parquedit';
 	type ServiceFeatureKeys = `supports${Capitalize<ServiceFeatures>}`;
 	type Service = {
 		[key in ServiceFeatureKeys]?: boolean;
@@ -34,14 +33,19 @@
 			displayName: 'VS Code',
 			name: 'vscode',
 			supportsBuckets: true,
-			supportsDatabase: true
+			supportsParquedit: true
 		},
-		{ displayName: 'Jupyter', name: 'jupyter', supportsBuckets: true },
-		{ displayName: 'RStudio', name: 'rstudio', supportsBuckets: true },
-		{ displayName: 'Marimo', name: 'marimo', supportsBuckets: true },
+		{ displayName: 'Jupyter', name: 'jupyter', supportsBuckets: true, supportsParquedit: true },
+		{ displayName: 'RStudio', name: 'rstudio', supportsBuckets: true, supportsParquedit: true },
+		{ displayName: 'Marimo', name: 'marimo', supportsBuckets: true, supportsParquedit: true },
 		{ displayName: 'Datadoc Editor', name: 'datadoc-editor' },
 		{ displayName: 'Vardef Forvaltning', name: 'vardef-forvaltning' },
-		{ displayName: 'Jupyter Playground', name: 'jupyter-playground', supportsBuckets: true },
+		{
+			displayName: 'Jupyter Playground',
+			name: 'jupyter-playground',
+			supportsBuckets: true,
+			supportsParquedit: true
+		},
 		{ displayName: 'Jupyter Pyspark', name: 'jupyter-pyspark', supportsBuckets: true },
 		{ displayName: 'JDemetra', name: 'jdemetra' }
 	].toSorted((a, b) => (a.displayName < b.displayName ? -1 : 1));
@@ -55,12 +59,8 @@
 
 	let parqueditSelected = $state(false);
 	let hasManualEditing = $derived($LaunchLab.data?.team.hasManualEditing);
-	const parqueditDatabaseUrl = env.PUBLIC_PARQUEDIT_DATABASE_URL;
 	let shouldShowParquedit = $derived(
-		serviceEnv === 'prod' &&
-			parqueditDatabaseUrl !== undefined &&
-			hasManualEditing &&
-			currentService?.supportsDatabase
+		serviceEnv === 'prod' && hasManualEditing && currentService?.supportsParquedit
 	);
 	let shouldAddParquedit = $derived(shouldShowParquedit && parqueditSelected);
 
@@ -92,10 +92,10 @@
 
 		parameters.push({ key: 'dapla.group', value: guillemetify(group) });
 
-		if (shouldAddParquedit && parqueditDatabaseUrl !== undefined) {
+		if (shouldAddParquedit) {
 			parameters.push({
-				key: 'avansertdb.database.instance',
-				value: guillemetify(parqueditDatabaseUrl)
+				key: 'avansert.database.enabled',
+				value: 'true'
 			});
 		}
 

@@ -232,11 +232,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	budgetNotificationEmails := make([]string, 0, 5)
-	teamDevelopersEmails, err := getGroupMemberEmails(ctx, client, fmt.Sprintf("%s-developers", daplaTeam.Slug), 1)
+	teamManager, err := client.Teams().GetTeamManager(ctx, &protoapi.GetTeamManagerRequest{
+		Slug: daplaTeam.Slug,
+	})
+
 	if err != nil {
 		return err
 	}
-	budgetNotificationEmails = append(budgetNotificationEmails, teamDevelopersEmails...)
+	budgetNotificationEmails = append(budgetNotificationEmails, teamManager.User.Email)
 
 	// The Google Billing API only allows 5 notification channels to be attached to a billing budget. Therefore we only pick one developer from the team + 4 dapla-stat developers to recieve billing alerts
 	if r.AIBudgetDeveloperBillingGroup != "" {

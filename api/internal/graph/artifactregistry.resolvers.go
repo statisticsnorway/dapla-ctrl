@@ -15,6 +15,10 @@ func (r *artifactRegistryAllowedGithubReposResolver) Team(ctx context.Context, o
 	return team.Get(ctx, obj.TeamSlug)
 }
 
+func (r *artifactRegistryRepositoryResolver) Team(ctx context.Context, obj *artifactregistry.ArtifactRegistryRepository) (*team.Team, error) {
+	return team.Get(ctx, obj.TeamSlug)
+}
+
 func (r *mutationResolver) GrantGithubRepoAccessToTeamArtifactRegistry(ctx context.Context, input artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput) (*artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryPayload, error) {
 	actor := authz.ActorFromContext(ctx)
 	isAdmin := actor.User.IsAdmin()
@@ -86,17 +90,50 @@ func (r *mutationResolver) RevokeGithubRepoAccessFromTeamArtifactRegistry(ctx co
 	}, nil
 }
 
+func (r *mutationResolver) CreateArtifactRegistryRepository(ctx context.Context, input artifactregistry.CreateArtifactRegistryRepositoryInput) (*artifactregistry.CreateArtifactRegistryRepositoryPayload, error) {
+	actor := authz.ActorFromContext(ctx)
+	if !actor.User.IsAdmin() {
+		return nil, authz.ErrNotSupported
+	}
+
+	repo, err := artifactregistry.CreateRepository(ctx, input, actor)
+	if err != nil {
+		return nil, err
+	}
+
+	correlationID := uuid.New()
+	r.triggerTeamUpdatedEvent(ctx, input.TeamSlug, correlationID)
+
+	return repo, nil
+}
+
 func (r *teamResolver) ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return artifactregistry.ListForTeam(ctx, obj.Slug, page)
+	return artifactregistry.ListGithubReposForTeam(ctx, obj.Slug, page)
+}
+
+func (r *teamResolver) ArtifactRegistryRepositories(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryRepository], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+
+	return artifactregistry.ListArtifactRegistryReposForTeam(ctx, obj.Slug, page)
 }
 
 func (r *Resolver) ArtifactRegistryAllowedGithubRepos() gengql.ArtifactRegistryAllowedGithubReposResolver {
 	return &artifactRegistryAllowedGithubReposResolver{r}
 }
 
-type artifactRegistryAllowedGithubReposResolver struct{ *Resolver }
+func (r *Resolver) ArtifactRegistryRepository() gengql.ArtifactRegistryRepositoryResolver {
+	return &artifactRegistryRepositoryResolver{r}
+}
+
+type (
+	artifactRegistryAllowedGithubReposResolver struct{ *Resolver }
+	artifactRegistryRepositoryResolver         struct{ *Resolver }
+)

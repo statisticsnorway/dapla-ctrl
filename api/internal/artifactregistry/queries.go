@@ -14,8 +14,20 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
-func getByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryAllowedGithubRepos, error) {
-	ts, githubRepositoryName, err := parseIdent(id)
+func getARRepoByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryRepository, error) {
+	ts, format, err := parseARIdent(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ArtifactRegistryRepository{
+		TeamSlug: ts,
+		Format:   format,
+	}, nil
+}
+
+func getGHReposByIdent(_ context.Context, id ident.Ident) (*ArtifactRegistryAllowedGithubRepos, error) {
+	ts, githubRepositoryName, err := parseGHIdent(id)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +92,7 @@ func RemoveGithubRepositoryFromTeam(ctx context.Context, input RevokeGithubRepoA
 	})
 }
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryAllowedGithubReposConnection, error) {
+func ListGithubReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryAllowedGithubReposConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListGithubReposForTeam(ctx, artifactregistrysql.ListGithubReposForTeamParams{
@@ -97,5 +109,57 @@ func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagin
 	}
 	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListGithubReposForTeamRow) *ArtifactRegistryAllowedGithubRepos {
 		return toGraphArtifactRegistryAllowedGithubRepos(&from.TeamArtifactRegistryGhReposAllowList)
+	}), nil
+}
+
+func CreateRepository(ctx context.Context, input CreateArtifactRegistryRepositoryInput, actor *authz.Actor) (*CreateArtifactRegistryRepositoryPayload, error) {
+	if err := input.Validate(ctx); err != nil {
+		return nil, err
+	}
+
+	var repo *artifactregistrysql.TeamArtifactRegistryRepository
+	if err := database.Transaction(ctx, func(ctx context.Context) error {
+		var err error
+		repo, err = db(ctx).CreateArtifactRegistryRepository(ctx, artifactregistrysql.CreateArtifactRegistryRepositoryParams{
+			TeamSlug: input.TeamSlug,
+			Format:   input.Format.String(),
+		})
+		if err != nil {
+			return err
+		}
+
+		return activitylog.Create(ctx, activitylog.CreateInput{
+			Action:       activitylog.ActivityLogEntryActionCreated,
+			Actor:        actor.User,
+			ResourceType: activityLogEntryResourceTypeArtifactRegistryRepository,
+			ResourceName: input.Format.String(),
+			TeamSlug:     new(input.TeamSlug),
+		})
+	}); err != nil {
+		return nil, err
+	}
+
+	return &CreateArtifactRegistryRepositoryPayload{
+		Repository: toGraphArtifactRegistryRepo(repo),
+	}, nil
+}
+
+func ListArtifactRegistryReposForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*ArtifactRegistryRepositoryConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListArtifactRegistryReposForTeam(ctx, artifactregistrysql.ListArtifactRegistryReposForTeamParams{
+		TeamSlug: teamSlug,
+		Offset:   page.Offset(),
+		Limit:    page.Limit(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	var total int64
+	if len(ret) > 0 {
+		total = ret[0].TotalCount
+	}
+	return pagination.NewConvertConnection(ret, page, total, func(from *artifactregistrysql.ListArtifactRegistryReposForTeamRow) *ArtifactRegistryRepository {
+		return toGraphArtifactRegistryRepo(&from.TeamArtifactRegistryRepository)
 	}), nil
 }

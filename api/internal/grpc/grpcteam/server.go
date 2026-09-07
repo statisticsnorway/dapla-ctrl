@@ -121,6 +121,24 @@ func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureReques
 	return resp, nil
 }
 
+func (t *Server) GetTeamManager(ctx context.Context, req *protoapi.GetTeamManagerRequest) (*protoapi.GetTeamManagerResponse, error) {
+	teamManager, err := t.querier.GetTeamManager(ctx, slug.Slug(req.Slug))
+	if err != nil {
+		return nil, err
+	}
+
+	user := &protoapi.User{
+		Id:         teamManager.ID.String(),
+		Name:       teamManager.Name,
+		Email:      teamManager.Email,
+		ExternalId: teamManager.ExternalID,
+	}
+
+	return &protoapi.GetTeamManagerResponse{
+		User: user,
+	}, nil
+}
+
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
 		Slug:         team.Slug.String(),

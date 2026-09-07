@@ -15,8 +15,7 @@ import (
 func NewMockTeamsServer(t interface {
 	mock.TestingT
 	Cleanup(func())
-},
-) *MockTeamsServer {
+}) *MockTeamsServer {
 	mock := &MockTeamsServer{}
 	mock.Mock.Test(t)
 
@@ -170,6 +169,74 @@ func (_c *MockTeamsServer_Get_Call) Return(getTeamResponse *GetTeamResponse, err
 }
 
 func (_c *MockTeamsServer_Get_Call) RunAndReturn(run func(context1 context.Context, getTeamRequest *GetTeamRequest) (*GetTeamResponse, error)) *MockTeamsServer_Get_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetTeamManager provides a mock function for the type MockTeamsServer
+func (_mock *MockTeamsServer) GetTeamManager(context1 context.Context, getTeamManagerRequest *GetTeamManagerRequest) (*GetTeamManagerResponse, error) {
+	ret := _mock.Called(context1, getTeamManagerRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTeamManager")
+	}
+
+	var r0 *GetTeamManagerResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetTeamManagerRequest) (*GetTeamManagerResponse, error)); ok {
+		return returnFunc(context1, getTeamManagerRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetTeamManagerRequest) *GetTeamManagerResponse); ok {
+		r0 = returnFunc(context1, getTeamManagerRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*GetTeamManagerResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *GetTeamManagerRequest) error); ok {
+		r1 = returnFunc(context1, getTeamManagerRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockTeamsServer_GetTeamManager_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTeamManager'
+type MockTeamsServer_GetTeamManager_Call struct {
+	*mock.Call
+}
+
+// GetTeamManager is a helper method to define mock.On call
+//   - context1 context.Context
+//   - getTeamManagerRequest *GetTeamManagerRequest
+func (_e *MockTeamsServer_Expecter) GetTeamManager(context1 interface{}, getTeamManagerRequest interface{}) *MockTeamsServer_GetTeamManager_Call {
+	return &MockTeamsServer_GetTeamManager_Call{Call: _e.mock.On("GetTeamManager", context1, getTeamManagerRequest)}
+}
+
+func (_c *MockTeamsServer_GetTeamManager_Call) Run(run func(context1 context.Context, getTeamManagerRequest *GetTeamManagerRequest)) *MockTeamsServer_GetTeamManager_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *GetTeamManagerRequest
+		if args[1] != nil {
+			arg1 = args[1].(*GetTeamManagerRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockTeamsServer_GetTeamManager_Call) Return(getTeamManagerResponse *GetTeamManagerResponse, err error) *MockTeamsServer_GetTeamManager_Call {
+	_c.Call.Return(getTeamManagerResponse, err)
+	return _c
+}
+
+func (_c *MockTeamsServer_GetTeamManager_Call) RunAndReturn(run func(context1 context.Context, getTeamManagerRequest *GetTeamManagerRequest) (*GetTeamManagerResponse, error)) *MockTeamsServer_GetTeamManager_Call {
 	_c.Call.Return(run)
 	return _c
 }

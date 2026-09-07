@@ -25,7 +25,6 @@
 		if (fieldName === 'hasManualEditing') {
 			return value === 'true' ? 'Parquedit ble skrudd på' : 'Parquedit ble skrudd av';
 		}
-		return value;
 	};
 </script>
 
@@ -34,9 +33,8 @@
 		{#if updatedFieldToDisplayText(field.field, field.newValue)}
 			{updatedFieldToDisplayText(field.field, field.newValue)}
 		{:else}
-			{fieldNameToDisplayName(field.field)} endret fra <i>(field.oldValue</i> til<i
-				>field.newValue</i
-			>
+			{fieldNameToDisplayName(field.field)} endret fra <i>{field.oldValue}</i> til
+			<i>{field.newValue}</i>
 		{/if}
 	{/each}
 

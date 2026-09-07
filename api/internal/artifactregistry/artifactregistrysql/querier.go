@@ -4,12 +4,17 @@ package artifactregistrysql
 
 import (
 	"context"
+
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Querier interface {
 	AddGithubRepositoryToTeam(ctx context.Context, arg AddGithubRepositoryToTeamParams) (*TeamArtifactRegistryGhReposAllowList, error)
+	CreateArtifactRegistryRepository(ctx context.Context, arg CreateArtifactRegistryRepositoryParams) (*TeamArtifactRegistryRepository, error)
+	ListArtifactRegistryReposForTeam(ctx context.Context, arg ListArtifactRegistryReposForTeamParams) ([]*ListArtifactRegistryReposForTeamRow, error)
 	ListGithubReposForTeam(ctx context.Context, arg ListGithubReposForTeamParams) ([]*ListGithubReposForTeamRow, error)
 	RemoveGithubRepositoryFromTeam(ctx context.Context, arg RemoveGithubRepositoryFromTeamParams) error
+	TeamExists(ctx context.Context, argSlug slug.Slug) (bool, error)
 }
 
 var _ Querier = (*Queries)(nil)

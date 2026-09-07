@@ -16,10 +16,8 @@ import (
 )
 
 const (
-	unsentStatus  = "PENDING"
-	sentStatus    = "PUBLISHED"
-	successStatus = "SUCCESSFUL"
-	failedStatus  = "FAILED"
+	unsentStatus = "PENDING"
+	sentStatus   = "PUBLISHED"
 )
 
 type MessageSender struct {
