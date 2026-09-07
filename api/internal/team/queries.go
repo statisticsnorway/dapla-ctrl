@@ -81,6 +81,13 @@ func createDefaultManagedResources(ctx context.Context, teamSlug slug.Slug, acto
 		return err
 	}
 
+	if _, err := artifactregistry.AddGithubRepositoryToTeam(ctx, artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput{
+		TeamSlug:       teamSlug,
+		RepositoryName: teamSlug.String() + "-iac",
+	}, actor); err != nil {
+		return err
+	}
+
 	return nil
 }
 
