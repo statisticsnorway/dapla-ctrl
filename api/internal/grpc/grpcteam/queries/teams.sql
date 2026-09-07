@@ -86,14 +86,11 @@ SELECT
 
 -- name: GetTeamManager :one
 SELECT
-  users.*
+	users.*
 FROM
-  sections
-INNER JOIN teams ON sections.code = teams.section_code
-INNER JOIN users ON users.id = sections.manager_id
+	sections
+	INNER JOIN teams ON sections.code = teams.section_code
+	INNER JOIN users ON users.id = sections.manager_id
 WHERE
-teams.slug = @team_slug::slug
-ORDER BY
-    users.id
-LIMIT 1
+	teams.slug = @team_slug::slug
 ;

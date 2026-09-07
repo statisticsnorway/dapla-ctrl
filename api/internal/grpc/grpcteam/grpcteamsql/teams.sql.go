@@ -77,16 +77,13 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 
 const getTeamManager = `-- name: GetTeamManager :one
 SELECT
-  users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
+	users.id, users.email, users.name, users.external_id, users.admin, users.section_code, users.job_title, users.employment_type
 FROM
-  sections
-INNER JOIN teams ON sections.code = teams.section_code
-INNER JOIN users ON users.id = sections.manager_id
+	sections
+	INNER JOIN teams ON sections.code = teams.section_code
+	INNER JOIN users ON users.id = sections.manager_id
 WHERE
-teams.slug = $1::slug
-ORDER BY
-    users.id
-LIMIT 1
+	teams.slug = $1::slug
 `
 
 func (q *Queries) GetTeamManager(ctx context.Context, teamSlug slug.Slug) (*User, error) {

@@ -113,6 +113,11 @@ Test.gql("Create managed team", function(t)
 							format
 						}
 					}
+					artifactRegistryAllowedGithubRepos {
+      					nodes {
+        					name
+        				}
+      				}
 				}
 			}
 		}
@@ -141,6 +146,13 @@ Test.gql("Create managed team", function(t)
 						nodes = {
 							{
 								format = "DOCKER",
+							},
+						},
+					},
+					artifactRegistryAllowedGithubRepos = {
+						nodes = {
+							{
+								name = "newteam-iac",
 							},
 						},
 					},
