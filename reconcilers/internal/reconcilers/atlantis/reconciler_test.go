@@ -49,15 +49,17 @@ func TestReconcileKubernetesSecret(t *testing.T) {
 	}
 
 	teamName := "test"
+	atlantisName := "atlantis-" + teamName
+	namespace := "default"
 	webhookSecret := "testing"
 	webhookSecretAlt := "not-testing"
 
 	t.Run("kubernetes secret created if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesSecret(t.Context(), teamName, webhookSecret); err != nil {
+		if err := r.reconcileKubernetesSecret(t.Context(), teamName, namespace, webhookSecret); err != nil {
 			t.Fatal(err)
 		}
 
-		secret, err := fakeClient.CoreV1().Secrets("default").Get(t.Context(), "atlantis-"+teamName, v1.GetOptions{})
+		secret, err := fakeClient.CoreV1().Secrets(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -70,16 +72,16 @@ func TestReconcileKubernetesSecret(t *testing.T) {
 
 	t.Run("kubernetes secret overriden if webhook secret changed", func(t *testing.T) {
 		// Check that it already exists
-		_, err := fakeClient.CoreV1().Secrets("default").Get(t.Context(), "atlantis-"+teamName, v1.GetOptions{})
+		_, err := fakeClient.CoreV1().Secrets(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKubernetesSecret(t.Context(), teamName, webhookSecretAlt); err != nil {
+		if err := r.reconcileKubernetesSecret(t.Context(), atlantisName, namespace, webhookSecretAlt); err != nil {
 			t.Fatal(err)
 		}
 
-		secret, err := fakeClient.CoreV1().Secrets("default").Get(t.Context(), "atlantis-"+teamName, v1.GetOptions{})
+		secret, err := fakeClient.CoreV1().Secrets(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
 		if err != nil {
 			t.Fatal(err)
 		}

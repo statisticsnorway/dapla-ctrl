@@ -135,11 +135,14 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	sa, err := r.reconcileGcpServiceAccount(ctx, daplaTeam.Slug)
+	namespace := "default"
+	atlantisName := "atlantis-" + daplaTeam.Slug
+
+	sa, err := r.reconcileGcpServiceAccount(ctx, daplaTeam.Slug, atlantisName, namespace)
 	if err != nil {
 		return err
 	}
-	saMember := "serviceAccount" + sa.Email
+	saMember := "serviceAccount:" + sa.Email
 
 	folderResp, err := client.GcpTeamResources().ListTeamFolders(ctx, &protoapi.ListGcpTeamFoldersRequest{
 		TeamSlug: daplaTeam.Slug,
@@ -168,33 +171,32 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, daplaTeam.Slug, webhookSecret, defaultRepoConfig, resource.MustParse("10Gi")); err != nil {
+	if err := r.reconcileKubernetesResources(ctx, atlantisName, namespace, webhookSecret, defaultRepoConfig, resource.MustParse("10Gi")); err != nil {
 		return nil
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, teamName string, webhookSecret, repoConfig string, diskSize resource.Quantity) error {
-	atlantisName := "atlantis-" + teamName
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, webhookSecret, repoConfig string, diskSize resource.Quantity) error {
 
-	if err := r.reconcileKubernetesServiceAccount(ctx, atlantisName); err != nil {
+	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesSecret(ctx, atlantisName, webhookSecret); err != nil {
+	if err := r.reconcileKubernetesSecret(ctx, name, namespace, webhookSecret); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesConfigMap(ctx, atlantisName, repoConfig); err != nil {
+	if err := r.reconcileKubernetesConfigMap(ctx, name, namespace, repoConfig); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesVolume(ctx, atlantisName, diskSize); err != nil {
+	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name string, webhookSecret string) error {
-	secretsClient := r.k8sClient.CoreV1().Secrets("default")
+func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name, namespace, webhookSecret string) error {
+	secretsClient := r.k8sClient.CoreV1().Secrets(namespace)
 
 	wantedData := map[string][]byte{
 		webhookSecretKey: []byte(webhookSecret),
@@ -204,8 +206,7 @@ func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name string,
 	if apierrors.IsNotFound(err) {
 		_, err = secretsClient.Create(ctx, &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: "default",
+				Name: name,
 			},
 			Data: wantedData,
 		}, metav1.CreateOptions{})
@@ -223,8 +224,8 @@ func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name string,
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name string, repoConfig string) error {
-	configMapsClient := r.k8sClient.CoreV1().ConfigMaps("default")
+func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name, namespace, repoConfig string) error {
+	configMapsClient := r.k8sClient.CoreV1().ConfigMaps(namespace)
 
 	wantedData := map[string]string{
 		reposYamlKey: repoConfig,
@@ -234,8 +235,7 @@ func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name stri
 	if apierrors.IsNotFound(err) {
 		_, err = configMapsClient.Create(ctx, &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: "default",
+				Name: name,
 			},
 			Data: wantedData,
 		}, metav1.CreateOptions{})
@@ -342,14 +342,14 @@ func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient
 	return secretToken, nil
 }
 
-func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName string) (*iam.ServiceAccount, error) {
-	sa, err := r.serviceAccounts.GetOrCreate(ctx, "atlantis-"+teamName, "Atlantis for team "+teamName, r.atlantisProject)
+func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName, name, namespace string) (*iam.ServiceAccount, error) {
+	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.atlantisProject)
 	if err != nil {
 		return nil, err
 	}
 
 	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
-		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[default/atlantis-%s]", r.atlantisProject, teamName)
+		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.atlantisProject, namespace, name)
 		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
 			return false
 		}
