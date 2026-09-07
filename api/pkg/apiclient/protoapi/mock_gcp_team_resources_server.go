@@ -106,6 +106,74 @@ func (_c *MockGcpTeamResourcesServer_GetTeamFolder_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// ListTeamFolders provides a mock function for the type MockGcpTeamResourcesServer
+func (_mock *MockGcpTeamResourcesServer) ListTeamFolders(context1 context.Context, listGcpTeamFoldersRequest *ListGcpTeamFoldersRequest) (*ListGcpTeamFoldersResponse, error) {
+	ret := _mock.Called(context1, listGcpTeamFoldersRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListTeamFolders")
+	}
+
+	var r0 *ListGcpTeamFoldersResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListGcpTeamFoldersRequest) (*ListGcpTeamFoldersResponse, error)); ok {
+		return returnFunc(context1, listGcpTeamFoldersRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListGcpTeamFoldersRequest) *ListGcpTeamFoldersResponse); ok {
+		r0 = returnFunc(context1, listGcpTeamFoldersRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ListGcpTeamFoldersResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *ListGcpTeamFoldersRequest) error); ok {
+		r1 = returnFunc(context1, listGcpTeamFoldersRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockGcpTeamResourcesServer_ListTeamFolders_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListTeamFolders'
+type MockGcpTeamResourcesServer_ListTeamFolders_Call struct {
+	*mock.Call
+}
+
+// ListTeamFolders is a helper method to define mock.On call
+//   - context1 context.Context
+//   - listGcpTeamFoldersRequest *ListGcpTeamFoldersRequest
+func (_e *MockGcpTeamResourcesServer_Expecter) ListTeamFolders(context1 interface{}, listGcpTeamFoldersRequest interface{}) *MockGcpTeamResourcesServer_ListTeamFolders_Call {
+	return &MockGcpTeamResourcesServer_ListTeamFolders_Call{Call: _e.mock.On("ListTeamFolders", context1, listGcpTeamFoldersRequest)}
+}
+
+func (_c *MockGcpTeamResourcesServer_ListTeamFolders_Call) Run(run func(context1 context.Context, listGcpTeamFoldersRequest *ListGcpTeamFoldersRequest)) *MockGcpTeamResourcesServer_ListTeamFolders_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *ListGcpTeamFoldersRequest
+		if args[1] != nil {
+			arg1 = args[1].(*ListGcpTeamFoldersRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockGcpTeamResourcesServer_ListTeamFolders_Call) Return(listGcpTeamFoldersResponse *ListGcpTeamFoldersResponse, err error) *MockGcpTeamResourcesServer_ListTeamFolders_Call {
+	_c.Call.Return(listGcpTeamFoldersResponse, err)
+	return _c
+}
+
+func (_c *MockGcpTeamResourcesServer_ListTeamFolders_Call) RunAndReturn(run func(context1 context.Context, listGcpTeamFoldersRequest *ListGcpTeamFoldersRequest) (*ListGcpTeamFoldersResponse, error)) *MockGcpTeamResourcesServer_ListTeamFolders_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpsertTeamFolder provides a mock function for the type MockGcpTeamResourcesServer
 func (_mock *MockGcpTeamResourcesServer) UpsertTeamFolder(context1 context.Context, upsertGcpTeamFolderRequest *UpsertGcpTeamFolderRequest) (*UpsertGcpTeamFolderResponse, error) {
 	ret := _mock.Called(context1, upsertGcpTeamFolderRequest)

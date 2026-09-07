@@ -10,7 +10,7 @@ SET
 
 -- name: GetTeamFolder :one
 SELECT
-    sqlc.embed(gcp_team_folders)
+	sqlc.embed(gcp_team_folders)
 FROM
 	gcp_team_folders
 WHERE
@@ -20,11 +20,11 @@ WHERE
 
 -- name: ListTeamFolders :many
 SELECT
-    sqlc.embed(gcp_team_folders)
+	sqlc.embed(gcp_team_folders)
 FROM
-    gcp_team_folders
+	gcp_team_folders
 WHERE
-    team_slug = @team_slug
+	team_slug = @team_slug
 ORDER BY
-    env
+	env
 ;
