@@ -183,10 +183,10 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesSecret(ctx, name, namespace, webhookSecret); err != nil {
+	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, webhookSecret); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesConfigMap(ctx, name, namespace, repoConfig); err != nil {
+	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
 		return err
 	}
 	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
@@ -195,7 +195,7 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name, namespace, webhookSecret string) error {
+func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name, namespace, webhookSecret string) error {
 	secretsClient := r.k8sClient.CoreV1().Secrets(namespace)
 
 	wantedData := map[string][]byte{
@@ -224,7 +224,7 @@ func (r *reconciler) reconcileKubernetesSecret(ctx context.Context, name, namesp
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name, namespace, repoConfig string) error {
+func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, namespace, repoConfig string) error {
 	configMapsClient := r.k8sClient.CoreV1().ConfigMaps(namespace)
 
 	wantedData := map[string]string{
@@ -248,7 +248,9 @@ func (r *reconciler) reconcileKubernetesConfigMap(ctx context.Context, name, nam
 		return nil
 	}
 
+	cm.Data = wantedData
 	_, err = configMapsClient.Update(ctx, cm, metav1.UpdateOptions{})
+
 	return err
 }
 

@@ -55,7 +55,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 		},
 	}
 
-	knService := &knv1.Service{
+	_ = &knv1.Service{
 		Spec: knv1.ServiceSpec{
 			ConfigurationSpec: knv1.ConfigurationSpec{
 				Template: knv1.RevisionTemplateSpec{
@@ -159,7 +159,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 		},
 	}
 
-	kns, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
+	_, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
 	if apierrors.IsNotFound(err) {
 		_, err = r.knServices.Create(ctx, &knv1.Service{}, metav1.CreateOptions{})
 		return err

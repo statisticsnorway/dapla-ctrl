@@ -2,9 +2,11 @@ package atlantis
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"google.golang.org/grpc"
@@ -41,7 +43,7 @@ func TestGetOrGenerateWebhookSecret(t *testing.T) {
 	})
 }
 
-func TestReconcileKubernetesSecret(t *testing.T) {
+func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 	fakeClient := fake.NewClientset()
 
 	r := &reconciler{
@@ -52,10 +54,10 @@ func TestReconcileKubernetesSecret(t *testing.T) {
 	atlantisName := "atlantis-" + teamName
 	namespace := "default"
 	webhookSecret := "testing"
-	webhookSecretAlt := "not-testing"
+	webhookSecretNew := "not-testing"
 
 	t.Run("kubernetes secret created if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesSecret(t.Context(), teamName, namespace, webhookSecret); err != nil {
+		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecret); err != nil {
 			t.Fatal(err)
 		}
 
@@ -77,7 +79,7 @@ func TestReconcileKubernetesSecret(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKubernetesSecret(t.Context(), atlantisName, namespace, webhookSecretAlt); err != nil {
+		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecretNew); err != nil {
 			t.Fatal(err)
 		}
 
@@ -87,8 +89,132 @@ func TestReconcileKubernetesSecret(t *testing.T) {
 		}
 
 		storedSecret := secret.Data[webhookSecretKey]
-		if string(storedSecret) != webhookSecretAlt {
-			t.Fatalf("stored %q != wanted %q, %v", storedSecret, webhookSecretAlt, secret)
+		if string(storedSecret) != webhookSecretNew {
+			t.Fatalf("stored %q != wanted %q, %v", storedSecret, webhookSecretNew, secret)
+		}
+	})
+
+}
+
+func TestReconcileKubernetesReposConfig(t *testing.T) {
+	fakeClient := fake.NewClientset()
+
+	r := &reconciler{
+		k8sClient: fakeClient,
+	}
+
+	teamName := "test"
+	atlantisName := "atlantis-" + teamName
+	namespace := "default"
+	reposConfig := "testing"
+	reposConfigNew := "not-testing"
+
+	t.Run("kubernetes repos configmap created if not exists", func(t *testing.T) {
+		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfig); err != nil {
+			t.Fatal(err)
+		}
+
+		cm, err := fakeClient.CoreV1().ConfigMaps(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		wantedData := map[string]string{
+			reposYamlKey: reposConfig,
+		}
+
+		if diff := cmp.Diff(wantedData, cm.Data); diff != "" {
+			t.Errorf("configmap data differs from wanted:\n %s", diff)
+		}
+	})
+
+	t.Run("kubernetes repos configmap overriden if repos.yaml changed", func(t *testing.T) {
+		// Check that it already exists
+		_, err := fakeClient.CoreV1().ConfigMaps(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfigNew); err != nil {
+			t.Fatal(err)
+		}
+
+		cm, err := fakeClient.CoreV1().ConfigMaps(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		wantedData := map[string]string{
+			reposYamlKey: reposConfigNew,
+		}
+
+		if diff := cmp.Diff(wantedData, cm.Data); diff != "" {
+			t.Errorf("configmap data differs from wanted:\n %s", diff)
+		}
+	})
+}
+
+func TestReconcileKubernetesServiceAccount(t *testing.T) {
+	fakeClient := fake.NewClientset()
+
+	teamName := "test"
+	atlantisName := "atlantis-" + teamName
+	namespace := "default"
+
+	projectId := "atlantis-test"
+
+	r := &reconciler{
+		k8sClient:       fakeClient,
+		atlantisProject: projectId,
+	}
+
+	wantedAnnotations := map[string]string{
+		wiAnnotationKey: fmt.Sprintf("%s@%s.iam.gserviceaccount.com", atlantisName, projectId),
+	}
+
+	t.Run("kubernetes SA is created if not exists", func(t *testing.T) {
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+			t.Fatal(err)
+		}
+
+		sa, err := fakeClient.CoreV1().ServiceAccounts(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if annotationDiff := cmp.Diff(sa.Annotations, wantedAnnotations); annotationDiff != "" {
+			t.Errorf("annotations does not match: %s", annotationDiff)
+		}
+	})
+
+	t.Run("kubernetes SA annotations are overwritten if they differ from wanted", func(t *testing.T) {
+		// Check that it already exists
+		sa, err := fakeClient.CoreV1().ServiceAccounts(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		sa.Annotations = map[string]string{
+			"lorem": "ipsum",
+			"dolor": "sit",
+		}
+
+		_, err = fakeClient.CoreV1().ServiceAccounts(namespace).Update(t.Context(), sa, v1.UpdateOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+			t.Fatal(err)
+		}
+
+		sa, err = fakeClient.CoreV1().ServiceAccounts(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if annotationDiff := cmp.Diff(sa.Annotations, wantedAnnotations); annotationDiff != "" {
+			t.Errorf("annotations does not match: %s", annotationDiff)
 		}
 	})
 
