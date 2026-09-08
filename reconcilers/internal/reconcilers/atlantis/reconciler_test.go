@@ -66,10 +66,14 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storedSecret := secret.Data[webhookSecretKey]
-		if string(storedSecret) != webhookSecret {
-			t.Fatalf("stored %q != wanted %q, %v", storedSecret, webhookSecret, secret)
+		wantedData := map[string][]byte{
+			webhookSecretKey: []byte(webhookSecret),
 		}
+
+		if diff := cmp.Diff(wantedData, secret.Data); diff != "" {
+			t.Errorf("secret data differs from wanted:\n %s", diff)
+		}
+
 	})
 
 	t.Run("kubernetes secret overriden if webhook secret changed", func(t *testing.T) {
@@ -88,9 +92,12 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		storedSecret := secret.Data[webhookSecretKey]
-		if string(storedSecret) != webhookSecretNew {
-			t.Fatalf("stored %q != wanted %q, %v", storedSecret, webhookSecretNew, secret)
+		wantedData := map[string][]byte{
+			webhookSecretKey: []byte(webhookSecretNew),
+		}
+
+		if diff := cmp.Diff(wantedData, secret.Data); diff != "" {
+			t.Errorf("secret data differs from wanted:\n %s", diff)
 		}
 	})
 
