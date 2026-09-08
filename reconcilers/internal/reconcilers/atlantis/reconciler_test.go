@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -15,6 +17,7 @@ import (
 	"google.golang.org/grpc/status"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
+	ktesting "k8s.io/client-go/testing"
 )
 
 func TestGetOrGenerateWebhookSecret(t *testing.T) {
@@ -179,7 +182,7 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 		wiAnnotationKey: fmt.Sprintf("%s@%s.iam.gserviceaccount.com", atlantisName, projectId),
 	}
 
-	t.Run("kubernetes SA is created if not exists", func(t *testing.T) {
+	t.Run("create if not exists", func(t *testing.T) {
 		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
 			t.Fatal(err)
 		}
@@ -194,7 +197,18 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 		}
 	})
 
-	t.Run("kubernetes SA annotations are overwritten if they differ from wanted", func(t *testing.T) {
+	t.Run("do nothing if webhook secret hasn't changed", func(t *testing.T) {
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+			t.Fatal(err)
+		}
+		if slices.ContainsFunc(fakeClient.Actions(), func(a ktesting.Action) bool {
+			return strings.EqualFold(a.GetVerb(), "update")
+		}) {
+			t.Fatal("update called")
+		}
+	})
+
+	t.Run("annotations are overwritten if they differ from wanted", func(t *testing.T) {
 		// Check that it already exists
 		sa, err := fakeClient.CoreV1().ServiceAccounts(namespace).Get(t.Context(), atlantisName, v1.GetOptions{})
 		if err != nil {
