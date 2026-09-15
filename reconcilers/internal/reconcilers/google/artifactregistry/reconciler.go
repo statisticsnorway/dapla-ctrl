@@ -41,7 +41,6 @@ type ArtifactRegistryClient interface {
 	GetIamPolicy(ctx context.Context, req *iampb.GetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error)
 	SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error)
 }
-type ServiceAccounts interface{}
 
 type reconciler struct {
 	config          Config
@@ -71,21 +70,14 @@ type Repository struct {
 
 type optFunc func(*reconciler)
 
-func New(ctx context.Context, serviceAccounts *serviceaccounts.Client, opts ...optFunc) (reconcilers.Reconciler, error) {
+func New(ctx context.Context, serviceAccounts *serviceaccounts.Client, arClient *arapiv1.Client, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
 
 	r.serviceAccounts = serviceAccounts
+	r.arClient = arClient
 
 	for _, opt := range opts {
 		opt(r)
-	}
-
-	if r.arClient == nil {
-		client, err := arapiv1.NewClient(ctx)
-		if err != nil {
-			return nil, err
-		}
-		r.arClient = client
 	}
 
 	return r, nil

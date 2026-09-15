@@ -32,13 +32,7 @@ type groupSaConfig struct {
 
 type optFunc func(*reconciler)
 
-func WithGroupServiceAccounts(gsa GroupServiceAccounts) optFunc {
-	return func(r *reconciler) {
-		r.client = gsa
-	}
-}
-
-func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
+func New(ctx context.Context, saClient GroupServiceAccounts, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
 
 	for _, opt := range opts {
