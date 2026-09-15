@@ -7,7 +7,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"maps"
 	"slices"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
@@ -25,6 +24,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,7 +41,13 @@ const (
 
 	wiAnnotationKey = "iam.gke.io/gcp-service-account"
 
-	namespaceConfigKey = "namespace"
+	namespaceConfigKey          = "namespace"
+	atlantisProjectConfigKey    = "atlantis_project"
+	atlantisBaseDomainConfigKey = "atlantis_base_domain"
+	atlantisImageConfigKey      = "atlantis_image"
+	memberGroupsConfigKey       = "member_groups"
+	managerGroupsConfigKey      = "manager_groups"
+	githubAppIdConfigKey        = "github_app_id"
 )
 
 type groupRole string
@@ -69,6 +75,10 @@ type reconciler struct {
 	atlantisProject string
 	memberGroups    []string
 	managerGroups   []string
+
+	atlantisBaseDomain string
+
+	githubAppId string
 }
 
 type reconcilerConfig struct {
@@ -124,7 +134,36 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Key:         namespaceConfigKey,
 				DisplayName: "Namespace",
 				Description: "The namespace where the atlantis resources should be deployed",
-				Secret:      false,
+			},
+			{
+				Key:         atlantisProjectConfigKey,
+				DisplayName: "Atlantis Project ID",
+				Description: "The GCP project of the atlantis cluster",
+			},
+			{
+				Key:         atlantisBaseDomainConfigKey,
+				DisplayName: "Atlantis base domain",
+				Description: "Base domain for atlantis ingresses, appended to 'https://atlantis-name.'",
+			},
+			{
+				Key:         atlantisImageConfigKey,
+				DisplayName: "Atlantis OCI image",
+				Description: "Image and tag to use for atlantis instances by default",
+			},
+			{
+				Key:         memberGroupsConfigKey,
+				DisplayName: "Atlantis Member groups",
+				Description: "Google groups of which every atlantis should be a member",
+			},
+			{
+				Key:         managerGroupsConfigKey,
+				DisplayName: "Atlantis Manager groups",
+				Description: "Google groups of which every atlantis should be a manager",
+			},
+			{
+				Key:         githubAppIdConfigKey,
+				DisplayName: "GitHub App ID",
+				Description: "App ID of the Atlantis GitHub app.",
 			},
 		},
 	}
@@ -171,15 +210,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, atlantisName, namespace, webhookSecret, defaultRepoConfig, resource.MustParse("10Gi")); err != nil {
+	if err := r.reconcileKubernetesResources(ctx, atlantisName, namespace, webhookSecret, defaultRepoConfig, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}, resource.MustParse("10Gi")); err != nil {
 		return nil
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, webhookSecret, repoConfig string, diskSize resource.Quantity) error {
-
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, webhookSecret, repoConfig string, repoAllowList []string, diskSize resource.Quantity) error {
 	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
 		return err
 	}
@@ -190,6 +228,9 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 		return err
 	}
 	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
+		return err
+	}
+	if err := r.reconcileKnativeService(ctx, name, repoAllowList); err != nil {
 		return err
 	}
 	return nil
@@ -310,8 +351,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		return err
 	}
 
-	if slices.Equal(pvc.Spec.AccessModes, wantedSpec.Spec.AccessModes) &&
-		maps.Equal(pvc.Spec.Resources.Requests, wantedSpec.Spec.Resources.Requests) {
+	if equality.Semantic.DeepDerivative(wantedSpec, pvc) {
 		return nil
 	}
 

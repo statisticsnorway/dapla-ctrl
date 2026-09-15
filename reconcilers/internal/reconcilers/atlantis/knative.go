@@ -2,6 +2,8 @@ package atlantis
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -11,14 +13,14 @@ import (
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) error {
+func (r *reconciler) reconcileKnativeService(ctx context.Context, name string, repoAllowList []string) error {
 	env := map[string]string{
-		"ATLANTIS_REPO_ALLOWLIST":                        "local.repo_allowlist",
-		"ATLANTIS_GH_APP_ID":                             "",
+		"ATLANTIS_REPO_ALLOWLIST":                        strings.Join(repoAllowList, ","),
+		"ATLANTIS_GH_APP_ID":                             r.githubAppId,
 		"ATLANTIS_GH_APP_KEY_FILE":                       "/secret/atlantis-app-key.pem",
 		"ATLANTIS_WRITE_GIT_CREDS":                       "true",
 		"ATLANTIS_DATA_DIR":                              "/atlantis",
-		"ATLANTIS_ATLANTIS_URL":                          "",
+		"ATLANTIS_ATLANTIS_URL":                          fmt.Sprintf("https://%s.%s", name, r.atlantisBaseDomain),
 		"ATLANTIS_PORT":                                  "4141",
 		"TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE": "true",
 		"ATLANTIS_GH_ALLOW_MERGEABLE_BYPASS_APPLY":       "true",
@@ -44,6 +46,18 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 		},
 	})
 
+	_, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		_, err = r.knServices.Create(ctx, &knv1.Service{}, metav1.CreateOptions{})
+		return err
+	} else if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func buildKnativeService() *knv1.Service {
 	probe := corev1.Probe{
 		PeriodSeconds: 60,
 		ProbeHandler: corev1.ProbeHandler{
@@ -54,8 +68,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 			},
 		},
 	}
-
-	_ = &knv1.Service{
+	return &knv1.Service{
 		Spec: knv1.ServiceSpec{
 			ConfigurationSpec: knv1.ConfigurationSpec{
 				Template: knv1.RevisionTemplateSpec{
@@ -158,14 +171,4 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name string) e
 			},
 		},
 	}
-
-	_, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = r.knServices.Create(ctx, &knv1.Service{}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	return err
 }

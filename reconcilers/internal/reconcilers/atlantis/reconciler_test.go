@@ -15,6 +15,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
@@ -239,6 +240,28 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 		}
 	})
 
+}
+
+func TestReconcileKubernetesVolume(t *testing.T) {
+	fakeClient := fake.NewClientset()
+
+	r := &reconciler{
+		k8sClient: fakeClient,
+	}
+
+	teamName := "test"
+	atlantisName := "atlantis-" + teamName
+	namespace := "default"
+
+	diskSizeDefault := resource.MustParse("10Gi")
+	diskSizeBigger := resource.MustParse("100Gi")
+
+	t.Run("create if not exists", func(t *testing.T) {
+		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, diskSizeDefault); err != nil {
+			t.Fatal(err)
+		}
+
+	})
 }
 
 type fakeAtlantisServer struct {
