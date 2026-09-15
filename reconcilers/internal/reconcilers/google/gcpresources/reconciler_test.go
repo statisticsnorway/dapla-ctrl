@@ -94,7 +94,7 @@ func TestValidateConfig(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, err := gcpresources.New(context.Background(), tt.cfg)
+			_, err := gcpresources.New(context.Background(), tt.cfg, nil)
 			if err == nil {
 				t.Fatal("expected error")
 			}
@@ -123,7 +123,7 @@ func TestReconcile_CreatesFoldersAndTagsThem(t *testing.T) {
 		},
 	}
 
-	r, err := gcpresources.New(ctx, cfg, gcpresources.WithResourceManager(fakeGcp))
+	r, err := gcpresources.New(ctx, cfg, nil, gcpresources.WithResourceManager(fakeGcp))
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}
@@ -165,7 +165,7 @@ func TestReconcile_IdempotentOnSecondRun(t *testing.T) {
 		EnvParentFolders:     map[string]string{"dev": "11111"},
 	}
 
-	r, _ := gcpresources.New(ctx, cfg, gcpresources.WithResourceManager(fakeGcp))
+	r, _ := gcpresources.New(ctx, cfg, nil, gcpresources.WithResourceManager(fakeGcp))
 	team := &protoapi.Team{Slug: "my-team"}
 
 	if err := r.Reconcile(ctx, apiClient, team, log); err != nil {

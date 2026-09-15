@@ -20,6 +20,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	iter "github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 
 	"google.golang.org/api/iterator"
@@ -52,13 +53,13 @@ type reconciler struct {
 	AIBudgetThresholds            []float64
 	AIBudgetNotificationName      string
 	AIBudgetDeveloperBillingGroup string
-	GoogleServices                *googleServices
+	GoogleServices                *google.Services
 	TeamAllowList                 []string
 }
 
 type optFunc func(*reconciler) error
 
-func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
+func New(ctx context.Context, services *google.Services, opts ...optFunc) (reconcilers.Reconciler, error) {
 	r := new(reconciler)
 
 	r.AIBudgetThresholds = []float64{0.5, 0.9, 1}
@@ -70,10 +71,6 @@ func New(ctx context.Context, opts ...optFunc) (reconcilers.Reconciler, error) {
 	// For SAs in the test environment
 	r.GroupSANameTemplate = "developers@dapla-group-sa-t-57.iam.gserviceaccount.com"
 
-	services, err := createGoogleClients(ctx)
-	if err != nil {
-		return nil, err
-	}
 	r.GoogleServices = services
 
 	for _, opt := range opts {
@@ -144,39 +141,6 @@ func (r *reconciler) Name() string {
 	return reconcilerName
 }
 
-type googleServices struct {
-	Project             *resourcemanager.ProjectsClient
-	ServiceUsage        *serviceusage.Client
-	CloudBudget         *budgets.BudgetClient
-	NotificationChannel *monitoring.NotificationChannelClient
-}
-
-func createGoogleClients(ctx context.Context) (*googleServices, error) {
-	resourceManagerService, err := resourcemanager.NewProjectsClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	serviceUsageService, err := serviceusage.NewClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	budgetService, err := budgets.NewBudgetClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-	ncService, err := monitoring.NewNotificationChannelClient(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return &googleServices{
-		Project:             resourceManagerService,
-		ServiceUsage:        serviceUsageService,
-		CloudBudget:         budgetService,
-		NotificationChannel: ncService,
-	}, nil
-}
-
 // Reconcile implements [reconcilers.Reconciler].
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	if err := r.updateConfig(ctx, client); err != nil {
@@ -202,7 +166,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	teamFolder := resp.GetFolder()
-	projectID, err := getStandardProjectID(ctx, r.GoogleServices.Project, teamFolder.FolderId, daplaTeam.Slug, teamFolder.Env)
+	projectID, err := getStandardProjectID(ctx, r.GoogleServices.Projects, teamFolder.FolderId, daplaTeam.Slug, teamFolder.Env)
 	if err != nil {
 		return err
 	}
@@ -222,7 +186,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
-	membersHaveIAM, err := r.membersHaveAIPlatformUserBinding(ctx, r.GoogleServices.Project, daplaTeam.Slug, projectID)
+	membersHaveIAM, err := r.membersHaveAIPlatformUserBinding(ctx, r.GoogleServices.Projects, daplaTeam.Slug, projectID)
 	if err != nil {
 		return err
 	}
@@ -262,7 +226,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if membersHaveIAM != aiFeatureIsEnabled {
-		if err := r.reconcileAIPlatformUserBinding(ctx, r.GoogleServices.Project, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
+		if err := r.reconcileAIPlatformUserBinding(ctx, r.GoogleServices.Projects, daplaTeam.Slug, projectID, aiFeatureIsEnabled); err != nil {
 			return err
 		}
 	}
@@ -417,7 +381,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 }
 
-func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *googleServices, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, budgetNotificationEmails []string, enabled bool) error {
+func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *google.Services, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, budgetNotificationEmails []string, enabled bool) error {
 	if !enabled {
 		if existingBudget != nil {
 			if err := services.CloudBudget.DeleteBudget(ctx, &budgetspb.DeleteBudgetRequest{
@@ -436,7 +400,7 @@ func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.AP
 		return err
 	}
 
-	project, err := services.Project.GetProject(ctx, &resourcemanagerpb.GetProjectRequest{Name: "projects/" + projectID})
+	project, err := services.Projects.GetProject(ctx, &resourcemanagerpb.GetProjectRequest{Name: "projects/" + projectID})
 	if err != nil {
 		return fmt.Errorf("get project %q: %w", projectID, err)
 	}

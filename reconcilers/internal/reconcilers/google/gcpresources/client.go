@@ -8,6 +8,7 @@ import (
 
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -28,26 +29,11 @@ type GoogleResourceManager struct {
 
 var ErrNotFound = errors.New("element not found")
 
-func NewGoogleResourceManager(ctx context.Context) (ResourceManager, error) {
-	folders, err := resourcemanager.NewFoldersClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("create folders client: %w", err)
-	}
-
-	tagValues, err := resourcemanager.NewTagValuesClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("create tag values client: %w", err)
-	}
-
-	tagBindings, err := resourcemanager.NewTagBindingsClient(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("create tag bindings client: %w", err)
-	}
-
+func NewGoogleResourceManager(ctx context.Context, services *google.Services) (ResourceManager, error) {
 	return &GoogleResourceManager{
-		folders:     folders,
-		tagValues:   tagValues,
-		tagBindings: tagBindings,
+		folders:     services.Folders,
+		tagValues:   services.TagValues,
+		tagBindings: services.TagBindings,
 	}, nil
 }
 
