@@ -9,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +35,7 @@ func WithResourceManager(c ResourceManager) optFunc {
 	}
 }
 
-func New(ctx context.Context, cfg Config, opts ...optFunc) (reconcilers.Reconciler, error) {
+func New(ctx context.Context, cfg Config, services *google.Services, opts ...optFunc) (reconcilers.Reconciler, error) {
 	err := validateConfig(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
@@ -47,7 +48,7 @@ func New(ctx context.Context, cfg Config, opts ...optFunc) (reconcilers.Reconcil
 	}
 
 	if r.client == nil {
-		c, err := NewGoogleResourceManager(ctx)
+		c, err := NewGoogleResourceManager(ctx, services)
 		if err != nil {
 			return nil, fmt.Errorf("create GCP client: %w", err)
 		}

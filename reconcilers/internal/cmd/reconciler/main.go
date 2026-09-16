@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
@@ -106,6 +106,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	reconcilerManager := reconcilers.NewManager(ctx, client, cfg.ReconcilersToEnable, cfg.PubSub.SubscriptionID, cfg.PubSub.ProjectID, log)
 	log.WithField("duration", time.Since(start).String()).Debug("Created reconciler manager")
 
+	// Common API clients
+	googleServices, err := google.New(ctx)
+	if err != nil {
+		return err
+	}
+
 	// Init reconcilers
 	// The reconcilers will be run in the order they are added to the manager
 	gcpSyncer := gcpsyncer.New(client)
@@ -116,7 +122,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	reconcilerManager.AddReconciler(entraIdGroupReconciler)
 	reconcilerManager.AddReconciler(gcpSyncer)
 
-	daplaGroupSaReconciler, err := groupserviceaccounts.New(ctx)
+	daplaGroupSaReconciler, err := groupserviceaccounts.New(ctx, googleServices.ServiceAccounts)
 	if err != nil {
 		return fmt.Errorf("error creating dapla group sa reconciler: %w", err)
 	}
@@ -125,17 +131,13 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
 		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
-	})
+	}, googleServices)
 	if err != nil {
 		return fmt.Errorf("create GCP resources reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(gcpResourcesReconciler)
 
-	saClient, err := serviceaccounts.NewClient(ctx)
-	if err != nil {
-		return fmt.Errorf("error creating service account client: %w", err)
-	}
-	arTeam, err := artifactregistry.New(ctx, saClient)
+	arTeam, err := artifactregistry.New(ctx, googleServices.ServiceAccounts, googleServices.ArtifactRegistry)
 	if err != nil {
 		return fmt.Errorf("create artifact registry reconciler: %w", err)
 	}
@@ -155,7 +157,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(parqueditReconciler)
 
-	aiReconciler, err := ai.New(ctx)
+	aiReconciler, err := ai.New(ctx, googleServices)
 	if err != nil {
 		return fmt.Errorf("create ai reconciler: %w", err)
 	}
