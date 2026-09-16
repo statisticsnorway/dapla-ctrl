@@ -1,174 +1,66 @@
 package atlantis
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
-	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/apimachinery/pkg/util/yaml"
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name string, repoAllowList []string) error {
-	env := map[string]string{
-		"ATLANTIS_REPO_ALLOWLIST":                        strings.Join(repoAllowList, ","),
-		"ATLANTIS_GH_APP_ID":                             r.githubAppId,
-		"ATLANTIS_GH_APP_KEY_FILE":                       "/secret/atlantis-app-key.pem",
-		"ATLANTIS_WRITE_GIT_CREDS":                       "true",
-		"ATLANTIS_DATA_DIR":                              "/atlantis",
-		"ATLANTIS_ATLANTIS_URL":                          fmt.Sprintf("https://%s.%s", name, r.atlantisBaseDomain),
-		"ATLANTIS_PORT":                                  "4141",
-		"TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE": "true",
-		"ATLANTIS_GH_ALLOW_MERGEABLE_BYPASS_APPLY":       "true",
-		"ATLANTIS_ENABLE_REGEXP_CMD":                     "true",
-		"ATLANTIS_REPO_CONFIG":                           "/config/repos.yaml",
+func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string) error {
+	if r.knativeServiceTemplate == nil {
+		return errors.New("missing knative template")
 	}
-	envVars := make([]corev1.EnvVar, 0, len(env)+1)
-	for key, val := range env {
-		envVars = append(envVars, corev1.EnvVar{
-			Name:  key,
-			Value: val,
-		})
-	}
-	envVars = append(envVars, corev1.EnvVar{
-		Name: "ATLANTIS_GH_WEBHOOK_SECRET",
-		ValueFrom: &corev1.EnvVarSource{
-			SecretKeyRef: &corev1.SecretKeySelector{
-				LocalObjectReference: corev1.LocalObjectReference{
-					Name: name,
-				},
-				Key: webhookSecretKey,
-			},
-		},
-	})
+	services := r.knServices.Services(namespace)
 
-	_, err := r.knServices.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = r.knServices.Create(ctx, &knv1.Service{}, metav1.CreateOptions{})
+	// Template up a new Knative Atlantis service, in case we have changed
+	// the template, or the Knative service itself has changed.
+	// Is this slow? maybe, but this is more flexible and readable than doing all
+	// the Go structs by hand. Maybe it should be a Helm chart..
+	buf := new(bytes.Buffer)
+	if err := r.knativeServiceTemplate.Execute(buf, map[string]string{
+		"Name":          name,
+		"RepoAllowList": strings.Join(repoAllowList, ","),
+		"BaseDomain":    r.atlantisBaseDomain,
+		"Image":         r.atlantisImage,
+	}); err != nil {
 		return err
+	}
+	var templatedKnativeService knv1.Service
+	if err := yaml.Unmarshal(buf.Bytes(), &templatedKnativeService); err != nil {
+		return err
+	}
+
+	ksvc, err := services.Get(ctx, name, metav1.GetOptions{})
+	// Create it if it does not already exist
+	if apierrors.IsNotFound(err) {
+		if _, err = services.Create(ctx, &templatedKnativeService, metav1.CreateOptions{}); err != nil {
+			return fmt.Errorf("could not create service: %w", err)
+		}
+		return nil
 	} else if err != nil {
 		return err
 	}
 
-	return err
-}
+	// If any fields are different, ignoring fields not set in the templated spec,
+	// we need to update the service.
+	// We ignore unset fields because of Knative's defaulting mechanics.
+	// This could cause problems if we explicitly want to unset a field, but I don't see us doing that.
+	if equality.Semantic.DeepDerivative(templatedKnativeService.Spec.ConfigurationSpec, ksvc.Spec.ConfigurationSpec) {
+		return nil
+	}
 
-func buildKnativeService() *knv1.Service {
-	probe := corev1.Probe{
-		PeriodSeconds: 60,
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/healthz",
-				Port:   intstr.FromString("4141"),
-				Scheme: corev1.URISchemeHTTP,
-			},
-		},
+	ksvc.Spec.ConfigurationSpec = templatedKnativeService.Spec.ConfigurationSpec
+	if _, err := services.Update(ctx, ksvc, metav1.UpdateOptions{}); err != nil {
+		return err
 	}
-	return &knv1.Service{
-		Spec: knv1.ServiceSpec{
-			ConfigurationSpec: knv1.ConfigurationSpec{
-				Template: knv1.RevisionTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Annotations: map[string]string{
-							"autoscaling.knative.dev/max-scale":                          "1",
-							"autoscaling.knative.dev/scale-to-zero-pod-retention-period": "1h",
-						},
-					},
-					Spec: knv1.RevisionSpec{
-						PodSpec: corev1.PodSpec{
-							ServiceAccountName: name,
-							SecurityContext: &corev1.PodSecurityContext{
-								FSGroup: new(int64(1000)),
-							},
-							Containers: []corev1.Container{
-								{
-									Image: "sdlkfskldfjsdlkfjds TODO",
-									Env:   envVars,
-									VolumeMounts: []corev1.VolumeMount{
-										{
-											Name:      "atlantis-data",
-											MountPath: "/atlantis",
-										},
-										{
-											Name:      "secret-volume",
-											ReadOnly:  true,
-											MountPath: "/secret",
-										},
-										{
-											Name:      "config-volume",
-											ReadOnly:  true,
-											MountPath: "/config",
-										},
-									},
-									Ports: []corev1.ContainerPort{
-										{
-											ContainerPort: 4141,
-										},
-									},
-									LivenessProbe:  &probe,
-									ReadinessProbe: &probe,
-									Resources: corev1.ResourceRequirements{
-										// TODO: investigage resourceXXX vs resource(requests/liits)XXX
-										Requests: corev1.ResourceList{
-											corev1.ResourceCPU:    resource.MustParse("100m"),
-											corev1.ResourceMemory: resource.MustParse("256Mi"),
-										},
-										Limits: corev1.ResourceList{
-											corev1.ResourceCPU:    resource.MustParse("500m"),
-											corev1.ResourceMemory: resource.MustParse("512Mi"), // TODO: get limit from API
-										},
-									},
-								},
-							},
-							Volumes: []corev1.Volume{
-								{
-									Name: "atlantis-data",
-									VolumeSource: corev1.VolumeSource{
-										PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
-											ClaimName: name,
-											ReadOnly:  false,
-										},
-									},
-								},
-								{
-									Name: "secret-volume",
-									VolumeSource: corev1.VolumeSource{
-										Secret: &corev1.SecretVolumeSource{
-											SecretName: "dapla-team",
-											Items: []corev1.KeyToPath{
-												{
-													Key:  "gh-key-file",
-													Path: "atlantis-app-key.pem",
-												},
-											},
-										},
-									},
-								},
-								{
-									Name: "config-volume",
-									VolumeSource: corev1.VolumeSource{
-										ConfigMap: &corev1.ConfigMapVolumeSource{
-											LocalObjectReference: corev1.LocalObjectReference{
-												Name: name,
-											},
-											Items: []corev1.KeyToPath{
-												{
-													Key:  "repos.yaml",
-													Path: "repos.yaml",
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
+
+	return nil
 }

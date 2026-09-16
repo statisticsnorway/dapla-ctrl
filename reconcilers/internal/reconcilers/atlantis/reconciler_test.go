@@ -254,7 +254,6 @@ func TestReconcileKubernetesVolume(t *testing.T) {
 	namespace := "default"
 
 	diskSizeDefault := resource.MustParse("10Gi")
-	diskSizeBigger := resource.MustParse("100Gi")
 
 	t.Run("create if not exists", func(t *testing.T) {
 		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, diskSizeDefault); err != nil {

@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"text/template"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
@@ -69,16 +70,19 @@ type reconciler struct {
 	members         *admindirectory.MembersService
 	folders         *resourcemanager.FoldersClient
 
-	knServices servingv1.ServiceInterface
+	knServices servingv1.ServingV1Interface
 	k8sClient  kubernetes.Interface
 
-	atlantisProject string
-	memberGroups    []string
-	managerGroups   []string
+	memberGroups  []string
+	managerGroups []string
 
+	atlantisProject    string
 	atlantisBaseDomain string
+	atlantisImage      string
 
 	githubAppId string
+
+	knativeServiceTemplate *template.Template
 }
 
 type reconcilerConfig struct {
@@ -230,10 +234,40 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
 		return err
 	}
-	if err := r.reconcileKnativeService(ctx, name, repoAllowList); err != nil {
+	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
+	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
+	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.atlantisProject)
+
+	wantedAnnotations := map[string]string{
+		wiAnnotationKey: gcpSaName,
+	}
+
+	sa, err := saClient.Get(ctx, name, metav1.GetOptions{})
+	if apierrors.IsNotFound(err) {
+		_, err = saClient.Create(ctx, &corev1.ServiceAccount{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        name,
+				Annotations: wantedAnnotations,
+			},
+		}, metav1.CreateOptions{})
+		return err
+	} else if err != nil {
+		return err
+	}
+
+	if cmp.Equal(sa.Annotations, wantedAnnotations) {
+		return nil
+	}
+
+	sa.Annotations = wantedAnnotations
+	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
+	return err
 }
 
 func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name, namespace, webhookSecret string) error {
@@ -292,36 +326,6 @@ func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, n
 	cm.Data = wantedData
 	_, err = configMapsClient.Update(ctx, cm, metav1.UpdateOptions{})
 
-	return err
-}
-
-func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
-	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
-	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.atlantisProject)
-
-	wantedAnnotations := map[string]string{
-		wiAnnotationKey: gcpSaName,
-	}
-
-	sa, err := saClient.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = saClient.Create(ctx, &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        name,
-				Annotations: wantedAnnotations,
-			},
-		}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if cmp.Equal(sa.Annotations, wantedAnnotations) {
-		return nil
-	}
-
-	sa.Annotations = wantedAnnotations
-	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
 	return err
 }
 
