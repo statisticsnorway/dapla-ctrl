@@ -20,7 +20,6 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
 	admindirectory "google.golang.org/api/admin/directory/v1"
-	cloudidentity "google.golang.org/api/cloudidentity/v1beta1"
 	"google.golang.org/api/iam/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -66,7 +65,6 @@ type reconciler struct {
 
 	storageClient   *storage.Client
 	serviceAccounts *serviceaccounts.Client
-	memberships     *cloudidentity.GroupsMembershipsService
 	members         *admindirectory.MembersService
 	folders         *resourcemanager.FoldersClient
 
@@ -91,37 +89,18 @@ type reconcilerConfig struct {
 
 type optFunc func(*reconciler)
 
-func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
+func New(ctx context.Context, googleServices google.Services, opts ...optFunc) (*reconciler, error) {
 	r := &reconciler{
 		tfstateProjects: make(map[string]string),
 	}
 
+	r.storageClient = googleServices.Storage
+	r.serviceAccounts = googleServices.ServiceAccounts
+	r.folders = googleServices.Folders
+	r.members = googleServices.AdminDirectory.Members
+
 	for _, opt := range opts {
 		opt(r)
-	}
-
-	if r.storageClient == nil {
-		storageClient, err := storage.NewClient(ctx)
-		if err != nil {
-			return nil, err
-		}
-		r.storageClient = storageClient
-	}
-
-	if r.serviceAccounts == nil {
-		serviceAccounts, err := serviceaccounts.NewClient(ctx)
-		if err != nil {
-			return nil, err
-		}
-		r.serviceAccounts = serviceAccounts
-	}
-
-	if r.memberships == nil {
-		ci, err := cloudidentity.NewService(ctx)
-		if err != nil {
-			return nil, err
-		}
-		r.memberships = ci.Groups.Memberships
 	}
 
 	return r, nil
