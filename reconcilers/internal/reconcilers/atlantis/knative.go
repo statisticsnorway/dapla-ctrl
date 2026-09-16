@@ -20,28 +20,15 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 	}
 	services := r.knServices.Services(namespace)
 
-	// Template up a new Knative Atlantis service, in case we have changed
-	// the template, or the Knative service itself has changed.
-	// Is this slow? maybe, but this is more flexible and readable than doing all
-	// the Go structs by hand. Maybe it should be a Helm chart..
-	buf := new(bytes.Buffer)
-	if err := r.knativeServiceTemplate.Execute(buf, map[string]string{
-		"Name":          name,
-		"RepoAllowList": strings.Join(repoAllowList, ","),
-		"BaseDomain":    r.atlantisBaseDomain,
-		"Image":         r.atlantisImage,
-	}); err != nil {
-		return err
-	}
-	var templatedKnativeService knv1.Service
-	if err := yaml.Unmarshal(buf.Bytes(), &templatedKnativeService); err != nil {
+	templatedKnativeService, err := r.buildKnativeService(name, repoAllowList)
+	if err != nil {
 		return err
 	}
 
 	ksvc, err := services.Get(ctx, name, metav1.GetOptions{})
 	// Create it if it does not already exist
 	if apierrors.IsNotFound(err) {
-		if _, err = services.Create(ctx, &templatedKnativeService, metav1.CreateOptions{}); err != nil {
+		if _, err = services.Create(ctx, templatedKnativeService, metav1.CreateOptions{}); err != nil {
 			return fmt.Errorf("could not create service: %w", err)
 		}
 		return nil
@@ -63,4 +50,26 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 	}
 
 	return nil
+}
+
+func (r *reconciler) buildKnativeService(name string, repoAllowList []string) (*knv1.Service, error) {
+	// Template up a new Knative Atlantis service, in case we have changed
+	// the template, or the Knative service itself has changed.
+	// Is this slow? maybe, but this is more flexible and readable than doing all
+	// the Go structs by hand. Maybe it should be a Helm chart..
+	buf := new(bytes.Buffer)
+	if err := r.knativeServiceTemplate.Execute(buf, map[string]string{
+		"Name":          name,
+		"RepoAllowList": strings.Join(repoAllowList, ","),
+		"BaseDomain":    r.atlantisBaseDomain,
+		"Image":         r.atlantisImage,
+	}); err != nil {
+		return nil, err
+	}
+	var templatedKnativeService knv1.Service
+	if err := yaml.Unmarshal(buf.Bytes(), &templatedKnativeService); err != nil {
+		return nil, err
+	}
+
+	return &templatedKnativeService, nil
 }
