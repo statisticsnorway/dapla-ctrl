@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 	"text/template"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
@@ -47,7 +48,6 @@ const (
 	atlantisImageConfigKey      = "atlantis_image"
 	memberGroupsConfigKey       = "member_groups"
 	managerGroupsConfigKey      = "manager_groups"
-	githubAppIdConfigKey        = "github_app_id"
 )
 
 type groupRole string
@@ -143,11 +143,6 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Atlantis Manager groups",
 				Description: "Google groups of which every atlantis should be a manager",
 			},
-			{
-				Key:         githubAppIdConfigKey,
-				DisplayName: "GitHub App ID",
-				Description: "App ID of the Atlantis GitHub app.",
-			},
 		},
 	}
 }
@@ -160,28 +155,8 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	namespace := "default"
 	atlantisName := "atlantis-" + daplaTeam.Slug
 
-	sa, err := r.reconcileGcpServiceAccount(ctx, daplaTeam.Slug, atlantisName, namespace)
-	if err != nil {
+	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, namespace); err != nil {
 		return err
-	}
-	saMember := "serviceAccount:" + sa.Email
-
-	folderResp, err := client.GcpTeamResources().ListTeamFolders(ctx, &protoapi.ListGcpTeamFoldersRequest{
-		TeamSlug: daplaTeam.Slug,
-	})
-	if err != nil {
-		return err
-	}
-	for _, folder := range folderResp.Folders {
-		google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
-			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
-			func(b *iampb.Binding) (modified bool) {
-				if slices.Contains(b.Members, saMember) {
-					return false
-				}
-				b.Members = append(b.Members, saMember)
-				return true
-			})
 	}
 
 	if err := r.reconcileBuckets(ctx, daplaTeam.Slug); err != nil {
@@ -367,10 +342,10 @@ func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient
 	return secretToken, nil
 }
 
-func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName, name, namespace string) (*iam.ServiceAccount, error) {
+func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.atlantisProject)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
@@ -393,10 +368,30 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, teamName, n
 		}
 	}
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return sa, nil
+	saMember := "serviceAccount:" + sa.Email
+
+	folderResp, err := client.GcpTeamResources().ListTeamFolders(ctx, &protoapi.ListGcpTeamFoldersRequest{
+		TeamSlug: teamName,
+	})
+	if err != nil {
+		return err
+	}
+	for _, folder := range folderResp.Folders {
+		google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
+			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
+			func(b *iampb.Binding) (modified bool) {
+				if slices.Contains(b.Members, saMember) {
+					return false
+				}
+				b.Members = append(b.Members, saMember)
+				return true
+			})
+	}
+
+	return nil
 }
 
 func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId string, role groupRole) error {
@@ -471,6 +466,22 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		switch c.Key {
 		case namespaceConfigKey:
 			rc.Namespace = c.Value
+		case atlantisProjectConfigKey:
+			r.atlantisProject = c.Value
+		case atlantisBaseDomainConfigKey:
+			r.atlantisBaseDomain = c.Value
+		case atlantisImageConfigKey:
+			r.atlantisImage = c.Value
+		case memberGroupsConfigKey:
+			if c.Value == "" {
+				continue
+			}
+			r.memberGroups = strings.Split(c.Value, ",")
+		case managerGroupsConfigKey:
+			if c.Value == "" {
+				continue
+			}
+			r.managerGroups = strings.Split(c.Value, ",")
 		default:
 			return nil, fmt.Errorf("unknown config key %q", c.Key)
 		}
