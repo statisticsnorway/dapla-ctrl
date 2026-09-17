@@ -74,30 +74,33 @@ type reconciler struct {
 	memberGroups  []string
 	managerGroups []string
 
-	atlantisProject string
-	atlantisImage   string
+	atlantisProject   string
+	atlantisImage     string
+	atlantisNamespace string
 
 	knativeServiceTemplate *template.Template
 }
 
-type reconcilerConfig struct {
-	Namespace string
-}
-
 type optFunc func(*reconciler)
 
-func New(ctx context.Context, googleServices google.Services, opts ...optFunc) (*reconciler, error) {
+func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) (*reconciler, error) {
 	r := &reconciler{
 		tfstateProjects: make(map[string]string),
 	}
 
-	r.storageClient = googleServices.Storage
-	r.serviceAccounts = googleServices.ServiceAccounts
-	r.folders = googleServices.Folders
-	r.members = googleServices.AdminDirectory.Members
+	if googleServices != nil {
+		r.storageClient = googleServices.Storage
+		r.serviceAccounts = googleServices.ServiceAccounts
+		r.folders = googleServices.Folders
+		r.members = googleServices.AdminDirectory.Members
+	}
 
 	for _, opt := range opts {
 		opt(r)
+	}
+
+	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil || r.knServices == nil || r.k8sClient == nil {
+		return nil, errors.New("one or more clients are nil, all need to be supplied")
 	}
 
 	return r, nil
@@ -449,20 +452,18 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 	return nil
 }
 
-func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) (*reconcilerConfig, error) {
+func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
 	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
 		ReconcilerName: r.Name(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("get reconciler config: %w", err)
+		return fmt.Errorf("get reconciler config: %w", err)
 	}
-
-	rc := reconcilerConfig{}
 
 	for _, c := range config.Nodes {
 		switch c.Key {
 		case namespaceConfigKey:
-			rc.Namespace = c.Value
+			r.atlantisNamespace = c.Value
 		case atlantisProjectConfigKey:
 			r.atlantisProject = c.Value
 		case atlantisImageConfigKey:
@@ -478,11 +479,11 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			}
 			r.managerGroups = strings.Split(c.Value, ",")
 		default:
-			return nil, fmt.Errorf("unknown config key %q", c.Key)
+			return fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
-	return &rc, nil
+	return nil
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
