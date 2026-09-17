@@ -5,11 +5,17 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	_ "embed"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"slices"
 	"strings"
 	"text/template"
+
+	googlecreds "golang.org/x/oauth2/google"
+
+	container "cloud.google.com/go/container/apiv1"
+	"cloud.google.com/go/container/apiv1/containerpb"
 
 	"cloud.google.com/go/iam/apiv1/iampb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
@@ -30,6 +36,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/transport"
 
 	servingv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
@@ -69,10 +77,18 @@ type reconciler struct {
 	serviceAccounts *serviceaccounts.Client
 	members         *admindirectory.MembersService
 	folders         *resourcemanager.FoldersClient
+	container       *container.ClusterManagerClient
 
+	knServices servingv1.ServingV1Interface
+	k8sClient  kubernetes.Interface
+
+	knativeServiceTemplate *template.Template
+
+	config reconcilerConfig
+}
+
+type reconcilerConfig struct {
 	clusterResourceName string
-	knServices          servingv1.ServingV1Interface
-	k8sClient           kubernetes.Interface
 
 	memberGroups  []string
 	managerGroups []string
@@ -80,8 +96,6 @@ type reconciler struct {
 	atlantisProject   string
 	atlantisImage     string
 	atlantisNamespace string
-
-	knativeServiceTemplate *template.Template
 
 	teamAllowlist []string
 }
@@ -157,14 +171,17 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	if len(r.teamAllowlist) != 0 && !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
+	if len(r.config.teamAllowlist) != 0 && !slices.Contains(r.config.teamAllowlist, daplaTeam.Slug) {
 		return nil
 	}
 
-	namespace := r.atlantisNamespace
+	if err := r.updateConfig(ctx, client); err != nil {
+		return err
+	}
+
 	atlantisName := "atlantis-" + daplaTeam.Slug
 
-	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, namespace); err != nil {
+	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
 		return err
 	}
 
@@ -177,7 +194,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, atlantisName, namespace, webhookSecret, defaultRepoConfig, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}, resource.MustParse("10Gi")); err != nil {
+	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, webhookSecret, defaultRepoConfig, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}, resource.MustParse("10Gi")); err != nil {
 		return nil
 	}
 
@@ -205,7 +222,7 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 
 func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
 	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
-	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.atlantisProject)
+	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.config.atlantisProject)
 
 	wantedAnnotations := map[string]string{
 		wiAnnotationKey: gcpSaName,
@@ -352,13 +369,13 @@ func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient
 }
 
 func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
-	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.atlantisProject)
+	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.atlantisProject)
 	if err != nil {
 		return err
 	}
 
 	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
-		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.atlantisProject, namespace, name)
+		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.config.atlantisProject, namespace, name)
 		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
 			return false
 		}
@@ -366,12 +383,12 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return true
 	})
 
-	for _, memberGroup := range r.memberGroups {
+	for _, memberGroup := range r.config.memberGroups {
 		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
 			err = errors.Join(err, currentErr)
 		}
 	}
-	for _, managerGroup := range r.managerGroups {
+	for _, managerGroup := range r.config.managerGroups {
 		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
 			err = errors.Join(err, currentErr)
 		}
@@ -469,38 +486,136 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		return fmt.Errorf("get reconciler config: %w", err)
 	}
 
+	rc := reconcilerConfig{}
+
 	for _, c := range config.Nodes {
 		switch c.Key {
 		case namespaceConfigKey:
-			r.atlantisNamespace = c.Value
+			rc.atlantisNamespace = c.Value
 		case atlantisProjectConfigKey:
-			r.atlantisProject = c.Value
+			rc.atlantisProject = c.Value
 		case atlantisImageConfigKey:
-			r.atlantisImage = c.Value
+			rc.atlantisImage = c.Value
 		case memberGroupsConfigKey:
 			if c.Value == "" {
 				continue
 			}
-			r.memberGroups = strings.Split(c.Value, ",")
+			rc.memberGroups = strings.Split(c.Value, ",")
 		case managerGroupsConfigKey:
 			if c.Value == "" {
 				continue
 			}
-			r.managerGroups = strings.Split(c.Value, ",")
+			rc.managerGroups = strings.Split(c.Value, ",")
 		case clusterResourceNameConfigKey:
-			r.clusterResourceName = c.Value
+			rc.clusterResourceName = c.Value
 		case teamAllowListConfigKey:
 			if c.Value == "" {
-				r.teamAllowlist = nil
+				rc.teamAllowlist = nil
 				continue
 			}
-			r.teamAllowlist = strings.Split(c.Value, ",")
+			rc.teamAllowlist = strings.Split(c.Value, ",")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
 	}
 
+	if equality.Semantic.DeepEqual(rc, r.config) {
+		return nil
+	}
+
+	k8sClient, knativeClient, err := r.createKubernetesClients(ctx)
+	if err != nil {
+		return err
+	}
+
+	r.k8sClient = k8sClient
+	r.knServices = knativeClient
+	r.config = rc
 	return nil
+}
+
+func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
+	// Get cluster info
+	cluster, err := r.container.GetCluster(ctx, &containerpb.GetClusterRequest{
+		Name: "projects/atlantis-8205/locations/europe-north1/clusters/atlantis",
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Extract server CA cert, base64 encoded. ClusterInfo needs it decoded
+	cert := cluster.MasterAuth.ClusterCaCertificate
+	ca, err := base64.StdEncoding.DecodeString(cert)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	endpoint := cluster.ControlPlaneEndpointsConfig.IpEndpointsConfig.GetPublicEndpoint()
+
+	// Get a token source for ADC
+	ts, err := googlecreds.FindDefaultCredentials(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	overrides := &clientcmd.ConfigOverrides{}
+	loader := &clientcmd.ClientConfigLoadingRules{}
+
+	overrides.ClusterInfo.CertificateAuthorityData = ca
+	// Need to specify https, defaults to http
+	overrides.ClusterDefaults.Server = "https://" + endpoint
+
+	// Create config for kubernetes clients
+	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
+	restCfg, err := cc.ClientConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// We wrap the underlying HTTP transport with a "middleware" which injects
+	// rquests with our ADC
+	restCfg.WrapTransport = transport.TokenSourceWrapTransport(ts.TokenSource)
+
+	k8s, err := kubernetes.NewForConfig(restCfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	knsrv, err := servingv1.NewForConfig(restCfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return k8s, knsrv, nil
+
+}
+
+func (r *reconciler) validateConfig() error {
+	fieldErrors := make(FieldsValidationError)
+	setMissing := func(key string) { fieldErrors[key] = "missing value" }
+	if im := r.config.atlantisImage; im == "" {
+		setMissing(atlantisImageConfigKey)
+	} else if !strings.Contains(im, ":") {
+		fieldErrors[atlantisImageConfigKey] = "invalid image ref, must be <image>:<tag>"
+	}
+
+	if project := r.config.atlantisProject; project == "" {
+		setMissing(atlantisProjectConfigKey)
+	}
+
+	if r.config.atlantisNamespace == "" {
+		setMissing(namespaceConfigKey)
+	}
+
+	if r.config.clusterResourceName == "" {
+		setMissing(clusterResourceNameConfigKey)
+	}
+
+	if len(fieldErrors) == 0 {
+		return nil
+	}
+
+	return fieldErrors
 }
 
 func (r *reconciler) Delete(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {

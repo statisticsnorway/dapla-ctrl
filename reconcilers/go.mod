@@ -16,6 +16,7 @@ require (
 	cloud.google.com/go/artifactregistry v1.26.0
 	cloud.google.com/go/auth v0.23.0
 	cloud.google.com/go/billing v1.26.0
+	cloud.google.com/go/container v1.54.0
 	cloud.google.com/go/iam v1.11.0
 	cloud.google.com/go/monitoring v1.30.0
 	cloud.google.com/go/pubsub/v2 v2.6.0
