@@ -49,11 +49,8 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 		}); err != nil {
 			return err
 		}
-
-		if team.IsManaged {
-			if err := createDefaultManagedResources(ctx, team.Slug, actor); err != nil {
-				return err
-			}
+		if err := createDefaultResources(ctx, team.Slug, actor); err != nil {
+			return err
 		}
 		return nil
 	})
@@ -64,7 +61,7 @@ func Create(ctx context.Context, input *CreateTeamInput, actor *authz.Actor) (*T
 	return toGraphTeam(team), nil
 }
 
-func createDefaultManagedResources(ctx context.Context, teamSlug slug.Slug, actor *authz.Actor) error {
+func createDefaultResources(ctx context.Context, teamSlug slug.Slug, actor *authz.Actor) error {
 	for _, category := range []string{"developers", "data-admins"} {
 		if _, err := group.Create(ctx, &group.CreateGroupInput{
 			TeamSlug: teamSlug,
