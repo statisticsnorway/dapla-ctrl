@@ -42,12 +42,14 @@ const (
 
 	wiAnnotationKey = "iam.gke.io/gcp-service-account"
 
-	namespaceConfigKey          = "namespace"
-	atlantisProjectConfigKey    = "atlantis_project"
-	atlantisBaseDomainConfigKey = "atlantis_base_domain"
-	atlantisImageConfigKey      = "atlantis_image"
-	memberGroupsConfigKey       = "member_groups"
-	managerGroupsConfigKey      = "manager_groups"
+	namespaceConfigKey           = "namespace"
+	atlantisProjectConfigKey     = "atlantis_project"
+	atlantisBaseDomainConfigKey  = "atlantis_base_domain"
+	atlantisImageConfigKey       = "atlantis_image"
+	memberGroupsConfigKey        = "member_groups"
+	managerGroupsConfigKey       = "manager_groups"
+	clusterResourceNameConfigKey = "cluster_resource_name"
+	teamAllowListConfigKey       = "team_allowlist"
 )
 
 type groupRole string
@@ -68,8 +70,9 @@ type reconciler struct {
 	members         *admindirectory.MembersService
 	folders         *resourcemanager.FoldersClient
 
-	knServices servingv1.ServingV1Interface
-	k8sClient  kubernetes.Interface
+	clusterResourceName string
+	knServices          servingv1.ServingV1Interface
+	k8sClient           kubernetes.Interface
 
 	memberGroups  []string
 	managerGroups []string
@@ -79,6 +82,8 @@ type reconciler struct {
 	atlantisNamespace string
 
 	knativeServiceTemplate *template.Template
+
+	teamAllowlist []string
 }
 
 type optFunc func(*reconciler)
@@ -152,7 +157,11 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	namespace := "default"
+	if len(r.teamAllowlist) != 0 && !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
+		return nil
+	}
+
+	namespace := r.atlantisNamespace
 	atlantisName := "atlantis-" + daplaTeam.Slug
 
 	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, namespace); err != nil {
@@ -478,6 +487,14 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 				continue
 			}
 			r.managerGroups = strings.Split(c.Value, ",")
+		case clusterResourceNameConfigKey:
+			r.clusterResourceName = c.Value
+		case teamAllowListConfigKey:
+			if c.Value == "" {
+				r.teamAllowlist = nil
+				continue
+			}
+			r.teamAllowlist = strings.Split(c.Value, ",")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
