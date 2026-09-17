@@ -26,7 +26,7 @@ spec:
         - name: ATLANTIS_REPO_ALLOWLIST
           value: {{ .RepoAllowList }}
         - name: ATLANTIS_ATLANTIS_URL
-          value: https://{{ .Name }}.{{ .BaseDomain }}
+          value: https://{{ .Name }}.example.com
         image: {{ .Image }}
 `
 
@@ -47,8 +47,7 @@ func TestReconcileKnativeService(t *testing.T) {
 	r := &reconciler{
 		knServices: fakeServing,
 
-		atlantisImage:      "atlantis:v0",
-		atlantisBaseDomain: "ssb.no",
+		atlantisImage: "atlantis:v0",
 
 		knativeServiceTemplate: tpl,
 	}
@@ -85,7 +84,7 @@ func TestReconcileKnativeService(t *testing.T) {
 			if e.Name != "ATLANTIS_ATLANTIS_URL" {
 				return false
 			}
-			if expected := fmt.Sprintf("https://%s.%s", atlantisName, r.atlantisBaseDomain); expected != e.Value {
+			if expected := fmt.Sprintf("https://%s.example.com", atlantisName); expected != e.Value {
 				t.Errorf("incorrect atlantis url, expected %q, got %q", expected, e.Value)
 			}
 			return true

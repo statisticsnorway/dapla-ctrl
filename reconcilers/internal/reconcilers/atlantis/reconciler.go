@@ -74,11 +74,8 @@ type reconciler struct {
 	memberGroups  []string
 	managerGroups []string
 
-	atlantisProject    string
-	atlantisBaseDomain string
-	atlantisImage      string
-
-	githubAppId string
+	atlantisProject string
+	atlantisImage   string
 
 	knativeServiceTemplate *template.Template
 }
@@ -468,8 +465,6 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			rc.Namespace = c.Value
 		case atlantisProjectConfigKey:
 			r.atlantisProject = c.Value
-		case atlantisBaseDomainConfigKey:
-			r.atlantisBaseDomain = c.Value
 		case atlantisImageConfigKey:
 			r.atlantisImage = c.Value
 		case memberGroupsConfigKey:
