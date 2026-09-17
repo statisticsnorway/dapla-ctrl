@@ -45,6 +45,11 @@ type Config struct {
 		Org string `env:"GITHUB_ORG"`
 	}
 
+	Atlantis struct {
+		// Go template to use for generating Knative Service manifest.
+		KnativeServiceTemplate string `env:"KNATIVE_SERVICE_TEMPLATE"`
+	}
+
 	// ListenAddress The host:port combination used by the http server.
 	ListenAddress string `env:"LISTEN_ADDRESS,default=127.0.0.1:3105"`
 

@@ -77,7 +77,7 @@ type reconciler struct {
 	serviceAccounts *serviceaccounts.Client
 	members         *admindirectory.MembersService
 	folders         *resourcemanager.FoldersClient
-	container       *container.ClusterManagerClient
+	clusterManager  *container.ClusterManagerClient
 
 	knServices servingv1.ServingV1Interface
 	k8sClient  kubernetes.Interface
@@ -112,14 +112,15 @@ func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) 
 		r.serviceAccounts = googleServices.ServiceAccounts
 		r.folders = googleServices.Folders
 		r.members = googleServices.AdminDirectory.Members
+		r.clusterManager = googleServices.ClusterManager
 	}
 
 	for _, opt := range opts {
 		opt(r)
 	}
 
-	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil || r.knServices == nil || r.k8sClient == nil {
-		return nil, errors.New("one or more clients are nil, all need to be supplied")
+	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil {
+		return nil, errors.New("one or more google clients are nil, all need to be supplied")
 	}
 
 	return r, nil
@@ -463,7 +464,7 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 	for env, projectId := range r.tfstateProjects {
 		bucketName := fmt.Sprintf("ssb-%s-tfstate-%s", teamName, env)
 		bucket := r.storageClient.Bucket(bucketName)
-		_, err := bucket.Attrs(ctx)
+		attrs, err := bucket.Attrs(ctx)
 		if status.Code(err) == codes.NotFound {
 			// Create bucket
 			if err := bucket.Create(ctx, projectId, defaultAttrs); err != nil {
@@ -472,7 +473,17 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 		} else if err != nil {
 			return fmt.Errorf("get bucket attrs: %w", err)
 		}
-		// TODO: check that bucket attrs are correct
+		if equality.Semantic.DeepDerivative(defaultAttrs, attrs) {
+			continue
+		}
+		if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
+			UniformBucketLevelAccess: &defaultAttrs.UniformBucketLevelAccess,
+			VersioningEnabled:        defaultAttrs.VersioningEnabled,
+			PublicAccessPrevention:   defaultAttrs.PublicAccessPrevention,
+			Lifecycle:                &defaultAttrs.Lifecycle,
+		}); err != nil {
+			return fmt.Errorf("update bucket attrs: %w", err)
+		}
 	}
 
 	return nil
@@ -536,7 +547,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
 	// Get cluster info
-	cluster, err := r.container.GetCluster(ctx, &containerpb.GetClusterRequest{
+	cluster, err := r.clusterManager.GetCluster(ctx, &containerpb.GetClusterRequest{
 		Name: "projects/atlantis-8205/locations/europe-north1/clusters/atlantis",
 	})
 	if err != nil {

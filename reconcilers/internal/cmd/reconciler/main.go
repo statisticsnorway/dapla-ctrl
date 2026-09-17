@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/atlantis"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
@@ -127,6 +128,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return fmt.Errorf("error creating dapla group sa reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
+
+	atlantisReconciler, err := atlantis.New(ctx, googleServices)
+	if err != nil {
+		return fmt.Errorf("error creating atlantis reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(atlantisReconciler)
 
 	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
