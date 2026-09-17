@@ -58,6 +58,7 @@ const (
 	managerGroupsConfigKey       = "manager_groups"
 	clusterResourceNameConfigKey = "cluster_resource_name"
 	teamAllowListConfigKey       = "team_allowlist"
+	tfStateProjectsConfigKey     = "tfstate_projects"
 )
 
 type groupRole string
@@ -71,8 +72,6 @@ const (
 var defaultRepoConfig string
 
 type reconciler struct {
-	tfstateProjects map[string]string
-
 	storageClient   *storage.Client
 	serviceAccounts *serviceaccounts.Client
 	members         *admindirectory.MembersService
@@ -88,6 +87,8 @@ type reconciler struct {
 }
 
 type reconcilerConfig struct {
+	tfstateProjects map[string]string
+
 	clusterResourceName string
 
 	memberGroups  []string
@@ -103,9 +104,7 @@ type reconcilerConfig struct {
 type optFunc func(*reconciler)
 
 func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) (*reconciler, error) {
-	r := &reconciler{
-		tfstateProjects: make(map[string]string),
-	}
+	r := new(reconciler)
 
 	if googleServices != nil {
 		r.storageClient = googleServices.Storage
@@ -162,6 +161,11 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Key:         managerGroupsConfigKey,
 				DisplayName: "Atlantis Manager groups",
 				Description: "Google groups of which every atlantis should be a manager",
+			},
+			{
+				Key:         tfStateProjectsConfigKey,
+				DisplayName: "Terraform State Projects",
+				Description: "Map of environment names to their respective Terraform state projects",
 			},
 		},
 	}
@@ -461,7 +465,7 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 		},
 	}
 
-	for env, projectId := range r.tfstateProjects {
+	for env, projectId := range r.config.tfstateProjects {
 		bucketName := fmt.Sprintf("ssb-%s-tfstate-%s", teamName, env)
 		bucket := r.storageClient.Bucket(bucketName)
 		attrs, err := bucket.Attrs(ctx)
@@ -521,10 +525,22 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			rc.clusterResourceName = c.Value
 		case teamAllowListConfigKey:
 			if c.Value == "" {
-				rc.teamAllowlist = nil
 				continue
 			}
 			rc.teamAllowlist = strings.Split(c.Value, ",")
+		case tfStateProjectsConfigKey:
+			if c.Value == "" {
+				continue
+			}
+			entries := strings.Split(c.Value, ",")
+			rc.tfstateProjects = make(map[string]string, len(entries))
+			for _, entry := range entries {
+				pair := strings.Split(entry, ":")
+				if len(pair) != 2 {
+					return fmt.Errorf("invalid entry: %s", entry)
+				}
+				rc.tfstateProjects[pair[0]] = pair[1]
+			}
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
