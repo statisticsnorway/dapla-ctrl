@@ -61,7 +61,7 @@ func (r *reconciler) buildKnativeService(name string, repoAllowList []string) (*
 	if err := r.knativeServiceTemplate.Execute(buf, map[string]string{
 		"Name":          name,
 		"RepoAllowList": strings.Join(repoAllowList, ","),
-		"Image":         r.atlantisImage,
+		"Image":         r.config.atlantisImage,
 	}); err != nil {
 		return nil, err
 	}

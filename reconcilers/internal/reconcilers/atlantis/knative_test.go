@@ -47,7 +47,9 @@ func TestReconcileKnativeService(t *testing.T) {
 	r := &reconciler{
 		knServices: fakeServing,
 
-		atlantisImage: "atlantis:v0",
+		config: reconcilerConfig{
+			atlantisImage: "atlantis:v0",
+		},
 
 		knativeServiceTemplate: tpl,
 	}
@@ -64,8 +66,8 @@ func TestReconcileKnativeService(t *testing.T) {
 
 		container := knsvc.Spec.Template.Spec.Containers[0]
 
-		if container.Image != r.atlantisImage {
-			t.Errorf("incorrect image %q, expected %q", container.Image, r.atlantisImage)
+		if container.Image != r.config.atlantisImage {
+			t.Errorf("incorrect image %q, expected %q", container.Image, r.config.atlantisImage)
 		}
 
 		if !slices.ContainsFunc(container.Env, func(e corev1.EnvVar) bool {
@@ -95,7 +97,7 @@ func TestReconcileKnativeService(t *testing.T) {
 	})
 
 	t.Run("image updated on config change", func(t *testing.T) {
-		r.atlantisImage = "atlantis:v1"
+		r.config.atlantisImage = "atlantis:v1"
 
 		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList); err != nil {
 			t.Fatal(err)
@@ -108,8 +110,8 @@ func TestReconcileKnativeService(t *testing.T) {
 
 		container := knsvc.Spec.Template.Spec.Containers[0]
 
-		if container.Image != r.atlantisImage {
-			t.Errorf("incorrect image %q, expected %q", container.Image, r.atlantisImage)
+		if container.Image != r.config.atlantisImage {
+			t.Errorf("incorrect image %q, expected %q", container.Image, r.config.atlantisImage)
 		}
 	})
 

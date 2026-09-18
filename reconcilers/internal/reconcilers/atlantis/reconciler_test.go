@@ -175,8 +175,10 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 	projectId := "atlantis-test"
 
 	r := &reconciler{
-		k8sClient:       fakeClient,
-		atlantisProject: projectId,
+		k8sClient: fakeClient,
+		config: reconcilerConfig{
+			atlantisProject: projectId,
+		},
 	}
 
 	wantedAnnotations := map[string]string{

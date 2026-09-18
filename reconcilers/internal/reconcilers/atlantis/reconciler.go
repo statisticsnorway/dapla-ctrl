@@ -176,6 +176,7 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
+	// Use allowlist to perform limited testing before full rollout
 	if len(r.config.teamAllowlist) != 0 && !slices.Contains(r.config.teamAllowlist, daplaTeam.Slug) {
 		return nil
 	}
@@ -184,7 +185,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
+	// All team atlantis instances should have their resources prefixed with "atlantis-"
 	atlantisName := "atlantis-" + daplaTeam.Slug
+	if daplaTeam.Slug == "dapla-platform" {
+		atlantisName += "-team"
+	}
 
 	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
 		return err
