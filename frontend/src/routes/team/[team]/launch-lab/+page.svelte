@@ -94,7 +94,7 @@
 
 		if (shouldAddParquedit) {
 			parameters.push({
-				key: 'avansert.database.enabled',
+				key: 'avansert.parquedit.enabled',
 				value: 'true'
 			});
 		}
