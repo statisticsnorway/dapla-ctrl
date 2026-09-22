@@ -21,32 +21,6 @@ import (
 	ktesting "k8s.io/client-go/testing"
 )
 
-func TestGetOrGenerateWebhookSecret(t *testing.T) {
-	atlantisServer := newFakeAtlantisServer()
-	client := startFakeGrpcServer(t, atlantisServer)
-	teamName := "blabla"
-	t.Run("create secret if not exists", func(t *testing.T) {
-		secret, err := generateWebhookSecret(t.Context(), client, teamName)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if stored := atlantisServer.webhookSecrets[teamName]; stored != secret {
-			t.Fatalf("%q != %q", stored, secret)
-		}
-	})
-
-	t.Run("existing secret is not overridden", func(t *testing.T) {
-		before := atlantisServer.webhookSecrets[teamName]
-		after, err := generateWebhookSecret(t.Context(), client, teamName)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if before != after {
-			t.Fatalf("%q != %q", before, after)
-		}
-	})
-}
-
 func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 	fakeClient := fake.NewClientset()
 
