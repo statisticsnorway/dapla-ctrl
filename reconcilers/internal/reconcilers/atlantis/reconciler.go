@@ -189,6 +189,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	config := configResponse.Config
 
 	// All team atlantis instances should have their resources prefixed with "atlantis-"
+	// unless they have a custom name
 	atlantisName := "atlantis-" + daplaTeam.Slug
 	if config.CustomName != nil {
 		atlantisName = *config.CustomName
@@ -203,21 +204,21 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if config.WebhookSecret == nil {
-		webhookSecret, err := getOrGenerateWebhookSecret(ctx, client, daplaTeam.Slug)
+		webhookSecret, err := createWebhookSecret(ctx, client, daplaTeam.Slug)
 		if err != nil {
 			return err
 		}
 		config.WebhookSecret = &webhookSecret
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, defaultRepoConfig, config, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}); err != nil {
+	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, config, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}); err != nil {
 		return nil
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, repoConfig string, config *protoapi.AtlantisConfig, repoAllowList []string) error {
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config *protoapi.AtlantisConfig, repoAllowList []string) error {
 	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
 		return err
 	}
@@ -226,7 +227,11 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 		return err
 	}
 
-	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
+	repoConfig := &defaultRepoConfig
+	if len(config.RepoConfig) != 0 {
+		repoConfig = new(string(config.RepoConfig))
+	}
+	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, *repoConfig); err != nil {
 		return err
 	}
 
@@ -242,7 +247,7 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 		return err
 	}
 
-	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config.CustomImage, config.Resources); err != nil {
+	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config); err != nil {
 		return err
 	}
 	return nil
@@ -371,16 +376,9 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 	return err
 }
 
-func getOrGenerateWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
-	cfg, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: teamName})
-	if err != nil && status.Code(err) != codes.NotFound {
-		return "", err
-	} else if err == nil && cfg.Config.WebhookSecret != nil {
-		return *cfg.Config.WebhookSecret, nil
-	}
-
+func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
 	randBytes := make([]byte, 128)
-	_, err = rand.Read(randBytes)
+	_, err := rand.Read(randBytes)
 	if err != nil {
 		return "", err
 	}

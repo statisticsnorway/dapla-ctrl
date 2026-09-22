@@ -26,7 +26,7 @@ func TestGetOrGenerateWebhookSecret(t *testing.T) {
 	client := startFakeGrpcServer(t, atlantisServer)
 	teamName := "blabla"
 	t.Run("create secret if not exists", func(t *testing.T) {
-		secret, err := getOrGenerateWebhookSecret(t.Context(), client, teamName)
+		secret, err := generateWebhookSecret(t.Context(), client, teamName)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -37,7 +37,7 @@ func TestGetOrGenerateWebhookSecret(t *testing.T) {
 
 	t.Run("existing secret is not overridden", func(t *testing.T) {
 		before := atlantisServer.webhookSecrets[teamName]
-		after, err := getOrGenerateWebhookSecret(t.Context(), client, teamName)
+		after, err := generateWebhookSecret(t.Context(), client, teamName)
 		if err != nil {
 			t.Fatal(err)
 		}

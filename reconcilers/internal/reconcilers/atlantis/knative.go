@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -16,13 +17,23 @@ import (
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, image, resources *string) error {
+func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, config *protoapi.AtlantisConfig) error {
 	if r.knativeServiceTemplate == nil {
 		return errors.New("missing knative template")
 	}
 	services := r.knServices.Services(namespace)
 
-	templatedKnativeService, err := r.buildKnativeService(name, repoAllowList, image, resources)
+	image := r.config.atlantisImage
+	if config.CustomImage != nil {
+		image = *config.CustomImage
+	}
+
+	resources, err := parseResources(config.Resources)
+	if err != nil {
+		return err
+	}
+
+	templatedKnativeService, err := r.buildKnativeService(name, image, resources, repoAllowList)
 	if err != nil {
 		return err
 	}
@@ -54,23 +65,19 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 	return nil
 }
 
-func parseResources(resources *string) (*v1.ResourceRequirements, error) {
-	if resources == nil {
+func parseResources(resources []byte) (*v1.ResourceRequirements, error) {
+	if len(resources) == 0 {
 		return nil, nil
 	}
 
 	rr := new(v1.ResourceRequirements)
-	if err := json.Unmarshal([]byte(*resources), rr); err != nil {
+	if err := json.Unmarshal(resources, rr); err != nil {
 		return nil, err
 	}
 	return rr, nil
 }
 
-func (r *reconciler) buildKnativeService(name string, repoAllowList []string, customImage, resources *string) (*knv1.Service, error) {
-	image := r.config.atlantisImage
-	if customImage != nil {
-		image = *customImage
-	}
+func (r *reconciler) buildKnativeService(name, image string, resources *v1.ResourceRequirements, repoAllowList []string) (*knv1.Service, error) {
 	// Template up a new Knative Atlantis service, in case we have changed
 	// the template, or the Knative service itself has changed.
 	// Is this slow? maybe, but this is more flexible and readable than doing all
@@ -89,12 +96,8 @@ func (r *reconciler) buildKnativeService(name string, repoAllowList []string, cu
 		return nil, err
 	}
 
-	resourceRequirements, err := parseResources(resources)
-	if err != nil {
-		return nil, err
-	}
-	if resourceRequirements != nil {
-		templatedKnativeService.Spec.Template.Spec.GetContainer().Resources = *resourceRequirements
+	if resources != nil {
+		templatedKnativeService.Spec.Template.Spec.GetContainer().Resources = *resources
 	}
 
 	return &templatedKnativeService, nil
