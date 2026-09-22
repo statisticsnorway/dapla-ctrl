@@ -118,7 +118,7 @@ func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) 
 		opt(r)
 	}
 
-	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil {
+	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil || r.clusterManager == nil {
 		return nil, errors.New("one or more google clients are nil, all need to be supplied")
 	}
 
