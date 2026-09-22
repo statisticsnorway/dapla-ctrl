@@ -4,7 +4,8 @@ CREATE TABLE team_atlantis_config (
 	custom_name TEXT,
 	webhook_secret TEXT,
 	custom_image TEXT,
-	resources TEXT,
-	disk_size TEXT
+	resources JSON,
+	disk_size TEXT,
+	repo_config JSON
 )
 ;

@@ -54,5 +54,6 @@ func toProtoTeamAtlantisConfig(config grpcatlantissql.TeamAtlantisConfig) *proto
 		CustomImage:   config.CustomImage,
 		Resources:     config.Resources,
 		DiskSize:      config.DiskSize,
+		RepoConfig:    config.RepoConfig,
 	}
 }

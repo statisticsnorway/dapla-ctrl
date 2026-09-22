@@ -11,7 +11,7 @@ import (
 
 const get = `-- name: Get :one
 SELECT
-	team_atlantis_config.team_slug, team_atlantis_config.custom_name, team_atlantis_config.webhook_secret, team_atlantis_config.custom_image, team_atlantis_config.resources, team_atlantis_config.disk_size
+	team_atlantis_config.team_slug, team_atlantis_config.custom_name, team_atlantis_config.webhook_secret, team_atlantis_config.custom_image, team_atlantis_config.resources, team_atlantis_config.disk_size, team_atlantis_config.repo_config
 FROM
 	team_atlantis_config
 WHERE
@@ -32,6 +32,7 @@ func (q *Queries) Get(ctx context.Context, teamSlug slug.Slug) (*GetRow, error) 
 		&i.TeamAtlantisConfig.CustomImage,
 		&i.TeamAtlantisConfig.Resources,
 		&i.TeamAtlantisConfig.DiskSize,
+		&i.TeamAtlantisConfig.RepoConfig,
 	)
 	return &i, err
 }

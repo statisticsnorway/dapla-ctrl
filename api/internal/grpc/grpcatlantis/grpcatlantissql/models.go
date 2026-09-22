@@ -11,6 +11,7 @@ type TeamAtlantisConfig struct {
 	CustomName    *string
 	WebhookSecret *string
 	CustomImage   *string
-	Resources     *string
+	Resources     []byte
 	DiskSize      *string
+	RepoConfig    []byte
 }
