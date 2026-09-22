@@ -57,7 +57,6 @@ const (
 	memberGroupsConfigKey        = "member_groups"
 	managerGroupsConfigKey       = "manager_groups"
 	clusterResourceNameConfigKey = "cluster_resource_name"
-	teamAllowListConfigKey       = "team_allowlist"
 	tfStateProjectsConfigKey     = "tfstate_projects"
 )
 
@@ -101,8 +100,6 @@ type reconcilerConfig struct {
 	atlantisProject   string
 	atlantisImage     string
 	atlantisNamespace string
-
-	teamAllowlist []string
 }
 
 type optFunc func(*reconciler)
@@ -180,11 +177,6 @@ func (r *reconciler) Name() string {
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
-	// Use allowlist to perform limited testing before full rollout
-	if len(r.config.teamAllowlist) != 0 && !slices.Contains(r.config.teamAllowlist, daplaTeam.Slug) {
-		return nil
-	}
-
 	if err := r.updateConfig(ctx, client); err != nil {
 		return err
 	}
@@ -554,11 +546,6 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			rc.managerGroups = strings.Split(c.Value, ",")
 		case clusterResourceNameConfigKey:
 			rc.clusterResourceName = c.Value
-		case teamAllowListConfigKey:
-			if c.Value == "" {
-				continue
-			}
-			rc.teamAllowlist = strings.Split(c.Value, ",")
 		case tfStateProjectsConfigKey:
 			if c.Value == "" {
 				continue
