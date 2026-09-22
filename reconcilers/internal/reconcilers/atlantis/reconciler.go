@@ -189,10 +189,17 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
+	configResponse, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: daplaTeam.Slug})
+	if err != nil && status.Code(err) != codes.NotFound {
+		return err
+	}
+
+	config := configResponse.Config
+
 	// All team atlantis instances should have their resources prefixed with "atlantis-"
 	atlantisName := "atlantis-" + daplaTeam.Slug
-	if daplaTeam.Slug == "dapla-platform" {
-		atlantisName += "-team"
+	if config.CustomName != nil {
+		atlantisName = *config.CustomName
 	}
 
 	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
@@ -203,12 +210,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	configResponse, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: daplaTeam.Slug})
-	if err != nil && status.Code(err) != codes.NotFound {
-		return err
-	}
-
-	config := configResponse.Config
 	if config.WebhookSecret == nil {
 		webhookSecret, err := getOrGenerateWebhookSecret(ctx, client, daplaTeam.Slug)
 		if err != nil {
