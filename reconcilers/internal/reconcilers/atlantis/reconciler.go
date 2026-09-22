@@ -45,7 +45,7 @@ import (
 const (
 	reconcilerName = "atlantis"
 
-	webhookSecretKey = "gh-webhook-secret"
+	webhookSecretKey = "gh-webhook-secret" // #nosec G101 -- This is a config key, not a credential
 	reposYamlKey     = "repos.yaml"
 
 	wiAnnotationKey = "iam.gke.io/gcp-service-account"
@@ -400,14 +400,16 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return err
 	}
 
-	r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
+	if err := r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
 		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.config.atlantisProject, namespace, name)
 		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
 			return false
 		}
 		b.Members = []string{k8sSaName}
 		return true
-	})
+	}); err != nil {
+		return err
+	}
 
 	for _, memberGroup := range r.config.memberGroups {
 		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
@@ -432,7 +434,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return err
 	}
 	for _, folder := range folderResp.Folders {
-		google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
+		if err := google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
 			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
 			func(b *iampb.Binding) (modified bool) {
 				if slices.Contains(b.Members, saMember) {
@@ -440,7 +442,9 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 				}
 				b.Members = append(b.Members, saMember)
 				return true
-			})
+			}); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -562,6 +566,10 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		}
 	}
 
+	if err := rc.Validate(); err != nil {
+		return err
+	}
+
 	if equality.Semantic.DeepEqual(rc, r.config) {
 		return nil
 	}
@@ -617,7 +625,7 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 
 	// We wrap the underlying HTTP transport with a "middleware" which injects
 	// rquests with our ADC
-	restCfg.WrapTransport = transport.TokenSourceWrapTransport(ts.TokenSource)
+	restCfg.Wrap(transport.TokenSourceWrapTransport(ts.TokenSource))
 
 	k8s, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
@@ -630,27 +638,26 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 	}
 
 	return k8s, knsrv, nil
-
 }
 
-func (r *reconciler) validateConfig() error {
+func (c reconcilerConfig) Validate() error {
 	fieldErrors := make(FieldsValidationError)
 	setMissing := func(key string) { fieldErrors[key] = "missing value" }
-	if im := r.config.atlantisImage; im == "" {
+	if im := c.atlantisImage; im == "" {
 		setMissing(atlantisImageConfigKey)
 	} else if !strings.Contains(im, ":") {
 		fieldErrors[atlantisImageConfigKey] = "invalid image ref, must be <image>:<tag>"
 	}
 
-	if project := r.config.atlantisProject; project == "" {
+	if project := c.atlantisProject; project == "" {
 		setMissing(atlantisProjectConfigKey)
 	}
 
-	if r.config.atlantisNamespace == "" {
+	if c.atlantisNamespace == "" {
 		setMissing(namespaceConfigKey)
 	}
 
-	if r.config.clusterResourceName == "" {
+	if c.clusterResourceName == "" {
 		setMissing(clusterResourceNameConfigKey)
 	}
 

@@ -13,10 +13,6 @@ type IamPolicyClient interface {
 	SetIamPolicy(ctx context.Context, req *iampb.SetIamPolicyRequest, opts ...gax.CallOption) (*iampb.Policy, error)
 }
 
-func EnsureRoleBindingFunc(ctx context.Context, g IamPolicyClient, resourceName, role string, modifyBinding func(b *iampb.Binding) (modified bool)) error {
-	return EnsureRolesBindingFunc(ctx, g, resourceName, []string{role}, modifyBinding)
-}
-
 func EnsureRolesBindingFunc(ctx context.Context, g IamPolicyClient, resourceName string, roles []string, modifyBinding func(b *iampb.Binding) (modified bool)) error {
 	policy, err := g.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: resourceName})
 	if err != nil {
