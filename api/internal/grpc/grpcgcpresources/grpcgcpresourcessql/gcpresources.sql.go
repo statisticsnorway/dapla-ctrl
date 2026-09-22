@@ -11,7 +11,7 @@ import (
 
 const getTeamFolder = `-- name: GetTeamFolder :one
 SELECT
-    gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
+	gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
 FROM
 	gcp_team_folders
 WHERE
@@ -37,13 +37,13 @@ func (q *Queries) GetTeamFolder(ctx context.Context, arg GetTeamFolderParams) (*
 
 const listTeamFolders = `-- name: ListTeamFolders :many
 SELECT
-    gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
+	gcp_team_folders.team_slug, gcp_team_folders.env, gcp_team_folders.folder_id
 FROM
-    gcp_team_folders
+	gcp_team_folders
 WHERE
-    team_slug = $1
+	team_slug = $1
 ORDER BY
-    env
+	env
 `
 
 type ListTeamFoldersRow struct {

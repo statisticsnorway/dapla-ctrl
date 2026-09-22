@@ -65,6 +65,7 @@ func (r *reconciler) buildKnativeService(name string, repoAllowList []string) (*
 	}); err != nil {
 		return nil, err
 	}
+
 	var templatedKnativeService knv1.Service
 	if err := yaml.Unmarshal(buf.Bytes(), &templatedKnativeService); err != nil {
 		return nil, err

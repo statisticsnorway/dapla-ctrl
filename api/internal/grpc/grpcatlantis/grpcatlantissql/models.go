@@ -8,5 +8,9 @@ import (
 
 type TeamAtlantisConfig struct {
 	TeamSlug      slug.Slug
+	CustomName    *string
 	WebhookSecret *string
+	CustomImage   *string
+	Resources     *string
+	DiskSize      *string
 }

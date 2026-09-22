@@ -50,5 +50,9 @@ func toProtoTeamAtlantisConfig(config grpcatlantissql.TeamAtlantisConfig) *proto
 	return &protoapi.AtlantisConfig{
 		TeamSlug:      config.TeamSlug.String(),
 		WebhookSecret: config.WebhookSecret,
+		CustomName:    config.CustomName,
+		CustomImage:   config.CustomImage,
+		Resources:     config.Resources,
+		DiskSize:      config.DiskSize,
 	}
 }

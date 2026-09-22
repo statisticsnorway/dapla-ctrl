@@ -8,8 +8,13 @@ option go_package = "./pkg/apiclient/protoapi";
 
 message AtlantisConfig {
     string team_slug = 1;
-    optional string webhook_secret = 2;
+    optional string custom_name = 2;
+    optional string webhook_secret = 3;
+    optional string custom_image = 4;
+    optional string resources = 5;
+    optional string disk_size = 6;
 }
+
 
 service Atlantis {
     rpc GetTeamAtlantis(GetTeamAtlantisRequest) returns (GetTeamAtlantisResponse) {}

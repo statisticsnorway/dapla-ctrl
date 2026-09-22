@@ -11,10 +11,11 @@ import (
 
 const get = `-- name: Get :one
 SELECT
-    team_atlantis_config.team_slug, team_atlantis_config.webhook_secret
-FROM team_atlantis_config
+	team_atlantis_config.team_slug, team_atlantis_config.custom_name, team_atlantis_config.webhook_secret, team_atlantis_config.custom_image, team_atlantis_config.resources, team_atlantis_config.disk_size
+FROM
+	team_atlantis_config
 WHERE
-    team_slug = $1::slug
+	team_slug = $1::slug
 `
 
 type GetRow struct {
@@ -24,18 +25,25 @@ type GetRow struct {
 func (q *Queries) Get(ctx context.Context, teamSlug slug.Slug) (*GetRow, error) {
 	row := q.db.QueryRow(ctx, get, teamSlug)
 	var i GetRow
-	err := row.Scan(&i.TeamAtlantisConfig.TeamSlug, &i.TeamAtlantisConfig.WebhookSecret)
+	err := row.Scan(
+		&i.TeamAtlantisConfig.TeamSlug,
+		&i.TeamAtlantisConfig.CustomName,
+		&i.TeamAtlantisConfig.WebhookSecret,
+		&i.TeamAtlantisConfig.CustomImage,
+		&i.TeamAtlantisConfig.Resources,
+		&i.TeamAtlantisConfig.DiskSize,
+	)
 	return &i, err
 }
 
 const upsertWebhookSecret = `-- name: UpsertWebhookSecret :exec
 INSERT INTO
-    team_atlantis_config (team_slug, webhook_secret)
+	team_atlantis_config (team_slug, webhook_secret)
 VALUES
-    ($1, $2)
+	($1, $2)
 ON CONFLICT (team_slug) DO UPDATE
 SET
-    webhook_secret = EXCLUDED.webhook_secret
+	webhook_secret = EXCLUDED.webhook_secret
 `
 
 type UpsertWebhookSecretParams struct {

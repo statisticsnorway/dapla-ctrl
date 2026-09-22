@@ -25,7 +25,11 @@ const (
 type AtlantisConfig struct {
 	state                    protoimpl.MessageState `protogen:"opaque.v1"`
 	xxx_hidden_TeamSlug      string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
-	xxx_hidden_WebhookSecret *string                `protobuf:"bytes,2,opt,name=webhook_secret,json=webhookSecret,proto3,oneof"`
+	xxx_hidden_CustomName    *string                `protobuf:"bytes,2,opt,name=custom_name,json=customName,proto3,oneof"`
+	xxx_hidden_WebhookSecret *string                `protobuf:"bytes,3,opt,name=webhook_secret,json=webhookSecret,proto3,oneof"`
+	xxx_hidden_CustomImage   *string                `protobuf:"bytes,4,opt,name=custom_image,json=customImage,proto3,oneof"`
+	xxx_hidden_Resources     *string                `protobuf:"bytes,5,opt,name=resources,proto3,oneof"`
+	xxx_hidden_DiskSize      *string                `protobuf:"bytes,6,opt,name=disk_size,json=diskSize,proto3,oneof"`
 	XXX_raceDetectHookData   protoimpl.RaceDetectHookData
 	XXX_presence             [1]uint32
 	unknownFields            protoimpl.UnknownFields
@@ -64,6 +68,16 @@ func (x *AtlantisConfig) GetTeamSlug() string {
 	return ""
 }
 
+func (x *AtlantisConfig) GetCustomName() string {
+	if x != nil {
+		if x.xxx_hidden_CustomName != nil {
+			return *x.xxx_hidden_CustomName
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AtlantisConfig) GetWebhookSecret() string {
 	if x != nil {
 		if x.xxx_hidden_WebhookSecret != nil {
@@ -74,32 +88,134 @@ func (x *AtlantisConfig) GetWebhookSecret() string {
 	return ""
 }
 
+func (x *AtlantisConfig) GetCustomImage() string {
+	if x != nil {
+		if x.xxx_hidden_CustomImage != nil {
+			return *x.xxx_hidden_CustomImage
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AtlantisConfig) GetResources() string {
+	if x != nil {
+		if x.xxx_hidden_Resources != nil {
+			return *x.xxx_hidden_Resources
+		}
+		return ""
+	}
+	return ""
+}
+
+func (x *AtlantisConfig) GetDiskSize() string {
+	if x != nil {
+		if x.xxx_hidden_DiskSize != nil {
+			return *x.xxx_hidden_DiskSize
+		}
+		return ""
+	}
+	return ""
+}
+
 func (x *AtlantisConfig) SetTeamSlug(v string) {
 	x.xxx_hidden_TeamSlug = v
 }
 
-func (x *AtlantisConfig) SetWebhookSecret(v string) {
-	x.xxx_hidden_WebhookSecret = &v
-	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 2)
+func (x *AtlantisConfig) SetCustomName(v string) {
+	x.xxx_hidden_CustomName = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 1, 6)
 }
 
-func (x *AtlantisConfig) HasWebhookSecret() bool {
+func (x *AtlantisConfig) SetWebhookSecret(v string) {
+	x.xxx_hidden_WebhookSecret = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 2, 6)
+}
+
+func (x *AtlantisConfig) SetCustomImage(v string) {
+	x.xxx_hidden_CustomImage = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 3, 6)
+}
+
+func (x *AtlantisConfig) SetResources(v string) {
+	x.xxx_hidden_Resources = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 4, 6)
+}
+
+func (x *AtlantisConfig) SetDiskSize(v string) {
+	x.xxx_hidden_DiskSize = &v
+	protoimpl.X.SetPresent(&(x.XXX_presence[0]), 5, 6)
+}
+
+func (x *AtlantisConfig) HasCustomName() bool {
 	if x == nil {
 		return false
 	}
 	return protoimpl.X.Present(&(x.XXX_presence[0]), 1)
 }
 
-func (x *AtlantisConfig) ClearWebhookSecret() {
+func (x *AtlantisConfig) HasWebhookSecret() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 2)
+}
+
+func (x *AtlantisConfig) HasCustomImage() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 3)
+}
+
+func (x *AtlantisConfig) HasResources() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 4)
+}
+
+func (x *AtlantisConfig) HasDiskSize() bool {
+	if x == nil {
+		return false
+	}
+	return protoimpl.X.Present(&(x.XXX_presence[0]), 5)
+}
+
+func (x *AtlantisConfig) ClearCustomName() {
 	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 1)
+	x.xxx_hidden_CustomName = nil
+}
+
+func (x *AtlantisConfig) ClearWebhookSecret() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 2)
 	x.xxx_hidden_WebhookSecret = nil
+}
+
+func (x *AtlantisConfig) ClearCustomImage() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 3)
+	x.xxx_hidden_CustomImage = nil
+}
+
+func (x *AtlantisConfig) ClearResources() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 4)
+	x.xxx_hidden_Resources = nil
+}
+
+func (x *AtlantisConfig) ClearDiskSize() {
+	protoimpl.X.ClearPresent(&(x.XXX_presence[0]), 5)
+	x.xxx_hidden_DiskSize = nil
 }
 
 type AtlantisConfig_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
 	TeamSlug      string
+	CustomName    *string
 	WebhookSecret *string
+	CustomImage   *string
+	Resources     *string
+	DiskSize      *string
 }
 
 func (b0 AtlantisConfig_builder) Build() *AtlantisConfig {
@@ -107,9 +223,25 @@ func (b0 AtlantisConfig_builder) Build() *AtlantisConfig {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.xxx_hidden_TeamSlug = b.TeamSlug
+	if b.CustomName != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 6)
+		x.xxx_hidden_CustomName = b.CustomName
+	}
 	if b.WebhookSecret != nil {
-		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 1, 2)
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 2, 6)
 		x.xxx_hidden_WebhookSecret = b.WebhookSecret
+	}
+	if b.CustomImage != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 3, 6)
+		x.xxx_hidden_CustomImage = b.CustomImage
+	}
+	if b.Resources != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 4, 6)
+		x.xxx_hidden_Resources = b.Resources
+	}
+	if b.DiskSize != nil {
+		protoimpl.X.SetPresentNonAtomic(&(x.XXX_presence[0]), 5, 6)
+		x.xxx_hidden_DiskSize = b.DiskSize
 	}
 	return m0
 }
@@ -357,11 +489,22 @@ var File_atlantis_proto protoreflect.FileDescriptor
 
 const file_atlantis_proto_rawDesc = "" +
 	"\n" +
-	"\x0eatlantis.proto\x12\x12dapla.api.protobuf\"l\n" +
+	"\x0eatlantis.proto\x12\x12dapla.api.protobuf\"\xbc\x02\n" +
 	"\x0eAtlantisConfig\x12\x1b\n" +
-	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12*\n" +
-	"\x0ewebhook_secret\x18\x02 \x01(\tH\x00R\rwebhookSecret\x88\x01\x01B\x11\n" +
-	"\x0f_webhook_secret\"5\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12$\n" +
+	"\vcustom_name\x18\x02 \x01(\tH\x00R\n" +
+	"customName\x88\x01\x01\x12*\n" +
+	"\x0ewebhook_secret\x18\x03 \x01(\tH\x01R\rwebhookSecret\x88\x01\x01\x12&\n" +
+	"\fcustom_image\x18\x04 \x01(\tH\x02R\vcustomImage\x88\x01\x01\x12!\n" +
+	"\tresources\x18\x05 \x01(\tH\x03R\tresources\x88\x01\x01\x12 \n" +
+	"\tdisk_size\x18\x06 \x01(\tH\x04R\bdiskSize\x88\x01\x01B\x0e\n" +
+	"\f_custom_nameB\x11\n" +
+	"\x0f_webhook_secretB\x0f\n" +
+	"\r_custom_imageB\f\n" +
+	"\n" +
+	"_resourcesB\f\n" +
+	"\n" +
+	"_disk_size\"5\n" +
 	"\x16GetTeamAtlantisRequest\x12\x1b\n" +
 	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\"U\n" +
 	"\x17GetTeamAtlantisResponse\x12:\n" +
