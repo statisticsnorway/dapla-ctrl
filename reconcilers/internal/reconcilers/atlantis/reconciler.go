@@ -68,6 +68,10 @@ const (
 	manager groupRole = "MANAGER"
 )
 
+var (
+	defaultDiskSize resource.Quantity = resource.MustParse("10Gi")
+)
+
 //go:embed repos.yaml
 var defaultRepoConfig string
 
@@ -199,32 +203,53 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	webhookSecret, err := getOrGenerateWebhookSecret(ctx, client, daplaTeam.Slug)
-	if err != nil {
+	configResponse, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: daplaTeam.Slug})
+	if err != nil && status.Code(err) != codes.NotFound {
 		return err
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, webhookSecret, defaultRepoConfig, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}, resource.MustParse("10Gi")); err != nil {
+	config := configResponse.Config
+	if config.WebhookSecret == nil {
+		webhookSecret, err := getOrGenerateWebhookSecret(ctx, client, daplaTeam.Slug)
+		if err != nil {
+			return err
+		}
+		config.WebhookSecret = &webhookSecret
+	}
+
+	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, defaultRepoConfig, config, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}); err != nil {
 		return nil
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, webhookSecret, repoConfig string, repoAllowList []string, diskSize resource.Quantity) error {
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace, repoConfig string, config *protoapi.AtlantisConfig, repoAllowList []string) error {
 	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
 		return err
 	}
-	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, webhookSecret); err != nil {
+
+	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, *config.WebhookSecret); err != nil {
 		return err
 	}
+
 	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
 		return err
+	}
+
+	diskSize := defaultDiskSize
+	if config.DiskSize != nil {
+		var err error
+		diskSize, err = resource.ParseQuantity(*config.DiskSize)
+		if err != nil {
+			return err
+		}
 	}
 	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
 		return err
 	}
-	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList); err != nil {
+
+	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config.CustomImage, config.Resources); err != nil {
 		return err
 	}
 	return nil

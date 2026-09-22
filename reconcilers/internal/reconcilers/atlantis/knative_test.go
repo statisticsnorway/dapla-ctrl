@@ -55,7 +55,7 @@ func TestReconcileKnativeService(t *testing.T) {
 	}
 
 	t.Run("create if not exists", func(t *testing.T) {
-		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList); err != nil {
+		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList, nil, nil); err != nil {
 			t.Fatal(err)
 		}
 
@@ -99,7 +99,7 @@ func TestReconcileKnativeService(t *testing.T) {
 	t.Run("image updated on config change", func(t *testing.T) {
 		r.config.atlantisImage = "atlantis:v1"
 
-		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList); err != nil {
+		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList, nil, nil); err != nil {
 			t.Fatal(err)
 		}
 
@@ -130,7 +130,7 @@ func TestReconcileKnativeService(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList); err != nil {
+		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList, nil, nil); err != nil {
 			t.Fatal(err)
 		}
 
@@ -150,7 +150,7 @@ func TestReconcileKnativeService(t *testing.T) {
 	t.Run("won't run if missing template", func(t *testing.T) {
 		r.knativeServiceTemplate = nil
 
-		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList); err == nil {
+		if err := r.reconcileKnativeService(t.Context(), atlantisName, namespace, repoAllowList, nil, nil); err == nil {
 			t.Fatal("knative reconciler ran with nil template")
 		} else if !strings.Contains(err.Error(), "missing knative template") {
 			t.Fatalf("unknown error occured: %s", err)
