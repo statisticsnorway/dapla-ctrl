@@ -20,6 +20,10 @@ spec:
         - host: graph.microsoft.com
         - host: login.microsoftonline.com
 
+  prometheus:
+    enabled: true
+    path: /metrics
+
   resources:
     requests:
       memory: "128Mi"
