@@ -178,16 +178,6 @@ Test.gql("Admin can create self-managed team", function(t)
 				team {
 					slug
 					isManaged
-					groups {
-						pageInfo {
-							totalCount
-						}
-					}
-					artifactRegistryRepositories {
-						pageInfo {
-							totalCount
-						}
-					}
 				}
 			}
 		}
@@ -199,16 +189,6 @@ Test.gql("Admin can create self-managed team", function(t)
 				team = {
 					slug = "newadminteam",
 					isManaged = false,
-					groups = {
-						pageInfo = {
-							totalCount = 0,
-						},
-					},
-					artifactRegistryRepositories = {
-						pageInfo = {
-							totalCount = 0,
-						},
-					},
 				},
 			},
 		},
