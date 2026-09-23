@@ -73,7 +73,7 @@ extend type Query {
 """
 The user type represents a user of the Dapla platform and the Dapla GraphQL API.
 """
-type User implements Node {
+type User implements Node @key(fields: "email") {
 	"""
 	The globally unique ID of the user.
 	"""
