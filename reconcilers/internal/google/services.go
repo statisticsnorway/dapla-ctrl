@@ -67,5 +67,10 @@ func New(ctx context.Context) (*Services, error) {
 		return nil, err
 	}
 
+	s.ServiceAccounts, err = serviceaccounts.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return s, nil
 }
