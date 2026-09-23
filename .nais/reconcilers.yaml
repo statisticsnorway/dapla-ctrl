@@ -23,7 +23,7 @@ spec:
   prometheus:
     enabled: true
     path: /metrics
-    port: 3105
+    port: "3105"
 
   resources:
     requests:
