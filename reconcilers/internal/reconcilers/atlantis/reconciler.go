@@ -318,7 +318,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		return nil
 	}
 
-	k8sClient, knativeClient, err := r.createKubernetesClients(ctx)
+	k8sClient, knativeClient, err := r.createKubernetesClients(ctx, rc.clusterResourceName)
 	if err != nil {
 		return fmt.Errorf("create kubernetes clients: %w", err)
 	}

@@ -21,10 +21,10 @@ import (
 	servingv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
 
-func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
+func (r *reconciler) createKubernetesClients(ctx context.Context, clusterResourceName string) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
 	// Get cluster info
 	cluster, err := r.clusterManager.GetCluster(ctx, &containerpb.GetClusterRequest{
-		Name: r.config.clusterResourceName,
+		Name: clusterResourceName,
 	})
 	if err != nil {
 		return nil, nil, fmt.Errorf("get cluster info: %w", err)
