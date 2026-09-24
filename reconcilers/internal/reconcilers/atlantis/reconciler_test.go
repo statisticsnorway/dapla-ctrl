@@ -157,7 +157,7 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 	r := &reconciler{
 		k8sClient: fakeClient,
 		config: reconcilerConfig{
-			atlantisProject: projectId,
+			AtlantisProject: projectId,
 		},
 	}
 

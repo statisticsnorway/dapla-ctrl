@@ -113,7 +113,7 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 
 func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string, log logrus.FieldLogger) error {
 	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
-	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.config.atlantisProject)
+	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.config.AtlantisProject)
 
 	wantedAnnotations := map[string]string{
 		wiAnnotationKey: gcpSaName,
@@ -136,7 +136,7 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		return nil
 	}
 
-	if r.config.logDiffs {
+	if r.config.LogDiffs {
 		LogDiff(wantedAnnotations, sa.Annotations, log)
 	}
 
@@ -169,7 +169,7 @@ func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name,
 		return nil
 	}
 
-	if r.config.logDiffs {
+	if r.config.LogDiffs {
 		// Hide sensitive secret
 		hiddenLive := make(map[string]int, len(secret.Data))
 		for k, v := range secret.Data {
@@ -211,7 +211,7 @@ func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, n
 		return nil
 	}
 
-	if r.config.logDiffs {
+	if r.config.LogDiffs {
 		LogDiff(cm.Data, wantedData, log)
 	}
 
@@ -251,7 +251,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		return nil
 	}
 
-	if r.config.logDiffs {
+	if r.config.LogDiffs {
 		LogDiff(pvc.Spec, wantedSpec.Spec, log)
 	}
 

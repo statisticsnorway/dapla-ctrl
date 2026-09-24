@@ -26,7 +26,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 	}
 	services := r.knServices.Services(namespace)
 
-	image := r.config.atlantisImage
+	image := r.config.AtlantisImage
 	if config.CustomImage != nil {
 		image = *config.CustomImage
 	}
@@ -60,7 +60,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 		return nil
 	}
 
-	if r.config.logDiffs {
+	if r.config.LogDiffs {
 		LogDiff(templatedKnativeService.Spec.ConfigurationSpec, ksvc.Spec.ConfigurationSpec, log)
 	}
 
@@ -104,8 +104,8 @@ func (r *reconciler) buildKnativeService(name, image string, resources *v1.Resou
 		"Name":          name,
 		"RepoAllowList": strings.Join(repoAllowList, ","),
 		"Image":         image,
-		"BaseDomain":    r.config.atlantisBaseDomain,
-		"GithubAppId":   r.config.githubAppId,
+		"BaseDomain":    r.config.AtlantisBaseDomain,
+		"GithubAppId":   r.config.GithubAppId,
 	}); err != nil {
 		return nil, err
 	}

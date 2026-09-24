@@ -31,13 +31,13 @@ func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apicl
 }
 
 func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
-	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.atlantisProject)
+	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.AtlantisProject)
 	if err != nil {
 		return err
 	}
 
 	if err := r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
-		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.config.atlantisProject, namespace, name)
+		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.config.AtlantisProject, namespace, name)
 		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
 			return false
 		}
@@ -47,12 +47,12 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return err
 	}
 
-	for _, memberGroup := range r.config.memberGroups {
+	for _, memberGroup := range r.config.MemberGroups {
 		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
 			err = errors.Join(err, currentErr)
 		}
 	}
-	for _, managerGroup := range r.config.managerGroups {
+	for _, managerGroup := range r.config.ManagerGroups {
 		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
 			err = errors.Join(err, currentErr)
 		}
@@ -126,7 +126,7 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 		},
 	}
 
-	for env, projectId := range r.config.tfstateProjects {
+	for env, projectId := range r.config.TfstateProjects {
 		bucketName := fmt.Sprintf("ssb-%s-tfstate-%s", teamName, env)
 		bucket := r.storageClient.Bucket(bucketName)
 		attrs, err := bucket.Attrs(ctx)
