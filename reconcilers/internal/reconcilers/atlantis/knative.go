@@ -97,6 +97,8 @@ func (r *reconciler) buildKnativeService(name, image string, resources *v1.Resou
 		"Name":          name,
 		"RepoAllowList": strings.Join(repoAllowList, ","),
 		"Image":         image,
+		"BaseDomain":    r.config.atlantisBaseDomain,
+		"GithubAppId":   r.config.githubAppId,
 	}); err != nil {
 		return nil, err
 	}

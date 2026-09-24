@@ -58,6 +58,7 @@ const (
 	managerGroupsConfigKey       = "manager_groups"
 	clusterResourceNameConfigKey = "cluster_resource_name"
 	tfStateProjectsConfigKey     = "tfstate_projects"
+	githubAppIdConfigKey         = "github_app_id"
 )
 
 type groupRole string
@@ -97,9 +98,12 @@ type reconcilerConfig struct {
 	memberGroups  []string
 	managerGroups []string
 
-	atlantisProject   string
-	atlantisImage     string
-	atlantisNamespace string
+	atlantisProject    string
+	atlantisImage      string
+	atlantisNamespace  string
+	atlantisBaseDomain string
+
+	githubAppId string
 }
 
 type optFunc func(*reconciler)
@@ -167,6 +171,11 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Key:         tfStateProjectsConfigKey,
 				DisplayName: "Terraform State Projects",
 				Description: "Map of environment names to their respective Terraform state projects",
+			},
+			{
+				Key:         githubAppIdConfigKey,
+				DisplayName: "GitHub App Id",
+				Description: "The GitHub App Id the Atlantis should use",
 			},
 		},
 	}
@@ -273,7 +282,7 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		return err
 	}
 
-	if cmp.Equal(sa.Annotations, wantedAnnotations) { // TODO: deepderivative?
+	if equality.Semantic.DeepDerivative(wantedAnnotations, sa.Annotations) {
 		return nil
 	}
 
@@ -560,6 +569,10 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 				}
 				rc.tfstateProjects[pair[0]] = pair[1]
 			}
+		case atlantisBaseDomainConfigKey:
+			rc.atlantisBaseDomain = c.Value
+		case githubAppIdConfigKey:
+			rc.githubAppId = c.Value
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -658,6 +671,14 @@ func (c reconcilerConfig) Validate() error {
 
 	if c.clusterResourceName == "" {
 		setMissing(clusterResourceNameConfigKey)
+	}
+
+	if c.atlantisBaseDomain == "" {
+		setMissing(atlantisBaseDomainConfigKey)
+	}
+
+	if c.githubAppId == "" {
+		setMissing(githubAppIdConfigKey)
 	}
 
 	if len(fieldErrors) == 0 {
