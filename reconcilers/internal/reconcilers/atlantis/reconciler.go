@@ -189,7 +189,10 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	configResponse, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: daplaTeam.Slug})
-	if err != nil && status.Code(err) != codes.NotFound {
+	if err != nil && status.Code(err) == codes.NotFound {
+		log.Debug("skipping team as they have no atlantis config")
+		return nil
+	} else if err != nil {
 		return err
 	}
 
