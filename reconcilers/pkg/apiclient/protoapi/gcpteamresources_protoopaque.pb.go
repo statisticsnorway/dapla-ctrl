@@ -357,6 +357,122 @@ func (b0 GetGcpTeamFolderResponse_builder) Build() *GetGcpTeamFolderResponse {
 	return m0
 }
 
+type ListGcpTeamFoldersRequest struct {
+	state               protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_TeamSlug string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *ListGcpTeamFoldersRequest) Reset() {
+	*x = ListGcpTeamFoldersRequest{}
+	mi := &file_gcpteamresources_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGcpTeamFoldersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGcpTeamFoldersRequest) ProtoMessage() {}
+
+func (x *ListGcpTeamFoldersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_gcpteamresources_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListGcpTeamFoldersRequest) GetTeamSlug() string {
+	if x != nil {
+		return x.xxx_hidden_TeamSlug
+	}
+	return ""
+}
+
+func (x *ListGcpTeamFoldersRequest) SetTeamSlug(v string) {
+	x.xxx_hidden_TeamSlug = v
+}
+
+type ListGcpTeamFoldersRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TeamSlug string
+}
+
+func (b0 ListGcpTeamFoldersRequest_builder) Build() *ListGcpTeamFoldersRequest {
+	m0 := &ListGcpTeamFoldersRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_TeamSlug = b.TeamSlug
+	return m0
+}
+
+type ListGcpTeamFoldersResponse struct {
+	state              protoimpl.MessageState `protogen:"opaque.v1"`
+	xxx_hidden_Folders *[]*GcpTeamFolder      `protobuf:"bytes,1,rep,name=folders,proto3"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ListGcpTeamFoldersResponse) Reset() {
+	*x = ListGcpTeamFoldersResponse{}
+	mi := &file_gcpteamresources_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListGcpTeamFoldersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListGcpTeamFoldersResponse) ProtoMessage() {}
+
+func (x *ListGcpTeamFoldersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_gcpteamresources_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListGcpTeamFoldersResponse) GetFolders() []*GcpTeamFolder {
+	if x != nil {
+		if x.xxx_hidden_Folders != nil {
+			return *x.xxx_hidden_Folders
+		}
+	}
+	return nil
+}
+
+func (x *ListGcpTeamFoldersResponse) SetFolders(v []*GcpTeamFolder) {
+	x.xxx_hidden_Folders = &v
+}
+
+type ListGcpTeamFoldersResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Folders []*GcpTeamFolder
+}
+
+func (b0 ListGcpTeamFoldersResponse_builder) Build() *ListGcpTeamFoldersResponse {
+	m0 := &ListGcpTeamFoldersResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.xxx_hidden_Folders = &b.Folders
+	return m0
+}
+
 var File_gcpteamresources_proto protoreflect.FileDescriptor
 
 const file_gcpteamresources_proto_rawDesc = "" +
@@ -373,31 +489,41 @@ const file_gcpteamresources_proto_rawDesc = "" +
 	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12\x10\n" +
 	"\x03env\x18\x02 \x01(\tR\x03env\"U\n" +
 	"\x18GetGcpTeamFolderResponse\x129\n" +
-	"\x06folder\x18\x01 \x01(\v2!.dapla.api.protobuf.GcpTeamFolderR\x06folder2\xf7\x01\n" +
+	"\x06folder\x18\x01 \x01(\v2!.dapla.api.protobuf.GcpTeamFolderR\x06folder\"8\n" +
+	"\x19ListGcpTeamFoldersRequest\x12\x1b\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\"Y\n" +
+	"\x1aListGcpTeamFoldersResponse\x12;\n" +
+	"\afolders\x18\x01 \x03(\v2!.dapla.api.protobuf.GcpTeamFolderR\afolders2\xeb\x02\n" +
 	"\x10GcpTeamResources\x12u\n" +
 	"\x10UpsertTeamFolder\x12..dapla.api.protobuf.UpsertGcpTeamFolderRequest\x1a/.dapla.api.protobuf.UpsertGcpTeamFolderResponse\"\x00\x12l\n" +
-	"\rGetTeamFolder\x12+.dapla.api.protobuf.GetGcpTeamFolderRequest\x1a,.dapla.api.protobuf.GetGcpTeamFolderResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
+	"\rGetTeamFolder\x12+.dapla.api.protobuf.GetGcpTeamFolderRequest\x1a,.dapla.api.protobuf.GetGcpTeamFolderResponse\"\x00\x12r\n" +
+	"\x0fListTeamFolders\x12-.dapla.api.protobuf.ListGcpTeamFoldersRequest\x1a..dapla.api.protobuf.ListGcpTeamFoldersResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_gcpteamresources_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_gcpteamresources_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_gcpteamresources_proto_goTypes = []any{
 	(*GcpTeamFolder)(nil),               // 0: dapla.api.protobuf.GcpTeamFolder
 	(*UpsertGcpTeamFolderRequest)(nil),  // 1: dapla.api.protobuf.UpsertGcpTeamFolderRequest
 	(*UpsertGcpTeamFolderResponse)(nil), // 2: dapla.api.protobuf.UpsertGcpTeamFolderResponse
 	(*GetGcpTeamFolderRequest)(nil),     // 3: dapla.api.protobuf.GetGcpTeamFolderRequest
 	(*GetGcpTeamFolderResponse)(nil),    // 4: dapla.api.protobuf.GetGcpTeamFolderResponse
+	(*ListGcpTeamFoldersRequest)(nil),   // 5: dapla.api.protobuf.ListGcpTeamFoldersRequest
+	(*ListGcpTeamFoldersResponse)(nil),  // 6: dapla.api.protobuf.ListGcpTeamFoldersResponse
 }
 var file_gcpteamresources_proto_depIdxs = []int32{
 	0, // 0: dapla.api.protobuf.UpsertGcpTeamFolderRequest.folder:type_name -> dapla.api.protobuf.GcpTeamFolder
 	0, // 1: dapla.api.protobuf.GetGcpTeamFolderResponse.folder:type_name -> dapla.api.protobuf.GcpTeamFolder
-	1, // 2: dapla.api.protobuf.GcpTeamResources.UpsertTeamFolder:input_type -> dapla.api.protobuf.UpsertGcpTeamFolderRequest
-	3, // 3: dapla.api.protobuf.GcpTeamResources.GetTeamFolder:input_type -> dapla.api.protobuf.GetGcpTeamFolderRequest
-	2, // 4: dapla.api.protobuf.GcpTeamResources.UpsertTeamFolder:output_type -> dapla.api.protobuf.UpsertGcpTeamFolderResponse
-	4, // 5: dapla.api.protobuf.GcpTeamResources.GetTeamFolder:output_type -> dapla.api.protobuf.GetGcpTeamFolderResponse
-	4, // [4:6] is the sub-list for method output_type
-	2, // [2:4] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0, // 2: dapla.api.protobuf.ListGcpTeamFoldersResponse.folders:type_name -> dapla.api.protobuf.GcpTeamFolder
+	1, // 3: dapla.api.protobuf.GcpTeamResources.UpsertTeamFolder:input_type -> dapla.api.protobuf.UpsertGcpTeamFolderRequest
+	3, // 4: dapla.api.protobuf.GcpTeamResources.GetTeamFolder:input_type -> dapla.api.protobuf.GetGcpTeamFolderRequest
+	5, // 5: dapla.api.protobuf.GcpTeamResources.ListTeamFolders:input_type -> dapla.api.protobuf.ListGcpTeamFoldersRequest
+	2, // 6: dapla.api.protobuf.GcpTeamResources.UpsertTeamFolder:output_type -> dapla.api.protobuf.UpsertGcpTeamFolderResponse
+	4, // 7: dapla.api.protobuf.GcpTeamResources.GetTeamFolder:output_type -> dapla.api.protobuf.GetGcpTeamFolderResponse
+	6, // 8: dapla.api.protobuf.GcpTeamResources.ListTeamFolders:output_type -> dapla.api.protobuf.ListGcpTeamFoldersResponse
+	6, // [6:9] is the sub-list for method output_type
+	3, // [3:6] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_gcpteamresources_proto_init() }
@@ -411,7 +537,7 @@ func file_gcpteamresources_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_gcpteamresources_proto_rawDesc), len(file_gcpteamresources_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -46,10 +46,32 @@ func (s *Server) GetTeamFolder(ctx context.Context, req *protoapi.GetGcpTeamFold
 		return nil, status.Errorf(codes.Internal, "get team folder: %s", err)
 	}
 	return &protoapi.GetGcpTeamFolderResponse{
-		Folder: &protoapi.GcpTeamFolder{
-			TeamSlug: string(row.TeamSlug),
-			Env:      row.Env,
-			FolderId: row.FolderID,
-		},
+		Folder: toProtoTeamFolder(&row.GcpTeamFolder),
 	}, nil
+}
+
+func (s *Server) ListTeamFolders(ctx context.Context, req *protoapi.ListGcpTeamFoldersRequest) (*protoapi.ListGcpTeamFoldersResponse, error) {
+	rows, err := s.querier.ListTeamFolders(ctx, slug.Slug(req.TeamSlug))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "team folders not found")
+	} else if err != nil {
+		return nil, status.Errorf(codes.Internal, "get team folder: %s", err)
+	}
+
+	folders := make([]*protoapi.GcpTeamFolder, 0, len(rows))
+	for _, row := range rows {
+		folders = append(folders, toProtoTeamFolder(&row.GcpTeamFolder))
+	}
+
+	return &protoapi.ListGcpTeamFoldersResponse{
+		Folders: folders,
+	}, nil
+}
+
+func toProtoTeamFolder(f *grpcgcpresourcessql.GcpTeamFolder) *protoapi.GcpTeamFolder {
+	return &protoapi.GcpTeamFolder{
+		TeamSlug: string(f.TeamSlug),
+		Env:      f.Env,
+		FolderId: f.FolderID,
+	}
 }

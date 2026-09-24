@@ -17,12 +17,6 @@ type client struct {
 
 type optFunc func(*client)
 
-func WithHttpClient(httpClient *http.Client) optFunc {
-	return func(c *client) {
-		c.httpClient = httpClient
-	}
-}
-
 func New(endpoint, secret string, opts ...optFunc) (*client, error) {
 	c := &client{
 		endpoint: endpoint,
