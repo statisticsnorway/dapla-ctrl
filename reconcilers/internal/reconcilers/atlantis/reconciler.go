@@ -46,6 +46,7 @@ const (
 	clusterResourceNameConfigKey = "cluster_resource_name"
 	tfStateProjectsConfigKey     = "tfstate_projects"
 	githubAppIdConfigKey         = "github_app_id"
+	logKubeDiffsConfigKey        = "log_kubernetes_diffs"
 )
 
 type groupRole string
@@ -55,9 +56,7 @@ const (
 	manager groupRole = "MANAGER"
 )
 
-var (
-	defaultDiskSize resource.Quantity = resource.MustParse("10Gi")
-)
+var defaultDiskSize resource.Quantity = resource.MustParse("10Gi")
 
 //go:embed repos.yaml
 var defaultRepoConfig string
@@ -94,6 +93,8 @@ type reconcilerConfig struct {
 	atlantisBaseDomain string
 
 	githubAppId string
+
+	logDiffs bool
 }
 
 type optFunc func(*reconciler)
@@ -175,6 +176,11 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "GitHub App Id",
 				Description: "The GitHub App Id the Atlantis should use",
 			},
+			{
+				Key:         logKubeDiffsConfigKey,
+				DisplayName: "Whether to log Kubernetes diffs",
+				Description: "Logs potential diffs found in Kubernetes resources as INFO. Set to `true` to enable",
+			},
 		},
 	}
 }
@@ -195,7 +201,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	} else if err != nil {
 		return err
 	}
-
 	config := configResponse.Config
 
 	// All team atlantis instances should have their resources prefixed with "atlantis-"
@@ -206,17 +211,22 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
-		return err
+		return fmt.Errorf("reconcile google resources: %w", err)
 	}
 
 	if config.WebhookSecret == nil {
+		log.Debug("creating webhook secret")
 		config.WebhookSecret, err = createWebhookSecret(ctx, client, daplaTeam.Slug)
 		if err != nil {
-			return err
+			return fmt.Errorf("create webhook secret: %w", err)
 		}
 	}
 
-	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, config, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}); err != nil {
+	if err := r.reconcileKubernetesResources(ctx,
+		atlantisName, r.config.atlantisNamespace, config,
+		[]string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"},
+		log.WithField("atlantis_subdomain", "kubernetes"),
+	); err != nil {
 		return err
 	}
 
@@ -288,6 +298,8 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			rc.atlantisBaseDomain = c.Value
 		case githubAppIdConfigKey:
 			rc.githubAppId = c.Value
+		case logKubeDiffsConfigKey:
+			rc.logDiffs = strings.EqualFold(c.Value, "true")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -303,7 +315,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 
 	k8sClient, knativeClient, err := r.createKubernetesClients(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("create kubernetes clients: %w", err)
 	}
 
 	r.k8sClient = k8sClient

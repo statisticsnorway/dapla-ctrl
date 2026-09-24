@@ -7,6 +7,7 @@ import (
 
 	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/google/go-cmp/cmp"
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	googlecreds "golang.org/x/oauth2/google"
 	corev1 "k8s.io/api/core/v1"
@@ -26,14 +27,14 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 		Name: r.config.clusterResourceName,
 	})
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("get cluster info: %w", err)
 	}
 
 	// Extract server CA cert, base64 encoded. ClusterInfo needs it decoded
 	cert := cluster.MasterAuth.ClusterCaCertificate
 	ca, err := base64.StdEncoding.DecodeString(cert)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("decode cluster certificate: %w", err)
 	}
 
 	endpoint := cluster.ControlPlaneEndpointsConfig.IpEndpointsConfig.GetPublicEndpoint()
@@ -41,7 +42,7 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 	// Get a token source for ADC
 	ts, err := googlecreds.FindDefaultCredentials(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("find default credentials: %w", err)
 	}
 
 	overrides := &clientcmd.ConfigOverrides{}
@@ -55,7 +56,7 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
 	restCfg, err := cc.ClientConfig()
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("create rest client config: %w", err)
 	}
 
 	// We wrap the underlying HTTP transport with a "middleware" which injects
@@ -64,31 +65,32 @@ func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.C
 
 	k8s, err := kubernetes.NewForConfig(restCfg)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("create kubernetes client: %W", err)
 	}
 
 	knsrv, err := servingv1.NewForConfig(restCfg)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("create knative serving client: %w", err)
 	}
 
 	return k8s, knsrv, nil
 }
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config *protoapi.AtlantisConfig, repoAllowList []string) error {
-	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
-		return err
+
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config *protoapi.AtlantisConfig, repoAllowList []string, log logrus.FieldLogger) error {
+	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace, log); err != nil {
+		return fmt.Errorf("reconcile service account: %w", err)
 	}
 
-	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, *config.WebhookSecret); err != nil {
-		return err
+	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, *config.WebhookSecret, log); err != nil {
+		return fmt.Errorf("reconcile webhook secret: %w", err)
 	}
 
 	repoConfig := defaultRepoConfig
 	if len(config.RepoConfig) != 0 {
 		repoConfig = string(config.RepoConfig)
 	}
-	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
-		return err
+	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig, log); err != nil {
+		return fmt.Errorf("reconcile repos config: %w", err)
 	}
 
 	diskSize := defaultDiskSize
@@ -96,20 +98,20 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 		var err error
 		diskSize, err = resource.ParseQuantity(*config.DiskSize)
 		if err != nil {
-			return err
+			return fmt.Errorf("parse disk size: %w", err)
 		}
 	}
-	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
-		return err
+	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize, log); err != nil {
+		return fmt.Errorf("reconcile volume: %w", err)
 	}
 
-	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config); err != nil {
-		return err
+	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config, log.WithField("atlantis_subdomain", "knative")); err != nil {
+		return fmt.Errorf("reconcile knative service: %w", err)
 	}
 	return nil
 }
 
-func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
+func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string, log logrus.FieldLogger) error {
 	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
 	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.config.atlantisProject)
 
@@ -134,12 +136,16 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		return nil
 	}
 
+	if r.config.logDiffs {
+		LogDiff(wantedAnnotations, sa.Annotations, log)
+	}
+
 	sa.Annotations = wantedAnnotations
 	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name, namespace, webhookSecret string) error {
+func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name, namespace, webhookSecret string, log logrus.FieldLogger) error {
 	secretsClient := r.k8sClient.CoreV1().Secrets(namespace)
 
 	wantedData := map[string][]byte{
@@ -163,12 +169,25 @@ func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name,
 		return nil
 	}
 
+	if r.config.logDiffs {
+		// Hide sensitive secret
+		hiddenLive := make(map[string]int, len(secret.Data))
+		for k, v := range secret.Data {
+			hiddenLive[k] = len(v)
+		}
+		hiddenWanted := make(map[string]int, len(wantedData))
+		for k, v := range secret.Data {
+			hiddenWanted[k] = len(v)
+		}
+		LogDiff(hiddenLive, hiddenWanted, log)
+	}
+
 	secret.Data = wantedData
 	_, err = secretsClient.Update(ctx, secret, metav1.UpdateOptions{})
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, namespace, repoConfig string) error {
+func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, namespace, repoConfig string, log logrus.FieldLogger) error {
 	configMapsClient := r.k8sClient.CoreV1().ConfigMaps(namespace)
 
 	wantedData := map[string]string{
@@ -192,13 +211,17 @@ func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, n
 		return nil
 	}
 
+	if r.config.logDiffs {
+		LogDiff(cm.Data, wantedData, log)
+	}
+
 	cm.Data = wantedData
 	_, err = configMapsClient.Update(ctx, cm, metav1.UpdateOptions{})
 
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSize resource.Quantity) error {
+func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSize resource.Quantity, log logrus.FieldLogger) error {
 	pvcClient := r.k8sClient.CoreV1().PersistentVolumeClaims(namespace)
 	wantedSpec := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
@@ -224,8 +247,12 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		return err
 	}
 
-	if equality.Semantic.DeepDerivative(wantedSpec, pvc) {
+	if equality.Semantic.DeepDerivative(wantedSpec.Spec, pvc.Spec) {
 		return nil
+	}
+
+	if r.config.logDiffs {
+		LogDiff(pvc.Spec, wantedSpec.Spec, log)
 	}
 
 	_, err = pvcClient.Update(ctx, wantedSpec, metav1.UpdateOptions{})

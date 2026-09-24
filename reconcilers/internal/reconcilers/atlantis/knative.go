@@ -10,6 +10,7 @@ import (
 
 	_ "embed"
 
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -19,7 +20,7 @@ import (
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, config *protoapi.AtlantisConfig) error {
+func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, config *protoapi.AtlantisConfig, log logrus.FieldLogger) error {
 	if r.knativeServiceTemplate == nil {
 		return errors.New("missing knative template")
 	}
@@ -32,23 +33,23 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 
 	resources, err := parseResources(config.Resources)
 	if err != nil {
-		return err
+		return fmt.Errorf("parse resources: %w", err)
 	}
 
 	templatedKnativeService, err := r.buildKnativeService(name, image, resources, repoAllowList)
 	if err != nil {
-		return err
+		return fmt.Errorf("build knative service: %w", err)
 	}
 
 	ksvc, err := services.Get(ctx, name, metav1.GetOptions{})
 	// Create it if it does not already exist
 	if apierrors.IsNotFound(err) {
 		if _, err = services.Create(ctx, templatedKnativeService, metav1.CreateOptions{}); err != nil {
-			return fmt.Errorf("could not create service: %w", err)
+			return fmt.Errorf("create service: %w", err)
 		}
 		return nil
 	} else if err != nil {
-		return err
+		return fmt.Errorf("get service: %w", err)
 	}
 
 	// If any fields are different, ignoring fields not set in the templated spec,
@@ -57,6 +58,10 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 	// This could cause problems if we explicitly want to unset a field, but I don't see us doing that.
 	if equality.Semantic.DeepDerivative(templatedKnativeService.Spec.ConfigurationSpec, ksvc.Spec.ConfigurationSpec) {
 		return nil
+	}
+
+	if r.config.logDiffs {
+		LogDiff(templatedKnativeService.Spec.ConfigurationSpec, ksvc.Spec.ConfigurationSpec, log)
 	}
 
 	// Or...
@@ -71,7 +76,7 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 
 	ksvc.Spec.ConfigurationSpec = templatedKnativeService.Spec.ConfigurationSpec
 	if _, err := services.Update(ctx, ksvc, metav1.UpdateOptions{}); err != nil {
-		return err
+		return fmt.Errorf("update service: %w", err)
 	}
 
 	return nil

@@ -199,7 +199,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	teamManager, err := client.Teams().GetTeamManager(ctx, &protoapi.GetTeamManagerRequest{
 		Slug: daplaTeam.Slug,
 	})
-
 	if err != nil {
 		return err
 	}
@@ -378,7 +377,6 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	}
 
 	return nil
-
 }
 
 func (r *reconciler) reconcileAIBudget(ctx context.Context, client *apiclient.APIClient, services *google.Services, daplaTeamSlug, projectID string, existingBudget *budgetspb.Budget, budgetNotificationEmails []string, enabled bool) error {
@@ -480,7 +478,8 @@ func (r *reconciler) reconcileAIBudgetNotificationChannels(ctx context.Context, 
 				Labels: map[string]string{
 					aiBudgetNotificationLabel: email,
 				},
-			}})
+			},
+		})
 		if err != nil {
 			return nil, fmt.Errorf("create AI budget notification channel for %q in project %q: %w", email, projectID, err)
 		}

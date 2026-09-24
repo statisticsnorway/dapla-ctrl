@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"google.golang.org/grpc"
@@ -22,6 +23,9 @@ import (
 )
 
 func TestReconcileKubernetesWebhookSecret(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
+
 	fakeClient := fake.NewClientset()
 
 	r := &reconciler{
@@ -35,7 +39,7 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 	webhookSecretNew := "not-testing"
 
 	t.Run("kubernetes secret created if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecret); err != nil {
+		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecret, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -51,7 +55,6 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 		if diff := cmp.Diff(wantedData, secret.Data); diff != "" {
 			t.Errorf("secret data differs from wanted:\n %s", diff)
 		}
-
 	})
 
 	t.Run("kubernetes secret overriden if webhook secret changed", func(t *testing.T) {
@@ -61,7 +64,7 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecretNew); err != nil {
+		if err := r.reconcileKubernetesWebhookSecret(t.Context(), atlantisName, namespace, webhookSecretNew, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -78,10 +81,11 @@ func TestReconcileKubernetesWebhookSecret(t *testing.T) {
 			t.Errorf("secret data differs from wanted:\n %s", diff)
 		}
 	})
-
 }
 
 func TestReconcileKubernetesReposConfig(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
 	fakeClient := fake.NewClientset()
 
 	r := &reconciler{
@@ -95,7 +99,7 @@ func TestReconcileKubernetesReposConfig(t *testing.T) {
 	reposConfigNew := "not-testing"
 
 	t.Run("kubernetes repos configmap created if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfig); err != nil {
+		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfig, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -120,7 +124,7 @@ func TestReconcileKubernetesReposConfig(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfigNew); err != nil {
+		if err := r.reconcileKubernetesReposConfig(t.Context(), atlantisName, namespace, reposConfigNew, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -140,6 +144,8 @@ func TestReconcileKubernetesReposConfig(t *testing.T) {
 }
 
 func TestReconcileKubernetesServiceAccount(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
 	fakeClient := fake.NewClientset()
 
 	teamName := "test"
@@ -160,7 +166,7 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 	}
 
 	t.Run("create if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -175,7 +181,7 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 	})
 
 	t.Run("do nothing if webhook secret hasn't changed", func(t *testing.T) {
-		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace, log); err != nil {
 			t.Fatal(err)
 		}
 		if slices.ContainsFunc(fakeClient.Actions(), func(a ktesting.Action) bool {
@@ -202,7 +208,7 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace); err != nil {
+		if err := r.reconcileKubernetesServiceAccount(t.Context(), atlantisName, namespace, log); err != nil {
 			t.Fatal(err)
 		}
 
@@ -215,10 +221,11 @@ func TestReconcileKubernetesServiceAccount(t *testing.T) {
 			t.Errorf("annotations does not match: %s", annotationDiff)
 		}
 	})
-
 }
 
 func TestReconcileKubernetesVolume(t *testing.T) {
+	log := logrus.New()
+	log.SetLevel(logrus.DebugLevel)
 	fakeClient := fake.NewClientset()
 
 	r := &reconciler{
@@ -232,10 +239,9 @@ func TestReconcileKubernetesVolume(t *testing.T) {
 	diskSizeDefault := resource.MustParse("10Gi")
 
 	t.Run("create if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, diskSizeDefault); err != nil {
+		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, diskSizeDefault, log); err != nil {
 			t.Fatal(err)
 		}
-
 	})
 }
 
