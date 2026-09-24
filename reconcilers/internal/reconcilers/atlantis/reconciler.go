@@ -80,21 +80,21 @@ type reconciler struct {
 }
 
 type reconcilerConfig struct {
-	tfstateProjects map[string]string
+	TfstateProjects map[string]string
 
-	clusterResourceName string
+	ClusterResourceName string
 
-	memberGroups  []string
-	managerGroups []string
+	MemberGroups  []string
+	ManagerGroups []string
 
-	atlantisProject    string
-	atlantisImage      string
-	atlantisNamespace  string
-	atlantisBaseDomain string
+	AtlantisProject    string
+	AtlantisImage      string
+	AtlantisNamespace  string
+	AtlantisBaseDomain string
 
-	githubAppId string
+	GithubAppId string
 
-	logDiffs bool
+	LogDiffs bool
 }
 
 type optFunc func(*reconciler)
@@ -215,7 +215,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		atlantisName = *config.CustomName
 	}
 
-	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
+	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.AtlantisNamespace); err != nil {
 		return fmt.Errorf("reconcile google resources: %w", err)
 	}
 
@@ -228,7 +228,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if err := r.reconcileKubernetesResources(ctx,
-		atlantisName, r.config.atlantisNamespace, config,
+		atlantisName, r.config.AtlantisNamespace, config,
 		[]string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"},
 		log.WithField("atlantis_subdomain", "kubernetes"),
 	); err != nil {
@@ -269,42 +269,42 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	for _, c := range config.Nodes {
 		switch c.Key {
 		case namespaceConfigKey:
-			rc.atlantisNamespace = c.Value
+			rc.AtlantisNamespace = c.Value
 		case atlantisProjectConfigKey:
-			rc.atlantisProject = c.Value
+			rc.AtlantisProject = c.Value
 		case atlantisImageConfigKey:
-			rc.atlantisImage = c.Value
+			rc.AtlantisImage = c.Value
 		case memberGroupsConfigKey:
 			if c.Value == "" {
 				continue
 			}
-			rc.memberGroups = strings.Split(c.Value, ",")
+			rc.MemberGroups = strings.Split(c.Value, ",")
 		case managerGroupsConfigKey:
 			if c.Value == "" {
 				continue
 			}
-			rc.managerGroups = strings.Split(c.Value, ",")
+			rc.ManagerGroups = strings.Split(c.Value, ",")
 		case clusterResourceNameConfigKey:
-			rc.clusterResourceName = c.Value
+			rc.ClusterResourceName = c.Value
 		case tfStateProjectsConfigKey:
 			if c.Value == "" {
 				continue
 			}
 			entries := strings.Split(c.Value, ",")
-			rc.tfstateProjects = make(map[string]string, len(entries))
+			rc.TfstateProjects = make(map[string]string, len(entries))
 			for _, entry := range entries {
 				pair := strings.Split(entry, ":")
 				if len(pair) != 2 {
 					return fmt.Errorf("invalid entry: %s", entry)
 				}
-				rc.tfstateProjects[pair[0]] = pair[1]
+				rc.TfstateProjects[pair[0]] = pair[1]
 			}
 		case atlantisBaseDomainConfigKey:
-			rc.atlantisBaseDomain = c.Value
+			rc.AtlantisBaseDomain = c.Value
 		case githubAppIdConfigKey:
-			rc.githubAppId = c.Value
+			rc.GithubAppId = c.Value
 		case logKubeDiffsConfigKey:
-			rc.logDiffs = strings.EqualFold(c.Value, "true")
+			rc.LogDiffs = strings.EqualFold(c.Value, "true")
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -318,7 +318,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 		return nil
 	}
 
-	k8sClient, knativeClient, err := r.createKubernetesClients(ctx, rc.clusterResourceName)
+	k8sClient, knativeClient, err := r.createKubernetesClients(ctx, rc.ClusterResourceName)
 	if err != nil {
 		return fmt.Errorf("create kubernetes clients: %w", err)
 	}
@@ -332,29 +332,29 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 func (c reconcilerConfig) Validate() error {
 	fieldErrors := make(FieldsValidationError)
 	setMissing := func(key string) { fieldErrors[key] = "missing value" }
-	if im := c.atlantisImage; im == "" {
+	if im := c.AtlantisImage; im == "" {
 		setMissing(atlantisImageConfigKey)
 	} else if !strings.Contains(im, ":") {
 		fieldErrors[atlantisImageConfigKey] = "invalid image ref, must be <image>:<tag>"
 	}
 
-	if project := c.atlantisProject; project == "" {
+	if project := c.AtlantisProject; project == "" {
 		setMissing(atlantisProjectConfigKey)
 	}
 
-	if c.atlantisNamespace == "" {
+	if c.AtlantisNamespace == "" {
 		setMissing(namespaceConfigKey)
 	}
 
-	if c.clusterResourceName == "" {
+	if c.ClusterResourceName == "" {
 		setMissing(clusterResourceNameConfigKey)
 	}
 
-	if c.atlantisBaseDomain == "" {
+	if c.AtlantisBaseDomain == "" {
 		setMissing(atlantisBaseDomainConfigKey)
 	}
 
-	if c.githubAppId == "" {
+	if c.GithubAppId == "" {
 		setMissing(githubAppIdConfigKey)
 	}
 
