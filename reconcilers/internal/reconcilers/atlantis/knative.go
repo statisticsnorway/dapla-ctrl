@@ -57,6 +57,16 @@ func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespac
 		return nil
 	}
 
+	// Or...
+	// ctx = apis.WithinCreate(ctx)
+	// ksvc.Spec.ConfigurationSpec.SetDefaults(ctx)
+	// The problem is that Knative sets some default fields based on the
+	// config-defaults ConfigMap. Therefore we cannot directly compare our wanted
+	// state and the live state as these defaults create a permadiff. We use DeepDerivative
+	// to only compare those fields which we have set. Another method is using SetDefaults,
+	// but this requires us to make it think it's in a Create event, or else it does not
+	// set all of the required defaults. Hopefully we can find a better way of doing this later.
+
 	ksvc.Spec.ConfigurationSpec = templatedKnativeService.Spec.ConfigurationSpec
 	if _, err := services.Update(ctx, ksvc, metav1.UpdateOptions{}); err != nil {
 		return err

@@ -204,15 +204,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	if config.WebhookSecret == nil {
-		webhookSecret, err := createWebhookSecret(ctx, client, daplaTeam.Slug)
+		config.WebhookSecret, err = createWebhookSecret(ctx, client, daplaTeam.Slug)
 		if err != nil {
 			return err
 		}
-		config.WebhookSecret = &webhookSecret
 	}
 
 	if err := r.reconcileKubernetesResources(ctx, atlantisName, r.config.atlantisNamespace, config, []string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"}); err != nil {
-		return nil
+		return err
 	}
 
 	return nil
@@ -227,11 +226,11 @@ func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, nam
 		return err
 	}
 
-	repoConfig := &defaultRepoConfig
+	repoConfig := defaultRepoConfig
 	if len(config.RepoConfig) != 0 {
-		repoConfig = new(string(config.RepoConfig))
+		repoConfig = string(config.RepoConfig)
 	}
-	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, *repoConfig); err != nil {
+	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
 		return err
 	}
 
@@ -274,7 +273,7 @@ func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name
 		return err
 	}
 
-	if cmp.Equal(sa.Annotations, wantedAnnotations) {
+	if cmp.Equal(sa.Annotations, wantedAnnotations) { // TODO: deepderivative?
 		return nil
 	}
 
@@ -376,11 +375,11 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 	return err
 }
 
-func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
+func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (*string, error) {
 	randBytes := make([]byte, 128)
 	_, err := rand.Read(randBytes)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	secretToken := fmt.Sprintf("%x", sha256.Sum256(randBytes))
 
@@ -388,10 +387,10 @@ func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamN
 		TeamSlug:      teamName,
 		WebhookSecret: secretToken,
 	}); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return secretToken, nil
+	return &secretToken, nil
 }
 
 func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
@@ -588,7 +587,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
 	// Get cluster info
 	cluster, err := r.clusterManager.GetCluster(ctx, &containerpb.GetClusterRequest{
-		Name: "projects/atlantis-8205/locations/europe-north1/clusters/atlantis",
+		Name: r.config.clusterResourceName,
 	})
 	if err != nil {
 		return nil, nil, err
