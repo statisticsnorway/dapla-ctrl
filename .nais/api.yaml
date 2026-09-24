@@ -24,6 +24,11 @@ spec:
         - host: login.microsoftonline.com
         - ipv4: 100.71.16.226
 
+  prometheus:
+    enabled: true
+    path: /metrics
+    port: "3005"
+
   resources:
     requests:
       memory: "64Mi"
