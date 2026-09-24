@@ -181,6 +181,11 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Whether to log Kubernetes diffs",
 				Description: "Logs potential diffs found in Kubernetes resources as INFO. Set to `true` to enable",
 			},
+			{
+				Key:         clusterResourceNameConfigKey,
+				DisplayName: "Resource name of the Atlantis cluster",
+				Description: "The full `projects/*/locations/*/clusters/*` resource name of the Atlantis cluster",
+			},
 		},
 	}
 }
