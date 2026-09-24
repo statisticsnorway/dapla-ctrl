@@ -5,39 +5,26 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	_ "embed"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 	"text/template"
 
-	googlecreds "golang.org/x/oauth2/google"
-
 	container "cloud.google.com/go/container/apiv1"
-	"cloud.google.com/go/container/apiv1/containerpb"
 
-	"cloud.google.com/go/iam/apiv1/iampb"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/storage"
-	"github.com/google/go-cmp/cmp"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google/serviceaccounts"
 	admindirectory "google.golang.org/api/admin/directory/v1"
-	"google.golang.org/api/iam/v1"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/transport"
 
 	servingv1 "knative.dev/serving/pkg/client/clientset/versioned/typed/serving/v1"
 )
@@ -215,11 +202,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		atlantisName = *config.CustomName
 	}
 
-	if err := r.reconcileGcpServiceAccount(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
-		return err
-	}
-
-	if err := r.reconcileBuckets(ctx, daplaTeam.Slug); err != nil {
+	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.atlantisNamespace); err != nil {
 		return err
 	}
 
@@ -235,164 +218,6 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	return nil
-}
-
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config *protoapi.AtlantisConfig, repoAllowList []string) error {
-	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace); err != nil {
-		return err
-	}
-
-	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, *config.WebhookSecret); err != nil {
-		return err
-	}
-
-	repoConfig := defaultRepoConfig
-	if len(config.RepoConfig) != 0 {
-		repoConfig = string(config.RepoConfig)
-	}
-	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig); err != nil {
-		return err
-	}
-
-	diskSize := defaultDiskSize
-	if config.DiskSize != nil {
-		var err error
-		diskSize, err = resource.ParseQuantity(*config.DiskSize)
-		if err != nil {
-			return err
-		}
-	}
-	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize); err != nil {
-		return err
-	}
-
-	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (r *reconciler) reconcileKubernetesServiceAccount(ctx context.Context, name, namespace string) error {
-	saClient := r.k8sClient.CoreV1().ServiceAccounts(namespace)
-	gcpSaName := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", name, r.config.atlantisProject)
-
-	wantedAnnotations := map[string]string{
-		wiAnnotationKey: gcpSaName,
-	}
-
-	sa, err := saClient.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = saClient.Create(ctx, &corev1.ServiceAccount{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:        name,
-				Annotations: wantedAnnotations,
-			},
-		}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if equality.Semantic.DeepDerivative(wantedAnnotations, sa.Annotations) {
-		return nil
-	}
-
-	sa.Annotations = wantedAnnotations
-	_, err = saClient.Update(ctx, sa, metav1.UpdateOptions{})
-	return err
-}
-
-func (r *reconciler) reconcileKubernetesWebhookSecret(ctx context.Context, name, namespace, webhookSecret string) error {
-	secretsClient := r.k8sClient.CoreV1().Secrets(namespace)
-
-	wantedData := map[string][]byte{
-		webhookSecretKey: []byte(webhookSecret),
-	}
-
-	secret, err := secretsClient.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = secretsClient.Create(ctx, &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-			},
-			Data: wantedData,
-		}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if cmp.Equal(secret.Data, wantedData) {
-		return nil
-	}
-
-	secret.Data = wantedData
-	_, err = secretsClient.Update(ctx, secret, metav1.UpdateOptions{})
-	return err
-}
-
-func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, namespace, repoConfig string) error {
-	configMapsClient := r.k8sClient.CoreV1().ConfigMaps(namespace)
-
-	wantedData := map[string]string{
-		reposYamlKey: repoConfig,
-	}
-
-	cm, err := configMapsClient.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = configMapsClient.Create(ctx, &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: name,
-			},
-			Data: wantedData,
-		}, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if cmp.Equal(cm.Data, wantedData) {
-		return nil
-	}
-
-	cm.Data = wantedData
-	_, err = configMapsClient.Update(ctx, cm, metav1.UpdateOptions{})
-
-	return err
-}
-
-func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSize resource.Quantity) error {
-	pvcClient := r.k8sClient.CoreV1().PersistentVolumeClaims(namespace)
-	wantedSpec := &corev1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes: []corev1.PersistentVolumeAccessMode{
-				corev1.ReadWriteOnce,
-			},
-			Resources: corev1.VolumeResourceRequirements{
-				Requests: corev1.ResourceList{
-					corev1.ResourceRequestsStorage: diskSize,
-				},
-			},
-		},
-	}
-
-	pvc, err := pvcClient.Get(ctx, name, metav1.GetOptions{})
-	if apierrors.IsNotFound(err) {
-		_, err = pvcClient.Create(ctx, wantedSpec, metav1.CreateOptions{})
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if equality.Semantic.DeepDerivative(wantedSpec, pvc) {
-		return nil
-	}
-
-	_, err = pvcClient.Update(ctx, wantedSpec, metav1.UpdateOptions{})
-	return err
 }
 
 func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (*string, error) {
@@ -411,130 +236,6 @@ func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamN
 	}
 
 	return &secretToken, nil
-}
-
-func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
-	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.atlantisProject)
-	if err != nil {
-		return err
-	}
-
-	if err := r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
-		k8sSaName := fmt.Sprintf("serviceAccount:%s.svc.id.goog[%s/%s]", r.config.atlantisProject, namespace, name)
-		if len(b.Members) == 1 && b.Members[0] == k8sSaName {
-			return false
-		}
-		b.Members = []string{k8sSaName}
-		return true
-	}); err != nil {
-		return err
-	}
-
-	for _, memberGroup := range r.config.memberGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
-			err = errors.Join(err, currentErr)
-		}
-	}
-	for _, managerGroup := range r.config.managerGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
-			err = errors.Join(err, currentErr)
-		}
-	}
-	if err != nil {
-		return err
-	}
-
-	saMember := "serviceAccount:" + sa.Email
-
-	folderResp, err := client.GcpTeamResources().ListTeamFolders(ctx, &protoapi.ListGcpTeamFoldersRequest{
-		TeamSlug: teamName,
-	})
-	if err != nil {
-		return err
-	}
-	for _, folder := range folderResp.Folders {
-		if err := google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
-			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
-			func(b *iampb.Binding) (modified bool) {
-				if slices.Contains(b.Members, saMember) {
-					return false
-				}
-				b.Members = append(b.Members, saMember)
-				return true
-			}); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId string, role groupRole) error {
-	member, err := r.members.Get(groupId, saEmail).Context(ctx).Do()
-	if status.Code(err) == codes.NotFound {
-		_, err := r.members.Insert(groupId, &admindirectory.Member{
-			Email: saEmail,
-			Role:  string(role),
-		}).Context(ctx).Do()
-		return err
-	} else if err != nil {
-		return err
-	}
-
-	if member.Role == string(role) {
-		return nil
-	}
-
-	_, err = r.members.Patch(groupId, saEmail, &admindirectory.Member{Etag: member.Etag, Role: string(role)}).Context(ctx).Do()
-	return err
-}
-
-func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) error {
-	defaultAttrs := &storage.BucketAttrs{
-		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{Enabled: true},
-		Location:                 "EUROPE-NORTH1",
-		VersioningEnabled:        true,
-		PublicAccessPrevention:   storage.PublicAccessPreventionInherited,
-		Lifecycle: storage.Lifecycle{
-			Rules: []storage.LifecycleRule{
-				{
-					Action: storage.LifecycleAction{
-						Type: "Delete",
-					},
-					Condition: storage.LifecycleCondition{
-						NumNewerVersions: 3,
-					},
-				},
-			},
-		},
-	}
-
-	for env, projectId := range r.config.tfstateProjects {
-		bucketName := fmt.Sprintf("ssb-%s-tfstate-%s", teamName, env)
-		bucket := r.storageClient.Bucket(bucketName)
-		attrs, err := bucket.Attrs(ctx)
-		if status.Code(err) == codes.NotFound {
-			// Create bucket
-			if err := bucket.Create(ctx, projectId, defaultAttrs); err != nil {
-				return fmt.Errorf("create bucket: %w", err)
-			}
-		} else if err != nil {
-			return fmt.Errorf("get bucket attrs: %w", err)
-		}
-		if equality.Semantic.DeepDerivative(defaultAttrs, attrs) {
-			continue
-		}
-		if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
-			UniformBucketLevelAccess: &defaultAttrs.UniformBucketLevelAccess,
-			VersioningEnabled:        defaultAttrs.VersioningEnabled,
-			PublicAccessPrevention:   defaultAttrs.PublicAccessPrevention,
-			Lifecycle:                &defaultAttrs.Lifecycle,
-		}); err != nil {
-			return fmt.Errorf("update bucket attrs: %w", err)
-		}
-	}
-
-	return nil
 }
 
 func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
@@ -606,61 +307,6 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	r.knServices = knativeClient
 	r.config = rc
 	return nil
-}
-
-func (r *reconciler) createKubernetesClients(ctx context.Context) (*kubernetes.Clientset, *servingv1.ServingV1Client, error) {
-	// Get cluster info
-	cluster, err := r.clusterManager.GetCluster(ctx, &containerpb.GetClusterRequest{
-		Name: r.config.clusterResourceName,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// Extract server CA cert, base64 encoded. ClusterInfo needs it decoded
-	cert := cluster.MasterAuth.ClusterCaCertificate
-	ca, err := base64.StdEncoding.DecodeString(cert)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	endpoint := cluster.ControlPlaneEndpointsConfig.IpEndpointsConfig.GetPublicEndpoint()
-
-	// Get a token source for ADC
-	ts, err := googlecreds.FindDefaultCredentials(ctx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	overrides := &clientcmd.ConfigOverrides{}
-	loader := &clientcmd.ClientConfigLoadingRules{}
-
-	overrides.ClusterInfo.CertificateAuthorityData = ca
-	// Need to specify https, defaults to http
-	overrides.ClusterDefaults.Server = "https://" + endpoint
-
-	// Create config for kubernetes clients
-	cc := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loader, overrides)
-	restCfg, err := cc.ClientConfig()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	// We wrap the underlying HTTP transport with a "middleware" which injects
-	// rquests with our ADC
-	restCfg.Wrap(transport.TokenSourceWrapTransport(ts.TokenSource))
-
-	k8s, err := kubernetes.NewForConfig(restCfg)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	knsrv, err := servingv1.NewForConfig(restCfg)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return k8s, knsrv, nil
 }
 
 func (c reconcilerConfig) Validate() error {
