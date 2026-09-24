@@ -66,7 +66,8 @@ export const menuItems = ({
 			menuItem('Datadeling', 'shared-data'),
 			(member || isAdmin) && menuItem('Dapla Lab', 'launch-lab'),
 			(member || isAdmin) && menuItem('Aktivitetslogg', 'activity-log'),
-			((isManaged && member) || isAdmin) && menuItem('Innstillinger', 'settings')
+			((isManaged && member) || isAdmin) && menuItem('Innstillinger', 'settings'),
+			(member || isAdmin) && menuItem('Artifact registry', 'artifact-registry')
 		].filter(Boolean) as { label: string; href: string; active?: boolean }[]
 	];
 };
