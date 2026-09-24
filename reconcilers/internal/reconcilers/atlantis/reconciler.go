@@ -75,6 +75,9 @@ var (
 //go:embed repos.yaml
 var defaultRepoConfig string
 
+//go:embed defaultservice.yaml.gotmpl
+var defaultKnativeServiceTemplate string
+
 type reconciler struct {
 	storageClient   *storage.Client
 	serviceAccounts *serviceaccounts.Client
@@ -125,6 +128,14 @@ func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) 
 
 	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil || r.clusterManager == nil {
 		return nil, errors.New("one or more google clients are nil, all need to be supplied")
+	}
+
+	if r.knativeServiceTemplate == nil {
+		tmpl, err := template.New("").Parse(defaultKnativeServiceTemplate)
+		if err != nil {
+			return nil, err
+		}
+		r.knativeServiceTemplate = tmpl
 	}
 
 	return r, nil

@@ -1,0 +1,94 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: {{ .Name }}
+  namespace: {{ .Namespace }}
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/max-scale: "1"
+        autoscaling.knative.dev/scale-to-zero-pod-retention-period: 1h
+    spec:
+      containers:
+      - env:
+        - name: ATLANTIS_ATLANTIS_URL
+          value: https://{{ .Name }}.{{ .BaseDomain }}
+        - name: ATLANTIS_DATA_DIR
+          value: /atlantis
+        - name: ATLANTIS_ENABLE_REGEXP_CMD
+          value: "true"
+        - name: ATLANTIS_GH_ALLOW_MERGEABLE_BYPASS_APPLY
+          value: "true"
+        - name: ATLANTIS_GH_APP_ID
+          value: {{ .GithubAppId }}
+        - name: ATLANTIS_GH_APP_KEY_FILE
+          value: /secret/atlantis-app-key.pem
+        - name: ATLANTIS_PORT
+          value: "4141"
+        - name: ATLANTIS_REPO_ALLOWLIST
+          value: {{ .RepoAllowList }}
+        - name: ATLANTIS_REPO_CONFIG
+          value: /config/repos.yaml
+        - name: ATLANTIS_WRITE_GIT_CREDS
+          value: "true"
+        - name: TF_PLUGIN_CACHE_MAY_BREAK_DEPENDENCY_LOCK_FILE
+          value: "true"
+        - name: ATLANTIS_GH_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: gh-webhook-secret
+              name: {{ .Name }}
+        image: {{ .Image }}
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 4141
+            scheme: HTTP
+          periodSeconds: 60
+        ports:
+        - containerPort: 4141
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 4141
+            scheme: HTTP
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /atlantis
+          name: atlantis-data
+        - mountPath: /secret
+          name: secret-volume
+          readOnly: true
+        - mountPath: /config
+          name: config-volume
+          readOnly: true
+      securityContext:
+        fsGroup: 1000
+      serviceAccountName: {{ .Name }}
+      volumes:
+      - name: atlantis-data
+        persistentVolumeClaim:
+          claimName: {{ .Name }}
+      - name: secret-volume
+        secret:
+          items:
+          - key: gh-key-file
+            path: atlantis-app-key.pem
+          secretName: dapla-team
+      - configMap:
+          items:
+          - key: repos.yaml
+            path: repos.yaml
+          name: {{ .Name }}
+        name: config-volume

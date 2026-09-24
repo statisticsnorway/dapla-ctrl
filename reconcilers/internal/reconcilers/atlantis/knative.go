@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"strings"
 
+	_ "embed"
+
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
