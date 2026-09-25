@@ -19,6 +19,7 @@ spec:
         - host: labradoor.lab.dapla.ssb.no
         - host: graph.microsoft.com
         - host: login.microsoftonline.com
+        - ipv4: 35.228.13.13
 
   prometheus:
     enabled: true
