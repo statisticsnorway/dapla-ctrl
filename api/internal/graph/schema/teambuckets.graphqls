@@ -1,0 +1,190 @@
+extend type Query {
+	"""
+	Get a list of Team Buckets.
+	"""
+	teamBuckets(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: TeamBucketFilter
+	): TeamBucketConnection!
+
+	"""
+	Get a Team Bucket by its name, e.g. 'ssb-my-team-data-produkt-prod'
+	"""
+	teamBucket(name: String!): TeamBucket!
+}
+
+extend type Team {
+	teamBuckets(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: TeamBucketFilter
+	): TeamBucketConnection!
+}
+
+type TeamBucket implements Node {
+	"""
+	The globally unique ID of the TeamBucket.
+	"""
+	id: ID!
+
+	"""
+	Name of the Team Bucket.
+
+	This is equal to "ssb-<teamSlug>-data-<produkt/kilde>-<env>"
+	"""
+	name: String!
+
+	"""
+	The bucket kind (produkt/kilde)
+	"""
+	kind: String!
+
+	"""
+	Which env the bucket is in (test/prod)
+	"""
+	env: String!
+
+	"""
+	The team that owns the bucket
+	"""
+	team: Team!
+}
+
+"""
+TeamBucket connection.
+"""
+type TeamBucketConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [TeamBucket]!
+
+	"""
+	List of edges.
+	"""
+	edges: [TeamBucketEdge!]!
+}
+
+"""
+TeamBucket edge.
+"""
+type TeamBucketEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The TeamBucket.
+	"""
+	node: TeamBucket!
+}
+
+input TeamBucketFilter {
+	"""
+	Filter by kinds (e.g. produkt/kilde)
+	"""
+	kinds: [String!]
+
+	"""
+	Filter by the envs the buckets belong to
+	"""
+	envs: [String!]
+}
+
+"""
+Ordering options when fetching TeamBucket.
+"""
+input TeamBucketOrder {
+	"""
+	The field to order items by.
+	"""
+	field: TeamBucketOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order TeamBucket by.
+"""
+enum TeamBucketOrderField {
+	"""
+	The name of the TeamBucket.
+	"""
+	NAME
+
+	"""
+	The kind of the TeamBucket.
+	"""
+	KIND
+
+	"""
+	The environment of the TeamBucket.
+	"""
+	ENV
+
+	"""
+	The team who owns the TeamBucket.
+	"""
+	TEAM
+}

@@ -84,7 +84,7 @@ The team type represents a team on the Dapla platform.
 
 External resources (e.g. entraIDGroupID, gitHubTeamSlug) are managed by Dapla API reconcilers.
 """
-type Team implements Node @key(fields: "slug") {
+type Team implements Node {
 	"The globally unique ID of the team."
 	id: ID!
 
