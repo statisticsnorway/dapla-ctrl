@@ -70,7 +70,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return fmt.Errorf("list team folders: %w", err)
 	}
 	for _, folder := range folderResp.Folders {
-		if err := google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
+		if err := google.EnsureRolesBindingFunc(ctx, r.folders, "folders/"+folder.FolderId,
 			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
 			func(b *iampb.Binding) (modified bool) {
 				if slices.Contains(b.Members, saMember) {
