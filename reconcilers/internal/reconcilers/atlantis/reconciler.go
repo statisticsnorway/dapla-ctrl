@@ -196,7 +196,7 @@ func (r *reconciler) Name() string {
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	if err := r.updateConfig(ctx, client); err != nil {
-		return err
+		return fmt.Errorf("update config: %w", err)
 	}
 
 	configResponse, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{TeamSlug: daplaTeam.Slug})
@@ -204,7 +204,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		log.Debug("skipping team as they have no atlantis config")
 		return nil
 	} else if err != nil {
-		return err
+		return fmt.Errorf("get team atlantis config: %w", err)
 	}
 	config := configResponse.Config
 
@@ -232,7 +232,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		[]string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"},
 		log.WithField("atlantis_subdomain", "kubernetes"),
 	); err != nil {
-		return err
+		return fmt.Errorf("reconcile kubernetes resources: %w", err)
 	}
 
 	return nil
@@ -242,7 +242,7 @@ func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamN
 	randBytes := make([]byte, 128)
 	_, err := rand.Read(randBytes)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("read random bytes: %w", err)
 	}
 	secretToken := fmt.Sprintf("%x", sha256.Sum256(randBytes))
 
@@ -250,7 +250,7 @@ func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamN
 		TeamSlug:      teamName,
 		WebhookSecret: secretToken,
 	}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("set atlantis webhook secret: %w", err)
 	}
 
 	return &secretToken, nil
@@ -311,7 +311,7 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 	}
 
 	if err := rc.Validate(); err != nil {
-		return err
+		return fmt.Errorf("validate config: %w", err)
 	}
 
 	if equality.Semantic.DeepEqual(rc, r.config) {

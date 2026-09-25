@@ -20,11 +20,11 @@ import (
 
 func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
 	if err := r.reconcileGcpServiceAccount(ctx, client, teamName, name, namespace); err != nil {
-		return err
+		return fmt.Errorf("reconcile service account: %w", err)
 	}
 
 	if err := r.reconcileBuckets(ctx, teamName); err != nil {
-		return err
+		return fmt.Errorf("reconcile buckets: %w", err)
 	}
 
 	return nil
@@ -33,7 +33,7 @@ func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apicl
 func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.AtlantisProject)
 	if err != nil {
-		return err
+		return fmt.Errorf("get or create SA: %w", err)
 	}
 
 	if err := r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
@@ -44,7 +44,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		b.Members = []string{k8sSaName}
 		return true
 	}); err != nil {
-		return err
+		return fmt.Errorf("ensure wi role binding: %w", err)
 	}
 
 	for _, memberGroup := range r.config.MemberGroups {
@@ -58,7 +58,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		}
 	}
 	if err != nil {
-		return err
+		return fmt.Errorf("ensure group memberships: %w", err)
 	}
 
 	saMember := "serviceAccount:" + sa.Email
@@ -67,7 +67,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		TeamSlug: teamName,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("list team folders: %w", err)
 	}
 	for _, folder := range folderResp.Folders {
 		if err := google.EnsureRolesBindingFunc(ctx, r.folders, folder.FolderId,
@@ -79,7 +79,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 				b.Members = append(b.Members, saMember)
 				return true
 			}); err != nil {
-			return err
+			return fmt.Errorf("ensure team folder iam: %w", err)
 		}
 	}
 
@@ -95,7 +95,7 @@ func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId
 		}).Context(ctx).Do()
 		return err
 	} else if err != nil {
-		return err
+		return fmt.Errorf("create membership: %w", err)
 	}
 
 	if member.Role == string(role) {
@@ -103,7 +103,7 @@ func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId
 	}
 
 	_, err = r.members.Patch(groupId, saEmail, &admindirectory.Member{Etag: member.Etag, Role: string(role)}).Context(ctx).Do()
-	return err
+	return fmt.Errorf("update membership: %w", err)
 }
 
 func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) error {
