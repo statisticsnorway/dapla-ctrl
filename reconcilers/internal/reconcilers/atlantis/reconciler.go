@@ -56,7 +56,7 @@ const (
 	manager groupRole = "MANAGER"
 )
 
-var defaultDiskSize resource.Quantity = resource.MustParse("10Gi")
+var defaultDiskSize resource.Quantity = resource.MustParse("5Gi")
 
 //go:embed repos.yaml
 var defaultRepoConfig string
