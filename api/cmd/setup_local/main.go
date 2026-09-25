@@ -17,6 +17,7 @@ import (
 	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
@@ -193,6 +194,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 
 	ctx = database.NewLoaderContext(ctx, pool)
 	ctx = activitylog.NewLoaderContext(ctx, pool)
+	ctx = artifactregistry.NewLoaderContext(ctx, pool)
 	ctx = user.NewLoaderContext(ctx, pool)
 	ctx = team.NewLoaderContext(ctx, pool, log)
 	ctx = authz.NewLoaderContext(ctx, pool)
@@ -319,8 +321,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 			emails[email] = struct{}{}
 		}
 
-		var devteam *team.Team
-		devteam, err = team.Get(ctx, "devteam")
+		_, err = team.Get(ctx, "devteam")
 		if err != nil {
 			input := &team.CreateTeamInput{
 				Slug:        "devteam",
@@ -328,15 +329,11 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				SectionCode: "724",
 				IsManaged:   new(true),
 			}
-			devteam, err = team.Create(ctx, input, actor)
+			_, err = team.Create(ctx, input, actor)
 			if err != nil {
 				return fmt.Errorf("create devteam: %w", err)
 			}
 		}
-		// devuser is first in array
-		createGroupAndAddUsers(ctx, actor, devteam.Slug, "developers", nil, users[:1], 1)
-
-		createGroupAndAddUsers(ctx, actor, devteam.Slug, "managers", nil, users[:1], 1)
 
 		for i := 1; i <= *cfg.NumTeams; i++ {
 			name := teamName()
@@ -364,8 +361,6 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 				"10x",
 			}
 
-			createGroupAndAddUsers(ctx, actor, name, "managers", nil, users, rand.IntN(2)+1)
-			createGroupAndAddUsers(ctx, actor, name, "developers", nil, users, rand.IntN(3)+1)
 			createGroupAndAddUsers(ctx, actor, name, "developers", &suffixes[rand.IntN(len(suffixes))], users, rand.IntN(2)+1)
 
 			log.Infof("\tGroups created and users added")
@@ -383,11 +378,14 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 }
 
 func createGroupAndAddUsers(ctx context.Context, actor *authz.Actor, team slug.Slug, teamCategory string, suffix *string, users []*user.User, membersToAdd int) {
-	createdGroup, _ := group.Create(ctx, &group.CreateGroupInput{
+	createdGroup, err := group.Create(ctx, &group.CreateGroupInput{
 		TeamSlug: team,
 		Category: teamCategory,
 		Suffix:   suffix,
 	}, actor)
+	if err != nil {
+		panic(err)
+	}
 
 	i := 0
 	if len(users)-membersToAdd > 0 {
