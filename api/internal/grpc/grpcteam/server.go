@@ -123,6 +123,9 @@ func (t *Server) HasFeature(ctx context.Context, team *protoapi.HasFeatureReques
 
 func (t *Server) GetTeamManager(ctx context.Context, req *protoapi.GetTeamManagerRequest) (*protoapi.GetTeamManagerResponse, error) {
 	teamManager, err := t.querier.GetTeamManager(ctx, slug.Slug(req.Slug))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "team manager not found")
+	}
 	if err != nil {
 		return nil, err
 	}

@@ -25,6 +25,8 @@ import (
 
 	"google.golang.org/api/iterator"
 	"google.golang.org/genproto/googleapis/type/money"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	fieldmaskpb "google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
@@ -199,7 +201,10 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	teamManager, err := client.Teams().GetTeamManager(ctx, &protoapi.GetTeamManagerRequest{
 		Slug: daplaTeam.Slug,
 	})
-	if err != nil {
+	if err != nil && status.Code(err) == codes.NotFound {
+		// Should not happen, but we had a case with a team where the section code was invalid
+		return nil
+	} else if err != nil {
 		return err
 	}
 	budgetNotificationEmails = append(budgetNotificationEmails, teamManager.User.Email)
