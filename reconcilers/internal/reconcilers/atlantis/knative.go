@@ -107,12 +107,12 @@ func (r *reconciler) buildKnativeService(name, image string, resources *v1.Resou
 		"BaseDomain":    r.config.AtlantisBaseDomain,
 		"GithubAppId":   r.config.GithubAppId,
 	}); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("template service: %w", err)
 	}
 
 	var templatedKnativeService knv1.Service
 	if err := yaml.Unmarshal(buf.Bytes(), &templatedKnativeService); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unmarshal templated service: %w", err)
 	}
 
 	if resources != nil {
