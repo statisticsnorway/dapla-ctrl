@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"maps"
 
 	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/google/go-cmp/cmp"
@@ -234,7 +233,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 			},
 			Resources: corev1.VolumeResourceRequirements{
 				Requests: corev1.ResourceList{
-					corev1.ResourceRequestsStorage: diskSize,
+					corev1.ResourceStorage: diskSize,
 				},
 			},
 		},
@@ -248,7 +247,11 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		return err
 	}
 
-	if maps.Equal(pvc.Spec.Resources.Requests, wantedSpec.Spec.Resources.Requests) {
+	currentSize := pvc.Spec.Resources.Requests[corev1.ResourceStorage]
+	if diff := currentSize.Cmp(diskSize); diff == 0 {
+		return nil
+	} else if diff == 1 {
+		log.Warnf("current size %s is larger than wanted size %s (cannot shrink volume)", &currentSize, &diskSize)
 		return nil
 	}
 
@@ -256,7 +259,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		LogDiff(pvc.Spec, wantedSpec.Spec, log)
 	}
 
-	pvc.Spec.Resources.Requests = wantedSpec.Spec.Resources.Requests
+	pvc.Spec.Resources.Requests[corev1.ResourceStorage] = diskSize
 	_, err = pvcClient.Update(ctx, pvc, metav1.UpdateOptions{})
 	return err
 }
