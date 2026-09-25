@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"maps"
 
 	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/google/go-cmp/cmp"
@@ -247,7 +248,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		return err
 	}
 
-	if equality.Semantic.DeepDerivative(wantedSpec.Spec, pvc.Spec) {
+	if maps.Equal(pvc.Spec.Resources.Requests, wantedSpec.Spec.Resources.Requests) {
 		return nil
 	}
 
@@ -255,6 +256,7 @@ func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namesp
 		LogDiff(pvc.Spec, wantedSpec.Spec, log)
 	}
 
-	_, err = pvcClient.Update(ctx, wantedSpec, metav1.UpdateOptions{})
+	pvc.Spec.Resources.Requests = wantedSpec.Spec.Resources.Requests
+	_, err = pvcClient.Update(ctx, pvc, metav1.UpdateOptions{})
 	return err
 }
