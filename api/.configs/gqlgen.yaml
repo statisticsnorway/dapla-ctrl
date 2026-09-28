@@ -7,6 +7,11 @@ exec:
   filename: internal/graph/gengql/generated.go
   package: gengql
 
+# Where should federated information go?
+federation:
+  filename: internal/graph/gengql/federation.go
+  package: gengql
+
 # Where should any generated models go?
 model:
   filename: internal/graph/model/donotuse/models_gen.go
