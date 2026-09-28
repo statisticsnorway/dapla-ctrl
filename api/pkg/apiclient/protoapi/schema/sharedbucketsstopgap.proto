@@ -46,7 +46,7 @@ message CreateSharedBucketsStopgapRequest {
 message CreateSharedBucketsStopgapResponse {}
 
 message DeleteSharedBucketsStopgapRequest {
-  string name = 1;
+  SharedBucketStopgap shared_bucket_stopgap = 1;
 }
 
 message DeleteSharedBucketsStopgapResponse {}
