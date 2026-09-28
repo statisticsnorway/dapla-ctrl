@@ -5,6 +5,12 @@ VALUES
 	(@name, @team_slug, @short_name, @kind, @env)
 ;
 
+-- name: Delete :exec
+DELETE FROM shared_buckets_stopgap
+WHERE
+	name = @name
+;
+
 -- name: Get :one
 SELECT
 	sqlc.embed(shared_buckets_stopgap)
@@ -15,6 +21,17 @@ WHERE
 	AND short_name = @short_name
 	AND kind = @kind
 	AND env = @env
+;
+
+-- name: ListForTeam :many
+SELECT
+	sqlc.embed(shared_buckets_stopgap)
+FROM
+	shared_buckets_stopgap
+WHERE
+	team_slug = @team_slug
+ORDER BY
+	name
 ;
 
 -- name: ListGroups :many

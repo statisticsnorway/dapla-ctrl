@@ -8392,28 +8392,66 @@ extend type Team {
 }
 
 type TeamBucket implements Node {
+	"""
+	The globally unique ID of the TeamBucket.
+	"""
 	id: ID!
 
+	"""
+	Name of the Team Bucket.
+
+	This is equal to "ssb-<teamSlug>-data-<produkt/kilde>-<env>"
+	"""
 	name: String!
 
+	"""
+	The bucket kind (produkt/kilde)
+	"""
 	kind: String!
 
+	"""
+	Which env the bucket is in (test/prod)
+	"""
 	env: String!
 
+	"""
+	The team that owns the bucket
+	"""
 	team: Team!
 }
 
+"""
+TeamBucket connection.
+"""
 type TeamBucketConnection {
+	"""
+	Pagination information.
+	"""
 	pageInfo: PageInfo!
 
+	"""
+	List of nodes.
+	"""
 	nodes: [TeamBucket]!
 
+	"""
+	List of edges.
+	"""
 	edges: [TeamBucketEdge!]!
 }
 
+"""
+TeamBucket edge.
+"""
 type TeamBucketEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
 	cursor: Cursor!
 
+	"""
+	The TeamBucket.
+	"""
 	node: TeamBucket!
 }
 

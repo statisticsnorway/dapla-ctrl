@@ -52,6 +52,18 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) error {
 	return err
 }
 
+const delete = `-- name: Delete :exec
+DELETE FROM
+    shared_buckets_stopgap
+WHERE
+    name = $1
+`
+
+func (q *Queries) Delete(ctx context.Context, name string) error {
+	_, err := q.db.Exec(ctx, delete, name)
+	return err
+}
+
 const get = `-- name: Get :one
 SELECT
 	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env
@@ -91,6 +103,47 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 		&i.SharedBucketsStopgap.Env,
 	)
 	return &i, err
+}
+
+const listForTeam = `-- name: ListForTeam :many
+SELECT
+    shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env
+FROM
+    shared_buckets_stopgap
+WHERE
+    team_slug = $1
+ORDER BY
+    name
+`
+
+type ListForTeamRow struct {
+	SharedBucketsStopgap SharedBucketsStopgap
+}
+
+func (q *Queries) ListForTeam(ctx context.Context, teamSlug slug.Slug) ([]*ListForTeamRow, error) {
+	rows, err := q.db.Query(ctx, listForTeam, teamSlug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListForTeamRow{}
+	for rows.Next() {
+		var i ListForTeamRow
+		if err := rows.Scan(
+			&i.SharedBucketsStopgap.Name,
+			&i.SharedBucketsStopgap.TeamSlug,
+			&i.SharedBucketsStopgap.ShortName,
+			&i.SharedBucketsStopgap.Kind,
+			&i.SharedBucketsStopgap.Env,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listGroups = `-- name: ListGroups :many

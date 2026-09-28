@@ -39,6 +39,14 @@ func (s *Server) Create(ctx context.Context, req *protoapi.CreateSharedBucketsSt
 	return &protoapi.CreateSharedBucketsStopgapResponse{}, nil
 }
 
+func (s *Server) Delete(ctx context.Context, req *protoapi.DeleteSharedBucketsStopgapRequest) (*protoapi.DeleteSharedBucketsStopgapResponse, error) {
+	if err := s.querier.Delete(ctx, req.Name); err != nil {
+		return nil, err
+	}
+
+	return &protoapi.DeleteSharedBucketsStopgapResponse{}, nil
+}
+
 func (s *Server) Get(ctx context.Context, req *protoapi.GetSharedBucketsStopgapRequest) (*protoapi.GetSharedBucketsStopgapResponse, error) {
 	res, err := s.querier.Get(ctx, grpcsharedbucketsstopgapsql.GetParams{
 		ShortName: req.SharedBucketStopgap.ShortName,
@@ -54,6 +62,22 @@ func (s *Server) Get(ctx context.Context, req *protoapi.GetSharedBucketsStopgapR
 	return &protoapi.GetSharedBucketsStopgapResponse{
 		SharedBucketStopgap: toProtoSharedBucketStopgap(&res.SharedBucketsStopgap),
 	}, nil
+}
+
+func (s *Server) ListForTeam(ctx context.Context, req *protoapi.ListSharedBucketsStopgapForTeamRequest) (*protoapi.ListSharedBucketsStopgapForTeamResponse, error) {
+	res, err := s.querier.ListForTeam(ctx, slug.Slug(req.TeamSlug))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return &protoapi.ListSharedBucketsStopgapForTeamResponse{}, nil
+	} else if err != nil {
+		return nil, err
+	}
+	resp := &protoapi.ListSharedBucketsStopgapForTeamResponse{
+		Nodes: make([]*protoapi.SharedBucketStopgap, len(res)),
+	}
+	for i, bucket := range res {
+		resp.Nodes[i] = toProtoSharedBucketStopgap(&bucket.SharedBucketsStopgap)
+	}
+	return resp, nil
 }
 
 func (s *Server) Groups(ctx context.Context, req *protoapi.ListSharedBucketsStopgapGroupsRequest) (*protoapi.ListSharedBucketsStopgapGroupsResponse, error) {
