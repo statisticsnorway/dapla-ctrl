@@ -11,6 +11,7 @@ exec:
 federation:
   filename: internal/graph/gengql/federation.go
   package: gengql
+  version: 2
 
 # Where should any generated models go?
 model:
