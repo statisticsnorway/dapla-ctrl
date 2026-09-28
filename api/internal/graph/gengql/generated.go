@@ -30,6 +30,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/teambuckets"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"
@@ -67,6 +68,7 @@ type ResolverRoot interface {
 	SharedBucketAccess() SharedBucketAccessResolver
 	Team() TeamResolver
 	TeamAccessManager() TeamAccessManagerResolver
+	TeamBucket() TeamBucketResolver
 	TeamMember() TeamMemberResolver
 	TeamRoleAssignedActivityLogEntryData() TeamRoleAssignedActivityLogEntryDataResolver
 	TeamRoleRevokedActivityLogEntryData() TeamRoleRevokedActivityLogEntryDataResolver
@@ -371,6 +373,8 @@ type ComplexityRoot struct {
 		SharedBucket    func(childComplexity int, name string) int
 		SharedBuckets   func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
 		Team            func(childComplexity int, slug slug.Slug) int
+		TeamBucket      func(childComplexity int, name string) int
+		TeamBuckets     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int
 		TeamMembers     func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int
 		Teams           func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int
 		User            func(childComplexity int, email *string) int
@@ -777,6 +781,7 @@ type ComplexityRoot struct {
 		SharedBuckets                      func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int
 		SharedBucketsAccess                func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		Slug                               func(childComplexity int) int
+		TeamBuckets                        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int
 		ViewerCanManageMembers             func(childComplexity int) int
 		ViewerIsMember                     func(childComplexity int) int
 		ViewerIsOwner                      func(childComplexity int) int
@@ -786,6 +791,25 @@ type ComplexityRoot struct {
 	TeamAccessManager struct {
 		Team func(childComplexity int) int
 		User func(childComplexity int) int
+	}
+
+	TeamBucket struct {
+		Env  func(childComplexity int) int
+		ID   func(childComplexity int) int
+		Kind func(childComplexity int) int
+		Name func(childComplexity int) int
+		Team func(childComplexity int) int
+	}
+
+	TeamBucketConnection struct {
+		Edges    func(childComplexity int) int
+		Nodes    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+	}
+
+	TeamBucketEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
 	}
 
 	TeamConnection struct {
@@ -1074,6 +1098,8 @@ type QueryResolver interface {
 	ServiceAccount(ctx context.Context, id ident.Ident) (*serviceaccount.ServiceAccount, error)
 	SharedBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) (*pagination.Connection[*sharedbucketsstopgap.SharedBucket], error)
 	SharedBucket(ctx context.Context, name string) (*sharedbucketsstopgap.SharedBucket, error)
+	TeamBuckets(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) (*pagination.Connection[*teambuckets.TeamBucket], error)
+	TeamBucket(ctx context.Context, name string) (*teambuckets.TeamBucket, error)
 	Teams(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error)
 	Team(ctx context.Context, slug slug.Slug) (*team.Team, error)
 	Users(ctx context.Context, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) (*pagination.Connection[*user.User], error)
@@ -1137,10 +1163,14 @@ type TeamResolver interface {
 	ActivityLog(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *activitylog.ActivityLogFilter) (*pagination.Connection[activitylog.ActivityLogEntry], error)
 	ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error)
 	ArtifactRegistryRepositories(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryRepository], error)
+	TeamBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) (*pagination.Connection[*teambuckets.TeamBucket], error)
 }
 type TeamAccessManagerResolver interface {
 	Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error)
 	User(ctx context.Context, obj *team.TeamAccessManager) (*user.User, error)
+}
+type TeamBucketResolver interface {
+	Team(ctx context.Context, obj *teambuckets.TeamBucket) (*team.Team, error)
 }
 type TeamMemberResolver interface {
 	Team(ctx context.Context, obj *team.TeamMember) (*team.Team, error)
@@ -2457,6 +2487,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Team(childComplexity, args["slug"].(slug.Slug)), true
+	case "Query.teamBucket":
+		if e.ComplexityRoot.Query.TeamBucket == nil {
+			break
+		}
+
+		args, err := ec.field_Query_teamBucket_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.TeamBucket(childComplexity, args["name"].(string)), true
+	case "Query.teamBuckets":
+		if e.ComplexityRoot.Query.TeamBuckets == nil {
+			break
+		}
+
+		args, err := ec.field_Query_teamBuckets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.TeamBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*teambuckets.TeamBucketOrder), args["filter"].(*teambuckets.TeamBucketFilter)), true
 	case "Query.teamMembers":
 		if e.ComplexityRoot.Query.TeamMembers == nil {
 			break
@@ -4058,6 +4110,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.Slug(childComplexity), true
+	case "Team.teamBuckets":
+		if e.ComplexityRoot.Team.TeamBuckets == nil {
+			break
+		}
+
+		args, err := ec.field_Team_teamBuckets_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Team.TeamBuckets(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*teambuckets.TeamBucketOrder), args["filter"].(*teambuckets.TeamBucketFilter)), true
 	case "Team.viewerCanManageMembers":
 		if e.ComplexityRoot.Team.ViewerCanManageMembers == nil {
 			break
@@ -4095,6 +4158,69 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TeamAccessManager.User(childComplexity), true
+
+	case "TeamBucket.env":
+		if e.ComplexityRoot.TeamBucket.Env == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucket.Env(childComplexity), true
+	case "TeamBucket.id":
+		if e.ComplexityRoot.TeamBucket.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucket.ID(childComplexity), true
+	case "TeamBucket.kind":
+		if e.ComplexityRoot.TeamBucket.Kind == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucket.Kind(childComplexity), true
+	case "TeamBucket.name":
+		if e.ComplexityRoot.TeamBucket.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucket.Name(childComplexity), true
+	case "TeamBucket.team":
+		if e.ComplexityRoot.TeamBucket.Team == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucket.Team(childComplexity), true
+
+	case "TeamBucketConnection.edges":
+		if e.ComplexityRoot.TeamBucketConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucketConnection.Edges(childComplexity), true
+	case "TeamBucketConnection.nodes":
+		if e.ComplexityRoot.TeamBucketConnection.Nodes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucketConnection.Nodes(childComplexity), true
+	case "TeamBucketConnection.pageInfo":
+		if e.ComplexityRoot.TeamBucketConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucketConnection.PageInfo(childComplexity), true
+
+	case "TeamBucketEdge.cursor":
+		if e.ComplexityRoot.TeamBucketEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucketEdge.Cursor(childComplexity), true
+	case "TeamBucketEdge.node":
+		if e.ComplexityRoot.TeamBucketEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TeamBucketEdge.Node(childComplexity), true
 
 	case "TeamConnection.edges":
 		if e.ComplexityRoot.TeamConnection.Edges == nil {
@@ -4935,6 +5061,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputSendMessageInput,
 		ec.unmarshalInputSharedBucketFilter,
 		ec.unmarshalInputSharedBucketOrder,
+		ec.unmarshalInputTeamBucketFilter,
+		ec.unmarshalInputTeamBucketOrder,
 		ec.unmarshalInputTeamOrder,
 		ec.unmarshalInputUpdateServiceAccountInput,
 		ec.unmarshalInputUpdateServiceAccountTokenInput,
@@ -8188,6 +8316,159 @@ enum SharedBucketOrderField {
 	TEAM
 }
 `, BuiltIn: false},
+	{Name: "../schema/teambuckets.graphqls", Input: `extend type Query {
+	"""
+	Get a list of Team Buckets.
+	"""
+	teamBuckets(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: TeamBucketFilter
+	): TeamBucketConnection!
+
+	"""
+	Get a Team Bucket by its name, e.g. 'ssb-my-team-data-produkt-prod'
+	"""
+	teamBucket(name: String!): TeamBucket!
+}
+
+extend type Team {
+	teamBuckets(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Ordering options for items returned from the connection.
+		"""
+		orderBy: TeamBucketOrder
+
+		"""
+		Filter the results
+		"""
+		filter: TeamBucketFilter
+	): TeamBucketConnection!
+}
+
+type TeamBucket implements Node {
+	id: ID!
+
+	name: String!
+
+	kind: String!
+
+	env: String!
+
+	team: Team!
+}
+
+type TeamBucketConnection {
+	pageInfo: PageInfo!
+
+	nodes: [TeamBucket]!
+
+	edges: [TeamBucketEdge!]!
+}
+
+type TeamBucketEdge {
+	cursor: Cursor!
+
+	node: TeamBucket!
+}
+
+input TeamBucketFilter {
+	"""
+	Filter by kinds (e.g. produkt/kilde)
+	"""
+	kinds: [String!]
+
+	"""
+	Filter by the envs the buckets belong to
+	"""
+	envs: [String!]
+}
+
+"""
+Ordering options when fetching TeamBucket.
+"""
+input TeamBucketOrder {
+	"""
+	The field to order items by.
+	"""
+	field: TeamBucketOrderField!
+
+	"""
+	The direction to order items by.
+	"""
+	direction: OrderDirection!
+}
+
+"""
+Possible fields to order TeamBucket by.
+"""
+enum TeamBucketOrderField {
+	"""
+	The name of the TeamBucket.
+	"""
+	NAME
+
+	"""
+	The kind of the TeamBucket.
+	"""
+	KIND
+
+	"""
+	The environment of the TeamBucket.
+	"""
+	ENV
+
+	"""
+	The team who owns the TeamBucket.
+	"""
+	TEAM
+}
+`, BuiltIn: false},
 	{Name: "../schema/teams.graphqls", Input: `extend type Query {
 	"""
 	Get a list of teams.
@@ -10265,6 +10546,53 @@ func (ec *executionContext) field_Query_sharedBuckets_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_teamBucket_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_teamBuckets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOTeamBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_teamMembers_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -10861,6 +11189,42 @@ func (ec *executionContext) field_Team_sharedBuckets_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Team_teamBuckets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["orderBy"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "filter", ec.unmarshalOTeamBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketFilter)
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg5
+	return args, nil
+}
+
 func (ec *executionContext) field_User_groups_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -11310,6 +11674,8 @@ func (ec *executionContext) fieldContext_AddTeamAccessManagerPayload_team(_ cont
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -11500,6 +11866,8 @@ func (ec *executionContext) fieldContext_ArtifactRegistryAllowedGithubRepos_team
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -12191,6 +12559,8 @@ func (ec *executionContext) fieldContext_ArtifactRegistryRepository_team(_ conte
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -12984,6 +13354,8 @@ func (ec *executionContext) fieldContext_CreateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -13164,6 +13536,8 @@ func (ec *executionContext) fieldContext_DisableTeamFeaturePayload_team(_ contex
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -13295,6 +13669,8 @@ func (ec *executionContext) fieldContext_EnableTeamFeaturePayload_team(_ context
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -17522,6 +17898,108 @@ func (ec *executionContext) fieldContext_Query_sharedBucket(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_teamBuckets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_teamBuckets,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().TeamBuckets(ctx, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*teambuckets.TeamBucketOrder), fc.Args["filter"].(*teambuckets.TeamBucketFilter))
+		},
+		nil,
+		ec.marshalNTeamBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_teamBuckets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_TeamBucketConnection_pageInfo(ctx, field)
+			case "nodes":
+				return ec.fieldContext_TeamBucketConnection_nodes(ctx, field)
+			case "edges":
+				return ec.fieldContext_TeamBucketConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucketConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_teamBuckets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_teamBucket(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_teamBucket,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().TeamBucket(ctx, fc.Args["name"].(string))
+		},
+		nil,
+		ec.marshalNTeamBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_teamBucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TeamBucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_TeamBucket_name(ctx, field)
+			case "kind":
+				return ec.fieldContext_TeamBucket_kind(ctx, field)
+			case "env":
+				return ec.fieldContext_TeamBucket_env(ctx, field)
+			case "team":
+				return ec.fieldContext_TeamBucket_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucket", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_teamBucket_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_teams(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -17638,6 +18116,8 @@ func (ec *executionContext) fieldContext_Query_team(ctx context.Context, field g
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -19560,6 +20040,8 @@ func (ec *executionContext) fieldContext_ReconcilerError_team(_ context.Context,
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -19930,6 +20412,8 @@ func (ec *executionContext) fieldContext_RemoveTeamAccessManagerPayload_team(_ c
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -22049,6 +22533,8 @@ func (ec *executionContext) fieldContext_ServiceAccount_team(_ context.Context, 
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -24630,6 +25116,8 @@ func (ec *executionContext) fieldContext_SharedBucket_team(_ context.Context, fi
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -24950,6 +25438,8 @@ func (ec *executionContext) fieldContext_SharedBucketAccess_team(_ context.Conte
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -26177,6 +26667,55 @@ func (ec *executionContext) fieldContext_Team_artifactRegistryRepositories(ctx c
 	return fc, nil
 }
 
+func (ec *executionContext) _Team_teamBuckets(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_teamBuckets,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Team().TeamBuckets(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*teambuckets.TeamBucketOrder), fc.Args["filter"].(*teambuckets.TeamBucketFilter))
+		},
+		nil,
+		ec.marshalNTeamBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_teamBuckets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_TeamBucketConnection_pageInfo(ctx, field)
+			case "nodes":
+				return ec.fieldContext_TeamBucketConnection_nodes(ctx, field)
+			case "edges":
+				return ec.fieldContext_TeamBucketConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucketConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Team_teamBuckets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TeamAccessManager_team(ctx context.Context, field graphql.CollectedField, obj *team.TeamAccessManager) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -26243,6 +26782,8 @@ func (ec *executionContext) fieldContext_TeamAccessManager_team(_ context.Contex
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -26304,6 +26845,388 @@ func (ec *executionContext) fieldContext_TeamAccessManager_user(_ context.Contex
 				return ec.fieldContext_User_isSectionManager(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucket_id(ctx context.Context, field graphql.CollectedField, obj *teambuckets.TeamBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucket_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID(), nil
+		},
+		nil,
+		ec.marshalNID2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋidentᚐIdent,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucket_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucket",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucket_name(ctx context.Context, field graphql.CollectedField, obj *teambuckets.TeamBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucket_name,
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucket_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucket_kind(ctx context.Context, field graphql.CollectedField, obj *teambuckets.TeamBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucket_kind,
+		func(ctx context.Context) (any, error) {
+			return obj.Kind, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucket_kind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucket_env(ctx context.Context, field graphql.CollectedField, obj *teambuckets.TeamBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucket_env,
+		func(ctx context.Context) (any, error) {
+			return obj.Env, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucket_env(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucket",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucket_team(ctx context.Context, field graphql.CollectedField, obj *teambuckets.TeamBucket) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucket_team,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.TeamBucket().Team(ctx, obj)
+		},
+		nil,
+		ec.marshalNTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeam,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucket_team(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucket",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Team_id(ctx, field)
+			case "slug":
+				return ec.fieldContext_Team_slug(ctx, field)
+			case "displayName":
+				return ec.fieldContext_Team_displayName(ctx, field)
+			case "section":
+				return ec.fieldContext_Team_section(ctx, field)
+			case "isManaged":
+				return ec.fieldContext_Team_isManaged(ctx, field)
+			case "hasManualEditing":
+				return ec.fieldContext_Team_hasManualEditing(ctx, field)
+			case "members":
+				return ec.fieldContext_Team_members(ctx, field)
+			case "groups":
+				return ec.fieldContext_Team_groups(ctx, field)
+			case "sharedBuckets":
+				return ec.fieldContext_Team_sharedBuckets(ctx, field)
+			case "sharedBucketsAccess":
+				return ec.fieldContext_Team_sharedBucketsAccess(ctx, field)
+			case "lastSuccessfulSync":
+				return ec.fieldContext_Team_lastSuccessfulSync(ctx, field)
+			case "deletionInProgress":
+				return ec.fieldContext_Team_deletionInProgress(ctx, field)
+			case "viewerIsOwner":
+				return ec.fieldContext_Team_viewerIsOwner(ctx, field)
+			case "viewerIsMember":
+				return ec.fieldContext_Team_viewerIsMember(ctx, field)
+			case "viewerCanManageMembers":
+				return ec.fieldContext_Team_viewerCanManageMembers(ctx, field)
+			case "viewerTeamMember":
+				return ec.fieldContext_Team_viewerTeamMember(ctx, field)
+			case "accessManagers":
+				return ec.fieldContext_Team_accessManagers(ctx, field)
+			case "features":
+				return ec.fieldContext_Team_features(ctx, field)
+			case "activityLog":
+				return ec.fieldContext_Team_activityLog(ctx, field)
+			case "artifactRegistryAllowedGithubRepos":
+				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
+			case "artifactRegistryRepositories":
+				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucketConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*teambuckets.TeamBucket]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucketConnection_pageInfo,
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		ec.marshalNPageInfo2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐPageInfo,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucketConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucketConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hasNextPage":
+				return ec.fieldContext_PageInfo_hasNextPage(ctx, field)
+			case "endCursor":
+				return ec.fieldContext_PageInfo_endCursor(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_PageInfo_hasPreviousPage(ctx, field)
+			case "startCursor":
+				return ec.fieldContext_PageInfo_startCursor(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_PageInfo_totalCount(ctx, field)
+			case "pageStart":
+				return ec.fieldContext_PageInfo_pageStart(ctx, field)
+			case "pageEnd":
+				return ec.fieldContext_PageInfo_pageEnd(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type PageInfo", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucketConnection_nodes(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*teambuckets.TeamBucket]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucketConnection_nodes,
+		func(ctx context.Context) (any, error) {
+			return obj.Nodes(), nil
+		},
+		nil,
+		ec.marshalNTeamBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucketConnection_nodes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucketConnection",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TeamBucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_TeamBucket_name(ctx, field)
+			case "kind":
+				return ec.fieldContext_TeamBucket_kind(ctx, field)
+			case "env":
+				return ec.fieldContext_TeamBucket_env(ctx, field)
+			case "team":
+				return ec.fieldContext_TeamBucket_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucket", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucketConnection_edges(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*teambuckets.TeamBucket]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucketConnection_edges,
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		ec.marshalNTeamBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucketConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucketConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cursor":
+				return ec.fieldContext_TeamBucketEdge_cursor(ctx, field)
+			case "node":
+				return ec.fieldContext_TeamBucketEdge_node(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucketEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucketEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*teambuckets.TeamBucket]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucketEdge_cursor,
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		ec.marshalNCursor2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucketEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucketEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Cursor does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TeamBucketEdge_node(ctx context.Context, field graphql.CollectedField, obj *pagination.Edge[*teambuckets.TeamBucket]) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_TeamBucketEdge_node,
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		ec.marshalNTeamBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_TeamBucketEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TeamBucketEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_TeamBucket_id(ctx, field)
+			case "name":
+				return ec.fieldContext_TeamBucket_name(ctx, field)
+			case "kind":
+				return ec.fieldContext_TeamBucket_kind(ctx, field)
+			case "env":
+				return ec.fieldContext_TeamBucket_env(ctx, field)
+			case "team":
+				return ec.fieldContext_TeamBucket_team(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamBucket", field.Name)
 		},
 	}
 	return fc, nil
@@ -26420,6 +27343,8 @@ func (ec *executionContext) fieldContext_TeamConnection_nodes(_ context.Context,
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -26760,6 +27685,8 @@ func (ec *executionContext) fieldContext_TeamEdge_node(_ context.Context, field 
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -27355,6 +28282,8 @@ func (ec *executionContext) fieldContext_TeamMember_team(_ context.Context, fiel
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -28872,6 +29801,8 @@ func (ec *executionContext) fieldContext_UpdateTeamPayload_team(_ context.Contex
 				return ec.fieldContext_Team_artifactRegistryAllowedGithubRepos(ctx, field)
 			case "artifactRegistryRepositories":
 				return ec.fieldContext_Team_artifactRegistryRepositories(ctx, field)
+			case "teamBuckets":
+				return ec.fieldContext_Team_teamBuckets(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Team", field.Name)
 		},
@@ -33237,6 +34168,80 @@ func (ec *executionContext) unmarshalInputSharedBucketOrder(ctx context.Context,
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputTeamBucketFilter(ctx context.Context, obj any) (teambuckets.TeamBucketFilter, error) {
+	var it teambuckets.TeamBucketFilter
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"kinds", "envs"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "kinds":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("kinds"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Kinds = data
+		case "envs":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("envs"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Envs = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputTeamBucketOrder(ctx context.Context, obj any) (teambuckets.TeamBucketOrder, error) {
+	var it teambuckets.TeamBucketOrder
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"field", "direction"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "field":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
+			data, err := ec.unmarshalNTeamBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrderField(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Field = data
+		case "direction":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direction"))
+			data, err := ec.unmarshalNOrderDirection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋmodelᚐOrderDirection(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Direction = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputTeamOrder(ctx context.Context, obj any) (team.TeamOrder, error) {
 	var it team.TeamOrder
 	if obj == nil {
@@ -33911,6 +34916,13 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 			return graphql.Null
 		}
 		return ec._User(ctx, sel, obj)
+	case teambuckets.TeamBucket:
+		return ec._TeamBucket(ctx, sel, &obj)
+	case *teambuckets.TeamBucket:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._TeamBucket(ctx, sel, obj)
 	case sharedbucketsstopgap.SharedBucket:
 		return ec._SharedBucket(ctx, sel, &obj)
 	case *sharedbucketsstopgap.SharedBucket:
@@ -36985,6 +37997,50 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_sharedBucket(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "teamBuckets":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_teamBuckets(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "teamBucket":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_teamBucket(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -41273,6 +42329,42 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "teamBuckets":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Team_teamBuckets(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -41379,6 +42471,189 @@ func (ec *executionContext) _TeamAccessManager(ctx context.Context, sel ast.Sele
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamBucketImplementors = []string{"TeamBucket", "Node"}
+
+func (ec *executionContext) _TeamBucket(ctx context.Context, sel ast.SelectionSet, obj *teambuckets.TeamBucket) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamBucketImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamBucket")
+		case "id":
+			out.Values[i] = ec._TeamBucket_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "name":
+			out.Values[i] = ec._TeamBucket_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "kind":
+			out.Values[i] = ec._TeamBucket_kind(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "env":
+			out.Values[i] = ec._TeamBucket_env(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "team":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._TeamBucket_team(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamBucketConnectionImplementors = []string{"TeamBucketConnection"}
+
+func (ec *executionContext) _TeamBucketConnection(ctx context.Context, sel ast.SelectionSet, obj *pagination.Connection[*teambuckets.TeamBucket]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamBucketConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamBucketConnection")
+		case "pageInfo":
+			out.Values[i] = ec._TeamBucketConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "nodes":
+			out.Values[i] = ec._TeamBucketConnection_nodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "edges":
+			out.Values[i] = ec._TeamBucketConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var teamBucketEdgeImplementors = []string{"TeamBucketEdge"}
+
+func (ec *executionContext) _TeamBucketEdge(ctx context.Context, sel ast.SelectionSet, obj *pagination.Edge[*teambuckets.TeamBucket]) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, teamBucketEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("TeamBucketEdge")
+		case "cursor":
+			out.Values[i] = ec._TeamBucketEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "node":
+			out.Values[i] = ec._TeamBucketEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -45461,6 +46736,74 @@ func (ec *executionContext) marshalNTeamAccessManager2ᚖgithubᚗcomᚋstatisti
 	return ec._TeamAccessManager(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNTeamBucket2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket(ctx context.Context, sel ast.SelectionSet, v teambuckets.TeamBucket) graphql.Marshaler {
+	return ec._TeamBucket(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTeamBucket2ᚕᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket(ctx context.Context, sel ast.SelectionSet, v []*teambuckets.TeamBucket) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOTeamBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalNTeamBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket(ctx context.Context, sel ast.SelectionSet, v *teambuckets.TeamBucket) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamBucket(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTeamBucketConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*teambuckets.TeamBucket]) graphql.Marshaler {
+	return ec._TeamBucketConnection(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTeamBucketConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v *pagination.Connection[*teambuckets.TeamBucket]) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._TeamBucketConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTeamBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx context.Context, sel ast.SelectionSet, v pagination.Edge[*teambuckets.TeamBucket]) graphql.Marshaler {
+	return ec._TeamBucketEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNTeamBucketEdge2ᚕgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []pagination.Edge[*teambuckets.TeamBucket]) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNTeamBucketEdge2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐEdge(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalNTeamBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrderField(ctx context.Context, v any) (teambuckets.TeamBucketOrderField, error) {
+	var res teambuckets.TeamBucketOrderField
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNTeamBucketOrderField2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrderField(ctx context.Context, sel ast.SelectionSet, v teambuckets.TeamBucketOrderField) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) marshalNTeamConnection2githubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection(ctx context.Context, sel ast.SelectionSet, v pagination.Connection[*team.Team]) graphql.Marshaler {
 	return ec._TeamConnection(ctx, sel, &v)
 }
@@ -46354,6 +47697,29 @@ func (ec *executionContext) marshalOTeam2ᚖgithubᚗcomᚋstatisticsnorwayᚋda
 		return graphql.Null
 	}
 	return ec._Team(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOTeamBucket2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucket(ctx context.Context, sel ast.SelectionSet, v *teambuckets.TeamBucket) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._TeamBucket(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTeamBucketFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketFilter(ctx context.Context, v any) (*teambuckets.TeamBucketFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTeamBucketFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOTeamBucketOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteambucketsᚐTeamBucketOrder(ctx context.Context, v any) (*teambuckets.TeamBucketOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTeamBucketOrder(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember(ctx context.Context, sel ast.SelectionSet, v *team.TeamMember) graphql.Marshaler {

@@ -231,3 +231,14 @@ sql:
         <<: *default_go
         package: "grpcatlantissql"
         out: "../internal/grpc/grpcatlantis/grpcatlantissql"
+
+  - <<: *default_domain
+    name: "Team Buckets SQL"
+    queries: "../internal/teambuckets/queries"
+    analyzer:
+      database: false
+    gen:
+      go:
+        <<: *default_go
+        package: "teambucketssql"
+        out: "../internal/teambuckets/teambucketssql"

@@ -7,6 +7,6 @@ CREATE TABLE team_atlantis_config (
 	resources JSON,
 	disk_size TEXT,
 	repo_config JSON,
-	UNIQUE(custom_name)
+	UNIQUE (custom_name)
 )
 ;

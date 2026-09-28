@@ -11,6 +11,7 @@ import (
 	section "github.com/statisticsnorway/dapla-ctrl/api/internal/section"
 	sharedbucketsstopgap "github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
 	team "github.com/statisticsnorway/dapla-ctrl/api/internal/team"
+	teambuckets "github.com/statisticsnorway/dapla-ctrl/api/internal/teambuckets"
 	user "github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
@@ -51,6 +52,9 @@ func NewComplexityRoot() ComplexityRoot {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.SharedBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder, filter *sharedbucketsstopgap.SharedBucketFilter) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Query.TeamBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Query.TeamMembers = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *user.UserOrder) int {
@@ -108,6 +112,9 @@ func NewComplexityRoot() ComplexityRoot {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.Team.SharedBucketsAccess = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
+	c.Team.TeamBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.User.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
