@@ -53,14 +53,28 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) error {
 }
 
 const delete = `-- name: Delete :exec
-DELETE FROM
-    shared_buckets_stopgap
+DELETE FROM shared_buckets_stopgap
 WHERE
-    name = $1
+	team_slug = $1
+	AND short_name = $2
+	AND kind = $3
+	AND env = $4
 `
 
-func (q *Queries) Delete(ctx context.Context, name string) error {
-	_, err := q.db.Exec(ctx, delete, name)
+type DeleteParams struct {
+	TeamSlug  slug.Slug
+	ShortName string
+	Kind      string
+	Env       string
+}
+
+func (q *Queries) Delete(ctx context.Context, arg DeleteParams) error {
+	_, err := q.db.Exec(ctx, delete,
+		arg.TeamSlug,
+		arg.ShortName,
+		arg.Kind,
+		arg.Env,
+	)
 	return err
 }
 
@@ -107,13 +121,13 @@ func (q *Queries) Get(ctx context.Context, arg GetParams) (*GetRow, error) {
 
 const listForTeam = `-- name: ListForTeam :many
 SELECT
-    shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env
+	shared_buckets_stopgap.name, shared_buckets_stopgap.team_slug, shared_buckets_stopgap.short_name, shared_buckets_stopgap.kind, shared_buckets_stopgap.env
 FROM
-    shared_buckets_stopgap
+	shared_buckets_stopgap
 WHERE
-    team_slug = $1
+	team_slug = $1
 ORDER BY
-    name
+	name
 `
 
 type ListForTeamRow struct {

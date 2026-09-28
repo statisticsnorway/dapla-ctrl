@@ -40,7 +40,13 @@ func (s *Server) Create(ctx context.Context, req *protoapi.CreateSharedBucketsSt
 }
 
 func (s *Server) Delete(ctx context.Context, req *protoapi.DeleteSharedBucketsStopgapRequest) (*protoapi.DeleteSharedBucketsStopgapResponse, error) {
-	if err := s.querier.Delete(ctx, req.Name); err != nil {
+	spec := req.SharedBucketStopgap
+	if err := s.querier.Delete(ctx, grpcsharedbucketsstopgapsql.DeleteParams{
+		ShortName: spec.ShortName,
+		TeamSlug:  slug.Slug(spec.TeamSlug),
+		Kind:      spec.Type,
+		Env:       spec.Env,
+	}); err != nil {
 		return nil, err
 	}
 
@@ -48,11 +54,12 @@ func (s *Server) Delete(ctx context.Context, req *protoapi.DeleteSharedBucketsSt
 }
 
 func (s *Server) Get(ctx context.Context, req *protoapi.GetSharedBucketsStopgapRequest) (*protoapi.GetSharedBucketsStopgapResponse, error) {
+	spec := req.SharedBucketStopgap
 	res, err := s.querier.Get(ctx, grpcsharedbucketsstopgapsql.GetParams{
-		ShortName: req.SharedBucketStopgap.ShortName,
-		TeamSlug:  slug.Slug(req.SharedBucketStopgap.TeamSlug),
-		Kind:      req.SharedBucketStopgap.Type,
-		Env:       req.SharedBucketStopgap.Env,
+		ShortName: spec.ShortName,
+		TeamSlug:  slug.Slug(spec.TeamSlug),
+		Kind:      spec.Type,
+		Env:       spec.Env,
 	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, status.Errorf(codes.NotFound, "bucket not found")

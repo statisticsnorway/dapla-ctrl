@@ -8,7 +8,10 @@ VALUES
 -- name: Delete :exec
 DELETE FROM shared_buckets_stopgap
 WHERE
-	name = @name
+	team_slug = @team_slug
+	AND short_name = @short_name
+	AND kind = @kind
+	AND env = @env
 ;
 
 -- name: Get :one
