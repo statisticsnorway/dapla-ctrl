@@ -1,0 +1,21 @@
+query ArtifactRegistryGithubRepos($team: Slug!) {
+	team(slug: $team) {
+		artifactRegistryAllowedGithubRepos(first: 25) @paginate(mode: SinglePage) {
+			pageInfo {
+				totalCount
+				hasNextPage
+				hasPreviousPage
+				pageStart
+				pageEnd
+				startCursor
+				endCursor
+			}
+			edges {
+				node {
+					id
+					name
+				}
+			}
+		}
+	}
+}
