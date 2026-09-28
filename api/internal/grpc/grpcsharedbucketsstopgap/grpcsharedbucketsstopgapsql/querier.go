@@ -4,12 +4,16 @@ package grpcsharedbucketsstopgapsql
 
 import (
 	"context"
+
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Querier interface {
 	AddGroup(ctx context.Context, arg AddGroupParams) error
 	Create(ctx context.Context, arg CreateParams) error
+	Delete(ctx context.Context, name string) error
 	Get(ctx context.Context, arg GetParams) (*GetRow, error)
+	ListForTeam(ctx context.Context, teamSlug slug.Slug) ([]*ListForTeamRow, error)
 	ListGroups(ctx context.Context, name string) ([]*ListGroupsRow, error)
 	RemoveGroup(ctx context.Context, arg RemoveGroupParams) error
 }

@@ -4,13 +4,12 @@ package teambuckets
 
 import (
 	"fmt"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"io"
 	"slices"
 	"strconv"
 	"strings"
-
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 )
 
 type (
