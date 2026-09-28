@@ -1,21 +1,13 @@
 package atlantis
 
 import (
-	"context"
 	"fmt"
-	"net"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
-	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
@@ -243,55 +235,4 @@ func TestReconcileKubernetesVolume(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-}
-
-type fakeAtlantisServer struct {
-	protoapi.UnimplementedAtlantisServer
-	webhookSecrets map[string]string
-}
-
-func newFakeAtlantisServer() *fakeAtlantisServer {
-	return &fakeAtlantisServer{
-		webhookSecrets: make(map[string]string),
-	}
-}
-
-func (s *fakeAtlantisServer) GetTeamAtlantis(ctx context.Context, req *protoapi.GetTeamAtlantisRequest) (*protoapi.GetTeamAtlantisResponse, error) {
-	secret, ok := s.webhookSecrets[req.TeamSlug]
-	if !ok {
-		return nil, status.Errorf(codes.NotFound, "team atlantis not found")
-	}
-	return &protoapi.GetTeamAtlantisResponse{
-		Config: &protoapi.AtlantisConfig{
-			TeamSlug:      req.TeamSlug,
-			WebhookSecret: &secret,
-		},
-	}, nil
-}
-
-func (s *fakeAtlantisServer) SetTeamAtlantisWebhookSecret(ctx context.Context, req *protoapi.SetTeamAtlantisWebhookSecretRequest) (*protoapi.SetTeamAtlantisWebhookSecretResponse, error) {
-	s.webhookSecrets[req.TeamSlug] = req.WebhookSecret
-	return nil, nil
-}
-
-func startFakeGrpcServer(t *testing.T, srv *fakeAtlantisServer) *apiclient.APIClient {
-	t.Helper()
-
-	lis, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		t.Fatalf("listen: %v", err)
-	}
-
-	s := grpc.NewServer()
-	protoapi.RegisterAtlantisServer(s, srv)
-	go func() { _ = s.Serve(lis) }()
-	t.Cleanup(s.Stop)
-
-	client, err := apiclient.New(lis.Addr().String(), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		t.Fatalf("create api client: %v", err)
-	}
-	t.Cleanup(func() { _ = client.Close() })
-
-	return client
 }
