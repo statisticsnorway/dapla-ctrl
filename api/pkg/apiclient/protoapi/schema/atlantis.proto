@@ -18,6 +18,7 @@ message AtlantisConfig {
 service Atlantis {
     rpc GetTeamAtlantis(GetTeamAtlantisRequest) returns (GetTeamAtlantisResponse) {}
     rpc SetTeamAtlantisWebhookSecret(SetTeamAtlantisWebhookSecretRequest) returns (SetTeamAtlantisWebhookSecretResponse) {}
+    rpc GetTeamAtlantisWebhookSecret(GetTeamAtlantisWebhookSecretRequest) returns (GetTeamAtlantisWebhookSecretResponse) {}
 }
 
 message GetTeamAtlantisRequest {
@@ -34,3 +35,10 @@ message SetTeamAtlantisWebhookSecretRequest {
 }
 
 message SetTeamAtlantisWebhookSecretResponse {}
+
+message GetTeamAtlantisWebhookSecretRequest {
+    string team_slug = 1;
+}
+message GetTeamAtlantisWebhookSecretResponse {
+    string webhook_secret = 1;
+}
