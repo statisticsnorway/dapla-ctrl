@@ -10,6 +10,7 @@ import (
 
 type Querier interface {
 	Get(ctx context.Context, teamSlug slug.Slug) (*GetRow, error)
+	GetWebhookSecret(ctx context.Context, teamSlug slug.Slug) (*string, error)
 	UpsertWebhookSecret(ctx context.Context, arg UpsertWebhookSecretParams) error
 }
 
