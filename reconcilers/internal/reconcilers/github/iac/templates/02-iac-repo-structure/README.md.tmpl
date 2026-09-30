@@ -1,0 +1,33 @@
+# {{ .RepositoryName }}
+
+Home of {{ .TeamName }}'s infrastructure code that configures GCP resources and Dapla services.
+
+### Working locally
+
+In order to be able to run `terraform plan` locally you will need to comment out the configuration for
+`terraform.backend` in the `main.tf` file in the root of the project. Then run `terraform init` from the root of the
+project.
+
+**Remember** to do this before anything else!
+
+### Useful commands
+
+```
+terraform fmt -check        # Checks input syntax (like main.tf in /examples)
+terraform fmt -recursive    # Formats code to Terraform standards (for all files in the project if run from root)
+terraform get -update       # Force update of remote Terraform modules
+terraform validate          # Checks that verify whether a configuration is syntactically valid and internally consistent
+```
+
+### Running static-code-analysis
+
+checkov - https://github.com/bridgecrewio/checkov/
+
+```
+brew install checkov
+
+terraform init
+terraform plan -out tf.plan
+terraform show -json tf.plan | jq '.' > tf.json
+checkov -f tf.json
+```

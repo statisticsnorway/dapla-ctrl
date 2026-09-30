@@ -1,0 +1,17 @@
+team_uniform_name: {{ .TeamSlug }}
+
+projects:
+  - project_name: {{ .TeamSlug }}
+    env: test
+    features:
+      - dapla-buckets
+      - transfer-service
+      - shared-buckets
+
+  - project_name: {{ .TeamSlug }}
+    env: prod
+    features:
+      - dapla-buckets
+      - transfer-service
+      - kildomaten
+      - shared-buckets
