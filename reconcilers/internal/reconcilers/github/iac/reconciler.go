@@ -2,6 +2,7 @@ package iac
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -20,8 +21,6 @@ const (
 
 	configTeamAllowlistKey = "teamAllowlist"
 	configRepoPrefixKey    = "repoPrefix"
-
-	githubOrganisation = "statisticsnorway"
 )
 
 type ghClient struct {
@@ -99,50 +98,27 @@ func (r *reconciler) Name() string {
 	return reconcilerName
 }
 
-// TODO: Implement Reconcile method
-// Reconcile should:
-// 1. Check if github repo exists. If yes then return
-// 2.
-//
-
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	if err := r.updateConfig(ctx, client); err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 
-	// Only check allowlist if there is anything in it.
+	// empty allowlist allows all
 	if len(r.teamAllowlist) > 0 && !slices.Contains(r.teamAllowlist, daplaTeam.Slug) {
 		return nil
 	}
-	repoName := r.repoPrefix + "" + "-iac"
-	repo, _, err := r.ghClient.Repositories.Get(ctx, githubOrganisation, repoName)
+
+	repoName := r.repoPrefix + daplaTeam.Slug + "-iac"
+	repo, created, err := r.getOrCreateRepository(ctx, r.org, repoName, daplaTeam)
 	if err != nil {
 		return err
 	}
 
-	if repo == nil {
-		description := "IaC repo for " + daplaTeam.GetSlug()
-		managedTopic := "managed"
-		if !daplaTeam.IsManaged {
-			managedTopic = "self-managed"
-		}
-		// TODO: loop with exponential backoff to verify that the repo exists
-		repo, _, err := r.ghClient.Repositories.Create(ctx, githubOrganisation, &github.Repository{
-			Name:        &repoName,
-			Description: &description,
-			Visibility:  new("internal"),
-			HasIssues:   new(true),
-			Topics:      []string{"terraform", "dapla-team", "kuben", managedTopic},
-			AutoInit:    new(true),
-		})
-		if err != nil {
-			return err
-		}
-
+	if created {
 		// get atlantis name
 		atlantisUrl := "https://${var.atlantis_name}.atlantis.ssb.no/events" // TODO:
 		secret := ""                                                         // TODO, fetch from api
-		r.ghClient.Repositories.CreateHook(ctx, githubOrganisation, *repo.Name, &github.Hook{
+		r.ghClient.Repositories.CreateHook(ctx, r.org, *repo.Name, &github.Hook{
 			Config: &github.HookConfig{
 				ContentType: new("json"),
 				URL:         &atlantisUrl,
@@ -166,7 +142,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		// TODO: create branch and commit iac repo tempalte
 	}
 
-	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, githubOrganisation, *repo.Name)
+	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, r.org, *repo.Name)
 	if err != nil {
 		return err
 	}
@@ -186,7 +162,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		"dapla-platform-developers":    "push",
 		daplaTeam.Slug + "-developers": ghTeamPermission,
 	} {
-		_, err = r.ghClient.Teams.AddTeamRepoBySlug(ctx, githubOrganisation, slug, githubOrganisation, *repo.Name, &github.TeamAddTeamRepoOptions{
+		_, err = r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, slug, r.org, *repo.Name, &github.TeamAddTeamRepoOptions{
 			Permission: permission,
 		})
 		if err != nil {
@@ -196,7 +172,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	// enforce branch protections rule
 	if daplaTeam.IsManaged {
-		_, _, err = r.ghClient.Repositories.UpdateBranchProtection(ctx, githubOrganisation, *repo.Name, "main", &github.ProtectionRequest{
+		_, _, err = r.ghClient.Repositories.UpdateBranchProtection(ctx, r.org, *repo.Name, "main", &github.ProtectionRequest{
 			EnforceAdmins: true,
 			RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
 				DismissStaleReviews:          true,
@@ -216,6 +192,90 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	// TODO update webhook secret if it has changed (check obfuscated secret or some other field).
 
 	return nil
+}
+
+func (r *reconciler) getOrCreateRepository(ctx context.Context, owner, repoName string, daplaTeam *protoapi.Team) (*github.Repository, bool, error) {
+	repo, _, err := r.ghClient.Repositories.Get(ctx, owner, repoName)
+	if err == nil {
+		return repo, false, nil
+	}
+
+	githubError, ok := errors.AsType[*github.ErrorResponse](err)
+	if !ok || githubError.Response.StatusCode != http.StatusNotFound {
+		return nil, false, err
+	}
+
+	description := "IaC repo for " + daplaTeam.GetSlug()
+	managedTopic := "managed"
+	if !daplaTeam.IsManaged {
+		managedTopic = "self-managed"
+	}
+	_, _, err = r.ghClient.Repositories.Create(ctx, owner, &github.Repository{
+		Name:        &repoName,
+		Description: &description,
+		Visibility:  new("internal"),
+		HasIssues:   new(true),
+		Topics:      []string{"terraform", "dapla-team", "kuben", managedTopic},
+		AutoInit:    new(true),
+	})
+	if err != nil {
+		return nil, false, err
+	}
+
+	// Let GitHub finish creating the repo, such that we avoid race condition later on
+	repo, err = r.waitForRepoVisible(ctx, owner, repoName)
+	if err != nil {
+		return nil, false, err
+	}
+
+	return repo, true, nil
+}
+
+func (r *reconciler) waitForRepoVisible(ctx context.Context, owner, repoName string) (*github.Repository, error) {
+	// 5 apptemts with exponential backoff caped at 4 seconds -> total potential 15 seconds hold
+	maxApptempts := 5
+	backoff := 1 * time.Second
+	waited := time.Duration(0)
+
+	for attempt := 1; attempt <= maxApptempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, fmt.Errorf("context done while waiting for github repo %q to become visible after creation: %w", repoName, err)
+		}
+
+		repo, _, err := r.ghClient.Repositories.Get(ctx, owner, repoName)
+		if err == nil {
+			return repo, nil
+		}
+
+		if githubError, ok := errors.AsType[*github.ErrorResponse](err); ok {
+			status := githubError.Response.StatusCode
+			shouldRetry := status == http.StatusNotFound ||
+				status == http.StatusTooManyRequests ||
+				status >= http.StatusInternalServerError
+			if !shouldRetry {
+				return nil, fmt.Errorf("failed to verify repository %q after creation: %w", repoName, err)
+			}
+		}
+
+		if attempt == maxApptempts {
+			break
+		}
+
+		// backoff
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("context done while waiting for repository %q to become visible after creation: %w", repoName, ctx.Err())
+		case <-time.After(backoff):
+		}
+
+		waited += backoff
+		backoff *= 2
+		if backoff > 4 * time.Second {
+			backoff = 4 * time.Second
+		}
+	}
+
+	return nil, fmt.Errorf("github repo %q was created but could not be verified as visible after %d attempts (waited ca %s )", repoName, maxApptempts, waited)
 }
 
 func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
