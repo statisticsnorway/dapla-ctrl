@@ -99,10 +99,6 @@
 			{#if isAdmin}
 				<div>
 					<Heading level="2">Parquedit</Heading>
-
-					Parquedit er en lagringsløsning for manuell editering, levert av team Dapla
-					Fellesfunksjoner.
-
 					<Switch
 						disabled={!canManageTeam}
 						checked={teamSettings.hasManualEditing}
@@ -111,8 +107,8 @@
 							showConfirmModal = true;
 						}}
 						>{teamSettings.hasManualEditing
-							? 'Fjern tilgang til Parquedit'
-							: 'Aktiver tilgang til Parquedit'}</Switch
+							? 'Skru av Parquedit i prodmiljøet'
+							: 'Skru på Parquedit i prodmiljøet'}</Switch
 					>
 
 					<GraphErrors errors={descriptionErrors} size="small" />
@@ -120,9 +116,8 @@
 			{/if}
 			<div>
 				<Heading level="2">Kunstig Intelligens (KI)</Heading>
-				Aktiver KI-funksjonalitet for teamet i testmiljøet.
 				<Switch disabled={!canManageTeam} checked={aiEnabled} onclick={toggleAi}>
-					{aiEnabled ? 'Deaktiver KI' : 'Aktiver KI'}
+					{aiEnabled ? 'Skru av KI i testmiljøet' : 'Skru på KI i testmiljøet'}
 				</Switch>
 				<GraphErrors errors={aiErrors} size="small" />
 			</div>
