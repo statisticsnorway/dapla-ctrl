@@ -1,6 +1,6 @@
 query ArtifactRegistryGithubRepos($team: Slug!) {
 	team(slug: $team) {
-		artifactRegistryAllowedGithubRepos(first: 25) @paginate(mode: SinglePage) {
+		artifactRegistryAllowedGithubRepos(first: 10) @paginate(mode: SinglePage) {
 			pageInfo {
 				totalCount
 				hasNextPage
