@@ -1,0 +1,18 @@
+name: Render project IaC
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: ["infra/projects.yaml"]
+  push:
+    branches:
+      - update/template
+
+jobs:
+  render:
+    uses: statisticsnorway/cookiecutter-dapla-project-iac/.github/workflows/render-projects.yaml@main
+    secrets: inherit
