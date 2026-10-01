@@ -127,11 +127,29 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 	notifier := notify.New(pool, log)
 	go notifier.Run(ctx)
 
-	var jwtMiddleware func(next http.Handler) http.Handler
+	var authMiddlewares []func(next http.Handler) http.Handler
 	if !cfg.JWT.SkipMiddleware {
-		jwtMiddleware, err = middleware.JWTAuthentication(ctx, cfg.JWT.Issuer, cfg.JWT.Audience, cfg.JWT.EmailClaim, log.WithField("subsystem", "jwt"))
+		jwtMiddleware, err := middleware.JWTAuthentication(ctx, cfg.JWT.Issuer, cfg.JWT.Audience, cfg.JWT.EmailClaim, log.WithField("subsystem", "jwt"))
 		if err != nil {
 			return fmt.Errorf("failed to create JWT authentication middleware: %w", err)
+		}
+		authMiddlewares = append(authMiddlewares, jwtMiddleware)
+	}
+
+	if !cfg.LabId.SkipMiddleware {
+		for _, issuer := range cfg.LabId.Issuers {
+			labIDMiddleware, err := middleware.JWTAuthenticationWithEmailTransformer(
+				ctx,
+				issuer,
+				cfg.LabId.Audience,
+				cfg.LabId.ShortNameClaim,
+				func(s string) string { return s + "@ssb.no" },
+				log.WithField("subsystem", "labid"),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to create LabID authentication middleware for issuer %s: %w", issuer, err)
+			}
+			authMiddlewares = append(authMiddlewares, labIDMiddleware)
 		}
 	}
 
@@ -143,7 +161,7 @@ func run(ctx context.Context, cfg *Config, log logrus.FieldLogger) error {
 			cfg.ListenAddress,
 			pool,
 			authHandler,
-			jwtMiddleware,
+			authMiddlewares,
 			graphHandler,
 			notifier,
 			log.WithField("subsystem", "http"),

@@ -22,13 +22,14 @@ import (
 const acceptableClockSkew = 3 * time.Second
 
 type jwtAuth struct {
-	issuer     string
-	audience   string
-	emailClaim string
-	jwksURL    string
-	jwksCache  *jwk.Cache
-	log        logrus.FieldLogger
-	now        clock
+	issuer                string
+	audience              string
+	emailClaim            string
+	jwksURL               string
+	jwksCache             *jwk.Cache
+	log                   logrus.FieldLogger
+	now                   clock
+	emailClaimTransformer func(string) string
 }
 
 type clock func() time.Time
@@ -98,6 +99,10 @@ func (j *jwtAuth) handler(next http.Handler) http.Handler {
 			return
 		}
 
+		if j.emailClaimTransformer != nil {
+			email = j.emailClaimTransformer(email)
+		}
+
 		usr, err := user.GetByEmail(ctx, email)
 		if err != nil {
 			j.log.WithError(err).Debug("failed to get user by external id")
@@ -118,6 +123,24 @@ func (j *jwtAuth) handler(next http.Handler) http.Handler {
 }
 
 func JWTAuthentication(ctx context.Context, issuer, audience, emailClaim string, log logrus.FieldLogger) (func(next http.Handler) http.Handler, error) {
+	auth, err := newJwtAuth(ctx, issuer, audience, emailClaim, log)
+	if err != nil {
+		return nil, err
+	}
+
+	return auth.handler, nil
+}
+
+func JWTAuthenticationWithEmailTransformer(ctx context.Context, issuer, audience, emailClaim string, transformer func(string) string, log logrus.FieldLogger) (func(next http.Handler) http.Handler, error) {
+	auth, err := newJwtAuth(ctx, issuer, audience, emailClaim, log)
+	if err != nil {
+		return nil, err
+	}
+	auth.emailClaimTransformer = transformer
+	return auth.handler, nil
+}
+
+func newJwtAuth(ctx context.Context, issuer, audience, emailClaim string, log logrus.FieldLogger) (*jwtAuth, error) {
 	if issuer == "" {
 		return nil, errors.New("issuer is required")
 	}
@@ -143,7 +166,7 @@ func JWTAuthentication(ctx context.Context, issuer, audience, emailClaim string,
 		return nil, fmt.Errorf("registering jwks provider uri to cache: %w", err)
 	}
 
-	auth := jwtAuth{
+	return &jwtAuth{
 		jwksURL:    client.JwksURI,
 		jwksCache:  cache,
 		issuer:     issuer,
@@ -151,7 +174,5 @@ func JWTAuthentication(ctx context.Context, issuer, audience, emailClaim string,
 		emailClaim: emailClaim,
 		log:        log,
 		now:        time.Now,
-	}
-
-	return auth.handler, nil
+	}, nil
 }

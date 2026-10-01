@@ -47,7 +47,7 @@ func runHttpServer(
 	listenAddress string,
 	pool *pgxpool.Pool,
 	authHandler authn.Handler,
-	jwtMiddleware func(http.Handler) http.Handler,
+	authMiddlewares []func(http.Handler) http.Handler,
 	graphHandler *handler.Server,
 	notifier *notify.Notifier,
 	log logrus.FieldLogger,
@@ -82,9 +82,9 @@ func runHttpServer(
 		if fakes.WithInsecureAuth {
 			middlewares = append(middlewares, middleware.InsecureUserHeader())
 		}
-		if jwtMiddleware != nil {
-			middlewares = append(middlewares, jwtMiddleware)
-		}
+
+		middlewares = append(middlewares, authMiddlewares...)
+
 		if authHandler != nil {
 			middlewares = append(middlewares, middleware.Oauth2Authentication(authHandler))
 		}
