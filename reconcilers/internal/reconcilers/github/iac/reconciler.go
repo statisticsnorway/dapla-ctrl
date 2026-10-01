@@ -2,6 +2,9 @@ package iac
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -113,12 +116,23 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return err
 	}
+	repoName = repo.GetName() // Should be the same as above, but reassign just to be safe
+
+	// get atlantis name
+	atlantisResp, err := client.Atlantis().GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{
+		TeamSlug: daplaTeam.Slug,
+	})
+	if err != nil {
+		return err
+	}
+	atlantisUrl := getAtlantisUrl(daplaTeam.Slug, atlantisResp.Config.GetCustomImage())
 
 	if created {
-		// get atlantis name
-		atlantisUrl := "https://${var.atlantis_name}.atlantis.ssb.no/events" // TODO:
-		secret := ""                                                         // TODO, fetch from api
-		r.ghClient.Repositories.CreateHook(ctx, r.org, *repo.Name, &github.Hook{
+		secret := atlantisResp.Config.GetWebhookSecret()
+		if secret == "" {
+			return fmt.Errorf("atlantis webhook secret for team %s is empty", daplaTeam.Slug)
+		}
+		r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
 			Config: &github.HookConfig{
 				ContentType: new("json"),
 				URL:         &atlantisUrl,
@@ -142,7 +156,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		// TODO: create branch and commit iac repo tempalte
 	}
 
-	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, r.org, *repo.Name)
+	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, r.org, repoName)
 	if err != nil {
 		return err
 	}
@@ -162,7 +176,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		"dapla-platform-developers":    "push",
 		daplaTeam.Slug + "-developers": ghTeamPermission,
 	} {
-		_, err = r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, slug, r.org, *repo.Name, &github.TeamAddTeamRepoOptions{
+		_, err = r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, slug, r.org, repoName, &github.TeamAddTeamRepoOptions{
 			Permission: permission,
 		})
 		if err != nil {
@@ -172,24 +186,21 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 
 	// enforce branch protections rule
 	if daplaTeam.IsManaged {
-		_, _, err = r.ghClient.Repositories.UpdateBranchProtection(ctx, r.org, *repo.Name, "main", &github.ProtectionRequest{
-			EnforceAdmins: true,
-			RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
-				DismissStaleReviews:          true,
-				RequireCodeOwnerReviews:      true,
-				RequiredApprovingReviewCount: 1,
-			},
-			RequiredStatusChecks: &github.RequiredStatusChecks{
-				Contexts: &[]string{"atlantis/apply"},
-				Strict:   true,
-			},
-		})
+		r.updateBranchProtection(ctx, repoName)
 		if err != nil {
 			return err
 		}
 	}
 
-	// TODO update webhook secret if it has changed (check obfuscated secret or some other field).
+	resp, err := client.Atlantis().GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
+		TeamSlug: daplaTeam.Slug,
+	})
+	if err != nil {
+		return err
+	}
+	if err := r.updateGhRepoAtlantisWebhookSecret(ctx, r.org, repoName, atlantisUrl, resp.WebhookSecret); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -270,12 +281,121 @@ func (r *reconciler) waitForRepoVisible(ctx context.Context, owner, repoName str
 
 		waited += backoff
 		backoff *= 2
-		if backoff > 4 * time.Second {
+		if backoff > 4*time.Second {
 			backoff = 4 * time.Second
 		}
 	}
 
 	return nil, fmt.Errorf("github repo %q was created but could not be verified as visible after %d attempts (waited ca %s )", repoName, maxApptempts, waited)
+}
+
+func (r *reconciler) updateBranchProtection(ctx context.Context, repoName string) error {
+	_, _, err := r.ghClient.Repositories.UpdateBranchProtection(ctx, r.org, repoName, "main", &github.ProtectionRequest{
+		EnforceAdmins: true,
+		RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
+			DismissStaleReviews:          true,
+			RequireCodeOwnerReviews:      true,
+			RequiredApprovingReviewCount: 1,
+		},
+		RequiredStatusChecks: &github.RequiredStatusChecks{
+			Contexts: &[]string{"atlantis/apply"},
+			Strict:   true,
+		},
+	})
+	return err
+}
+
+func (r *reconciler) updateGhRepoAtlantisWebhookSecret(ctx context.Context, owner, repoName, atlantisUrl, secret string) error {
+	if secret == "" {
+		return fmt.Errorf("atlantis webhook secret for repo %s is empty", repoName)
+	}
+
+	hooks, _, err := r.ghClient.Repositories.ListHooks(ctx, owner, repoName, &github.ListOptions{PerPage: 100})
+	if err != nil {
+		return err
+	}
+
+	var hook *github.Hook
+	for _, h := range hooks {
+		if h.GetConfig().GetURL() == atlantisUrl {
+			hook = h
+			break
+		}
+	}
+	if hook == nil {
+		return fmt.Errorf("no atlantis webhook with url %q found in repo %s", atlantisUrl, repoName)
+	}
+
+	// compare if we need to update secret
+	upToDate, err := r.hookLatestDeliverySignedWith(ctx, owner, repoName, hook.GetID(), secret)
+	if err != nil {
+		return err
+	}
+	if upToDate {
+		return nil
+	}
+
+	config := *hook.GetConfig()
+	config.Secret = &secret
+	if _, _, err := r.ghClient.Repositories.EditHook(ctx, owner, repoName, hook.GetID(), &github.Hook{Config: &config}); err != nil {
+		return fmt.Errorf("update atlantis webhook secret for repo %s: %w", repoName, err)
+	}
+
+	// Trigger webhook so the next reconcile can verify it without updating again.
+	if _, err := r.ghClient.Repositories.PingHook(ctx, owner, repoName, hook.GetID()); err != nil {
+		return fmt.Errorf("ping atlantis webhook for repo %s: %w", repoName, err)
+	}
+
+	return nil
+}
+
+// https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
+// return false if the secret can not be verifed (can happn for no triggers), which implies that the secret should be updated
+func (r *reconciler) hookLatestDeliverySignedWith(ctx context.Context, owner, repoName string, hookID int64, secret string) (bool, error) {
+	deliveries, _, err := r.ghClient.Repositories.ListHookDeliveries(ctx, owner, repoName, hookID, &github.ListCursorOptions{First: 1})
+	if err != nil {
+		return false, err
+	}
+	if len(deliveries) == 0 {
+		return false, nil
+	}
+
+	delivery, _, err := r.ghClient.Repositories.GetHookDelivery(ctx, owner, repoName, hookID, deliveries[0].GetID())
+	if err != nil {
+		return false, err
+	}
+	if delivery.Request == nil || delivery.Request.RawPayload == nil {
+		return false, nil
+	}
+
+	var ghSignature string
+	for k, v := range delivery.Request.Headers {
+		if strings.EqualFold(k, "X-Hub-Signature-256") {
+			ghSignature = v
+			break
+		}
+	}
+	got, err := hex.DecodeString(strings.TrimPrefix(ghSignature, "sha256="))
+	if ghSignature == "" || err != nil {
+		return false, nil
+	}
+
+	signature := generateSignature([]byte(secret), []byte(*delivery.Request.RawPayload))
+	return hmac.Equal(signature, got), nil
+}
+
+func generateSignature(secret, payload []byte) []byte {
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(payload)
+	return mac.Sum(nil)
+}
+
+func getAtlantisUrl(teamName, customAtlantisName string) string {
+	atlantisName := "atlantis-" + teamName
+	if customAtlantisName != "" {
+		atlantisName = customAtlantisName
+	}
+	return "https://" + atlantisName + ".atlantis.ssb.no/events"
 }
 
 func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
