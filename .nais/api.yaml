@@ -23,6 +23,8 @@ spec:
         - host: auth.ssb.no
         - host: login.microsoftonline.com
         - ipv4: 100.71.16.226
+        - host: labid.lab.dapla-external.ssb.no
+        - host: labid.lab.dapla-test-external.ssb.no
 
   prometheus:
     enabled: true

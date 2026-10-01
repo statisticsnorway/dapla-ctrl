@@ -62,6 +62,17 @@ type JWTConfig struct {
 	SkipMiddleware bool `env:"JWT_SKIP_MIDDLEWARE,default=false"`
 }
 
+type LabID struct {
+	// The LabID issuers to trust for JWT Bearer tokens
+	Issuers []string `env:"LABID_ISSUERS,default=https://labid.lab.dapla-external.ssb.no,https://labid.lab.dapla-test-external.ssb.no"`
+	// Required token audience
+	Audience string `env:"LABID_AUDIENCE,default=dapla-api"`
+	// Which claim in the token to extract the user short name from
+	ShortNameClaim string `env:"LABID_SHORT_NAME_CLAIM,default=sub"`
+	// Set to true to disable the JWT middleware
+	SkipMiddleware bool `env:"LABID_SKIP_MIDDLEWARE,default=false"`
+}
+
 type PostmanConfig struct {
 	Enabled bool `env:"POSTMAN_ENABLED,default=false"`
 	// Incoming for dapla-api, outgoing for SUP Postman
@@ -98,6 +109,7 @@ type Config struct {
 	Usersync usersyncConfig
 	OAuth    oAuthConfig
 	JWT      JWTConfig
+	LabId    LabID
 	Postman  PostmanConfig
 
 	Fakes Fakes
