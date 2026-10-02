@@ -1,0 +1,24 @@
+name: Delomaten
+
+permissions:
+  contents: "read"
+  id-token: "write"
+  issues: "write"
+  pull-requests: "write"
+  statuses: "read"
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths: ["automation/shared-data/**"]
+  push:
+    branches: [ "main" ]
+    paths: ["automation/shared-data/**"]
+  pull_request_review:
+    types: [submitted, edited]
+  workflow_dispatch:
+
+jobs:
+  delomaten:
+    uses: statisticsnorway/dapla-shared-data-processor-build-scripts/.github/workflows/delomaten.yaml@main
+    secrets: inherit

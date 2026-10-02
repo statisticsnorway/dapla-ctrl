@@ -157,6 +157,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		}
 		reconcilerManager.AddReconciler(githubTeam)
 	}
+	// TODO: Add githubrepo reconciler
 
 	parqueditReconciler, err := parquedit.New(ctx)
 	if err != nil {

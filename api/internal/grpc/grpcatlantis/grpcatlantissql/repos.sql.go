@@ -37,6 +37,22 @@ func (q *Queries) Get(ctx context.Context, teamSlug slug.Slug) (*GetRow, error) 
 	return &i, err
 }
 
+const getWebhookSecret = `-- name: GetWebhookSecret :one
+SELECT
+	webhook_secret
+FROM
+	team_atlantis_config
+WHERE
+	team_slug = $1::slug
+`
+
+func (q *Queries) GetWebhookSecret(ctx context.Context, teamSlug slug.Slug) (*string, error) {
+	row := q.db.QueryRow(ctx, getWebhookSecret, teamSlug)
+	var webhook_secret *string
+	err := row.Scan(&webhook_secret)
+	return webhook_secret, err
+}
+
 const upsertWebhookSecret = `-- name: UpsertWebhookSecret :exec
 INSERT INTO
 	team_atlantis_config (team_slug, webhook_secret)

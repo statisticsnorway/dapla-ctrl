@@ -1,0 +1,25 @@
+# File generated with autonomy level: {{ .AutonomyLevel }}
+# The latest match takes precedence.
+
+# dapla-platform-developers should be able to approve all PRs
+* @statisticsnorway/dapla-platform-developers
+
+{{- if eq .AutonomyLevel "MANAGED" }}
+*.yaml @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+/infra/**/dapla-*.tf @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+/infra/**/.cruft.json @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+{{- end }}
+{{- if eq .AutonomyLevel "SEMI_MANAGED" }}
+/infra/ @statisticsnorway/{{ .TeamSlug }}-developers @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+{{- end }}
+{{- if eq .AutonomyLevel "SELF_MANAGED" }}
+* @statisticsnorway/{{ .TeamSlug }}-developers @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+{{- end }}
+
+# data-admins should be able to approve changes to the automation folder
+/automation/ @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+/docs/ @statisticsnorway/{{ .TeamSlug }}-developers @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+/metadata/ @statisticsnorway/{{ .TeamSlug }}-developers @statisticsnorway/{{ .TeamSlug }}-data-admins @statisticsnorway/dapla-platform-developers
+
+# Only dapla-platform-developers should be able to approve changes to CODEOWNERS
+CODEOWNERS @statisticsnorway/dapla-platform-developers

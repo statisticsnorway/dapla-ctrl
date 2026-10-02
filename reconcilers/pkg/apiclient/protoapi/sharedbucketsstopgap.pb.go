@@ -257,6 +257,120 @@ func (b0 GetSharedBucketsStopgapResponse_builder) Build() *GetSharedBucketsStopg
 	return m0
 }
 
+type ListSharedBucketsStopgapForTeamRequest struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	TeamSlug      string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3" json:"team_slug,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSharedBucketsStopgapForTeamRequest) Reset() {
+	*x = ListSharedBucketsStopgapForTeamRequest{}
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSharedBucketsStopgapForTeamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSharedBucketsStopgapForTeamRequest) ProtoMessage() {}
+
+func (x *ListSharedBucketsStopgapForTeamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListSharedBucketsStopgapForTeamRequest) GetTeamSlug() string {
+	if x != nil {
+		return x.TeamSlug
+	}
+	return ""
+}
+
+func (x *ListSharedBucketsStopgapForTeamRequest) SetTeamSlug(v string) {
+	x.TeamSlug = v
+}
+
+type ListSharedBucketsStopgapForTeamRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	TeamSlug string
+}
+
+func (b0 ListSharedBucketsStopgapForTeamRequest_builder) Build() *ListSharedBucketsStopgapForTeamRequest {
+	m0 := &ListSharedBucketsStopgapForTeamRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.TeamSlug = b.TeamSlug
+	return m0
+}
+
+type ListSharedBucketsStopgapForTeamResponse struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	Nodes         []*SharedBucketStopgap `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSharedBucketsStopgapForTeamResponse) Reset() {
+	*x = ListSharedBucketsStopgapForTeamResponse{}
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSharedBucketsStopgapForTeamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSharedBucketsStopgapForTeamResponse) ProtoMessage() {}
+
+func (x *ListSharedBucketsStopgapForTeamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *ListSharedBucketsStopgapForTeamResponse) GetNodes() []*SharedBucketStopgap {
+	if x != nil {
+		return x.Nodes
+	}
+	return nil
+}
+
+func (x *ListSharedBucketsStopgapForTeamResponse) SetNodes(v []*SharedBucketStopgap) {
+	x.Nodes = v
+}
+
+type ListSharedBucketsStopgapForTeamResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	Nodes []*SharedBucketStopgap
+}
+
+func (b0 ListSharedBucketsStopgapForTeamResponse_builder) Build() *ListSharedBucketsStopgapForTeamResponse {
+	m0 := &ListSharedBucketsStopgapForTeamResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.Nodes = b.Nodes
+	return m0
+}
+
 type CreateSharedBucketsStopgapRequest struct {
 	state               protoimpl.MessageState `protogen:"hybrid.v1"`
 	SharedBucketStopgap *SharedBucketStopgap   `protobuf:"bytes,1,opt,name=shared_bucket_stopgap,json=sharedBucketStopgap,proto3" json:"shared_bucket_stopgap,omitempty"`
@@ -266,7 +380,7 @@ type CreateSharedBucketsStopgapRequest struct {
 
 func (x *CreateSharedBucketsStopgapRequest) Reset() {
 	*x = CreateSharedBucketsStopgapRequest{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[3]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -278,7 +392,7 @@ func (x *CreateSharedBucketsStopgapRequest) String() string {
 func (*CreateSharedBucketsStopgapRequest) ProtoMessage() {}
 
 func (x *CreateSharedBucketsStopgapRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[3]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -333,7 +447,7 @@ type CreateSharedBucketsStopgapResponse struct {
 
 func (x *CreateSharedBucketsStopgapResponse) Reset() {
 	*x = CreateSharedBucketsStopgapResponse{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[4]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -345,7 +459,7 @@ func (x *CreateSharedBucketsStopgapResponse) String() string {
 func (*CreateSharedBucketsStopgapResponse) ProtoMessage() {}
 
 func (x *CreateSharedBucketsStopgapResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[4]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,6 +482,117 @@ func (b0 CreateSharedBucketsStopgapResponse_builder) Build() *CreateSharedBucket
 	return m0
 }
 
+type DeleteSharedBucketsStopgapRequest struct {
+	state               protoimpl.MessageState `protogen:"hybrid.v1"`
+	SharedBucketStopgap *SharedBucketStopgap   `protobuf:"bytes,1,opt,name=shared_bucket_stopgap,json=sharedBucketStopgap,proto3" json:"shared_bucket_stopgap,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) Reset() {
+	*x = DeleteSharedBucketsStopgapRequest{}
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSharedBucketsStopgapRequest) ProtoMessage() {}
+
+func (x *DeleteSharedBucketsStopgapRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) GetSharedBucketStopgap() *SharedBucketStopgap {
+	if x != nil {
+		return x.SharedBucketStopgap
+	}
+	return nil
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) SetSharedBucketStopgap(v *SharedBucketStopgap) {
+	x.SharedBucketStopgap = v
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) HasSharedBucketStopgap() bool {
+	if x == nil {
+		return false
+	}
+	return x.SharedBucketStopgap != nil
+}
+
+func (x *DeleteSharedBucketsStopgapRequest) ClearSharedBucketStopgap() {
+	x.SharedBucketStopgap = nil
+}
+
+type DeleteSharedBucketsStopgapRequest_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+	SharedBucketStopgap *SharedBucketStopgap
+}
+
+func (b0 DeleteSharedBucketsStopgapRequest_builder) Build() *DeleteSharedBucketsStopgapRequest {
+	m0 := &DeleteSharedBucketsStopgapRequest{}
+	b, x := &b0, m0
+	_, _ = b, x
+	x.SharedBucketStopgap = b.SharedBucketStopgap
+	return m0
+}
+
+type DeleteSharedBucketsStopgapResponse struct {
+	state         protoimpl.MessageState `protogen:"hybrid.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSharedBucketsStopgapResponse) Reset() {
+	*x = DeleteSharedBucketsStopgapResponse{}
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSharedBucketsStopgapResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSharedBucketsStopgapResponse) ProtoMessage() {}
+
+func (x *DeleteSharedBucketsStopgapResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+type DeleteSharedBucketsStopgapResponse_builder struct {
+	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
+
+}
+
+func (b0 DeleteSharedBucketsStopgapResponse_builder) Build() *DeleteSharedBucketsStopgapResponse {
+	m0 := &DeleteSharedBucketsStopgapResponse{}
+	b, x := &b0, m0
+	_, _ = b, x
+	return m0
+}
+
 type ListSharedBucketsStopgapGroupsRequest struct {
 	state               protoimpl.MessageState `protogen:"hybrid.v1"`
 	SharedBucketStopgap *SharedBucketStopgap   `protobuf:"bytes,1,opt,name=shared_bucket_stopgap,json=sharedBucketStopgap,proto3" json:"shared_bucket_stopgap,omitempty"`
@@ -377,7 +602,7 @@ type ListSharedBucketsStopgapGroupsRequest struct {
 
 func (x *ListSharedBucketsStopgapGroupsRequest) Reset() {
 	*x = ListSharedBucketsStopgapGroupsRequest{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[5]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -389,7 +614,7 @@ func (x *ListSharedBucketsStopgapGroupsRequest) String() string {
 func (*ListSharedBucketsStopgapGroupsRequest) ProtoMessage() {}
 
 func (x *ListSharedBucketsStopgapGroupsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[5]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -445,7 +670,7 @@ type ListSharedBucketsStopgapGroupsResponse struct {
 
 func (x *ListSharedBucketsStopgapGroupsResponse) Reset() {
 	*x = ListSharedBucketsStopgapGroupsResponse{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[6]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -457,7 +682,7 @@ func (x *ListSharedBucketsStopgapGroupsResponse) String() string {
 func (*ListSharedBucketsStopgapGroupsResponse) ProtoMessage() {}
 
 func (x *ListSharedBucketsStopgapGroupsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[6]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -503,7 +728,7 @@ type AddSharedBucketsStopgapGroupRequest struct {
 
 func (x *AddSharedBucketsStopgapGroupRequest) Reset() {
 	*x = AddSharedBucketsStopgapGroupRequest{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[7]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -515,7 +740,7 @@ func (x *AddSharedBucketsStopgapGroupRequest) String() string {
 func (*AddSharedBucketsStopgapGroupRequest) ProtoMessage() {}
 
 func (x *AddSharedBucketsStopgapGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[7]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -583,7 +808,7 @@ type AddSharedBucketsStopgapGroupResponse struct {
 
 func (x *AddSharedBucketsStopgapGroupResponse) Reset() {
 	*x = AddSharedBucketsStopgapGroupResponse{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[8]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +820,7 @@ func (x *AddSharedBucketsStopgapGroupResponse) String() string {
 func (*AddSharedBucketsStopgapGroupResponse) ProtoMessage() {}
 
 func (x *AddSharedBucketsStopgapGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[8]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -628,7 +853,7 @@ type RemoveSharedBucketsStopgapGroupRequest struct {
 
 func (x *RemoveSharedBucketsStopgapGroupRequest) Reset() {
 	*x = RemoveSharedBucketsStopgapGroupRequest{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[9]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -640,7 +865,7 @@ func (x *RemoveSharedBucketsStopgapGroupRequest) String() string {
 func (*RemoveSharedBucketsStopgapGroupRequest) ProtoMessage() {}
 
 func (x *RemoveSharedBucketsStopgapGroupRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[9]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -708,7 +933,7 @@ type RemoveSharedBucketsStopgapGroupResponse struct {
 
 func (x *RemoveSharedBucketsStopgapGroupResponse) Reset() {
 	*x = RemoveSharedBucketsStopgapGroupResponse{}
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[10]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -720,7 +945,7 @@ func (x *RemoveSharedBucketsStopgapGroupResponse) String() string {
 func (*RemoveSharedBucketsStopgapGroupResponse) ProtoMessage() {}
 
 func (x *RemoveSharedBucketsStopgapGroupResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sharedbucketsstopgap_proto_msgTypes[10]
+	mi := &file_sharedbucketsstopgap_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -757,10 +982,17 @@ const file_sharedbucketsstopgap_proto_rawDesc = "" +
 	"\x1eGetSharedBucketsStopgapRequest\x12[\n" +
 	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"~\n" +
 	"\x1fGetSharedBucketsStopgapResponse\x12[\n" +
-	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"\x80\x01\n" +
+	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"E\n" +
+	"&ListSharedBucketsStopgapForTeamRequest\x12\x1b\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\"h\n" +
+	"'ListSharedBucketsStopgapForTeamResponse\x12=\n" +
+	"\x05nodes\x18\x01 \x03(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x05nodes\"\x80\x01\n" +
 	"!CreateSharedBucketsStopgapRequest\x12[\n" +
 	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"$\n" +
-	"\"CreateSharedBucketsStopgapResponse\"\x84\x01\n" +
+	"\"CreateSharedBucketsStopgapResponse\"\x80\x01\n" +
+	"!DeleteSharedBucketsStopgapRequest\x12[\n" +
+	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"$\n" +
+	"\"DeleteSharedBucketsStopgapResponse\"\x84\x01\n" +
 	"%ListSharedBucketsStopgapGroupsRequest\x12[\n" +
 	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\"Y\n" +
 	"&ListSharedBucketsStopgapGroupsResponse\x12/\n" +
@@ -772,52 +1004,64 @@ const file_sharedbucketsstopgap_proto_rawDesc = "" +
 	"&RemoveSharedBucketsStopgapGroupRequest\x12[\n" +
 	"\x15shared_bucket_stopgap\x18\x01 \x01(\v2'.dapla.api.protobuf.SharedBucketStopgapR\x13sharedBucketStopgap\x12\x14\n" +
 	"\x05group\x18\x02 \x01(\tR\x05group\")\n" +
-	"'RemoveSharedBucketsStopgapGroupResponse2\x93\x05\n" +
+	"'RemoveSharedBucketsStopgapGroupResponse2\x99\a\n" +
 	"\x14SharedBucketsStopgap\x12y\n" +
-	"\x06Create\x125.dapla.api.protobuf.CreateSharedBucketsStopgapRequest\x1a6.dapla.api.protobuf.CreateSharedBucketsStopgapResponse\"\x00\x12p\n" +
-	"\x03Get\x122.dapla.api.protobuf.GetSharedBucketsStopgapRequest\x1a3.dapla.api.protobuf.GetSharedBucketsStopgapResponse\"\x00\x12\x81\x01\n" +
+	"\x06Create\x125.dapla.api.protobuf.CreateSharedBucketsStopgapRequest\x1a6.dapla.api.protobuf.CreateSharedBucketsStopgapResponse\"\x00\x12y\n" +
+	"\x06Delete\x125.dapla.api.protobuf.DeleteSharedBucketsStopgapRequest\x1a6.dapla.api.protobuf.DeleteSharedBucketsStopgapResponse\"\x00\x12p\n" +
+	"\x03Get\x122.dapla.api.protobuf.GetSharedBucketsStopgapRequest\x1a3.dapla.api.protobuf.GetSharedBucketsStopgapResponse\"\x00\x12\x88\x01\n" +
+	"\vListForTeam\x12:.dapla.api.protobuf.ListSharedBucketsStopgapForTeamRequest\x1a;.dapla.api.protobuf.ListSharedBucketsStopgapForTeamResponse\"\x00\x12\x81\x01\n" +
 	"\x06Groups\x129.dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest\x1a:.dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse\"\x00\x12\x7f\n" +
 	"\bAddGroup\x127.dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest\x1a8.dapla.api.protobuf.AddSharedBucketsStopgapGroupResponse\"\x00\x12\x88\x01\n" +
 	"\vRemoveGroup\x12:.dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest\x1a;.dapla.api.protobuf.RemoveSharedBucketsStopgapGroupResponse\"\x00B\x1aZ\x18./pkg/apiclient/protoapib\x06proto3"
 
-var file_sharedbucketsstopgap_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_sharedbucketsstopgap_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_sharedbucketsstopgap_proto_goTypes = []any{
 	(*SharedBucketStopgap)(nil),                     // 0: dapla.api.protobuf.SharedBucketStopgap
 	(*GetSharedBucketsStopgapRequest)(nil),          // 1: dapla.api.protobuf.GetSharedBucketsStopgapRequest
 	(*GetSharedBucketsStopgapResponse)(nil),         // 2: dapla.api.protobuf.GetSharedBucketsStopgapResponse
-	(*CreateSharedBucketsStopgapRequest)(nil),       // 3: dapla.api.protobuf.CreateSharedBucketsStopgapRequest
-	(*CreateSharedBucketsStopgapResponse)(nil),      // 4: dapla.api.protobuf.CreateSharedBucketsStopgapResponse
-	(*ListSharedBucketsStopgapGroupsRequest)(nil),   // 5: dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest
-	(*ListSharedBucketsStopgapGroupsResponse)(nil),  // 6: dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse
-	(*AddSharedBucketsStopgapGroupRequest)(nil),     // 7: dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest
-	(*AddSharedBucketsStopgapGroupResponse)(nil),    // 8: dapla.api.protobuf.AddSharedBucketsStopgapGroupResponse
-	(*RemoveSharedBucketsStopgapGroupRequest)(nil),  // 9: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest
-	(*RemoveSharedBucketsStopgapGroupResponse)(nil), // 10: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupResponse
-	(*Group)(nil), // 11: dapla.api.protobuf.Group
+	(*ListSharedBucketsStopgapForTeamRequest)(nil),  // 3: dapla.api.protobuf.ListSharedBucketsStopgapForTeamRequest
+	(*ListSharedBucketsStopgapForTeamResponse)(nil), // 4: dapla.api.protobuf.ListSharedBucketsStopgapForTeamResponse
+	(*CreateSharedBucketsStopgapRequest)(nil),       // 5: dapla.api.protobuf.CreateSharedBucketsStopgapRequest
+	(*CreateSharedBucketsStopgapResponse)(nil),      // 6: dapla.api.protobuf.CreateSharedBucketsStopgapResponse
+	(*DeleteSharedBucketsStopgapRequest)(nil),       // 7: dapla.api.protobuf.DeleteSharedBucketsStopgapRequest
+	(*DeleteSharedBucketsStopgapResponse)(nil),      // 8: dapla.api.protobuf.DeleteSharedBucketsStopgapResponse
+	(*ListSharedBucketsStopgapGroupsRequest)(nil),   // 9: dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest
+	(*ListSharedBucketsStopgapGroupsResponse)(nil),  // 10: dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse
+	(*AddSharedBucketsStopgapGroupRequest)(nil),     // 11: dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest
+	(*AddSharedBucketsStopgapGroupResponse)(nil),    // 12: dapla.api.protobuf.AddSharedBucketsStopgapGroupResponse
+	(*RemoveSharedBucketsStopgapGroupRequest)(nil),  // 13: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest
+	(*RemoveSharedBucketsStopgapGroupResponse)(nil), // 14: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupResponse
+	(*Group)(nil), // 15: dapla.api.protobuf.Group
 }
 var file_sharedbucketsstopgap_proto_depIdxs = []int32{
 	0,  // 0: dapla.api.protobuf.GetSharedBucketsStopgapRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
 	0,  // 1: dapla.api.protobuf.GetSharedBucketsStopgapResponse.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
-	0,  // 2: dapla.api.protobuf.CreateSharedBucketsStopgapRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
-	0,  // 3: dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
-	11, // 4: dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse.nodes:type_name -> dapla.api.protobuf.Group
-	0,  // 5: dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
-	0,  // 6: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
-	3,  // 7: dapla.api.protobuf.SharedBucketsStopgap.Create:input_type -> dapla.api.protobuf.CreateSharedBucketsStopgapRequest
-	1,  // 8: dapla.api.protobuf.SharedBucketsStopgap.Get:input_type -> dapla.api.protobuf.GetSharedBucketsStopgapRequest
-	5,  // 9: dapla.api.protobuf.SharedBucketsStopgap.Groups:input_type -> dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest
-	7,  // 10: dapla.api.protobuf.SharedBucketsStopgap.AddGroup:input_type -> dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest
-	9,  // 11: dapla.api.protobuf.SharedBucketsStopgap.RemoveGroup:input_type -> dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest
-	4,  // 12: dapla.api.protobuf.SharedBucketsStopgap.Create:output_type -> dapla.api.protobuf.CreateSharedBucketsStopgapResponse
-	2,  // 13: dapla.api.protobuf.SharedBucketsStopgap.Get:output_type -> dapla.api.protobuf.GetSharedBucketsStopgapResponse
-	6,  // 14: dapla.api.protobuf.SharedBucketsStopgap.Groups:output_type -> dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse
-	8,  // 15: dapla.api.protobuf.SharedBucketsStopgap.AddGroup:output_type -> dapla.api.protobuf.AddSharedBucketsStopgapGroupResponse
-	10, // 16: dapla.api.protobuf.SharedBucketsStopgap.RemoveGroup:output_type -> dapla.api.protobuf.RemoveSharedBucketsStopgapGroupResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	0,  // 2: dapla.api.protobuf.ListSharedBucketsStopgapForTeamResponse.nodes:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	0,  // 3: dapla.api.protobuf.CreateSharedBucketsStopgapRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	0,  // 4: dapla.api.protobuf.DeleteSharedBucketsStopgapRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	0,  // 5: dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	15, // 6: dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse.nodes:type_name -> dapla.api.protobuf.Group
+	0,  // 7: dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	0,  // 8: dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest.shared_bucket_stopgap:type_name -> dapla.api.protobuf.SharedBucketStopgap
+	5,  // 9: dapla.api.protobuf.SharedBucketsStopgap.Create:input_type -> dapla.api.protobuf.CreateSharedBucketsStopgapRequest
+	7,  // 10: dapla.api.protobuf.SharedBucketsStopgap.Delete:input_type -> dapla.api.protobuf.DeleteSharedBucketsStopgapRequest
+	1,  // 11: dapla.api.protobuf.SharedBucketsStopgap.Get:input_type -> dapla.api.protobuf.GetSharedBucketsStopgapRequest
+	3,  // 12: dapla.api.protobuf.SharedBucketsStopgap.ListForTeam:input_type -> dapla.api.protobuf.ListSharedBucketsStopgapForTeamRequest
+	9,  // 13: dapla.api.protobuf.SharedBucketsStopgap.Groups:input_type -> dapla.api.protobuf.ListSharedBucketsStopgapGroupsRequest
+	11, // 14: dapla.api.protobuf.SharedBucketsStopgap.AddGroup:input_type -> dapla.api.protobuf.AddSharedBucketsStopgapGroupRequest
+	13, // 15: dapla.api.protobuf.SharedBucketsStopgap.RemoveGroup:input_type -> dapla.api.protobuf.RemoveSharedBucketsStopgapGroupRequest
+	6,  // 16: dapla.api.protobuf.SharedBucketsStopgap.Create:output_type -> dapla.api.protobuf.CreateSharedBucketsStopgapResponse
+	8,  // 17: dapla.api.protobuf.SharedBucketsStopgap.Delete:output_type -> dapla.api.protobuf.DeleteSharedBucketsStopgapResponse
+	2,  // 18: dapla.api.protobuf.SharedBucketsStopgap.Get:output_type -> dapla.api.protobuf.GetSharedBucketsStopgapResponse
+	4,  // 19: dapla.api.protobuf.SharedBucketsStopgap.ListForTeam:output_type -> dapla.api.protobuf.ListSharedBucketsStopgapForTeamResponse
+	10, // 20: dapla.api.protobuf.SharedBucketsStopgap.Groups:output_type -> dapla.api.protobuf.ListSharedBucketsStopgapGroupsResponse
+	12, // 21: dapla.api.protobuf.SharedBucketsStopgap.AddGroup:output_type -> dapla.api.protobuf.AddSharedBucketsStopgapGroupResponse
+	14, // 22: dapla.api.protobuf.SharedBucketsStopgap.RemoveGroup:output_type -> dapla.api.protobuf.RemoveSharedBucketsStopgapGroupResponse
+	16, // [16:23] is the sub-list for method output_type
+	9,  // [9:16] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_sharedbucketsstopgap_proto_init() }
@@ -832,7 +1076,7 @@ func file_sharedbucketsstopgap_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sharedbucketsstopgap_proto_rawDesc), len(file_sharedbucketsstopgap_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
