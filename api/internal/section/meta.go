@@ -17,7 +17,8 @@ type (
 	SectionEdge       = pagination.Edge[*Section]
 )
 
-func (Section) IsNode() {}
+func (Section) IsNode()   {}
+func (Section) IsEntity() {}
 
 type SectionOrder struct {
 	Field     SectionOrderField    `json:"field"`

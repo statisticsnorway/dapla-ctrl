@@ -8,7 +8,7 @@ import (
 
 //mgo:gen model
 //mgo:gen order NAME CODE
-//mgo:impl node paginated
+//mgo:impl node paginated entity
 type Section struct {
 	Code      string     `json:"-"`
 	Name      string     `json:"name"`

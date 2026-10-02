@@ -20,6 +20,7 @@ type (
 func (Team) IsNode()           {}
 func (Team) IsSearchNode()     {}
 func (Team) IsActivityLogger() {}
+func (Team) IsEntity()         {}
 
 type TeamOrder struct {
 	Field     TeamOrderField       `json:"field"`

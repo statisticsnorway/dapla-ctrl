@@ -8,7 +8,7 @@ import (
 
 //mgo:gen model
 //mgo:gen order NAME EMAIL SECTION_CODE
-//mgo:impl node searchnode paginated
+//mgo:impl node searchnode paginated entity
 type User struct {
 	UUID           uuid.UUID `json:"-"`
 	Email          string    `json:"email"`
