@@ -19,7 +19,7 @@ import (
 
 //mgo:gen model
 //mgo:gen order SLUG SECTION_CODE
-//mgo:impl paginated node searchnode activitylogger
+//mgo:impl paginated node searchnode activitylogger entity
 type Team struct {
 	Slug                 slug.Slug  `json:"slug"`
 	DisplayName          string     `json:"displayName"`
