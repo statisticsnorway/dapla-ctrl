@@ -3,6 +3,7 @@
 		CogIcon,
 		FloppydiskIcon,
 		HexagonGridIcon,
+		PackageIcon,
 		PersonGroupIcon,
 		QuestionmarkIcon,
 		RocketIcon,
@@ -31,6 +32,9 @@
 				return CogIcon;
 			case 'dapla lab':
 				return RocketIcon;
+			case 'artifact-registry':
+			case 'artifact registry':
+				return PackageIcon;
 			default:
 				return QuestionmarkIcon;
 		}
