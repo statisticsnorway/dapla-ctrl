@@ -140,7 +140,6 @@
 			{#if canManageAccess}
 				<Button
 					size="small"
-					variant="secondary"
 					icon={PlusIcon}
 					onclick={() => {
 						mutationErrors = undefined;
@@ -157,9 +156,11 @@
 		{:else}
 			{#each repositories.edges as { node: repository } (repository.id)}
 				<ListItem>
-					<ExternalLink href={`https://github.com/statisticsnorway/${repository.name}`}>
-						statisticsnorway/{repository.name}
-					</ExternalLink>
+					<span class="repository-link">
+						<ExternalLink href={`https://github.com/statisticsnorway/${repository.name}`}>
+							statisticsnorway/{repository.name}
+						</ExternalLink>
+					</span>
 					{#if canManageAccess}
 						<Button
 							size="small"
@@ -247,9 +248,13 @@
 </Modal>
 
 <style>
+	.repository-link :global(a) {
+		color: var(--ssb-green-4);
+	}
+
 	.description {
 		margin-top: calc(-1 * var(--spacing-layout));
-		margin-bottom: var(--ax-space-16);
+		margin-bottom: var(--ax-space-24);
 	}
 
 	.actions {
