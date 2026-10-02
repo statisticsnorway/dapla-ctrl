@@ -27,6 +27,7 @@ const (
 )
 
 type ghClient struct {
+	Git          *github.GitService
 	Repositories *github.RepositoriesService
 	PullRequests *github.PullRequestsService
 	Teams        *github.TeamsService
@@ -66,6 +67,7 @@ func New(ctx context.Context, org string, appId, installationId int64, privateKe
 	}
 
 	r.ghClient = &ghClient{
+		Git:          client.Git,
 		Repositories: client.Repositories,
 		PullRequests: client.PullRequests,
 		Teams:        client.Teams,
@@ -152,19 +154,24 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 			Active: new(true),
 		})
 
-		// TODO: Commit render projects
-		// TODO: create branch and commit iac repo tempalte
+		if err := initializeRepoContent(ctx, r.ghClient.Git, r.org, repoName, daplaTeam.GetSlug(), daplaTeam.IsManaged); err != nil {
+			return fmt.Errorf("initialize content of repo %s: %w", repoName, err)
+		}
+		_, _, err := r.ghClient.PullRequests.Create(ctx, r.org, repoName, github.CreatePullRequest{
+			Title: new("Initial setup"),
+			Head:  initBranch,
+			Base:  "main",
+			Body:  new("Create base repo structure and initial IaC code"),
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, r.org, repoName)
 	if err != nil {
 		return err
 	}
-
-	// Give access to github repoL:
-	// "dapla-skyinfra-developers" = "admin"
-	// "dapla-platform-developers" = "push"
-	// The team it self = push if managed, admin if not managed.
 
 	ghTeamPermission := "push"
 	if !daplaTeam.IsManaged {
