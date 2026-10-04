@@ -53,7 +53,7 @@ func TestRenderTemplateDir(t *testing.T) {
 				}
 			})
 
-			t.Run("files should be templated", func(t *testing.T) {
+			t.Run("file content should be templated", func(t *testing.T) {
 				if !strings.Contains(repoFiles["README.md"], "# example-iac") {
 					t.Errorf("README.md did not contain the repository name:\n%s", repoFiles["README.md"])
 				}

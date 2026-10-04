@@ -13,6 +13,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/atlantis"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/gcpsyncer"
 	entraidreconciler "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/entraid/group"
+	githubIac "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/iac"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/github/team"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/ai"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/artifactregistry"
@@ -157,7 +158,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		}
 		reconcilerManager.AddReconciler(githubTeam)
 	}
-	// TODO: Add githubrepo reconciler
+
+	ghIac, err := githubIac.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
+	if err != nil {
+		return fmt.Errorf("create github repo reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(ghIac)
 
 	parqueditReconciler, err := parquedit.New(ctx)
 	if err != nil {

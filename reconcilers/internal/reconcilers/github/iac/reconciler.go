@@ -79,8 +79,8 @@ func New(ctx context.Context, org string, appId, installationId int64, privateKe
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
 	return &protoapi.NewReconciler{
 		Name:        r.Name(),
-		DisplayName: "GitHub Team",
-		Description: "Create GitHub teams and sync them with Entra ID",
+		DisplayName: "GitHub iac Repo",
+		Description: "Create GitHub dapla team iac repositories",
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
@@ -95,6 +95,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Prefix to add to GitHub iac repos",
 				Secret:      false,
 			},
+
 		},
 	}
 }
@@ -134,7 +135,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		if secret == "" {
 			return fmt.Errorf("atlantis webhook secret for team %s is empty", daplaTeam.Slug)
 		}
-		r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
+		_,_, err := r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
 			Config: &github.HookConfig{
 				ContentType: new("json"),
 				URL:         &atlantisUrl,
@@ -153,11 +154,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 			},
 			Active: new(true),
 		})
+		if err != nil {
+			return err
+		}
 
 		if err := initializeRepoContent(ctx, r.ghClient.Git, r.org, repoName, daplaTeam.GetSlug(), daplaTeam.IsManaged); err != nil {
 			return fmt.Errorf("initialize content of repo %s: %w", repoName, err)
 		}
-		_, _, err := r.ghClient.PullRequests.Create(ctx, r.org, repoName, github.CreatePullRequest{
+		_, _, err = r.ghClient.PullRequests.Create(ctx, r.org, repoName, github.CreatePullRequest{
 			Title: new("Initial setup"),
 			Head:  initBranch,
 			Base:  "main",
@@ -191,9 +195,8 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		}
 	}
 
-	// enforce branch protections rule
 	if daplaTeam.IsManaged {
-		r.updateBranchProtection(ctx, repoName)
+		err := r.updateBranchProtection(ctx, repoName)
 		if err != nil {
 			return err
 		}
