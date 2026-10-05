@@ -20,7 +20,6 @@ const (
 	reconcilerName = "github:iac"
 
 	configTeamAllowlistKey = "teamAllowlist"
-	configRepoPrefixKey    = "repoPrefix"
 )
 
 type ghClient struct {
@@ -32,7 +31,6 @@ type ghClient struct {
 
 type reconciler struct {
 	teamAllowlist []string
-	repoPrefix    string
 	org           string
 	ghClient      *ghClient
 }
@@ -86,12 +84,6 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Comma-separated list of teams to create iac repos for. Empty list means create for all teams.",
 				Secret:      false,
 			},
-			{
-				Key:         configRepoPrefixKey,
-				DisplayName: "Repo prefix",
-				Description: "Prefix to add to GitHub iac repos",
-				Secret:      false,
-			},
 		},
 	}
 }
@@ -110,8 +102,8 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return nil
 	}
 
-	repoName := r.repoPrefix + daplaTeam.Slug + "-iac"
-	_, created, err := r.getOrCreateRepository(ctx, r.org, repoName, daplaTeam)
+	repoName := daplaTeam.Slug + "-iac"
+	created, err := r.getOrCreateRepository(ctx, r.org, repoName, daplaTeam)
 	if err != nil {
 		return err
 	}
@@ -323,10 +315,6 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			whitelist := strings.Split(c.Value, ",")
 			if !slices.Equal(r.teamAllowlist, whitelist) {
 				r.teamAllowlist = whitelist
-			}
-		case configRepoPrefixKey:
-			if r.repoPrefix != c.Value {
-				r.repoPrefix = c.Value
 			}
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
