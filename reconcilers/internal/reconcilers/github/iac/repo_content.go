@@ -10,8 +10,8 @@ import (
 const (
 	defaultBranch           = "main"
 	initBranch              = "init"
-	initialFilesTemplateDir = "templates/01-initial-files"
-	teamRepoTemplateDir     = "templates/02-dapla-team-repo"
+	InitialFilesTemplateDir = "templates/01-initial-files"
+	TeamRepoTemplateDir     = "templates/02-dapla-team-repo"
 )
 
 type repoContentService struct {
@@ -19,7 +19,7 @@ type repoContentService struct {
 }
 
 func (g *repoContentService) initIacRepoContent(ctx context.Context, repoOwner, repoName, teamSlug string, isManaged bool) error {
-	tmplVars := newTemplateVars(repoName, teamSlug, isManaged)
+	tmplVars := NewTemplateVars(repoName, teamSlug, isManaged)
 
 	err := g.templateAndCommitFiles(ctx, tmplVars, repoOwner, repoName)
 	if err != nil {
@@ -35,7 +35,7 @@ func (g *repoContentService) initIacRepoContent(ctx context.Context, repoOwner, 
 }
 
 func (g *repoContentService) templateAndCommitFiles(ctx context.Context, tmplVars templateVariables, repoOwner string, repoName string) error {
-	initialFiles, err := renderTemplateDir(initialFilesTemplateDir, tmplVars)
+	initialFiles, err := RenderTemplateDir(InitialFilesTemplateDir, tmplVars)
 	if err != nil {
 		return fmt.Errorf("render initial files: %w", err)
 	}

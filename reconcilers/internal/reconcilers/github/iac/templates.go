@@ -25,7 +25,7 @@ type templateVariables struct {
 	AutonomyLevel  string
 }
 
-func newTemplateVars(repoName string, teamSlug string, isManaged bool) templateVariables {
+func NewTemplateVars(repoName string, teamSlug string, isManaged bool) templateVariables {
 	autonomyLevel := managed
 	if !isManaged {
 		autonomyLevel = selfManaged
@@ -42,7 +42,7 @@ type repoFile struct {
 	Content string
 }
 
-func renderTemplateDir(dir string, tmplVars templateVariables) ([]repoFile, error) {
+func RenderTemplateDir(dir string, tmplVars templateVariables) ([]repoFile, error) {
 	var files []repoFile
 	err := fs.WalkDir(repoTemplates, dir, func(templatePath string, entry fs.DirEntry, err error) error {
 		if err != nil {

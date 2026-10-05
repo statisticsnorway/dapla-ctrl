@@ -32,14 +32,14 @@ func TestRenderTemplateDir(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			tmplVars := newTemplateVars("example-iac", "example", tt.isManaged)
+			tmplVars := NewTemplateVars("example-iac", "example", tt.isManaged)
 
-			initial := renderToMap(t, initialFilesTemplateDir, tmplVars)
+			initial := renderToMap(t, InitialFilesTemplateDir, tmplVars)
 			if _, ok := initial[".github/workflows/render-projects.yaml"]; !ok || len(initial) != 1 {
 				t.Fatalf("unexpected initial files: %v", paths(initial))
 			}
 
-			repoFiles := renderToMap(t, teamRepoTemplateDir, tmplVars)
+			repoFiles := renderToMap(t, TeamRepoTemplateDir, tmplVars)
 			for _, path := range []string{".gitignore", ".github/workflows/kildomaten.yaml", "infra/projects.yaml", "infra/projects/README.md", "README.md", "CODEOWNERS"} {
 				if _, ok := repoFiles[path]; !ok {
 					t.Errorf("expected %q in rendered files: %v", path, paths(repoFiles))
@@ -82,7 +82,7 @@ func TestExecuteTemplateMissingFieldShouldError(t *testing.T) {
 
 func renderToMap(t *testing.T, dir string, data templateVariables) map[string]string {
 	t.Helper()
-	files, err := renderTemplateDir(dir, data)
+	files, err := RenderTemplateDir(dir, data)
 	if err != nil {
 		t.Fatalf("renderTemplateDir(%q) error = %v", dir, err)
 	}
