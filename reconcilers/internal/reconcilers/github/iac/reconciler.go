@@ -95,7 +95,6 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Prefix to add to GitHub iac repos",
 				Secret:      false,
 			},
-
 		},
 	}
 }
@@ -135,7 +134,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		if secret == "" {
 			return fmt.Errorf("atlantis webhook secret for team %s is empty", daplaTeam.Slug)
 		}
-		_,_, err := r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
+		_, _, err := r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
 			Config: &github.HookConfig{
 				ContentType: new("json"),
 				URL:         &atlantisUrl,
@@ -158,17 +157,14 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 			return err
 		}
 
-		if err := initializeRepoContent(ctx, r.ghClient.Git, r.org, repoName, daplaTeam.GetSlug(), daplaTeam.IsManaged); err != nil {
+		if err := (&repoContentService{
+			git: r.ghClient.Git,
+		}).initIacRepoContent(ctx, r.org, repoName, daplaTeam.GetSlug(), daplaTeam.IsManaged); err != nil {
 			return fmt.Errorf("initialize content of repo %s: %w", repoName, err)
 		}
-		_, _, err = r.ghClient.PullRequests.Create(ctx, r.org, repoName, github.CreatePullRequest{
-			Title: new("Initial setup"),
-			Head:  initBranch,
-			Base:  "main",
-			Body:  new("Create base repo structure and initial IaC code"),
-		})
+		err = r.createInitialPR(ctx, repoName)
 		if err != nil {
-			return err
+			return fmt.Errorf("create pull request of repo %s: %w", repoName, err)
 		}
 	}
 
@@ -213,6 +209,16 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	return nil
+}
+
+func (r *reconciler) createInitialPR(ctx context.Context, repoName string) error {
+	_, _, err := r.ghClient.PullRequests.Create(ctx, r.org, repoName, github.CreatePullRequest{
+		Title: new("Initial setup"),
+		Head:  initBranch,
+		Base:  defaultBranch,
+		Body:  new("Create base repo structure and initial IaC code"),
+	})
+	return err
 }
 
 func (r *reconciler) getOrCreateRepository(ctx context.Context, owner, repoName string, daplaTeam *protoapi.Team) (*github.Repository, bool, error) {
