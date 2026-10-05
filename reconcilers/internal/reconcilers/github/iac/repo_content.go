@@ -21,12 +21,12 @@ type repoContentService struct {
 func (g *repoContentService) initIacRepoContent(ctx context.Context, repoOwner, repoName, teamSlug string, isManaged bool) error {
 	tmplVars := NewTemplateVars(repoName, teamSlug, isManaged)
 
-	err := g.templateAndCommitFiles(ctx, tmplVars, repoOwner, repoName)
+	err := g.templateAndCommitFiles(ctx, InitialFilesTemplateDir, tmplVars, repoOwner, repoName, defaultBranch, "Add initial files")
 	if err != nil {
 		return err
 	}
 
-	err = g.templateAndCommitFiles(ctx, tmplVars, repoOwner, repoName)
+	err = g.templateAndCommitFiles(ctx, TeamRepoTemplateDir, tmplVars, repoOwner, repoName, initBranch, "Add dapla team iac repo files")
 	if err != nil {
 		return err
 	}
@@ -34,13 +34,13 @@ func (g *repoContentService) initIacRepoContent(ctx context.Context, repoOwner, 
 	return nil
 }
 
-func (g *repoContentService) templateAndCommitFiles(ctx context.Context, tmplVars templateVariables, repoOwner string, repoName string) error {
-	initialFiles, err := RenderTemplateDir(InitialFilesTemplateDir, tmplVars)
+func (g *repoContentService) templateAndCommitFiles(ctx context.Context, templatesPath string, tmplVars templateVariables, repoOwner string, repoName string, branch string, commitMessage string) error {
+	templateFiles, err := RenderTemplateDir(templatesPath, tmplVars)
 	if err != nil {
-		return fmt.Errorf("render initial files: %w", err)
+		return fmt.Errorf("render template files: %w", err)
 	}
-	if err := g.commitFiles(ctx, repoOwner, repoName, defaultBranch, defaultBranch, "Add initial files", initialFiles); err != nil {
-		return fmt.Errorf("commit initial files to %s: %w", defaultBranch, err)
+	if err := g.commitFiles(ctx, repoOwner, repoName, defaultBranch, branch, commitMessage, templateFiles); err != nil {
+		return fmt.Errorf("commit files to %s: %w", branch, err)
 	}
 	return nil
 }

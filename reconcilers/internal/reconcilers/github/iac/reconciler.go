@@ -111,13 +111,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	repoName := r.repoPrefix + daplaTeam.Slug + "-iac"
-	repo, created, err := r.getOrCreateRepository(ctx, r.org, repoName, daplaTeam)
-	if err != nil {
-		return err
-	}
-	repoName = repo.GetName() // Should be the same as above, but reassign just to be safe
-
-	err = r.reconcileGhRepoAtlantisWebhookSecret(ctx, client, daplaTeam, repoName)
+	_, created, err := r.getOrCreateRepository(ctx, r.org, repoName, daplaTeam)
 	if err != nil {
 		return err
 	}
@@ -135,6 +129,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		}
 	}
 
+	err = r.reconcileAtlantisWebhook(ctx, client, daplaTeam, repoName)
+	if err != nil {
+		return err
+	}
+
 	_, err = r.ghClient.Repositories.EnableVulnerabilityAlerts(ctx, r.org, repoName)
 	if err != nil {
 		return err
@@ -148,7 +147,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	return nil
 }
 
-func (r *reconciler) reconcileGhRepoAtlantisWebhookSecret(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, repoName string) error {
+func (r *reconciler) reconcileAtlantisWebhook(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, repoName string) error {
 	atlantisUrl, err := getAtlantisUrl(ctx, client.Atlantis(), daplaTeam.Slug)
 	if err != nil {
 		return err
@@ -169,15 +168,15 @@ func (r *reconciler) reconcileGhRepoAtlantisWebhookSecret(ctx context.Context, c
 
 // set team permissions and branch protection rules on repo
 func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, daplaTeam *protoapi.Team, repoName string) error {
-	permission := "push"
+	teamPermission := "push"
 	if !daplaTeam.IsManaged {
-		permission = "admin"
+		teamPermission = "admin"
 	}
 
 	for team, permission := range map[string]string{
 		"dapla-skyinfra-developers":    "admin",
 		"dapla-platform-developers":    "push",
-		daplaTeam.Slug + "-developers": permission,
+		daplaTeam.Slug + "-developers": teamPermission,
 	} {
 		_, err := r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
 			Permission: permission,
@@ -206,15 +205,15 @@ func (r *reconciler) createInitialPR(ctx context.Context, repoName string) error
 	return err
 }
 
-func (r *reconciler) getOrCreateRepository(ctx context.Context, owner, repoName string, daplaTeam *protoapi.Team) (*github.Repository, bool, error) {
-	repo, _, err := r.ghClient.Repositories.Get(ctx, owner, repoName)
+func (r *reconciler) getOrCreateRepository(ctx context.Context, owner, repoName string, daplaTeam *protoapi.Team) (bool, error) {
+	_, _, err := r.ghClient.Repositories.Get(ctx, owner, repoName)
 	if err == nil {
-		return repo, false, nil
+		return false, nil
 	}
 
 	githubError, ok := errors.AsType[*github.ErrorResponse](err)
 	if !ok || githubError.Response.StatusCode != http.StatusNotFound {
-		return nil, false, err
+		return false, err
 	}
 
 	description := "IaC repo for " + daplaTeam.GetSlug()
@@ -231,16 +230,16 @@ func (r *reconciler) getOrCreateRepository(ctx context.Context, owner, repoName 
 		AutoInit:    new(true),
 	})
 	if err != nil {
-		return nil, false, err
+		return false, err
 	}
 
 	// Let GitHub finish creating the repo, such that we avoid race condition later on
-	repo, err = r.waitForRepoVisible(ctx, owner, repoName)
+	_, err = r.waitForRepoVisible(ctx, owner, repoName)
 	if err != nil {
-		return nil, false, err
+		return false, err
 	}
 
-	return repo, true, nil
+	return true, nil
 }
 
 func (r *reconciler) waitForRepoVisible(ctx context.Context, owner, repoName string) (*github.Repository, error) {
@@ -291,7 +290,7 @@ func (r *reconciler) waitForRepoVisible(ctx context.Context, owner, repoName str
 }
 
 func (r *reconciler) updateBranchProtection(ctx context.Context, repoName string) error {
-	_, _, err := r.ghClient.Repositories.UpdateBranchProtection(ctx, r.org, repoName, "main", &github.ProtectionRequest{
+	_, _, err := r.ghClient.Repositories.UpdateBranchProtection(ctx, r.org, repoName, defaultBranch, &github.ProtectionRequest{
 		EnforceAdmins: true,
 		RequiredPullRequestReviews: &github.PullRequestReviewsEnforcementRequest{
 			DismissStaleReviews:          true,

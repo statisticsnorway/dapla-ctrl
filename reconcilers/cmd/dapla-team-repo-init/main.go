@@ -80,14 +80,14 @@ func writeFile(path, content string) {
 	dirname, _, _ := strings.CutLast(path, "/")
 	err := os.MkdirAll(dirname, 0o755)
 	if err != nil {
-		fmt.Errorf("Failed to create directory: %v", err)
+		log.Fatalf("failed to create directory: %v", err)
 	}
 
 	// 3. Write data to the file
 	// 0644 gives the owner read/write permissions, and others read-only
 	err = os.WriteFile(path, []byte(content), 0o644)
 	if err != nil {
-		fmt.Errorf("Failed to write file: %v", err)
+		log.Fatalf("failed to write file: %v", err)
 	}
 	log.Println("wrote", path)
 }

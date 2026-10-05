@@ -222,6 +222,9 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	resp, err := client.Atlantis().GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
 		TeamSlug: daplaTeam.Slug,
 	})
+	if err != nil {
+		return err
+	}
 	webhookSecret := resp.GetWebhookSecret()
 	if webhookSecret == "" {
 		log.Debug("creating webhook secret")

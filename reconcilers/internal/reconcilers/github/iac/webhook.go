@@ -81,7 +81,7 @@ func (r *webhookReconciler) createWebHook(ctx context.Context, owner, repo, atla
 	if err != nil {
 		return fmt.Errorf("failed to create webhook for repo %s: %w", repo, err)
 	}
-	return err
+	return nil
 }
 
 func (r *webhookReconciler) updateGhRepoAtlantisWebhookSecret(ctx context.Context, owner, repoName string, hook github.Hook, secret string) error {
