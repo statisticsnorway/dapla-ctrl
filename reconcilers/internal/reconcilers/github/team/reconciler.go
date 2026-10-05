@@ -127,8 +127,8 @@ func (r *reconciler) reconcileGroup(ctx context.Context, groupName, entraIdGroup
 
 	if team.GetPrivacy() != "closed" {
 		if team, _, err = r.teamsClient.UpdateTeamBySlug(ctx, r.org, *team.Slug, github.UpdateTeamRequest{
-			Name:    team.Slug,
-			Privacy: new("closed"),
+			Name:             team.Slug,
+			Privacy:          new("closed"),
 			RemoveParentTeam: true,
 		}); err != nil {
 			return err
