@@ -2,9 +2,6 @@ package iac
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -120,17 +117,13 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 	repoName = repo.GetName() // Should be the same as above, but reassign just to be safe
 
-	atlantisUrl, err := getAtlantisUrl(ctx, client.Atlantis(), daplaTeam.Slug)
+	err = r.reconcileGhRepoAtlantisWebhookSecret(ctx, client, daplaTeam, repoName)
 	if err != nil {
 		return err
 	}
-	atlantisSecret, err := getAtlantisWebhookSecret(ctx, client.Atlantis(), daplaTeam.Slug)
-	if err != nil {
-		return err
-	}
-	r.reconcileGhRepoAtlantisWebhookSecret(ctx, r.org, repoName, atlantisUrl, atlantisSecret)
 
 	if created {
+		// Note: If this step fails we must create the files and PR our self, which is ok, as discussed in team meeting
 		if err := (&repoContentService{
 			git: r.ghClient.Git,
 		}).initIacRepoContent(ctx, r.org, repoName, daplaTeam.GetSlug(), daplaTeam.IsManaged); err != nil {
@@ -152,6 +145,25 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
+	return nil
+}
+
+func (r *reconciler) reconcileGhRepoAtlantisWebhookSecret(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, repoName string) error {
+	atlantisUrl, err := getAtlantisUrl(ctx, client.Atlantis(), daplaTeam.Slug)
+	if err != nil {
+		return err
+	}
+	atlantisSecret, err := getAtlantisWebhookSecret(ctx, client.Atlantis(), daplaTeam.Slug)
+	if err != nil {
+		return err
+	}
+
+	err = (&webhookReconciler{
+		client: r.ghClient.Repositories,
+	}).upsertAtlantisWebhook(ctx, r.org, repoName, atlantisUrl, atlantisSecret)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -292,162 +304,6 @@ func (r *reconciler) updateBranchProtection(ctx context.Context, repoName string
 		},
 	})
 	return err
-}
-
-// will return nil, nil if the webhook does not exists
-func (r *reconciler) findWebhook(ctx context.Context, owner, repo, atlantisUrl string) (*github.Hook, error) {
-	hooks, _, err := r.ghClient.Repositories.ListHooks(ctx, owner, repo, &github.ListOptions{PerPage: 100})
-	if err != nil {
-		return nil, err
-	}
-
-	var hook *github.Hook
-	for _, h := range hooks {
-		if h.GetConfig().GetURL() == atlantisUrl {
-			hook = h
-			break
-		}
-	}
-	if hook == nil {
-		return nil, nil
-	}
-
-	return hook, nil
-}
-
-func (r *reconciler) createWebHook(ctx context.Context, owner, repo, atlantisUrl, secret string) error {
-	_, _, err := r.ghClient.Repositories.CreateHook(ctx, r.org, repo, &github.Hook{
-		Config: &github.HookConfig{
-			ContentType: new("json"),
-			URL:         &atlantisUrl,
-			Secret:      &secret,
-		},
-		Events: []string{
-			"check_run",
-			"create",
-			"delete",
-			"issue_comment",
-			"issues",
-			"pull_request",
-			"pull_request_review",
-			"pull_request_review_comment",
-			"push",
-		},
-		Active: new(true),
-	})
-	if err != nil {
-		return fmt.Errorf("failed to create webhook for repo %s: %w", repo, err)
-	}
-	return err
-}
-
-func (r *reconciler) reconcileGhRepoAtlantisWebhookSecret(ctx context.Context, owner, repo, atlantisUrl, secret string) error {
-	hook, err := r.findWebhook(ctx, owner, repo, atlantisUrl)
-	if err != nil {
-		return err
-	}
-	if hook == nil {
-		return r.createWebHook(ctx, owner, repo, atlantisUrl, secret)
-	}
-	return r.updateGhRepoAtlantisWebhookSecret(ctx, owner, repo, *hook, secret)
-}
-
-func (r *reconciler) updateGhRepoAtlantisWebhookSecret(ctx context.Context, owner, repoName string, hook github.Hook, secret string) error {
-	hookId := hook.GetID()
-
-	// compare if we need to update secret
-	upToDate, err := r.hookLatestDeliverySignedWith(ctx, owner, repoName, hookId, secret)
-	if err != nil {
-		return err
-	}
-	if upToDate {
-		return nil
-	}
-
-	config := *hook.GetConfig()
-	config.Secret = &secret
-	if _, _, err := r.ghClient.Repositories.EditHook(ctx, owner, repoName, hookId, &github.Hook{Config: &config}); err != nil {
-		return fmt.Errorf("update atlantis webhook secret for repo %s: %w", repoName, err)
-	}
-
-	// Trigger webhook so the next reconcile can verify it without updating again.
-	if _, err := r.ghClient.Repositories.PingHook(ctx, owner, repoName, hookId); err != nil {
-		return fmt.Errorf("ping atlantis webhook for repo %s: %w", repoName, err)
-	}
-
-	return nil
-}
-
-// https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
-// return false if the secret can not be verifed (can happn for no triggers), which implies that the secret should be updated
-func (r *reconciler) hookLatestDeliverySignedWith(ctx context.Context, owner, repoName string, hookID int64, secret string) (bool, error) {
-	deliveries, _, err := r.ghClient.Repositories.ListHookDeliveries(ctx, owner, repoName, hookID, &github.ListCursorOptions{First: 1})
-	if err != nil {
-		return false, err
-	}
-	if len(deliveries) == 0 {
-		return false, nil
-	}
-
-	delivery, _, err := r.ghClient.Repositories.GetHookDelivery(ctx, owner, repoName, hookID, deliveries[0].GetID())
-	if err != nil {
-		return false, err
-	}
-	if delivery.Request == nil || delivery.Request.RawPayload == nil {
-		return false, nil
-	}
-
-	var ghSignature string
-	for k, v := range delivery.Request.Headers {
-		if strings.EqualFold(k, "X-Hub-Signature-256") {
-			ghSignature = v
-			break
-		}
-	}
-	got, err := hex.DecodeString(strings.TrimPrefix(ghSignature, "sha256="))
-	if ghSignature == "" || err != nil {
-		return false, nil
-	}
-
-	signature := generateSignature([]byte(secret), []byte(*delivery.Request.RawPayload))
-	return hmac.Equal(signature, got), nil
-}
-
-func generateSignature(secret, payload []byte) []byte {
-	mac := hmac.New(sha256.New, secret)
-	mac.Write(payload)
-	return mac.Sum(nil)
-}
-
-func getAtlantisUrl(ctx context.Context, client protoapi.AtlantisClient, teamSlug string) (string, error) {
-	resp, err := client.GetTeamAtlantis(ctx, &protoapi.GetTeamAtlantisRequest{
-		TeamSlug: teamSlug,
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to get team atlantis config: %w", err)
-	}
-	customAtlantisName := resp.Config.GetCustomName()
-
-	atlantisName := "atlantis-" + teamSlug
-	if customAtlantisName != "" {
-		atlantisName = customAtlantisName
-	}
-
-	return "https://" + atlantisName + ".atlantis.ssb.no/events", nil
-}
-
-func getAtlantisWebhookSecret(ctx context.Context, client protoapi.AtlantisClient, teamSlug string) (string, error) {
-	resp, err := client.GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
-		TeamSlug: teamSlug,
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch atlantis webhook secret for team %s: %w", teamSlug, err)
-	}
-	secret := resp.WebhookSecret
-	if secret == "" {
-		return "", fmt.Errorf("atlantis webhook secret for team %s is empty", teamSlug)
-	}
-	return secret, nil
 }
 
 func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
