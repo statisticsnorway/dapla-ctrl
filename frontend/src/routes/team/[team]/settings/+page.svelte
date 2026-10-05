@@ -11,7 +11,6 @@
 	let aiErrors: { message: string }[] | undefined = $state();
 
 	let team = $derived($TeamSettings.data?.team);
-	let isAdmin = $derived($UserInfo.data?.me.__typename === 'User' && $UserInfo.data.me.isAdmin);
 	let canManageTeam = $derived.by(() => {
 		let me = $UserInfo.data?.me;
 		if (me?.__typename !== 'User') return false;
@@ -96,24 +95,22 @@
 	</div>
 	<div class="wrapper">
 		<div style="display: flex; flex-direction: column; gap: var(--spacing-layout)">
-			{#if isAdmin}
-				<div>
-					<Heading level="2">Parquedit</Heading>
-					<Switch
-						disabled={!canManageTeam}
-						checked={teamSettings.hasManualEditing}
-						onclick={(e: MouseEvent) => {
-							e.preventDefault();
-							showConfirmModal = true;
-						}}
-						>{teamSettings.hasManualEditing
-							? 'Skru av Parquedit i prodmiljøet'
-							: 'Skru på Parquedit i prodmiljøet'}</Switch
-					>
+			<div>
+				<Heading level="2">Parquedit</Heading>
+				<Switch
+					disabled={!canManageTeam}
+					checked={teamSettings.hasManualEditing}
+					onclick={(e: MouseEvent) => {
+						e.preventDefault();
+						showConfirmModal = true;
+					}}
+					>{teamSettings.hasManualEditing
+						? 'Skru av Parquedit i prodmiljøet'
+						: 'Skru på Parquedit i prodmiljøet'}</Switch
+				>
 
-					<GraphErrors errors={descriptionErrors} size="small" />
-				</div>
-			{/if}
+				<GraphErrors errors={descriptionErrors} size="small" />
+			</div>
 			<div>
 				<Heading level="2">Kunstig Intelligens (KI)</Heading>
 				<Switch disabled={!canManageTeam} checked={aiEnabled} onclick={toggleAi}>
