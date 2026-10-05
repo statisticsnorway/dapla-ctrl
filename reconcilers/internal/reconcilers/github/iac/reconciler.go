@@ -179,29 +179,9 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
-	ghTeamPermission := "push"
-	if !daplaTeam.IsManaged {
-		ghTeamPermission = "admin"
-	}
-
-	for slug, permission := range map[string]string{
-		"dapla-skyinfra-developers":    "admin",
-		"dapla-platform-developers":    "push",
-		daplaTeam.Slug + "-developers": ghTeamPermission,
-	} {
-		_, err = r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, slug, r.org, repoName, &github.TeamAddTeamRepoOptions{
-			Permission: permission,
-		})
-		if err != nil {
-			return err
-		}
-	}
-
-	if daplaTeam.IsManaged {
-		err := r.updateBranchProtection(ctx, repoName)
-		if err != nil {
-			return err
-		}
+	err = r.reconcileGithubRepoPermissions(ctx, daplaTeam, repoName)
+	if err != nil {
+		return err
 	}
 
 	resp, err := client.Atlantis().GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
@@ -214,6 +194,35 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
+	return nil
+}
+
+// set team permissions and branch protection rules on repo
+func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, daplaTeam *protoapi.Team, repoName string) error {
+	permission := "push"
+	if !daplaTeam.IsManaged {
+		permission = "admin"
+	}
+
+	for team, permission := range map[string]string{
+		"dapla-skyinfra-developers":    "admin",
+		"dapla-platform-developers":    "push",
+		daplaTeam.Slug + "-developers": permission,
+	} {
+		_, err := r.ghClient.Teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
+			Permission: permission,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to add team repo permission, repo: %s, github team: %s, err: %w", repoName, team, err)
+		}
+	}
+
+	if daplaTeam.IsManaged {
+		err := r.updateBranchProtection(ctx, repoName)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
