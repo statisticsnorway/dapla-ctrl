@@ -32,7 +32,6 @@
 				return CogIcon;
 			case 'dapla lab':
 				return RocketIcon;
-			case 'artifact-registry':
 			case 'artifact registry':
 				return PackageIcon;
 			default:

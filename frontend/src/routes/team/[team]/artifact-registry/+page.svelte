@@ -166,7 +166,7 @@
 							size="small"
 							variant="tertiary"
 							icon={TrashIcon}
-							aria-label={`Fjern tilgang for statisticsNorway/${repository.name}`}
+							aria-label={`Fjern tilgang for statisticsnorway/${repository.name}`}
 							onclick={() => {
 								removeErrors = undefined;
 								removeRepositoryName = repository.name;
