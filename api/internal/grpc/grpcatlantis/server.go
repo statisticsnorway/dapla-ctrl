@@ -54,17 +54,16 @@ func (s *Server) GetTeamAtlantisWebhookSecret(ctx context.Context, req *protoapi
 		return nil, status.Errorf(codes.Internal, "get webhook secret: %s", err)
 	}
 
-	return &protoapi.GetTeamAtlantisWebhookSecretResponse{WebhookSecret: *webhookSecret }, nil
+	return &protoapi.GetTeamAtlantisWebhookSecretResponse{WebhookSecret: *webhookSecret}, nil
 }
 
 func toProtoTeamAtlantisConfig(config grpcatlantissql.TeamAtlantisConfig) *protoapi.AtlantisConfig {
 	return &protoapi.AtlantisConfig{
-		TeamSlug:      config.TeamSlug.String(),
-		WebhookSecret: config.WebhookSecret,
-		CustomName:    config.CustomName,
-		CustomImage:   config.CustomImage,
-		Resources:     config.Resources,
-		DiskSize:      config.DiskSize,
-		RepoConfig:    config.RepoConfig,
+		TeamSlug:    config.TeamSlug.String(),
+		CustomName:  config.CustomName,
+		CustomImage: config.CustomImage,
+		Resources:   config.Resources,
+		DiskSize:    config.DiskSize,
+		RepoConfig:  config.RepoConfig,
 	}
 }

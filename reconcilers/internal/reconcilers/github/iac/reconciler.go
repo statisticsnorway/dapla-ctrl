@@ -130,11 +130,17 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	atlantisUrl := getAtlantisUrl(daplaTeam.Slug, atlantisResp.Config.GetCustomImage())
 
 	if created {
-		secret := atlantisResp.Config.GetWebhookSecret()
+		resp, err := client.Atlantis().GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
+			TeamSlug: daplaTeam.Slug,
+		})
+		if err != nil {
+			return fmt.Errorf("failed to fetch atlantis webhook secret for team %s: %w", daplaTeam.Slug, err)
+		}
+		secret := resp.WebhookSecret
 		if secret == "" {
 			return fmt.Errorf("atlantis webhook secret for team %s is empty", daplaTeam.Slug)
 		}
-		_, _, err := r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
+		_, _, err = r.ghClient.Repositories.CreateHook(ctx, r.org, repoName, &github.Hook{
 			Config: &github.HookConfig{
 				ContentType: new("json"),
 				URL:         &atlantisUrl,
@@ -202,7 +208,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		TeamSlug: daplaTeam.Slug,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to fetch atlantis webhook secret for team %s: %w", daplaTeam.Slug, err)
 	}
 	if err := r.updateGhRepoAtlantisWebhookSecret(ctx, r.org, repoName, atlantisUrl, resp.WebhookSecret); err != nil {
 		return err

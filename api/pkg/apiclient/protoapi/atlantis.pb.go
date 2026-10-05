@@ -23,14 +23,14 @@ const (
 )
 
 type AtlantisConfig struct {
-	state         protoimpl.MessageState `protogen:"hybrid.v1"`
-	TeamSlug      string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3" json:"team_slug,omitempty"`
-	WebhookSecret *string                `protobuf:"bytes,2,opt,name=webhook_secret,json=webhookSecret,proto3,oneof" json:"webhook_secret,omitempty"`
-	CustomName    *string                `protobuf:"bytes,3,opt,name=custom_name,json=customName,proto3,oneof" json:"custom_name,omitempty"`
-	CustomImage   *string                `protobuf:"bytes,4,opt,name=custom_image,json=customImage,proto3,oneof" json:"custom_image,omitempty"`
-	Resources     []byte                 `protobuf:"bytes,5,opt,name=resources,proto3,oneof" json:"resources,omitempty"`
-	DiskSize      *string                `protobuf:"bytes,6,opt,name=disk_size,json=diskSize,proto3,oneof" json:"disk_size,omitempty"`
-	RepoConfig    []byte                 `protobuf:"bytes,7,opt,name=repo_config,json=repoConfig,proto3,oneof" json:"repo_config,omitempty"`
+	state    protoimpl.MessageState `protogen:"hybrid.v1"`
+	TeamSlug string                 `protobuf:"bytes,1,opt,name=team_slug,json=teamSlug,proto3" json:"team_slug,omitempty"`
+	// optional string webhook_secret = 2;
+	CustomName    *string `protobuf:"bytes,3,opt,name=custom_name,json=customName,proto3,oneof" json:"custom_name,omitempty"`
+	CustomImage   *string `protobuf:"bytes,4,opt,name=custom_image,json=customImage,proto3,oneof" json:"custom_image,omitempty"`
+	Resources     []byte  `protobuf:"bytes,5,opt,name=resources,proto3,oneof" json:"resources,omitempty"`
+	DiskSize      *string `protobuf:"bytes,6,opt,name=disk_size,json=diskSize,proto3,oneof" json:"disk_size,omitempty"`
+	RepoConfig    []byte  `protobuf:"bytes,7,opt,name=repo_config,json=repoConfig,proto3,oneof" json:"repo_config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -63,13 +63,6 @@ func (x *AtlantisConfig) ProtoReflect() protoreflect.Message {
 func (x *AtlantisConfig) GetTeamSlug() string {
 	if x != nil {
 		return x.TeamSlug
-	}
-	return ""
-}
-
-func (x *AtlantisConfig) GetWebhookSecret() string {
-	if x != nil && x.WebhookSecret != nil {
-		return *x.WebhookSecret
 	}
 	return ""
 }
@@ -113,10 +106,6 @@ func (x *AtlantisConfig) SetTeamSlug(v string) {
 	x.TeamSlug = v
 }
 
-func (x *AtlantisConfig) SetWebhookSecret(v string) {
-	x.WebhookSecret = &v
-}
-
 func (x *AtlantisConfig) SetCustomName(v string) {
 	x.CustomName = &v
 }
@@ -141,13 +130,6 @@ func (x *AtlantisConfig) SetRepoConfig(v []byte) {
 		v = []byte{}
 	}
 	x.RepoConfig = v
-}
-
-func (x *AtlantisConfig) HasWebhookSecret() bool {
-	if x == nil {
-		return false
-	}
-	return x.WebhookSecret != nil
 }
 
 func (x *AtlantisConfig) HasCustomName() bool {
@@ -185,10 +167,6 @@ func (x *AtlantisConfig) HasRepoConfig() bool {
 	return x.RepoConfig != nil
 }
 
-func (x *AtlantisConfig) ClearWebhookSecret() {
-	x.WebhookSecret = nil
-}
-
 func (x *AtlantisConfig) ClearCustomName() {
 	x.CustomName = nil
 }
@@ -212,13 +190,13 @@ func (x *AtlantisConfig) ClearRepoConfig() {
 type AtlantisConfig_builder struct {
 	_ [0]func() // Prevents comparability and use of unkeyed literals for the builder.
 
-	TeamSlug      string
-	WebhookSecret *string
-	CustomName    *string
-	CustomImage   *string
-	Resources     []byte
-	DiskSize      *string
-	RepoConfig    []byte
+	TeamSlug string
+	// optional string webhook_secret = 2;
+	CustomName  *string
+	CustomImage *string
+	Resources   []byte
+	DiskSize    *string
+	RepoConfig  []byte
 }
 
 func (b0 AtlantisConfig_builder) Build() *AtlantisConfig {
@@ -226,7 +204,6 @@ func (b0 AtlantisConfig_builder) Build() *AtlantisConfig {
 	b, x := &b0, m0
 	_, _ = b, x
 	x.TeamSlug = b.TeamSlug
-	x.WebhookSecret = b.WebhookSecret
 	x.CustomName = b.CustomName
 	x.CustomImage = b.CustomImage
 	x.Resources = b.Resources
@@ -592,25 +569,23 @@ var File_atlantis_proto protoreflect.FileDescriptor
 
 const file_atlantis_proto_rawDesc = "" +
 	"\n" +
-	"\x0eatlantis.proto\x12\x12dapla.api.protobuf\"\xf2\x02\n" +
+	"\x0eatlantis.proto\x12\x12dapla.api.protobuf\"\xc9\x02\n" +
 	"\x0eAtlantisConfig\x12\x1b\n" +
-	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12*\n" +
-	"\x0ewebhook_secret\x18\x02 \x01(\tH\x00R\rwebhookSecret\x88\x01\x01\x12$\n" +
-	"\vcustom_name\x18\x03 \x01(\tH\x01R\n" +
+	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\x12$\n" +
+	"\vcustom_name\x18\x03 \x01(\tH\x00R\n" +
 	"customName\x88\x01\x01\x12&\n" +
-	"\fcustom_image\x18\x04 \x01(\tH\x02R\vcustomImage\x88\x01\x01\x12!\n" +
-	"\tresources\x18\x05 \x01(\fH\x03R\tresources\x88\x01\x01\x12 \n" +
-	"\tdisk_size\x18\x06 \x01(\tH\x04R\bdiskSize\x88\x01\x01\x12$\n" +
-	"\vrepo_config\x18\a \x01(\fH\x05R\n" +
-	"repoConfig\x88\x01\x01B\x11\n" +
-	"\x0f_webhook_secretB\x0e\n" +
+	"\fcustom_image\x18\x04 \x01(\tH\x01R\vcustomImage\x88\x01\x01\x12!\n" +
+	"\tresources\x18\x05 \x01(\fH\x02R\tresources\x88\x01\x01\x12 \n" +
+	"\tdisk_size\x18\x06 \x01(\tH\x03R\bdiskSize\x88\x01\x01\x12$\n" +
+	"\vrepo_config\x18\a \x01(\fH\x04R\n" +
+	"repoConfig\x88\x01\x01B\x0e\n" +
 	"\f_custom_nameB\x0f\n" +
 	"\r_custom_imageB\f\n" +
 	"\n" +
 	"_resourcesB\f\n" +
 	"\n" +
 	"_disk_sizeB\x0e\n" +
-	"\f_repo_config\"5\n" +
+	"\f_repo_configJ\x04\b\x02\x10\x03R\x0ewebhook_secret\"5\n" +
 	"\x16GetTeamAtlantisRequest\x12\x1b\n" +
 	"\tteam_slug\x18\x01 \x01(\tR\bteamSlug\"U\n" +
 	"\x17GetTeamAtlantisResponse\x12:\n" +
