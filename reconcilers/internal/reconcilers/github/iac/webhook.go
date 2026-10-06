@@ -129,13 +129,7 @@ func (r *webhookReconciler) hookLatestDeliverySignedWith(ctx context.Context, ow
 		return false, nil
 	}
 
-	var ghSignature string
-	for k, v := range delivery.Request.Headers {
-		if strings.EqualFold(k, "X-Hub-Signature-256") {
-			ghSignature = v
-			break
-		}
-	}
+	ghSignature := delivery.Request.GetHeader("X-Hub-Signature-256")
 	got, err := hex.DecodeString(strings.TrimPrefix(ghSignature, "sha256="))
 	if ghSignature == "" || err != nil {
 		return false, nil

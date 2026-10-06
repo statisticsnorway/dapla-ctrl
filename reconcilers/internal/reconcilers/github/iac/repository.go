@@ -64,7 +64,7 @@ func (r *repositoryReconciler) reconcileVulnerabilityAlerts(ctx context.Context,
 }
 
 func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, repo string) (*github.Repository, error) {
-	// 5 attempt with exponential backoff to max 4 seconds each -> total potential 15 seconds hold
+	// 5 attempt with exponential backoff to max 4 seconds each -> total potential 11 seconds hold
 	maxAttempts := 5
 	backoff := 1 * time.Second
 	waited := time.Duration(0)
