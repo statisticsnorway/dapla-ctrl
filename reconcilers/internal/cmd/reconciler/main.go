@@ -157,13 +157,13 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 			return fmt.Errorf("create github team reconciler: %w", err)
 		}
 		reconcilerManager.AddReconciler(githubTeam)
-	}
 
-	ghIac, err := githubIac.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
-	if err != nil {
-		return fmt.Errorf("create github repo reconciler: %w", err)
+		ghIac, err := githubIac.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
+		if err != nil {
+			return fmt.Errorf("create github repo reconciler: %w", err)
+		}
+		reconcilerManager.AddReconciler(ghIac)
 	}
-	reconcilerManager.AddReconciler(ghIac)
 
 	parqueditReconciler, err := parquedit.New(ctx)
 	if err != nil {
