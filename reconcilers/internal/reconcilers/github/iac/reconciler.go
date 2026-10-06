@@ -21,11 +21,6 @@ const (
 	configTeamAllowlistKey = "teamAllowlist"
 )
 
-type repositoriesClient interface {
-	webhookReconcilerClient
-	repositoriesReconcilerClient
-}
-
 type pullRequestsClient interface {
 	Create(ctx context.Context, owner, repo string, body github.CreatePullRequest) (*github.PullRequest, *github.Response, error)
 }
@@ -33,13 +28,6 @@ type pullRequestsClient interface {
 type teamsClient interface {
 	AddTeamRepoBySlug(ctx context.Context, org, slug, owner, repo string, body *github.TeamAddTeamRepoOptions) (*github.Response, error)
 }
-
-var ( // Make sure the github interfaces actually match our interfaces
-	_ gitClient          = (*github.GitService)(nil)
-	_ repositoriesClient = (*github.RepositoriesService)(nil)
-	_ pullRequestsClient = (*github.PullRequestsService)(nil)
-	_ teamsClient        = (*github.TeamsService)(nil)
-)
 
 type reconciler struct {
 	teamAllowlist []string
@@ -120,39 +108,40 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	teamName := daplaTeam.Slug
 	isManaged := daplaTeam.IsManaged
 
-	repoName := teamName + "-iac"
-	created, err := r.repository.getOrCreate(ctx, r.org, repoName, teamName, isManaged)
+	owner := r.org
+	repo := teamName + "-iac"
+	created, err := r.repository.getOrCreate(ctx, owner, repo, teamName, isManaged)
 	if err != nil {
 		return err
 	}
 
 	if created {
 		// Note: If this step fails we must init the repo our self
-		if err := r.repoContent.initIacRepoContent(ctx, r.org, repoName, teamName, isManaged); err != nil {
-			return fmt.Errorf("initialize content of repo %s: %w", repoName, err)
+		if err := r.repoContent.initIacRepoContent(ctx, owner, repo, teamName, isManaged); err != nil {
+			return fmt.Errorf("initialize content of repo %s: %w", repo, err)
 		}
-		err = r.createInitialPR(ctx, repoName)
+		err = r.createInitialPR(ctx, repo)
 		if err != nil {
-			return fmt.Errorf("create pull request of repo %s: %w", repoName, err)
+			return fmt.Errorf("create pull request of repo %s: %w", repo, err)
 		}
 	}
 
-	err = r.reconcileAtlantisWebhook(ctx, client, daplaTeam, repoName)
+	err = r.reconcileAtlantisWebhook(ctx, client, repo, teamName)
 	if err != nil {
 		return err
 	}
 
-	err = r.repository.reconcileVulnerabilityAlerts(ctx, r.org, repoName)
+	err = r.repository.reconcileVulnerabilityAlerts(ctx, owner, repo)
 	if err != nil {
 		return err
 	}
 
-	err = r.reconcileGithubRepoPermissions(ctx, daplaTeam, repoName)
+	err = r.reconcileGithubRepoPermissions(ctx, repo, teamName, isManaged)
 	if err != nil {
 		return err
 	}
 
-	err = r.repository.reconcileBranchProtection(ctx, r.org, repoName, isManaged)
+	err = r.repository.reconcileBranchProtection(ctx, owner, repo, isManaged)
 	if err != nil {
 		return err
 	}
@@ -160,29 +149,29 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	return nil
 }
 
-func (r *reconciler) reconcileAtlantisWebhook(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, repoName string) error {
-	atlantisUrl, err := getAtlantisUrl(ctx, client.Atlantis(), daplaTeam.Slug)
+func (r *reconciler) reconcileAtlantisWebhook(ctx context.Context, client *apiclient.APIClient, repo, teamName string) error {
+	atlantisUrl, err := getAtlantisUrl(ctx, client.Atlantis(), teamName)
 	if err != nil {
 		return err
 	}
-	atlantisSecret, err := getAtlantisWebhookSecret(ctx, client.Atlantis(), daplaTeam.Slug)
+	atlantisSecret, err := getAtlantisWebhookSecret(ctx, client.Atlantis(), teamName)
 	if err != nil {
 		return err
 	}
 
-	return r.webhooks.upsertAtlantisWebhook(ctx, r.org, repoName, atlantisUrl, atlantisSecret)
+	return r.webhooks.upsertAtlantisWebhook(ctx, r.org, repo, atlantisUrl, atlantisSecret)
 }
 
-func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, daplaTeam *protoapi.Team, repoName string) error {
+func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, repoName, teamName string, isManaged bool) error {
 	teamPermission := "push"
-	if !daplaTeam.IsManaged {
+	if !isManaged {
 		teamPermission = "admin"
 	}
 
 	for team, permission := range map[string]string{
-		"dapla-skyinfra-developers":    "admin",
-		"dapla-platform-developers":    "push",
-		daplaTeam.Slug + "-developers": teamPermission,
+		"dapla-skyinfra-developers": "admin",
+		"dapla-platform-developers": "push",
+		teamName + "-developers":    teamPermission,
 	} {
 		_, err := r.teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
 			Permission: permission,

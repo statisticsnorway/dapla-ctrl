@@ -21,7 +21,7 @@ type repositoryReconciler struct {
 	client repositoriesReconcilerClient
 }
 
-func (r *repositoryReconciler) getOrCreate(ctx context.Context, owner, repo string, teamSlug string, isManged bool) (bool, error) {
+func (r *repositoryReconciler) getOrCreate(ctx context.Context, owner, repo string, daplaTeam string, isManaged bool) (bool, error) {
 	_, _, err := r.client.Get(ctx, owner, repo)
 	if err == nil {
 		return false, nil
@@ -32,9 +32,9 @@ func (r *repositoryReconciler) getOrCreate(ctx context.Context, owner, repo stri
 		return false, err
 	}
 
-	description := "IaC repo for " + teamSlug
+	description := "IaC repo for " + daplaTeam
 	managedTopic := "managed"
-	if !isManged {
+	if !isManaged {
 		managedTopic = "self-managed"
 	}
 	_, _, err = r.client.Create(ctx, owner, &github.Repository{
@@ -64,12 +64,12 @@ func (r *repositoryReconciler) reconcileVulnerabilityAlerts(ctx context.Context,
 }
 
 func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, repo string) (*github.Repository, error) {
-	// 5 apptemts with exponential backoff caped at 4 seconds -> total potential 15 seconds hold
-	maxApptempts := 5
+	// 5 attempt with exponential backoff to max 4 seconds each -> total potential 15 seconds hold
+	maxAttempts := 5
 	backoff := 1 * time.Second
 	waited := time.Duration(0)
 
-	for attempt := 1; attempt <= maxApptempts; attempt++ {
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		if err := ctx.Err(); err != nil {
 			return nil, fmt.Errorf("context done while waiting for github repo %q to become visible after creation: %w", repo, err)
 		}
@@ -89,7 +89,7 @@ func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, re
 			}
 		}
 
-		if attempt == maxApptempts {
+		if attempt == maxAttempts {
 			break
 		}
 
@@ -107,7 +107,7 @@ func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, re
 		}
 	}
 
-	return nil, fmt.Errorf("github repo %q was created but could not be verified as visible after %d attempts (waited ca %s )", repo, maxApptempts, waited)
+	return nil, fmt.Errorf("github repo %q was created but could not be verified as visible after %d attempts (waited ca %s )", repo, maxAttempts, waited)
 }
 
 func (r *repositoryReconciler) reconcileBranchProtection(ctx context.Context, owner, repo string, isManaged bool) error {
