@@ -106,7 +106,7 @@ func TestRepositoryGetOrCreate(t *testing.T) {
 
 			created, err := r.getOrCreate(t.Context(), "statisticsnorway", "play-iac", "play", tt.isManaged)
 
-			if (err != nil) != tt.wantErr {
+			if hasErr := err != nil; hasErr != tt.wantErr {
 				t.Fatalf("err = %v, wantErr %v", err, tt.wantErr)
 			}
 			if created != tt.wantCreated {

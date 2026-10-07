@@ -55,7 +55,7 @@ func RenderTemplateDir(dir string, tmplVars templateVariables) ([]repoFile, erro
 		relativePath := strings.TrimPrefix(templatePath, dir+"/")
 
 		if tmplVars.AutonomyLevel == selfManaged && strings.HasPrefix(relativePath, "automation/") {
-			// Only manged team should have automation folder
+			// Only managed teams should have automation folder
 			return nil
 		}
 

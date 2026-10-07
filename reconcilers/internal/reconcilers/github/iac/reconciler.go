@@ -84,7 +84,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
 				Key:         configTeamAllowlistKey,
-				DisplayName: "Team whitelist",
+				DisplayName: "Team allowlist",
 				Description: "Comma-separated list of teams to create iac repos for. Empty list means create for all teams.",
 				Secret:      false,
 			},
@@ -115,20 +115,20 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return err
 	}
 
+	err = r.reconcileAtlantisWebhook(ctx, client, repo, teamName)
+	if err != nil {
+		return err
+	}
+
 	if created {
 		// Note: If this step fails we must init the repo our self
 		if err := r.repoContent.initIacRepoContent(ctx, owner, repo, teamName, isManaged); err != nil {
 			return fmt.Errorf("initialize content of repo %s: %w", repo, err)
 		}
-		err = r.createInitialPR(ctx, repo)
-		if err != nil {
+
+		if err := r.createInitialPR(ctx, repo); err != nil {
 			return fmt.Errorf("create pull request of repo %s: %w", repo, err)
 		}
-	}
-
-	err = r.reconcileAtlantisWebhook(ctx, client, repo, teamName)
-	if err != nil {
-		return err
 	}
 
 	err = r.repository.reconcileVulnerabilityAlerts(ctx, owner, repo)
@@ -208,9 +208,9 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 				r.teamAllowlist = nil
 				break
 			}
-			whitelist := strings.Split(c.Value, ",")
-			if !slices.Equal(r.teamAllowlist, whitelist) {
-				r.teamAllowlist = whitelist
+			allowlist := strings.Split(c.Value, ",")
+			if !slices.Equal(r.teamAllowlist, allowlist) {
+				r.teamAllowlist = allowlist
 			}
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)

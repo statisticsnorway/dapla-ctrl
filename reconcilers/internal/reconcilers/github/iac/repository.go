@@ -33,16 +33,19 @@ func (r *repositoryReconciler) getOrCreate(ctx context.Context, owner, repo stri
 	}
 
 	description := "IaC repo for " + daplaTeam
-	managedTopic := "managed"
-	if !isManaged {
-		managedTopic = "self-managed"
+	topics := []string{"terraform", "dapla-team", "kuben"}
+	if isManaged {
+		topics = append(topics, "managed")
+	} else {
+		topics = append(topics, "self-managed")
 	}
+
 	_, _, err = r.client.Create(ctx, owner, &github.Repository{
 		Name:        &repo,
 		Description: &description,
 		Visibility:  new("internal"),
 		HasIssues:   new(true),
-		Topics:      []string{"terraform", "dapla-team", "kuben", managedTopic},
+		Topics:      topics,
 		AutoInit:    new(true),
 	})
 	if err != nil {
@@ -64,35 +67,11 @@ func (r *repositoryReconciler) reconcileVulnerabilityAlerts(ctx context.Context,
 }
 
 func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, repo string) (*github.Repository, error) {
-	// 5 attempt with exponential backoff to max 4 seconds each -> total potential 11 seconds hold
+	// 5 attempt with backoff incrementing one second each time: 1, 2, 3, 4 (total 10s)
 	maxAttempts := 5
-	backoff := 1 * time.Second
+	backoff := time.Duration(0)
 	waited := time.Duration(0)
-
-	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		if err := ctx.Err(); err != nil {
-			return nil, fmt.Errorf("context done while waiting for github repo %q to become visible after creation: %w", repo, err)
-		}
-
-		ghRepo, _, err := r.client.Get(ctx, owner, repo)
-		if err == nil {
-			return ghRepo, nil
-		}
-
-		if githubError, ok := errors.AsType[*github.ErrorResponse](err); ok {
-			status := githubError.Response.StatusCode
-			shouldRetry := status == http.StatusNotFound ||
-				status == http.StatusTooManyRequests ||
-				status >= http.StatusInternalServerError
-			if !shouldRetry {
-				return nil, fmt.Errorf("failed to verify repository %q after creation: %w", repo, err)
-			}
-		}
-
-		if attempt == maxAttempts {
-			break
-		}
-
+	for range maxAttempts {
 		// backoff
 		select {
 		case <-ctx.Done():
@@ -101,9 +80,23 @@ func (r *repositoryReconciler) waitForRepoVisible(ctx context.Context, owner, re
 		}
 
 		waited += backoff
-		backoff *= 2
-		if backoff > 4*time.Second {
-			backoff = 4 * time.Second
+		backoff += time.Second
+
+		if err := ctx.Err(); err != nil {
+			return nil, fmt.Errorf("context done while waiting for github repo %q to become visible after creation: %w", repo, err)
+		}
+		ghRepo, _, err := r.client.Get(ctx, owner, repo)
+		if err == nil {
+			return ghRepo, nil
+		}
+		if githubError, ok := errors.AsType[*github.ErrorResponse](err); ok {
+			status := githubError.Response.StatusCode
+			shouldRetry := status == http.StatusNotFound ||
+				status == http.StatusTooManyRequests ||
+				status >= http.StatusInternalServerError
+			if !shouldRetry {
+				return nil, fmt.Errorf("failed to verify repository %q after creation: %w", repo, err)
+			}
 		}
 	}
 
