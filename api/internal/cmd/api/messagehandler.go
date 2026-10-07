@@ -64,16 +64,17 @@ func runMessageHandling(ctx context.Context, pool *pgxpool.Pool, cfg *Config, lo
 
 func sender(ctx context.Context, sm *messagesender.MessageSender, cfg *Config, log logrus.FieldLogger) error {
 	for {
-		if cfg.LeaderElectionEnabled && !leaderelection.IsLeader(log) {
-			log.Debug("not leader, skipping message sending")
-			return nil
-		}
 		func() {
+			if cfg.LeaderElectionEnabled && !leaderelection.IsLeader(log) {
+				log.Debug("not leader, skipping message sending")
+				return
+			}
+
 			ctx, cancel := context.WithTimeout(ctx, sendMessageTimeout)
 			defer cancel()
 
 			if err := sm.SendMessages(ctx); err != nil {
-				log.WithError(err).Errorf("could not send messages")
+				log.WithError(err).Errorf("send messages")
 			}
 		}()
 		select {
