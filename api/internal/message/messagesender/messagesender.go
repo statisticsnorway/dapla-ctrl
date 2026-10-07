@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/leaderelection"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/message/messagesql"
 )
 
@@ -145,10 +144,6 @@ func (m *MessageSender) ReceiveMessages(ctx context.Context, leaderElectionEnabl
 	subscriber := m.pubsubClient.Subscriber(m.postmanOutgoingSubscription)
 
 	err := subscriber.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
-		if !leaderElectionEnabled && !leaderelection.IsLeader(m.log) {
-			m.log.Debug("not leader, skipping message recieving")
-			return
-		}
 		var messageResult MessageResult
 		if err := json.Unmarshal(msg.Data, &messageResult); err != nil {
 			msg.Nack()
