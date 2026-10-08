@@ -8,7 +8,6 @@ import (
 	"cloud.google.com/go/container/apiv1/containerpb"
 	"github.com/google/go-cmp/cmp"
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	googlecreds "golang.org/x/oauth2/google"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
@@ -76,36 +75,37 @@ func (r *reconciler) createKubernetesClients(ctx context.Context, clusterResourc
 	return k8s, knsrv, nil
 }
 
-func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config *protoapi.AtlantisConfig, repoAllowList []string, log logrus.FieldLogger) error {
+type kubernetesConfig struct {
+	webhookSecret string
+	customImage   string
+	resources     []byte
+	diskSize      string
+	repoConfig    []byte
+	repoAllowList []string
+}
+
+func (r *reconciler) reconcileKubernetesResources(ctx context.Context, name, namespace string, config kubernetesConfig, log logrus.FieldLogger) error {
 	if err := r.reconcileKubernetesServiceAccount(ctx, name, namespace, log); err != nil {
 		return fmt.Errorf("reconcile service account: %w", err)
 	}
 
-	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, *config.WebhookSecret, log); err != nil {
+	if err := r.reconcileKubernetesWebhookSecret(ctx, name, namespace, config.webhookSecret, log); err != nil {
 		return fmt.Errorf("reconcile webhook secret: %w", err)
 	}
 
 	repoConfig := defaultRepoConfig
-	if len(config.RepoConfig) != 0 {
-		repoConfig = string(config.RepoConfig)
+	if len(config.repoConfig) != 0 {
+		repoConfig = string(config.repoConfig)
 	}
 	if err := r.reconcileKubernetesReposConfig(ctx, name, namespace, repoConfig, log); err != nil {
 		return fmt.Errorf("reconcile repos config: %w", err)
 	}
 
-	diskSize := defaultDiskSize
-	if config.DiskSize != nil {
-		var err error
-		diskSize, err = resource.ParseQuantity(*config.DiskSize)
-		if err != nil {
-			return fmt.Errorf("parse disk size: %w", err)
-		}
-	}
-	if err := r.reconcileKubernetesVolume(ctx, name, namespace, diskSize, log); err != nil {
+	if err := r.reconcileKubernetesVolume(ctx, name, namespace, config.diskSize, log); err != nil {
 		return fmt.Errorf("reconcile volume: %w", err)
 	}
 
-	if err := r.reconcileKnativeService(ctx, name, namespace, repoAllowList, config, log.WithField("atlantis_subdomain", "knative")); err != nil {
+	if err := r.reconcileKnativeService(ctx, name, namespace, config.repoAllowList, config.customImage, config.resources, log.WithField("atlantis_subdomain", "knative")); err != nil {
 		return fmt.Errorf("reconcile knative service: %w", err)
 	}
 	return nil
@@ -221,7 +221,16 @@ func (r *reconciler) reconcileKubernetesReposConfig(ctx context.Context, name, n
 	return err
 }
 
-func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSize resource.Quantity, log logrus.FieldLogger) error {
+func (r *reconciler) reconcileKubernetesVolume(ctx context.Context, name, namespace string, diskSizeQuantity string, log logrus.FieldLogger) error {
+	diskSize := defaultDiskSize
+	if diskSizeQuantity != "" {
+		var err error
+		diskSize, err = resource.ParseQuantity(diskSizeQuantity)
+		if err != nil {
+			return fmt.Errorf("parse disk size: %w", err)
+		}
+	}
+
 	pvcClient := r.k8sClient.CoreV1().PersistentVolumeClaims(namespace)
 	wantedSpec := &corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{

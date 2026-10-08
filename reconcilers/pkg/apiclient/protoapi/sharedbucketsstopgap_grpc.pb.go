@@ -20,7 +20,9 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	SharedBucketsStopgap_Create_FullMethodName      = "/dapla.api.protobuf.SharedBucketsStopgap/Create"
+	SharedBucketsStopgap_Delete_FullMethodName      = "/dapla.api.protobuf.SharedBucketsStopgap/Delete"
 	SharedBucketsStopgap_Get_FullMethodName         = "/dapla.api.protobuf.SharedBucketsStopgap/Get"
+	SharedBucketsStopgap_ListForTeam_FullMethodName = "/dapla.api.protobuf.SharedBucketsStopgap/ListForTeam"
 	SharedBucketsStopgap_Groups_FullMethodName      = "/dapla.api.protobuf.SharedBucketsStopgap/Groups"
 	SharedBucketsStopgap_AddGroup_FullMethodName    = "/dapla.api.protobuf.SharedBucketsStopgap/AddGroup"
 	SharedBucketsStopgap_RemoveGroup_FullMethodName = "/dapla.api.protobuf.SharedBucketsStopgap/RemoveGroup"
@@ -31,7 +33,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SharedBucketsStopgapClient interface {
 	Create(ctx context.Context, in *CreateSharedBucketsStopgapRequest, opts ...grpc.CallOption) (*CreateSharedBucketsStopgapResponse, error)
+	Delete(ctx context.Context, in *DeleteSharedBucketsStopgapRequest, opts ...grpc.CallOption) (*DeleteSharedBucketsStopgapResponse, error)
 	Get(ctx context.Context, in *GetSharedBucketsStopgapRequest, opts ...grpc.CallOption) (*GetSharedBucketsStopgapResponse, error)
+	ListForTeam(ctx context.Context, in *ListSharedBucketsStopgapForTeamRequest, opts ...grpc.CallOption) (*ListSharedBucketsStopgapForTeamResponse, error)
 	Groups(ctx context.Context, in *ListSharedBucketsStopgapGroupsRequest, opts ...grpc.CallOption) (*ListSharedBucketsStopgapGroupsResponse, error)
 	AddGroup(ctx context.Context, in *AddSharedBucketsStopgapGroupRequest, opts ...grpc.CallOption) (*AddSharedBucketsStopgapGroupResponse, error)
 	RemoveGroup(ctx context.Context, in *RemoveSharedBucketsStopgapGroupRequest, opts ...grpc.CallOption) (*RemoveSharedBucketsStopgapGroupResponse, error)
@@ -55,10 +59,30 @@ func (c *sharedBucketsStopgapClient) Create(ctx context.Context, in *CreateShare
 	return out, nil
 }
 
+func (c *sharedBucketsStopgapClient) Delete(ctx context.Context, in *DeleteSharedBucketsStopgapRequest, opts ...grpc.CallOption) (*DeleteSharedBucketsStopgapResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteSharedBucketsStopgapResponse)
+	err := c.cc.Invoke(ctx, SharedBucketsStopgap_Delete_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *sharedBucketsStopgapClient) Get(ctx context.Context, in *GetSharedBucketsStopgapRequest, opts ...grpc.CallOption) (*GetSharedBucketsStopgapResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetSharedBucketsStopgapResponse)
 	err := c.cc.Invoke(ctx, SharedBucketsStopgap_Get_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sharedBucketsStopgapClient) ListForTeam(ctx context.Context, in *ListSharedBucketsStopgapForTeamRequest, opts ...grpc.CallOption) (*ListSharedBucketsStopgapForTeamResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSharedBucketsStopgapForTeamResponse)
+	err := c.cc.Invoke(ctx, SharedBucketsStopgap_ListForTeam_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +124,9 @@ func (c *sharedBucketsStopgapClient) RemoveGroup(ctx context.Context, in *Remove
 // for forward compatibility.
 type SharedBucketsStopgapServer interface {
 	Create(context.Context, *CreateSharedBucketsStopgapRequest) (*CreateSharedBucketsStopgapResponse, error)
+	Delete(context.Context, *DeleteSharedBucketsStopgapRequest) (*DeleteSharedBucketsStopgapResponse, error)
 	Get(context.Context, *GetSharedBucketsStopgapRequest) (*GetSharedBucketsStopgapResponse, error)
+	ListForTeam(context.Context, *ListSharedBucketsStopgapForTeamRequest) (*ListSharedBucketsStopgapForTeamResponse, error)
 	Groups(context.Context, *ListSharedBucketsStopgapGroupsRequest) (*ListSharedBucketsStopgapGroupsResponse, error)
 	AddGroup(context.Context, *AddSharedBucketsStopgapGroupRequest) (*AddSharedBucketsStopgapGroupResponse, error)
 	RemoveGroup(context.Context, *RemoveSharedBucketsStopgapGroupRequest) (*RemoveSharedBucketsStopgapGroupResponse, error)
@@ -117,8 +143,14 @@ type UnimplementedSharedBucketsStopgapServer struct{}
 func (UnimplementedSharedBucketsStopgapServer) Create(context.Context, *CreateSharedBucketsStopgapRequest) (*CreateSharedBucketsStopgapResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Create not implemented")
 }
+func (UnimplementedSharedBucketsStopgapServer) Delete(context.Context, *DeleteSharedBucketsStopgapRequest) (*DeleteSharedBucketsStopgapResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
+}
 func (UnimplementedSharedBucketsStopgapServer) Get(context.Context, *GetSharedBucketsStopgapRequest) (*GetSharedBucketsStopgapResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedSharedBucketsStopgapServer) ListForTeam(context.Context, *ListSharedBucketsStopgapForTeamRequest) (*ListSharedBucketsStopgapForTeamResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListForTeam not implemented")
 }
 func (UnimplementedSharedBucketsStopgapServer) Groups(context.Context, *ListSharedBucketsStopgapGroupsRequest) (*ListSharedBucketsStopgapGroupsResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Groups not implemented")
@@ -168,6 +200,24 @@ func _SharedBucketsStopgap_Create_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SharedBucketsStopgap_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSharedBucketsStopgapRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SharedBucketsStopgapServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SharedBucketsStopgap_Delete_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SharedBucketsStopgapServer).Delete(ctx, req.(*DeleteSharedBucketsStopgapRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _SharedBucketsStopgap_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetSharedBucketsStopgapRequest)
 	if err := dec(in); err != nil {
@@ -182,6 +232,24 @@ func _SharedBucketsStopgap_Get_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SharedBucketsStopgapServer).Get(ctx, req.(*GetSharedBucketsStopgapRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SharedBucketsStopgap_ListForTeam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSharedBucketsStopgapForTeamRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SharedBucketsStopgapServer).ListForTeam(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SharedBucketsStopgap_ListForTeam_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SharedBucketsStopgapServer).ListForTeam(ctx, req.(*ListSharedBucketsStopgapForTeamRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -252,8 +320,16 @@ var SharedBucketsStopgap_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SharedBucketsStopgap_Create_Handler,
 		},
 		{
+			MethodName: "Delete",
+			Handler:    _SharedBucketsStopgap_Delete_Handler,
+		},
+		{
 			MethodName: "Get",
 			Handler:    _SharedBucketsStopgap_Get_Handler,
+		},
+		{
+			MethodName: "ListForTeam",
+			Handler:    _SharedBucketsStopgap_ListForTeam_Handler,
 		},
 		{
 			MethodName: "Groups",

@@ -15,7 +15,9 @@ message SharedBucketStopgap {
 
 service SharedBucketsStopgap {
   rpc Create(CreateSharedBucketsStopgapRequest) returns (CreateSharedBucketsStopgapResponse) {}
+  rpc Delete(DeleteSharedBucketsStopgapRequest) returns (DeleteSharedBucketsStopgapResponse) {}
   rpc Get(GetSharedBucketsStopgapRequest) returns (GetSharedBucketsStopgapResponse) {}
+  rpc ListForTeam(ListSharedBucketsStopgapForTeamRequest) returns (ListSharedBucketsStopgapForTeamResponse) {}
   rpc Groups(ListSharedBucketsStopgapGroupsRequest) returns (ListSharedBucketsStopgapGroupsResponse) {}
   rpc AddGroup(AddSharedBucketsStopgapGroupRequest) returns (AddSharedBucketsStopgapGroupResponse) {}
   rpc RemoveGroup(RemoveSharedBucketsStopgapGroupRequest) returns (RemoveSharedBucketsStopgapGroupResponse) {}
@@ -29,11 +31,25 @@ message GetSharedBucketsStopgapResponse {
   SharedBucketStopgap shared_bucket_stopgap = 1;
 }
 
+message ListSharedBucketsStopgapForTeamRequest {
+    string team_slug = 1;
+}
+
+message ListSharedBucketsStopgapForTeamResponse {
+    repeated SharedBucketStopgap nodes = 1;
+}
+
 message CreateSharedBucketsStopgapRequest {
   SharedBucketStopgap shared_bucket_stopgap = 1;
 }
 
 message CreateSharedBucketsStopgapResponse {}
+
+message DeleteSharedBucketsStopgapRequest {
+  SharedBucketStopgap shared_bucket_stopgap = 1;
+}
+
+message DeleteSharedBucketsStopgapResponse {}
 
 message ListSharedBucketsStopgapGroupsRequest {
   SharedBucketStopgap shared_bucket_stopgap = 1;

@@ -11,7 +11,6 @@ import (
 	_ "embed"
 
 	"github.com/sirupsen/logrus"
-	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -20,23 +19,23 @@ import (
 	knv1 "knative.dev/serving/pkg/apis/serving/v1"
 )
 
-func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, config *protoapi.AtlantisConfig, log logrus.FieldLogger) error {
+func (r *reconciler) reconcileKnativeService(ctx context.Context, name, namespace string, repoAllowList []string, customImage string, resources []byte, log logrus.FieldLogger) error {
 	if r.knativeServiceTemplate == nil {
 		return errors.New("missing knative template")
 	}
 	services := r.knServices.Services(namespace)
 
 	image := r.config.AtlantisImage
-	if config.CustomImage != nil {
-		image = *config.CustomImage
+	if customImage != "" {
+		image = customImage
 	}
 
-	resources, err := parseResources(config.Resources)
+	k8sResources, err := parseResources(resources)
 	if err != nil {
 		return fmt.Errorf("parse resources: %w", err)
 	}
 
-	templatedKnativeService, err := r.buildKnativeService(name, image, resources, repoAllowList)
+	templatedKnativeService, err := r.buildKnativeService(name, image, k8sResources, repoAllowList)
 	if err != nil {
 		return fmt.Errorf("build knative service: %w", err)
 	}

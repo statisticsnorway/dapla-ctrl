@@ -46,14 +46,24 @@ func (s *Server) SetTeamAtlantisWebhookSecret(ctx context.Context, req *protoapi
 	return &protoapi.SetTeamAtlantisWebhookSecretResponse{}, nil
 }
 
+func (s *Server) GetTeamAtlantisWebhookSecret(ctx context.Context, req *protoapi.GetTeamAtlantisWebhookSecretRequest) (*protoapi.GetTeamAtlantisWebhookSecretResponse, error) {
+	webhookSecret, err := s.querier.GetWebhookSecret(ctx, slug.Slug(req.TeamSlug))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, status.Errorf(codes.NotFound, "webhook secret not found")
+	} else if err != nil || webhookSecret == nil {
+		return nil, status.Errorf(codes.Internal, "get webhook secret: %s", err)
+	}
+
+	return &protoapi.GetTeamAtlantisWebhookSecretResponse{WebhookSecret: *webhookSecret}, nil
+}
+
 func toProtoTeamAtlantisConfig(config grpcatlantissql.TeamAtlantisConfig) *protoapi.AtlantisConfig {
 	return &protoapi.AtlantisConfig{
-		TeamSlug:      config.TeamSlug.String(),
-		WebhookSecret: config.WebhookSecret,
-		CustomName:    config.CustomName,
-		CustomImage:   config.CustomImage,
-		Resources:     config.Resources,
-		DiskSize:      config.DiskSize,
-		RepoConfig:    config.RepoConfig,
+		TeamSlug:    config.TeamSlug.String(),
+		CustomName:  config.CustomName,
+		CustomImage: config.CustomImage,
+		Resources:   config.Resources,
+		DiskSize:    config.DiskSize,
+		RepoConfig:  config.RepoConfig,
 	}
 }

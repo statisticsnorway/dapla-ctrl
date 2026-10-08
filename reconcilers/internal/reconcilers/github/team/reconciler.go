@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/bradleyfalzon/ghinstallation/v2"
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v92/github"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/iterator"
@@ -126,10 +126,11 @@ func (r *reconciler) reconcileGroup(ctx context.Context, groupName, entraIdGroup
 	}
 
 	if team.GetPrivacy() != "closed" {
-		if team, _, err = r.teamsClient.EditTeamBySlug(ctx, r.org, *team.Slug, github.NewTeam{
-			Name:    team.GetSlug(),
-			Privacy: new("closed"),
-		}, true); err != nil {
+		if team, _, err = r.teamsClient.UpdateTeamBySlug(ctx, r.org, *team.Slug, github.UpdateTeamRequest{
+			Name:             team.Slug,
+			Privacy:          new("closed"),
+			RemoveParentTeam: true,
+		}); err != nil {
 			return err
 		}
 	}
@@ -163,7 +164,7 @@ func (r *reconciler) getOrCreateGitHubTeam(ctx context.Context, groupName string
 		return team, nil
 	}
 	if githubError, ok := errors.AsType[*github.ErrorResponse](err); ok && githubError.Response.StatusCode == http.StatusNotFound {
-		team, _, err := r.teamsClient.CreateTeam(ctx, r.org, github.NewTeam{Name: teamSlug, Privacy: new("closed")})
+		team, _, err := r.teamsClient.CreateTeam(ctx, r.org, github.CreateTeamRequest{Name: teamSlug, Privacy: new("closed")})
 		return team, err
 	}
 	return nil, err

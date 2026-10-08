@@ -16,3 +16,12 @@ FROM
 WHERE
 	team_slug = @team_slug::slug
 ;
+
+-- name: GetWebhookSecret :one
+SELECT
+	webhook_secret
+FROM
+	team_atlantis_config
+WHERE
+	team_slug = @team_slug::slug
+;

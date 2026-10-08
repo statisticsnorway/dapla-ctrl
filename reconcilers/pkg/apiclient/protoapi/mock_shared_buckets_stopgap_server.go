@@ -174,6 +174,74 @@ func (_c *MockSharedBucketsStopgapServer_Create_Call) RunAndReturn(run func(cont
 	return _c
 }
 
+// Delete provides a mock function for the type MockSharedBucketsStopgapServer
+func (_mock *MockSharedBucketsStopgapServer) Delete(context1 context.Context, deleteSharedBucketsStopgapRequest *DeleteSharedBucketsStopgapRequest) (*DeleteSharedBucketsStopgapResponse, error) {
+	ret := _mock.Called(context1, deleteSharedBucketsStopgapRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 *DeleteSharedBucketsStopgapResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *DeleteSharedBucketsStopgapRequest) (*DeleteSharedBucketsStopgapResponse, error)); ok {
+		return returnFunc(context1, deleteSharedBucketsStopgapRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *DeleteSharedBucketsStopgapRequest) *DeleteSharedBucketsStopgapResponse); ok {
+		r0 = returnFunc(context1, deleteSharedBucketsStopgapRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*DeleteSharedBucketsStopgapResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *DeleteSharedBucketsStopgapRequest) error); ok {
+		r1 = returnFunc(context1, deleteSharedBucketsStopgapRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockSharedBucketsStopgapServer_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type MockSharedBucketsStopgapServer_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - context1 context.Context
+//   - deleteSharedBucketsStopgapRequest *DeleteSharedBucketsStopgapRequest
+func (_e *MockSharedBucketsStopgapServer_Expecter) Delete(context1 interface{}, deleteSharedBucketsStopgapRequest interface{}) *MockSharedBucketsStopgapServer_Delete_Call {
+	return &MockSharedBucketsStopgapServer_Delete_Call{Call: _e.mock.On("Delete", context1, deleteSharedBucketsStopgapRequest)}
+}
+
+func (_c *MockSharedBucketsStopgapServer_Delete_Call) Run(run func(context1 context.Context, deleteSharedBucketsStopgapRequest *DeleteSharedBucketsStopgapRequest)) *MockSharedBucketsStopgapServer_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *DeleteSharedBucketsStopgapRequest
+		if args[1] != nil {
+			arg1 = args[1].(*DeleteSharedBucketsStopgapRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockSharedBucketsStopgapServer_Delete_Call) Return(deleteSharedBucketsStopgapResponse *DeleteSharedBucketsStopgapResponse, err error) *MockSharedBucketsStopgapServer_Delete_Call {
+	_c.Call.Return(deleteSharedBucketsStopgapResponse, err)
+	return _c
+}
+
+func (_c *MockSharedBucketsStopgapServer_Delete_Call) RunAndReturn(run func(context1 context.Context, deleteSharedBucketsStopgapRequest *DeleteSharedBucketsStopgapRequest) (*DeleteSharedBucketsStopgapResponse, error)) *MockSharedBucketsStopgapServer_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function for the type MockSharedBucketsStopgapServer
 func (_mock *MockSharedBucketsStopgapServer) Get(context1 context.Context, getSharedBucketsStopgapRequest *GetSharedBucketsStopgapRequest) (*GetSharedBucketsStopgapResponse, error) {
 	ret := _mock.Called(context1, getSharedBucketsStopgapRequest)
@@ -306,6 +374,74 @@ func (_c *MockSharedBucketsStopgapServer_Groups_Call) Return(listSharedBucketsSt
 }
 
 func (_c *MockSharedBucketsStopgapServer_Groups_Call) RunAndReturn(run func(context1 context.Context, listSharedBucketsStopgapGroupsRequest *ListSharedBucketsStopgapGroupsRequest) (*ListSharedBucketsStopgapGroupsResponse, error)) *MockSharedBucketsStopgapServer_Groups_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListForTeam provides a mock function for the type MockSharedBucketsStopgapServer
+func (_mock *MockSharedBucketsStopgapServer) ListForTeam(context1 context.Context, listSharedBucketsStopgapForTeamRequest *ListSharedBucketsStopgapForTeamRequest) (*ListSharedBucketsStopgapForTeamResponse, error) {
+	ret := _mock.Called(context1, listSharedBucketsStopgapForTeamRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListForTeam")
+	}
+
+	var r0 *ListSharedBucketsStopgapForTeamResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListSharedBucketsStopgapForTeamRequest) (*ListSharedBucketsStopgapForTeamResponse, error)); ok {
+		return returnFunc(context1, listSharedBucketsStopgapForTeamRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *ListSharedBucketsStopgapForTeamRequest) *ListSharedBucketsStopgapForTeamResponse); ok {
+		r0 = returnFunc(context1, listSharedBucketsStopgapForTeamRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ListSharedBucketsStopgapForTeamResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *ListSharedBucketsStopgapForTeamRequest) error); ok {
+		r1 = returnFunc(context1, listSharedBucketsStopgapForTeamRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockSharedBucketsStopgapServer_ListForTeam_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListForTeam'
+type MockSharedBucketsStopgapServer_ListForTeam_Call struct {
+	*mock.Call
+}
+
+// ListForTeam is a helper method to define mock.On call
+//   - context1 context.Context
+//   - listSharedBucketsStopgapForTeamRequest *ListSharedBucketsStopgapForTeamRequest
+func (_e *MockSharedBucketsStopgapServer_Expecter) ListForTeam(context1 interface{}, listSharedBucketsStopgapForTeamRequest interface{}) *MockSharedBucketsStopgapServer_ListForTeam_Call {
+	return &MockSharedBucketsStopgapServer_ListForTeam_Call{Call: _e.mock.On("ListForTeam", context1, listSharedBucketsStopgapForTeamRequest)}
+}
+
+func (_c *MockSharedBucketsStopgapServer_ListForTeam_Call) Run(run func(context1 context.Context, listSharedBucketsStopgapForTeamRequest *ListSharedBucketsStopgapForTeamRequest)) *MockSharedBucketsStopgapServer_ListForTeam_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *ListSharedBucketsStopgapForTeamRequest
+		if args[1] != nil {
+			arg1 = args[1].(*ListSharedBucketsStopgapForTeamRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockSharedBucketsStopgapServer_ListForTeam_Call) Return(listSharedBucketsStopgapForTeamResponse *ListSharedBucketsStopgapForTeamResponse, err error) *MockSharedBucketsStopgapServer_ListForTeam_Call {
+	_c.Call.Return(listSharedBucketsStopgapForTeamResponse, err)
+	return _c
+}
+
+func (_c *MockSharedBucketsStopgapServer_ListForTeam_Call) RunAndReturn(run func(context1 context.Context, listSharedBucketsStopgapForTeamRequest *ListSharedBucketsStopgapForTeamRequest) (*ListSharedBucketsStopgapForTeamResponse, error)) *MockSharedBucketsStopgapServer_ListForTeam_Call {
 	_c.Call.Return(run)
 	return _c
 }

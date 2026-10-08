@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/api/resource"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	ktesting "k8s.io/client-go/testing"
@@ -228,10 +227,14 @@ func TestReconcileKubernetesVolume(t *testing.T) {
 	atlantisName := "atlantis-" + teamName
 	namespace := "default"
 
-	diskSizeDefault := resource.MustParse("10Gi")
-
 	t.Run("create if not exists", func(t *testing.T) {
-		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, diskSizeDefault, log); err != nil {
+		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, "10Gi", log); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("invalid disk size should error", func(t *testing.T) {
+		if err := r.reconcileKubernetesVolume(t.Context(), atlantisName, namespace, "ErrMe", log); err == nil {
 			t.Fatal(err)
 		}
 	})

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#MISE description="One-off: initialize content of a team IaC repo (pass flags after --, e.g. -team my-team -managed=true)"
+
+set -e
+
+go run ./cmd/dapla-team-repo-init "$@"

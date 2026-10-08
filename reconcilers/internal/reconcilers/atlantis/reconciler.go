@@ -219,17 +219,33 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("reconcile google resources: %w", err)
 	}
 
-	if config.WebhookSecret == nil {
+	resp, err := client.Atlantis().GetTeamAtlantisWebhookSecret(ctx, &protoapi.GetTeamAtlantisWebhookSecretRequest{
+		TeamSlug: daplaTeam.Slug,
+	})
+	if err != nil {
+		return err
+	}
+	webhookSecret := resp.GetWebhookSecret()
+	if webhookSecret == "" {
 		log.Debug("creating webhook secret")
-		config.WebhookSecret, err = createWebhookSecret(ctx, client, daplaTeam.Slug)
+		webhookSecret, err = createWebhookSecret(ctx, client, daplaTeam.Slug)
 		if err != nil {
 			return fmt.Errorf("create webhook secret: %w", err)
 		}
 	}
 
+	reconcileConfig := kubernetesConfig{
+		webhookSecret: webhookSecret,
+		customImage:   config.GetCustomImage(),
+		resources:     config.GetResources(),
+		diskSize:      config.GetDiskSize(),
+		repoConfig:    config.RepoConfig,
+		repoAllowList: []string{
+			"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac",
+		},
+	}
 	if err := r.reconcileKubernetesResources(ctx,
-		atlantisName, r.config.AtlantisNamespace, config,
-		[]string{"github.com/statisticsnorway/" + daplaTeam.Slug + "-iac"},
+		atlantisName, r.config.AtlantisNamespace, reconcileConfig,
 		log.WithField("atlantis_subdomain", "kubernetes"),
 	); err != nil {
 		return fmt.Errorf("reconcile kubernetes resources: %w", err)
@@ -238,11 +254,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	return nil
 }
 
-func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (*string, error) {
+func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamName string) (string, error) {
 	randBytes := make([]byte, 128)
 	_, err := rand.Read(randBytes)
 	if err != nil {
-		return nil, fmt.Errorf("read random bytes: %w", err)
+		return "", fmt.Errorf("read random bytes: %w", err)
 	}
 	secretToken := fmt.Sprintf("%x", sha256.Sum256(randBytes))
 
@@ -250,10 +266,10 @@ func createWebhookSecret(ctx context.Context, client *apiclient.APIClient, teamN
 		TeamSlug:      teamName,
 		WebhookSecret: secretToken,
 	}); err != nil {
-		return nil, fmt.Errorf("set atlantis webhook secret: %w", err)
+		return "", fmt.Errorf("set atlantis webhook secret: %w", err)
 	}
 
-	return &secretToken, nil
+	return secretToken, nil
 }
 
 func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClient) error {
