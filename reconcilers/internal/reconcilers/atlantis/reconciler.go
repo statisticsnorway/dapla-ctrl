@@ -10,6 +10,7 @@ import (
 	"strings"
 	"text/template"
 
+	artifactregistry "cloud.google.com/go/artifactregistry/apiv1"
 	container "cloud.google.com/go/container/apiv1"
 
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
@@ -47,6 +48,7 @@ const (
 	tfStateProjectsConfigKey     = "tfstate_projects"
 	githubAppIdConfigKey         = "github_app_id"
 	logKubeDiffsConfigKey        = "log_kubernetes_diffs"
+	artifactRegistryPrefixKey    = "artifact_registry_prefix"
 )
 
 type groupRole string
@@ -65,11 +67,12 @@ var defaultRepoConfig string
 var defaultKnativeServiceTemplate string
 
 type reconciler struct {
-	storageClient   *storage.Client
-	serviceAccounts *serviceaccounts.Client
-	members         *admindirectory.MembersService
-	folders         *resourcemanager.FoldersClient
-	clusterManager  *container.ClusterManagerClient
+	storageClient    *storage.Client
+	serviceAccounts  *serviceaccounts.Client
+	members          *admindirectory.MembersService
+	folders          *resourcemanager.FoldersClient
+	clusterManager   *container.ClusterManagerClient
+	artifactRegistry *artifactregistry.Client
 
 	knServices servingv1.ServingV1Interface
 	k8sClient  kubernetes.Interface
@@ -95,6 +98,8 @@ type reconcilerConfig struct {
 	GithubAppId string
 
 	LogDiffs bool
+
+	ArtifactRegistryPrefix string
 }
 
 type optFunc func(*reconciler)
@@ -108,13 +113,16 @@ func New(ctx context.Context, googleServices *google.Services, opts ...optFunc) 
 		r.folders = googleServices.Folders
 		r.members = googleServices.AdminDirectory.Members
 		r.clusterManager = googleServices.ClusterManager
+		r.artifactRegistry = googleServices.ArtifactRegistry
 	}
 
 	for _, opt := range opts {
 		opt(r)
 	}
 
-	if r.storageClient == nil || r.serviceAccounts == nil || r.members == nil || r.folders == nil || r.clusterManager == nil {
+	if r.storageClient == nil || r.serviceAccounts == nil ||
+		r.members == nil || r.folders == nil ||
+		r.clusterManager == nil || r.artifactRegistry == nil {
 		return nil, errors.New("one or more google clients are nil, all need to be supplied")
 	}
 
@@ -186,6 +194,10 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				DisplayName: "Resource name of the Atlantis cluster",
 				Description: "The full `projects/*/locations/*/clusters/*` resource name of the Atlantis cluster",
 			},
+			{
+				Key:         artifactRegistryPrefixKey,
+				DisplayName: "Resource name prefix of Artifact Registry repos",
+				Description: "The full resource name prefix of AR repos. E.g. `projects/.../locations/.../repositories/`"},
 		},
 	}
 }
@@ -215,7 +227,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		atlantisName = *config.CustomName
 	}
 
-	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.AtlantisNamespace); err != nil {
+	if err := r.reconcileGoogleResources(ctx, client, daplaTeam.Slug, atlantisName, r.config.AtlantisNamespace, log.WithField("atlantis_subresource", "google")); err != nil {
 		return fmt.Errorf("reconcile google resources: %w", err)
 	}
 
@@ -246,7 +258,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 	if err := r.reconcileKubernetesResources(ctx,
 		atlantisName, r.config.AtlantisNamespace, reconcileConfig,
-		log.WithField("atlantis_subdomain", "kubernetes"),
+		log.WithField("atlantis_subresource", "kubernetes"),
 	); err != nil {
 		return fmt.Errorf("reconcile kubernetes resources: %w", err)
 	}
@@ -321,6 +333,8 @@ func (r *reconciler) updateConfig(ctx context.Context, client *apiclient.APIClie
 			rc.GithubAppId = c.Value
 		case logKubeDiffsConfigKey:
 			rc.LogDiffs = strings.EqualFold(c.Value, "true")
+		case artifactRegistryPrefixKey:
+			rc.ArtifactRegistryPrefix = c.Value
 		default:
 			return fmt.Errorf("unknown config key %q", c.Key)
 		}

@@ -8,6 +8,7 @@ import (
 
 	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/storage"
+	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
@@ -18,22 +19,35 @@ import (
 	"k8s.io/apimachinery/pkg/api/equality"
 )
 
-func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
-	if err := r.reconcileGcpServiceAccount(ctx, client, teamName, name, namespace); err != nil {
+const stateBucketAtlantisSaRole = "roles/storage.objectAdmin"
+
+var artifactRegistryAdminRole = []string{"organizations/573742569423/roles/ssb.artifactregistry.repositories.admin"}
+
+var teamFoldersAtlantisSaRoles []string = []string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"}
+
+func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string, log logrus.FieldLogger) error {
+	saMemberRef, err := r.reconcileGcpServiceAccount(ctx, client, teamName, name, namespace)
+	if err != nil {
 		return fmt.Errorf("reconcile service account: %w", err)
 	}
 
-	if err := r.reconcileBuckets(ctx, teamName); err != nil {
+	if err := r.reconcileBuckets(ctx, teamName, saMemberRef); err != nil {
 		return fmt.Errorf("reconcile buckets: %w", err)
+	}
+
+	if r.config.ArtifactRegistryPrefix != "" {
+		if err := r.reconcileArtifactRegistryAdmin(ctx, client, teamName, saMemberRef, log); err != nil {
+			return fmt.Errorf("reconcile AR admin: %w", err)
+		}
 	}
 
 	return nil
 }
 
-func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) error {
+func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string) (string, error) {
 	sa, err := r.serviceAccounts.GetOrCreate(ctx, name, "Atlantis for team "+teamName, r.config.AtlantisProject)
 	if err != nil {
-		return fmt.Errorf("get or create SA: %w", err)
+		return "", fmt.Errorf("get or create SA: %w", err)
 	}
 
 	if err := r.serviceAccounts.EnsureRoleBindingFunc(ctx, sa.Name, "roles/iam.workloadIdentityUser", func(b *iam.Binding) bool {
@@ -44,7 +58,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		b.Members = []string{k8sSaName}
 		return true
 	}); err != nil {
-		return fmt.Errorf("ensure wi role binding: %w", err)
+		return "", fmt.Errorf("ensure wi role binding: %w", err)
 	}
 
 	for _, memberGroup := range r.config.MemberGroups {
@@ -58,7 +72,7 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		}
 	}
 	if err != nil {
-		return fmt.Errorf("ensure group memberships: %w", err)
+		return "", fmt.Errorf("ensure group memberships: %w", err)
 	}
 
 	saMember := "serviceAccount:" + sa.Email
@@ -67,11 +81,11 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		TeamSlug: teamName,
 	})
 	if err != nil {
-		return fmt.Errorf("list team folders: %w", err)
+		return "", fmt.Errorf("list team folders: %w", err)
 	}
 	for _, folder := range folderResp.Folders {
 		if err := google.EnsureRolesBindingFunc(ctx, r.folders, "folders/"+folder.FolderId,
-			[]string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"},
+			teamFoldersAtlantisSaRoles,
 			func(b *iampb.Binding) (modified bool) {
 				if slices.Contains(b.Members, saMember) {
 					return false
@@ -79,11 +93,11 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 				b.Members = append(b.Members, saMember)
 				return true
 			}); err != nil {
-			return fmt.Errorf("ensure team folder iam: %w", err)
+			return "", fmt.Errorf("ensure team folder iam: %w", err)
 		}
 	}
 
-	return nil
+	return saMember, nil
 }
 
 func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId string, role groupRole) error {
@@ -106,7 +120,7 @@ func (r *reconciler) ensureGroupMembership(ctx context.Context, saEmail, groupId
 	return fmt.Errorf("update membership: %w", err)
 }
 
-func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) error {
+func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string, saMemberRef string) error {
 	defaultAttrs := &storage.BucketAttrs{
 		UniformBucketLevelAccess: storage.UniformBucketLevelAccess{Enabled: true},
 		Location:                 "EUROPE-NORTH1",
@@ -138,7 +152,20 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 		} else if err != nil {
 			return fmt.Errorf("get bucket attrs: %w", err)
 		}
-		if equality.Semantic.DeepDerivative(defaultAttrs, attrs) {
+
+		iamPolicy, err := bucket.IAM().Policy(ctx)
+		if err != nil {
+			return fmt.Errorf("get bucket iam policy: %w", err)
+		}
+
+		if !iamPolicy.HasRole(saMemberRef, stateBucketAtlantisSaRole) {
+			iamPolicy.Add(saMemberRef, stateBucketAtlantisSaRole)
+			if err := bucket.IAM().SetPolicy(ctx, iamPolicy); err != nil {
+				return fmt.Errorf("set bucket iam policy: %w", err)
+			}
+		}
+
+		if !bucketAttrsDiffer(attrs, defaultAttrs) {
 			continue
 		}
 		if _, err := bucket.Update(ctx, storage.BucketAttrsToUpdate{
@@ -149,6 +176,41 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string) erro
 		}); err != nil {
 			return fmt.Errorf("update bucket attrs: %w", err)
 		}
+	}
+
+	return nil
+}
+
+func bucketAttrsDiffer(liveAttrs, defaultAttrs *storage.BucketAttrs) bool {
+	return liveAttrs.VersioningEnabled != defaultAttrs.VersioningEnabled ||
+		liveAttrs.UniformBucketLevelAccess != defaultAttrs.UniformBucketLevelAccess ||
+		liveAttrs.PublicAccessPrevention != defaultAttrs.PublicAccessPrevention ||
+		!equality.Semantic.DeepEqual(liveAttrs.Lifecycle, defaultAttrs.Lifecycle)
+}
+
+func (r *reconciler) reconcileArtifactRegistryAdmin(ctx context.Context, client *apiclient.APIClient, teamName, saMemberRef string, log logrus.FieldLogger) error {
+	_, err := client.ArtifactRegistry().GetArtifactRegistryRepo(ctx, &protoapi.GetArtifactRegistryRepoRequest{TeamSlug: teamName,
+		Format: "DOCKER",
+	})
+	if status.Code(err) == codes.NotFound {
+		log.Warn("missing docker AR repo")
+		return nil
+	} else if err != nil {
+		return fmt.Errorf("get docker AR repo: %w", err)
+	}
+
+	if err := google.EnsureRolesBindingFunc(ctx,
+		r.artifactRegistry,
+		r.config.ArtifactRegistryPrefix+teamName+"-docker",
+		artifactRegistryAdminRole,
+		func(b *iampb.Binding) (modified bool) {
+			if slices.Contains(b.Members, saMemberRef) {
+				return false
+			}
+			b.Members = append(b.Members, saMemberRef)
+			return true
+		}); err != nil {
+		return fmt.Errorf("ensure atlantis AR admin role: %w", err)
 	}
 
 	return nil

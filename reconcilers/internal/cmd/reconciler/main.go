@@ -130,12 +130,6 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(daplaGroupSaReconciler)
 
-	atlantisReconciler, err := atlantis.New(ctx, googleServices)
-	if err != nil {
-		return fmt.Errorf("error creating atlantis reconciler: %w", err)
-	}
-	reconcilerManager.AddReconciler(atlantisReconciler)
-
 	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
 		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
@@ -150,6 +144,12 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return fmt.Errorf("create artifact registry reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(arTeam)
+
+	atlantisReconciler, err := atlantis.New(ctx, googleServices)
+	if err != nil {
+		return fmt.Errorf("error creating atlantis reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(atlantisReconciler)
 
 	if cfg.GitHub.Enabled {
 		githubTeam, err := team.New(ctx, cfg.GitHub.Org, cfg.GitHub.AppId, cfg.GitHub.InstallationId, cfg.GitHub.PrivateKeyFile)
