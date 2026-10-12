@@ -8,6 +8,7 @@ import (
 	"io"
 	"slices"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -18,11 +19,11 @@ type (
 func (ArtifactRegistryRepository) IsNode() {}
 
 const (
-	ArtifactRegistryFormatDocker ArtifactRegistryFormat = "DOCKER"
-	ArtifactRegistryFormatPython ArtifactRegistryFormat = "PYTHON"
-	ArtifactRegistryFormatMaven  ArtifactRegistryFormat = "MAVEN"
-	ArtifactRegistryFormatNpm    ArtifactRegistryFormat = "NPM"
-	ArtifactRegistryFormatGo     ArtifactRegistryFormat = "GO"
+	ArtifactRegistryFormatDocker ArtifactRegistryFormat = "docker"
+	ArtifactRegistryFormatPython ArtifactRegistryFormat = "python"
+	ArtifactRegistryFormatMaven  ArtifactRegistryFormat = "maven"
+	ArtifactRegistryFormatNpm    ArtifactRegistryFormat = "npm"
+	ArtifactRegistryFormatGo     ArtifactRegistryFormat = "go"
 )
 
 var AllArtifactRegistryFormat = []ArtifactRegistryFormat{
@@ -46,6 +47,7 @@ func (e *ArtifactRegistryFormat) UnmarshalGQL(v any) error {
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
+	str = strings.ToLower(str)
 
 	*e = ArtifactRegistryFormat(str)
 	if !e.IsValid() {
@@ -55,7 +57,10 @@ func (e *ArtifactRegistryFormat) UnmarshalGQL(v any) error {
 }
 
 func (e ArtifactRegistryFormat) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	str := e.String()
+	str = strings.ToUpper(str)
+
+	fmt.Fprint(w, strconv.Quote(str))
 }
 
 type (

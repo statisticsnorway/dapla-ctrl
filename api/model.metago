@@ -87,6 +87,9 @@ func (e {{ name . }}OrderField) MarshalGQL(w io.Writer) {
 {{ imports "strconv" }}
 {{ imports "slices" }}
 {{ imports "io" }}
+{{- if (propHas . "enum" "lowercase") }}
+{{ imports "strings" }}
+{{- end }}
 const (
 {{- range .Argv }}
 	{{ name $ }}{{ pascal . }}        {{ name $ }} = "{{ . }}"
@@ -113,6 +116,10 @@ func (e *{{ name . }}) UnmarshalGQL(v any) error {
 		return fmt.Errorf("enums must be strings")
 	}
 
+	{{- if (propHas . "enum" "lowercase") }}
+	str = strings.ToLower(str)
+	{{- end }}
+
 	*e = {{ name . }}(str)
 	if !e.IsValid() {
 		return fmt.Errorf("%s is not a valid {{ name . }}", str)
@@ -121,6 +128,12 @@ func (e *{{ name . }}) UnmarshalGQL(v any) error {
 }
 
 func (e {{ name . }}) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+    str := e.String()
+
+	{{- if (propHas . "enum" "lowercase") }}
+	str = strings.ToUpper(str)
+	{{- end }}
+
+	fmt.Fprint(w, strconv.Quote(str))
 }
 {{ end }}
