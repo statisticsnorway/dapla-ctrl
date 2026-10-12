@@ -61,18 +61,19 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return "", fmt.Errorf("ensure wi role binding: %w", err)
 	}
 
+	var groupErrs []error
 	for _, memberGroup := range r.config.MemberGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
-			err = errors.Join(err, currentErr)
+		if err := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
+			groupErrs = append(groupErrs, err)
 		}
 	}
 	for _, managerGroup := range r.config.ManagerGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
-			err = errors.Join(err, currentErr)
+		if err := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
+			groupErrs = append(groupErrs, err)
 		}
 	}
-	if err != nil {
-		return "", fmt.Errorf("ensure group memberships: %w", err)
+	if len(groupErrs) != 0 {
+		return "", fmt.Errorf("ensure group memberships: %w", errors.Join(groupErrs...))
 	}
 
 	saMember := "serviceAccount:" + sa.Email
