@@ -57,7 +57,7 @@ https://docs.github.com/en/rest/authentication/permissions-required-for-github-a
 
 ### Dapla team repo not initialized
 
-We must manualy init the dapla team iac repoiIf reconcile fails.
+We must manualy init the dapla team iac repo if reconcile fails.
 This is due to we don't want to check the content of every repo to see if they have been initialized (most of them has, it is a one time thing), thus we accept the trade of of having to do this manually if a error occures which stops the reconciler from doing it.
 
 A script is provided to ease this. Eiter via mise, or run directly with go:
