@@ -106,6 +106,74 @@ func (_c *MockAtlantisServer_GetTeamAtlantis_Call) RunAndReturn(run func(context
 	return _c
 }
 
+// GetTeamAtlantisWebhookSecret provides a mock function for the type MockAtlantisServer
+func (_mock *MockAtlantisServer) GetTeamAtlantisWebhookSecret(context1 context.Context, getTeamAtlantisWebhookSecretRequest *GetTeamAtlantisWebhookSecretRequest) (*GetTeamAtlantisWebhookSecretResponse, error) {
+	ret := _mock.Called(context1, getTeamAtlantisWebhookSecretRequest)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTeamAtlantisWebhookSecret")
+	}
+
+	var r0 *GetTeamAtlantisWebhookSecretResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetTeamAtlantisWebhookSecretRequest) (*GetTeamAtlantisWebhookSecretResponse, error)); ok {
+		return returnFunc(context1, getTeamAtlantisWebhookSecretRequest)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, *GetTeamAtlantisWebhookSecretRequest) *GetTeamAtlantisWebhookSecretResponse); ok {
+		r0 = returnFunc(context1, getTeamAtlantisWebhookSecretRequest)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*GetTeamAtlantisWebhookSecretResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, *GetTeamAtlantisWebhookSecretRequest) error); ok {
+		r1 = returnFunc(context1, getTeamAtlantisWebhookSecretRequest)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetTeamAtlantisWebhookSecret'
+type MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call struct {
+	*mock.Call
+}
+
+// GetTeamAtlantisWebhookSecret is a helper method to define mock.On call
+//   - context1 context.Context
+//   - getTeamAtlantisWebhookSecretRequest *GetTeamAtlantisWebhookSecretRequest
+func (_e *MockAtlantisServer_Expecter) GetTeamAtlantisWebhookSecret(context1 interface{}, getTeamAtlantisWebhookSecretRequest interface{}) *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call {
+	return &MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call{Call: _e.mock.On("GetTeamAtlantisWebhookSecret", context1, getTeamAtlantisWebhookSecretRequest)}
+}
+
+func (_c *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call) Run(run func(context1 context.Context, getTeamAtlantisWebhookSecretRequest *GetTeamAtlantisWebhookSecretRequest)) *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *GetTeamAtlantisWebhookSecretRequest
+		if args[1] != nil {
+			arg1 = args[1].(*GetTeamAtlantisWebhookSecretRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call) Return(getTeamAtlantisWebhookSecretResponse *GetTeamAtlantisWebhookSecretResponse, err error) *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call {
+	_c.Call.Return(getTeamAtlantisWebhookSecretResponse, err)
+	return _c
+}
+
+func (_c *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call) RunAndReturn(run func(context1 context.Context, getTeamAtlantisWebhookSecretRequest *GetTeamAtlantisWebhookSecretRequest) (*GetTeamAtlantisWebhookSecretResponse, error)) *MockAtlantisServer_GetTeamAtlantisWebhookSecret_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SetTeamAtlantisWebhookSecret provides a mock function for the type MockAtlantisServer
 func (_mock *MockAtlantisServer) SetTeamAtlantisWebhookSecret(context1 context.Context, setTeamAtlantisWebhookSecretRequest *SetTeamAtlantisWebhookSecretRequest) (*SetTeamAtlantisWebhookSecretResponse, error) {
 	ret := _mock.Called(context1, setTeamAtlantisWebhookSecretRequest)
