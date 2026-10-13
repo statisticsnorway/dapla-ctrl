@@ -192,8 +192,9 @@ func bucketAttrsDiffer(liveAttrs, defaultAttrs *storage.BucketAttrs) bool {
 }
 
 func (r *reconciler) reconcileArtifactRegistryAdmin(ctx context.Context, client *apiclient.APIClient, teamName, saMemberRef string, log logrus.FieldLogger) error {
-	_, err := client.ArtifactRegistry().GetArtifactRegistryRepo(ctx, &protoapi.GetArtifactRegistryRepoRequest{TeamSlug: teamName,
-		Format: artifactRegistryFormatDocker,
+	_, err := client.ArtifactRegistry().GetArtifactRegistryRepo(ctx, &protoapi.GetArtifactRegistryRepoRequest{
+		TeamSlug: teamName,
+		Format:   artifactRegistryFormatDocker,
 	})
 	if status.Code(err) == codes.NotFound {
 		log.Warn("missing docker AR repo")
