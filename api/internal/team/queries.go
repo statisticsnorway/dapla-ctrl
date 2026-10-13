@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/atlantis"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
@@ -67,7 +68,7 @@ func createDefaultResources(ctx context.Context, teamSlug slug.Slug, actor *auth
 			TeamSlug: teamSlug,
 			Category: category,
 		}, actor); err != nil {
-			return err
+			return fmt.Errorf("create group %q: %w", category, err)
 		}
 	}
 
@@ -75,14 +76,18 @@ func createDefaultResources(ctx context.Context, teamSlug slug.Slug, actor *auth
 		TeamSlug: teamSlug,
 		Format:   artifactregistry.ArtifactRegistryFormatDocker,
 	}, actor); err != nil {
-		return err
+		return fmt.Errorf("create default docker repo: %w", err)
 	}
 
 	if _, err := artifactregistry.AddGithubRepositoryToTeam(ctx, artifactregistry.GrantGithubRepoAccessToTeamArtifactRegistryInput{
 		TeamSlug:       teamSlug,
 		RepositoryName: teamSlug.String() + "-iac",
 	}, actor); err != nil {
-		return err
+		return fmt.Errorf("grant iac repo access to AR: %w", err)
+	}
+
+	if err := atlantis.Create(ctx, teamSlug); err != nil {
+		return fmt.Errorf("create atlantis config: %w", err)
 	}
 
 	return nil
