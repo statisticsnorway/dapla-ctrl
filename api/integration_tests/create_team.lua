@@ -160,6 +160,11 @@ Test.gql("Create managed team", function(t)
 			},
 		},
 	}
+
+	-- Make sure the Atlantis config has been created
+	Helper.SQLQueryRow([[
+		SELECT 1 FROM team_atlantis_config WHERE team_slug = $1
+		]], "newteam")
 end)
 
 Test.gql("Admin can create self-managed team", function(t)
