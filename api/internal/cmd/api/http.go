@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/atlantis"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authn"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/middleware"
@@ -183,6 +184,7 @@ func ConfigureGraph(
 		ctx = sharedbucketsstopgap.NewLoaderContext(ctx, pool)
 		ctx = message.NewLoaderContext(ctx, pool)
 		ctx = teambuckets.NewLoaderContext(ctx, pool)
+		ctx = atlantis.NewLoaderContext(ctx, pool)
 		return ctx
 	}
 
