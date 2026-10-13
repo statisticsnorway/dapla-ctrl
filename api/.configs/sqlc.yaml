@@ -242,3 +242,14 @@ sql:
         <<: *default_go
         package: "teambucketssql"
         out: "../internal/teambuckets/teambucketssql"
+
+  - <<: *default_domain
+    name: "Atlantis SQL"
+    queries: "../internal/atlantis/queries"
+    analyzer:
+      database: false
+    gen:
+      go:
+        <<: *default_go
+        package: "atlantissql"
+        out: "../internal/atlantis/atlantissql"
