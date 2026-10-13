@@ -11,9 +11,9 @@ import (
 
 const create = `-- name: Create :exec
 INSERT INTO
-    team_atlantis_config (team_slug)
+	team_atlantis_config (team_slug)
 VALUES
-    (team_slug = $1::slug)
+	($1)
 `
 
 func (q *Queries) Create(ctx context.Context, teamSlug slug.Slug) error {
