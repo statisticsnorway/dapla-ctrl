@@ -152,6 +152,7 @@ func (r *reconciler) reconcileBuckets(ctx context.Context, teamName string, saMe
 			if err := bucket.Create(ctx, projectId, defaultAttrs); err != nil {
 				return fmt.Errorf("create bucket: %w", err)
 			}
+			attrs = defaultAttrs
 		} else if err != nil {
 			return fmt.Errorf("get bucket attrs: %w", err)
 		}
