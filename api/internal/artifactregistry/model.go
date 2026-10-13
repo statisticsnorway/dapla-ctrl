@@ -22,7 +22,8 @@ func (r ArtifactRegistryRepository) ID() ident.Ident {
 	return newARIdent(r.TeamSlug, r.Format.String())
 }
 
-//mgo:gen enum DOCKER PYTHON MAVEN NPM GO
+//mgo:gen enum docker python maven npm go
+//mgo:enum lowercase
 type ArtifactRegistryFormat string
 
 //mgo:gen model

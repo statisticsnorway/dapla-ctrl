@@ -73,7 +73,7 @@ func createDefaultResources(ctx context.Context, teamSlug slug.Slug, actor *auth
 
 	if _, err := artifactregistry.CreateRepository(ctx, artifactregistry.CreateArtifactRegistryRepositoryInput{
 		TeamSlug: teamSlug,
-		Format:   "DOCKER",
+		Format:   artifactregistry.ArtifactRegistryFormatDocker,
 	}, actor); err != nil {
 		return err
 	}

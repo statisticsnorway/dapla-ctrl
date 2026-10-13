@@ -25,6 +25,8 @@ var artifactRegistryAdminRole = []string{"organizations/573742569423/roles/ssb.a
 
 var teamFoldersAtlantisSaRoles []string = []string{"roles/resourcemanager.projectCreator", "roles/resourcemanager.projectIamAdmin"}
 
+const artifactRegistryFormatDocker = "docker"
+
 func (r *reconciler) reconcileGoogleResources(ctx context.Context, client *apiclient.APIClient, teamName, name, namespace string, log logrus.FieldLogger) error {
 	saMemberRef, err := r.reconcileGcpServiceAccount(ctx, client, teamName, name, namespace)
 	if err != nil {
@@ -61,18 +63,19 @@ func (r *reconciler) reconcileGcpServiceAccount(ctx context.Context, client *api
 		return "", fmt.Errorf("ensure wi role binding: %w", err)
 	}
 
+	var groupErrs []error
 	for _, memberGroup := range r.config.MemberGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
-			err = errors.Join(err, currentErr)
+		if err := r.ensureGroupMembership(ctx, sa.Email, memberGroup, member); err != nil {
+			groupErrs = append(groupErrs, err)
 		}
 	}
 	for _, managerGroup := range r.config.ManagerGroups {
-		if currentErr := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
-			err = errors.Join(err, currentErr)
+		if err := r.ensureGroupMembership(ctx, sa.Email, managerGroup, manager); err != nil {
+			groupErrs = append(groupErrs, err)
 		}
 	}
-	if err != nil {
-		return "", fmt.Errorf("ensure group memberships: %w", err)
+	if len(groupErrs) != 0 {
+		return "", fmt.Errorf("ensure group memberships: %w", errors.Join(groupErrs...))
 	}
 
 	saMember := "serviceAccount:" + sa.Email
@@ -190,7 +193,7 @@ func bucketAttrsDiffer(liveAttrs, defaultAttrs *storage.BucketAttrs) bool {
 
 func (r *reconciler) reconcileArtifactRegistryAdmin(ctx context.Context, client *apiclient.APIClient, teamName, saMemberRef string, log logrus.FieldLogger) error {
 	_, err := client.ArtifactRegistry().GetArtifactRegistryRepo(ctx, &protoapi.GetArtifactRegistryRepoRequest{TeamSlug: teamName,
-		Format: "DOCKER",
+		Format: artifactRegistryFormatDocker,
 	})
 	if status.Code(err) == codes.NotFound {
 		log.Warn("missing docker AR repo")
@@ -201,7 +204,7 @@ func (r *reconciler) reconcileArtifactRegistryAdmin(ctx context.Context, client 
 
 	if err := google.EnsureRolesBindingFunc(ctx,
 		r.artifactRegistry,
-		r.config.ArtifactRegistryPrefix+teamName+"-docker",
+		r.config.ArtifactRegistryPrefix+teamName+"-"+artifactRegistryFormatDocker,
 		artifactRegistryAdminRole,
 		func(b *iampb.Binding) (modified bool) {
 			if slices.Contains(b.Members, saMemberRef) {
