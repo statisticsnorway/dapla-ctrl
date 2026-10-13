@@ -113,7 +113,7 @@ func (r *webhookReconciler) updateGhRepoAtlantisWebhookSecret(ctx context.Contex
 // https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries
 // return false if the secret can not be verifed (can happn for no triggers), which implies that the secret should be updated
 func (r *webhookReconciler) hookLatestDeliverySignedWith(ctx context.Context, owner, repoName string, hookID int64, secret string) (bool, error) {
-	deliveries, _, err := r.client.ListHookDeliveries(ctx, owner, repoName, hookID, &github.ListCursorOptions{First: 1})
+	deliveries, _, err := r.client.ListHookDeliveries(ctx, owner, repoName, hookID, &github.ListCursorOptions{PerPage: 1})
 	if err != nil {
 		return false, err
 	}
