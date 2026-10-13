@@ -53,6 +53,70 @@ https://docs.github.com/en/rest/authentication/permissions-required-for-github-a
 - ListHookDeliveries: GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries
 - GetHookDelivery: GET /repos/{owner}/{repo}/hooks/{hook_id}/deliveries/{delivery_id}
 
+## Reconcile flow: iac -> GitHub API (sequence)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Rec as reconciler.Reconcile
+    participant Repo as repositoryReconciler
+    participant Hook as webhookReconciler
+    participant Content as repoContentReconciler
+    participant GH as GitHub API
+
+    Rec->>Repo: getOrCreate(owner, repo, team, isManaged)
+    Repo->>GH: Repositories.Get(owner, repo)
+    alt repo exists
+        Repo-->>Rec: created=false
+    else 404 Not Found
+        Repo->>GH: Repositories.Create(org, repo)
+        loop waitForRepoVisible (poll/backoff)
+            Repo->>GH: Repositories.Get(owner, repo)
+            GH-->>Repo: 404/429/5xx retry or 200 OK
+        end
+        Repo-->>Rec: created=true
+    end
+
+    Rec->>Hook: upsertAtlantisWebhook(owner, repo, url, secret)
+    Hook->>GH: ListHooks(owner, repo)
+    alt no matching hook
+        Hook->>GH: CreateHook(url, secret, events)
+    else hook exists
+        Hook->>GH: ListHookDeliveries(hookID, first=1)
+        Hook->>GH: GetHookDelivery(hookID, deliveryID)
+        alt secret mismatch or unverifiable signature
+            Hook->>GH: EditHook(hookID, secret)
+            Hook->>GH: PingHook(hookID)
+        else secret already valid
+            Hook-->>Rec: no change
+        end
+    end
+
+    alt created == true
+        Rec->>Content: initIacRepoContent(...)
+        loop commit flow twice (main, then init)
+            Content->>GH: GetRef(heads/main)
+            Content->>GH: GetCommit(parentSHA)
+            Content->>GH: CreateTree(entries)
+            Content->>GH: CreateCommit(message, tree, parent)
+            alt branch == main
+                Content->>GH: UpdateRef(heads/main, commitSHA)
+            else branch == init
+                Content->>GH: CreateRef(refs/heads/init, commitSHA)
+            end
+        end
+        Rec->>GH: PullRequests.Create(head=init, base=main)
+    end
+
+    Rec->>GH: EnableVulnerabilityAlerts(owner, repo)
+    Rec->>GH: AddTeamRepoBySlug(dapla-skyinfra-developers, admin)
+    Rec->>GH: AddTeamRepoBySlug(dapla-platform-developers, push)
+    Rec->>GH: AddTeamRepoBySlug(<team>-developers, push or admin)
+    alt isManaged
+        Rec->>GH: UpdateBranchProtection(owner, repo, main)
+    end
+```
+
 ## Error handling
 
 ### Dapla team repo not initialized
