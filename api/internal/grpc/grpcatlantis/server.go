@@ -50,8 +50,12 @@ func (s *Server) GetTeamAtlantisWebhookSecret(ctx context.Context, req *protoapi
 	webhookSecret, err := s.querier.GetWebhookSecret(ctx, slug.Slug(req.TeamSlug))
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, status.Errorf(codes.NotFound, "webhook secret not found")
-	} else if err != nil || webhookSecret == nil {
+	} else if err != nil {
 		return nil, status.Errorf(codes.Internal, "get webhook secret: %s", err)
+	}
+
+	if webhookSecret == nil {
+		webhookSecret = new("")
 	}
 
 	return &protoapi.GetTeamAtlantisWebhookSecretResponse{WebhookSecret: *webhookSecret}, nil
