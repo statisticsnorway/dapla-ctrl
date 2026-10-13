@@ -33,4 +33,4 @@ In order to function correctly, the reconciler needs the follow set of permisson
   - Should already be in place because of the AR reconciler
 - On the teams' GCP folders
   - Manage IAM bindings
-  - Should already be in oplace because of the GCP resources reconciler
+  - Should already be in place because of the GCP resources reconciler
