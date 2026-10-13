@@ -197,7 +197,8 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 			{
 				Key:         artifactRegistryPrefixKey,
 				DisplayName: "Resource name prefix of Artifact Registry repos",
-				Description: "The full resource name prefix of AR repos. E.g. `projects/.../locations/.../repositories/`"},
+				Description: "The full resource name prefix of AR repos. E.g. `projects/.../locations/.../repositories/`",
+			},
 		},
 	}
 }
