@@ -11,6 +11,7 @@ repos:
         run: |
           last_accessed_weeks="2"
           dir_to_clean="$ATLANTIS_DATA_DIR/plugin-cache/registry.terraform.io"
+          stat $dir_to_clean || exit 0
           echo "Clean up old files in $dir_to_clean not accessed in the last $last_accessed_weeks weeks"
           # clean up old files
           find \
