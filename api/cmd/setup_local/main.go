@@ -18,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/activitylog"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/artifactregistry"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/atlantis"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/auth/authz"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/database"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/model"
@@ -195,6 +196,7 @@ func run(ctx context.Context, cfg *seedConfig, log logrus.FieldLogger) error {
 	ctx = database.NewLoaderContext(ctx, pool)
 	ctx = activitylog.NewLoaderContext(ctx, pool)
 	ctx = artifactregistry.NewLoaderContext(ctx, pool)
+	ctx = atlantis.NewLoaderContext(ctx, pool)
 	ctx = user.NewLoaderContext(ctx, pool)
 	ctx = team.NewLoaderContext(ctx, pool, log)
 	ctx = authz.NewLoaderContext(ctx, pool)
