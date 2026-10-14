@@ -4,11 +4,11 @@ This package replaces the github module in the old terraform setup
 
 ## Github app
 
-Overview over endpoints in Github used, and which permissions the github app requires for this reconciler to work. 
+Overview over endpoints in Github used, and which permissions the github app requires for this reconciler to work.
 
 ### Permissions needed
 
-https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps?apiVersion=2026-03-10 
+https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps?apiVersion=2026-03-10
 
 | Permission                 | Level        | Covered Go Function(s)                                                         |
 | -------------------------- | ------------ | ------------------------------------------------------------------------------ |
@@ -17,8 +17,8 @@ https://docs.github.com/en/rest/authentication/permissions-required-for-github-a
 | Repository: Pull requests  | Read & write | pullRequests.Create                                                            |
 | Repository: Administration | Read & write | repositories.Create, EnableVulnerabilityAlerts, UpdateBranchProtection         |
 | Repository: Webhooks       | Read & write | ListHooks, CreateHook, EditHook, PingHook, ListHookDeliveries, GetHookDelivery |
-| Organization: Members      | Read-only    | AddTeamRepoBySlug                                                        |
-
+| Repository: Workflows      | Read & write | (commit of github action file)                                                 |
+| Organization: Members      | Read-only    | AddTeamRepoBySlug                                                              |
 
 ### `gitClient` (`repo_content.go`)
 
