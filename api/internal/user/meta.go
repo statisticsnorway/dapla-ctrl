@@ -19,6 +19,7 @@ type (
 
 func (User) IsNode()       {}
 func (User) IsSearchNode() {}
+func (User) IsEntity()     {}
 
 type UserOrder struct {
 	Field     UserOrderField       `json:"field"`
