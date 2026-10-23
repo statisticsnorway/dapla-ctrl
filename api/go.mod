@@ -1,6 +1,6 @@
 module github.com/statisticsnorway/dapla-ctrl/api
 
-go 1.27.2
+go 1.27.3
 
 tool (
 	github.com/99designs/gqlgen
