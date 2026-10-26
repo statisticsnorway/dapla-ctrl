@@ -46,3 +46,45 @@ WHERE
 ORDER BY
 	code
 ;
+
+-- name: ListTeamsForSection :many
+SELECT
+	teams.slug,
+	teams.display_name,
+	teams.section_code,
+	teams.is_managed,
+	teams.has_manual_editing,
+	teams.last_successful_sync,
+	teams.delete_key_confirmed_at,
+	count(*) OVER () AS total_count
+FROM
+	teams
+WHERE
+	teams.section_code = @section_code
+ORDER BY
+	CASE
+		WHEN @order_by::TEXT = 'slug:asc' THEN teams.slug
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'slug:desc' THEN teams.slug
+	END DESC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN @order_by::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
+LIMIT
+	sqlc.arg('limit')
+OFFSET
+	sqlc.arg('offset')
+;
+
+-- name: CountTeamsForSection :one
+SELECT
+	COUNT(*)
+FROM
+	teams
+WHERE
+	teams.section_code = @section_code;

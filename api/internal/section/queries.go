@@ -8,6 +8,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/section/sectionsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 )
 
 func Get(ctx context.Context, sectionCode string) (*Section, error) {
@@ -63,4 +64,58 @@ func IsUserSectionManager(ctx context.Context, userId uuid.UUID) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func ListTeam(
+	ctx context.Context,
+	sectionCode string,
+	page *pagination.Pagination,
+	orderBy *team.TeamOrder,
+) (*team.TeamConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListTeamsForSection(ctx, sectionsql.ListTeamsForSectionParams{
+		SectionCode: sectionCode,
+		Offset:      page.Offset(),
+		Limit:       page.Limit(),
+		OrderBy:     orderBy.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var total int64
+	if len(ret) > 0 {
+		total = ret[0].TotalCount
+	} else if page.Offset() > 0 {
+		// An empty page has no rows, so we need to count the total separately
+		total, err = q.CountTeamsForSection(ctx, sectionCode)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return pagination.NewConvertConnection(
+		ret,
+		page,
+		total,
+		func(from *sectionsql.ListTeamsForSectionRow) *team.Team {
+			t := &team.Team{
+				Slug:             from.Slug,
+				DisplayName:      from.DisplayName,
+				SectionCode:      from.SectionCode,
+				IsManaged:        from.IsManaged,
+				HasManualEditing: from.HasManualEditing,
+			}
+
+			if from.LastSuccessfulSync.Valid {
+				t.LastSuccessfulSync = &from.LastSuccessfulSync.Time
+			}
+			if from.DeleteKeyConfirmedAt.Valid {
+				t.DeleteKeyConfirmedAt = &from.DeleteKeyConfirmedAt.Time
+			}
+
+			return t
+		},
+	), nil
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/gengql"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/section"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
@@ -26,6 +27,14 @@ func (r *sectionResolver) Manager(ctx context.Context, obj *section.Section) (*u
 		return nil, nil
 	}
 	return user.Get(ctx, *obj.ManagerId)
+}
+
+func (r *sectionResolver) Teams(ctx context.Context, obj *section.Section, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error) {
+	page, err := pagination.ParsePage(first, after, last, before)
+	if err != nil {
+		return nil, err
+	}
+	return section.ListTeam(ctx, obj.Code, page, orderBy)
 }
 
 func (r *Resolver) Section() gengql.SectionResolver { return &sectionResolver{r} }
