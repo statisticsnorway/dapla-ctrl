@@ -9,9 +9,11 @@ import (
 )
 
 type Querier interface {
+	CountTeamsForSection(ctx context.Context, sectionCode string) (int64, error)
 	GetByCodes(ctx context.Context, codes []string) ([]*Section, error)
 	GetByManagerId(ctx context.Context, userID *uuid.UUID) (*Section, error)
 	List(ctx context.Context, arg ListParams) ([]*ListRow, error)
+	ListTeamsForSection(ctx context.Context, arg ListTeamsForSectionParams) ([]*ListTeamsForSectionRow, error)
 }
 
 var _ Querier = (*Queries)(nil)
