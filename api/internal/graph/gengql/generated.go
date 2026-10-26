@@ -569,6 +569,7 @@ type ComplexityRoot struct {
 		ID      func(childComplexity int) int
 		Manager func(childComplexity int) int
 		Name    func(childComplexity int) int
+		Teams   func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) int
 	}
 
 	SectionConnection struct {
@@ -1127,6 +1128,7 @@ type RemoveTeamAccessManagerPayloadResolver interface {
 }
 type SectionResolver interface {
 	Manager(ctx context.Context, obj *section.Section) (*user.User, error)
+	Teams(ctx context.Context, obj *section.Section, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *team.TeamOrder) (*pagination.Connection[*team.Team], error)
 }
 type ServiceAccountResolver interface {
 	LastUsedAt(ctx context.Context, obj *serviceaccount.ServiceAccount) (*time.Time, error)
@@ -3249,6 +3251,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Section.Name(childComplexity), true
+	case "Section.teams":
+		if e.ComplexityRoot.Section.Teams == nil {
+			break
+		}
+
+		args, err := ec.field_Section_teams_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Section.Teams(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["orderBy"].(*team.TeamOrder)), true
 
 	case "SectionConnection.edges":
 		if e.ComplexityRoot.SectionConnection.Edges == nil {
@@ -7012,6 +7025,38 @@ type Section implements Node {
 	The manager of the section.
 	"""
 	manager: User
+
+	"""
+	The teams belonging to the section, including managed and self-managed teams.
+	"""
+	teams(
+	"""
+	Get the first n items in the connection. This can be used in combination with the after parameter.
+	"""
+	first: Int
+
+	"""
+	Get items after this cursor.
+	"""
+	after: Cursor
+
+	"""
+	Get the last n items in the connection. This can be used in combination with the before parameter.
+	"""
+	last: Int
+
+	"""
+	Get items before this cursor.
+	"""
+	before: Cursor
+
+	"""
+	Ordering options for items returned from the connection.
+	"""
+	orderBy: TeamOrder
+
+): TeamConnection!
+
 }
 
 """
@@ -10826,6 +10871,37 @@ func (ec *executionContext) field_Reconciler_errors_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["before"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Section_teams_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "last", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["last"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "before", ec.unmarshalOCursor2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐCursor)
+	if err != nil {
+		return nil, err
+	}
+	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "orderBy", ec.unmarshalOTeamOrder2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["orderBy"] = arg4
 	return args, nil
 }
 
@@ -17696,6 +17772,8 @@ func (ec *executionContext) fieldContext_Query_section(ctx context.Context, fiel
 				return ec.fieldContext_Section_name(ctx, field)
 			case "manager":
 				return ec.fieldContext_Section_manager(ctx, field)
+			case "teams":
+				return ec.fieldContext_Section_teams(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
 		},
@@ -22115,6 +22193,55 @@ func (ec *executionContext) fieldContext_Section_manager(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Section_teams(ctx context.Context, field graphql.CollectedField, obj *section.Section) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Section_teams,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Section().Teams(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["orderBy"].(*team.TeamOrder))
+		},
+		nil,
+		ec.marshalNTeamConnection2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋgraphᚋpaginationᚐConnection,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Section_teams(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Section",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "pageInfo":
+				return ec.fieldContext_TeamConnection_pageInfo(ctx, field)
+			case "nodes":
+				return ec.fieldContext_TeamConnection_nodes(ctx, field)
+			case "edges":
+				return ec.fieldContext_TeamConnection_edges(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type TeamConnection", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Section_teams_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _SectionConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *pagination.Connection[*section.Section]) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -22192,6 +22319,8 @@ func (ec *executionContext) fieldContext_SectionConnection_nodes(_ context.Conte
 				return ec.fieldContext_Section_name(ctx, field)
 			case "manager":
 				return ec.fieldContext_Section_manager(ctx, field)
+			case "teams":
+				return ec.fieldContext_Section_teams(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
 		},
@@ -22295,6 +22424,8 @@ func (ec *executionContext) fieldContext_SectionEdge_node(_ context.Context, fie
 				return ec.fieldContext_Section_name(ctx, field)
 			case "manager":
 				return ec.fieldContext_Section_manager(ctx, field)
+			case "teams":
+				return ec.fieldContext_Section_teams(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
 		},
@@ -26045,6 +26176,8 @@ func (ec *executionContext) fieldContext_Team_section(_ context.Context, field g
 				return ec.fieldContext_Section_name(ctx, field)
 			case "manager":
 				return ec.fieldContext_Section_manager(ctx, field)
+			case "teams":
+				return ec.fieldContext_Section_teams(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
 		},
@@ -30083,6 +30216,8 @@ func (ec *executionContext) fieldContext_User_section(_ context.Context, field g
 				return ec.fieldContext_Section_name(ctx, field)
 			case "manager":
 				return ec.fieldContext_Section_manager(ctx, field)
+			case "teams":
+				return ec.fieldContext_Section_teams(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Section", field.Name)
 		},
@@ -39974,6 +40109,42 @@ func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, 
 					}
 				}()
 				res = ec._Section_manager(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "teams":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Section_teams(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
