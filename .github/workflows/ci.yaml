@@ -426,7 +426,7 @@ jobs:
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c #v4.2.0
 
       - name: Login to GCP Artifact Registry
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 #v4.4.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f #v4.6.0
         with:
           registry: europe-north1-docker.pkg.dev/artifact-registry-5n/dapla-lab-docker
           username: "oauth2accesstoken"
