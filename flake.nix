@@ -16,7 +16,7 @@
           packages = with pkgs; [
             actionlint
             buf # protobuf LSP server
-            go
+            go_1_27
             gopls
             lua-language-server
             mise
