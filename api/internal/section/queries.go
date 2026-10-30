@@ -66,7 +66,7 @@ func IsUserSectionManager(ctx context.Context, userId uuid.UUID) (bool, error) {
 	return true, nil
 }
 
-func ListTeam(
+func ListTeams(
 	ctx context.Context,
 	sectionCode string,
 	page *pagination.Pagination,

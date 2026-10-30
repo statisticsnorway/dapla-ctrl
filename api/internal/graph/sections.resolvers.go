@@ -34,7 +34,7 @@ func (r *sectionResolver) Teams(ctx context.Context, obj *section.Section, first
 	if err != nil {
 		return nil, err
 	}
-	return section.ListTeam(ctx, obj.Code, page, orderBy)
+	return section.ListTeams(ctx, obj.Code, page, orderBy)
 }
 
 func (r *Resolver) Section() gengql.SectionResolver { return &sectionResolver{r} }
