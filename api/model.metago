@@ -20,6 +20,10 @@ func ({{ name . }}) IsSearchNode() {}
 func ({{ name . }}) IsActivityLogger() {}
 {{- end }}
 
+{{- if (propHas . "impl" "entity") }}
+func ({{ name . }}) IsEntity() {}
+{{- end }}
+
 {{ end }}
 
 {{ define "order" }}

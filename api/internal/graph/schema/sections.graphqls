@@ -38,7 +38,7 @@ extend type Query {
 """
 The section type represents a section of the Dapla platform and the Dapla GraphQL API.
 """
-type Section implements Node {
+type Section implements Node @key(fields: "code") {
 	"""
 	The globally unique ID of the section.
 	"""
