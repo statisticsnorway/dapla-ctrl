@@ -49,13 +49,7 @@ ORDER BY
 
 -- name: ListTeamsForSection :many
 SELECT
-	teams.slug,
-	teams.display_name,
-	teams.section_code,
-	teams.is_managed,
-	teams.has_manual_editing,
-	teams.last_successful_sync,
-	teams.delete_key_confirmed_at,
+	sqlc.embed(teams),
 	count(*) OVER () AS total_count
 FROM
 	teams

@@ -7,8 +7,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 const countTeamsForSection = `-- name: CountTeamsForSection :one
@@ -141,13 +139,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 
 const listTeamsForSection = `-- name: ListTeamsForSection :many
 SELECT
-	teams.slug,
-	teams.display_name,
-	teams.section_code,
-	teams.is_managed,
-	teams.has_manual_editing,
-	teams.last_successful_sync,
-	teams.delete_key_confirmed_at,
+	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.has_manual_editing,
 	count(*) OVER () AS total_count
 FROM
 	teams
@@ -181,14 +173,8 @@ type ListTeamsForSectionParams struct {
 }
 
 type ListTeamsForSectionRow struct {
-	Slug                 slug.Slug
-	DisplayName          string
-	SectionCode          string
-	IsManaged            bool
-	HasManualEditing     bool
-	LastSuccessfulSync   pgtype.Timestamp
-	DeleteKeyConfirmedAt pgtype.Timestamptz
-	TotalCount           int64
+	Team       Team
+	TotalCount int64
 }
 
 func (q *Queries) ListTeamsForSection(ctx context.Context, arg ListTeamsForSectionParams) ([]*ListTeamsForSectionRow, error) {
@@ -206,13 +192,13 @@ func (q *Queries) ListTeamsForSection(ctx context.Context, arg ListTeamsForSecti
 	for rows.Next() {
 		var i ListTeamsForSectionRow
 		if err := rows.Scan(
-			&i.Slug,
-			&i.DisplayName,
-			&i.SectionCode,
-			&i.IsManaged,
-			&i.HasManualEditing,
-			&i.LastSuccessfulSync,
-			&i.DeleteKeyConfirmedAt,
+			&i.Team.Slug,
+			&i.Team.DisplayName,
+			&i.Team.LastSuccessfulSync,
+			&i.Team.DeleteKeyConfirmedAt,
+			&i.Team.SectionCode,
+			&i.Team.IsManaged,
+			&i.Team.HasManualEditing,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err

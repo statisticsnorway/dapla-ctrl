@@ -101,18 +101,18 @@ func ListTeams(
 		total,
 		func(from *sectionsql.ListTeamsForSectionRow) *team.Team {
 			t := &team.Team{
-				Slug:             from.Slug,
-				DisplayName:      from.DisplayName,
-				SectionCode:      from.SectionCode,
-				IsManaged:        from.IsManaged,
-				HasManualEditing: from.HasManualEditing,
+				Slug:             from.Team.Slug,
+				DisplayName:      from.Team.DisplayName,
+				SectionCode:      from.Team.SectionCode,
+				IsManaged:        from.Team.IsManaged,
+				HasManualEditing: from.Team.HasManualEditing,
 			}
 
-			if from.LastSuccessfulSync.Valid {
-				t.LastSuccessfulSync = &from.LastSuccessfulSync.Time
+			if from.Team.LastSuccessfulSync.Valid {
+				t.LastSuccessfulSync = &from.Team.LastSuccessfulSync.Time
 			}
-			if from.DeleteKeyConfirmedAt.Valid {
-				t.DeleteKeyConfirmedAt = &from.DeleteKeyConfirmedAt.Time
+			if from.Team.DeleteKeyConfirmedAt.Valid {
+				t.DeleteKeyConfirmedAt = &from.Team.DeleteKeyConfirmedAt.Time
 			}
 
 			return t
