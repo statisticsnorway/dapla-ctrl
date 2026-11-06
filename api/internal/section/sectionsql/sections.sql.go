@@ -9,6 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
+const countTeamsForSection = `-- name: CountTeamsForSection :one
+SELECT
+	COUNT(*)
+FROM
+	teams
+WHERE
+	teams.section_code = $1
+`
+
+func (q *Queries) CountTeamsForSection(ctx context.Context, sectionCode string) (int64, error) {
+	row := q.db.QueryRow(ctx, countTeamsForSection, sectionCode)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getByCodes = `-- name: GetByCodes :many
 SELECT
 	code, name, manager_id
@@ -109,6 +125,80 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 			&i.Section.Code,
 			&i.Section.Name,
 			&i.Section.ManagerID,
+			&i.TotalCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listTeamsForSection = `-- name: ListTeamsForSection :many
+SELECT
+	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.has_manual_editing,
+	count(*) OVER () AS total_count
+FROM
+	teams
+WHERE
+	teams.section_code = $1
+ORDER BY
+	CASE
+		WHEN $2::TEXT = 'slug:asc' THEN teams.slug
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'slug:desc' THEN teams.slug
+	END DESC,
+	CASE
+		WHEN $2::TEXT = 'section_code:asc' THEN teams.section_code
+	END ASC,
+	CASE
+		WHEN $2::TEXT = 'section_code:desc' THEN teams.section_code
+	END DESC,
+	teams.slug ASC
+LIMIT
+	$4
+OFFSET
+	$3
+`
+
+type ListTeamsForSectionParams struct {
+	SectionCode string
+	OrderBy     string
+	Offset      int32
+	Limit       int32
+}
+
+type ListTeamsForSectionRow struct {
+	Team       Team
+	TotalCount int64
+}
+
+func (q *Queries) ListTeamsForSection(ctx context.Context, arg ListTeamsForSectionParams) ([]*ListTeamsForSectionRow, error) {
+	rows, err := q.db.Query(ctx, listTeamsForSection,
+		arg.SectionCode,
+		arg.OrderBy,
+		arg.Offset,
+		arg.Limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*ListTeamsForSectionRow{}
+	for rows.Next() {
+		var i ListTeamsForSectionRow
+		if err := rows.Scan(
+			&i.Team.Slug,
+			&i.Team.DisplayName,
+			&i.Team.LastSuccessfulSync,
+			&i.Team.DeleteKeyConfirmedAt,
+			&i.Team.SectionCode,
+			&i.Team.IsManaged,
+			&i.Team.HasManualEditing,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
