@@ -50,7 +50,7 @@ ORDER BY
 -- name: ListTeamsForSection :many
 SELECT
 	sqlc.embed(teams),
-	count(*) OVER () AS total_count
+	COUNT(*) OVER () AS total_count
 FROM
 	teams
 WHERE
@@ -81,4 +81,5 @@ SELECT
 FROM
 	teams
 WHERE
-	teams.section_code = @section_code;
+	teams.section_code = @section_code
+;

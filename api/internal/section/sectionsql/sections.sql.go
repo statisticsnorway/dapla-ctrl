@@ -140,7 +140,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 const listTeamsForSection = `-- name: ListTeamsForSection :many
 SELECT
 	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.has_manual_editing,
-	count(*) OVER () AS total_count
+	COUNT(*) OVER () AS total_count
 FROM
 	teams
 WHERE
