@@ -87,12 +87,6 @@ func ListTeams(
 	var total int64
 	if len(ret) > 0 {
 		total = ret[0].TotalCount
-	} else if page.Offset() > 0 {
-		// An empty page has no rows, so we need to count the total separately
-		total, err = q.CountTeamsForSection(ctx, sectionCode)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	return pagination.NewConvertConnection(

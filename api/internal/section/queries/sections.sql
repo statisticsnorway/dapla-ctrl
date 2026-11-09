@@ -74,12 +74,3 @@ LIMIT
 OFFSET
 	sqlc.arg('offset')
 ;
-
--- name: CountTeamsForSection :one
-SELECT
-	COUNT(*)
-FROM
-	teams
-WHERE
-	teams.section_code = @section_code
-;

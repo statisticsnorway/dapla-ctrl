@@ -9,22 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const countTeamsForSection = `-- name: CountTeamsForSection :one
-SELECT
-	COUNT(*)
-FROM
-	teams
-WHERE
-	teams.section_code = $1
-`
-
-func (q *Queries) CountTeamsForSection(ctx context.Context, sectionCode string) (int64, error) {
-	row := q.db.QueryRow(ctx, countTeamsForSection, sectionCode)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const getByCodes = `-- name: GetByCodes :many
 SELECT
 	code, name, manager_id
