@@ -2,15 +2,15 @@ local user = User.new()
 
 Helper.SQLExec([[
     INSERT INTO sections (code, name) VALUES
-        ('review-one',   'Section with three teams'),
-        ('review-other', 'Section with another team'),
-        ('review-empty', 'Section without teams')
+        ('606',   'Section with three teams'),
+        ('707', 'Section with another team'),
+        ('808', 'Section without teams')
 ]])
 
-Team.new("review-a", "review-one", true)
-Team.new("review-b", "review-one", false)
-Team.new("review-c", "review-one", true)
-Team.new("other-team", "review-other", true)
+Team.new("review-a", "606", true)
+Team.new("review-b", "606", false)
+Team.new("review-c", "606", true)
+Team.new("other-team", "707", true)
 
 Helper.SQLExec([[
     UPDATE teams
@@ -23,7 +23,7 @@ Test.gql("section teams: filters, sorts and paginates", function(t)
 
     t.query [[
         query {
-            section(code: "review-one") {
+            section(code: "606") {
                 teams(first: 2, orderBy: {field: SLUG, direction: DESC}) {
                     nodes { slug isManaged lastSuccessfulSync }
                     pageInfo { totalCount hasNextPage endCursor }
@@ -53,7 +53,7 @@ Test.gql("section teams: filters, sorts and paginates", function(t)
     -- Use the cursor returned by the API to fetch the remaining team.
     t.query(string.format([[
         query {
-            section(code: "review-one") {
+            section(code: "606") {
                 teams(first: 2, after: "%s", orderBy: {field: SLUG, direction: DESC}) {
                     nodes { slug }
                     pageInfo { totalCount hasNextPage }
@@ -79,7 +79,7 @@ Test.gql("section teams: a section without teams returns an empty list", functio
 
     t.query [[
         query {
-            section(code: "review-empty") {
+            section(code: "808") {
                 teams(first: 2) {
                     nodes { slug }
                     pageInfo { totalCount hasNextPage }
