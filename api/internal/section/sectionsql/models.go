@@ -4,10 +4,22 @@ package sectionsql
 
 import (
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 )
 
 type Section struct {
 	Code      string
 	Name      string
 	ManagerID *uuid.UUID
+}
+
+type Team struct {
+	Slug                 slug.Slug
+	DisplayName          string
+	LastSuccessfulSync   pgtype.Timestamp
+	DeleteKeyConfirmedAt pgtype.Timestamptz
+	SectionCode          string
+	IsManaged            bool
+	HasManualEditing     bool
 }

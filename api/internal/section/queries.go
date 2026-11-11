@@ -8,6 +8,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/pagination"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/section/sectionsql"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 )
 
 func Get(ctx context.Context, sectionCode string) (*Section, error) {
@@ -63,4 +64,52 @@ func IsUserSectionManager(ctx context.Context, userId uuid.UUID) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func ListTeams(
+	ctx context.Context,
+	sectionCode string,
+	page *pagination.Pagination,
+	orderBy *team.TeamOrder,
+) (*team.TeamConnection, error) {
+	q := db(ctx)
+
+	ret, err := q.ListTeamsForSection(ctx, sectionsql.ListTeamsForSectionParams{
+		SectionCode: sectionCode,
+		Offset:      page.Offset(),
+		Limit:       page.Limit(),
+		OrderBy:     orderBy.String(),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var total int64
+	if len(ret) > 0 {
+		total = ret[0].TotalCount
+	}
+
+	return pagination.NewConvertConnection(
+		ret,
+		page,
+		total,
+		func(from *sectionsql.ListTeamsForSectionRow) *team.Team {
+			t := &team.Team{
+				Slug:             from.Team.Slug,
+				DisplayName:      from.Team.DisplayName,
+				SectionCode:      from.Team.SectionCode,
+				IsManaged:        from.Team.IsManaged,
+				HasManualEditing: from.Team.HasManualEditing,
+			}
+
+			if from.Team.LastSuccessfulSync.Valid {
+				t.LastSuccessfulSync = &from.Team.LastSuccessfulSync.Time
+			}
+			if from.Team.DeleteKeyConfirmedAt.Valid {
+				t.DeleteKeyConfirmedAt = &from.Team.DeleteKeyConfirmedAt.Time
+			}
+
+			return t
+		},
+	), nil
 }
