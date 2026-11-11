@@ -45,7 +45,7 @@
 		<Tabs>
 			<Tab
 				data-sveltekit-noscroll
-				href="/team/${params.team}/shared-data"
+				href={`/team/${params.team}/shared-data`}
 				active={page.url.pathname === `/team/${params.team}/shared-data`}
 				title={`Deler (${$SharedData.data.team.sharedBuckets.pageInfo.totalCount})`}
 			/>
