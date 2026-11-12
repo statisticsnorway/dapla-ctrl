@@ -259,6 +259,7 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				"role":               " roles/storage.objectViewer ",
 				"max_grant_duration": "2h",
 				"condition_template": testPAMConditionTemplate,
+				"team_allowlist":     "my-team",
 			}
 			r, err := googlepam.New(t.Context(), googlepam.Config{
 				Environments: []string{"dev", "test", "prod"},
@@ -308,6 +309,88 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestReconcile_TeamAllowlist(t *testing.T) {
+	for name, tt := range map[string]struct {
+		value       string
+		omit        bool
+		wantAllowed bool
+		wantErr     bool
+	}{
+		"unset allows all":          {omit: true, wantAllowed: true},
+		"empty allows all":          {wantAllowed: true},
+		"whitespace allows all":     {value: " \t ", wantAllowed: true},
+		"exact match":               {value: "my-team", wantAllowed: true},
+		"trimmed multiple entries":  {value: " another-team, my-team ", wantAllowed: true},
+		"not listed":                {value: "another-team"},
+		"prefix and substring":      {value: "my-team-extra,other-my-team"},
+		"case sensitive":            {value: "My-Team"},
+		"wildcard is not supported": {value: "*"},
+		"trailing comma":            {value: "my-team,", wantErr: true},
+		"blank entry":               {value: "my-team, ,another-team", wantErr: true},
+		"comma only":                {value: ",", wantErr: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			server := newFakeGcpTeamResourcesServer()
+			server.folders["my-team/dev"] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: "dev", FolderId: "100"}
+			if !tt.omit {
+				server.config["team_allowlist"] = tt.value
+			}
+			pam := &fakePrivilegedAccessManager{}
+			r, err := googlepam.New(t.Context(), googlepam.Config{
+				Environments: []string{"dev"},
+			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = r.Reconcile(t.Context(), startFakeGrpcServer(t, server), &protoapi.Team{Slug: "my-team", IsManaged: true}, logrus.New())
+			if tt.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "PAM team allowlist must not contain empty entries") {
+					t.Fatalf("got %v, want invalid allowlist error", err)
+				}
+			} else if err != nil {
+				t.Fatal(err)
+			}
+			if tt.wantAllowed {
+				if len(pam.calls) != 1 || pam.calls[0].folderID != "100" {
+					t.Fatalf("allowed team must receive its folder entitlement, got %+v", pam.calls)
+				}
+			} else if len(pam.calls) != 0 || len(server.getRequests) != 0 {
+				t.Fatal("excluded teams and invalid allowlists must not query folders or reconcile entitlements")
+			}
+		})
+	}
+}
+
+func TestReconcile_TeamAllowlistChangesWithoutRestart(t *testing.T) {
+	server := newFakeGcpTeamResourcesServer()
+	server.folders["my-team/dev"] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: "dev", FolderId: "100"}
+	client := startFakeGrpcServer(t, server)
+	pam := &fakePrivilegedAccessManager{}
+	r, err := googlepam.New(t.Context(), googlepam.Config{
+		Environments: []string{"dev"},
+	}, nil, googlepam.WithPrivilegedAccessManager(pam))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, step := range []struct {
+		allowlist string
+		wantCalls int
+	}{
+		{allowlist: "another-team", wantCalls: 0},
+		{allowlist: "my-team", wantCalls: 1},
+		{allowlist: "another-team", wantCalls: 1},
+		{allowlist: "", wantCalls: 2},
+	} {
+		server.config["team_allowlist"] = step.allowlist
+		if err := r.Reconcile(t.Context(), client, &protoapi.Team{Slug: "my-team", IsManaged: true}, logrus.New()); err != nil {
+			t.Fatal(err)
+		}
+		if len(pam.calls) != step.wantCalls {
+			t.Fatalf("allowlist %q: got %d PAM calls, want %d", step.allowlist, len(pam.calls), step.wantCalls)
+		}
 	}
 }
 

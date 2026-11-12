@@ -29,8 +29,9 @@ specifications with Dapla API at startup.
 | `role` | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer` |
 | `max_grant_duration` | Go duration between `30m` and `168h`, e.g. `1h` |
 | `condition_template` | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env` |
+| `team_allowlist` | Optional comma-separated list of exact, case-sensitive team slugs, e.g. `my-team,another-team`. Empty or unset allows all Managed teams. |
 
-None of these values has a default. Until all four are set, PAM reconciliation
+The four policy settings have no defaults. Until all four are set, PAM reconciliation
 is skipped with a warning; folder and tag reconciliation continues. Invalid
 configuration and malformed templates are returned as reconciliation errors.
 Template
@@ -42,6 +43,13 @@ restarting the process. API failures are returned as errors, never replaced with
 stale configuration. Existing entitlements are updated
 when the policy changes, using an explicit field mask and the current etag;
 unchanged entitlements are left alone.
+
+Use `team_allowlist` to limit PAM reconciliation to selected teams during testing.
+Whitespace around entries is trimmed; non-empty lists must not contain empty
+entries. Matching is exact, with no wildcard or prefix matching, and the
+Managed-team requirement still applies. Changes take effect on the next
+reconciliation without restarting the process. Excluded teams are skipped before
+folder lookup or PAM calls.
 
 The former `PAM_MANAGED_TEAM_FOLDER_*` environment variables are no longer read.
 Re-enter their values under the corresponding API keys above; environment
@@ -104,5 +112,5 @@ permissions to get, create and update PAM entitlements and the folder IAM
 permissions required by PAM. See Google's
 [PAM entitlement setup](https://cloud.google.com/iam/docs/pam-create-entitlements).
 
-Deletion is not implemented. Skipping a self-managed team or clearing PAM
-configuration does not delete an existing entitlement.
+Deletion is not implemented. Skipping a self-managed or non-allowlisted team, or
+clearing PAM configuration, does not delete an existing entitlement.

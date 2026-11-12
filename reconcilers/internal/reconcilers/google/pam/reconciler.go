@@ -23,6 +23,7 @@ const (
 	configPrincipalsKey        = "principals"
 	configMaxGrantDurationKey  = "max_grant_duration"
 	configConditionTemplateKey = "condition_template"
+	configTeamAllowlistKey     = "team_allowlist"
 )
 
 type Config struct {
@@ -34,6 +35,7 @@ type pamConfig struct {
 	Role              string
 	MaxGrantDuration  time.Duration
 	ConditionTemplate *template.Template
+	TeamAllowlist     []string
 }
 
 func (c pamConfig) configured() bool {
@@ -53,6 +55,11 @@ func (c Config) validate() error {
 }
 
 func (c pamConfig) validate() error {
+	for _, teamSlug := range c.TeamAllowlist {
+		if teamSlug == "" {
+			return fmt.Errorf("PAM team allowlist must not contain empty entries")
+		}
+	}
 	for _, principal := range c.Principals {
 		if strings.TrimSpace(principal) == "" {
 			return fmt.Errorf("PAM principals must not contain empty entries")
@@ -127,6 +134,12 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Go text template rendering an IAM CEL condition, using .TeamSlug and .Env.",
 				Secret:      false,
 			},
+			{
+				Key:         configTeamAllowlistKey,
+				DisplayName: "Team allowlist",
+				Description: "Comma-separated list of exact, case-sensitive team slugs. Empty allows all Managed teams.",
+				Secret:      false,
+			},
 		},
 	}
 }
@@ -142,6 +155,10 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	cfg, err := r.getConfig(ctx, client)
 	if err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
+	}
+	if len(cfg.TeamAllowlist) > 0 && !slices.Contains(cfg.TeamAllowlist, daplaTeam.Slug) {
+		log.Debug("skipping PAM entitlements: team is not allowlisted")
+		return nil
 	}
 	if !cfg.configured() {
 		log.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
@@ -202,6 +219,13 @@ func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient)
 			}
 		case configConditionTemplateKey:
 			conditionTemplate = value
+		case configTeamAllowlistKey:
+			if value != "" {
+				cfg.TeamAllowlist = strings.Split(value, ",")
+				for i, teamSlug := range cfg.TeamAllowlist {
+					cfg.TeamAllowlist[i] = strings.TrimSpace(teamSlug)
+				}
+			}
 		default:
 			return pamConfig{}, fmt.Errorf("unknown config key %q", c.Key)
 		}
