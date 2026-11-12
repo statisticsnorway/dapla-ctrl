@@ -14,9 +14,10 @@ type Config struct {
 	}
 
 	PAMManagedTeamFolder struct {
-		Role             string        `env:"PAM_MANAGED_TEAM_FOLDER_ROLE"`
-		Principals       []string      `env:"PAM_MANAGED_TEAM_FOLDER_PRINCIPALS"`
-		MaxGrantDuration time.Duration `env:"PAM_MANAGED_TEAM_FOLDER_MAX_GRANT_DURATION"`
+		Role              string        `env:"PAM_MANAGED_TEAM_FOLDER_ROLE"`
+		Principals        []string      `env:"PAM_MANAGED_TEAM_FOLDER_PRINCIPALS"`
+		MaxGrantDuration  time.Duration `env:"PAM_MANAGED_TEAM_FOLDER_MAX_GRANT_DURATION"`
+		ConditionTemplate string        `env:"PAM_MANAGED_TEAM_FOLDER_CONDITION_TEMPLATE"`
 	}
 
 	GRPC struct {

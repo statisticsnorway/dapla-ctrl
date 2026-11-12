@@ -1,6 +1,7 @@
 package gcpresources
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -18,13 +19,29 @@ import (
 const pamEntitlementID = "ssb-bucket-read"
 
 type PAMConfig struct {
-	Principals       []string
-	Role             string
-	MaxGrantDuration time.Duration
+	Principals        []string
+	Role              string
+	MaxGrantDuration  time.Duration
+	ConditionTemplate string
 }
 
 func (c PAMConfig) configured() bool {
-	return len(c.Principals) != 0 && c.Role != "" && c.MaxGrantDuration != 0
+	return len(c.Principals) != 0 && c.Role != "" && c.MaxGrantDuration != 0 && c.ConditionTemplate != ""
+}
+
+func (r *reconciler) renderPAMCondition(teamSlug, env string) (string, error) {
+	var rendered bytes.Buffer
+	if err := r.pamConditionTemplate.Execute(&rendered, struct {
+		TeamSlug string
+		Env      string
+	}{TeamSlug: teamSlug, Env: env}); err != nil {
+		return "", fmt.Errorf("render PAM IAM condition: %w", err)
+	}
+	expression := strings.TrimSpace(rendered.String())
+	if expression == "" {
+		return "", fmt.Errorf("PAM IAM condition rendered to an empty expression")
+	}
+	return expression, nil
 }
 
 func (c PAMConfig) validate() error {
@@ -40,14 +57,17 @@ func (c PAMConfig) validate() error {
 }
 
 type PrivilegedAccessManager interface {
-	EnsureEntitlement(ctx context.Context, folderID, role string, principals []string, maxGrantDuration time.Duration) error
+	EnsureEntitlement(ctx context.Context, folderID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error
 }
 
 type GooglePrivilegedAccessManager struct {
 	client *privilegedaccessmanager.Client
 }
 
-func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, folderID, role string, principals []string, maxGrantDuration time.Duration) error {
+func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, folderID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error {
+	if strings.TrimSpace(conditionExpression) == "" {
+		return fmt.Errorf("PAM IAM condition is required")
+	}
 	if g.client == nil {
 		return fmt.Errorf("PAM client is not configured")
 	}
@@ -64,7 +84,7 @@ func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, f
 					ResourceType: "cloudresourcemanager.googleapis.com/Folder",
 					Resource:     "//cloudresourcemanager.googleapis.com/folders/" + folderID,
 					RoleBindings: []*privilegedaccessmanagerpb.PrivilegedAccess_GcpIamAccess_RoleBinding{
-						{Role: role},
+						{Role: role, ConditionExpression: conditionExpression},
 					},
 				},
 			},

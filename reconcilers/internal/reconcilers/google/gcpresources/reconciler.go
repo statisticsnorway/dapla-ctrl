@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"text/template"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -25,9 +26,10 @@ type Config struct {
 }
 
 type reconciler struct {
-	client ResourceManager
-	pam    PrivilegedAccessManager
-	cfg    Config
+	client               ResourceManager
+	pam                  PrivilegedAccessManager
+	cfg                  Config
+	pamConditionTemplate *template.Template
 }
 
 type optFunc func(*reconciler)
@@ -51,12 +53,19 @@ func New(ctx context.Context, cfg Config, services *google.Services, opts ...opt
 	}
 
 	cfg.PAM.Role = strings.TrimSpace(cfg.PAM.Role)
+	cfg.PAM.ConditionTemplate = strings.TrimSpace(cfg.PAM.ConditionTemplate)
 	cfg.PAM.Principals = slices.Clone(cfg.PAM.Principals)
 	for i, principal := range cfg.PAM.Principals {
 		cfg.PAM.Principals[i] = strings.TrimSpace(principal)
 	}
 
 	r := &reconciler{cfg: cfg}
+	if cfg.PAM.ConditionTemplate != "" {
+		r.pamConditionTemplate, err = template.New("PAM IAM condition").Option("missingkey=error").Parse(cfg.PAM.ConditionTemplate)
+		if err != nil {
+			return nil, fmt.Errorf("parse PAM IAM condition template: %w", err)
+		}
+	}
 	if services != nil {
 		r.pam = &GooglePrivilegedAccessManager{client: services.PrivilegedAccessManager}
 	}
@@ -114,7 +123,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if daplaTeam.IsManaged {
 		pamCfg = r.cfg.PAM
 		if !pamCfg.configured() {
-			log.Warn("skipping PAM entitlements: eligible principals, IAM role and maximum grant duration must all be configured")
+			log.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
 		}
 	}
 
@@ -196,7 +205,11 @@ func (r *reconciler) reconcileEnvFolder(
 		if r.pam == nil {
 			return fmt.Errorf("PAM client is not configured")
 		}
-		if err := r.pam.EnsureEntitlement(ctx, fID, pamCfg.Role, pamCfg.Principals, pamCfg.MaxGrantDuration); err != nil {
+		conditionExpression, err := r.renderPAMCondition(teamSlug, env)
+		if err != nil {
+			return fmt.Errorf("PAM condition for folder %q in env %q: %w", fID, env, err)
+		}
+		if err := r.pam.EnsureEntitlement(ctx, fID, pamCfg.Role, conditionExpression, pamCfg.Principals, pamCfg.MaxGrantDuration); err != nil {
 			return fmt.Errorf("reconcile PAM entitlement for folder %q in env %q: %w", fID, env, err)
 		}
 	}

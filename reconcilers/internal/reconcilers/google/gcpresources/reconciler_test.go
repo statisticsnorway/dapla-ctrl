@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"slices"
 	"strings"
@@ -183,10 +184,11 @@ func TestReconcile_IdempotentOnSecondRun(t *testing.T) {
 }
 
 type entitlementCall struct {
-	folderID   string
-	role       string
-	principals []string
-	duration   time.Duration
+	folderID            string
+	role                string
+	conditionExpression string
+	principals          []string
+	duration            time.Duration
 }
 
 type fakePrivilegedAccessManager struct {
@@ -194,10 +196,12 @@ type fakePrivilegedAccessManager struct {
 	err   error
 }
 
-func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folderID, role string, principals []string, duration time.Duration) error {
-	f.calls = append(f.calls, entitlementCall{folderID, role, principals, duration})
+func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folderID, role, conditionExpression string, principals []string, duration time.Duration) error {
+	f.calls = append(f.calls, entitlementCall{folderID, role, conditionExpression, principals, duration})
 	return f.err
 }
+
+const testPAMConditionTemplate = `resource.name == "projects/_/buckets/ssb-{{.TeamSlug}}-data-produkt-{{.Env}}/objects/example"`
 
 func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 	for _, managed := range []bool{true, false} {
@@ -216,9 +220,10 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				TagKeyNamespacedName: "tagKeys/123456",
 				EnvParentFolders:     map[string]string{"dev": "111", "test": "222", "prod": "333"},
 				PAM: gcpresources.PAMConfig{
-					Principals:       []string{" serviceAccount:reader@test.iam.gserviceaccount.com", " group:readers@example.com "},
-					Role:             " roles/storage.objectViewer ",
-					MaxGrantDuration: 2 * time.Hour,
+					Principals:        []string{" serviceAccount:reader@test.iam.gserviceaccount.com", " group:readers@example.com "},
+					Role:              " roles/storage.objectViewer ",
+					MaxGrantDuration:  2 * time.Hour,
+					ConditionTemplate: testPAMConditionTemplate,
 				},
 			}, nil, gcpresources.WithResourceManager(resources), gcpresources.WithPrivilegedAccessManager(pam))
 			if err != nil {
@@ -248,6 +253,11 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 					call.role != "roles/storage.objectViewer" || call.duration != 2*time.Hour {
 					t.Errorf("unexpected entitlement: %+v", call)
 				}
+				env := map[string]string{"100": "dev", "200": "test", "300": "prod"}[call.folderID]
+				expectedCondition := fmt.Sprintf(`resource.name == "projects/_/buckets/ssb-my-team-data-produkt-%s/objects/example"`, env)
+				if call.conditionExpression != expectedCondition {
+					t.Errorf("incorrect condition for folder %s: %s", call.folderID, call.conditionExpression)
+				}
 			}
 			for _, id := range []string{"100", "200", "300"} {
 				if !folders[id] {
@@ -260,33 +270,40 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 
 func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 	tests := map[string]struct {
-		principals string
-		role       string
-		omitRole   bool
-		duration   string
-		pamErr     error
-		wantErr    string
-		wantSkip   bool
+		principals        string
+		role              string
+		omitRole          bool
+		omitCondition     bool
+		conditionTemplate string
+		duration          string
+		pamErr            error
+		wantErr           string
+		wantSkip          bool
 	}{
-		"missing all":         {wantSkip: true},
-		"missing principals":  {role: "roles/storage.objectViewer", duration: "1h", wantSkip: true},
-		"missing duration":    {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", wantSkip: true},
-		"missing role":        {principals: "user:reader@example.com", duration: "1h", omitRole: true, wantSkip: true},
-		"empty role":          {principals: "user:reader@example.com", duration: "1h", wantSkip: true},
-		"whitespace role":     {principals: "user:reader@example.com", role: "  ", duration: "1h", wantSkip: true},
-		"group principal":     {principals: "group:readers@example.com", role: "roles/storage.objectViewer", duration: "1h"},
-		"multiple principals": {principals: "user:reader@example.com,group:readers@example.com", role: "roles/storage.objectViewer", duration: "1h"},
-		"federated principal": {principals: "principal://iam.googleapis.com/locations/global/workforcePools/example/subject/reader", role: "roles/storage.objectViewer", duration: "1h"},
-		"empty entry":         {principals: "user:reader@example.com, ,group:readers@example.com", duration: "1h", wantErr: "principals must not contain empty entries"},
-		"trailing comma":      {principals: "user:reader@example.com,", duration: "1h", wantErr: "principals must not contain empty entries"},
-		"configured role":     {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h"},
-		"invalid duration":    {duration: "one hour", wantErr: "invalid duration"},
-		"negative duration":   {duration: "-1h", wantErr: "must be between 30m and 168h"},
-		"below minimum":       {duration: "29m59s", wantErr: "must be between 30m and 168h"},
-		"above maximum":       {duration: "168h1s", wantErr: "must be between 30m and 168h"},
-		"minimum":             {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "30m"},
-		"maximum":             {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "168h"},
-		"PAM error":           {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "1h", pamErr: errors.New("PAM unavailable"), wantErr: `folder "fake-folder-my-team" in env "dev": PAM unavailable`},
+		"missing all":               {wantSkip: true},
+		"missing principals":        {role: "roles/storage.objectViewer", duration: "1h", wantSkip: true},
+		"missing duration":          {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", wantSkip: true},
+		"missing role":              {principals: "user:reader@example.com", duration: "1h", omitRole: true, wantSkip: true},
+		"missing condition":         {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", omitCondition: true, wantSkip: true},
+		"blank condition":           {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "  ", wantSkip: true},
+		"invalid template":          {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "{{", wantErr: "parse PAM IAM condition template"},
+		"unknown template variable": {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "{{.Unknown}}", wantErr: "render PAM IAM condition"},
+		"empty rendered condition":  {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: `{{if eq .Env "absent"}}true{{end}}`, wantErr: "rendered to an empty expression"},
+		"empty role":                {principals: "user:reader@example.com", duration: "1h", wantSkip: true},
+		"whitespace role":           {principals: "user:reader@example.com", role: "  ", duration: "1h", wantSkip: true},
+		"group principal":           {principals: "group:readers@example.com", role: "roles/storage.objectViewer", duration: "1h"},
+		"multiple principals":       {principals: "user:reader@example.com,group:readers@example.com", role: "roles/storage.objectViewer", duration: "1h"},
+		"federated principal":       {principals: "principal://iam.googleapis.com/locations/global/workforcePools/example/subject/reader", role: "roles/storage.objectViewer", duration: "1h"},
+		"empty entry":               {principals: "user:reader@example.com, ,group:readers@example.com", duration: "1h", wantErr: "principals must not contain empty entries"},
+		"trailing comma":            {principals: "user:reader@example.com,", duration: "1h", wantErr: "principals must not contain empty entries"},
+		"configured role":           {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h"},
+		"invalid duration":          {duration: "one hour", wantErr: "invalid duration"},
+		"negative duration":         {duration: "-1h", wantErr: "must be between 30m and 168h"},
+		"below minimum":             {duration: "29m59s", wantErr: "must be between 30m and 168h"},
+		"above maximum":             {duration: "168h1s", wantErr: "must be between 30m and 168h"},
+		"minimum":                   {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "30m"},
+		"maximum":                   {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "168h"},
+		"PAM error":                 {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "1h", pamErr: errors.New("PAM unavailable"), wantErr: `folder "fake-folder-my-team" in env "dev": PAM unavailable`},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -297,6 +314,13 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 			}
 			if !tt.omitRole {
 				env["PAM_MANAGED_TEAM_FOLDER_ROLE"] = tt.role
+			}
+			if !tt.omitCondition {
+				conditionTemplate := tt.conditionTemplate
+				if conditionTemplate == "" {
+					conditionTemplate = testPAMConditionTemplate
+				}
+				env["PAM_MANAGED_TEAM_FOLDER_CONDITION_TEMPLATE"] = conditionTemplate
 			}
 			cfg, err := reconcilerconfig.NewConfig(t.Context(), envconfig.MapLookuper(env))
 			if err != nil {
@@ -311,9 +335,10 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 				TagKeyNamespacedName: "tagKeys/123456",
 				EnvParentFolders:     map[string]string{"dev": "111"},
 				PAM: gcpresources.PAMConfig{
-					Role:             cfg.PAMManagedTeamFolder.Role,
-					Principals:       cfg.PAMManagedTeamFolder.Principals,
-					MaxGrantDuration: cfg.PAMManagedTeamFolder.MaxGrantDuration,
+					Role:              cfg.PAMManagedTeamFolder.Role,
+					Principals:        cfg.PAMManagedTeamFolder.Principals,
+					MaxGrantDuration:  cfg.PAMManagedTeamFolder.MaxGrantDuration,
+					ConditionTemplate: cfg.PAMManagedTeamFolder.ConditionTemplate,
 				},
 			}, nil, gcpresources.WithResourceManager(resources), gcpresources.WithPrivilegedAccessManager(pam))
 			if err != nil {
@@ -329,6 +354,9 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 			if tt.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
 					t.Fatalf("got %v, want error containing %q", err, tt.wantErr)
+				}
+				if tt.pamErr == nil && len(pam.calls) != 0 {
+					t.Fatal("invalid condition must not reach PAM")
 				}
 				return
 			}
@@ -348,6 +376,9 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 				if pam.calls[0].role != tt.role || !slices.Equal(pam.calls[0].principals, strings.Split(tt.principals, ",")) {
 					t.Fatalf("unexpected entitlement: %+v", pam.calls[0])
 				}
+				if pam.calls[0].conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
+					t.Fatalf("unexpected condition: %s", pam.calls[0].conditionExpression)
+				}
 			}
 		})
 	}
@@ -358,9 +389,10 @@ func TestReconcile_PAMConfigurationIsSnapshot(t *testing.T) {
 		TagKeyNamespacedName: "tagKeys/123456",
 		EnvParentFolders:     map[string]string{"dev": "111"},
 		PAM: gcpresources.PAMConfig{
-			Principals:       []string{"user:reader@example.com"},
-			Role:             "roles/storage.objectViewer",
-			MaxGrantDuration: time.Hour,
+			Principals:        []string{"user:reader@example.com"},
+			Role:              "roles/storage.objectViewer",
+			MaxGrantDuration:  time.Hour,
+			ConditionTemplate: testPAMConditionTemplate,
 		},
 	}
 	pam := &fakePrivilegedAccessManager{}
@@ -371,6 +403,7 @@ func TestReconcile_PAMConfigurationIsSnapshot(t *testing.T) {
 	cfg.PAM.Role = ""
 	cfg.PAM.Principals[0] = "user:other@example.com"
 	cfg.PAM.MaxGrantDuration = 2 * time.Hour
+	cfg.PAM.ConditionTemplate = "false"
 	client := startFakeGrpcServer(t, newFakeGcpTeamResourcesServer())
 	team := &protoapi.Team{Slug: "my-team", IsManaged: true}
 	for range 2 {
@@ -385,6 +418,9 @@ func TestReconcile_PAMConfigurationIsSnapshot(t *testing.T) {
 		if call.duration != time.Hour || call.role != "roles/storage.objectViewer" ||
 			!slices.Equal(call.principals, []string{"user:reader@example.com"}) {
 			t.Fatalf("startup config was changed: %+v", call)
+		}
+		if call.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
+			t.Fatalf("startup condition template was changed: %s", call.conditionExpression)
 		}
 	}
 }

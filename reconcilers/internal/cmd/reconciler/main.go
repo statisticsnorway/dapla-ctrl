@@ -134,9 +134,10 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
 		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
 		PAM: gcpresources.PAMConfig{
-			Role:             cfg.PAMManagedTeamFolder.Role,
-			Principals:       cfg.PAMManagedTeamFolder.Principals,
-			MaxGrantDuration: cfg.PAMManagedTeamFolder.MaxGrantDuration,
+			Role:              cfg.PAMManagedTeamFolder.Role,
+			Principals:        cfg.PAMManagedTeamFolder.Principals,
+			MaxGrantDuration:  cfg.PAMManagedTeamFolder.MaxGrantDuration,
+			ConditionTemplate: cfg.PAMManagedTeamFolder.ConditionTemplate,
 		},
 	}, googleServices)
 	if err != nil {

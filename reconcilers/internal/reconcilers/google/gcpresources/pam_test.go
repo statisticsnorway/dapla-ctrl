@@ -115,7 +115,8 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	client := newFakePAMClient(t, server)
 	principals := []string{"serviceAccount:reader@test.iam.gserviceaccount.com", "user:reader@example.com", "group:readers@example.com"}
 	role := "roles/storage.objectViewer"
-	if err := client.EnsureEntitlement(t.Context(), "123", role, principals, time.Hour); err != nil {
+	condition := `resource.name.startsWith("projects/_/buckets/ssb-my-team-data-produkt-dev/")`
+	if err := client.EnsureEntitlement(t.Context(), "123", role, condition, principals, time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.createRequests) != 1 {
@@ -133,7 +134,7 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 		t.Fatalf("incorrect entitlement scope: %v", entitlement)
 	}
 	if len(access.RoleBindings) != 1 || access.RoleBindings[0].Role != role ||
-		access.RoleBindings[0].ConditionExpression != "" {
+		access.RoleBindings[0].ConditionExpression != condition {
 		t.Fatalf("incorrect roles or unexpected condition: %v", access.RoleBindings)
 	}
 	if len(entitlement.EligibleUsers) != 1 {
@@ -147,7 +148,7 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 		t.Fatalf("incorrect grant policy: %v", entitlement)
 	}
 
-	if err := client.EnsureEntitlement(t.Context(), "123", role, principals, time.Hour); err != nil {
+	if err := client.EnsureEntitlement(t.Context(), "123", role, condition, principals, time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.createRequests) != 1 || len(server.updateRequests) != 0 {
@@ -162,7 +163,8 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	}
 	newPrincipals := []string{"group:other-readers@example.com"}
 	newRole := "organizations/573742569423/roles/ssb.bucket.read"
-	if err := client.EnsureEntitlement(t.Context(), "123", newRole, newPrincipals, 2*time.Hour); err != nil {
+	newCondition := `resource.name.startsWith("projects/_/buckets/ssb-my-team-data-produkt-prod/")`
+	if err := client.EnsureEntitlement(t.Context(), "123", newRole, newCondition, newPrincipals, 2*time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.updateRequests) != 1 {
@@ -176,6 +178,7 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	expected.Etag = "current-version"
 	expected.EligibleUsers[0].Principals = newPrincipals
 	expected.PrivilegedAccess.GetGcpIamAccess().RoleBindings[0].Role = newRole
+	expected.PrivilegedAccess.GetGcpIamAccess().RoleBindings[0].ConditionExpression = newCondition
 	expected.MaxRequestDuration = durationpb.New(2 * time.Hour)
 	if diff := cmp.Diff(expected, update.Entitlement, protocmp.Transform()); diff != "" {
 		t.Fatalf("update policy mismatch (-want +got):\n%s", diff)
@@ -183,6 +186,35 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	wantPaths := []string{"eligible_users", "privileged_access", "max_request_duration", "approval_workflow", "requester_justification_config"}
 	if diff := cmp.Diff(wantPaths, update.UpdateMask.Paths); diff != "" {
 		t.Fatalf("update mask mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestEnsureEntitlement_UpdatesOnlyCondition(t *testing.T) {
+	server := &fakePAMServer{}
+	client := newFakePAMClient(t, server)
+	principals := []string{"user:reader@example.com"}
+	for _, condition := range []string{"false", `resource.type == "storage.googleapis.com/Object"`, `resource.type == "storage.googleapis.com/Object"`} {
+		if err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", condition, principals, time.Hour); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(server.createRequests) != 1 || len(server.updateRequests) != 1 {
+		t.Fatalf("expected one create and one condition-only update, got %d creates and %d updates", len(server.createRequests), len(server.updateRequests))
+	}
+	if server.entitlement.PrivilegedAccess.GetGcpIamAccess().RoleBindings[0].ConditionExpression != `resource.type == "storage.googleapis.com/Object"` {
+		t.Fatalf("condition was not updated: %v", server.entitlement)
+	}
+}
+
+func TestEnsureEntitlement_RejectsEmptyCondition(t *testing.T) {
+	server := &fakePAMServer{}
+	client := newFakePAMClient(t, server)
+	err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", "  ", []string{"user:reader@example.com"}, time.Hour)
+	if err == nil || !strings.Contains(err.Error(), "PAM IAM condition is required") {
+		t.Fatalf("got %v, want missing condition error", err)
+	}
+	if len(server.createRequests) != 0 {
+		t.Fatal("an unconditional entitlement must not be created")
 	}
 }
 
@@ -201,6 +233,7 @@ func TestEnsureEntitlement_PropagatesFailures(t *testing.T) {
 		"update":           {existing: true, updateErr: status.Error(codes.Aborted, "conflict"), want: "update entitlement"},
 		"update operation": {existing: true, operationErr: &rpcstatus.Status{Code: int32(codes.Internal), Message: "failed"}, want: "wait for entitlement update"},
 	}
+
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			server := &fakePAMServer{getErr: tt.getErr, createErr: tt.createErr, updateErr: tt.updateErr, operationErr: tt.operationErr}
@@ -211,7 +244,7 @@ func TestEnsureEntitlement_PropagatesFailures(t *testing.T) {
 				}
 			}
 			client := newFakePAMClient(t, server)
-			err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", []string{"user:reader@example.com"}, time.Hour)
+			err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", "false", []string{"user:reader@example.com"}, time.Hour)
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("got %v, want error containing %q", err, tt.want)
 			}
