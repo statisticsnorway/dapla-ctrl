@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"os/signal"
+	"slices"
 	"syscall"
 	"time"
 
@@ -19,6 +21,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/artifactregistry"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/groupserviceaccounts"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/parquedit"
 
 	"github.com/joho/godotenv"
@@ -138,6 +141,14 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return fmt.Errorf("create GCP resources reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(gcpResourcesReconciler)
+
+	pamReconciler, err := pam.New(ctx, pam.Config{
+		Environments: slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers)),
+	}, googleServices)
+	if err != nil {
+		return fmt.Errorf("create PAM reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(pamReconciler)
 
 	arTeam, err := artifactregistry.New(ctx, googleServices.ServiceAccounts, googleServices.ArtifactRegistry)
 	if err != nil {

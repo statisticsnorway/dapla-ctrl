@@ -6,6 +6,25 @@ We are deeply inspired by [Nais API reconcilers](https://github.com/nais/api-rec
 
 The main purpose is to create team resources, permissions and maintain them.
 
+## Configuration
+
+**API-backed configuration is the preferred method for reconciler-specific
+behavior and policies.** Declare configuration keys in the reconciler's
+`Configuration()` method using `ReconcilerConfigSpec`, and read their values
+through `client.Reconcilers().Config(...)` during reconciliation.
+
+Values are stored in Dapla API and can be configured through the Console or the
+admin-only `configureReconciler` GraphQL mutation. Read a fresh configuration
+snapshot for each reconciliation so changes take effect on the next run without
+a process restart.
+
+Use environment variables for startup and integration settings such as
+credentials, the API connection, Google folder parents and initial reconciler
+enablement. A local `.env` file supplies those environment variables for
+development; it is not an alternative source for API-backed policy settings.
+See the [PAM reconciler configuration](internal/reconcilers/google/pam/README.md)
+for an example.
+
 ## Local development
 
 [dapla-api](../api/README.md) is a dependency for this project, and you will need to
