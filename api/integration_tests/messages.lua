@@ -29,6 +29,7 @@ Test.gql("Send message as unauthorized user", function(t)
 		errors = {
 			{
 				message = 'You are authenticated, but your account is not authorized to perform this action. Specifically, you need the \"messages:send\" authorization.',
+				locations = NotNull(),
 				path = { "sendMessage" },
 			},
 		},
@@ -105,6 +106,7 @@ Test.gql("Send message to non existent recipient", function(t)
 					field = "Recipient",
 				},
 				message = "User does not exists.",
+				locations = NotNull(),
 				path = { "sendMessage" },
 			},
 		},
@@ -176,6 +178,7 @@ Test.gql("List messages as user without permission", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = { "messages" },
 			},
 		},
@@ -205,6 +208,7 @@ Test.gql("List messages to non existing user", function(t)
 		errors = {
 			{
 				message = "Object was not found in the database. This usually means you specified a non-existing team identifier or e-mail address.",
+				locations = NotNull(),
 				path = { "messages" },
 			},
 		},
@@ -318,6 +322,7 @@ Test.gql("Get message by messageId without permission", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = { "message" },
 			},
 		},
@@ -347,6 +352,7 @@ Test.gql("Get message by non existing messageId", function(t)
 		errors = {
 			{
 				message = "The specified message was not found.",
+				locations = NotNull(),
 				path = { "message" },
 			},
 		},

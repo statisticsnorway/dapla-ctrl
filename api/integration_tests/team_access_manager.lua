@@ -39,6 +39,7 @@ Test.gql("Delegate cannot add team members before being made access manager", fu
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"addGroupMember",
 				},
@@ -158,6 +159,7 @@ Test.gql("Adding more than 2 access managers gives an error", function(t)
 		errors = {
 			{
 				message = "Et team kan ha maks to tilgangsansvarlige",
+				locations = NotNull(),
 				path = Ignore(),
 			},
 		},

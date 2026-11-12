@@ -35,6 +35,7 @@ Test.gql("Unauthorized user cannot enable team feature", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"enableTeamFeature",
 				},
@@ -63,6 +64,7 @@ Test.gql("Cannot enable AI team feature in prod", function(t)
 		errors = {
 			{
 				message = 'validateTeamFeatureArgs: Invalid combination of values feature: "ai" and env: "prod"',
+				locations = NotNull(),
 				path = {
 					"enableTeamFeature",
 				},
@@ -133,6 +135,7 @@ Test.gql("Unauthorized user cannot disable team feature", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"disableTeamFeature",
 				},
@@ -319,6 +322,7 @@ Test.gql("Manager of self-managed team cannot disable team feature", function(t)
 		errors = {
 			{
 				message = "Features are only supported for managed teams.",
+				locations = NotNull(),
 				path = {
 					"disableTeamFeature",
 				},
