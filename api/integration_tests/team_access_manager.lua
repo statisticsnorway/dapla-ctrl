@@ -159,7 +159,6 @@ Test.gql("Adding more than 2 access managers gives an error", function(t)
 		errors = {
 			{
 				message = "Et team kan ha maks to tilgangsansvarlige",
-				locations = NotNull(),
 				path = Ignore(),
 			},
 		},

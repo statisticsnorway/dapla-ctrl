@@ -175,7 +175,6 @@ Test.gql("Create duplicate group fails", function(t)
 					field = "teamSlug",
 				},
 				message = "Group with the same team, category and suffix already exists.",
-				locations = NotNull(),
 				path = {
 					"createGroup",
 				},

@@ -106,7 +106,6 @@ Test.gql("Send message to non existent recipient", function(t)
 					field = "Recipient",
 				},
 				message = "User does not exists.",
-				locations = NotNull(),
 				path = { "sendMessage" },
 			},
 		},

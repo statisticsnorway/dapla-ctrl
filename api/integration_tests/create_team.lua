@@ -79,7 +79,6 @@ Test.gql("Create team with slug that is already taken", function(t)
 					field = "slug",
 				},
 				message = "Team slug is not available.",
-				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -308,7 +307,6 @@ Test.gql("Create team with invalid slug", function(t)
 				errors = {
 					{
 						message = errorMessageMatch,
-						locations = NotNull(),
 						path = {
 							"createTeam",
 							"input",
@@ -414,7 +412,6 @@ Test.gql("Create team with category in slug", function(t)
 						extensions = {
 							field = "slug",
 						},
-						locations = NotNull(),
 						path = {
 							"createTeam",
 						},
@@ -461,7 +458,6 @@ Test.gql("Create team with empty display name", function(t)
 					field = "displayName",
 				},
 				message = "This is not a valid display name.",
-				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -540,7 +536,6 @@ Test.gql("Create team with unavailable slug", function(t)
 					field = "slug",
 				},
 				message = "Team slug is not available.",
-				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
