@@ -5,41 +5,30 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/cel-go/cel"
 	"github.com/google/cel-go/common/types"
 	"github.com/google/cel-go/common/types/ref"
-	"github.com/joho/godotenv"
-	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
-	reconcilerconfig "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler/config"
 	googlepam "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
 )
 
 func examplePAMCondition(t *testing.T) string {
 	t.Helper()
-	example, err := os.ReadFile("../../../../.env.example")
+	example, err := os.ReadFile("README.md")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, line := range strings.Split(string(example), "\n") {
-		if !strings.HasPrefix(line, "# PAM_MANAGED_TEAM_FOLDER_CONDITION_TEMPLATE=") {
-			continue
-		}
-		values, err := godotenv.Unmarshal(strings.TrimPrefix(line, "# "))
-		if err != nil {
-			t.Fatal(err)
-		}
-		cfg, err := reconcilerconfig.NewConfig(t.Context(), envconfig.MapLookuper(values))
-		if err != nil {
-			t.Fatal(err)
-		}
-		return cfg.PAMManagedTeamFolder.ConditionTemplate
+	_, after, found := strings.Cut(string(example), "```gotemplate\n")
+	if !found {
+		t.Fatal("condition template example is missing")
 	}
-	t.Fatal("condition template example is missing")
-	return ""
+	expression, _, found := strings.Cut(after, "\n```")
+	if !found {
+		t.Fatal("condition template example has no closing fence")
+	}
+	return expression
 }
 
 func conditionProgram(t *testing.T, expression string) cel.Program {
@@ -84,13 +73,10 @@ func conditionProgram(t *testing.T, expression string) cel.Program {
 
 func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
+	server.config["condition_template"] = examplePAMCondition(t)
 	pam := &fakePrivilegedAccessManager{}
 	r, err := googlepam.New(t.Context(), googlepam.Config{
-		Environments:      []string{"dev", "test", "prod"},
-		Role:              "roles/storage.objectViewer",
-		Principals:        []string{"user:reader@example.com"},
-		MaxGrantDuration:  time.Hour,
-		ConditionTemplate: examplePAMCondition(t),
+		Environments: []string{"dev", "test", "prod"},
 	}, nil, googlepam.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)

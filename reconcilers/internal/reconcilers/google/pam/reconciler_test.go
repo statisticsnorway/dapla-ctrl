@@ -11,11 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sethvargo/go-envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
-	reconcilerconfig "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler/config"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
 	googlepam "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
 	"google.golang.org/grpc"
@@ -27,16 +25,41 @@ import (
 // fakeGcpTeamResourcesServer implements protoapi.GcpTeamResourcesServer in memory.
 type fakeGcpTeamResourcesServer struct {
 	protoapi.UnimplementedGcpTeamResourcesServer
-	folders     map[string]*protoapi.GcpTeamFolder // "teamSlug/env" -> folder
-	getErr      error
-	getRequests []*protoapi.GetGcpTeamFolderRequest
-	upsertCalls int
+	protoapi.UnimplementedReconcilersServer
+	folders        map[string]*protoapi.GcpTeamFolder // "teamSlug/env" -> folder
+	getErr         error
+	getRequests    []*protoapi.GetGcpTeamFolderRequest
+	upsertCalls    int
+	config         map[string]string
+	configErr      error
+	configRequests []*protoapi.ConfigReconcilerRequest
 }
 
 func newFakeGcpTeamResourcesServer() *fakeGcpTeamResourcesServer {
 	return &fakeGcpTeamResourcesServer{
 		folders: make(map[string]*protoapi.GcpTeamFolder),
+		config: map[string]string{
+			"role":               "roles/storage.objectViewer",
+			"principals":         "user:reader@example.com",
+			"max_grant_duration": "1h",
+			"condition_template": testPAMConditionTemplate,
+		},
 	}
+}
+
+func (s *fakeGcpTeamResourcesServer) Config(_ context.Context, req *protoapi.ConfigReconcilerRequest) (*protoapi.ConfigReconcilerResponse, error) {
+	s.configRequests = append(s.configRequests, req)
+	if req.ReconcilerName != "google:pam" {
+		return nil, status.Errorf(codes.InvalidArgument, "unexpected reconciler %q", req.ReconcilerName)
+	}
+	if s.configErr != nil {
+		return nil, s.configErr
+	}
+	resp := &protoapi.ConfigReconcilerResponse{}
+	for key, value := range s.config {
+		resp.Nodes = append(resp.Nodes, &protoapi.ReconcilerConfig{Key: key, Value: value})
+	}
+	return resp, nil
 }
 
 func (s *fakeGcpTeamResourcesServer) UpsertTeamFolder(_ context.Context, req *protoapi.UpsertGcpTeamFolderRequest) (*protoapi.UpsertGcpTeamFolderResponse, error) {
@@ -70,6 +93,7 @@ func startFakeGrpcServer(t *testing.T, srv *fakeGcpTeamResourcesServer) *apiclie
 
 	s := grpc.NewServer()
 	protoapi.RegisterGcpTeamResourcesServer(s, srv)
+	protoapi.RegisterReconcilersServer(s, srv)
 	go func() { _ = s.Serve(lis) }()
 	t.Cleanup(s.Stop)
 
@@ -156,11 +180,7 @@ func TestReconcile_StoredFolderErrors(t *testing.T) {
 			}
 			pam := &fakePrivilegedAccessManager{}
 			r, err := googlepam.New(t.Context(), googlepam.Config{
-				Environments:      []string{"dev"},
-				Principals:        []string{"user:reader@example.com"},
-				Role:              "roles/storage.objectViewer",
-				MaxGrantDuration:  time.Hour,
-				ConditionTemplate: testPAMConditionTemplate,
+				Environments: []string{"dev"},
 			}, nil, googlepam.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
@@ -190,14 +210,10 @@ func TestReconcile_AfterFolderReconciliation(t *testing.T) {
 				t.Fatal(err)
 			}
 			cfg := googlepam.Config{
-				Environments:      []string{"dev"},
-				Principals:        []string{"user:reader@example.com"},
-				Role:              "roles/storage.objectViewer",
-				MaxGrantDuration:  time.Hour,
-				ConditionTemplate: testPAMConditionTemplate,
+				Environments: []string{"dev"},
 			}
 			if !configured {
-				cfg.Role = ""
+				server.config["role"] = ""
 			}
 			pam := &fakePrivilegedAccessManager{}
 			pamReconciler, err := googlepam.New(t.Context(), cfg, nil, googlepam.WithPrivilegedAccessManager(pam))
@@ -238,12 +254,14 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				server.folders["my-team/"+env] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: env, FolderId: id}
 			}
 			pam := &fakePrivilegedAccessManager{}
+			server.config = map[string]string{
+				"principals":         " serviceAccount:reader@test.iam.gserviceaccount.com, group:readers@example.com ",
+				"role":               " roles/storage.objectViewer ",
+				"max_grant_duration": "2h",
+				"condition_template": testPAMConditionTemplate,
+			}
 			r, err := googlepam.New(t.Context(), googlepam.Config{
-				Environments:      []string{"dev", "test", "prod"},
-				Principals:        []string{" serviceAccount:reader@test.iam.gserviceaccount.com", " group:readers@example.com "},
-				Role:              " roles/storage.objectViewer ",
-				MaxGrantDuration:  2 * time.Hour,
-				ConditionTemplate: testPAMConditionTemplate,
+				Environments: []string{"dev", "test", "prod"},
 			}, nil, googlepam.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
@@ -257,8 +275,8 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				t.Fatal("PAM must not create or store folders")
 			}
 			if !managed {
-				if len(pam.calls) != 0 || len(server.getRequests) != 0 {
-					t.Fatal("self-managed team must not use PAM or query folders")
+				if len(pam.calls) != 0 || len(server.getRequests) != 0 || len(server.configRequests) != 0 {
+					t.Fatal("self-managed team must not use PAM or query configuration or folders")
 				}
 				return
 			}
@@ -267,6 +285,9 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 			}
 			if len(server.getRequests) != 3 {
 				t.Fatalf("got %d folder requests, want 3", len(server.getRequests))
+			}
+			if len(server.configRequests) != 1 {
+				t.Fatalf("got %d configuration requests, want one per team", len(server.configRequests))
 			}
 			folders := make(map[string]bool)
 			for _, call := range pam.calls {
@@ -290,7 +311,7 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 	}
 }
 
-func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
+func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 	tests := map[string]struct {
 		principals        string
 		role              string
@@ -299,10 +320,13 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 		conditionTemplate string
 		duration          string
 		pamErr            error
+		configErr         error
+		unknownKey        string
 		wantErr           string
 		wantSkip          bool
 	}{
 		"missing all":               {wantSkip: true},
+		"blank principals":          {principals: "  ", role: "roles/storage.objectViewer", duration: "1h", wantSkip: true},
 		"missing principals":        {role: "roles/storage.objectViewer", duration: "1h", wantSkip: true},
 		"missing duration":          {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", wantSkip: true},
 		"missing role":              {principals: "user:reader@example.com", duration: "1h", omitRole: true, wantSkip: true},
@@ -325,46 +349,40 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 		"above maximum":             {duration: "168h1s", wantErr: "must be between 30m and 168h"},
 		"minimum":                   {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "30m"},
 		"maximum":                   {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "168h"},
+		"padded duration":           {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: " 1h "},
+		"API error":                 {configErr: status.Error(codes.Unavailable, "configuration unavailable"), wantErr: "get reconciler config"},
+		"unknown key":               {unknownKey: "unknown", wantErr: `unknown config key "unknown"`},
 		"PAM error":                 {principals: "serviceAccount:reader@test.iam.gserviceaccount.com", role: "roles/storage.objectViewer", duration: "1h", pamErr: errors.New("PAM unavailable"), wantErr: `folder "100" in env "dev": PAM unavailable`},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			server := newFakeGcpTeamResourcesServer()
 			server.folders["my-team/dev"] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: "dev", FolderId: "100"}
-			env := map[string]string{
-				"PAM_MANAGED_TEAM_FOLDER_PRINCIPALS":         tt.principals,
-				"PAM_MANAGED_TEAM_FOLDER_MAX_GRANT_DURATION": tt.duration,
+			values := map[string]string{
+				"principals":         tt.principals,
+				"max_grant_duration": tt.duration,
 			}
 			if !tt.omitRole {
-				env["PAM_MANAGED_TEAM_FOLDER_ROLE"] = tt.role
+				values["role"] = tt.role
 			}
 			if !tt.omitCondition {
 				conditionTemplate := tt.conditionTemplate
 				if conditionTemplate == "" {
 					conditionTemplate = testPAMConditionTemplate
 				}
-				env["PAM_MANAGED_TEAM_FOLDER_CONDITION_TEMPLATE"] = conditionTemplate
+				values["condition_template"] = conditionTemplate
 			}
-			cfg, err := reconcilerconfig.NewConfig(t.Context(), envconfig.MapLookuper(env))
-			if err != nil {
-				if tt.wantErr == "" || !strings.Contains(err.Error(), tt.wantErr) {
-					t.Fatalf("unexpected environment config error: %v", err)
-				}
-				return
+			if tt.unknownKey != "" {
+				values[tt.unknownKey] = "value"
 			}
+			server.config = values
+			server.configErr = tt.configErr
 			pam := &fakePrivilegedAccessManager{err: tt.pamErr}
 			r, err := googlepam.New(t.Context(), googlepam.Config{
-				Environments:      []string{"dev"},
-				Role:              cfg.PAMManagedTeamFolder.Role,
-				Principals:        cfg.PAMManagedTeamFolder.Principals,
-				MaxGrantDuration:  cfg.PAMManagedTeamFolder.MaxGrantDuration,
-				ConditionTemplate: cfg.PAMManagedTeamFolder.ConditionTemplate,
+				Environments: []string{"dev"},
 			}, nil, googlepam.WithPrivilegedAccessManager(pam))
 			if err != nil {
-				if tt.wantErr == "" || !strings.Contains(err.Error(), tt.wantErr) {
-					t.Fatalf("unexpected reconciler config error: %v", err)
-				}
-				return
+				t.Fatal(err)
 			}
 			var output bytes.Buffer
 			log := logrus.New()
@@ -375,7 +393,10 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 					t.Fatalf("got %v, want error containing %q", err, tt.wantErr)
 				}
 				if tt.pamErr == nil && len(pam.calls) != 0 {
-					t.Fatal("invalid condition must not reach PAM")
+					t.Fatal("invalid or unavailable configuration must not reach PAM")
+				}
+				if tt.configErr != nil && (status.Code(err) != codes.Unavailable || len(server.getRequests) != 0) {
+					t.Fatal("API configuration errors must be propagated before querying folders")
 				}
 				return
 			}
@@ -400,43 +421,63 @@ func TestReconcile_PAMConfigurationFromEnvironment(t *testing.T) {
 	}
 }
 
-func TestReconcile_PAMConfigurationIsSnapshot(t *testing.T) {
+func TestReconcile_PAMConfigurationChangesWithoutRestart(t *testing.T) {
 	cfg := googlepam.Config{
-		Environments:      []string{"dev"},
-		Principals:        []string{"user:reader@example.com"},
-		Role:              "roles/storage.objectViewer",
-		MaxGrantDuration:  time.Hour,
-		ConditionTemplate: testPAMConditionTemplate,
+		Environments: []string{"dev"},
 	}
 	pam := &fakePrivilegedAccessManager{}
 	r, err := googlepam.New(t.Context(), cfg, nil, googlepam.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg.Role = ""
-	cfg.Principals[0] = "user:other@example.com"
 	cfg.Environments[0] = "prod"
-	cfg.MaxGrantDuration = 2 * time.Hour
-	cfg.ConditionTemplate = "false"
 	server := newFakeGcpTeamResourcesServer()
 	server.folders["my-team/dev"] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: "dev", FolderId: "100"}
 	client := startFakeGrpcServer(t, server)
 	team := &protoapi.Team{Slug: "my-team", IsManaged: true}
-	for range 2 {
-		if err := r.Reconcile(t.Context(), client, team, logrus.New()); err != nil {
-			t.Fatal(err)
-		}
+	if err := r.Reconcile(t.Context(), client, team, logrus.New()); err != nil {
+		t.Fatal(err)
+	}
+	server.config["role"] = "roles/storage.objectAdmin"
+	server.config["principals"] = "group:readers@example.com"
+	server.config["max_grant_duration"] = "2h"
+	server.config["condition_template"] = `resource.name == "projects/_/buckets/{{.TeamSlug}}-{{.Env}}"`
+	if err := r.Reconcile(t.Context(), client, team, logrus.New()); err != nil {
+		t.Fatal(err)
 	}
 	if len(pam.calls) != 2 {
 		t.Fatalf("got %d PAM calls, want 2", len(pam.calls))
 	}
-	for _, call := range pam.calls {
-		if call.duration != time.Hour || call.role != "roles/storage.objectViewer" ||
-			!slices.Equal(call.principals, []string{"user:reader@example.com"}) {
-			t.Fatalf("startup config was changed: %+v", call)
-		}
-		if call.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
-			t.Fatalf("startup condition template was changed: %s", call.conditionExpression)
-		}
+	first, updated := pam.calls[0], pam.calls[1]
+	if first.duration != time.Hour || first.role != "roles/storage.objectViewer" ||
+		!slices.Equal(first.principals, []string{"user:reader@example.com"}) ||
+		first.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
+		t.Fatalf("unexpected initial configuration: %+v", first)
+	}
+	if updated.duration != 2*time.Hour || updated.role != "roles/storage.objectAdmin" ||
+		!slices.Equal(updated.principals, []string{"group:readers@example.com"}) ||
+		updated.conditionExpression != `resource.name == "projects/_/buckets/my-team-dev"` {
+		t.Fatalf("configuration changes were not applied: %+v", updated)
+	}
+	server.config["condition_template"] = "{{"
+	if err := r.Reconcile(t.Context(), client, team, logrus.New()); err == nil || !strings.Contains(err.Error(), "parse PAM IAM condition template") {
+		t.Fatalf("invalid configuration must not reuse the previous policy, got %v", err)
+	}
+	server.config = nil
+	var output bytes.Buffer
+	log := logrus.New()
+	log.SetOutput(&output)
+	if err := r.Reconcile(t.Context(), client, team, log); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(output.String(), "level=warning") {
+		t.Fatal("cleared configuration must be skipped with a warning")
+	}
+	server.configErr = status.Error(codes.Unavailable, "configuration unavailable")
+	if err := r.Reconcile(t.Context(), client, team, log); status.Code(err) != codes.Unavailable {
+		t.Fatalf("configuration API failure must be propagated, got %v", err)
+	}
+	if len(pam.calls) != 2 || len(server.getRequests) != 2 || len(server.configRequests) != 5 {
+		t.Fatal("configuration must be refreshed on each run without reusing stale policies")
 	}
 }

@@ -18,38 +18,60 @@ enabled so the team folders are created and maintained.
 
 ## PAM configuration
 
-Set these environment variables for the reconciler process (or in a local
-`.env` file):
+**API-backed configuration is the preferred method for reconciler policies.**
+Set these keys for `google:pam` through the Console or the admin-only
+`configureReconciler` GraphQL mutation. The reconciler registers their
+specifications with Dapla API at startup.
 
-| Key                                          | Value                                                                                                                             |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `PAM_MANAGED_TEAM_FOLDER_PRINCIPALS`         | Comma-separated IAM principal identifiers, e.g. `serviceAccount:reader@example.iam.gserviceaccount.com,group:readers@example.com` |
-| `PAM_MANAGED_TEAM_FOLDER_ROLE`               | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer`                          |
-| `PAM_MANAGED_TEAM_FOLDER_MAX_GRANT_DURATION` | Go duration between `30m` and `168h`, e.g. `1h`                                                                                   |
-| `PAM_MANAGED_TEAM_FOLDER_CONDITION_TEMPLATE` | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env` |
+| Key | Value |
+| --- | --- |
+| `principals` | Comma-separated IAM principal identifiers, e.g. `serviceAccount:reader@example.iam.gserviceaccount.com,group:readers@example.com` |
+| `role` | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer` |
+| `max_grant_duration` | Go duration between `30m` and `168h`, e.g. `1h` |
+| `condition_template` | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env` |
 
 None of these values has a default. Until all four are set, PAM reconciliation
 is skipped with a warning; folder and tag reconciliation continues. Invalid
-configuration and malformed templates are rejected at startup. Template
+configuration and malformed templates are returned as reconciliation errors.
+Template
 execution failures, empty rendered conditions and PAM API failures are returned
 as reconciliation errors; an unconditional entitlement is never created as a
-fallback. Configuration is read once at startup; restart the
-process after changing environment variables. Existing entitlements are updated
+fallback. Configuration is fetched once per Managed-team reconciliation and used
+for all its environments. Changes take effect on the next reconciliation without
+restarting the process. API failures are returned as errors, never replaced with
+stale configuration. Existing entitlements are updated
 when the policy changes, using an explicit field mask and the current etag;
 unchanged entitlements are left alone.
 
-PAM settings are no longer registered or read through the API-backed reconciler
-configuration. Principal entries are trimmed and must not be empty; their IAM
+The former `PAM_MANAGED_TEAM_FOLDER_*` environment variables are no longer read.
+Re-enter their values under the corresponding API keys above; environment
+values are not migrated automatically or used as a fallback.
+
+Principal entries are trimmed and must not be empty; their IAM
 identifier formats are validated by Google's API, not restricted to service
 accounts. The entitlement ID remains `ssb-bucket-read` when its role changes so
 existing entitlements are updated rather than duplicated.
 
 ## IAM condition
 
-The single-quoted condition example in [`.env.example`](../../../../.env.example)
-can be copied into a local `.env` file or supplied as the environment variable's
-literal value. It uses Go template `printf "%q"` to quote interpolated strings
-for CEL. Rendering occurs separately for each team and environment.
+Set `condition_template` to the following literal Go template (without the
+Markdown fences or additional surrounding quotes). It uses Go template
+`printf "%q"` to quote interpolated strings for CEL. Rendering occurs separately
+for each team and environment.
+
+```gotemplate
+{{- $bucket := `(resource.type == "storage.googleapis.com/Bucket" ? resource.name.extract("projects/_/buckets/{bucket}") : resource.name.extract("projects/_/buckets/{bucket}/"))` -}}
+resource.type in ["storage.googleapis.com/Bucket", "storage.googleapis.com/Object"] &&
+{{$bucket}}.endsWith({{printf "%q" (printf "-%s" .Env)}}) &&
+(
+  {{$bucket}} == {{printf "%q" (printf "ssb-%s-data-produkt-%s" .TeamSlug .Env)}} ||
+  (
+    {{$bucket}}.startsWith({{printf "%q" (printf "ssb-%s-data-delt-" .TeamSlug)}}) &&
+    {{$bucket}} != {{printf "%q" (printf "ssb-%s-data-delt--%s" .TeamSlug .Env)}} &&
+    {{$bucket}} != {{printf "%q" (printf "ssb-%s-data-delt-delomat--%s" .TeamSlug .Env)}}
+  )
+)
+```
 
 The example allows the following bucket names for that team and environment:
 

@@ -143,11 +143,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	reconcilerManager.AddReconciler(gcpResourcesReconciler)
 
 	pamReconciler, err := pam.New(ctx, pam.Config{
-		Environments:      slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers)),
-		Role:              cfg.PAMManagedTeamFolder.Role,
-		Principals:        cfg.PAMManagedTeamFolder.Principals,
-		MaxGrantDuration:  cfg.PAMManagedTeamFolder.MaxGrantDuration,
-		ConditionTemplate: cfg.PAMManagedTeamFolder.ConditionTemplate,
+		Environments: slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers)),
 	}, googleServices)
 	if err != nil {
 		return fmt.Errorf("create PAM reconciler: %w", err)
