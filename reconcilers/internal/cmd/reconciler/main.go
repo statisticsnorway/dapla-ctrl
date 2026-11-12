@@ -133,6 +133,11 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	gcpResourcesReconciler, err := gcpresources.New(ctx, gcpresources.Config{
 		TagKeyNamespacedName: cfg.GCP.TeamKeyNamespacedName,
 		EnvParentFolders:     cfg.GCP.TeamsFolderNumbers,
+		PAM: gcpresources.PAMConfig{
+			Role:             cfg.PAMManagedTeamFolder.Role,
+			Principals:       cfg.PAMManagedTeamFolder.Principals,
+			MaxGrantDuration: cfg.PAMManagedTeamFolder.MaxGrantDuration,
+		},
 	}, googleServices)
 	if err != nil {
 		return fmt.Errorf("create GCP resources reconciler: %w", err)

@@ -19,6 +19,7 @@ require (
 	cloud.google.com/go/container v1.54.0
 	cloud.google.com/go/iam v1.11.0
 	cloud.google.com/go/monitoring v1.30.0
+	cloud.google.com/go/privilegedaccessmanager v1.2.0
 	cloud.google.com/go/pubsub/v2 v2.6.0
 	cloud.google.com/go/resourcemanager v1.16.0
 	cloud.google.com/go/serviceusage v1.15.0

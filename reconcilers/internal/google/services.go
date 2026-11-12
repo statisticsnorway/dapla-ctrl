@@ -7,6 +7,7 @@ import (
 	budgets "cloud.google.com/go/billing/budgets/apiv1"
 	container "cloud.google.com/go/container/apiv1"
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	privilegedaccessmanager "cloud.google.com/go/privilegedaccessmanager/apiv1"
 	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
 	serviceusage "cloud.google.com/go/serviceusage/apiv1"
 	"cloud.google.com/go/storage"
@@ -15,18 +16,19 @@ import (
 )
 
 type Services struct {
-	Projects            *resourcemanager.ProjectsClient
-	Folders             *resourcemanager.FoldersClient
-	TagValues           *resourcemanager.TagValuesClient
-	TagBindings         *resourcemanager.TagBindingsClient
-	ServiceUsage        *serviceusage.Client
-	CloudBudget         *budgets.BudgetClient
-	NotificationChannel *monitoring.NotificationChannelClient
-	ArtifactRegistry    *artifactregistry.Client
-	ServiceAccounts     *serviceaccounts.Client
-	Storage             *storage.Client
-	AdminDirectory      *admindirectory.Service
-	ClusterManager      *container.ClusterManagerClient
+	Projects                *resourcemanager.ProjectsClient
+	Folders                 *resourcemanager.FoldersClient
+	TagValues               *resourcemanager.TagValuesClient
+	TagBindings             *resourcemanager.TagBindingsClient
+	ServiceUsage            *serviceusage.Client
+	CloudBudget             *budgets.BudgetClient
+	NotificationChannel     *monitoring.NotificationChannelClient
+	ArtifactRegistry        *artifactregistry.Client
+	ServiceAccounts         *serviceaccounts.Client
+	Storage                 *storage.Client
+	AdminDirectory          *admindirectory.Service
+	ClusterManager          *container.ClusterManagerClient
+	PrivilegedAccessManager *privilegedaccessmanager.Client
 }
 
 func New(ctx context.Context) (*Services, error) {
@@ -89,6 +91,11 @@ func New(ctx context.Context) (*Services, error) {
 	}
 
 	s.ServiceAccounts, err = serviceaccounts.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	s.PrivilegedAccessManager, err = privilegedaccessmanager.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
