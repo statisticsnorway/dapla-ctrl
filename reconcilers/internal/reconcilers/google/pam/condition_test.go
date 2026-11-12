@@ -1,4 +1,4 @@
-package gcpresources_test
+package pam_test
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	reconcilerconfig "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/cmd/reconciler/config"
-	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
+	googlepam "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
 )
 
 func examplePAMCondition(t *testing.T) string {
@@ -85,16 +85,13 @@ func conditionProgram(t *testing.T, expression string) cel.Program {
 func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
 	pam := &fakePrivilegedAccessManager{}
-	r, err := gcpresources.New(t.Context(), gcpresources.Config{
-		TagKeyNamespacedName: "tagKeys/123456",
-		EnvParentFolders:     map[string]string{"dev": "111", "test": "222", "prod": "333"},
-		PAM: gcpresources.PAMConfig{
-			Role:              "roles/storage.objectViewer",
-			Principals:        []string{"user:reader@example.com"},
-			MaxGrantDuration:  time.Hour,
-			ConditionTemplate: examplePAMCondition(t),
-		},
-	}, nil, gcpresources.WithResourceManager(gcpresources.NewFakeResourceManager()), gcpresources.WithPrivilegedAccessManager(pam))
+	r, err := googlepam.New(t.Context(), googlepam.Config{
+		Environments:      []string{"dev", "test", "prod"},
+		Role:              "roles/storage.objectViewer",
+		Principals:        []string{"user:reader@example.com"},
+		MaxGrantDuration:  time.Hour,
+		ConditionTemplate: examplePAMCondition(t),
+	}, nil, googlepam.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}

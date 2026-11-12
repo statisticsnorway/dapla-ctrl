@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
-	"text/template"
 
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
@@ -22,14 +20,11 @@ const reconcilerName = "google:gcpresources"
 type Config struct {
 	TagKeyNamespacedName string
 	EnvParentFolders     map[string]string
-	PAM                  PAMConfig
 }
 
 type reconciler struct {
-	client               ResourceManager
-	pam                  PrivilegedAccessManager
-	cfg                  Config
-	pamConditionTemplate *template.Template
+	client ResourceManager
+	cfg    Config
 }
 
 type optFunc func(*reconciler)
@@ -40,35 +35,13 @@ func WithResourceManager(c ResourceManager) optFunc {
 	}
 }
 
-func WithPrivilegedAccessManager(c PrivilegedAccessManager) optFunc {
-	return func(r *reconciler) {
-		r.pam = c
-	}
-}
-
 func New(ctx context.Context, cfg Config, services *google.Services, opts ...optFunc) (reconcilers.Reconciler, error) {
 	err := validateConfig(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 
-	cfg.PAM.Role = strings.TrimSpace(cfg.PAM.Role)
-	cfg.PAM.ConditionTemplate = strings.TrimSpace(cfg.PAM.ConditionTemplate)
-	cfg.PAM.Principals = slices.Clone(cfg.PAM.Principals)
-	for i, principal := range cfg.PAM.Principals {
-		cfg.PAM.Principals[i] = strings.TrimSpace(principal)
-	}
-
 	r := &reconciler{cfg: cfg}
-	if cfg.PAM.ConditionTemplate != "" {
-		r.pamConditionTemplate, err = template.New("PAM IAM condition").Option("missingkey=error").Parse(cfg.PAM.ConditionTemplate)
-		if err != nil {
-			return nil, fmt.Errorf("parse PAM IAM condition template: %w", err)
-		}
-	}
-	if services != nil {
-		r.pam = &GooglePrivilegedAccessManager{client: services.PrivilegedAccessManager}
-	}
 
 	for _, opt := range opts {
 		opt(r)
@@ -99,14 +72,14 @@ func validateConfig(cfg Config) error {
 	if len(cfg.EnvParentFolders) == 0 {
 		return fmt.Errorf("at least one environment parent folder must be configured")
 	}
-	return cfg.PAM.validate()
+	return nil
 }
 
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
 	return &protoapi.NewReconciler{
 		Name:        r.Name(),
 		DisplayName: "GCP Resources reconciler",
-		Description: "Create team folders, attach team tags and manage PAM entitlements for Managed teams",
+		Description: "Create team folders and attach new team tags",
 		MemberAware: false,
 	}
 }
@@ -118,14 +91,6 @@ func (r *reconciler) Name() string {
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
 	teamSlug := daplaTeam.Slug
 	teamFoldersClient := client.GcpTeamResources()
-
-	var pamCfg PAMConfig
-	if daplaTeam.IsManaged {
-		pamCfg = r.cfg.PAM
-		if !pamCfg.configured() {
-			log.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
-		}
-	}
 
 	tagValueName, err := r.client.GetTagValue(ctx, r.cfg.TagKeyNamespacedName, teamSlug)
 	if errors.Is(err, ErrNotFound) {
@@ -141,7 +106,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	for env, parentFolderNumber := range r.cfg.EnvParentFolders {
-		if err := r.reconcileEnvFolder(ctx, teamFoldersClient, teamSlug, env, parentFolderNumber, tagValueName, pamCfg, log); err != nil {
+		if err := r.reconcileEnvFolder(ctx, teamFoldersClient, teamSlug, env, parentFolderNumber, tagValueName, log); err != nil {
 			return err
 		}
 	}
@@ -153,7 +118,6 @@ func (r *reconciler) reconcileEnvFolder(
 	ctx context.Context,
 	teamFoldersClient protoapi.GcpTeamResourcesClient,
 	teamSlug, env, parentFolderNumber, tagValueName string,
-	pamCfg PAMConfig,
 	log logrus.FieldLogger,
 ) error {
 	log = log.WithField("env", env)
@@ -199,19 +163,6 @@ func (r *reconciler) reconcileEnvFolder(
 
 	if err := r.client.TagFolder(ctx, fID, tagValueName); err != nil {
 		return fmt.Errorf("tag folder %q in env %q: %w", fID, env, err)
-	}
-
-	if pamCfg.configured() {
-		if r.pam == nil {
-			return fmt.Errorf("PAM client is not configured")
-		}
-		conditionExpression, err := r.renderPAMCondition(teamSlug, env)
-		if err != nil {
-			return fmt.Errorf("PAM condition for folder %q in env %q: %w", fID, env, err)
-		}
-		if err := r.pam.EnsureEntitlement(ctx, fID, pamCfg.Role, conditionExpression, pamCfg.Principals, pamCfg.MaxGrantDuration); err != nil {
-			return fmt.Errorf("reconcile PAM entitlement for folder %q in env %q: %w", fID, env, err)
-		}
 	}
 
 	return nil

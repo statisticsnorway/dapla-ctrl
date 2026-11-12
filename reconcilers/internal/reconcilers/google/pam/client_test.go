@@ -1,4 +1,4 @@
-package gcpresources
+package pam
 
 import (
 	"context"

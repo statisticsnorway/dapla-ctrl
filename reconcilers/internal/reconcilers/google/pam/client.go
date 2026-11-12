@@ -1,7 +1,6 @@
-package gcpresources
+package pam
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"strings"
@@ -17,44 +16,6 @@ import (
 )
 
 const pamEntitlementID = "ssb-bucket-read"
-
-type PAMConfig struct {
-	Principals        []string
-	Role              string
-	MaxGrantDuration  time.Duration
-	ConditionTemplate string
-}
-
-func (c PAMConfig) configured() bool {
-	return len(c.Principals) != 0 && c.Role != "" && c.MaxGrantDuration != 0 && c.ConditionTemplate != ""
-}
-
-func (r *reconciler) renderPAMCondition(teamSlug, env string) (string, error) {
-	var rendered bytes.Buffer
-	if err := r.pamConditionTemplate.Execute(&rendered, struct {
-		TeamSlug string
-		Env      string
-	}{TeamSlug: teamSlug, Env: env}); err != nil {
-		return "", fmt.Errorf("render PAM IAM condition: %w", err)
-	}
-	expression := strings.TrimSpace(rendered.String())
-	if expression == "" {
-		return "", fmt.Errorf("PAM IAM condition rendered to an empty expression")
-	}
-	return expression, nil
-}
-
-func (c PAMConfig) validate() error {
-	for _, principal := range c.Principals {
-		if strings.TrimSpace(principal) == "" {
-			return fmt.Errorf("PAM principals must not contain empty entries")
-		}
-	}
-	if c.MaxGrantDuration != 0 && (c.MaxGrantDuration < 30*time.Minute || c.MaxGrantDuration > 168*time.Hour) {
-		return fmt.Errorf("PAM maximum grant duration must be between 30m and 168h")
-	}
-	return nil
-}
 
 type PrivilegedAccessManager interface {
 	EnsureEntitlement(ctx context.Context, folderID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error
