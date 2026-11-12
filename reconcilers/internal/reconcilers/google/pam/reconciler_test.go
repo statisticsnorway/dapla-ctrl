@@ -394,6 +394,117 @@ func TestReconcile_TeamAllowlistChangesWithoutRestart(t *testing.T) {
 	}
 }
 
+func TestReconcile_EnvironmentAllowlist(t *testing.T) {
+	for name, tt := range map[string]struct {
+		value       string
+		omit        bool
+		excludeTeam bool
+		wantEnvs    []string
+		wantErr     bool
+	}{
+		"unset allows all":          {omit: true, wantEnvs: []string{"dev", "test", "prod"}},
+		"empty allows all":          {wantEnvs: []string{"dev", "test", "prod"}},
+		"whitespace allows all":     {value: " \t ", wantEnvs: []string{"dev", "test", "prod"}},
+		"exact match":               {value: "dev", wantEnvs: []string{"dev"}},
+		"trimmed multiple entries":  {value: " test, dev ", wantEnvs: []string{"dev", "test"}},
+		"unconfigured environment":  {value: "qa"},
+		"prefix and substring":      {value: "dev-extra,pre-dev"},
+		"case sensitive":            {value: "Dev"},
+		"wildcard is not supported": {value: "*"},
+		"team must also be allowed": {value: "dev", excludeTeam: true},
+		"trailing comma":            {value: "dev,", wantErr: true},
+		"blank entry":               {value: "dev, ,test", wantErr: true},
+		"comma only":                {value: ",", wantErr: true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			server := newFakeGcpTeamResourcesServer()
+			folders := map[string]string{"dev": "100", "test": "200", "prod": "300"}
+			for env, id := range folders {
+				server.folders["my-team/"+env] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: env, FolderId: id}
+			}
+			server.config["team_allowlist"] = "my-team"
+			if tt.excludeTeam {
+				server.config["team_allowlist"] = "another-team"
+			}
+			if !tt.omit {
+				server.config["environment_allowlist"] = tt.value
+			}
+			pam := &fakePrivilegedAccessManager{}
+			r, err := googlepam.New(t.Context(), googlepam.Config{
+				Environments: []string{"dev", "test", "prod"},
+			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = r.Reconcile(t.Context(), startFakeGrpcServer(t, server), &protoapi.Team{Slug: "my-team", IsManaged: true}, logrus.New())
+			if tt.wantErr {
+				if err == nil || !strings.Contains(err.Error(), "PAM environment allowlist must not contain empty entries") {
+					t.Fatalf("got %v, want invalid allowlist error", err)
+				}
+			} else if err != nil {
+				t.Fatal(err)
+			}
+			var gotEnvs []string
+			for _, req := range server.getRequests {
+				gotEnvs = append(gotEnvs, req.Env)
+			}
+			if !slices.Equal(gotEnvs, tt.wantEnvs) {
+				t.Fatalf("queried environments %v, want %v", gotEnvs, tt.wantEnvs)
+			}
+			if len(pam.calls) != len(tt.wantEnvs) {
+				t.Fatalf("got %d PAM calls, want %d", len(pam.calls), len(tt.wantEnvs))
+			}
+			for i, env := range tt.wantEnvs {
+				if pam.calls[i].folderID != folders[env] {
+					t.Errorf("environment %q: entitlement used folder %q, want %q", env, pam.calls[i].folderID, folders[env])
+				}
+			}
+		})
+	}
+}
+
+func TestReconcile_EnvironmentAllowlistChangesWithoutRestart(t *testing.T) {
+	server := newFakeGcpTeamResourcesServer()
+	for env, id := range map[string]string{"dev": "100", "test": "200"} {
+		server.folders["my-team/"+env] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: env, FolderId: id}
+	}
+	client := startFakeGrpcServer(t, server)
+	pam := &fakePrivilegedAccessManager{}
+	r, err := googlepam.New(t.Context(), googlepam.Config{
+		Environments: []string{"dev", "test"},
+	}, nil, googlepam.WithPrivilegedAccessManager(pam))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, step := range []struct {
+		allowlist   string
+		omit        bool
+		wantFolders []string
+	}{
+		{allowlist: "dev", wantFolders: []string{"100"}},
+		{allowlist: "test", wantFolders: []string{"200"}},
+		{allowlist: "", wantFolders: []string{"100", "200"}},
+		{allowlist: "qa"},
+		{omit: true, wantFolders: []string{"100", "200"}},
+	} {
+		server.config["environment_allowlist"] = step.allowlist
+		if step.omit {
+			delete(server.config, "environment_allowlist")
+		}
+		before := len(pam.calls)
+		if err := r.Reconcile(t.Context(), client, &protoapi.Team{Slug: "my-team", IsManaged: true}, logrus.New()); err != nil {
+			t.Fatal(err)
+		}
+		var gotFolders []string
+		for _, call := range pam.calls[before:] {
+			gotFolders = append(gotFolders, call.folderID)
+		}
+		if !slices.Equal(gotFolders, step.wantFolders) {
+			t.Fatalf("allowlist %q (omitted=%t): reconciled folders %v, want %v", step.allowlist, step.omit, gotFolders, step.wantFolders)
+		}
+	}
+}
+
 func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 	tests := map[string]struct {
 		principals        string

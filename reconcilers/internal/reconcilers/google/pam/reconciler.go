@@ -19,11 +19,12 @@ import (
 const (
 	reconcilerName = "google:pam"
 
-	configRoleKey              = "role"
-	configPrincipalsKey        = "principals"
-	configMaxGrantDurationKey  = "max_grant_duration"
-	configConditionTemplateKey = "condition_template"
-	configTeamAllowlistKey     = "team_allowlist"
+	configRoleKey                 = "role"
+	configPrincipalsKey           = "principals"
+	configMaxGrantDurationKey     = "max_grant_duration"
+	configConditionTemplateKey    = "condition_template"
+	configTeamAllowlistKey        = "team_allowlist"
+	configEnvironmentAllowlistKey = "environment_allowlist"
 )
 
 type Config struct {
@@ -31,11 +32,12 @@ type Config struct {
 }
 
 type pamConfig struct {
-	Principals        []string
-	Role              string
-	MaxGrantDuration  time.Duration
-	ConditionTemplate *template.Template
-	TeamAllowlist     []string
+	Principals           []string
+	Role                 string
+	MaxGrantDuration     time.Duration
+	ConditionTemplate    *template.Template
+	TeamAllowlist        []string
+	EnvironmentAllowlist []string
 }
 
 func (c pamConfig) configured() bool {
@@ -58,6 +60,11 @@ func (c pamConfig) validate() error {
 	for _, teamSlug := range c.TeamAllowlist {
 		if teamSlug == "" {
 			return fmt.Errorf("PAM team allowlist must not contain empty entries")
+		}
+	}
+	for _, env := range c.EnvironmentAllowlist {
+		if env == "" {
+			return fmt.Errorf("PAM environment allowlist must not contain empty entries")
 		}
 	}
 	for _, principal := range c.Principals {
@@ -140,6 +147,12 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Comma-separated list of exact, case-sensitive team slugs. Empty allows all Managed teams.",
 				Secret:      false,
 			},
+			{
+				Key:         configEnvironmentAllowlistKey,
+				DisplayName: "Environment allowlist",
+				Description: "Comma-separated list of exact, case-sensitive environment names. Empty allows all configured environments.",
+				Secret:      false,
+			},
 		},
 	}
 }
@@ -166,6 +179,10 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	}
 
 	for _, env := range r.cfg.Environments {
+		if len(cfg.EnvironmentAllowlist) > 0 && !slices.Contains(cfg.EnvironmentAllowlist, env) {
+			log.WithField("env", env).Debug("skipping PAM entitlement: environment is not allowlisted")
+			continue
+		}
 		resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
 			TeamSlug: daplaTeam.Slug,
 			Env:      env,
@@ -204,12 +221,7 @@ func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient)
 		case configRoleKey:
 			cfg.Role = value
 		case configPrincipalsKey:
-			if value != "" {
-				cfg.Principals = strings.Split(value, ",")
-				for i, principal := range cfg.Principals {
-					cfg.Principals[i] = strings.TrimSpace(principal)
-				}
-			}
+			cfg.Principals = parseCommaSeparatedList(value)
 		case configMaxGrantDurationKey:
 			if value != "" {
 				cfg.MaxGrantDuration, err = time.ParseDuration(value)
@@ -220,12 +232,9 @@ func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient)
 		case configConditionTemplateKey:
 			conditionTemplate = value
 		case configTeamAllowlistKey:
-			if value != "" {
-				cfg.TeamAllowlist = strings.Split(value, ",")
-				for i, teamSlug := range cfg.TeamAllowlist {
-					cfg.TeamAllowlist[i] = strings.TrimSpace(teamSlug)
-				}
-			}
+			cfg.TeamAllowlist = parseCommaSeparatedList(value)
+		case configEnvironmentAllowlistKey:
+			cfg.EnvironmentAllowlist = parseCommaSeparatedList(value)
 		default:
 			return pamConfig{}, fmt.Errorf("unknown config key %q", c.Key)
 		}
@@ -240,6 +249,17 @@ func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient)
 		}
 	}
 	return cfg, nil
+}
+
+func parseCommaSeparatedList(value string) []string {
+	if value == "" {
+		return nil
+	}
+	entries := strings.Split(value, ",")
+	for i, entry := range entries {
+		entries[i] = strings.TrimSpace(entry)
+	}
+	return entries
 }
 
 func (c pamConfig) renderPAMCondition(teamSlug, env string) (string, error) {
