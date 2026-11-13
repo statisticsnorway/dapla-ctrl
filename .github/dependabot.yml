@@ -5,8 +5,25 @@
 
 version: 2
 updates:
-  - package-ecosystem: 'npm' # See documentation for possible values
-    directory: '/' # Location of package manifests
+  - package-ecosystem: 'gomod'
+    directories:
+      - '/api'
+      - '/api/pkg/apiclient'
+      - '/reconcilers'
+      - '/reconcilers/pkg/apiclient'
+      - '/labradoor'
+    schedule:
+      interval: 'weekly'
+    cooldown:
+      default-days: 14
+    groups:
+      gomod:
+        patterns:
+          - '*'
+
+  - package-ecosystem: 'npm'
+    directories:
+      - '/frontend'
     schedule:
       interval: 'weekly'
     cooldown:
@@ -17,14 +34,20 @@ updates:
           - '*'
 
   - package-ecosystem: github-actions
-    directory: '/'
+    directories:
+      - '/'
+      - '/.github/actions/*'
     schedule:
       interval: 'weekly'
     cooldown:
       default-days: 14
 
   - package-ecosystem: 'docker'
-    directory: '/'
+    directories:
+      - '/api'
+      - '/frontend'
+      - '/labradoor'
+      - '/reconcilers'
     schedule:
       interval: 'weekly'
     cooldown:
