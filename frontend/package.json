@@ -2,7 +2,7 @@
 	"name": "console-frontend",
 	"version": "0.0.1",
 	"private": true,
-	"packageManager": "pnpm@11.7.0",
+	"packageManager": "pnpm@12.18.0",
 	"scripts": {
 		"prepare": "cd .. && husky frontend/.husky && cd frontend && svelte-kit sync || echo ''",
 		"dev": "vite dev",

@@ -144,9 +144,10 @@ func (t *Server) GetTeamManager(ctx context.Context, req *protoapi.GetTeamManage
 
 func toProtoTeam(team *grpcteamsql.Team) *protoapi.Team {
 	t := &protoapi.Team{
-		Slug:         team.Slug.String(),
-		HasParquedit: team.HasManualEditing,
-		IsManaged:    team.IsManaged,
+		Slug:             team.Slug.String(),
+		HasParquedit:     team.HasManualEditing,
+		HasParqueditTest: team.HasManualEditingTest,
+		IsManaged:        team.IsManaged,
 	}
 
 	if team.DeleteKeyConfirmedAt.Valid {

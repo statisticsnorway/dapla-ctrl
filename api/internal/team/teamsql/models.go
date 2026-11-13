@@ -16,6 +16,7 @@ type Team struct {
 	SectionCode          string
 	IsManaged            bool
 	HasManualEditing     bool
+	HasManualEditingTest bool
 }
 
 type TeamDeleteKey struct {

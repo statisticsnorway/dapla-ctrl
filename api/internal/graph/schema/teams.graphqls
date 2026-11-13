@@ -103,6 +103,9 @@ type Team implements Node {
 	"If manual editing from team dapla-ffunk is enabled for the team"
 	hasManualEditing: Boolean!
 
+	"If manual editing from team dapla-ffunk is enabled for the test environment"
+	hasManualEditingTest: Boolean!
+
 	"Team members."
 	members(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
@@ -384,6 +387,12 @@ input UpdateTeamInput {
 	When omitted, the existing value will not be updated.
 	"""
 	hasManualEditing: Boolean
+
+	"""
+	If manual editing from team dapla-ffunk should be enabled for the test environment.
+	When omitted, the existing value will not be updated.
+	"""
+	hasManualEditingTest: Boolean
 }
 
 input AddTeamAccessManagerInput {

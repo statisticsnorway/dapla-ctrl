@@ -53,7 +53,7 @@ func (q *Queries) Delete(ctx context.Context, argSlug slug.Slug) error {
 
 const get = `-- name: Get :one
 SELECT
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 FROM
 	teams
 WHERE
@@ -71,6 +71,7 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 		&i.SectionCode,
 		&i.IsManaged,
 		&i.HasManualEditing,
+		&i.HasManualEditingTest,
 	)
 	return &i, err
 }
@@ -104,7 +105,7 @@ func (q *Queries) GetTeamManager(ctx context.Context, teamSlug slug.Slug) (*User
 
 const list = `-- name: List :many
 SELECT
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 FROM
 	teams
 ORDER BY
@@ -137,6 +138,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*Team, error) {
 			&i.SectionCode,
 			&i.IsManaged,
 			&i.HasManualEditing,
+			&i.HasManualEditingTest,
 		); err != nil {
 			return nil, err
 		}

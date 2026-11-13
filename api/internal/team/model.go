@@ -26,6 +26,7 @@ type Team struct {
 	SectionCode          string     `json:"sectionCode"`
 	IsManaged            bool       `json:"isManaged"`
 	HasManualEditing     bool       `json:"hasManualEditing"`
+	HasManualEditingTest bool       `json:"hasManualEditingTest"`
 	LastSuccessfulSync   *time.Time `json:"lastSuccessfulSync"`
 	DeleteKeyConfirmedAt *time.Time `json:"-"`
 }
@@ -48,11 +49,12 @@ func (t *Team) ExternalResources() *TeamExternalResources {
 
 func toGraphTeam(m *teamsql.Team) *Team {
 	ret := &Team{
-		Slug:             m.Slug,
-		DisplayName:      m.DisplayName,
-		SectionCode:      m.SectionCode,
-		IsManaged:        m.IsManaged,
-		HasManualEditing: m.HasManualEditing,
+		Slug:                 m.Slug,
+		DisplayName:          m.DisplayName,
+		SectionCode:          m.SectionCode,
+		IsManaged:            m.IsManaged,
+		HasManualEditing:     m.HasManualEditing,
+		HasManualEditingTest: m.HasManualEditingTest,
 	}
 
 	if m.LastSuccessfulSync.Valid {
@@ -229,10 +231,11 @@ func (i *CreateTeamInput) Validate(ctx context.Context) error {
 }
 
 type UpdateTeamInput struct {
-	Slug             slug.Slug `json:"slug"`
-	DisplayName      *string   `json:"displayName"`
-	SectionCode      *string   `json:"sectionCode"`
-	HasManualEditing *bool     `json:"hasManualEditing"`
+	Slug                 slug.Slug `json:"slug"`
+	DisplayName          *string   `json:"displayName"`
+	SectionCode          *string   `json:"sectionCode"`
+	HasManualEditing     *bool     `json:"hasManualEditing"`
+	HasManualEditingTest *bool     `json:"hasManualEditingTest"`
 }
 
 func (i *UpdateTeamInput) Validate() error {
@@ -250,7 +253,8 @@ func (i *UpdateTeamInput) Validate() error {
 }
 
 func (i *UpdateTeamInput) HasNoChanges() bool {
-	return i.DisplayName == nil && i.SectionCode == nil && i.HasManualEditing == nil
+	return i.DisplayName == nil && i.SectionCode == nil && i.HasManualEditing == nil &&
+		i.HasManualEditingTest == nil
 }
 
 type AddTeamAccessManagerInput struct {
@@ -267,7 +271,9 @@ type RemoveTeamAccessManagerInput struct {
 
 type TeamFeatureName string
 
-const TeamFeatureNameAI TeamFeatureName = "ai"
+const (
+	TeamFeatureNameAI TeamFeatureName = "ai"
+)
 
 func (e *TeamFeatureName) UnmarshalGQL(v any) error {
 	value, ok := v.(string)

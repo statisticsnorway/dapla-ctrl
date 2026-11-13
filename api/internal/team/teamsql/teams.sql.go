@@ -47,7 +47,7 @@ INSERT INTO
 VALUES
 	($1, $2, $3, $4)
 RETURNING
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 `
 
 type CreateParams struct {
@@ -73,6 +73,7 @@ func (q *Queries) Create(ctx context.Context, arg CreateParams) (*Team, error) {
 		&i.SectionCode,
 		&i.IsManaged,
 		&i.HasManualEditing,
+		&i.HasManualEditingTest,
 	)
 	return &i, err
 }
@@ -125,7 +126,7 @@ func (q *Queries) Exists(ctx context.Context, argSlug slug.Slug) (bool, error) {
 
 const get = `-- name: Get :one
 SELECT
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 FROM
 	teams
 WHERE
@@ -143,6 +144,7 @@ func (q *Queries) Get(ctx context.Context, argSlug slug.Slug) (*Team, error) {
 		&i.SectionCode,
 		&i.IsManaged,
 		&i.HasManualEditing,
+		&i.HasManualEditingTest,
 	)
 	return &i, err
 }
@@ -209,7 +211,7 @@ func (q *Queries) GetDeleteKey(ctx context.Context, arg GetDeleteKeyParams) (*Te
 
 const list = `-- name: List :many
 SELECT
-	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.has_manual_editing,
+	teams.slug, teams.display_name, teams.last_successful_sync, teams.delete_key_confirmed_at, teams.section_code, teams.is_managed, teams.has_manual_editing, teams.has_manual_editing_test,
 	COUNT(*) OVER () AS total_count
 FROM
 	teams
@@ -261,6 +263,7 @@ func (q *Queries) List(ctx context.Context, arg ListParams) ([]*ListRow, error) 
 			&i.Team.SectionCode,
 			&i.Team.IsManaged,
 			&i.Team.HasManualEditing,
+			&i.Team.HasManualEditingTest,
 			&i.TotalCount,
 		); err != nil {
 			return nil, err
@@ -324,7 +327,7 @@ func (q *Queries) ListAllSlugs(ctx context.Context) ([]slug.Slug, error) {
 
 const listBySlugs = `-- name: ListBySlugs :many
 SELECT
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 FROM
 	teams
 WHERE
@@ -350,6 +353,7 @@ func (q *Queries) ListBySlugs(ctx context.Context, slugs []slug.Slug) ([]*Team, 
 			&i.SectionCode,
 			&i.IsManaged,
 			&i.HasManualEditing,
+			&i.HasManualEditingTest,
 		); err != nil {
 			return nil, err
 		}
@@ -419,18 +423,23 @@ SET
 	has_manual_editing = COALESCE(
 		$3,
 		has_manual_editing
+	),
+	has_manual_editing_test = COALESCE(
+		$4,
+		has_manual_editing_test
 	)
 WHERE
-	teams.slug = $4
+	teams.slug = $5
 RETURNING
-	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing
+	slug, display_name, last_successful_sync, delete_key_confirmed_at, section_code, is_managed, has_manual_editing, has_manual_editing_test
 `
 
 type UpdateParams struct {
-	DisplayName      *string
-	SectionCode      *string
-	HasManualEditing *bool
-	Slug             slug.Slug
+	DisplayName          *string
+	SectionCode          *string
+	HasManualEditing     *bool
+	HasManualEditingTest *bool
+	Slug                 slug.Slug
 }
 
 func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
@@ -438,6 +447,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
 		arg.DisplayName,
 		arg.SectionCode,
 		arg.HasManualEditing,
+		arg.HasManualEditingTest,
 		arg.Slug,
 	)
 	var i Team
@@ -449,6 +459,7 @@ func (q *Queries) Update(ctx context.Context, arg UpdateParams) (*Team, error) {
 		&i.SectionCode,
 		&i.IsManaged,
 		&i.HasManualEditing,
+		&i.HasManualEditingTest,
 	)
 	return &i, err
 }

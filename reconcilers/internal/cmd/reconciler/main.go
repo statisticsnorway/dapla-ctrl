@@ -171,6 +171,15 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	}
 	reconcilerManager.AddReconciler(parqueditReconciler)
 
+	testParqueditReconciler, err := parquedit.New(
+		ctx,
+		parquedit.WithEnvironment(parquedit.Test),
+	)
+	if err != nil {
+		return fmt.Errorf("create test parquedit reconciler: %w", err)
+	}
+	reconcilerManager.AddReconciler(testParqueditReconciler)
+
 	aiReconciler, err := ai.New(ctx, googleServices)
 	if err != nil {
 		return fmt.Errorf("create ai reconciler: %w", err)

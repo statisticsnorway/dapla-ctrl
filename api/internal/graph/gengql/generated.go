@@ -775,6 +775,7 @@ type ComplexityRoot struct {
 		Features                           func(childComplexity int) int
 		Groups                             func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int
 		HasManualEditing                   func(childComplexity int) int
+		HasManualEditingTest               func(childComplexity int) int
 		ID                                 func(childComplexity int) int
 		IsManaged                          func(childComplexity int) int
 		LastSuccessfulSync                 func(childComplexity int) int
@@ -4069,6 +4070,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Team.HasManualEditing(childComplexity), true
+	case "Team.hasManualEditingTest":
+		if e.ComplexityRoot.Team.HasManualEditingTest == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Team.HasManualEditingTest(childComplexity), true
 	case "Team.id":
 		if e.ComplexityRoot.Team.ID == nil {
 			break
@@ -8666,6 +8673,9 @@ type Team implements Node {
 	"If manual editing from team dapla-ffunk is enabled for the team"
 	hasManualEditing: Boolean!
 
+	"If manual editing from team dapla-ffunk is enabled for the test environment"
+	hasManualEditingTest: Boolean!
+
 	"Team members."
 	members(
 		"Get the first n items in the connection. This can be used in combination with the after parameter."
@@ -8947,6 +8957,12 @@ input UpdateTeamInput {
 	When omitted, the existing value will not be updated.
 	"""
 	hasManualEditing: Boolean
+
+	"""
+	If manual editing from team dapla-ffunk should be enabled for the test environment.
+	When omitted, the existing value will not be updated.
+	"""
+	hasManualEditingTest: Boolean
 }
 
 input AddTeamAccessManagerInput {
@@ -25027,6 +25043,35 @@ func (ec *executionContext) fieldContext_Team_hasManualEditing(_ context.Context
 	return graphql.NewScalarFieldContext("Team", field, false, false, "Boolean")
 }
 
+func (ec *executionContext) _Team_hasManualEditingTest(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Team_hasManualEditingTest,
+		func(ctx context.Context) (any, error) {
+			return obj.HasManualEditingTest, nil
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Team_hasManualEditingTest(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Team",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Team_members(ctx context.Context, field graphql.CollectedField, obj *team.Team) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -32114,7 +32159,7 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "hasManualEditing"}
+	fieldsInOrder := [...]string{"slug", "displayName", "sectionCode", "hasManualEditing", "hasManualEditingTest"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -32149,6 +32194,13 @@ func (ec *executionContext) unmarshalInputUpdateTeamInput(ctx context.Context, o
 				return it, err
 			}
 			it.HasManualEditing = data
+		case "hasManualEditingTest":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hasManualEditingTest"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HasManualEditingTest = data
 		}
 	}
 	return it, nil
@@ -37706,6 +37758,11 @@ func (ec *executionContext) _Team(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "hasManualEditing":
 			out.Values[i] = ec._Team_hasManualEditing(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "hasManualEditingTest":
+			out.Values[i] = ec._Team_hasManualEditingTest(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}

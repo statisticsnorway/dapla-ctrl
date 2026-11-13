@@ -10,6 +10,7 @@ query TeamSettings($team: Slug!) {
 		}
 		lastSuccessfulSync
 		hasManualEditing
+		hasManualEditingTest
 		features {
 			name
 			env

@@ -47,8 +47,10 @@ func TestTeamsServer_Get(t *testing.T) {
 		sectionCode := "724"
 
 		stmt := `
-			INSERT INTO teams (slug, display_name, section_code, is_managed) VALUES
-			($1, 'Team', $2, TRUE)`
+			INSERT INTO teams (
+				slug, display_name, section_code, is_managed,
+				has_manual_editing, has_manual_editing_test
+			) VALUES ($1, 'Team', $2, TRUE, TRUE, FALSE)`
 		if _, err = pool.Exec(ctx, stmt, teamSlug, sectionCode); err != nil {
 			t.Fatalf("failed to insert team: %v", err)
 		}
@@ -64,6 +66,35 @@ func TestTeamsServer_Get(t *testing.T) {
 
 		if resp.Team.Slug != teamSlug {
 			t.Errorf("expected team slug to be %q, got %q", teamSlug, resp.Team.Slug)
+		}
+		if !resp.Team.HasParquedit || resp.Team.HasParqueditTest {
+			t.Errorf(
+				"expected production=true and test=false, got production=%v test=%v",
+				resp.Team.HasParquedit,
+				resp.Team.HasParqueditTest,
+			)
+		}
+
+		testOnlyTeamSlug := "test-only"
+		stmt = `
+			INSERT INTO teams (
+				slug, display_name, section_code, is_managed,
+				has_manual_editing, has_manual_editing_test
+			) VALUES ($1, 'Team', $2, TRUE, FALSE, TRUE)`
+		if _, err := pool.Exec(ctx, stmt, testOnlyTeamSlug, sectionCode); err != nil {
+			t.Fatalf("failed to insert test-only team: %v", err)
+		}
+
+		resp, err = grpcteam.NewServer(pool).Get(ctx, &protoapi.GetTeamRequest{Slug: testOnlyTeamSlug})
+		if err != nil {
+			t.Fatalf("unexpected error getting test-only team: %v", err)
+		}
+		if resp.Team.HasParquedit || !resp.Team.HasParqueditTest {
+			t.Errorf(
+				"expected production=false and test=true, got production=%v test=%v",
+				resp.Team.HasParquedit,
+				resp.Team.HasParqueditTest,
+			)
 		}
 	})
 }
