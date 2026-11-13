@@ -28,6 +28,7 @@ Test.gql("Create global service account as non-admin", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createServiceAccount",
 				},
@@ -99,6 +100,7 @@ Test.gql("Update service account as non-admin", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"updateServiceAccount",
 				},
@@ -161,6 +163,7 @@ Test.gql("Assign role to service account as non-admin", function(t)
 		errors = {
 			{
 				message = Contains("Specifically, you need the \"service_accounts:update\" authorization."),
+				locations = NotNull(),
 				path = {
 					"assignRoleToServiceAccount",
 				},
@@ -237,6 +240,7 @@ Test.gql("Assign duplicate role to service account as admin", function(t)
 		errors = {
 			{
 				message = Contains("has already been assigned the \"Team owner\" role"),
+				locations = NotNull(),
 				path = {
 					"assignRoleToServiceAccount",
 				},
@@ -313,6 +317,7 @@ Test.gql("Revoke role from service account as non-admin", function(t)
 		errors = {
 			{
 				message = Contains("Specifically, you need the \"service_accounts:update\" authorization."),
+				locations = NotNull(),
 				path = {
 					"revokeRoleFromServiceAccount",
 				},
@@ -390,6 +395,7 @@ Test.gql("Revoke unassigned role from service account as admin", function(t)
 		errors = {
 			{
 				message = Contains("does not have the \"Message sender\" role assigned"),
+				locations = NotNull(),
 				path = {
 					"revokeRoleFromServiceAccount",
 				},
@@ -418,6 +424,7 @@ Test.gql("Delete service account as non-admin", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"deleteServiceAccount",
 				},
