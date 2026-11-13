@@ -15,6 +15,10 @@ SET
 	has_manual_editing = COALESCE(
 		sqlc.narg(has_manual_editing),
 		has_manual_editing
+	),
+	has_manual_editing_test = COALESCE(
+		sqlc.narg(has_manual_editing_test),
+		has_manual_editing_test
 	)
 WHERE
 	teams.slug = @slug

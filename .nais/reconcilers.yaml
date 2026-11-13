@@ -17,6 +17,7 @@ spec:
         - application: dapla-api
       external:
         - host: labradoor.lab.dapla.ssb.no
+        - host: labradoor.lab.dapla-test.ssb.no
         - host: graph.microsoft.com
         - host: login.microsoftonline.com
         - ipv4: 35.228.13.13

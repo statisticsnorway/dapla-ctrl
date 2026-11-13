@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -30,6 +31,7 @@ type Client struct {
 	cloudSqlProject    string
 	cloudSqlInstance   string
 	cloudSqlUserSuffix string
+	dataPathTemplate   string
 }
 
 func (c *Client) Close() {
@@ -47,6 +49,10 @@ type SqlManager interface {
 }
 
 func New(ctx context.Context, config config.ParqueditConfig, crm CloudResourceManager, sqlClient SqlManager) (*Client, error) {
+	if err := validateDataPathTemplate(config.DataPathTemplate); err != nil {
+		return nil, err
+	}
+
 	pool, err := pgxpool.New(ctx, config.DatabaseUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create connection pool: %w", err)
@@ -65,6 +71,7 @@ func New(ctx context.Context, config config.ParqueditConfig, crm CloudResourceMa
 		cloudSqlProject:    config.CloudSQLProject,
 		cloudSqlInstance:   config.CloudSQLInstance,
 		cloudSqlUserSuffix: config.CloudSqlUserSuffix,
+		dataPathTemplate:   config.DataPathTemplate,
 	}
 
 	return parquedit, nil
@@ -128,7 +135,8 @@ func (c *Client) EnableForTeam(w http.ResponseWriter, req *http.Request) {
 	}
 	log.Info("initialized ducklake schema")
 	log.Info("overriding ducklake data_path")
-	result, err := c.db.Exec(req.Context(), "UPDATE "+schema+".ducklake_metadata SET value = 'gs://ssb-"+team+"-data-produkt-prod/.parquedit_data/' WHERE key = 'data_path'")
+	dataPath := strings.ReplaceAll(c.dataPathTemplate, "{team}", team)
+	result, err := c.db.Exec(req.Context(), "UPDATE "+schema+".ducklake_metadata SET value = $1 WHERE key = 'data_path'", dataPath)
 	if err != nil {
 		_ = httplog.SetError(req.Context(), err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -229,6 +237,28 @@ func (c *Client) HasEnabled(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func validateDataPathTemplate(template string) error {
+	if !strings.Contains(template, "{team}") {
+		return fmt.Errorf("PARQUEDIT_DATA_PATH_TEMPLATE must contain {team}")
+	}
+	probe := strings.ReplaceAll(template, "{team}", "example-team")
+	if strings.ContainsAny(probe, "{}") {
+		return fmt.Errorf("PARQUEDIT_DATA_PATH_TEMPLATE contains an unknown placeholder")
+	}
+
+	u, err := url.Parse(probe)
+	if err != nil {
+		return fmt.Errorf("PARQUEDIT_DATA_PATH_TEMPLATE must be a valid GCS URI")
+	}
+	if u.Scheme != "gs" || u.Host == "" || u.User != nil ||
+		u.Host != u.Hostname() || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" ||
+		strings.ContainsAny(probe, " \t\r\n") ||
+		u.Path == "" || !strings.HasSuffix(probe, "/") {
+		return fmt.Errorf("PARQUEDIT_DATA_PATH_TEMPLATE must be a gs://bucket/path/ URI without credentials, port, query or fragment")
+	}
+	return nil
 }
 
 // schema names are prefixed with _team to be clear in the DB and avoid potential collisions

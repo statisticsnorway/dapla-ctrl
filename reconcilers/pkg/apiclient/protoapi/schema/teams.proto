@@ -14,6 +14,7 @@ message Team {
   bool has_parquedit = 2;
   optional google.protobuf.Timestamp delete_key_confirmed_at = 3;
   bool is_managed = 4;
+  bool has_parquedit_test = 5;
 }
 
 message Feature {

@@ -29,6 +29,7 @@ type Team struct {
 	HasParquedit         bool                   `protobuf:"varint,2,opt,name=has_parquedit,json=hasParquedit,proto3" json:"has_parquedit,omitempty"`
 	DeleteKeyConfirmedAt *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=delete_key_confirmed_at,json=deleteKeyConfirmedAt,proto3,oneof" json:"delete_key_confirmed_at,omitempty"`
 	IsManaged            bool                   `protobuf:"varint,4,opt,name=is_managed,json=isManaged,proto3" json:"is_managed,omitempty"`
+	HasParqueditTest     bool                   `protobuf:"varint,5,opt,name=has_parquedit_test,json=hasParqueditTest,proto3" json:"has_parquedit_test,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
@@ -86,6 +87,13 @@ func (x *Team) GetIsManaged() bool {
 	return false
 }
 
+func (x *Team) GetHasParqueditTest() bool {
+	if x != nil {
+		return x.HasParqueditTest
+	}
+	return false
+}
+
 func (x *Team) SetSlug(v string) {
 	x.Slug = v
 }
@@ -100,6 +108,10 @@ func (x *Team) SetDeleteKeyConfirmedAt(v *timestamppb.Timestamp) {
 
 func (x *Team) SetIsManaged(v bool) {
 	x.IsManaged = v
+}
+
+func (x *Team) SetHasParqueditTest(v bool) {
+	x.HasParqueditTest = v
 }
 
 func (x *Team) HasDeleteKeyConfirmedAt() bool {
@@ -120,6 +132,7 @@ type Team_builder struct {
 	HasParquedit         bool
 	DeleteKeyConfirmedAt *timestamppb.Timestamp
 	IsManaged            bool
+	HasParqueditTest     bool
 }
 
 func (b0 Team_builder) Build() *Team {
@@ -130,6 +143,7 @@ func (b0 Team_builder) Build() *Team {
 	x.HasParquedit = b.HasParquedit
 	x.DeleteKeyConfirmedAt = b.DeleteKeyConfirmedAt
 	x.IsManaged = b.IsManaged
+	x.HasParqueditTest = b.HasParqueditTest
 	return m0
 }
 
@@ -1085,13 +1099,14 @@ var File_teams_proto protoreflect.FileDescriptor
 
 const file_teams_proto_rawDesc = "" +
 	"\n" +
-	"\vteams.proto\x12\x12dapla.api.protobuf\x1a\vusers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\fgroups.proto\x1a\x10pagination.proto\"\xd2\x01\n" +
+	"\vteams.proto\x12\x12dapla.api.protobuf\x1a\vusers.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\fgroups.proto\x1a\x10pagination.proto\"\x80\x02\n" +
 	"\x04Team\x12\x12\n" +
 	"\x04slug\x18\x01 \x01(\tR\x04slug\x12#\n" +
 	"\rhas_parquedit\x18\x02 \x01(\bR\fhasParquedit\x12V\n" +
 	"\x17delete_key_confirmed_at\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampH\x00R\x14deleteKeyConfirmedAt\x88\x01\x01\x12\x1d\n" +
 	"\n" +
-	"is_managed\x18\x04 \x01(\bR\tisManagedB\x1a\n" +
+	"is_managed\x18\x04 \x01(\bR\tisManaged\x12,\n" +
+	"\x12has_parquedit_test\x18\x05 \x01(\bR\x10hasParqueditTestB\x1a\n" +
 	"\x18_delete_key_confirmed_at\"/\n" +
 	"\aFeature\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +

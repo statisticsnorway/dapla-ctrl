@@ -25,41 +25,65 @@ func TestManageTeamSchema(t *testing.T) {
 
 	grm := googleresourcemanager.NewFake()
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, grm, googlesqladmin.NewFake(connectionString))
-	if err != nil {
-		t.Fatalf("failed to create parquedit client: %v", err)
+	for _, tt := range []struct {
+		name     string
+		template string
+		dataPath string
+	}{
+		{
+			name:     "production",
+			template: "gs://ssb-{team}-data-produkt-prod/.parquedit_data/",
+			dataPath: "gs://ssb-binde-strek-data-produkt-prod/.parquedit_data/",
+		},
+		{
+			name:     "test",
+			template: "gs://ssb-{team}-data-produkt-test/.parquedit_data/",
+			dataPath: "gs://ssb-binde-strek-data-produkt-test/.parquedit_data/",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			client, err := New(ctx, config.ParqueditConfig{
+				DatabaseUrl:      connectionString,
+				DataPathTemplate: tt.template,
+			}, grm, googlesqladmin.NewFake(connectionString))
+			if err != nil {
+				t.Fatalf("failed to create parquedit client: %v", err)
+			}
+			t.Cleanup(client.Close)
+
+			handler := setupTestRoutes(client)
+
+			team := "binde-strek" // In Cloud SQL, dashes are allowed in IAM user names.
+			schema := "team_binde_strek"
+
+			t.Run("check status for non enabled team", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
+				assertSchemaExists(ctx, t, client, schema, false)
+			})
+
+			t.Run("enable for team", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, true)
+				assertDataPath(ctx, t, client, schema, tt.dataPath)
+				assertStatus(t, handler, http.MethodGet, team, http.StatusOK)
+			})
+
+			t.Run("enable is idempotent", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, true)
+				assertDataPath(ctx, t, client, schema, tt.dataPath)
+			})
+
+			t.Run("disable for team, and it is idempotent", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, false)
+				assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
+
+				assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, false)
+			})
+		})
 	}
-	t.Cleanup(client.Close)
-
-	handler := setupTestRoutes(client)
-
-	team := "binde-strek" // Test with a underdash team, since we otherwise have to do special logic related to test. In cloudsql dash is allowed
-	schema := "team_binde_strek"
-
-	t.Run("check status for non enabled team", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
-		assertSchemaExists(ctx, t, client, schema, false)
-	})
-
-	t.Run("enable for team", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, true)
-		assertStatus(t, handler, http.MethodGet, team, http.StatusOK)
-	})
-
-	t.Run("enable is idempotent", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, true)
-	})
-
-	t.Run("disable for team, and it is idempotent", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, false)
-		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
-
-		assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, false)
-	})
 }
 
 func startPostgres(ctx context.Context, t *testing.T) string {
@@ -126,5 +150,18 @@ func assertSchemaExists(ctx context.Context, t *testing.T, client *Client, schem
 	}
 	if exists != want {
 		t.Fatalf("schema %q exists = %v, want %v", schema, exists, want)
+	}
+}
+
+func assertDataPath(ctx context.Context, t *testing.T, client *Client, schema, want string) {
+	t.Helper()
+
+	var dataPath string
+	err := client.db.QueryRow(ctx, "SELECT value FROM "+schema+".ducklake_metadata WHERE key = 'data_path'").Scan(&dataPath)
+	if err != nil {
+		t.Fatalf("failed to read data_path for %q: %v", schema, err)
+	}
+	if dataPath != want {
+		t.Fatalf("data_path = %q, want %q", dataPath, want)
 	}
 }

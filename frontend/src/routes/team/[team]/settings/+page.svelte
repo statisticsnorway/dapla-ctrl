@@ -22,6 +22,7 @@
 			updateTeam(input: $input) {
 				team {
 					hasManualEditing
+					hasManualEditingTest
 				}
 			}
 		}
@@ -55,6 +56,11 @@
 	let aiEnabled = $derived(
 		teamSettings?.features.some(({ name, env }) => name === 'ai' && env === 'test')
 	);
+	let parqueditTestEnabled = $derived(teamSettings?.hasManualEditingTest ?? false);
+	let showTestConfirmModal = $state(false);
+	let requestedTestEnabled = $state(false);
+	let parqueditTestPending = $state(false);
+	let parqueditTestErrors: { message: string }[] | undefined = $state();
 
 	let descriptionErrors: { message: string }[] | undefined = $state();
 
@@ -78,6 +84,26 @@
 			input: { teamSlug, feature: 'ai', env: 'test' }
 		});
 		if (result.errors) aiErrors = result.errors;
+	};
+
+	const setTestParquedit = async () => {
+		parqueditTestErrors = undefined;
+		parqueditTestPending = true;
+		try {
+			const result = await updateTeam.mutate({
+				input: { slug: teamSlug, hasManualEditingTest: requestedTestEnabled }
+			});
+			if (result.errors) parqueditTestErrors = result.errors;
+		} catch (error) {
+			parqueditTestErrors = [
+				{
+					message:
+						error instanceof Error ? error.message : 'Kunne ikke oppdatere Parquedit i testmiljøet.'
+				}
+			];
+		} finally {
+			parqueditTestPending = false;
+		}
 	};
 </script>
 
@@ -112,6 +138,24 @@
 				<GraphErrors errors={descriptionErrors} size="small" />
 			</div>
 			<div>
+				<Heading level="2">Parquedit (test)</Heading>
+				<Switch
+					disabled={!canManageTeam || parqueditTestPending}
+					loading={parqueditTestPending}
+					checked={parqueditTestEnabled}
+					onclick={(e: MouseEvent) => {
+						e.preventDefault();
+						requestedTestEnabled = !parqueditTestEnabled;
+						showTestConfirmModal = true;
+					}}
+				>
+					{parqueditTestEnabled
+						? 'Skru av Parquedit i testmiljøet'
+						: 'Skru på Parquedit i testmiljøet'}
+				</Switch>
+				<GraphErrors errors={parqueditTestErrors} size="small" />
+			</div>
+			<div>
 				<Heading level="2">Kunstig Intelligens (KI)</Heading>
 				<Switch disabled={!canManageTeam} checked={aiEnabled} onclick={toggleAi}>
 					{aiEnabled ? 'Skru av KI i testmiljøet' : 'Skru på KI i testmiljøet'}
@@ -132,6 +176,18 @@
 	{$TeamSettings.data?.team.hasManualEditing
 		? 'Historikken knyttet til manuell editering vil da bli slettet.'
 		: ''}
+</Confirm>
+
+<Confirm bind:open={showTestConfirmModal} onconfirm={setTestParquedit} confirmText="Bekreft">
+	{#snippet header()}
+		<h3>Parquedit i testmiljøet</h3>
+	{/snippet}
+
+	Dette vil <b>{requestedTestEnabled ? 'slå på' : 'slå av'}</b> Parquedit i testmiljøet.<br />
+	{#if !requestedTestEnabled}
+		Historikken knyttet til manuell editering i testmiljøet vil bli slettet.
+	{/if}
+	Produksjonsmiljøet blir ikke endret.
 </Confirm>
 
 <style>

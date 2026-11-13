@@ -2567,6 +2567,9 @@ type Team implements ActivityLogger & Node {
   """If manual editing from team dapla-ffunk is enabled for the team"""
   hasManualEditing: Boolean!
 
+  """If manual editing from team dapla-ffunk is enabled for the test environment"""
+  hasManualEditingTest: Boolean!
+
   """The globally unique ID of the team."""
   id: ID!
 
@@ -3016,6 +3019,12 @@ input UpdateTeamInput {
   When omitted, the existing value will not be updated.
   """
   hasManualEditing: Boolean
+
+  """
+  If manual editing from team dapla-ffunk should be enabled for the test environment.
+  When omitted, the existing value will not be updated.
+  """
+  hasManualEditingTest: Boolean
 
   """
   An optional new section code for the team.

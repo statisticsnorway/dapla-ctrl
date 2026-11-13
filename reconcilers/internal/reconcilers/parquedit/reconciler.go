@@ -17,10 +17,24 @@ const (
 	configExternalReconcilerSecretKey   = "labReconcilerSecret"
 )
 
+type Environment string
+
+const (
+	Prod Environment = "prod"
+	Test Environment = "test"
+)
+
+func WithEnvironment(env Environment) optFunc {
+	return func(r *reconciler) {
+		r.environment = env
+	}
+}
+
 type reconciler struct {
 	config       config
 	client       client
 	staticClient client
+	environment  Environment
 }
 
 type config struct {
@@ -37,20 +51,29 @@ type client interface {
 type optFunc func(*reconciler)
 
 func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
-	r := new(reconciler)
+	r := &reconciler{environment: Prod}
 
 	for _, opt := range opts {
 		opt(r)
 	}
-
+	if r.environment != Prod && r.environment != Test {
+		return nil, fmt.Errorf("invalid Parquedit environment %q", r.environment)
+	}
 	return r, nil
 }
 
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
+	displayName := "Parquedit"
+	description := "Manage Parquedit resources in ffunk's database"
+	if r.environment == Test {
+		displayName = "Parquedit (test)"
+		description = "Manage Parquedit resources in ffunk's test database"
+	}
+
 	return &protoapi.NewReconciler{
 		Name:        r.Name(),
-		DisplayName: "Parquedit",
-		Description: "Manage Parquedit resources in ffunk's database",
+		DisplayName: displayName,
+		Description: description,
 		MemberAware: true,
 		Config: []*protoapi.ReconcilerConfigSpec{
 			{
@@ -70,7 +93,18 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 }
 
 func (r *reconciler) Name() string {
+	if r.environment == Test {
+		return reconcilerName + ":test"
+	}
 	return reconcilerName
+}
+
+func (r *reconciler) desiredState(daplaTeam *protoapi.Team) bool {
+	if r.environment == Prod {
+		return daplaTeam.HasParquedit
+	}
+
+	return daplaTeam.HasParqueditTest
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient, daplaTeam *protoapi.Team, log logrus.FieldLogger) error {
@@ -84,7 +118,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("check if team has parquedit: %w", err)
 	}
 
-	shouldHaveParquedit := daplaTeam.HasParquedit
+	shouldHaveParquedit := r.desiredState(daplaTeam)
 
 	if hasParquedit == shouldHaveParquedit {
 		return nil
