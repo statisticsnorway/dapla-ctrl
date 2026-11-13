@@ -23,13 +23,13 @@ Set these keys for `google:pam` through the Console or the admin-only
 `configureReconciler` GraphQL mutation. The reconciler registers their
 specifications with Dapla API at startup.
 
-| Key | Value |
-| --- | --- |
-| `principals` | Comma-separated IAM principal identifiers, e.g. `serviceAccount:reader@example.iam.gserviceaccount.com,group:readers@example.com` |
-| `role` | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer` |
-| `max_grant_duration` | Go duration between `30m` and `168h`, e.g. `1h` |
-| `condition_template` | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env` |
-| `team_allowlist` | Optional comma-separated list of exact, case-sensitive team slugs, e.g. `my-team,another-team`. Empty or unset allows all Managed teams. |
+| Key                     | Value                                                                                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `principals`            | Comma-separated IAM principal identifiers, e.g. `serviceAccount:reader@example.iam.gserviceaccount.com,group:readers@example.com`             |
+| `role`                  | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer`                                      |
+| `max_grant_duration`    | Go duration between `30m` and `168h`, e.g. `1h`                                                                                               |
+| `condition_template`    | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env`                                                      |
+| `team_allowlist`        | Optional comma-separated list of exact, case-sensitive team slugs, e.g. `my-team,another-team`. Empty or unset allows all Managed teams.      |
 | `environment_allowlist` | Optional comma-separated list of exact, case-sensitive environment names, e.g. `dev,test`. Empty or unset allows all configured environments. |
 
 The four policy settings have no defaults. Until all four are set, PAM reconciliation
@@ -74,16 +74,9 @@ Markdown fences or additional surrounding quotes). It uses Go template
 for each team and environment.
 
 ```gotemplate
-{{- $bucket := `(resource.type == "storage.googleapis.com/Bucket" ? resource.name.extract("projects/_/buckets/{bucket}") : resource.name.extract("projects/_/buckets/{bucket}/"))` -}}
 resource.type in ["storage.googleapis.com/Bucket", "storage.googleapis.com/Object"] &&
-{{$bucket}}.endsWith({{printf "%q" (printf "-%s" .Env)}}) &&
 (
-  {{$bucket}} == {{printf "%q" (printf "ssb-%s-data-produkt-%s" .TeamSlug .Env)}} ||
-  (
-    {{$bucket}}.startsWith({{printf "%q" (printf "ssb-%s-data-delt-" .TeamSlug)}}) &&
-    {{$bucket}} != {{printf "%q" (printf "ssb-%s-data-delt--%s" .TeamSlug .Env)}} &&
-    {{$bucket}} != {{printf "%q" (printf "ssb-%s-data-delt-delomat--%s" .TeamSlug .Env)}}
-  )
+  resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-produkt" .TeamSlug)}}) || resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-delt" .TeamSlug)}})
 )
 ```
 
