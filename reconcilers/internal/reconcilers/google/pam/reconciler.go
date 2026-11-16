@@ -57,15 +57,11 @@ func (c Config) validate() error {
 }
 
 func (c pamConfig) validate() error {
-	for _, teamSlug := range c.TeamAllowlist {
-		if teamSlug == "" {
-			return fmt.Errorf("PAM team allowlist must not contain empty entries")
-		}
+	if slices.Contains(c.TeamAllowlist, "") {
+		return fmt.Errorf("PAM team allowlist must not contain empty entries")
 	}
-	for _, env := range c.EnvironmentAllowlist {
-		if env == "" {
-			return fmt.Errorf("PAM environment allowlist must not contain empty entries")
-		}
+	if slices.Contains(c.EnvironmentAllowlist, "") {
+		return fmt.Errorf("PAM environment allowlist must not contain empty entries")
 	}
 	for _, principal := range c.Principals {
 		if strings.TrimSpace(principal) == "" {
@@ -194,7 +190,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		if folderID == "" {
 			return fmt.Errorf("stored folder ID for team %q in env %q is empty", daplaTeam.Slug, env)
 		}
-		conditionExpression, err := cfg.renderPAMCondition(daplaTeam.Slug, env)
+		conditionExpression, err := cfg.renderPAMCondition(daplaTeam.Slug)
 		if err != nil {
 			return fmt.Errorf("PAM condition for folder %q in env %q: %w", folderID, env, err)
 		}
@@ -262,12 +258,11 @@ func parseCommaSeparatedList(value string) []string {
 	return entries
 }
 
-func (c pamConfig) renderPAMCondition(teamSlug, env string) (string, error) {
+func (c pamConfig) renderPAMCondition(teamSlug string) (string, error) {
 	var rendered bytes.Buffer
 	if err := c.ConditionTemplate.Execute(&rendered, struct {
 		TeamSlug string
-		Env      string
-	}{TeamSlug: teamSlug, Env: env}); err != nil {
+	}{TeamSlug: teamSlug}); err != nil {
 		return "", fmt.Errorf("render PAM IAM condition: %w", err)
 	}
 	expression := strings.TrimSpace(rendered.String())
