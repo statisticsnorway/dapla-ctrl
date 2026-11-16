@@ -1,4 +1,7 @@
-# PAM reconciler
+# Metamapper reconciler
+
+The implementation lives in `metadata/metamapper`. Its API identity remains
+`google:pam` to preserve existing configuration and enablement.
 
 The `google:pam` reconciler creates the `ssb-bucket-read` PAM entitlement on
 each team folder in `locations/global`. The entitlement grants a configurable
@@ -7,7 +10,7 @@ No approval or requester justification is required. A templated IAM condition
 scopes the permissions granted by the entitlement.
 
 Only Managed teams are reconciled. This reconciler runs after
-[`google:gcpresources`](../gcpresources) and reads the folder IDs stored by it;
+[`google:gcpresources`](../../google/gcpresources) and reads the folder IDs stored by it;
 it does not create folders or tags. Environments are taken from the keys of
 `GCP_TEAMS_FOLDER_NUMBERS`. Missing stored folders are returned as reconciliation
 errors.

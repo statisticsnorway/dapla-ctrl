@@ -1,4 +1,4 @@
-package pam_test
+package metamapper_test
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/google/cel-go/common/types/ref"
 	"github.com/sirupsen/logrus"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
-	googlepam "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/metadata/metamapper"
 )
 
 func examplePAMCondition(t *testing.T) string {
@@ -75,9 +75,9 @@ func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
 	server.config["condition_template"] = examplePAMCondition(t)
 	pam := &fakePrivilegedAccessManager{}
-	r, err := googlepam.New(t.Context(), googlepam.Config{
+	r, err := metamapper.New(t.Context(), metamapper.Config{
 		Environments: []string{"dev", "test", "prod"},
-	}, nil, googlepam.WithPrivilegedAccessManager(pam))
+	}, nil, metamapper.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package pam_test
+package metamapper_test
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient"
 	"github.com/statisticsnorway/dapla-ctrl/api/pkg/apiclient/protoapi"
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/gcpresources"
-	googlepam "github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/google/pam"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/metadata/metamapper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -124,7 +124,7 @@ func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folde
 	return f.err
 }
 
-const testPAMConditionTemplate = `resource.name == "projects/_/buckets/ssb-{{.TeamSlug}}-data-produkt-{{.Env}}/objects/example"`
+const testPAMConditionTemplate = `resource.name == "projects/_/buckets/ssb-{{.TeamSlug}}-data-produkt/objects/example"`
 
 func TestNew_ValidatesEnvironments(t *testing.T) {
 	for name, tt := range map[string]struct {
@@ -135,7 +135,7 @@ func TestNew_ValidatesEnvironments(t *testing.T) {
 		"empty":   {environments: []string{"dev", " "}, wantErr: "PAM environments must not contain empty entries"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			_, err := googlepam.New(t.Context(), googlepam.Config{Environments: tt.environments}, nil)
+			_, err := metamapper.New(t.Context(), metamapper.Config{Environments: tt.environments}, nil)
 			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
 				t.Fatalf("got %v, want error containing %q", err, tt.wantErr)
 			}
@@ -179,9 +179,9 @@ func TestReconcile_StoredFolderErrors(t *testing.T) {
 				server.folders["my-team/dev"] = tt.folder
 			}
 			pam := &fakePrivilegedAccessManager{}
-			r, err := googlepam.New(t.Context(), googlepam.Config{
+			r, err := metamapper.New(t.Context(), metamapper.Config{
 				Environments: []string{"dev"},
-			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			}, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -209,14 +209,14 @@ func TestReconcile_AfterFolderReconciliation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			cfg := googlepam.Config{
+			cfg := metamapper.Config{
 				Environments: []string{"dev"},
 			}
 			if !configured {
 				server.config["role"] = ""
 			}
 			pam := &fakePrivilegedAccessManager{}
-			pamReconciler, err := googlepam.New(t.Context(), cfg, nil, googlepam.WithPrivilegedAccessManager(pam))
+			pamReconciler, err := metamapper.New(t.Context(), cfg, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -261,9 +261,9 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 				"condition_template": testPAMConditionTemplate,
 				"team_allowlist":     "my-team",
 			}
-			r, err := googlepam.New(t.Context(), googlepam.Config{
+			r, err := metamapper.New(t.Context(), metamapper.Config{
 				Environments: []string{"dev", "test", "prod"},
-			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			}, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -297,8 +297,7 @@ func TestReconcile_PAMOnlyForManagedTeams(t *testing.T) {
 					call.role != "roles/storage.objectViewer" || call.duration != 2*time.Hour {
 					t.Errorf("unexpected entitlement: %+v", call)
 				}
-				env := map[string]string{"100": "dev", "200": "test", "300": "prod"}[call.folderID]
-				expectedCondition := fmt.Sprintf(`resource.name == "projects/_/buckets/ssb-my-team-data-produkt-%s/objects/example"`, env)
+				expectedCondition := `resource.name == "projects/_/buckets/ssb-my-team-data-produkt/objects/example"`
 				if call.conditionExpression != expectedCondition {
 					t.Errorf("incorrect condition for folder %s: %s", call.folderID, call.conditionExpression)
 				}
@@ -339,9 +338,9 @@ func TestReconcile_TeamAllowlist(t *testing.T) {
 				server.config["team_allowlist"] = tt.value
 			}
 			pam := &fakePrivilegedAccessManager{}
-			r, err := googlepam.New(t.Context(), googlepam.Config{
+			r, err := metamapper.New(t.Context(), metamapper.Config{
 				Environments: []string{"dev"},
-			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			}, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -369,9 +368,9 @@ func TestReconcile_TeamAllowlistChangesWithoutRestart(t *testing.T) {
 	server.folders["my-team/dev"] = &protoapi.GcpTeamFolder{TeamSlug: "my-team", Env: "dev", FolderId: "100"}
 	client := startFakeGrpcServer(t, server)
 	pam := &fakePrivilegedAccessManager{}
-	r, err := googlepam.New(t.Context(), googlepam.Config{
+	r, err := metamapper.New(t.Context(), metamapper.Config{
 		Environments: []string{"dev"},
-	}, nil, googlepam.WithPrivilegedAccessManager(pam))
+	}, nil, metamapper.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -430,9 +429,9 @@ func TestReconcile_EnvironmentAllowlist(t *testing.T) {
 				server.config["environment_allowlist"] = tt.value
 			}
 			pam := &fakePrivilegedAccessManager{}
-			r, err := googlepam.New(t.Context(), googlepam.Config{
+			r, err := metamapper.New(t.Context(), metamapper.Config{
 				Environments: []string{"dev", "test", "prod"},
-			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			}, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -470,9 +469,9 @@ func TestReconcile_EnvironmentAllowlistChangesWithoutRestart(t *testing.T) {
 	}
 	client := startFakeGrpcServer(t, server)
 	pam := &fakePrivilegedAccessManager{}
-	r, err := googlepam.New(t.Context(), googlepam.Config{
+	r, err := metamapper.New(t.Context(), metamapper.Config{
 		Environments: []string{"dev", "test"},
-	}, nil, googlepam.WithPrivilegedAccessManager(pam))
+	}, nil, metamapper.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -528,7 +527,7 @@ func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 		"blank condition":           {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "  ", wantSkip: true},
 		"invalid template":          {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "{{", wantErr: "parse PAM IAM condition template"},
 		"unknown template variable": {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: "{{.Unknown}}", wantErr: "render PAM IAM condition"},
-		"empty rendered condition":  {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: `{{if eq .Env "absent"}}true{{end}}`, wantErr: "rendered to an empty expression"},
+		"empty rendered condition":  {principals: "user:reader@example.com", role: "roles/storage.objectViewer", duration: "1h", conditionTemplate: `{{if eq .TeamSlug "absent"}}true{{end}}`, wantErr: "rendered to an empty expression"},
 		"empty role":                {principals: "user:reader@example.com", duration: "1h", wantSkip: true},
 		"whitespace role":           {principals: "user:reader@example.com", role: "  ", duration: "1h", wantSkip: true},
 		"group principal":           {principals: "group:readers@example.com", role: "roles/storage.objectViewer", duration: "1h"},
@@ -572,9 +571,9 @@ func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 			server.config = values
 			server.configErr = tt.configErr
 			pam := &fakePrivilegedAccessManager{err: tt.pamErr}
-			r, err := googlepam.New(t.Context(), googlepam.Config{
+			r, err := metamapper.New(t.Context(), metamapper.Config{
 				Environments: []string{"dev"},
-			}, nil, googlepam.WithPrivilegedAccessManager(pam))
+			}, nil, metamapper.WithPrivilegedAccessManager(pam))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -607,7 +606,7 @@ func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 				if pam.calls[0].role != tt.role || !slices.Equal(pam.calls[0].principals, strings.Split(tt.principals, ",")) {
 					t.Fatalf("unexpected entitlement: %+v", pam.calls[0])
 				}
-				if pam.calls[0].conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
+				if pam.calls[0].conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt/objects/example"` {
 					t.Fatalf("unexpected condition: %s", pam.calls[0].conditionExpression)
 				}
 			}
@@ -616,11 +615,11 @@ func TestReconcile_PAMConfigurationFromAPI(t *testing.T) {
 }
 
 func TestReconcile_PAMConfigurationChangesWithoutRestart(t *testing.T) {
-	cfg := googlepam.Config{
+	cfg := metamapper.Config{
 		Environments: []string{"dev"},
 	}
 	pam := &fakePrivilegedAccessManager{}
-	r, err := googlepam.New(t.Context(), cfg, nil, googlepam.WithPrivilegedAccessManager(pam))
+	r, err := metamapper.New(t.Context(), cfg, nil, metamapper.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -635,7 +634,7 @@ func TestReconcile_PAMConfigurationChangesWithoutRestart(t *testing.T) {
 	server.config["role"] = "roles/storage.objectAdmin"
 	server.config["principals"] = "group:readers@example.com"
 	server.config["max_grant_duration"] = "2h"
-	server.config["condition_template"] = `resource.name == "projects/_/buckets/{{.TeamSlug}}-{{.Env}}"`
+	server.config["condition_template"] = `resource.name == "projects/_/buckets/{{.TeamSlug}}"`
 	if err := r.Reconcile(t.Context(), client, team, logrus.New()); err != nil {
 		t.Fatal(err)
 	}
@@ -645,12 +644,12 @@ func TestReconcile_PAMConfigurationChangesWithoutRestart(t *testing.T) {
 	first, updated := pam.calls[0], pam.calls[1]
 	if first.duration != time.Hour || first.role != "roles/storage.objectViewer" ||
 		!slices.Equal(first.principals, []string{"user:reader@example.com"}) ||
-		first.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt-dev/objects/example"` {
+		first.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt/objects/example"` {
 		t.Fatalf("unexpected initial configuration: %+v", first)
 	}
 	if updated.duration != 2*time.Hour || updated.role != "roles/storage.objectAdmin" ||
 		!slices.Equal(updated.principals, []string{"group:readers@example.com"}) ||
-		updated.conditionExpression != `resource.name == "projects/_/buckets/my-team-dev"` {
+		updated.conditionExpression != `resource.name == "projects/_/buckets/my-team"` {
 		t.Fatalf("configuration changes were not applied: %+v", updated)
 	}
 	server.config["condition_template"] = "{{"

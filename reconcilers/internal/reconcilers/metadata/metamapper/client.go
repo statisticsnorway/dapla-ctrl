@@ -1,4 +1,4 @@
-package pam
+package metamapper
 
 import (
 	"context"

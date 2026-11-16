@@ -22,7 +22,7 @@ Use environment variables for startup and integration settings such as
 credentials, the API connection, Google folder parents and initial reconciler
 enablement. A local `.env` file supplies those environment variables for
 development; it is not an alternative source for API-backed policy settings.
-See the [PAM reconciler configuration](internal/reconcilers/google/pam/README.md)
+See the [Metamapper reconciler configuration](internal/reconcilers/metadata/metamapper/README.md)
 for an example.
 
 ## Local development

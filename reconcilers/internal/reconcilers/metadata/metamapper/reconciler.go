@@ -1,4 +1,4 @@
-package pam
+package metamapper
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	reconcilerName = "google:pam"
+	reconcilerName = "metadata:metamapper:pam"
 
 	configRoleKey                 = "role"
 	configPrincipalsKey           = "principals"
