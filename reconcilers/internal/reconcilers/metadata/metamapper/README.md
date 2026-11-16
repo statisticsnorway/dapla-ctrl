@@ -1,9 +1,9 @@
 # Metamapper reconciler
 
-The implementation lives in `metadata/metamapper`. Its API identity remains
-`google:pam` to preserve existing configuration and enablement.
+The implementation lives in `metadata/metamapper`. Its API identity is
+`metadata:metamapper:pam`.
 
-The `google:pam` reconciler creates the `ssb-bucket-read` PAM entitlement on
+The `metadata:metamapper:pam` reconciler creates a PAM entitlement on
 each team folder in `locations/global`. The entitlement grants a configurable
 IAM role to the configured eligible principals.
 No approval or requester justification is required. A templated IAM condition
@@ -15,14 +15,14 @@ it does not create folders or tags. Environments are taken from the keys of
 `GCP_TEAMS_FOLDER_NUMBERS`. Missing stored folders are returned as reconciliation
 errors.
 
-Enable `google:pam` separately through the Console, or include it in
+Enable `metadata:metamapper:pam` separately through the Console, or include it in
 `RECONCILERS_TO_ENABLE` before its first registration. Keep `google:gcpresources`
 enabled so the team folders are created and maintained.
 
 ## PAM configuration
 
 **API-backed configuration is the preferred method for reconciler policies.**
-Set these keys for `google:pam` through the Console or the admin-only
+Set these keys for `metadata:metamapper:pam` through the Console or the admin-only
 `configureReconciler` GraphQL mutation. The reconciler registers their
 specifications with Dapla API at startup.
 

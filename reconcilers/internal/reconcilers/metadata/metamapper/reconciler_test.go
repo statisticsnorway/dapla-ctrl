@@ -49,7 +49,7 @@ func newFakeGcpTeamResourcesServer() *fakeGcpTeamResourcesServer {
 
 func (s *fakeGcpTeamResourcesServer) Config(_ context.Context, req *protoapi.ConfigReconcilerRequest) (*protoapi.ConfigReconcilerResponse, error) {
 	s.configRequests = append(s.configRequests, req)
-	if req.ReconcilerName != "google:pam" {
+	if req.ReconcilerName != "metadata:metamapper:pam" {
 		return nil, status.Errorf(codes.InvalidArgument, "unexpected reconciler %q", req.ReconcilerName)
 	}
 	if s.configErr != nil {
