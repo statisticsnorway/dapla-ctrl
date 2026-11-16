@@ -26,39 +26,47 @@ Set these keys for `metadata:metamapper:pam` through the Console or the admin-on
 `configureReconciler` GraphQL mutation. The reconciler registers their
 specifications with Dapla API at startup.
 
-| Key                     | Value                                                                                                                                         |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `principals`            | Comma-separated IAM principal identifiers, e.g. `serviceAccount:reader@example.iam.gserviceaccount.com,group:readers@example.com`             |
-| `role`                  | Full IAM role name, e.g. `organizations/333333333/roles/ssb.bucket.read` or `roles/storage.objectViewer`                                      |
-| `max_grant_duration`    | Go duration between `30m` and `168h`, e.g. `1h`                                                                                               |
-| `condition_template`    | Go text template that renders an IAM CEL condition; variables are `.TeamSlug` and `.Env`                                                      |
-| `team_allowlist`        | Optional comma-separated list of exact, case-sensitive team slugs, e.g. `my-team,another-team`. Empty or unset allows all Managed teams.      |
-| `environment_allowlist` | Optional comma-separated list of exact, case-sensitive environment names, e.g. `dev,test`. Empty or unset allows all configured environments. |
+Each environment has independent configuration, with no shared defaults or
+fallback between TEST and PROD:
 
-The four policy settings have no defaults. Until all four are set, PAM reconciliation
-is skipped with a warning; folder and tag reconciliation continues. Invalid
+| TEST key | PROD key | Value |
+| --- | --- | --- |
+| `test_principals` | `prod_principals` | Comma-separated IAM principal identifiers, e.g. `user:reader@example.com,group:readers@example.com` |
+| `test_role` | `prod_role` | Full IAM role name, e.g. `roles/storage.objectViewer` |
+| `test_max_grant_duration` | `prod_max_grant_duration` | Go duration between `30m` and `168h`, e.g. `1h` |
+| `test_condition_template` | `prod_condition_template` | Go text template rendering an IAM CEL condition using `.TeamSlug` only |
+| `test_team_allowlist` | `prod_team_allowlist` | Optional comma-separated list of exact, case-sensitive team slugs. Empty or unset allows all Managed teams in that environment. |
+
+Keys are registered for environments in `GCP_TEAMS_FOLDER_NUMBERS`, using the
+lowercase environment name as their prefix. Folder lookups retain the original
+environment name, e.g. `TEST` or `PROD`.
+
+The four policy settings have no defaults. Until all four are set for an
+environment, PAM reconciliation for that environment is skipped with a warning;
+the other environment and folder/tag reconciliation continue. Invalid
 configuration and malformed templates are returned as reconciliation errors.
 Template
 execution failures, empty rendered conditions and PAM API failures are returned
 as reconciliation errors; an unconditional entitlement is never created as a
-fallback. Configuration is fetched once per Managed-team reconciliation and used
-for all its environments. Changes take effect on the next reconciliation without
+fallback. Configuration is fetched once per Managed-team reconciliation, with
+each environment using its own policy from that snapshot. Changes take effect on the next reconciliation without
 restarting the process. API failures are returned as errors, never replaced with
 stale configuration. Existing entitlements are updated
 when the policy changes, using an explicit field mask and the current etag;
 unchanged entitlements are left alone.
 
-Use `team_allowlist` and `environment_allowlist` to limit PAM reconciliation
-during testing. Both filters must allow a team/environment combination, and the
-Managed-team requirement still applies. The environment allowlist only filters
-environments configured through `GCP_TEAMS_FOLDER_NUMBERS`; it does not add new
-environments.
-
-For both allowlists, whitespace around entries is trimmed and non-empty lists
+Use `test_team_allowlist` and `prod_team_allowlist` to limit PAM reconciliation
+independently during testing. The Managed-team requirement still applies.
+For each team allowlist, whitespace around entries is trimmed and non-empty lists
 must not contain empty entries. Matching is exact and case-sensitive, with no
 wildcard or prefix matching. Changes take effect on the next reconciliation
-without restarting the process. Excluded teams and environments are skipped
+without restarting the process. Excluded teams and unconfigured environments are skipped
 before folder lookup or PAM calls.
+
+The former unprefixed API policy keys and `environment_allowlist` are removed.
+Re-enter policy values separately under the TEST and PROD keys; values are not
+copied automatically. To disable one environment, clear any of its four required
+policy settings. Existing entitlements are not deleted.
 
 The former `PAM_MANAGED_TEAM_FOLDER_*` environment variables are no longer read.
 Re-enter their values under the corresponding API keys above; environment
@@ -71,7 +79,8 @@ existing entitlements are updated rather than duplicated.
 
 ## IAM condition
 
-Set `condition_template` to the following literal Go template (without the
+Set `test_condition_template` and/or `prod_condition_template` to the following
+literal Go template (without the
 Markdown fences or additional surrounding quotes). It uses Go template
 `printf "%q"` to quote interpolated strings for CEL. Rendering occurs separately
 for each team and environment.

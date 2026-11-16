@@ -73,25 +73,30 @@ func conditionProgram(t *testing.T, expression string) cel.Program {
 
 func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
-	server.config["condition_template"] = examplePAMCondition(t)
+	for _, env := range []string{"test", "prod"} {
+		server.config[env+"_role"] = "roles/storage.objectViewer"
+		server.config[env+"_principals"] = "user:reader@example.com"
+		server.config[env+"_max_grant_duration"] = "1h"
+		server.config[env+"_condition_template"] = examplePAMCondition(t)
+	}
 	pam := &fakePrivilegedAccessManager{}
 	r, err := metamapper.New(t.Context(), metamapper.Config{
-		Environments: []string{"dev", "test", "prod"},
+		Environments: []string{"test", "prod"},
 	}, nil, metamapper.WithPrivilegedAccessManager(pam))
 	if err != nil {
 		t.Fatal(err)
 	}
 	apiClient := startFakeGrpcServer(t, server)
 	for _, team := range []string{"my-team", "another-team"} {
-		for _, env := range []string{"dev", "test", "prod"} {
+		for _, env := range []string{"test", "prod"} {
 			server.folders[team+"/"+env] = &protoapi.GcpTeamFolder{TeamSlug: team, Env: env, FolderId: team + "/" + env}
 		}
 		if err := r.Reconcile(t.Context(), apiClient, &protoapi.Team{Slug: team, IsManaged: true}, logrus.New()); err != nil {
 			t.Fatal(err)
 		}
 	}
-	if len(pam.calls) != 6 {
-		t.Fatalf("got %d entitlements, want 6", len(pam.calls))
+	if len(pam.calls) != 4 {
+		t.Fatalf("got %d entitlements, want 4", len(pam.calls))
 	}
 	for _, call := range pam.calls {
 		team, env, _ := strings.Cut(call.folderID, "/")

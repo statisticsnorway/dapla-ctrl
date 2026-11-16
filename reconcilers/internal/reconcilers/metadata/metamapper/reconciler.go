@@ -19,12 +19,11 @@ import (
 const (
 	reconcilerName = "metadata:metamapper:pam"
 
-	configRoleKey                 = "role"
-	configPrincipalsKey           = "principals"
-	configMaxGrantDurationKey     = "max_grant_duration"
-	configConditionTemplateKey    = "condition_template"
-	configTeamAllowlistKey        = "team_allowlist"
-	configEnvironmentAllowlistKey = "environment_allowlist"
+	configRoleKey              = "role"
+	configPrincipalsKey        = "principals"
+	configMaxGrantDurationKey  = "max_grant_duration"
+	configConditionTemplateKey = "condition_template"
+	configTeamAllowlistKey     = "team_allowlist"
 )
 
 type Config struct {
@@ -32,12 +31,11 @@ type Config struct {
 }
 
 type pamConfig struct {
-	Principals           []string
-	Role                 string
-	MaxGrantDuration     time.Duration
-	ConditionTemplate    *template.Template
-	TeamAllowlist        []string
-	EnvironmentAllowlist []string
+	Principals        []string
+	Role              string
+	MaxGrantDuration  time.Duration
+	ConditionTemplate *template.Template
+	TeamAllowlist     []string
 }
 
 func (c pamConfig) configured() bool {
@@ -59,9 +57,6 @@ func (c Config) validate() error {
 func (c pamConfig) validate() error {
 	if slices.Contains(c.TeamAllowlist, "") {
 		return fmt.Errorf("PAM team allowlist must not contain empty entries")
-	}
-	if slices.Contains(c.EnvironmentAllowlist, "") {
-		return fmt.Errorf("PAM environment allowlist must not contain empty entries")
 	}
 	for _, principal := range c.Principals {
 		if strings.TrimSpace(principal) == "" {
@@ -107,12 +102,14 @@ func New(ctx context.Context, cfg Config, services *google.Services, opts ...opt
 }
 
 func (r *reconciler) Configuration() *protoapi.NewReconciler {
-	return &protoapi.NewReconciler{
+	config := &protoapi.NewReconciler{
 		Name:        r.Name(),
 		DisplayName: "PAM reconciler",
 		Description: "Manage PAM entitlements on team folders for Managed teams",
 		MemberAware: false,
-		Config: []*protoapi.ReconcilerConfigSpec{
+	}
+	for _, env := range r.cfg.Environments {
+		specs := []*protoapi.ReconcilerConfigSpec{
 			{
 				Key:         configRoleKey,
 				DisplayName: "Managed team folder IAM role",
@@ -134,7 +131,7 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 			{
 				Key:         configConditionTemplateKey,
 				DisplayName: "Managed team folder IAM condition template",
-				Description: "Go text template rendering an IAM CEL condition, using .TeamSlug and .Env.",
+				Description: "Go text template rendering an IAM CEL condition, using .TeamSlug.",
 				Secret:      false,
 			},
 			{
@@ -143,14 +140,14 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 				Description: "Comma-separated list of exact, case-sensitive team slugs. Empty allows all Managed teams.",
 				Secret:      false,
 			},
-			{
-				Key:         configEnvironmentAllowlistKey,
-				DisplayName: "Environment allowlist",
-				Description: "Comma-separated list of exact, case-sensitive environment names. Empty allows all configured environments.",
-				Secret:      false,
-			},
-		},
+		}
+		for _, spec := range specs {
+			spec.Key = strings.ToLower(env) + "_" + spec.Key
+			spec.DisplayName = env + ": " + spec.DisplayName
+		}
+		config.Config = append(config.Config, specs...)
 	}
+	return config
 }
 
 func (r *reconciler) Name() string {
@@ -165,18 +162,15 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 	if err != nil {
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
-	if len(cfg.TeamAllowlist) > 0 && !slices.Contains(cfg.TeamAllowlist, daplaTeam.Slug) {
-		log.Debug("skipping PAM entitlements: team is not allowlisted")
-		return nil
-	}
-	if !cfg.configured() {
-		log.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
-		return nil
-	}
-
 	for _, env := range r.cfg.Environments {
-		if len(cfg.EnvironmentAllowlist) > 0 && !slices.Contains(cfg.EnvironmentAllowlist, env) {
-			log.WithField("env", env).Debug("skipping PAM entitlement: environment is not allowlisted")
+		policy := cfg[env]
+		envLog := log.WithField("env", env)
+		if len(policy.TeamAllowlist) > 0 && !slices.Contains(policy.TeamAllowlist, daplaTeam.Slug) {
+			envLog.Debug("skipping PAM entitlements: team is not allowlisted")
+			continue
+		}
+		if !policy.configured() {
+			envLog.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
 			continue
 		}
 		resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
@@ -190,61 +184,74 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		if folderID == "" {
 			return fmt.Errorf("stored folder ID for team %q in env %q is empty", daplaTeam.Slug, env)
 		}
-		conditionExpression, err := cfg.renderPAMCondition(daplaTeam.Slug)
+		conditionExpression, err := policy.renderPAMCondition(daplaTeam.Slug)
 		if err != nil {
 			return fmt.Errorf("PAM condition for folder %q in env %q: %w", folderID, env, err)
 		}
-		if err := r.client.EnsureEntitlement(ctx, folderID, cfg.Role, conditionExpression, cfg.Principals, cfg.MaxGrantDuration); err != nil {
+		if err := r.client.EnsureEntitlement(ctx, folderID, policy.Role, conditionExpression, policy.Principals, policy.MaxGrantDuration); err != nil {
 			return fmt.Errorf("reconcile PAM entitlement for folder %q in env %q: %w", folderID, env, err)
 		}
 	}
 	return nil
 }
 
-func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient) (pamConfig, error) {
+func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient) (map[string]pamConfig, error) {
 	config, err := client.Reconcilers().Config(ctx, &protoapi.ConfigReconcilerRequest{
 		ReconcilerName: r.Name(),
 	})
 	if err != nil {
-		return pamConfig{}, fmt.Errorf("get reconciler config: %w", err)
+		return nil, fmt.Errorf("get reconciler config: %w", err)
 	}
 
-	cfg := pamConfig{}
-	var conditionTemplate string
+	values := make(map[string]string, len(config.Nodes))
 	for _, c := range config.Nodes {
-		value := strings.TrimSpace(c.Value)
-		switch c.Key {
-		case configRoleKey:
-			cfg.Role = value
-		case configPrincipalsKey:
-			cfg.Principals = parseCommaSeparatedList(value)
-		case configMaxGrantDurationKey:
-			if value != "" {
-				cfg.MaxGrantDuration, err = time.ParseDuration(value)
-				if err != nil {
-					return pamConfig{}, fmt.Errorf("parse PAM maximum grant duration: %w", err)
-				}
+		values[c.Key] = strings.TrimSpace(c.Value)
+	}
+	policies := make(map[string]pamConfig, len(r.cfg.Environments))
+	for _, env := range r.cfg.Environments {
+		cfg := pamConfig{}
+		var conditionTemplate string
+		prefix := strings.ToLower(env) + "_"
+		for key, value := range values {
+			if !strings.HasPrefix(key, prefix) {
+				continue
 			}
-		case configConditionTemplateKey:
-			conditionTemplate = value
-		case configTeamAllowlistKey:
-			cfg.TeamAllowlist = parseCommaSeparatedList(value)
-		case configEnvironmentAllowlistKey:
-			cfg.EnvironmentAllowlist = parseCommaSeparatedList(value)
-		default:
-			return pamConfig{}, fmt.Errorf("unknown config key %q", c.Key)
+			switch strings.TrimPrefix(key, prefix) {
+			case configRoleKey:
+				cfg.Role = value
+			case configPrincipalsKey:
+				cfg.Principals = parseCommaSeparatedList(value)
+			case configMaxGrantDurationKey:
+				if value != "" {
+					cfg.MaxGrantDuration, err = time.ParseDuration(value)
+					if err != nil {
+						return nil, fmt.Errorf("env %q: parse PAM maximum grant duration: %w", env, err)
+					}
+				}
+			case configConditionTemplateKey:
+				conditionTemplate = value
+			case configTeamAllowlistKey:
+				cfg.TeamAllowlist = parseCommaSeparatedList(value)
+			default:
+				return nil, fmt.Errorf("unknown config key %q", key)
+			}
+			delete(values, key)
 		}
-	}
-	if err := cfg.validate(); err != nil {
-		return pamConfig{}, fmt.Errorf("validate reconciler config: %w", err)
-	}
-	if conditionTemplate != "" {
-		cfg.ConditionTemplate, err = template.New("PAM IAM condition").Option("missingkey=error").Parse(conditionTemplate)
-		if err != nil {
-			return pamConfig{}, fmt.Errorf("parse PAM IAM condition template: %w", err)
+		if err := cfg.validate(); err != nil {
+			return nil, fmt.Errorf("env %q: validate reconciler config: %w", env, err)
 		}
+		if conditionTemplate != "" {
+			cfg.ConditionTemplate, err = template.New("PAM IAM condition").Option("missingkey=error").Parse(conditionTemplate)
+			if err != nil {
+				return nil, fmt.Errorf("env %q: parse PAM IAM condition template: %w", env, err)
+			}
+		}
+		policies[env] = cfg
 	}
-	return cfg, nil
+	for key := range values {
+		return nil, fmt.Errorf("unknown config key %q", key)
+	}
+	return policies, nil
 }
 
 func parseCommaSeparatedList(value string) []string {
