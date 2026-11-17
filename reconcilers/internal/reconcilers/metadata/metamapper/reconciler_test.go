@@ -37,6 +37,7 @@ func newFakeGcpTeamResourcesServer() *fakeGcpTeamResourcesServer {
 	return &fakeGcpTeamResourcesServer{
 		folders: make(map[string]*protoapi.GcpTeamFolder),
 		config: map[string]string{
+			"test_entitlement_id":     "test-bucket-read",
 			"test_role":               "roles/storage.objectViewer",
 			"test_principals":         "user:reader@example.com",
 			"test_max_grant_duration": "1h",
@@ -93,6 +94,7 @@ func startFakeGrpcServer(t *testing.T, srv *fakeGcpTeamResourcesServer) *apiclie
 
 type entitlementCall struct {
 	folderID            string
+	entitlementID       string
 	role                string
 	conditionExpression string
 	principals          []string
@@ -104,8 +106,8 @@ type fakePrivilegedAccessManager struct {
 	err   error
 }
 
-func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folderID, role, conditionExpression string, principals []string, duration time.Duration) error {
-	f.calls = append(f.calls, entitlementCall{folderID, role, conditionExpression, principals, duration})
+func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, duration time.Duration) error {
+	f.calls = append(f.calls, entitlementCall{folderID, entitlementID, role, conditionExpression, principals, duration})
 	return f.err
 }
 
@@ -129,6 +131,7 @@ func TestNew_ValidatesEnvironments(t *testing.T) {
 func TestReconcile_IndependentEnvironmentConfiguration(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
 	server.config["test_team_allowlist"] = " other-team, my-team "
+	server.config["prod_entitlement_id"] = " prod-bucket-read "
 	server.config["prod_role"] = " roles/storage.objectAdmin "
 	server.config["prod_principals"] = " group:prod@example.com, user:admin@example.com "
 	server.config["prod_max_grant_duration"] = " 2h "
@@ -149,8 +152,8 @@ func TestReconcile_IndependentEnvironmentConfiguration(t *testing.T) {
 		keys = append(keys, spec.Key)
 	}
 	if !slices.Equal(keys, []string{
-		"test_role", "test_principals", "test_max_grant_duration", "test_condition_template", "test_team_allowlist",
-		"prod_role", "prod_principals", "prod_max_grant_duration", "prod_condition_template", "prod_team_allowlist",
+		"test_entitlement_id", "test_role", "test_principals", "test_max_grant_duration", "test_condition_template", "test_team_allowlist",
+		"prod_entitlement_id", "prod_role", "prod_principals", "prod_max_grant_duration", "prod_condition_template", "prod_team_allowlist",
 	}) {
 		t.Fatalf("unexpected API configuration keys: %v", keys)
 	}
@@ -164,22 +167,23 @@ func TestReconcile_IndependentEnvironmentConfiguration(t *testing.T) {
 		t.Fatalf("expected two entitlements from one config snapshot, got %+v", pam.calls)
 	}
 	test, prod := pam.calls[0], pam.calls[1]
-	if test.folderID != "100" || test.role != "roles/storage.objectViewer" || test.duration != time.Hour ||
+	if test.folderID != "100" || test.entitlementID != "test-bucket-read" || test.role != "roles/storage.objectViewer" || test.duration != time.Hour ||
 		!slices.Equal(test.principals, []string{"user:reader@example.com"}) ||
 		test.conditionExpression != `resource.name == "projects/_/buckets/ssb-my-team-data-produkt/objects/example"` {
 		t.Fatalf("unexpected TEST policy: %+v", test)
 	}
-	if prod.folderID != "200" || prod.role != "roles/storage.objectAdmin" || prod.duration != 2*time.Hour ||
+	if prod.folderID != "200" || prod.entitlementID != "prod-bucket-read" || prod.role != "roles/storage.objectAdmin" || prod.duration != 2*time.Hour ||
 		!slices.Equal(prod.principals, []string{"group:prod@example.com", "user:admin@example.com"}) ||
 		prod.conditionExpression != `resource.name.startsWith("my-team-prod")` {
 		t.Fatalf("unexpected PROD policy: %+v", prod)
 	}
 	server.config["test_team_allowlist"] = "another-team"
 	server.config["prod_role"] = "roles/storage.objectViewer"
+	server.config["prod_entitlement_id"] = "updated-prod-reader"
 	if err := r.Reconcile(t.Context(), client, team, log); err != nil {
 		t.Fatal(err)
 	}
-	if len(pam.calls) != 3 || pam.calls[2].folderID != "200" || pam.calls[2].role != "roles/storage.objectViewer" {
+	if len(pam.calls) != 3 || pam.calls[2].folderID != "200" || pam.calls[2].entitlementID != "updated-prod-reader" || pam.calls[2].role != "roles/storage.objectViewer" {
 		t.Fatalf("per-environment changes were not applied: %+v", pam.calls)
 	}
 	server.config["test_team_allowlist"] = ""
@@ -226,6 +230,9 @@ func TestReconcile_EnvironmentPolicyValidation(t *testing.T) {
 		remove              bool
 		wantSkip            bool
 	}{
+		"missing ID":        {key: "test_entitlement_id", remove: true, wantSkip: true},
+		"blank ID":          {key: "test_entitlement_id", value: " ", wantSkip: true},
+		"invalid ID":        {key: "test_entitlement_id", value: "invalid/id", wantErr: "PAM entitlement ID must be"},
 		"missing role":      {key: "test_role", remove: true, wantSkip: true},
 		"missing users":     {key: "test_principals", remove: true, wantSkip: true},
 		"missing duration":  {key: "test_max_grant_duration", remove: true, wantSkip: true},

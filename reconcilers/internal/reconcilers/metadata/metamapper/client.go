@@ -3,6 +3,7 @@ package metamapper
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -15,17 +16,27 @@ import (
 	"google.golang.org/protobuf/types/known/fieldmaskpb"
 )
 
-const pamEntitlementID = "ssb-bucket-read"
+var entitlementIDPattern = regexp.MustCompile(`^[a-z][a-z0-9-]{3,62}$`)
+
+func validateEntitlementID(id string) error {
+	if !entitlementIDPattern.MatchString(id) {
+		return fmt.Errorf("PAM entitlement ID must be 4-63 lowercase letters, digits or hyphens, starting with a letter")
+	}
+	return nil
+}
 
 type PrivilegedAccessManager interface {
-	EnsureEntitlement(ctx context.Context, folderID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error
+	EnsureEntitlement(ctx context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error
 }
 
 type GooglePrivilegedAccessManager struct {
 	client *privilegedaccessmanager.Client
 }
 
-func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, folderID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error {
+func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error {
+	if err := validateEntitlementID(entitlementID); err != nil {
+		return err
+	}
 	if strings.TrimSpace(conditionExpression) == "" {
 		return fmt.Errorf("PAM IAM condition is required")
 	}
@@ -35,7 +46,7 @@ func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, f
 
 	parent := fmt.Sprintf("folders/%s/locations/global", folderID)
 	desired := &privilegedaccessmanagerpb.Entitlement{
-		Name: parent + "/entitlements/" + pamEntitlementID,
+		Name: parent + "/entitlements/" + entitlementID,
 		EligibleUsers: []*privilegedaccessmanagerpb.AccessControlEntry{
 			{Principals: principals},
 		},
@@ -62,7 +73,7 @@ func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, f
 	if status.Code(err) == codes.NotFound {
 		op, err := g.client.CreateEntitlement(ctx, &privilegedaccessmanagerpb.CreateEntitlementRequest{
 			Parent:        parent,
-			EntitlementId: pamEntitlementID,
+			EntitlementId: entitlementID,
 			Entitlement:   desired,
 		})
 		if err != nil {

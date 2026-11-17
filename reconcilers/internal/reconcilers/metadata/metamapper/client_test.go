@@ -28,6 +28,7 @@ import (
 type fakePAMServer struct {
 	privilegedaccessmanagerpb.UnimplementedPrivilegedAccessManagerServer
 	entitlement    *privilegedaccessmanagerpb.Entitlement
+	getRequests    []*privilegedaccessmanagerpb.GetEntitlementRequest
 	createRequests []*privilegedaccessmanagerpb.CreateEntitlementRequest
 	updateRequests []*privilegedaccessmanagerpb.UpdateEntitlementRequest
 	getErr         error
@@ -37,6 +38,7 @@ type fakePAMServer struct {
 }
 
 func (s *fakePAMServer) GetEntitlement(_ context.Context, req *privilegedaccessmanagerpb.GetEntitlementRequest) (*privilegedaccessmanagerpb.Entitlement, error) {
+	s.getRequests = append(s.getRequests, req)
 	if s.getErr != nil {
 		return nil, s.getErr
 	}
@@ -116,19 +118,19 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	principals := []string{"serviceAccount:reader@test.iam.gserviceaccount.com", "user:reader@example.com", "group:readers@example.com"}
 	role := "roles/storage.objectViewer"
 	condition := `resource.name.startsWith("projects/_/buckets/ssb-my-team-data-produkt-dev/")`
-	if err := client.EnsureEntitlement(t.Context(), "123", role, condition, principals, time.Hour); err != nil {
+	if err := client.EnsureEntitlement(t.Context(), "123", "custom-reader", role, condition, principals, time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.createRequests) != 1 {
 		t.Fatalf("got %d creates, want 1", len(server.createRequests))
 	}
 	request := server.createRequests[0]
-	if request.Parent != "folders/123/locations/global" || request.EntitlementId != "ssb-bucket-read" {
+	if request.Parent != "folders/123/locations/global" || request.EntitlementId != "custom-reader" {
 		t.Fatalf("incorrect folder scope: %v", request)
 	}
 	entitlement := request.Entitlement
 	access := entitlement.PrivilegedAccess.GetGcpIamAccess()
-	if entitlement.Name != "folders/123/locations/global/entitlements/ssb-bucket-read" ||
+	if entitlement.Name != "folders/123/locations/global/entitlements/custom-reader" ||
 		access.Resource != "//cloudresourcemanager.googleapis.com/folders/123" ||
 		access.ResourceType != "cloudresourcemanager.googleapis.com/Folder" {
 		t.Fatalf("incorrect entitlement scope: %v", entitlement)
@@ -148,7 +150,7 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 		t.Fatalf("incorrect grant policy: %v", entitlement)
 	}
 
-	if err := client.EnsureEntitlement(t.Context(), "123", role, condition, principals, time.Hour); err != nil {
+	if err := client.EnsureEntitlement(t.Context(), "123", "custom-reader", role, condition, principals, time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.createRequests) != 1 || len(server.updateRequests) != 0 {
@@ -164,7 +166,7 @@ func TestEnsureEntitlement_CreatesAndReconcilesPolicy(t *testing.T) {
 	newPrincipals := []string{"group:other-readers@example.com"}
 	newRole := "organizations/573742569423/roles/ssb.bucket.read"
 	newCondition := `resource.name.startsWith("projects/_/buckets/ssb-my-team-data-produkt-prod/")`
-	if err := client.EnsureEntitlement(t.Context(), "123", newRole, newCondition, newPrincipals, 2*time.Hour); err != nil {
+	if err := client.EnsureEntitlement(t.Context(), "123", "custom-reader", newRole, newCondition, newPrincipals, 2*time.Hour); err != nil {
 		t.Fatal(err)
 	}
 	if len(server.updateRequests) != 1 {
@@ -194,7 +196,7 @@ func TestEnsureEntitlement_UpdatesOnlyCondition(t *testing.T) {
 	client := newFakePAMClient(t, server)
 	principals := []string{"user:reader@example.com"}
 	for _, condition := range []string{"false", `resource.type == "storage.googleapis.com/Object"`, `resource.type == "storage.googleapis.com/Object"`} {
-		if err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", condition, principals, time.Hour); err != nil {
+		if err := client.EnsureEntitlement(t.Context(), "123", "custom-reader", "roles/storage.objectViewer", condition, principals, time.Hour); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -209,12 +211,52 @@ func TestEnsureEntitlement_UpdatesOnlyCondition(t *testing.T) {
 func TestEnsureEntitlement_RejectsEmptyCondition(t *testing.T) {
 	server := &fakePAMServer{}
 	client := newFakePAMClient(t, server)
-	err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", "  ", []string{"user:reader@example.com"}, time.Hour)
+	err := client.EnsureEntitlement(t.Context(), "123", "custom-reader", "roles/storage.objectViewer", "  ", []string{"user:reader@example.com"}, time.Hour)
 	if err == nil || !strings.Contains(err.Error(), "PAM IAM condition is required") {
 		t.Fatalf("got %v, want missing condition error", err)
 	}
 	if len(server.createRequests) != 0 {
 		t.Fatal("an unconditional entitlement must not be created")
+	}
+}
+
+func TestEnsureEntitlement_ValidatesID(t *testing.T) {
+	for _, tt := range []struct {
+		id    string
+		valid bool
+	}{
+		{id: ""},
+		{id: "abc"},
+		{id: "abcd", valid: true},
+		{id: strings.Repeat("a", 63), valid: true},
+		{id: strings.Repeat("a", 64)},
+		{id: "1-reader"},
+		{id: "Uppercase"},
+		{id: "read_only"},
+		{id: "reader/other"},
+		{id: " reader "},
+		{id: "reader-123", valid: true},
+	} {
+		t.Run(tt.id, func(t *testing.T) {
+			server := &fakePAMServer{}
+			client := newFakePAMClient(t, server)
+			err := client.EnsureEntitlement(t.Context(), "123", tt.id, "roles/storage.objectViewer", "false", []string{"user:reader@example.com"}, time.Hour)
+			if tt.valid {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if len(server.createRequests) != 1 || server.createRequests[0].EntitlementId != tt.id {
+					t.Fatalf("configured ID was not used: %v", server.createRequests)
+				}
+			} else {
+				if err == nil || !strings.Contains(err.Error(), "PAM entitlement ID must be") {
+					t.Fatalf("expected invalid ID error, got %v", err)
+				}
+				if len(server.getRequests) != 0 || len(server.createRequests) != 0 || len(server.updateRequests) != 0 {
+					t.Fatal("invalid ID must not call PAM")
+				}
+			}
+		})
 	}
 }
 
@@ -244,7 +286,7 @@ func TestEnsureEntitlement_PropagatesFailures(t *testing.T) {
 				}
 			}
 			client := newFakePAMClient(t, server)
-			err := client.EnsureEntitlement(t.Context(), "123", "roles/storage.objectViewer", "false", []string{"user:reader@example.com"}, time.Hour)
+			err := client.EnsureEntitlement(t.Context(), "123", "ssb-bucket-read", "roles/storage.objectViewer", "false", []string{"user:reader@example.com"}, time.Hour)
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("got %v, want error containing %q", err, tt.want)
 			}

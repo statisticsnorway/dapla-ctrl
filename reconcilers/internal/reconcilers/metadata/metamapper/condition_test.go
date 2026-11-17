@@ -74,6 +74,7 @@ func conditionProgram(t *testing.T, expression string) cel.Program {
 func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 	server := newFakeGcpTeamResourcesServer()
 	for _, env := range []string{"test", "prod"} {
+		server.config[env+"_entitlement_id"] = env + "-bucket-read"
 		server.config[env+"_role"] = "roles/storage.objectViewer"
 		server.config[env+"_principals"] = "user:reader@example.com"
 		server.config[env+"_max_grant_duration"] = "1h"

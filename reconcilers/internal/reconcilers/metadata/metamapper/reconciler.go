@@ -24,6 +24,7 @@ const (
 	configMaxGrantDurationKey  = "max_grant_duration"
 	configConditionTemplateKey = "condition_template"
 	configTeamAllowlistKey     = "team_allowlist"
+	configEntitlementIDKey     = "entitlement_id"
 )
 
 type Config struct {
@@ -31,6 +32,7 @@ type Config struct {
 }
 
 type pamConfig struct {
+	EntitlementID     string
 	Principals        []string
 	Role              string
 	MaxGrantDuration  time.Duration
@@ -39,7 +41,7 @@ type pamConfig struct {
 }
 
 func (c pamConfig) configured() bool {
-	return len(c.Principals) != 0 && c.Role != "" && c.MaxGrantDuration != 0 && c.ConditionTemplate != nil
+	return c.EntitlementID != "" && len(c.Principals) != 0 && c.Role != "" && c.MaxGrantDuration != 0 && c.ConditionTemplate != nil
 }
 
 func (c Config) validate() error {
@@ -55,6 +57,11 @@ func (c Config) validate() error {
 }
 
 func (c pamConfig) validate() error {
+	if c.EntitlementID != "" {
+		if err := validateEntitlementID(c.EntitlementID); err != nil {
+			return err
+		}
+	}
 	if slices.Contains(c.TeamAllowlist, "") {
 		return fmt.Errorf("PAM team allowlist must not contain empty entries")
 	}
@@ -110,6 +117,12 @@ func (r *reconciler) Configuration() *protoapi.NewReconciler {
 	}
 	for _, env := range r.cfg.Environments {
 		specs := []*protoapi.ReconcilerConfigSpec{
+			{
+				Key:         configEntitlementIDKey,
+				DisplayName: "Managed team folder PAM entitlement ID",
+				Description: "Required entitlement ID: 4-63 lowercase letters, digits or hyphens, starting with a letter. No default is applied.",
+				Secret:      false,
+			},
 			{
 				Key:         configRoleKey,
 				DisplayName: "Managed team folder IAM role",
@@ -170,7 +183,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 			continue
 		}
 		if !policy.configured() {
-			envLog.Warn("skipping PAM entitlements: eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
+			envLog.Warn("skipping PAM entitlements: entitlement ID, eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
 			continue
 		}
 		resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
@@ -188,7 +201,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		if err != nil {
 			return fmt.Errorf("PAM condition for folder %q in env %q: %w", folderID, env, err)
 		}
-		if err := r.client.EnsureEntitlement(ctx, folderID, policy.Role, conditionExpression, policy.Principals, policy.MaxGrantDuration); err != nil {
+		if err := r.client.EnsureEntitlement(ctx, folderID, policy.EntitlementID, policy.Role, conditionExpression, policy.Principals, policy.MaxGrantDuration); err != nil {
 			return fmt.Errorf("reconcile PAM entitlement for folder %q in env %q: %w", folderID, env, err)
 		}
 	}
@@ -217,6 +230,8 @@ func (r *reconciler) getConfig(ctx context.Context, client *apiclient.APIClient)
 				continue
 			}
 			switch strings.TrimPrefix(key, prefix) {
+			case configEntitlementIDKey:
+				cfg.EntitlementID = value
 			case configRoleKey:
 				cfg.Role = value
 			case configPrincipalsKey:

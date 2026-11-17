@@ -31,6 +31,7 @@ fallback between TEST and PROD:
 
 | TEST key | PROD key | Value |
 | --- | --- | --- |
+| `test_entitlement_id` | `prod_entitlement_id` | Required PAM entitlement ID: 4-63 lowercase letters, digits or hyphens, starting with a letter |
 | `test_principals` | `prod_principals` | Comma-separated IAM principal identifiers, e.g. `user:reader@example.com,group:readers@example.com` |
 | `test_role` | `prod_role` | Full IAM role name, e.g. `roles/storage.objectViewer` |
 | `test_max_grant_duration` | `prod_max_grant_duration` | Go duration between `30m` and `168h`, e.g. `1h` |
@@ -41,7 +42,7 @@ Keys are registered for environments in `GCP_TEAMS_FOLDER_NUMBERS`, using the
 lowercase environment name as their prefix. Folder lookups retain the original
 environment name, e.g. `TEST` or `PROD`.
 
-The four policy settings have no defaults. Until all four are set for an
+The five policy settings have no defaults. Until all five are set for an
 environment, PAM reconciliation for that environment is skipped with a warning;
 the other environment and folder/tag reconciliation continue. Invalid
 configuration and malformed templates are returned as reconciliation errors.
@@ -65,7 +66,7 @@ before folder lookup or PAM calls.
 
 The former unprefixed API policy keys and `environment_allowlist` are removed.
 Re-enter policy values separately under the TEST and PROD keys; values are not
-copied automatically. To disable one environment, clear any of its four required
+copied automatically. To disable one environment, clear any of its five required
 policy settings. Existing entitlements are not deleted.
 
 The former `PAM_MANAGED_TEAM_FOLDER_*` environment variables are no longer read.
@@ -74,8 +75,11 @@ values are not migrated automatically or used as a fallback.
 
 Principal entries are trimmed and must not be empty; their IAM
 identifier formats are validated by Google's API, not restricted to service
-accounts. The entitlement ID remains `ssb-bucket-read` when its role changes so
-existing entitlements are updated rather than duplicated.
+accounts. Set `test_entitlement_id` and `prod_entitlement_id` explicitly. To keep
+managing entitlements previously created with the fixed ID, use `ssb-bucket-read`.
+Keeping an ID stable updates the existing entitlement when its policy changes.
+Changing an ID targets a different entitlement and creates it if missing; the old
+entitlement is not renamed or deleted.
 
 ## IAM condition
 
