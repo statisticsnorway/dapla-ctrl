@@ -25,41 +25,62 @@ func TestManageTeamSchema(t *testing.T) {
 
 	grm := googleresourcemanager.NewFake()
 	connectionString := startPostgres(ctx, t)
-	client, err := New(ctx, config.ParqueditConfig{DatabaseUrl: connectionString}, grm, googlesqladmin.NewFake(connectionString))
-	if err != nil {
-		t.Fatalf("failed to create parquedit client: %v", err)
+	for _, env := range []string{"prod", "test"} {
+		t.Run(env, func(t *testing.T) {
+			template := "gs://ssb-{team}-data-produkt-" + env + "/.parquedit_data/"
+			client, err := New(ctx, config.ParqueditConfig{
+				DatabaseUrl:      connectionString,
+				DataPathTemplate: template,
+			}, grm, googlesqladmin.NewFake(connectionString))
+			if err != nil {
+				t.Fatalf("failed to create parquedit client: %v", err)
+			}
+			t.Cleanup(client.Close)
+
+			handler := setupTestRoutes(client)
+			team := "binde-strek" // Cloud SQL permits dashes, unlike the local test database.
+			schema := "team_binde_strek"
+			wantDataPath := "gs://ssb-" + team + "-data-produkt-" + env + "/.parquedit_data/"
+
+			t.Run("check status for non enabled team", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
+				assertSchemaExists(ctx, t, client, schema, false)
+			})
+
+			t.Run("enable for team", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, true)
+				assertDataPath(ctx, t, client, schema, wantDataPath)
+				assertStatus(t, handler, http.MethodGet, team, http.StatusOK)
+			})
+
+			t.Run("enable is idempotent", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, true)
+				assertDataPath(ctx, t, client, schema, wantDataPath)
+			})
+
+			t.Run("disable for team, and it is idempotent", func(t *testing.T) {
+				assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, false)
+				assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
+
+				assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
+				assertSchemaExists(ctx, t, client, schema, false)
+			})
+		})
 	}
-	t.Cleanup(client.Close)
+}
 
-	handler := setupTestRoutes(client)
-
-	team := "binde-strek" // Test with a underdash team, since we otherwise have to do special logic related to test. In cloudsql dash is allowed
-	schema := "team_binde_strek"
-
-	t.Run("check status for non enabled team", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
-		assertSchemaExists(ctx, t, client, schema, false)
-	})
-
-	t.Run("enable for team", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, true)
-		assertStatus(t, handler, http.MethodGet, team, http.StatusOK)
-	})
-
-	t.Run("enable is idempotent", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodPut, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, true)
-	})
-
-	t.Run("disable for team, and it is idempotent", func(t *testing.T) {
-		assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, false)
-		assertStatus(t, handler, http.MethodGet, team, http.StatusNotFound)
-
-		assertStatus(t, handler, http.MethodDelete, team, http.StatusOK)
-		assertSchemaExists(ctx, t, client, schema, false)
-	})
+func assertDataPath(ctx context.Context, t *testing.T, client *Client, schema, want string) {
+	t.Helper()
+	var got string
+	if err := client.db.QueryRow(ctx, "SELECT value FROM "+schema+".ducklake_metadata WHERE key = 'data_path'").Scan(&got); err != nil {
+		t.Fatalf("failed to query data_path: %v", err)
+	}
+	if got != want {
+		t.Fatalf("data_path = %q, want %q", got, want)
+	}
 }
 
 func startPostgres(ctx context.Context, t *testing.T) string {
