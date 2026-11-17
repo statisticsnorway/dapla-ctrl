@@ -187,7 +187,7 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 			continue
 		}
 		if !policy.configured() {
-			envLog.Warn("skipping PAM entitlements: entitlement ID, eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
+			envLog.Debug("skipping PAM entitlements: entitlement ID, eligible principals, IAM role, maximum grant duration and IAM condition template must all be configured")
 			continue
 		}
 		resp, err := client.GcpTeamResources().GetTeamFolder(ctx, &protoapi.GetGcpTeamFolderRequest{
