@@ -30,6 +30,7 @@ type ParqueditConfig struct {
 	CloudSQLProject    string `env:"PARQUEDIT_CLOUDSQL_PROJECT"`
 	CloudSQLInstance   string `env:"PARQUEDIT_CLOUDSQL_INSTANCE"`
 	CloudSqlUserSuffix string `env:"PARQUEDIT_CLOUDSQL_USER_SUFFIX"` // e.g. "-developers@my-project-1d.iam.gserviceaccount.com"
+	DataPathTemplate   string `env:"PARQUEDIT_STORAGE_PATH" envDefault:"gs://ssb-{team}-data-produkt-test/.parquedit_data/"`
 }
 
 func ParseConfig[T any]() (T, error) {
