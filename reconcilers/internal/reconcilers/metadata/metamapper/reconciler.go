@@ -176,7 +176,11 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		return fmt.Errorf("error getting reconciler config: %w", err)
 	}
 	for _, env := range r.cfg.Environments {
-		policy := cfg[env]
+		policy, ok := cfg[env]
+		if !ok {
+			// Environment doesn't exist, short circuit
+			continue
+		}
 		envLog := log.WithField("env", env)
 		if len(policy.TeamAllowlist) > 0 && !slices.Contains(policy.TeamAllowlist, daplaTeam.Slug) {
 			envLog.Debug("skipping PAM entitlements: team is not allowlisted")
