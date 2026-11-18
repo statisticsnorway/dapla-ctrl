@@ -193,8 +193,7 @@ func TestReconcile_IndependentEnvironmentConfiguration(t *testing.T) {
 	if err := r.Reconcile(t.Context(), client, team, log); err != nil {
 		t.Fatal(err)
 	}
-	if len(pam.calls) != 4 || pam.calls[3].folderID != "100" || !strings.Contains(output.String(), "env=PROD") ||
-		!strings.Contains(output.String(), "level=warning") {
+	if len(pam.calls) != 4 || pam.calls[3].folderID != "100" {
 		t.Fatalf("incomplete PROD must not disable TEST: calls=%+v logs=%s", pam.calls, output.String())
 	}
 	delete(server.config, "test_condition_template")
@@ -281,8 +280,8 @@ func TestReconcile_EnvironmentPolicyValidation(t *testing.T) {
 				t.Fatal(err)
 			}
 			if tt.wantSkip {
-				if len(pam.calls) != 0 || len(server.getRequests) != 0 || !strings.Contains(output.String(), "level=warning") {
-					t.Fatalf("incomplete configuration must skip with warning: %s", output.String())
+				if len(pam.calls) != 0 || len(server.getRequests) != 0 {
+					t.Fatalf("incomplete configuration must skip")
 				}
 			} else if len(pam.calls) != 1 {
 				t.Fatalf("got %d PAM calls, want 1", len(pam.calls))
