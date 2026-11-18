@@ -45,7 +45,7 @@ See the [IAM resource-name condition reference](https://cloud.google.com/iam/doc
 
 ## Deletion
 
-Deletion is not yet implemented. However, if a team is deleted then the PAM entitlement will be since it is applied to the team folder which will be deleted in this case.
+Deletion is not yet implemented. However, if a team is deleted then the PAM entitlement will also be deleted since it is applied to the team folder which will be deleted in this case.
 
 ## Sequence diagram
 

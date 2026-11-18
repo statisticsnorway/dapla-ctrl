@@ -146,7 +146,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		Environments: slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers)),
 	}, googleServices)
 	if err != nil {
-		return fmt.Errorf("create PAM reconciler: %w", err)
+		return fmt.Errorf("create metamapper reconciler: %w", err)
 	}
 	reconcilerManager.AddReconciler(metamapperReconciler)
 
