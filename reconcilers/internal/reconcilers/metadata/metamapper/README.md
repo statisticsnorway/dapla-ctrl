@@ -19,17 +19,9 @@ Each environment has independent configuration with environment prefixes. If a r
 
 ## IAM condition
 
-The IAM condition needs to be templated with the `TeamSlug` in order to scope the access suitably. See below for an example condition which may be used. This condition shall be supplied along with the other config.
+The IAM condition needs to be templated with the `TeamSlug` in order to scope the access suitably. This condition shall be supplied along with the other config.
 
-:warning: This template example is read and used in tests so changing it may break tests.
-
-```gotemplate
-resource.type in ["storage.googleapis.com/Bucket", "storage.googleapis.com/Object"] &&
-(
-  resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-produkt" .TeamSlug)}}) ||
-  resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-delt" .TeamSlug)}})
-)
-```
+See an example of the IAM Condition for the scope we intend here: [reconcilers/internal/reconcilers/metadata/metamapper/condition_test.go](reconcilers/internal/reconcilers/metadata/metamapper/condition_test.go)
 
 The example allows the following bucket names for that team and environment:
 

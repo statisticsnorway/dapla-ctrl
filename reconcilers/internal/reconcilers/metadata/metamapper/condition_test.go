@@ -2,7 +2,6 @@ package metamapper_test
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"testing"
 
@@ -14,22 +13,13 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/reconcilers/metadata/metamapper"
 )
 
-func examplePAMCondition(t *testing.T) string {
-	t.Helper()
-	example, err := os.ReadFile("README.md")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, after, found := strings.Cut(string(example), "```gotemplate\n")
-	if !found {
-		t.Fatal("condition template example is missing")
-	}
-	expression, _, found := strings.Cut(after, "\n```")
-	if !found {
-		t.Fatal("condition template example has no closing fence")
-	}
-	return expression
-}
+// This IAM Condition expression represents the intended scope of access allowed by the PAM entitlements created by this reconciler
+const EXAMPLE_PAM_CONDITION = `resource.type in ["storage.googleapis.com/Bucket", "storage.googleapis.com/Object"] &&
+(
+  resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-produkt" .TeamSlug)}}) ||
+  resource.name.startsWith({{printf "%q" (printf "projects/_/buckets/ssb-%s-data-delt" .TeamSlug)}})
+  )
+`
 
 func conditionProgram(t *testing.T, expression string) cel.Program {
 	t.Helper()
@@ -78,7 +68,7 @@ func TestPAMConditionExample_ScopesBucketAndObjectAccess(t *testing.T) {
 		server.config[env+"_role"] = "roles/storage.objectViewer"
 		server.config[env+"_principals"] = "user:reader@example.com"
 		server.config[env+"_max_grant_duration"] = "1h"
-		server.config[env+"_condition_template"] = examplePAMCondition(t)
+		server.config[env+"_condition_template"] = EXAMPLE_PAM_CONDITION
 	}
 	pam := &fakePrivilegedAccessManager{}
 	r, err := metamapper.New(t.Context(), metamapper.Config{
