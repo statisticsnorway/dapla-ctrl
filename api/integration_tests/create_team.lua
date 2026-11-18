@@ -40,6 +40,7 @@ Test.gql("Create team with user that is not authorized", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -227,6 +228,7 @@ Test.gql("non-7xx-manager can NOT create self-managed team", function(t)
 			{
 				-- message = "Only Section managers in IT department may create self-managed teams.",
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -261,6 +263,7 @@ Test.gql("7xx-manager can create self-managed team", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -338,6 +341,7 @@ Test.gql("Create team with invalid slug", function(t)
 				errors = {
 					{
 						message = errorMessageMatch,
+						locations = NotNull(),
 						path = {
 							"createTeam",
 						},

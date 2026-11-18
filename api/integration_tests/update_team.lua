@@ -129,6 +129,7 @@ Test.gql("Non-admin user should not be able to update team", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"updateTeam",
 				},

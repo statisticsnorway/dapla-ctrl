@@ -27,6 +27,7 @@ Test.gql("Non-admin member cannot create group", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createGroup",
 				},
@@ -209,6 +210,7 @@ Test.gql("Non-admin member cannot add group member", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"addGroupMember",
 				},
@@ -277,6 +279,7 @@ Test.gql("Add duplicate member fails", function(t)
 		errors = {
 			{
 				message = "User is already a member of the group.",
+				locations = NotNull(),
 				path = {
 					"addGroupMember",
 				},
@@ -528,6 +531,7 @@ Test.gql("Remove non-member fails", function(t)
 		errors = {
 			{
 				message = "User is not a member of the group.",
+				locations = NotNull(),
 				path = {
 					"removeGroupMember",
 				},

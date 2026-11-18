@@ -19,9 +19,9 @@ Helper.SQLExec([[
 ]])
 
 Test.gql("section teams: filters, sorts and paginates", function(t)
-    t.addHeader("x-user-email", user:email())
+	t.addHeader("x-user-email", user:email())
 
-    t.query [[
+	t.query [[
         query {
             section(code: "606") {
                 teams(first: 2, orderBy: {field: SLUG, direction: DESC}) {
@@ -32,26 +32,26 @@ Test.gql("section teams: filters, sorts and paginates", function(t)
         }
     ]]
 
-    t.check {
-        data = {
-            section = {
-                teams = {
-                    nodes = {
-                        { slug = "review-c", isManaged = true, lastSuccessfulSync = "2026-01-02T03:04:05Z" },
-                        { slug = "review-b", isManaged = false, lastSuccessfulSync = Null },
-                    },
-                    pageInfo = {
-                        totalCount = 3,
-                        hasNextPage = true,
-                        endCursor = Save("sectionTeamsCursor"),
-                    },
-                },
-            },
-        },
-    }
+	t.check {
+		data = {
+			section = {
+				teams = {
+					nodes = {
+						{ slug = "review-c", isManaged = true,  lastSuccessfulSync = "2026-01-02T03:04:05Z" },
+						{ slug = "review-b", isManaged = false, lastSuccessfulSync = Null },
+					},
+					pageInfo = {
+						totalCount = 3,
+						hasNextPage = true,
+						endCursor = Save("sectionTeamsCursor"),
+					},
+				},
+			},
+		},
+	}
 
-    -- Use the cursor returned by the API to fetch the remaining team.
-    t.query(string.format([[
+	-- Use the cursor returned by the API to fetch the remaining team.
+	t.query(string.format([[
         query {
             section(code: "606") {
                 teams(first: 2, after: "%s", orderBy: {field: SLUG, direction: DESC}) {
@@ -62,22 +62,22 @@ Test.gql("section teams: filters, sorts and paginates", function(t)
         }
     ]], State.sectionTeamsCursor))
 
-    t.check {
-        data = {
-            section = {
-                teams = {
-                    nodes = { { slug = "review-a" } },
-                    pageInfo = { totalCount = 3, hasNextPage = false },
-                },
-            },
-        },
-    }
+	t.check {
+		data = {
+			section = {
+				teams = {
+					nodes = { { slug = "review-a" } },
+					pageInfo = { totalCount = 3, hasNextPage = false },
+				},
+			},
+		},
+	}
 end)
 
 Test.gql("section teams: a section without teams returns an empty list", function(t)
-    t.addHeader("x-user-email", user:email())
+	t.addHeader("x-user-email", user:email())
 
-    t.query [[
+	t.query [[
         query {
             section(code: "808") {
                 teams(first: 2) {
@@ -88,14 +88,14 @@ Test.gql("section teams: a section without teams returns an empty list", functio
         }
     ]]
 
-    t.check {
-        data = {
-            section = {
-                teams = {
-                    nodes = {},
-                    pageInfo = { totalCount = 0, hasNextPage = false },
-                },
-            },
-        },
-    }
+	t.check {
+		data = {
+			section = {
+				teams = {
+					nodes = {},
+					pageInfo = { totalCount = 0, hasNextPage = false },
+				},
+			},
+		},
+	}
 end)

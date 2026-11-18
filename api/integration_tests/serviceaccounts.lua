@@ -105,6 +105,7 @@ Test.gql("Create new team as service account without permission", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"createTeam",
 				},
@@ -173,6 +174,7 @@ Test.gql("Add team member without permission", function(t)
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"addGroupMember",
 				},
@@ -278,6 +280,7 @@ Test.gql("Send message as service account without role should be unauthorized", 
 		errors = {
 			{
 				message = Contains("Specifically, you need the \"messages:send\" authorization."),
+				locations = NotNull(),
 				path = {
 					"sendMessage",
 				},
@@ -309,6 +312,7 @@ Test.gql("Assign role to service account should be unauthorized for user", funct
 		errors = {
 			{
 				message = Contains("Specifically, you need the \"service_accounts:update\" authorization."),
+				locations = NotNull(),
 				path = {
 					"assignRoleToServiceAccount",
 				},

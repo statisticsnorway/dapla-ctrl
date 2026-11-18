@@ -37,6 +37,7 @@ Test.gql("Non members cannot add artifact registry Github repositories", functio
 		errors = {
 			{
 				message = "You are authenticated, but your account is not authorized to perform this action.",
+				locations = NotNull(),
 				path = {
 					"grantGithubRepoAccessToTeamArtifactRegistry",
 				},
@@ -65,6 +66,7 @@ Test.gql("Repository name with organization cannot be added", function(t)
 		errors = {
 			{
 				message = "Repository name should not contain organisation. E.g. `myrepo` (instead of `statisticsnorway/myrepo`)",
+				locations = NotNull(),
 				path = {
 					"grantGithubRepoAccessToTeamArtifactRegistry",
 				},

@@ -36,6 +36,7 @@ func TestReconcileGithubRepoPermissions(t *testing.T) {
 				"statisticsnorway/dapla-skyinfra-developers -> statisticsnorway/play-iac": "admin",
 				"statisticsnorway/dapla-platform-developers -> statisticsnorway/play-iac": "push",
 				"statisticsnorway/play-developers -> statisticsnorway/play-iac":           "push",
+				"statisticsnorway/play-data-admins -> statisticsnorway/play-iac":          "push",
 			},
 		},
 		{
@@ -45,6 +46,7 @@ func TestReconcileGithubRepoPermissions(t *testing.T) {
 				"statisticsnorway/dapla-skyinfra-developers -> statisticsnorway/play-iac": "admin",
 				"statisticsnorway/dapla-platform-developers -> statisticsnorway/play-iac": "push",
 				"statisticsnorway/play-developers -> statisticsnorway/play-iac":           "admin",
+				"statisticsnorway/play-data-admins -> statisticsnorway/play-iac":          "admin",
 			},
 		},
 	}

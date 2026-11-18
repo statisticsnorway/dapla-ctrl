@@ -172,6 +172,7 @@ func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, repoNam
 		"dapla-skyinfra-developers": "admin",
 		"dapla-platform-developers": "push",
 		teamName + "-developers":    teamPermission,
+		teamName + "-data-admins":   teamPermission,
 	} {
 		_, err := r.teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
 			Permission: permission,
