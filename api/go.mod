@@ -16,7 +16,7 @@ tool (
 
 require (
 	cloud.google.com/go/auth v0.24.4
-	cloud.google.com/go/monitoring v1.25.0
+	cloud.google.com/go/monitoring v1.32.1
 	cloud.google.com/go/pubsub/v2 v2.9.0
 	github.com/99designs/gqlgen v0.17.98
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.15.0
