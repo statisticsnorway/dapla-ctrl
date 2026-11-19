@@ -1,3 +1,5 @@
+cel.dev/cel-go v0.33.4 h1:9hd5BRPQZwj81qOddEXh0WhE1N3shkG3ad89pSqk+iU=
+cel.dev/cel-go v0.33.4/go.mod h1:DnVip7tpJSsgZymwfT+m1tnEVy3ivAjSMXPx12YrMkU=
 cel.dev/expr v0.26.0 h1:oLXvOF0jiYA5A/tmzU91pLEWZkKynhLJlC9Gw7PrKvs=
 cel.dev/expr v0.26.0/go.mod h1:hrXvqGP6G6gyx8UAHSHJ5RGk//1Oj5nXQ2NI02Nrsg4=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
@@ -25,6 +27,8 @@ cloud.google.com/go/longrunning v1.5.0 h1:aGonu6LHQl38DyozLs2jxGieI4Ixk+7GTnmHVc
 cloud.google.com/go/longrunning v1.5.0/go.mod h1:vjM1U85ZQuTv8lJoUBSA44HLWvM6BBFeaSJYGFF1Q00=
 cloud.google.com/go/monitoring v1.32.1 h1:DzNqsbCCyMJ+Oq+McBHaR5qqqxCvdNCIgfJug/YM0Ys=
 cloud.google.com/go/monitoring v1.32.1/go.mod h1:JkJhVXtTcGh6KQuvProJ9olvu2p37Ay29CinCDFKHHg=
+cloud.google.com/go/privilegedaccessmanager v1.2.0 h1:DlZNa1AR32G3UZ1gH3W+Hc8RAyWMSZk05nTxTWlFSV8=
+cloud.google.com/go/privilegedaccessmanager v1.2.0/go.mod h1:9BIqh1Q0nBKOC338/qUnD/v4kXwqhDA9Uo6m8fDuT0Y=
 cloud.google.com/go/pubsub/v2 v2.9.0 h1:n0obETiU+DSIjNFBZx72sFaW9di18ZMgPN9SDYq7o2Q=
 cloud.google.com/go/pubsub/v2 v2.9.0/go.mod h1:OaymNdZYwo89Xow5XC3unXn9VknMq/+AbLJO7dwRsdc=
 cloud.google.com/go/resourcemanager v1.18.1 h1:xdaDmfzM08PA2Zs8hU8ej1TXQTJAcRoHbvQpaAEPYj0=
@@ -59,6 +63,8 @@ github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapp
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0/go.mod h1:sg6Wqbl0BKKZ5zKnQj2q0qic/3ziF894SCx1LpbX37Y=
 github.com/Masterminds/semver/v3 v3.4.0 h1:Zog+i5UMtVoCU8oKka5P7i9q9HgrJeGzI9SA1Xbatp0=
 github.com/Masterminds/semver/v3 v3.4.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
+github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
+github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/blendle/zapdriver v1.3.1 h1:C3dydBOWYRiOk+B8X9IVZ5IOe+7cl+tGOexN4QqHfpE=

@@ -13,12 +13,15 @@ tool (
 )
 
 require (
+	cel.dev/cel-go v0.33.4
 	cloud.google.com/go/artifactregistry v1.28.1
 	cloud.google.com/go/auth v0.24.4
 	cloud.google.com/go/billing v1.28.1
 	cloud.google.com/go/container v1.56.1
 	cloud.google.com/go/iam v1.15.1
+	cloud.google.com/go/longrunning v1.5.0
 	cloud.google.com/go/monitoring v1.32.1
+	cloud.google.com/go/privilegedaccessmanager v1.2.0
 	cloud.google.com/go/pubsub/v2 v2.9.0
 	cloud.google.com/go/resourcemanager v1.18.1
 	cloud.google.com/go/serviceusage v1.16.1
@@ -48,6 +51,7 @@ require (
 	golang.org/x/sync v0.25.0
 	google.golang.org/api v0.313.0
 	google.golang.org/genproto v0.0.0-20261110000943-09e21b237f2c
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c
 	google.golang.org/grpc v1.85.0
 	google.golang.org/protobuf v1.36.12
 	k8s.io/api v0.37.2
@@ -63,13 +67,13 @@ require (
 	cloud.google.com/go/ai v0.12.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
-	cloud.google.com/go/longrunning v1.5.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.24.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.13.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.10.1 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.62.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/brunoga/deep v1.2.4 // indirect
@@ -202,7 +206,6 @@ require (
 	golang.org/x/vuln v1.1.4 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
