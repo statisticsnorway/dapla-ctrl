@@ -33,6 +33,7 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/teambuckets"
+	"github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -184,6 +185,7 @@ func ConfigureGraph(
 		ctx = sharedbucketsstopgap.NewLoaderContext(ctx, pool)
 		ctx = message.NewLoaderContext(ctx, pool)
 		ctx = teambuckets.NewLoaderContext(ctx, pool)
+		ctx = teamfolders.NewLoaderContext(ctx, pool)
 		ctx = atlantis.NewLoaderContext(ctx, pool)
 		return ctx
 	}

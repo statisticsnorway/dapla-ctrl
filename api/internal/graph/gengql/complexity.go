@@ -120,6 +120,9 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.TeamBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
+	c.Team.TeamFolders = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+		return cursorComplexity(first, last) * childComplexity
+	}
 	c.User.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
