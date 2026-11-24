@@ -117,6 +117,9 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		return err
 	}
 
+	// Configured folder environments
+	folderEnvs := slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers))
+
 	// Init reconcilers
 	// The reconcilers will be run in the order they are added to the manager
 	gcpSyncer := gcpsyncer.New(client)
@@ -143,7 +146,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 	reconcilerManager.AddReconciler(gcpResourcesReconciler)
 
 	metamapperReconciler, err := metamapper.New(ctx, metamapper.Config{
-		Environments: slices.Sorted(maps.Keys(cfg.GCP.TeamsFolderNumbers)),
+		Environments: folderEnvs,
 	}, googleServices)
 	if err != nil {
 		return fmt.Errorf("create metamapper reconciler: %w", err)
@@ -176,7 +179,7 @@ func run(ctx context.Context, cfg *config.Config, log logrus.FieldLogger) error 
 		reconcilerManager.AddReconciler(ghIac)
 	}
 
-	parqueditReconciler, err := parquedit.New(ctx)
+	parqueditReconciler, err := parquedit.New(ctx, folderEnvs)
 	if err != nil {
 		return fmt.Errorf("create parquedit reconciler: %w", err)
 	}

@@ -39,8 +39,10 @@ type client interface {
 
 type optFunc func(*reconciler)
 
-func New(ctx context.Context, opts ...optFunc) (*reconciler, error) {
-	r := new(reconciler)
+func New(ctx context.Context, envs []string, opts ...optFunc) (*reconciler, error) {
+	r := &reconciler{
+		environments: envs,
+	}
 
 	for _, opt := range opts {
 		opt(r)
