@@ -3,7 +3,46 @@ package parquedit
 import (
 	"strings"
 	"testing"
+
+	"github.com/statisticsnorway/dapla-ctrl/labradoor/internal/config"
 )
+
+func TestDataPathTemplate(t *testing.T) {
+	for _, tt := range []struct {
+		name     string
+		template string
+		wantErr  bool
+	}{
+		{name: "production", template: "gs://ssb-{team}-data-produkt-prod/.parquedit_data/"},
+		{name: "test", template: "gs://ssb-{team}-data-produkt-test/.parquedit_data/"},
+		{name: "empty", wantErr: true},
+		{name: "missing team", template: "gs://bucket/.parquedit_data/", wantErr: true},
+		{name: "unknown placeholder", template: "gs://ssb-{team}-{env}/.parquedit_data/", wantErr: true},
+		{name: "wrong scheme", template: "https://ssb-{team}/.parquedit_data/", wantErr: true},
+		{name: "missing bucket", template: "gs:///{team}/", wantErr: true},
+		{name: "missing trailing slash", template: "gs://ssb-{team}/.parquedit_data", wantErr: true},
+		{name: "credentials", template: "gs://user@ssb-{team}/.parquedit_data/", wantErr: true},
+		{name: "port", template: "gs://ssb-{team}:443/.parquedit_data/", wantErr: true},
+		{name: "query", template: "gs://ssb-{team}/.parquedit_data/?other=bucket", wantErr: true},
+		{name: "fragment", template: "gs://ssb-{team}/.parquedit_data/#other", wantErr: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := validateDataPathTemplate(tt.template); (err != nil) != tt.wantErr {
+				t.Fatalf("validateDataPathTemplate() error = %v, wantErr %t", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestInvalidDataPathFailsBeforeConnecting(t *testing.T) {
+	_, err := New(t.Context(), config.ParqueditConfig{
+		DatabaseUrl:      "invalid database URL",
+		DataPathTemplate: "gs://bucket/missing-team/",
+	}, nil, nil)
+	if err == nil || !strings.Contains(err.Error(), "PARQUEDIT_STORAGE_PATH") {
+		t.Fatalf("expected template validation before database connection, got %v", err)
+	}
+}
 
 func TestToSchemaName(t *testing.T) {
 	tests := []struct {
