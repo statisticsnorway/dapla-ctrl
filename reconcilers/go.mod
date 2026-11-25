@@ -21,7 +21,7 @@ require (
 	cloud.google.com/go/iam v1.15.1
 	cloud.google.com/go/longrunning v1.5.0
 	cloud.google.com/go/monitoring v1.32.1
-	cloud.google.com/go/privilegedaccessmanager v1.2.0
+	cloud.google.com/go/privilegedaccessmanager v1.3.1
 	cloud.google.com/go/pubsub/v2 v2.9.0
 	cloud.google.com/go/resourcemanager v1.18.1
 	cloud.google.com/go/serviceusage v1.16.1
