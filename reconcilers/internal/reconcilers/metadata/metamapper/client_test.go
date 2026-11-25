@@ -7,9 +7,12 @@ import (
 	"testing"
 	"time"
 
+	"cloud.google.com/go/iam/apiv1/iampb"
 	"cloud.google.com/go/longrunning/autogen/longrunningpb"
 	privilegedaccessmanager "cloud.google.com/go/privilegedaccessmanager/apiv1"
 	"cloud.google.com/go/privilegedaccessmanager/apiv1/privilegedaccessmanagerpb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"github.com/google/go-cmp/cmp"
 	"google.golang.org/api/option"
 	rpcstatus "google.golang.org/genproto/googleapis/rpc/status"
@@ -291,5 +294,58 @@ func TestEnsureEntitlement_PropagatesFailures(t *testing.T) {
 				t.Fatalf("got %v, want error containing %q", err, tt.want)
 			}
 		})
+	}
+}
+
+type fakeFoldersServer struct {
+	resourcemanagerpb.UnimplementedFoldersServer
+	policy      *iampb.Policy
+	setRequests []*iampb.SetIamPolicyRequest
+}
+
+func (s *fakeFoldersServer) GetIamPolicy(context.Context, *iampb.GetIamPolicyRequest) (*iampb.Policy, error) {
+	return proto.Clone(s.policy).(*iampb.Policy), nil
+}
+
+func (s *fakeFoldersServer) SetIamPolicy(_ context.Context, req *iampb.SetIamPolicyRequest) (*iampb.Policy, error) {
+	s.setRequests = append(s.setRequests, req)
+	s.policy = req.Policy
+	return s.policy, nil
+}
+
+func TestEnsurePermissions_GrantsViewerRoleIdempotently(t *testing.T) {
+	server := &fakeFoldersServer{policy: &iampb.Policy{}}
+	listener := bufconn.Listen(1024 * 1024)
+	grpcServer := grpc.NewServer()
+	resourcemanagerpb.RegisterFoldersServer(grpcServer, server)
+	go func() { _ = grpcServer.Serve(listener) }()
+	t.Cleanup(grpcServer.Stop)
+	conn, err := grpc.NewClient("passthrough:///bufnet",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) { return listener.Dial() }),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+	folders, err := resourcemanager.NewFoldersClient(t.Context(), option.WithGRPCConn(conn))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = folders.Close() })
+	client := &GooglePrivilegedAccessManager{folders: folders}
+
+	principals := []string{"user:reader@example.com", "group:readers@example.com"}
+	for range 2 {
+		if err := client.EnsurePermissions(t.Context(), "123", principals); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if len(server.setRequests) != 1 || server.setRequests[0].Resource != "folders/123" {
+		t.Fatalf("expected one SetIamPolicy on folders/123, got %+v", server.setRequests)
+	}
+	want := &iampb.Policy{Bindings: []*iampb.Binding{{Role: "roles/privilegedaccessmanager.viewer", Members: principals}}}
+	if diff := cmp.Diff(want, server.policy, protocmp.Transform()); diff != "" {
+		t.Fatalf("unexpected policy (-want +got):\n%s", diff)
 	}
 }
