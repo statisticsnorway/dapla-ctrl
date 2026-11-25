@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
+	"cloud.google.com/go/iam/apiv1/iampb"
 	privilegedaccessmanager "cloud.google.com/go/privilegedaccessmanager/apiv1"
 	"cloud.google.com/go/privilegedaccessmanager/apiv1/privilegedaccessmanagerpb"
+	resourcemanager "cloud.google.com/go/resourcemanager/apiv3"
+	"github.com/statisticsnorway/dapla-ctrl/reconcilers/internal/google"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -25,12 +29,36 @@ func validateEntitlementID(id string) error {
 	return nil
 }
 
+const pamViewerRole = "roles/privilegedaccessmanager.viewer"
+
 type PrivilegedAccessManager interface {
 	EnsureEntitlement(ctx context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error
+	EnsurePermissions(ctx context.Context, folderID string, principals []string) error
 }
 
 type GooglePrivilegedAccessManager struct {
-	client *privilegedaccessmanager.Client
+	client  *privilegedaccessmanager.Client
+	folders *resourcemanager.FoldersClient
+}
+
+// In order for principals to be able to create grants against the entitlements created in this reconciler,
+// they need access to view entitlements and grants.
+func (g *GooglePrivilegedAccessManager) EnsurePermissions(ctx context.Context, folderID string, principals []string) error {
+	if g.folders == nil {
+		return fmt.Errorf("folders client is not configured")
+	}
+	return google.EnsureRolesBindingFunc(ctx, g.folders, "folders/"+folderID,
+		[]string{pamViewerRole},
+		func(b *iampb.Binding) (modified bool) {
+			for _, principal := range principals {
+				if slices.Contains(b.Members, principal) {
+					continue
+				}
+				b.Members = append(b.Members, principal)
+				modified = true
+			}
+			return modified
+		})
 }
 
 func (g *GooglePrivilegedAccessManager) EnsureEntitlement(ctx context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, maxGrantDuration time.Duration) error {

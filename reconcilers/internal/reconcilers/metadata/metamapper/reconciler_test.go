@@ -101,14 +101,25 @@ type entitlementCall struct {
 	duration            time.Duration
 }
 
+type permissionsCall struct {
+	folderID   string
+	principals []string
+}
+
 type fakePrivilegedAccessManager struct {
-	calls []entitlementCall
-	err   error
+	calls            []entitlementCall
+	permissionsCalls []permissionsCall
+	err              error
 }
 
 func (f *fakePrivilegedAccessManager) EnsureEntitlement(_ context.Context, folderID, entitlementID, role, conditionExpression string, principals []string, duration time.Duration) error {
 	f.calls = append(f.calls, entitlementCall{folderID, entitlementID, role, conditionExpression, principals, duration})
 	return f.err
+}
+
+func (f *fakePrivilegedAccessManager) EnsurePermissions(_ context.Context, folderID string, principals []string) error {
+	f.permissionsCalls = append(f.permissionsCalls, permissionsCall{folderID, principals})
+	return nil
 }
 
 func TestNew_ValidatesEnvironments(t *testing.T) {
@@ -364,6 +375,25 @@ func TestReconcile_FailuresAndManagedGating(t *testing.T) {
 			if tt.unmanaged && (err != nil || len(server.configRequests) != 0 || len(server.getRequests) != 0 || len(pam.calls) != 0) {
 				t.Fatal("self-managed team must be skipped entirely")
 			}
+			if len(pam.permissionsCalls) != 0 {
+				t.Fatalf("permissions must only be ensured after a successful entitlement, got %+v", pam.permissionsCalls)
+			}
 		})
+	}
+}
+
+func TestReconcile_EnsuresPermissionsAfterEntitlement(t *testing.T) {
+	server := newFakeGcpTeamResourcesServer()
+	server.folders["my-team/TEST"] = &protoapi.GcpTeamFolder{FolderId: "100"}
+	pam := &fakePrivilegedAccessManager{}
+	r, err := metamapper.New(t.Context(), metamapper.Config{Environments: []string{"TEST"}}, nil, metamapper.WithPrivilegedAccessManager(pam))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := r.Reconcile(t.Context(), startFakeGrpcServer(t, server), &protoapi.Team{Slug: "my-team", IsManaged: true}, logrus.New()); err != nil {
+		t.Fatal(err)
+	}
+	if len(pam.permissionsCalls) != 1 || pam.permissionsCalls[0].folderID != "100" || !slices.Equal(pam.permissionsCalls[0].principals, []string{"user:reader@example.com"}) {
+		t.Fatalf("unexpected permissions calls: %+v", pam.permissionsCalls)
 	}
 }

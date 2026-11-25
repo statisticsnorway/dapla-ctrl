@@ -97,7 +97,7 @@ func New(ctx context.Context, cfg Config, services *google.Services, opts ...opt
 
 	r := &reconciler{cfg: cfg}
 	if services != nil {
-		r.client = &GooglePrivilegedAccessManager{client: services.PrivilegedAccessManager}
+		r.client = &GooglePrivilegedAccessManager{client: services.PrivilegedAccessManager, folders: services.Folders}
 	}
 	for _, opt := range opts {
 		opt(r)
@@ -207,6 +207,9 @@ func (r *reconciler) Reconcile(ctx context.Context, client *apiclient.APIClient,
 		}
 		if err := r.client.EnsureEntitlement(ctx, folderID, policy.EntitlementID, policy.Role, conditionExpression, policy.Principals, policy.MaxGrantDuration); err != nil {
 			return fmt.Errorf("reconcile PAM entitlement for folder %q in env %q: %w", folderID, env, err)
+		}
+		if err := r.client.EnsurePermissions(ctx, folderID, policy.Principals); err != nil {
+			return fmt.Errorf("reconcile PAM permissions for folder %q in env %q: %w", folderID, env, err)
 		}
 	}
 	return nil
