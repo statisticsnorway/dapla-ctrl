@@ -40,6 +40,7 @@ autobind:
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/team"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/teambuckets"
+  - "github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/user"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/usersync"
   - "github.com/statisticsnorway/dapla-ctrl/api/internal/usersync/changes"

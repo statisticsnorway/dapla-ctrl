@@ -1,0 +1,100 @@
+extend type Team {
+	"""
+	The GCP folders owned by the team, one per environment.
+	"""
+	teamFolders(
+		"""
+		Get the first n items in the connection. This can be used in combination with the after parameter.
+		"""
+		first: Int
+
+		"""
+		Get items after this cursor.
+		"""
+		after: Cursor
+
+		"""
+		Get the last n items in the connection. This can be used in combination with the before parameter.
+		"""
+		last: Int
+
+		"""
+		Get items before this cursor.
+		"""
+		before: Cursor
+
+		"""
+		Filter the results
+		"""
+		filter: TeamFolderFilter
+	): TeamFolderConnection!
+}
+
+input TeamFolderFilter {
+	"""
+	Filter by the envs the folders belong to
+	"""
+	envs: [String!]
+}
+
+type TeamFolder implements Node {
+	"""
+	The globally unique ID of the TeamFolder.
+	"""
+	id: ID!
+
+	"""
+	Name of the Team Folder. This is equal to the team slug.
+	"""
+	name: String!
+
+	"""
+	The GCP folder ID.
+	"""
+	folderId: String!
+
+	"""
+	Which env the folder is in (test/prod)
+	"""
+	env: String!
+
+	"""
+	The team that owns the folder
+	"""
+	team: Team!
+}
+
+"""
+TeamFolder connection.
+"""
+type TeamFolderConnection {
+	"""
+	Pagination information.
+	"""
+	pageInfo: PageInfo!
+
+	"""
+	List of nodes.
+	"""
+	nodes: [TeamFolder]!
+
+	"""
+	List of edges.
+	"""
+	edges: [TeamFolderEdge!]!
+}
+
+"""
+TeamFolder edge.
+"""
+type TeamFolderEdge {
+	"""
+	Cursor for this edge that can be used for pagination.
+	"""
+	cursor: Cursor!
+
+	"""
+	The TeamFolder.
+	"""
+	node: TeamFolder!
+}
