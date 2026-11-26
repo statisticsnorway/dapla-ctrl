@@ -786,7 +786,7 @@ type ComplexityRoot struct {
 		SharedBucketsAccess                func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *sharedbucketsstopgap.SharedBucketOrder) int
 		Slug                               func(childComplexity int) int
 		TeamBuckets                        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int
-		TeamFolders                        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int
+		TeamFolders                        func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *teamfolders.TeamFolderFilter) int
 		ViewerCanManageMembers             func(childComplexity int) int
 		ViewerIsMember                     func(childComplexity int) int
 		ViewerIsOwner                      func(childComplexity int) int
@@ -1193,7 +1193,7 @@ type TeamResolver interface {
 	ArtifactRegistryAllowedGithubRepos(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryAllowedGithubRepos], error)
 	ArtifactRegistryRepositories(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*artifactregistry.ArtifactRegistryRepository], error)
 	TeamBuckets(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) (*pagination.Connection[*teambuckets.TeamBucket], error)
-	TeamFolders(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*teamfolders.TeamFolder], error)
+	TeamFolders(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *teamfolders.TeamFolderFilter) (*pagination.Connection[*teamfolders.TeamFolder], error)
 }
 type TeamAccessManagerResolver interface {
 	Team(ctx context.Context, obj *team.TeamAccessManager) (*team.Team, error)
@@ -4179,7 +4179,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.ComplexityRoot.Team.TeamFolders(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor)), true
+		return e.ComplexityRoot.Team.TeamFolders(childComplexity, args["first"].(*int), args["after"].(*pagination.Cursor), args["last"].(*int), args["before"].(*pagination.Cursor), args["filter"].(*teamfolders.TeamFolderFilter)), true
 	case "Team.viewerCanManageMembers":
 		if e.ComplexityRoot.Team.ViewerCanManageMembers == nil {
 			break
@@ -5186,6 +5186,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("SharedBucketOrder", ec.unmarshalInputSharedBucketOrder),
 			graphql.NewInputUnmarshaler("TeamBucketFilter", ec.unmarshalInputTeamBucketFilter),
 			graphql.NewInputUnmarshaler("TeamBucketOrder", ec.unmarshalInputTeamBucketOrder),
+			graphql.NewInputUnmarshaler("TeamFolderFilter", ec.unmarshalInputTeamFolderFilter),
 			graphql.NewInputUnmarshaler("TeamOrder", ec.unmarshalInputTeamOrder),
 			graphql.NewInputUnmarshaler("UpdateServiceAccountInput", ec.unmarshalInputUpdateServiceAccountInput),
 			graphql.NewInputUnmarshaler("UpdateServiceAccountTokenInput", ec.unmarshalInputUpdateServiceAccountTokenInput),
@@ -8685,7 +8686,19 @@ enum TeamBucketOrderField {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter the results
+		"""
+		filter: TeamFolderFilter
 	): TeamFolderConnection!
+}
+
+input TeamFolderFilter {
+	"""
+	Filter by the envs the folders belong to
+	"""
+	envs: [String!]
 }
 
 type TeamFolder implements Node {
@@ -13528,6 +13541,14 @@ func (ec *executionContext) field_Team_teamFolders_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["before"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "filter",
+		func(ctx context.Context, v any) (*teamfolders.TeamFolderFilter, error) {
+			return ec.unmarshalOTeamFolderFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamfoldersᚐTeamFolderFilter(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg4
 	return args, nil
 }
 
@@ -25867,7 +25888,7 @@ func (ec *executionContext) _Team_teamFolders(ctx context.Context, field graphql
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Team().TeamFolders(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor))
+			return ec.Resolvers.Team().TeamFolders(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*pagination.Cursor), fc.Args["last"].(*int), fc.Args["before"].(*pagination.Cursor), fc.Args["filter"].(*teamfolders.TeamFolderFilter))
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *pagination.Connection[*teamfolders.TeamFolder]) graphql.Marshaler {
@@ -32532,6 +32553,48 @@ func (ec *executionContext) unmarshalInputTeamBucketOrder(ctx context.Context, o
 func UnmarshalTeamBucketOrder(ctx context.Context, raw any) (teambuckets.TeamBucketOrder, error) {
 	var out teambuckets.TeamBucketOrder
 	err := graphql.UnmarshalNamedInputFromContext(ctx, "TeamBucketOrder", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputTeamFolderFilter(ctx context.Context, obj any) (teamfolders.TeamFolderFilter, error) {
+	var it teamfolders.TeamFolderFilter
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"envs"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "envs":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("envs"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Envs = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalTeamFolderFilter unmarshals raw into the TeamFolderFilter input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalTeamFolderFilter(ctx context.Context, raw any) (teamfolders.TeamFolderFilter, error) {
+	var out teamfolders.TeamFolderFilter
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "TeamFolderFilter", raw, &out)
 	return out, err
 }
 
@@ -42956,6 +43019,14 @@ func (ec *executionContext) marshalOTeamFolder2ᚖgithubᚗcomᚋstatisticsnorwa
 		return graphql.Null
 	}
 	return ec._TeamFolder(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOTeamFolderFilter2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamfoldersᚐTeamFolderFilter(ctx context.Context, v any) (*teamfolders.TeamFolderFilter, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputTeamFolderFilter(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOTeamMember2ᚖgithubᚗcomᚋstatisticsnorwayᚋdaplaᚑctrlᚋapiᚋinternalᚋteamᚐTeamMember(ctx context.Context, sel ast.SelectionSet, v *team.TeamMember) graphql.Marshaler {

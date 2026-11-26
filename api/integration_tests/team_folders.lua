@@ -21,13 +21,14 @@ Test.gql("Managed team has a folder per environment", function(t)
 	t.query(string.format([[
 	query {
 		team(slug: "%s") {
-			teamFolders(first: 3) {
+			teamFolders(first: 100) {
 				pageInfo {
 					totalCount
 				}
 				nodes {
 					env
 					name
+					folderId
 				}
 			}
 		}
@@ -45,14 +46,57 @@ Test.gql("Managed team has a folder per environment", function(t)
 						{
 							env = "dev",
 							name = managed:slug(),
+							folderId = "77777777",
 						},
 						{
 							env = "prod",
 							name = managed:slug(),
+							folderId = "99999999",
 						},
 						{
 							env = "test",
 							name = managed:slug(),
+							folderId = "88888888",
+						},
+					},
+				},
+			},
+		},
+	}
+end)
+
+Test.gql("Can filter team folders by environment", function(t)
+	t.addHeader("x-user-email", user:email())
+
+	t.query(string.format([[
+	query {
+		team(slug: "%s") {
+			teamFolders(first: 100, filter: { envs: ["TEST"] }) {
+				pageInfo {
+					totalCount
+				}
+				nodes {
+					env
+					name
+					folderId
+				}
+			}
+		}
+	}
+	]], managed:slug()))
+
+	t.check {
+		data = {
+			team = {
+				teamFolders = {
+					pageInfo = {
+						totalCount = 1,
+					},
+					nodes = {
+						{
+							env = "test",
+							name = managed:slug(),
+							folderId = "88888888",
 						},
 					},
 				},

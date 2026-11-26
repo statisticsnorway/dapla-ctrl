@@ -1,6 +1,8 @@
 package teamfolders
 
 import (
+	"strings"
+
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/graph/ident"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/slug"
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders/teamfolderssql"
@@ -28,4 +30,18 @@ func toGraphFolder(f *teamfolderssql.GcpTeamFolder) *TeamFolder {
 		Env:      f.Env,
 		FolderID: f.FolderID,
 	}
+}
+
+type TeamFolderFilter struct {
+	Envs []string `json:"envs,omitempty"`
+}
+
+func (f *TeamFolderFilter) EnvFilter() []string {
+	var envFilter []string
+	if f != nil {
+		for _, c := range f.Envs {
+			envFilter = append(envFilter, strings.ToLower(c))
+		}
+	}
+	return envFilter
 }

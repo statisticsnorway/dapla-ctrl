@@ -41,16 +41,21 @@ FROM
 	gcp_team_folders
 WHERE
 	team_slug = $1::slug
+	AND (
+		$2::TEXT[] IS NULL
+		OR (env) = ANY ($2::TEXT[])
+	)
 ORDER BY
 	env ASC
 LIMIT
-	$3
+	$4
 OFFSET
-	$2
+	$3
 `
 
 type ListForTeamParams struct {
 	TeamSlug slug.Slug
+	Envs     []string
 	Offset   int32
 	Limit    int32
 }
@@ -63,7 +68,12 @@ type ListForTeamRow struct {
 }
 
 func (q *Queries) ListForTeam(ctx context.Context, arg ListForTeamParams) ([]*ListForTeamRow, error) {
-	rows, err := q.db.Query(ctx, listForTeam, arg.TeamSlug, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, listForTeam,
+		arg.TeamSlug,
+		arg.Envs,
+		arg.Offset,
+		arg.Limit,
+	)
 	if err != nil {
 		return nil, err
 	}

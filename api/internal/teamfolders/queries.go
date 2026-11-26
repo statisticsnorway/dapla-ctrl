@@ -9,13 +9,14 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders/teamfolderssql"
 )
 
-func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination) (*TeamFolderConnection, error) {
+func ListForTeam(ctx context.Context, teamSlug slug.Slug, page *pagination.Pagination, filter *TeamFolderFilter) (*TeamFolderConnection, error) {
 	q := db(ctx)
 
 	ret, err := q.ListForTeam(ctx, teamfolderssql.ListForTeamParams{
 		TeamSlug: teamSlug,
 		Offset:   page.Offset(),
 		Limit:    page.Limit(),
+		Envs:     filter.EnvFilter(),
 	})
 	if err != nil {
 		return nil, err

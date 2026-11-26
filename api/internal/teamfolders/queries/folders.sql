@@ -8,6 +8,10 @@ FROM
 	gcp_team_folders
 WHERE
 	team_slug = @team_slug::slug
+	AND (
+		sqlc.narg('envs')::TEXT[] IS NULL
+		OR (env) = ANY (sqlc.narg('envs')::TEXT[])
+	)
 ORDER BY
 	env ASC
 LIMIT

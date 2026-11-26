@@ -12,6 +12,7 @@ import (
 	sharedbucketsstopgap "github.com/statisticsnorway/dapla-ctrl/api/internal/sharedbucketsstopgap"
 	team "github.com/statisticsnorway/dapla-ctrl/api/internal/team"
 	teambuckets "github.com/statisticsnorway/dapla-ctrl/api/internal/teambuckets"
+	teamfolders "github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders"
 	user "github.com/statisticsnorway/dapla-ctrl/api/internal/user"
 )
 
@@ -120,7 +121,7 @@ func NewComplexityRoot() ComplexityRoot {
 	c.Team.TeamBuckets = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *teambuckets.TeamBucketOrder, filter *teambuckets.TeamBucketFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
-	c.Team.TeamFolders = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) int {
+	c.Team.TeamFolders = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *teamfolders.TeamFolderFilter) int {
 		return cursorComplexity(first, last) * childComplexity
 	}
 	c.User.Groups = func(childComplexity int, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, orderBy *group.GroupOrder, filter *group.GroupFilter) int {

@@ -9,13 +9,13 @@ import (
 	"github.com/statisticsnorway/dapla-ctrl/api/internal/teamfolders"
 )
 
-func (r *teamResolver) TeamFolders(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor) (*pagination.Connection[*teamfolders.TeamFolder], error) {
+func (r *teamResolver) TeamFolders(ctx context.Context, obj *team.Team, first *int, after *pagination.Cursor, last *int, before *pagination.Cursor, filter *teamfolders.TeamFolderFilter) (*pagination.Connection[*teamfolders.TeamFolder], error) {
 	page, err := pagination.ParsePage(first, after, last, before)
 	if err != nil {
 		return nil, err
 	}
 
-	return teamfolders.ListForTeam(ctx, obj.Slug, page)
+	return teamfolders.ListForTeam(ctx, obj.Slug, page, filter)
 }
 
 func (r *teamFolderResolver) Team(ctx context.Context, obj *teamfolders.TeamFolder) (*team.Team, error) {

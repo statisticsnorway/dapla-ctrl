@@ -22,7 +22,19 @@ extend type Team {
 		Get items before this cursor.
 		"""
 		before: Cursor
+
+		"""
+		Filter the results
+		"""
+		filter: TeamFolderFilter
 	): TeamFolderConnection!
+}
+
+input TeamFolderFilter {
+	"""
+	Filter by the envs the folders belong to
+	"""
+	envs: [String!]
 }
 
 type TeamFolder implements Node {
