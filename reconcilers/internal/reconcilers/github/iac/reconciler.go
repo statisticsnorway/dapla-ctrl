@@ -29,12 +29,17 @@ type teamsClient interface {
 	AddTeamRepoBySlug(ctx context.Context, org, slug, owner, repo string, body *github.TeamAddTeamRepoOptions) (*github.Response, error)
 }
 
+type repoTeamsClient interface {
+	ListTeams(ctx context.Context, owner, repo string, opts *github.ListOptions) ([]*github.Team, *github.Response, error)
+}
+
 type reconciler struct {
 	teamAllowlist []string
 	org           string
 
 	pullRequests pullRequestsClient
 	teams        teamsClient
+	repoTeams    repoTeamsClient
 	repository   *repositoryReconciler
 	repoContent  *repoContentReconciler
 	webhooks     *webhookReconciler
@@ -68,6 +73,7 @@ func New(ctx context.Context, org string, appId, installationId int64, privateKe
 
 	r.pullRequests = client.PullRequests
 	r.teams = client.Teams
+	r.repoTeams = client.Repositories
 	r.repository = &repositoryReconciler{client: client.Repositories}
 	r.repoContent = &repoContentReconciler{client: client.Git}
 	r.webhooks = &webhookReconciler{client: client.Repositories}
@@ -168,13 +174,22 @@ func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, repoNam
 		teamPermission = "admin"
 	}
 
+	current, err := r.currentRepoTeamPermissions(ctx, repoName)
+	if err != nil {
+		return fmt.Errorf("failed to list repo team permissions, repo: %s, err: %w", repoName, err)
+	}
+
 	for team, permission := range map[string]string{
 		"dapla-skyinfra-developers": "admin",
 		"dapla-platform-developers": "push",
 		teamName + "-developers":    teamPermission,
 		teamName + "-data-admins":   teamPermission,
 	} {
-		_, err := r.teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
+		if current[team] == permission {
+			continue
+		}
+
+		_, err = r.teams.AddTeamRepoBySlug(ctx, r.org, team, r.org, repoName, &github.TeamAddTeamRepoOptions{
 			Permission: permission,
 		})
 		if err != nil {
@@ -182,6 +197,29 @@ func (r *reconciler) reconcileGithubRepoPermissions(ctx context.Context, repoNam
 		}
 	}
 	return nil
+}
+
+// https://docs.github.com/en/rest/repos/repos#list-repository-teams
+func (r *reconciler) currentRepoTeamPermissions(ctx context.Context, repoName string) (map[string]string, error) {
+	permissions := map[string]string{}
+	opts := &github.ListOptions{PerPage: 100} // Should be ok (no team should have over 100 teams, right..?)
+	teams, _, err := r.repoTeams.ListTeams(ctx, r.org, repoName, opts)
+	if err != nil {
+		return nil, err
+	}
+	for _, t := range teams {
+		permissions[t.GetSlug()] = highestPermission(t.Permissions)
+	}
+	return permissions, nil
+}
+
+func highestPermission(permissions map[string]bool) string {
+	for _, p := range []string{"admin", "maintain", "push", "triage", "pull"} {
+		if permissions[p] {
+			return p
+		}
+	}
+	return ""
 }
 
 func (r *reconciler) createInitialPR(ctx context.Context, repoName string) error {
